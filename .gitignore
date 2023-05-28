@@ -1,0 +1,7 @@
+.vs
+out
+
+/rawsmb.*
+/smb.*
+/src/generated/*.cpp
+/src/generated/*.h

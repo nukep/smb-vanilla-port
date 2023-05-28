@@ -12,6 +12,7 @@ INPUT_C_FILE = 'rawsmb.c'
 INPUT_H_FILE = 'rawsmb.h'
 
 # As finessed by this script
+TARGET_DIR = 'src/generated/'
 TARGET_CPP_FILE = 'smb.cpp'
 TARGET_H_FILE = 'smb.h'
 
@@ -174,10 +175,15 @@ outstr = outstr.replace('in_I', '0')
 
 outstr = outstr.replace(INPUT_H_FILE, TARGET_H_FILE)
 
+# Set all undefined "in" variables to 0
+outstr = re.sub(r'byte (in_.*?);', r'byte \1 = 0;', outstr)
+outstr = re.sub(r'bool (in_.*?);', r'bool \1 = false;', outstr)
+
+
 # break the infinite loop in Start
 outstr = outstr.replace('// WARNING: Do nothing block with infinite loop', 'break;')
 
-with open(TARGET_CPP_FILE, 'w') as f:
+with open(TARGET_DIR + TARGET_CPP_FILE, 'w') as f:
     f.write(outstr)
 
 
@@ -202,7 +208,7 @@ outstr = re.sub(r'struct (.*?) {', r'''struct \1 {
     }
 ''', outstr)
 
-with open(TARGET_H_FILE, 'w') as f:
+with open(TARGET_DIR + TARGET_H_FILE, 'w') as f:
     f.write('#pragma pack(push, 1)')
     f.write('\n')
     f.write(outstr)
