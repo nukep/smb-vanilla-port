@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<language_definitions>
+  
+  <language processor="6502"
+            endian="little"
+            size="16"
+            variant="smb"
+            version="1.0"
+            slafile="6502smb.sla"
+            processorspec="6502smb.pspec"
+            manualindexfile="../manuals/6502.idx"
+            id="6502:LE:16:smb">
+    <description>NES - 6502 Microcontroller Family</description>
+    <compiler name="default" spec="6502smb.cspec" id="default"/>
+    <external_name tool="IDA-PRO" name="m6502"/>
+  </language>
+  
+</language_definitions>

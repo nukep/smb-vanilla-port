@@ -1,0 +1,913 @@
+# sleigh specification file for MOS 6502
+
+@define TMPVAR_UPTO 0x07
+
+define endian=little;
+define alignment=1;
+
+define space RAM     type=ram_space      size=2  default;
+define space register type=register_space size=1;
+# define space tmpvars type=register_space size=1;
+
+define register offset=0x80  size=1 [ A X Y P ];
+define register offset=0xA0 size=2  [ PC      SP   ];
+define register offset=0xA0 size=1  [ PCL PCH S SH ];
+define register offset=0xB0 size=1 [ N V B D I Z C ];	# status bits
+
+# 0x80 and up are reserved for tmpvars
+
+# Some zero-page addresses are conventionally used as registers
+define register offset=0x00 size=1 [ r00 r01 r02 r03 r04 r05 r06 r07 ];
+define register offset=0x00 size=2 [ r00w    r02w    r04w    r06w    ];
+
+#TOKENS
+
+define token opbyte (8)
+   op       = (0,7)
+   
+   aaa      = (5,7)
+   bbb      = (2,4)
+   cc       = (0,1)
+;
+
+define token data8 (8)
+   imm8		= (0,7)
+   imm8_v   = (0,7)
+   rel		= (0,7) signed
+;
+
+define token data (16)
+	imm16   = (0,15)
+	imm16_v = (0,15)
+	imm16_hi = (8,15)
+;
+
+macro popSR() {
+	SP = SP + 1;
+	local ccr = *:1 SP;
+	N = ccr[7,1];
+	V = ccr[6,1];
+	B = ccr[4,1];
+	D = ccr[3,1];
+	I = ccr[2,1];
+	Z = ccr[1,1];
+	C = ccr[0,1];
+}
+
+macro pushSR() {
+	local ccr:1 = 0xff;
+	ccr[7,1] = N;
+	ccr[6,1] = V;
+	ccr[4,1] = B;
+	ccr[3,1] = D;
+	ccr[2,1] = I;
+	ccr[1,1] = Z;
+	ccr[0,1] = C;
+	*:1 (SP) = ccr;
+	SP = SP -1;
+}
+
+macro resultFlags(value) {
+	Z = (value == 0);
+	N = (value >= 0x80);
+}
+
+
+################################################################
+# Pseudo Instructions
+################################################################
+
+define pcodeop readIRQ;
+
+################################################################
+REL: reloc		is rel	[ reloc = inst_next + rel; ] { export *:2 reloc; } 
+
+
+define token addr8hack (8)
+	addr8v = (0,7)
+;
+
+
+ADDR8V: addr8v is addr8v { tmp:2 = addr8v; export tmp; }
+
+define pcodeop mytest;
+
+# Ghidra's decompiler doesn't know how to reference zero-page addresses very well, unfortunately.
+# I'm not really sure why.
+# We always, invariably, get something like: *(byte*)(ushort)(byte)(param_1 + 0x12)
+# When we'd rather have: myarray[param_1]   (where myarray is at address 0x12)
+#
+# We workaround this by adding an offset to an unused page of memory.
+# In SMB, all addresses that can be accessed with zero-page, are accessed with zero-page.
+# So an easy hack is to change the zero-page address modes.
+
+# Immediate
+OP1: "#"imm8    is bbb=2; imm8			{ tmp:1 = imm8; export tmp; }
+# Zero Page
+OP1: imm8       is bbb=1; imm8			{ tmp:2 = imm8+0x5000; export *:1 tmp; }
+# Zero Page Indexed X
+OP1: imm8,X     is bbb=5 & X; imm8		{ tmp:2 = imm8+zext(X)+0x5000; export *:1 tmp; }
+# Absolute
+OP1: imm16      is bbb=3; imm16			{ tmp:2 = imm16+0x5000; export *:1 tmp; }
+# Absolute Indexed X
+OP1: imm16,X    is bbb=7 & X; imm16		{ tmp:2 = imm16 + zext(X)+0x5000; export *:1 tmp; }
+# Absolute Indexed Y
+OP1: imm16,Y    is bbb=6 & Y; imm16		{ tmp:2 = imm16 + zext(Y)+0x5000; export *:1 tmp; }
+# Indirect X
+OP1: (imm8,X)   is bbb=0 & X; imm8		{ addr:2 = imm8 + zext(X)+0x5000; tmp:2 = *:2 addr; export *:1 tmp; }
+# Indirect Y
+OP1: (imm8),Y   is bbb=4 & Y; imm8		{ addr:2 = imm8+0x5000; tmp:2 = *:2 addr; tmp = tmp + zext(Y); export *:1 tmp; }
+
+# Immediate
+OP2: "#"imm8    is bbb=0; imm8			{ tmp:1 = imm8; export tmp; }
+# Zero Page
+OP2: imm8       is bbb=1; imm8			{ tmp:2 = imm8+0x5000; export *:1 tmp; }
+OP2: A          is bbb=2 & A            { export A; }
+# Absolute
+OP2: imm16      is bbb=3; imm16			{ tmp:2 = imm16+0x5000; export *:1 tmp; }
+# Zero Page Indexed X
+OP2: imm8,X     is bbb=5 & X; imm8		{ tmp:2 = imm8+zext(X)+0x5000; export *:1 tmp; }
+# Absolute Indexed X
+OP2: imm16,X    is bbb=7 & X; imm16		{ tmp:2 = imm16 + zext(X)+0x5000; export *:1 tmp; }
+
+OP2ST: OP2      is OP2                  { export OP2; }
+OP2ST: imm8,Y   is bbb=5 & Y; imm8		{ tmp:2 = imm8+zext(Y)+0x5000; export *:1 tmp; }
+
+OP2LD: OP2      is OP2                  { export OP2; }
+OP2LD: imm8,Y   is bbb=5 & Y; imm8		{ tmp:2 = imm8+zext(Y)+0x5000; export *:1 tmp; }
+OP2LD: imm16,Y  is bbb=7 & Y; imm16		{ tmp:2 = imm16 + zext(Y)+0x5000; export *:1 tmp; }
+
+
+
+OP1: imm16      is bbb=3; imm16 & imm16_hi >= 0x20			{ tmp:2 = imm16; export *:1 tmp; }
+OP1: imm16,X    is bbb=7 & X; imm16 & imm16_hi >= 0x20		{ tmp:2 = imm16 + zext(X); export *:1 tmp; }
+OP1: imm16,Y    is bbb=6 & Y; imm16 & imm16_hi >= 0x20		{ tmp:2 = imm16 + zext(Y); export *:1 tmp; }
+OP2: imm16      is bbb=3; imm16 & imm16_hi >= 0x20			{ tmp:2 = imm16; export *:1 tmp; }
+OP2: imm16,X    is bbb=7 & X; imm16 & imm16_hi >= 0x20		{ tmp:2 = imm16 + zext(X); export *:1 tmp; }
+OP2LD: imm16,Y  is bbb=7 & Y; imm16 & imm16_hi >= 0x20		{ tmp:2 = imm16 + zext(Y); export *:1 tmp; }
+
+
+
+TREG: imm8 is imm8 & imm8_v=0x00 { export r00; } TREG: imm8 is imm8 & imm8_v=0x01 { export r01; }
+TREG: imm8 is imm8 & imm8_v=0x02 { export r02; } TREG: imm8 is imm8 & imm8_v=0x03 { export r03; }
+TREG: imm8 is imm8 & imm8_v=0x04 { export r04; } TREG: imm8 is imm8 & imm8_v=0x05 { export r05; }
+TREG: imm8 is imm8 & imm8_v=0x06 { export r06; } TREG: imm8 is imm8 & imm8_v=0x07 { export r07; }
+TREG2: imm8 is imm8 & imm8_v=0x00 { export r00w; }
+TREG2: imm8 is imm8 & imm8_v=0x02 { export r02w; }
+TREG2: imm8 is imm8 & imm8_v=0x04 { export r04w; }
+TREG2: imm8 is imm8 & imm8_v=0x06 { export r06w; }
+
+# Override address modes for temporary variable registers.
+# Why on earth???
+# Because, it results in much cleaner decompilation code where we're not setting mysterious global state all the time.
+# In practice, these temporary variables _act_ like registers.
+
+# I used to put "export *[register]:1 tmp; " in each of these,
+# but it was creating problems for Ghidra's decompiler.
+# Namely: "Ignoring partial resolution of indirect."
+# It was sometimes treating registers as if they hadn't been set.
+
+# Pro-tip: Search for "INVALID" in the program listing to fix any occurrences of problematic address modes.
+
+OP1: "tmpreg" TREG       is bbb=1; TREG & imm8_v <= $(TMPVAR_UPTO) 			{ export TREG; }
+OP1: "tmpreg" TREG       is bbb=3; TREG & imm8_v <= $(TMPVAR_UPTO); imm8=0	{ export TREG; }
+
+# Note: SMB uses these in select cases for addresses $00-$07, but we hack them elsewhere.
+OP1: "INVALID" imm8,X     is bbb=5 & X; imm8 & imm8_v <= $(TMPVAR_UPTO)		{ tmp:2 = zext(imm8 + X); tmp = tmp; export *[register]:1 tmp; }
+OP1: "INVALID" imm16,X    is bbb=7 & X; imm16 & imm16_v <= $(TMPVAR_UPTO)	{ tmp:2 = imm16 + zext(X); tmp = tmp; export *[register]:1 tmp; }
+OP1: "INVALID" imm16,Y    is bbb=6 & Y; imm16 & imm16_v <= $(TMPVAR_UPTO)	{ tmp:2 = imm16 + zext(Y); tmp = tmp; export *[register]:1 tmp; }
+
+# Note: SMB doesn't use indirect-x. 
+OP1: "INVALID" (imm8,X)   is bbb=0 & X; imm8 & imm8_v <= $(TMPVAR_UPTO)		{ addr:1 = zext(imm8 + X); addr = addr; tmp:2 = *[register]:2 addr; export *:1 tmp; }
+
+OP1: "tmpreg" (TREG2),Y  is bbb=4 & Y; TREG2 & imm8_v <= $(TMPVAR_UPTO)		{ tmp:2 = TREG2; tmp = tmp + zext(Y); export *:1 tmp; }
+OP2: "tmpreg" TREG       is bbb=1; TREG & imm8_v <= $(TMPVAR_UPTO)			{ export TREG; }
+OP2: "tmpreg" TREG       is bbb=3; TREG & imm8_v <= $(TMPVAR_UPTO); imm8=0	{ export TREG; }
+
+# Note: SMB uses these in select cases for addresses $00-$07, but we hack them elsewhere.
+OP2: "INVALID" imm8,X     is bbb=5 & X; imm8 & imm8_v <= $(TMPVAR_UPTO)		{ tmp:2 = zext(imm8 + X); tmp = tmp; export *[register]:1 tmp; }
+OP2: "INVALID" imm16,X    is bbb=7 & X; imm16 & imm16_v <= $(TMPVAR_UPTO)	{ tmp:2 = imm16 + zext(X); tmp = tmp; export *[register]:1 tmp; }
+OP2ST: "INVALID" imm8,Y   is bbb=5 & Y; imm8 & imm8_v <= $(TMPVAR_UPTO)		{ tmp:2 = zext(imm8 + Y); tmp = tmp; export *[register]:1 tmp; }
+OP2LD: "INVALID" imm8,Y   is bbb=5 & Y; imm8 & imm8_v <= $(TMPVAR_UPTO)		{ tmp:2 = zext(imm8 + Y); tmp = tmp; export *[register]:1 tmp; }
+OP2LD: "INVALID" imm16,Y  is bbb=7 & Y; imm16 & imm16_v <= $(TMPVAR_UPTO)	{ tmp:2 = imm16 + zext(Y); tmp = tmp; export *[register]:1 tmp; }
+
+ADDRI: "tmpreg" (TREG2)  is TREG2 & imm8_v <= $(TMPVAR_UPTO)    			{ export TREG2; }
+
+
+# SMB accesses the $00-$07 temporary variables with indexing in these specific situations:
+# We override this with game-specific hacks, because Ghidra can't properly analyze which registers it uses and it fubars the decompilation.
+# sta $01,x   ;; uses $01 $02 $03  (near DifLoop)
+# sta $0001,y ;; uses $01 $02 $03  (near LdLDa)
+# lda $0001,y ;; uses $01 $02 $03  (near SubDifAdj)
+# sta $02,x   ;; uses $02 $03 $04 $05 $06 $07  (near PIntLoop)
+
+define token smbhack_byte (8)
+	smbh8 = (0,7)
+;
+define token smbhack_word (16) endian=big
+	smbh16 = (0,15)
+;
+define token smbhack_dword (32) endian=big
+	smbh32 = (0,31)
+;
+
+# sta $01,x
+:C40F_HACK is smbh32=0xb998c395; smbh32=0x01c8c8c8; smbh32=0xc8ca10f4 {
+	# lda $c398,y
+    # sta $01,x
+    # iny
+    # iny
+    # iny
+    # iny
+    # dex
+    # bpl -12
+
+	# assume X is 2
+
+	local p:2;
+	p = 0xc398 + zext(Y);
+	r01 = *:1 p;
+	p = 0xc39c + zext(Y);
+	r02 = *:1 p;
+	p = 0xc3a0 + zext(Y);
+	r03 = *:1 p;
+	Y = Y + 12;
+	X = 0;
+}
+
+# sta $02,x
+:EFA6_HACK is smbh32=0xbd9eef95; smbh32=0x02ca10f8 {
+	# assume x = 5
+	# lda $ef9e,x
+	# sta $02,x
+	# dex
+	# bpl -8
+
+	r02 = *:1 (0xef9e:2 + 0);
+	r03 = *:1 (0xef9e:2 + 1);
+	r04 = *:1 (0xef9e:2 + 2);
+	r05 = *:1 (0xef9e:2 + 3);
+	r06 = *:1 (0xef9e:2 + 4);
+	r07 = *:1 (0xef9e:2 + 5);
+	X = 0xFF;
+	N = 1;
+	A = r02;
+}
+
+# sta $0001,y
+:CF47_HACK is smbh8=0xb9; smbh32=0x25cf9901; smbh32=0x008810f7 {
+	# assume Y = 2
+	# lda $CF25,y
+    # sta $0001,y
+    # dey
+    # bpl -9
+	r01 = *:1 (0xcf25:2);
+	r02 = *:1 (0xcf26:2);
+	r03 = *:1 (0xcf27:2);
+	Y = 0xFF;
+	N = 1;
+}
+
+# lda $0001,y
+:CFD1_HACK is smbh8=0xb9; smbh16=0x0100 {
+	# y is one of: 0, 1, 2. guaranteed to not be anything else (i triple checked!).
+	# lda $0001,y
+	# ignoring setting flags, because there's another load instruction right after this one
+
+	if (Y == 0) goto <on0>;
+	if (Y == 1) goto <on1>;
+	# if (Y == 2) goto <on2>;
+	goto <on2>;
+	<on0>
+	A = r01;
+	goto <end>;
+	<on1>
+	A = r02;
+	goto <end>;
+	<on2>
+	A = r03;
+	<end>
+}
+
+:MOVA TREG is op=0x1F; TREG {
+	TREG = A;
+	# tmp:1 = imm8; tmp = tmp[0,7];
+	# *[register]:1 tmp = A;
+	# r00 = A;
+}
+:MOVX TREG is op=0x2F; TREG {
+	TREG = X;
+	# tmp:1 = imm8; tmp = tmp[0,7]; 
+	# *[register]:1 tmp = X;
+	# r01 = X;
+}
+
+# used for branching
+ADDR16: imm16   is imm16   	{ export * imm16; }
+ADDRI:  (imm16)   is imm16    { tmp:2 = imm16; export *:2 tmp; }
+
+
+# Instructions
+
+:ADC OP1     is (cc=1 & aaa=3) ... & OP1
+{
+	local op1 = OP1;
+	local tmpA = A;
+
+	# Fixing bug in Ghidra's ADC:
+	# carry should also account for the previous carry flag
+	# overflow was also completely wrong (it's not a copy of carry)
+	# i.e. C = carry(A, op1, C)
+	# e.g.
+	# SEC
+	# LDA #$80
+	# ADC #$7F
+	# should set the carry flag
+
+	A = A + op1 + C;
+	resultFlags(A);
+	C = carry(tmpA, op1) || (C && (A == 0));
+	V = (~(tmpA ^ op1) & (tmpA ^ A) & 0x80);
+}
+
+# SBC is equivalent to ADC (op^0xFF)
+# i.e. the operand has all bits flipped
+
+:SBC OP1     is (cc=1 & aaa=7) ... & OP1
+{
+	local op1 = OP1;
+	local tmpA = A;
+
+	A = A - op1 - !C;
+	resultFlags(A);
+	# C = carry(tmpA, ~op1) || (C && (A == 0));
+	# This one gives the best decompilation results overall
+	C = (C && (tmpA >= op1)) || ((!C) && (tmpA > op1));
+	# C = (C && (tmpA >= op1)) || (tmpA > op1);
+	V = ((tmpA ^ op1) & (tmpA ^ A) & 0x80);
+}
+
+:AND OP1     is (cc=1 & aaa=1) ... & OP1
+{ 
+	A = A & OP1; 
+	resultFlags(A);
+}
+
+:ASL OP2     is (op=0x06 | op=0x0A | op=0x0E | op=0x16 | op=0x1E) ... & OP2
+{
+	local tmp = OP2;
+	C = tmp >> 7;
+	tmp = tmp << 1;
+	OP2 = tmp;
+	resultFlags(tmp);	
+}
+
+# NOT a real instruction. Making it up to patch in unconditional branches.
+:BRA  REL			is op=0x80; REL
+{
+	goto REL;
+}
+
+:BCC  REL			is op=0x90; REL
+{
+	if (C == 0) goto REL;
+}
+
+:BCS  REL			is op=0xB0; REL
+{
+	if (C) goto REL;
+}
+
+:BEQ  REL			is op=0xF0; REL
+{
+	if (Z) goto REL;
+}
+
+:BIT OP2     is (op=0x24) ... & OP2
+{
+	N = (OP2 & 0x80) == 0x80;
+	V = (OP2 & 0x40) == 0x40;
+	local value = A & OP2;
+	Z = (value == 0);
+}
+
+# Getting rid of BIT for all cases except one, because SMB mostly uses it as a way to ignore the next instruction.
+# Disassembly is extremely obnoxious because of it
+:BIT imm16     is op=0x2C; imm16 & imm16_v=0x06dd
+{
+	local p:2 = imm16 + 0x5000;
+	local inp:1 = *:1 p;
+	N = (inp & 0x80) == 0x80;
+	V = (inp & 0x40) == 0x40;
+	local value = A & inp;
+	Z = (value == 0);
+}
+
+# Treating BIT as a one-byte instruction that skips ahead
+:BIT_SKIP is op=0x2C
+{
+	# these shouldn't be used. set these to something that's show up in the decompiler if they're used.
+	N = I;
+	V = I;
+	Z = I;
+	goto inst_next2;
+}
+
+:BMI  REL			is op=0x30; REL
+{
+	if (N) goto REL;
+}
+
+:BNE  REL			is op=0xD0; REL
+{
+	if (Z == 0) goto REL;
+}
+
+:BPL  REL			is op=0x10; REL
+{
+	if (N == 0) goto REL;
+}
+
+:BRK   is op=0x00
+{
+	*:2 (SP - 1) = inst_next;
+	SP = SP - 2;
+	B = 1;
+	pushSR();
+	I = 1;
+	local target:2 = 0xFFFE;
+	goto [*:2 target];
+}
+
+:BVC  REL			is op=0x50; REL
+{
+	if (V == 0) goto REL;
+}
+
+:BVS  REL			is op=0x70; REL
+{
+	if (V) goto REL;
+}
+
+:CLC     is op=0x18
+{
+	C = 0;
+}
+
+:CLD     is op=0xD8
+{
+	D = 0;
+}
+
+:CLI     is op=0x58
+{
+	I = 0;
+}
+
+:CLV     is op=0xB8
+{
+	V = 0;
+}
+
+:CMP OP1     is (cc=1 & aaa=6) ... & OP1
+{ 
+	local op1 = OP1;
+	local tmp = A - op1;
+	resultFlags(tmp);
+	C = (A >= op1);
+}
+
+:CPX OP2     is (op=0xE0 | op=0xE4 | op=0xEC) ... & OP2
+{
+	local op1 = OP2;
+	local tmp = X - op1;
+	resultFlags(tmp);
+	C = (X >= op1);
+}
+
+:CPY OP2     is (op=0xC0 | op=0xC4 | op=0xCC) ... & OP2
+{
+	local op1 = OP2;
+	local tmp = Y - op1;
+	resultFlags(tmp);
+	C = (Y >= op1);
+}
+
+:DEC OP2     is (op=0xC6 | op=0xCE | op=0xD6 | op=0xDE) ... & OP2
+{
+	local tmp = OP2 - 1;
+	OP2 = tmp;
+	resultFlags(tmp);
+}
+
+:DEX     is op=0xCA
+{
+	X = X - 1;
+	resultFlags(X);
+}
+
+
+:DEY     is op=0x88
+{
+	Y = Y -1;
+	resultFlags(Y);
+}
+
+:EOR OP1     is (cc=1 & aaa=2) ... & OP1
+{ 
+	local op1 = OP1;
+	A = A ^ op1;
+	resultFlags(A);
+}
+
+:INC OP2     is (op=0xE6 | op=0xEE | op=0xF6 | op=0xFE) ... & OP2
+{
+	local tmp = OP2 + 1;
+	OP2 = tmp;
+	resultFlags(tmp);
+}
+
+:INY     is op=0xC8
+{
+	Y = Y + 1;
+	resultFlags(Y);
+}
+
+:INX     is op=0xE8
+{
+	X = X + 1;
+	resultFlags(X);
+}
+
+:JMP ADDR16     is (op=0x4C); ADDR16
+{
+	goto ADDR16;
+}
+
+:JMP ADDRI     is (op=0x6c); ADDRI
+{
+	goto [ADDRI];
+}
+
+define token jsrhack(16)
+	jsrbankaddr=(0,15)
+;
+define token jsrhack2(8)
+	jsrbank=(0,7)
+;
+define token jsrhack3(24)
+	jsraddr=(0,15)
+	jsraddrbank=(16,23)
+;
+
+# define token jsrhack4 (16)
+# 	jsrmmc3 = (0,15)
+# ;
+
+ADDR16_JMPENGINE: imm16 is imm16 { export imm16; }
+
+define pcodeop jmpengine;
+
+:JMPENGINE is op=0x20; imm16=0x8e04 {
+	local p:2 = inst_next;
+	local index:1 = A;
+
+	# Before the jump, these are set:
+	# Y = A*2 + 2
+	# A = the hi byte of the address we're jumping to
+	# X is untouched
+	# r04w = the address of the jump table, minus 1
+	# r06w = the address we're jumping to
+
+	r04w = inst_next-1;
+	local addr:2 = inst_next + zext(A*2);
+	addr = zext(*:2 addr);
+	r06w = addr;
+	Y = A*2 + 2;
+	A = r07;
+	resultFlags(A);
+
+	jmpengine(p, index);
+
+	SP = SP+1;
+	tmp:2 = *:2 SP;
+	SP = SP+1;	
+	return [tmp];
+
+	# goto 0x8e04;
+	# local addr:2 = inst_next + zext(A*2);
+	# addr = zext(*:2 addr);
+	# goto [addr];
+}
+
+# I don't want to patch with 6502 code that tediously sets and restores registers.
+# take up the unused 0x_7 column for custom instructions
+:JMPENGINE_INIT imm16 is op=0x07; imm16 {
+	# argument is location of jumptable data
+	local tmp:2 = imm16-1;
+	r04 = tmp[0,8];
+	r05 = tmp[8,8];
+}
+:JMPENGINE_JSRIF imm8 "->" ADDR16 is op=0x17; imm8; ADDR16 {
+	if (A != imm8) goto <end>;
+
+	local tmp1:2 = ADDR16;
+
+	r06 = tmp1[0,8];
+	r07 = tmp1[8,8];
+	Y = A*2 + 2;
+	A = r07;
+	resultFlags(A);
+	
+	*:2 (SP-1) = inst_next;
+	SP=SP-2;
+	call ADDR16;
+	SP = SP+1;
+	tmp:2 = *:2 SP;
+	SP = SP+1;
+	return [tmp];
+
+	<end>
+}
+
+define pcodeop jmpengine_overflow;
+:JMPENGINE_JSRELSE is op=0x27 {
+	jmpengine_overflow(A);
+	SP = SP+1;
+	tmp:2 = *:2 SP;
+	SP = SP+1;
+	return [tmp];
+}
+
+# :JMPENGINE_4 is op=0x20; imm16=0x0004 {
+# 	if (A == 0) goto <cond0>;
+# 	if (A == 1) goto <cond1>;
+# 	if (A == 2) goto <cond2>;
+# 	if (A == 3) goto <cond3>;
+# 	goto <end>;
+# 	local addr:2;
+# 	<cond0>
+# 	addr = inst_next + zext((0:2)*2); addr = zext(*:2 addr); goto [addr];
+# 	<cond1>
+# 	addr = inst_next + zext((1:2)*2); addr = zext(*:2 addr); goto [addr];
+# 	<cond2>
+# 	addr = inst_next + zext((2:2)*2); addr = zext(*:2 addr); goto [addr];
+# 	<cond3>
+# 	addr = inst_next + zext((3:2)*2); addr = zext(*:2 addr); goto [addr];
+
+# 	<end>
+# 	SP = SP+1;
+# 	tmp:2 = *:2 SP;
+# 	SP = SP+1;	
+# 	return [tmp];
+# }
+
+# :JMPENGINE_4 is op=0x20; imm16=0x0004 {
+# 	if (A == 0) goto <cond0>;
+# 	if (A == 1) goto <cond1>;
+# 	if (A == 2) goto <cond2>;
+# 	if (A == 3) goto <cond3>;
+# 	goto <end>;
+# 	local addr:2;
+# 	<cond0>
+# 	addr = inst_next + zext((0:2)*2); addr = zext(*:2 addr); call [addr]; goto <end>;
+# 	<cond1>
+# 	addr = inst_next + zext((1:2)*2); addr = zext(*:2 addr); call [addr]; goto <end>;
+# 	<cond2>
+# 	addr = inst_next + zext((2:2)*2); addr = zext(*:2 addr); call [addr]; goto <end>;
+# 	<cond3>
+# 	addr = inst_next + zext((3:2)*2); addr = zext(*:2 addr); call [addr]; goto <end>;
+
+# 	<end>
+# 	SP = SP+1;
+# 	tmp:2 = *:2 SP;
+# 	SP = SP+1;	
+# 	return [tmp];
+# }
+
+
+# :JMPENGINE_4 is op=0x20; imm16=0x0004 {
+# 	local p:2 = inst_next;
+# 	jmpengine(4:1, p);
+# 	SP = SP+1;
+# 	tmp:2 = *:2 SP;
+# 	SP = SP+1;	
+# 	return [tmp];
+# }
+
+# :JMPENGINE_4 is op=0x20; imm16=0x0004 {
+# 	if (A >= 4) goto <noop>;
+# 	local addr:2 = inst_next + zext(A*2);
+# 	addr = zext(*:2 addr);
+# 	call [addr];
+# 	goto <end>;
+
+# 	<noop>
+# 	# addr = inst_next + zext((3:1)*2);
+# 	# addr = zext(*:2 addr);
+# 	# goto [addr];
+
+# 	<end>
+# 	SP = SP+1;
+# 	tmp:2 = *:2 SP;
+# 	SP = SP+1;	
+# 	return [tmp];
+# }
+
+define pcodeop jmpenginefail;
+
+:JMPENGINE imm16 is op=0x0F; imm16&imm16_v=4 {
+	if (A == 0) goto <cond0>;
+	if (A == 1) goto <cond1>;
+	if (A == 2) goto <cond2>;
+	if (A == 3) goto <cond3>;
+
+	jmpenginefail();
+	goto <end>;
+	local addr:2;
+	<cond0> addr = inst_next + 0x00; addr = zext(*:2 addr); call [addr]; goto <end>;
+	<cond1> addr = inst_next + 0x02; addr = zext(*:2 addr); call [addr]; goto <end>;
+	<cond2> addr = inst_next + 0x04; addr = zext(*:2 addr); call [addr]; goto <end>;
+	<cond3> addr = inst_next + 0x06; addr = zext(*:2 addr); call [addr]; goto <end>;
+
+	<end>
+	SP = SP+1;
+	tmp:2 = *:2 SP;
+	SP = SP+1;	
+	return [tmp];
+}
+
+:JSR   ADDR16    is op=0x20; ADDR16
+{
+	*:2 (SP-1) = inst_next;
+	SP=SP-2;
+	call ADDR16;
+}
+
+:LDA OP1     is (cc=1 & aaa=5) ... & OP1
+{
+	A = OP1;
+	resultFlags(A);
+}
+
+:LDY OP2     is (op=0xA0 | op=0xA4 | op=0xAC | op=0xB4 | op=0xBC) ... & OP2
+{
+	Y = OP2;
+	resultFlags(Y);
+}
+
+:LDX OP2LD     is (op=0xA2 | op=0xA6 | op=0xAE | op=0xB6 | op=0xBE) ... & OP2LD
+{
+	X = OP2LD;
+	resultFlags(X);
+}
+
+:LSR OP2     is (op=0x46 | op=0x4A | op=0x4E | op=0x56 | op=0x5E) ... & OP2
+{
+	local tmp = OP2;
+	C = tmp & 1;
+	tmp = tmp >> 1;
+	OP2 = tmp;
+	Z = (tmp == 0);
+	N = 0;	
+}
+
+:NOP     is op=0xEA
+{
+}
+
+:ORA  OP1    is  (cc=1 & aaa=0) ... & OP1
+{
+	A = A | OP1; 
+	resultFlags(A);
+}
+
+:PHP     is op=0x8
+{
+	pushSR();
+}
+
+:PLP     is op=0x28
+{
+	popSR();
+}
+
+:PHA     is op=0x48
+{
+	*:1 (SP) = A;
+	SP = SP - 1;
+}
+
+:PLA     is op=0x68
+{
+	SP = SP + 1;
+	A = *:1 (SP);
+	resultFlags(A);
+}
+
+:ROL OP2     is (op=0x26 | op=0x2A | op=0x2E | op=0x36 | op=0x3E) ... & OP2
+{
+	local tmpC = C;
+	local op2 = OP2;
+	C = op2 >> 7;
+	local result = op2 << 1;
+	result = result | tmpC;
+	OP2 = result;
+	resultFlags(result);	
+}
+
+:ROR OP2     is (op=0x66 | op=0x6A | op=0x6E | op=0x76 | op=0x7E) ... & OP2
+{
+	local tmpC = C << 7;
+	local tmp = OP2;
+	C = tmp & 1;
+	tmp = tmp >> 1;
+	tmp = tmp | tmpC;
+	OP2 = tmp;
+	resultFlags(tmp);	
+}
+
+:RTI      is op=0x40
+{
+	popSR();
+	
+    SP = SP+1;
+	tmp:2 = *:2 SP;
+	SP = SP+1;
+	
+	return [tmp];
+}
+
+:RTS      is op=0x60
+{
+	SP = SP+1;
+	tmp:2 = *:2 SP;
+	SP = SP+1;
+	
+	return [tmp];
+}
+
+:SEC     is op=0x38
+{
+	C = 1;
+}
+
+:SED     is op=0xF8
+{
+	D = 1;	
+}
+
+:SEI     is op=0x78
+{
+	I = 1;
+}
+
+:STA OP1     is (cc=1 & aaa=4) ... & OP1
+{
+	OP1 = A;
+}
+
+:STX OP2ST     is (op=0x86 | op=0x8E | op=0x96) ... & OP2ST
+{
+	OP2ST = X;
+}
+
+:STY OP2     is (op=0x84 | op=0x8C | op=0x94) ... & OP2
+{
+	OP2 = Y;
+}
+
+:TAX     is op=0xAA
+{
+	X = A;
+	resultFlags(X);
+}
+
+:TAY     is op=0xA8
+{
+	Y = A;
+	resultFlags(Y);
+}
+
+:TSX     is op=0xBA
+{
+	X = S;
+	resultFlags(X);
+}
+
+:TXA     is op=0x8A
+{
+	A = X;
+	resultFlags(A);
+}
+
+:TXS     is op=0x9A
+{
+	S = X;
+}
+
+:TYA     is op=0x98
+{
+	A = Y;
+	resultFlags(A);
+}

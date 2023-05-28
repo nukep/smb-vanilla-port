@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<processor_spec>
+  <context_data>
+    <tracked_set space="RAM">
+      <set name="PPUADDRLATCH" val="0"/>
+    </tracked_set>
+  </context_data>
+  <programcounter register="PC"/>
+</processor_spec>
