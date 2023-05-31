@@ -23,8 +23,8 @@ from ghidra.program.model.address import AddressSet
 from ghidra.app.cmd.disassemble import DisassembleCommand
 from ghidra.program.model.listing import FlowOverride
 
-# Beginning at $6000...
-patches_at = toAddr(0x6000)
+# Beginning at $3000...
+patches_at = toAddr(0x3000)
 # start at the next available undefined address
 patches_at = getUndefinedDataAfter(patches_at.subtract(1)).address
 

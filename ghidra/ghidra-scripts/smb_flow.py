@@ -523,8 +523,9 @@ def apply_function_inputs_outputs_to_the_real_thing(f):
     if not fn:
         raise Exception('What? How is there no function here? at {}'.format(f.addr))
     
-    set_function_io(fn, sorted_registers(f.input_regs), sorted_registers(f.output_regs))
-    fn.setComment('Analyzed! SMB:{}'.format(fn.getEntryPoint()))
+    ins, outs = sorted_registers(f.input_regs), sorted_registers(f.output_regs)
+    set_function_io(fn, ins, outs)
+    fn.setComment('SMB:{}\nSignature: {} -> {}'.format(fn.getEntryPoint(), ins, outs))
 
 def decompose_varnode_to_regs(varnode):
     '''Meant to convert 16-bit registers to 8-bit ones'''

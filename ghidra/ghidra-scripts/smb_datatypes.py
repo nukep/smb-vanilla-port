@@ -1,7 +1,7 @@
 def data_filename(name):
     import os
     CUR_PATH = os.path.dirname(os.path.realpath(__file__))
-    return os.path.realpath(os.path.join(CUR_PATH, '../data', name))
+    return os.path.realpath(os.path.join(CUR_PATH, '../../data', name))
 
 from ghidra.program.model.address import AddressSet
 from ghidra.app.cmd.data import CreateArrayCmd
