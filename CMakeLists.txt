@@ -16,8 +16,9 @@ include_directories(smbport ${SDL2_INCLUDE_DIRS})
 
 # Add source to this project's executable.
 add_executable (smbport
+	"src/main.cpp"
 	"src/foundation.cpp"
-)
+  "src/smb_functions.h")
 
 target_link_libraries(smbport ${SDL2_LIBRARIES})
 

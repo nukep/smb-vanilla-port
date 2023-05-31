@@ -5,6 +5,7 @@
 #
 # run without arguments: python3 <this-script>
 
+import shutil
 import re
 
 # As outputted by Ghidra
@@ -60,6 +61,7 @@ for line in mangled_array_fixups_str.strip().split('\n'):
 
 with open(INPUT_C_FILE, 'r') as f:
     outstr = f.read()
+shutil.copyfile(INPUT_C_FILE, INPUT_C_FILE+'.bak')
 
 # Replace mangled arrays
 # e.g. *(byte *)(A + 0x1234) => FooBar[A - 1]
@@ -142,7 +144,8 @@ writable_hw_registers = [
     ('2005', 'ppuscroll'),
     ('2006', 'ppuaddr'),
     ('2007', 'ppudata'),
-
+    
+    ('4014', 'oamdma'),
     ('4016', 'joystick_strobe'), 
 
     ('4000', 'apu_sq1_vol'), ('4001', 'apu_sq1_sweep'), ('4002', 'apu_sq1_lo'),    ('4003', 'apu_sq1_hi'),
@@ -150,7 +153,6 @@ writable_hw_registers = [
     ('4008', 'apu_tri_linear'),                         ('400a', 'apu_tri_lo'),    ('400b', 'apu_tri_hi'),
     ('400c', 'apu_noise_vol'),                          ('400e', 'apu_noise_lo'),  ('400f', 'apu_noise_hi'),
     ('4010', 'apu_dmc_freq'), ('4011', 'apu_dmc_raw'),  ('4012', 'apu_dmc_start'), ('4013', 'apu_dmc_len'),
-    ('4014', 'apu_oamdma'),
     ('4015', 'apu_snd_chn'),
     ('4017', 'apu_framecounter_ctrl'),
 ]
@@ -168,6 +170,7 @@ for name,replacement in writable_hw_registers:
 for name,replacement in readable_hw_registers:
     outstr = re.sub(r'BYTE_{}'.format(name), '{}()'.format(replacement), outstr)
 
+
 outstr = re.sub(r'undefined in_I;', '', outstr)
 # things might try to assign to in_I if another function had returned it and the current one also returns it
 outstr = re.sub(r'in_I \=.*', '', outstr)
@@ -184,6 +187,7 @@ outstr = re.sub(r'bool (in_.*?);', r'bool \1 = false;', outstr)
 outstr = outstr.replace('// WARNING: Do nothing block with infinite loop', 'break;')
 
 with open(TARGET_DIR + TARGET_CPP_FILE, 'w') as f:
+    f.write('#include "../smb_functions.h"\n')
     f.write(outstr)
 
 
@@ -191,6 +195,7 @@ with open(TARGET_DIR + TARGET_CPP_FILE, 'w') as f:
 
 with open(INPUT_H_FILE, 'r') as f:
     outstr = f.read()
+shutil.copyfile(INPUT_H_FILE, INPUT_H_FILE+'.bak')
 
 # C++ has a bool type. Don't redefine it!
 outstr = outstr.replace('typedef unsigned char    bool;', '')
@@ -209,8 +214,7 @@ outstr = re.sub(r'struct (.*?) {', r'''struct \1 {
 ''', outstr)
 
 with open(TARGET_DIR + TARGET_H_FILE, 'w') as f:
-    f.write('#pragma pack(push, 1)')
-    f.write('\n')
+    f.write('#pragma once\n')
+    f.write('#pragma pack(push, 1)\n')
     f.write(outstr)
-    f.write('#pragma pack(pop)')
-    f.write('\n')
+    f.write('#pragma pack(pop)\n')
