@@ -7,8 +7,8 @@
 
 typedef unsigned char byte;
 typedef unsigned short ushort;
-#define warning printf
-//#define warning(...)
+//#define warning printf
+#define warning(...)
 #define NOINLINE __attribute__ ((noinline))
 
 
@@ -230,13 +230,14 @@ static const ConstRamByteArray GameText = ConstRamByteArray(0x8752, 0x9B);
 // The provided number is up to which address in the $0700 page to set to zero.
 // e.g. if i=0x14, then clear up to $0714 inclusive.
 // Doesn't set the stack, between $0160 and $01FF inclusive.
+// Note that this port, which doesn't target the 6502, doesn't use the stack at $0160-$1FFF at all.
 // 
 // SMB:90CC
 // Signature: [Y] -> [A]
 byte InitializeMemory(byte i) {
     memset(&RAM(0x000), 0, 0x160);
-    memset(&RAM(0x200), 0, 0x700-0x200);
-    memset(&RAM(0x700), 0, i+1);
+    memset(&RAM(0x200), 0, (size_t)0x700-0x200);
+    memset(&RAM(0x700), 0, (byte)(i+1));
     return 0;
 }
 
@@ -269,7 +270,7 @@ typedef uint64_t uint7;
 
 // SMB:8000
 // Signature: [] -> []
-void Start(void) {
+void Start() {
     ppuctrl(0x10);
     // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
     // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
@@ -293,7 +294,9 @@ void Start(void) {
     MoveAllSpritesOffscreen();
     InitializeNameTables();
     DisableScreenFlag += 1;
-    WritePPUReg1(Mirror_PPU_CTRL_REG1 | 0x80);
+
+    Mirror_PPU_CTRL_REG1 |= 0x80;
+    ppuctrl(Mirror_PPU_CTRL_REG1);
 
     // There was an infinite do-nothing loop here for the NES.
     // At this point, the NMI would interrupt the loop each frame.
@@ -310,7 +313,7 @@ void SoundEngine() {
     // Sound code is horrifying, so we're dealing with it later
 }
 
-// SMB's Pseudo-Random Number Generator
+// SMB1 and SMBLL's Pseudo-Random Number Generator
 //
 // How it works, in plain language:
 // The PRNG is a 56-bit string (7 * 8 bits) that's shifted to the right each iteration.
@@ -355,8 +358,8 @@ static inline void dectimer(byte& timer) {
 // SMB:8082
 // Signature: [] -> []
 void NonMaskableInterrupt() {
-    Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & 0x7f;
-    ppuctrl(Mirror_PPU_CTRL_REG1 & 0x7e);
+    Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & ~0x80;
+    ppuctrl(Mirror_PPU_CTRL_REG1 & ~0x81);
 
     if (DisableScreenFlag == 0) {
         Mirror_PPU_CTRL_REG2 |= 0x1e;
@@ -370,7 +373,7 @@ void NonMaskableInterrupt() {
     ppuscroll(0);
 
     // The NES wrote to OAM registers to initiate copying sprites
-    transfer_sprite_data(&RAM(0x200));
+    transfer_sprite_data(&Sprite_Data);
 
     // VRAM_Buffer_AddrCtrl of 0, 5, 6, 7 are in RAM ($301, $300, $341, $341 respectively). All other ones are in ROM.
     UpdateScreen(&RAM(VRAM_AddrTable_High[VRAM_Buffer_AddrCtrl]*0x100 + VRAM_AddrTable_Low[VRAM_Buffer_AddrCtrl]));
