@@ -490,7 +490,7 @@ void FUN_3198(byte param_1)
 
 {
   if (param_1 == 0) {
-    Entrance_GameTimerSetup(0);
+    Entrance_GameTimerSetup(0x91);
     return;
   }
   if (param_1 == 1) {
@@ -3571,21 +3571,21 @@ void VerticalPipe(byte param_1,byte param_2)
   byte bVar2;
   byte bVar3;
   byte bVar4;
-  struct_xci sVar5;
-  struct_yr06r07 sVar6;
+  struct_yr06r07 sVar5;
+  struct_xci sVar6;
   byte bStack0000;
   
-  sVar6 = GetPipeHeight(param_1);
-  bVar2 = sVar6.r07;
-  bVar1 = sVar6.r06;
-  bStack0000 = sVar6.y;
+  sVar5 = GetPipeHeight(param_1);
+  bVar2 = sVar5.r07;
+  bVar1 = sVar5.r06;
+  bStack0000 = sVar5.y;
   if (param_2 != 0) {
     bStack0000 += 4;
   }
   if (((AreaNumber | WorldNumber) != 0) && (AreaObjectLength[param_1] != 0)) {
-    sVar5 = FindEmptyEnemySlot();
-    bVar4 = sVar5.x;
-    if (!sVar5.c) {
+    sVar6 = FindEmptyEnemySlot();
+    bVar4 = sVar6.x;
+    if (!sVar6.c) {
       bVar3 = GetAreaObjXPosition();
       Enemy_X_Position[bVar4] = bVar3 + 8;
       Enemy_PageLoc[bVar4] = CurrentPageLoc + (0xf7 < bVar3);
@@ -4013,13 +4013,13 @@ void Jumpspring(byte param_1)
   byte bVar1;
   byte bVar2;
   byte bVar3;
-  struct_xci sVar4;
-  struct_yr07i sVar5;
+  struct_yr07i sVar4;
+  struct_xci sVar5;
   
-  sVar5 = GetLrgObjAttrib(param_1);
-  bVar1 = sVar5.r07;
-  sVar4 = FindEmptyEnemySlot();
-  bVar3 = sVar4.x;
+  sVar4 = GetLrgObjAttrib(param_1);
+  bVar1 = sVar4.r07;
+  sVar5 = FindEmptyEnemySlot();
+  bVar3 = sVar5.x;
   bVar2 = GetAreaObjXPosition();
   Enemy_X_Position[bVar3] = bVar2;
   Enemy_PageLoc[bVar3] = CurrentPageLoc;
@@ -5817,11 +5817,11 @@ byte BulletBillHandler(byte param_1)
 
 {
   byte bVar1;
-  struct_xci sVar2;
-  struct_ncr00 sVar3;
-  struct_axi sVar4;
-  struct_xyi sVar5;
-  struct_axr00 sVar6;
+  struct_ncr00 sVar2;
+  struct_axi sVar3;
+  struct_xyi sVar4;
+  struct_axr00 sVar5;
+  struct_xci sVar6;
   
   if (TimerControl == 0) {
     if (Enemy_State[param_1] == 0) {
@@ -5831,13 +5831,13 @@ KillBB:
         return param_1;
       }
       bVar1 = 1;
-      sVar3 = PlayerEnemyDiff(param_1);
-      if (!sVar3.n) {
+      sVar2 = PlayerEnemyDiff(param_1);
+      if (!sVar2.n) {
         bVar1 += 1;
       }
       Enemy_MovingDir[param_1] = bVar1;
       PlayerSpriteVarData1[param_1 + 1] = BulletBillXSpdData[(byte)(bVar1 - 1)];
-      if ((byte)(sVar3.r00 + 0x28 + sVar3.c) < 0x50) goto KillBB;
+      if ((byte)(sVar2.r00 + 0x28 + sVar2.c) < 0x50) goto KillBB;
       Enemy_State[param_1] = 1;
       EnemyFrameTimer[param_1] = 10;
       Square2SoundQueue = 8;
@@ -5845,14 +5845,14 @@ KillBB:
     if ((Enemy_State[param_1] & 0x20) != 0) {
       param_1 = MoveD_EnemyVertically(param_1);
     }
-    sVar4 = MoveEnemyHorizontally(param_1);
-    param_1 = sVar4.x;
+    sVar3 = MoveEnemyHorizontally(param_1);
+    param_1 = sVar3.x;
   }
-  sVar5 = GetEnemyOffscreenBits(param_1);
-  sVar6 = RelativeEnemyPosition(sVar5.x);
-  bVar1 = GetEnemyBoundBox(sVar6.x);
-  sVar2 = PlayerEnemyCollision(bVar1);
-  bVar1 = EnemyGfxHandler(sVar2.x);
+  sVar4 = GetEnemyOffscreenBits(param_1);
+  sVar5 = RelativeEnemyPosition(sVar4.x);
+  bVar1 = GetEnemyBoundBox(sVar5.x);
+  sVar6 = PlayerEnemyCollision(bVar1);
+  bVar1 = EnemyGfxHandler(sVar6.x);
   return bVar1;
 }
 
@@ -6168,9 +6168,9 @@ byte PowerUpObjHandler(void)
 {
   byte bVar1;
   bool bVar2;
-  struct_xci sVar3;
+  struct_axr00 sVar3;
   struct_xyi sVar4;
-  struct_axr00 sVar5;
+  struct_xci sVar5;
   
   bVar1 = 5;
   ObjectOffset = 5;
@@ -6204,12 +6204,12 @@ byte PowerUpObjHandler(void)
         return 5;
       }
     }
-    sVar5 = RelativeEnemyPosition(bVar1);
-    sVar4 = GetEnemyOffscreenBits(sVar5.x);
+    sVar3 = RelativeEnemyPosition(bVar1);
+    sVar4 = GetEnemyOffscreenBits(sVar3.x);
     GetEnemyBoundBox(sVar4.x);
     bVar1 = DrawPowerUp();
-    sVar3 = PlayerEnemyCollision(bVar1);
-    bVar1 = sVar3.x;
+    sVar5 = PlayerEnemyCollision(bVar1);
+    bVar1 = sVar5.x;
     OffscreenBoundsCheck(bVar1);
   }
   return bVar1;
@@ -6313,19 +6313,19 @@ void BumpBlock(byte param_1,byte param_2,byte param_3,byte param_4)
   byte bVar2;
   byte bVar3;
   bool bVar4;
-  struct_xr05i sVar5;
-  struct_yci sVar6;
+  struct_yci sVar5;
+  struct_xr05i sVar6;
   
-  sVar5 = CheckTopOfBlock(param_1,param_2,param_3,param_4);
-  bVar2 = sVar5.x;
+  sVar6 = CheckTopOfBlock(param_1,param_2,param_3,param_4);
+  bVar2 = sVar6.x;
   Square1SoundQueue = 2;
   Block_X_Speed[bVar2] = 0;
   Block_Y_MoveForce[bVar2] = 0;
   PlayerSpriteVarData2[0] = 0;
   Block_Y_Speed[bVar2] = 0xfe;
-  sVar6 = BlockBumpedChk(sVar5.r05);
-  bVar3 = sVar6.y;
-  if (sVar6.c != false) {
+  sVar5 = BlockBumpedChk(sVar6.r05);
+  bVar3 = sVar5.y;
+  if (sVar5.c != false) {
     bVar4 = 8 < bVar3;
     bVar1 = bVar3;
     if (bVar4) {
@@ -8109,16 +8109,16 @@ byte RunBowserFlame(byte param_1)
 
 {
   byte bVar1;
-  struct_xci sVar2;
-  struct_xyi sVar3;
-  struct_axr00 sVar4;
+  struct_xyi sVar2;
+  struct_axr00 sVar3;
+  struct_xci sVar4;
   
   bVar1 = ProcBowserFlame(param_1);
-  sVar3 = GetEnemyOffscreenBits(bVar1);
-  sVar4 = RelativeEnemyPosition(sVar3.x);
-  bVar1 = GetEnemyBoundBox(sVar4.x);
-  sVar2 = PlayerEnemyCollision(bVar1);
-  bVar1 = sVar2.x;
+  sVar2 = GetEnemyOffscreenBits(bVar1);
+  sVar3 = RelativeEnemyPosition(sVar2.x);
+  bVar1 = GetEnemyBoundBox(sVar3.x);
+  sVar4 = PlayerEnemyCollision(bVar1);
+  bVar1 = sVar4.x;
   OffscreenBoundsCheck(bVar1);
   return bVar1;
 }
@@ -8715,13 +8715,13 @@ byte ProcFirebar(byte param_1)
   byte bVar1;
   byte bVar2;
   byte bVar3;
-  struct_xyi sVar4;
-  struct_axr00 sVar5;
+  struct_axr00 sVar4;
+  struct_xyi sVar5;
   struct_r01r02r03 sVar6;
   struct_xr00r06 sVar7;
   
-  sVar4 = GetEnemyOffscreenBits(param_1);
-  bVar3 = sVar4.x;
+  sVar5 = GetEnemyOffscreenBits(param_1);
+  bVar3 = sVar5.x;
   if ((Enemy_OffscreenBits & 8) == 0) {
     if (TimerControl == 0) {
       bVar2 = FirebarSpin(FirebarSpinSpeed[bVar3],bVar3);
@@ -8732,9 +8732,9 @@ byte ProcFirebar(byte param_1)
       MysterySpriteThing4 += 1;
       PlayerSpriteVarData2[bVar3 + 1] = MysterySpriteThing4;
     }
-    sVar5 = RelativeEnemyPosition(bVar3);
-    bVar3 = sVar5.x;
-    GetFirebarPosition(sVar5.a,sVar5.r00);
+    sVar4 = RelativeEnemyPosition(bVar3);
+    bVar3 = sVar4.x;
+    GetFirebarPosition(sVar4.a,sVar4.r00);
     bVar1 = Enemy_Rel_YPos;
     bVar3 = Enemy_SprDataOffset[bVar3];
     Sprite_Data[bVar3] = Enemy_Rel_YPos;
@@ -9264,8 +9264,8 @@ byte ProcBowserFlame(byte param_1)
   byte bVar3;
   byte bVar4;
   byte bVar5;
-  struct_xyi sVar6;
-  struct_axr00 sVar7;
+  struct_axr00 sVar6;
+  struct_xyi sVar7;
   
   if (TimerControl == 0) {
     bVar3 = 0x40;
@@ -9286,8 +9286,8 @@ byte ProcBowserFlame(byte param_1)
            CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
     }
   }
-  sVar7 = RelativeEnemyPosition(param_1);
-  bVar3 = sVar7.x;
+  sVar6 = RelativeEnemyPosition(param_1);
+  bVar3 = sVar6.x;
   if (Enemy_State[bVar3] == 0) {
     bVar2 = 0x51;
     bVar5 = 2;
@@ -9306,9 +9306,9 @@ byte ProcBowserFlame(byte param_1)
       bVar3 += 4;
       bVar4 += 1;
     } while (bVar4 < 3);
-    sVar6 = GetEnemyOffscreenBits(ObjectOffset);
+    sVar7 = GetEnemyOffscreenBits(ObjectOffset);
     bVar5 = Enemy_OffscreenBits;
-    bVar3 = Enemy_SprDataOffset[sVar6.x];
+    bVar3 = Enemy_SprDataOffset[sVar7.x];
     bVar2 = Enemy_OffscreenBits >> 1;
     if ((Enemy_OffscreenBits & 1) != 0) {
       Sprite_Data[bVar3 + 0xc] = 0xf8;
@@ -9322,7 +9322,7 @@ byte ProcBowserFlame(byte param_1)
     if ((bVar5 >> 3 & 1) != 0) {
       Sprite_Data[bVar3] = 0xf8;
     }
-    return sVar6.x;
+    return sVar7.x;
   }
   return bVar3;
 }
@@ -11292,8 +11292,8 @@ byte EnemyToBGCollisionDet(byte param_1)
   byte bVar4;
   byte bVar5;
   bool bVar6;
-  struct_axzr02r04r06r07 sVar7;
-  struct_ncr00 sVar8;
+  struct_ncr00 sVar7;
+  struct_axzr02r04r06r07 sVar8;
   
   if ((((Enemy_State[param_1] & 0x20) != 0) || (bVar6 = SubtEnemyYPos(param_1), !bVar6)) ||
      ((bVar4 = Enemy_ID[param_1], bVar4 == 0x12 && (Enemy_Y_Position[param_1] < 0x25)))) {
@@ -11310,13 +11310,13 @@ byte EnemyToBGCollisionDet(byte param_1)
   if (((bVar4 != 0x12) && (bVar4 != 0x2e)) && (6 < bVar4)) {
     return param_1;
   }
-  sVar7 = ChkUnderEnemy(param_1);
-  sVar2 = (short)((uint7)sVar7 >> 0x28);
-  bVar1 = sVar7.r04;
-  bVar4 = sVar7.r02;
-  bVar5 = sVar7.x;
-  bVar3 = sVar7.a;
-  if ((sVar7.z != false) || (bVar6 = ChkForNonSolids(bVar3), bVar6)) {
+  sVar8 = ChkUnderEnemy(param_1);
+  sVar2 = (short)((uint7)sVar8 >> 0x28);
+  bVar1 = sVar8.r04;
+  bVar4 = sVar8.r02;
+  bVar5 = sVar8.x;
+  bVar3 = sVar8.a;
+  if ((sVar8.z != false) || (bVar6 = ChkForNonSolids(bVar3), bVar6)) {
     bVar4 = ChkForRedKoopa(bVar5);
     return bVar4;
   }
@@ -11365,8 +11365,8 @@ byte EnemyToBGCollisionDet(byte param_1)
         if ((FrameCounter & 7) == 0) goto LandEnemyInitState;
       }
       bVar4 = 1;
-      sVar8 = PlayerEnemyDiff(bVar5);
-      if (sVar8.n != false) {
+      sVar7 = PlayerEnemyDiff(bVar5);
+      if (sVar7.n != false) {
         bVar4 += 1;
       }
       if (bVar4 == Enemy_MovingDir[bVar5]) {
@@ -12022,10 +12022,7 @@ struct_ayr02r04r06r07 BlockBufferColli_Feet(byte param_1)
   bVar1 = param_1 + 1;
   sVar2 = BlockBufferCollision(0,0,bVar1);
   return (struct_ayr02r04r06r07)
-         CONCAT33((uint3)(((uint6)sVar2 & 0xff0000ff0000) >> 0x18) |
-                  (uint3)(ushort)((uint6)sVar2 >> 0x18),
-                  (uint3)((uint6)sVar2 & 0xff0000ff0000) |
-                  (uint3)(SUB62(sVar2,0) & 0xff | (ushort)bVar1 << 8));
+         ((uint6)sVar2 & 0xffffff000000 | (uint6)CONCAT12(sVar2.r02,CONCAT11(bVar1,sVar2.a)));
 }
 
 

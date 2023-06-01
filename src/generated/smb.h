@@ -86,24 +86,6 @@ struct struct_xr00r01 {
     byte r01;
 };
 
-typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
-
-struct struct_axr00 {
-    inline struct_axr00() {}
-    inline struct_axr00(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-
-    byte a;
-    byte x;
-    byte r00;
-};
-
 typedef struct struct_nr00i struct_nr00i, *Pstruct_nr00i;
 
 struct struct_nr00i {
@@ -197,24 +179,6 @@ struct struct_ayr02r04r06r07 {
     byte r07;
 };
 
-typedef struct struct_ayi struct_ayi, *Pstruct_ayi;
-
-struct struct_ayi {
-    inline struct_ayi() {}
-    inline struct_ayi(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-
-    byte a;
-    byte y;
-    bool i;
-};
-
 typedef struct struct_azr02r04r06r07 struct_azr02r04r06r07, *Pstruct_azr02r04r06r07;
 
 struct struct_azr02r04r06r07 {
@@ -234,6 +198,78 @@ struct struct_azr02r04r06r07 {
     byte r04;
     byte r06;
     byte r07;
+};
+
+typedef struct struct_r01r02r03 struct_r01r02r03, *Pstruct_r01r02r03;
+
+struct struct_r01r02r03 {
+    inline struct_r01r02r03() {}
+    inline struct_r01r02r03(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+
+    byte r01;
+    byte r02;
+    byte r03;
+};
+
+typedef struct struct_xyi struct_xyi, *Pstruct_xyi;
+
+struct struct_xyi {
+    inline struct_xyi() {}
+    inline struct_xyi(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+
+    byte x;
+    byte y;
+    bool i;
+};
+
+typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
+
+struct struct_axr00 {
+    inline struct_axr00() {}
+    inline struct_axr00(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+
+    byte a;
+    byte x;
+    byte r00;
+};
+
+typedef struct struct_ayi struct_ayi, *Pstruct_ayi;
+
+struct struct_ayi {
+    inline struct_ayi() {}
+    inline struct_ayi(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+
+    byte a;
+    byte y;
+    bool i;
 };
 
 typedef struct struct_axz struct_axz, *Pstruct_axz;
@@ -330,24 +366,6 @@ struct struct_xr05i {
     bool i;
 };
 
-typedef struct struct_r01r02r03 struct_r01r02r03, *Pstruct_r01r02r03;
-
-struct struct_r01r02r03 {
-    inline struct_r01r02r03() {}
-    inline struct_r01r02r03(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-
-    byte r01;
-    byte r02;
-    byte r03;
-};
-
 typedef struct struct_xci struct_xci, *Pstruct_xci;
 
 struct struct_xci {
@@ -417,24 +435,6 @@ struct struct_ar00i {
 
     byte a;
     byte r00;
-    bool i;
-};
-
-typedef struct struct_xyi struct_xyi, *Pstruct_xyi;
-
-struct struct_xyi {
-    inline struct_xyi() {}
-    inline struct_xyi(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-
-    byte x;
-    byte y;
     bool i;
 };
 

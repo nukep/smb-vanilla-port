@@ -611,7 +611,7 @@ define pcodeop jmpengine;
 :JMPENGINE_JSRIF imm8 "->" ADDR16 is op=0x17; imm8; ADDR16 {
 	if (A != imm8) goto <end>;
 
-	local tmp1:2 = ADDR16;
+	local tmp1:2 = &ADDR16;
 
 	r06 = tmp1[0,8];
 	r07 = tmp1[8,8];
