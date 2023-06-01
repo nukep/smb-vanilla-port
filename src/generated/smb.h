@@ -86,6 +86,24 @@ struct struct_xr00r01 {
     byte r01;
 };
 
+typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
+
+struct struct_axr00 {
+    inline struct_axr00() {}
+    inline struct_axr00(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+
+    byte a;
+    byte x;
+    byte r00;
+};
+
 typedef struct struct_nr00i struct_nr00i, *Pstruct_nr00i;
 
 struct struct_nr00i {
@@ -179,6 +197,24 @@ struct struct_ayr02r04r06r07 {
     byte r07;
 };
 
+typedef struct struct_ayi struct_ayi, *Pstruct_ayi;
+
+struct struct_ayi {
+    inline struct_ayi() {}
+    inline struct_ayi(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+
+    byte a;
+    byte y;
+    bool i;
+};
+
 typedef struct struct_azr02r04r06r07 struct_azr02r04r06r07, *Pstruct_azr02r04r06r07;
 
 struct struct_azr02r04r06r07 {
@@ -198,78 +234,6 @@ struct struct_azr02r04r06r07 {
     byte r04;
     byte r06;
     byte r07;
-};
-
-typedef struct struct_r01r02r03 struct_r01r02r03, *Pstruct_r01r02r03;
-
-struct struct_r01r02r03 {
-    inline struct_r01r02r03() {}
-    inline struct_r01r02r03(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-
-    byte r01;
-    byte r02;
-    byte r03;
-};
-
-typedef struct struct_xyi struct_xyi, *Pstruct_xyi;
-
-struct struct_xyi {
-    inline struct_xyi() {}
-    inline struct_xyi(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-
-    byte x;
-    byte y;
-    bool i;
-};
-
-typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
-
-struct struct_axr00 {
-    inline struct_axr00() {}
-    inline struct_axr00(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-
-    byte a;
-    byte x;
-    byte r00;
-};
-
-typedef struct struct_ayi struct_ayi, *Pstruct_ayi;
-
-struct struct_ayi {
-    inline struct_ayi() {}
-    inline struct_ayi(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-
-    byte a;
-    byte y;
-    bool i;
 };
 
 typedef struct struct_axz struct_axz, *Pstruct_axz;
@@ -366,6 +330,24 @@ struct struct_xr05i {
     bool i;
 };
 
+typedef struct struct_r01r02r03 struct_r01r02r03, *Pstruct_r01r02r03;
+
+struct struct_r01r02r03 {
+    inline struct_r01r02r03() {}
+    inline struct_r01r02r03(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+
+    byte r01;
+    byte r02;
+    byte r03;
+};
+
 typedef struct struct_xci struct_xci, *Pstruct_xci;
 
 struct struct_xci {
@@ -438,6 +420,24 @@ struct struct_ar00i {
     bool i;
 };
 
+typedef struct struct_xyi struct_xyi, *Pstruct_xyi;
+
+struct struct_xyi {
+    inline struct_xyi() {}
+    inline struct_xyi(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+
+    byte x;
+    byte y;
+    bool i;
+};
+
 typedef struct struct_aci struct_aci, *Pstruct_aci;
 
 struct struct_aci {
@@ -506,11 +506,11 @@ void FUN_3174(byte param_1,byte param_2);
 void FUN_3184(byte param_1);
 void FUN_3198(byte param_1);
 void FUN_31d0(byte param_1);
-void FUN_31e4(byte param_1,byte param_2,bool param_3);
-void FUN_320c(byte param_1,byte param_2,bool param_3);
+void FUN_31e4(byte param_1,byte param_2);
+void FUN_320c(byte param_1,byte param_2);
 void FUN_32ec(byte param_1,byte param_2);
 byte FUN_3308(byte param_1,byte param_2);
-byte FUN_3394(byte param_1,byte param_2,bool param_3);
+byte FUN_3394(byte param_1,byte param_2);
 byte FUN_33ec(byte param_1,byte param_2);
 byte FUN_340c(byte param_1,byte param_2);
 void PauseRoutine(void);
@@ -535,7 +535,7 @@ void InitScreen(void);
 void SetupIntermediate(void);
 void GetAreaPalette(void);
 void GetBackgroundColor(void);
-struct_xci GetPlayerColors(void);
+byte GetPlayerColors(void);
 void GetAlternatePalette1(void);
 void WriteTopStatusLine(void);
 void WriteBottomStatusLine(void);
@@ -794,7 +794,7 @@ byte RunEnemyObjectsCore(void);
 void NoRunCode(void);
 byte RunRetainerObj(byte param_1);
 byte RunNormalEnemies(byte param_1);
-byte EnemyMovementSubs(byte param_1,bool param_2);
+byte EnemyMovementSubs(byte param_1);
 void NoMoveCode(void);
 byte RunBowserFlame(byte param_1);
 byte RunFirebarObj(byte param_1);
@@ -861,21 +861,21 @@ void ChkSmallPlatCollision(byte param_1);
 void OffscreenBoundsCheck(byte param_1);
 byte FireballEnemyCollision(byte param_1);
 void HandleEnemyFBallCol(byte param_1,byte param_2);
-bool ShellOrBlockDefeat(byte param_1);
+void ShellOrBlockDefeat(byte param_1);
 void EnemySmackScore(byte param_1,byte param_2);
 byte PlayerHammerCollision(byte param_1);
-struct_xci HandlePowerUpCollision(byte param_1);
-struct_xci PlayerEnemyCollision(byte param_1);
-struct_xci InjurePlayer(bool param_1);
-struct_xci ForceInjury(byte param_1,bool param_2);
+byte HandlePowerUpCollision(byte param_1);
+byte PlayerEnemyCollision(byte param_1);
+byte InjurePlayer(void);
+byte ForceInjury(byte param_1);
 byte SetPRout(byte param_1,byte param_2);
-struct_xci ChkEnemyFaceRight(byte param_1);
-struct_xci LInj(byte param_1);
-struct_yci EnemyFacePlayer(byte param_1);
+byte ChkEnemyFaceRight(byte param_1);
+byte LInj(byte param_1);
+byte EnemyFacePlayer(byte param_1);
 byte SetupFloateyNumber(byte param_1,byte param_2);
 byte EnemiesCollision(byte param_1);
 void ProcEnemyCollisions(byte param_1,byte param_2,byte param_3);
-bool EnemyTurnAround(byte param_1);
+void EnemyTurnAround(byte param_1);
 void RXSpd(byte param_1);
 byte LargePlatformCollision(byte param_1);
 byte ChkForPlayerC_LargeP(byte param_1);
@@ -900,7 +900,7 @@ struct_aci CheckForCoinMTiles(byte param_1);
 byte GetMTileAttrib(byte param_1);
 byte EnemyToBGCollisionDet(byte param_1);
 void ChkToStunEnemies(byte param_1,byte param_2);
-bool SetStun(byte param_1);
+void SetStun(byte param_1);
 byte ChkForRedKoopa(byte param_1);
 byte DoEnemySideCheck(byte param_1);
 byte ChkForBump_HammerBroJ(byte param_1);

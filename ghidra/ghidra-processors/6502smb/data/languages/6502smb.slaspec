@@ -613,6 +613,8 @@ define pcodeop jmpengine;
 
 	local tmp1:2 = &ADDR16;
 
+	# carry is bit 7 of A (in practice, 0). yes, this is important and shows up as a bug in SMB!
+	C = A[7,1];
 	r06 = tmp1[0,8];
 	r07 = tmp1[8,8];
 	Y = A*2 + 2;
