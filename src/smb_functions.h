@@ -6,3 +6,5 @@ void WriteNTAddr(byte);
 void DrawTitleScreen();
 byte InitializeMemory(byte);
 bool TransposePlayers();
+void ReadJoypads();
+void ReadPortBits(byte joynum);

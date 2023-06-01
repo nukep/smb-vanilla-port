@@ -9,6 +9,8 @@ reimplemented = [
     'UpdateScreen',
     'InitializeMemory',
     'TransposePlayers',
+    'ReadJoypads',
+    'ReadPortBits'
 ]
 
 unused = [

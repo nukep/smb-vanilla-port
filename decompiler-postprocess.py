@@ -77,13 +77,6 @@ outstr = outstr.replace('*(byte *)param_1', 'RAM(param_1)')
 # Okay, we can get rid of all other (byte *)s
 outstr = outstr.replace('(byte *)', '')
 
-# Very specific hack on reading the player controller
-# Yes, there's actually only one read on $4016 or $4017 despite the decompilation showing it twice.
-outstr = outstr.replace(
-    r'bVar3 = ((&BYTE_4016)[param_1] >> 1 | (&BYTE_4016)[param_1]) & 1;',
-    r'byte j; if (param_1 == 0) { j = joy1(); } else { j = joy2(); } bVar3 = (j >> 1 | j & 1) & 1;'
-)
-
 # We're gonna replace the (&A)[B] pattern with (&A)[force_byte(B)].
 # MSVC likes to "optimize" away the underflow-wrapping behavior of bytes when used in this specific context.
 # (even though this is defined behavior!!!!!)

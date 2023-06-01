@@ -2358,53 +2358,6 @@ void InitializeNameTables(void)
 
 
 
-// SMB:8e5c
-// Signature: [] -> []
-
-void ReadJoypads(void)
-
-{
-  char cVar1;
-  
-  joystick_strobe(1);
-  cVar1 = 0;
-  joystick_strobe(0);
-  ReadPortBits(0);
-  ReadPortBits(cVar1 + 1);
-  return;
-}
-
-
-
-// SMB:8e6a
-// Signature: [X] -> []
-
-void ReadPortBits(byte param_1)
-
-{
-  byte bVar1;
-  byte in_A = 0;
-  char cVar2;
-  byte bVar3;
-  
-  cVar2 = 8;
-  do {
-    byte j; if (param_1 == 0) { j = joy1(); } else { j = joy2(); } bVar3 = (j >> 1 | j & 1) & 1;
-    bVar1 = in_A << 1;
-    in_A = bVar1 | bVar3;
-    cVar2 += -1;
-  } while (cVar2 != 0);
-  SavedJoypadBits[param_1] = in_A;
-  if ((bVar1 & 0x30 & JoypadBitMask[param_1]) != 0) {
-    SavedJoypadBits[param_1] = bVar1 & 0xcf | bVar3;
-    return;
-  }
-  JoypadBitMask[param_1] = in_A;
-  return;
-}
-
-
-
 // SMB:8eed
 // Signature: [A] -> []
 

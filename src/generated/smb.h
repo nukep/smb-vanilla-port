@@ -558,8 +558,6 @@ void MoveVOffset(byte param_1);
 byte PutBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 void RemBridge(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 void InitializeNameTables(void);
-void ReadJoypads(void);
-void ReadPortBits(byte param_1);
 void WritePPUReg1(byte param_1);
 void PrintStatusBarNumbers(byte param_1);
 void OutputNumbers(byte param_1);

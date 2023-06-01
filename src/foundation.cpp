@@ -581,3 +581,38 @@ bool TransposePlayers() {
         return true;
     }
 }
+
+
+// SMB:8e5c
+// Signature: [] -> []
+void ReadJoypads() {
+    joystick_strobe(1);
+    joystick_strobe(0);
+    ReadPortBits(0);
+    ReadPortBits(1);
+}
+
+
+// SMB:8e6a
+// Signature: [X] -> []
+void ReadPortBits(byte joynum) {
+    static const byte button_lookup[8] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
+
+    byte buttons = 0;
+
+    for (int i = 0; i < 8; i++) {
+        byte j = joynum == 0 ? joy1() : joy2();
+        if ((j & 0x03) != 0) {
+            buttons |= button_lookup[i];
+        }
+    }
+
+    SavedJoypadBits[joynum] = buttons;
+
+    // If Select or Start were pressed last time this was called, then "unpress" them.
+    if ((buttons & (0x20 | 0x10) & JoypadBitMask[joynum]) != 0) {
+        SavedJoypadBits[joynum] = buttons & ~(0x20 | 0x10);
+    } else {
+        JoypadBitMask[joynum] = buttons;
+    }
+}
