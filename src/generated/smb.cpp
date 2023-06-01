@@ -1385,7 +1385,7 @@ SelectBLogic:
         WorldSelectNumber = WorldSelectNumber + 1 & 7;
         bVar2 = GoContinue(WorldSelectNumber);
         do {
-          (&VRAM_Buffer1_Offset)[bVar2] = WSelectBufferTemplate[bVar2];
+          (&VRAM_Buffer1_Offset)[force_byte(bVar2)] = WSelectBufferTemplate[bVar2];
           bVar1 = bVar2 - 5;
           bVar2 = bVar2 + 1;
         } while (0x7f < bVar1);
@@ -1450,7 +1450,7 @@ void DrawMushroomIcon(void)
   
   bVar1 = 7;
   do {
-    (&VRAM_Buffer1_Offset)[bVar1] = MushroomIconData[bVar1];
+    (&VRAM_Buffer1_Offset)[force_byte(bVar1)] = MushroomIconData[bVar1];
     bVar1 -= 1;
   } while (bVar1 < 0x80);
   if (NumberOfPlayers != 0) {
@@ -1955,7 +1955,7 @@ void ClearBuffersDrawIcon(void)
   if (OperMode == 0) {
     bVar1 = 0;
     do {
-      (&VRAM_Buffer1_Offset)[bVar1] = 0;
+      (&VRAM_Buffer1_Offset)[force_byte(bVar1)] = 0;
       SprObject_X_MoveForce[bVar1] = 0;
       bVar1 -= 1;
     } while (bVar1 != 0);
@@ -2331,7 +2331,7 @@ void RemBridge(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5)
   VRAM_Buffer1[param_2 + 8] = BlockGfxData[param_1 + 3];
   VRAM_Buffer1[param_2] = param_4;
   VRAM_Buffer1[param_2 + 5] = param_4 + 0x20;
-  (&VRAM_Buffer1_Offset)[param_2] = param_5;
+  (&VRAM_Buffer1_Offset)[force_byte(param_2)] = param_5;
   VRAM_Buffer1[param_2 + 4] = param_5;
   VRAM_Buffer1[param_2 + 1] = 2;
   VRAM_Buffer1[param_2 + 6] = 2;
@@ -2567,7 +2567,7 @@ void InitializeGame(void)
   bVar1 = InitializeMemory(0x6f);
   bVar2 = 0x1f;
   do {
-    (&MusicOffset_Noise)[bVar2] = bVar1;
+    (&MusicOffset_Noise)[force_byte(bVar2)] = bVar1;
     bVar2 -= 1;
   } while (bVar2 < 0x80);
   DemoTimer = 0x18;
@@ -2589,7 +2589,7 @@ void InitializeArea(void)
   InitializeMemory(0x4b);
   bVar1 = 0x21;
   do {
-    (&SelectTimer)[bVar1] = 0;
+    (&SelectTimer)[force_byte(bVar1)] = 0;
     bVar1 -= 1;
   } while (bVar1 < 0x80);
   ScreenEdgeOrLeft_PageLoc[0] = HalfwayPage;
@@ -2651,7 +2651,7 @@ void SecondaryGameSetup(void)
   DisableScreenFlag = 0;
   bVar1 = 0;
   do {
-    (&VRAM_Buffer1_Offset)[bVar1] = 0;
+    (&VRAM_Buffer1_Offset)[force_byte(bVar1)] = 0;
     bVar1 += 1;
   } while (bVar1 != 0);
   GameTimerExpiredFlag = 0;

@@ -217,6 +217,12 @@ public:
     }
 };
 
+// Workaround!!!
+// Used to avoid some undefined behavior in MSVC
+__declspec(noinline) static byte force_byte(byte x) {
+    return x;
+}
+
 /////////////////////////
 /// implemented code! ///
 /////////////////////////
