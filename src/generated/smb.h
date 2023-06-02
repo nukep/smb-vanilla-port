@@ -62,6 +62,10 @@ struct struct_ycr07 {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte y;
     bool c;
@@ -79,6 +83,10 @@ struct struct_xr00r01 {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte x;
@@ -98,6 +106,10 @@ struct struct_axr00 {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte a;
     byte x;
@@ -115,6 +127,10 @@ struct struct_nr00i {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     bool n;
@@ -134,6 +150,10 @@ struct struct_ncr00 {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     bool n;
     bool c;
@@ -151,6 +171,10 @@ struct struct_xr00r06 {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte x;
@@ -170,6 +194,10 @@ struct struct_r06r07i {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte r06;
     byte r07;
@@ -187,6 +215,10 @@ struct struct_ayr02r04r06r07 {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte a;
@@ -209,6 +241,10 @@ struct struct_ayi {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte a;
     byte y;
@@ -226,6 +262,10 @@ struct struct_azr02r04r06r07 {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte a;
@@ -248,6 +288,10 @@ struct struct_axz {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte a;
     byte x;
@@ -265,6 +309,10 @@ struct struct_axzr02r04r06r07 {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte a;
@@ -288,6 +336,10 @@ struct struct_yr07i {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte y;
     byte r07;
@@ -305,6 +357,10 @@ struct struct_axi {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte a;
@@ -324,6 +380,10 @@ struct struct_xr05i {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte x;
     byte r05;
@@ -341,6 +401,10 @@ struct struct_r01r02r03 {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte r01;
@@ -360,6 +424,10 @@ struct struct_xci {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte x;
     bool c;
@@ -377,6 +445,10 @@ struct struct_xyr02 {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte x;
@@ -396,6 +468,10 @@ struct struct_yci {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte y;
     bool c;
@@ -413,6 +489,10 @@ struct struct_ar00i {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte a;
@@ -432,6 +512,10 @@ struct struct_xyi {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte x;
     byte y;
@@ -449,6 +533,10 @@ struct struct_aci {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte a;
@@ -468,6 +556,10 @@ struct struct_yr06r07 {
         memcpy(&v, this, sizeof(*this));
         return v;
     }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
 
     byte y;
     byte r06;
@@ -485,6 +577,10 @@ struct struct_xr00i {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
     byte x;
@@ -738,12 +834,14 @@ void ImposeGravityBlock(byte param_1);
 void ImposeGravitySprObj(byte param_1,byte param_2,byte param_3);
 byte MovePlatformDown(byte param_1);
 byte MovePlatformUp(byte param_1);
+byte RedPTroopaGrav(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 void ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 byte EnemiesAndLoopsCore(byte param_1);
 void ExecGameLoopback(byte param_1);
 byte ProcLoopCommand(byte param_1);
 void InitEnemyObject(byte param_1);
 byte CheckThreeBytes(void);
+byte Inc2B(void);
 void CheckpointEnemyID(byte param_1);
 void NoInitCode(void);
 void InitGoomba(byte param_1);
@@ -970,6 +1068,7 @@ byte ThreeFrameExtent(byte param_1);
 byte AnimationControl(byte param_1,byte param_2);
 byte GetGfxOffsetAdder(byte param_1);
 byte HandleChangeSize(void);
+byte GetOffsetFromAnimCtrl(byte param_1,byte param_2);
 void ChkForPlayerAttrib(void);
 byte RelativePlayerPosition(void);
 byte RelativeBubblePosition(byte param_1);

@@ -268,6 +268,7 @@ typedef uint64_t int3;
 typedef uint64_t uint3;
 typedef uint64_t uint6;
 typedef uint64_t uint7;
+typedef uint64_t undefined3;
 
 #include "generated/smb.h"
 #include "generated/smb.cpp"

@@ -40,7 +40,7 @@ functions_to_analyze = [
 
 # Should we apply the solved inputs/outputs? False means we just log them.
 applyit = True
-
+log_call_trees = False
 
 
 
@@ -513,7 +513,7 @@ def set_function_io(fn, input_regs, output_regs):
         fn.setReturn(create_multireg_struct(output_regs), VariableStorage(currentProgram, output_regs[::-1]), SourceType.USER_DEFINED)
         # fn.setReturn(byte_array(len(output_regs)), VariableStorage(currentProgram, output_regs[::-1]), SourceType.USER_DEFINED)
     
-    fn.setCallingConvention(fn.getDefaultCallingConventionName())
+    fn.setCallingConvention('__stdcall')
 
 def apply_function_inputs_outputs_to_the_real_thing(f):
     # for now, multiple outputs are a byte array.
@@ -608,7 +608,7 @@ def process_block(callstack, block, visit_fn):
 
 
 def analyze_fn(callstack, f, caller_cur, visit_fn):
-    visit_fn(f)
+    visit_fn(f, callstack[-1] if len(callstack) > 0 else None)
     # presolved functions are a way to prevent recursion issues, so it comes before the recursion check
     if len(callstack) > 0:
         if f.presolved:
@@ -671,7 +671,13 @@ def analyze_start(f):
     inputs = BlockPorts()
     cur = inputs.clone()
     visited_fns = set()
-    def visit_fn(f):
+    def visit_fn(f, caller_f):
+        if log_call_trees:
+            if caller_f:
+                print('calls(0x{}, 0x{})'.format(caller_f.addr, f.addr))
+            tags = [str(x.name) for x in getFunctionAt(f.addr).getTags()]
+            if tags:
+                print('tags(0x{}, {})'.format(f.addr, tags))
         visited_fns.add(f)
     cur,readlist = analyze_fn([], f, cur, visit_fn)
     for reg in f.output_regs:

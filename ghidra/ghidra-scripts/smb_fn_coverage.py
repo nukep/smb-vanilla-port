@@ -116,6 +116,9 @@ def set_callreturn_to_branches_to_functions():
 
     for inst in list(currentProgram.listing.getInstructions(True)):
         addr = inst.address
+        if 'JMPENGINE' in inst.mnemonicString:
+            # Workaround - don't apply to our custom instructions...
+            continue
         for flowaddr in inst.flows:
             flowinst = getInstructionAt(flowaddr)
             if flowinst:

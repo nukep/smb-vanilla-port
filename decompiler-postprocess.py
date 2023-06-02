@@ -30,7 +30,7 @@ def fixup_manged_array_access(input_string, offset, array_str):
     else:
         offset_str = r'\+\s*0x{:x}'.format(offset)
 
-    pattern = r'\*\((char|byte|undefined)\s*\*\)\((.+?)\s*{}\)'.format(offset_str)
+    pattern = r'\*\(([a-zA-Z]+)\s*\*\)\((.+?)\s*{}\)'.format(offset_str)
     replacement = array_str.format(r'\2')
     output_string = re.sub(pattern, replacement, input_string)
     return output_string
@@ -174,6 +174,23 @@ for name,replacement in readable_hw_registers:
     outstr = re.sub(r'BYTE_{}'.format(name), '{}()'.format(replacement), outstr)
 
 
+outstr = outstr.replace('EnemyData._0_1_', 'EnemyData.lo')
+outstr = outstr.replace('EnemyData._1_1_', 'EnemyData.hi')
+
+# Since Ghidra 10.3, these appear in the structures
+outstr = re.sub(r'\._([0-9])_([0-9])_', r'.subpiece(\1,\2)', outstr)
+
+# Ack! This is so weird! Appeared since Ghidra 10.3
+#   register0x06 = (char)((uint3)uVar1 >> 8);
+#   register0x07 = (char)((uint3)uVar1 >> 0x10);
+#   return sVar2;
+outstr = re.sub(r'register0x06 = (.*?);\n\s*register0x07 = (.*?);\n\s*return (.*?);',
+                r'\3.r06 = \1;\n  \3.r07 = \2;\n  return \3;',
+                outstr)
+
+if 'register0x' in outstr:
+    raise Exception('Leftover register0x... usage is still there!')
+
 outstr = re.sub(r'undefined in_I;', '', outstr)
 # things might try to assign to in_I if another function had returned it and the current one also returns it
 outstr = re.sub(r'in_I \=.*', '', outstr)
@@ -213,6 +230,10 @@ outstr = re.sub(r'struct (.*?) {', r'''struct \1 {
         uint64_t v = 0;
         memcpy(&v, this, sizeof(*this));
         return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 ''', outstr)
 
