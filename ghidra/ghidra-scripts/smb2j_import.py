@@ -47,3 +47,6 @@ create('sm2data4_z', 0xc5d0, 0xd1ff, 'SM2DATA4.bin', origin=0xc2b4, overlay=True
 
 # sm2data2 and sm2data4 share the same data here
 create('sm2data_24_common', 0xc470, 0xc5cf, 'SM2DATA2.bin', origin=0xc470, overlay=True)
+
+# Create FDSBIOS initialized to "RTS", so we get free stubs
+memory.createInitializedBlock('FDSBIOS', toAddr(0xE000), 0x2000, 0x60, None, False)

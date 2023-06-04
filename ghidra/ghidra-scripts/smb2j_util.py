@@ -52,5 +52,7 @@ def current_patch_start():
 
 def add_patch(patch):
     global __PATCHES_AT
+    start = __PATCHES_AT
     setBytes(__PATCHES_AT, bytes(bytearray(patch)))
     __PATCHES_AT = __PATCHES_AT.add(len(patch))
+    return start

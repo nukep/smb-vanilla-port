@@ -2365,3 +2365,6 @@ AltSound_ExitMusicHandler       ,sm2data3,0xCEEC
 AltSound_ProcessLengthData      ,sm2data3,0xCFAC
 AltSound_MusicHeaderData        ,sm2data3,0xD005
 AltSound_MusicLengthLookupTbl   ,sm2data3,0xD28F
+
+FDSBIOS_LoadFiles               ,,0xE1F8
+FDSBIOS_WriteFile               ,,0xE239

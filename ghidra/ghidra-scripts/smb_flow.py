@@ -21,6 +21,7 @@ def is_register_a_flag(reg):
 
 
 # (address, inputs, outputs)
+# If a label doesn't exist, it'll be ignored
 presolved_functions_list = [
     ('Reset',                 [], []),       # Reset
     ('NMI',                   [], []),       # NMI
@@ -28,14 +29,17 @@ presolved_functions_list = [
     ('ReadPortBits',          ['X'], []),    # Bitshifts accumulator from caller, but the original value becomes completely lost.
     ('CheckpointEnemyID',     ['X'], []),    # Recursive. It's the entrypoint for a call hierarchy that eventually calls itself again.
     ('SoundEngine',           [], []),       # Actually we're ignoring it because this is frightening and we don't want to analyze it right now lol
+
+    ('FDSBIOS_LoadFiles',     [], ['A', 'Z']),
+    ('FDSBIOS_WriteFile',     ['A'], ['A', 'Z']),
 ]
 
 # Which functions should be analyze, in order? Note: recurses into calls.
 functions_to_analyze = [
-    0x8000,
-    0x8082,
-    0xc26c,
-    0x8212
+    'Reset',
+    'NMI',
+    'CheckpointEnemyID',
+    'OperModeExecutionTree'
 ]
 
 # Should we apply the solved inputs/outputs? False means we just log them.
@@ -47,7 +51,7 @@ log_call_trees = False
 
 
 presolved_functions = {
-    toAddr(x[0]): x[1:3] for x in presolved_functions_list
+    toAddr(x[0]): x[1:3] for x in presolved_functions_list if toAddr(x[0]) is not None
 }
 
 # We need a feature to assert that certain calls do not use a register as input or output
@@ -70,6 +74,15 @@ calls_register_exclusions = {
     toAddr(x[0]): x[1:] for x in calls_register_exclusions_list
 }
 
+
+def next_paddr_ram(paddr):
+    # increment the ram part, and set seq to 0
+    ram_addr, seq = paddr
+    instr = getInstructionAt(ram_addr)
+    next_addr = instr.getFallThrough()
+    if next_addr is None:
+        raise Exception('No fallthrough exists for the instruction at {}'.format(ram_addr))
+    return (next_addr, 0)
 
 def canonical_paddr(paddr):
     ram_addr, seq = paddr
@@ -100,8 +113,14 @@ def at(paddr):
     # Get the pcodeops, with overrides enabled.
     # Allows for nice things like CALL_RETURN (tail calls for branches).
     ops = instr.getPcode(java.lang.Boolean(True))
+    if len(ops) == 0 and seq == 0:
+        # NOP, or another do-nothing instruction
+        return None
+
     return ops[seq]
 
+def is_instr_relative_branch(instr):
+    return instr.mnemonicString in ['BPL', 'BMI', 'BVC', 'BVS', 'BRA', 'BCC', 'BCS', 'BNE', 'BEQ']
 
 def parse_paddr_from_pcodeop(current_paddr, pcodeop, input_num):
     '''Returns the "paddr" (ram,seq tuple) referred to at the given input parameter for the pcode op'''
@@ -113,7 +132,30 @@ def parse_paddr_from_pcodeop(current_paddr, pcodeop, input_num):
         return add_paddr(current_paddr, addr.getOffset())
     else:
         # assume RAM
+
+        current_ram_addr = current_paddr[0]
+    
+        # Workaround: Assume we're in the same address space for relative branches
+        # Ghidra uses the RAM address space and ignores the actual one for all branches unfortunately :/
+        instr = getInstructionAt(current_ram_addr)
+        if pcodeop.mnemonic == 'CBRANCH' and is_instr_relative_branch(instr):
+            addr = instr.getPrimaryReference(0).toAddress
+        if instr.mnemonicString == 'JMP':
+            # Also workaround JMPs entirely
+            addr = instr.getPrimaryReference(0).toAddress
+
         return (addr, 0)
+
+def parse_call_addr_from_pcodeop(current_paddr, pcodeop, input_num):
+    current_ram_addr = current_paddr[0]
+    addr = pcodeop.getInputs()[input_num].getAddress()
+    instr = getInstructionAt(current_ram_addr)
+    if pcodeop.mnemonic == 'CBRANCH' and is_instr_relative_branch(instr):
+        addr = instr.getPrimaryReference(0).toAddress
+    if instr.mnemonicString == 'JMP':
+        # Also workaround JMPs entirely
+        addr = instr.getPrimaryReference(0).toAddress
+    return addr
 
 def find_pcode_blocks(start_ram_addr):
     '''Returns the entrypoint block, and all the block objects'''
@@ -133,6 +175,11 @@ def find_pcode_blocks(start_ram_addr):
             continue
         visited.add(paddr)
         pcodeop = at(paddr)
+        if not pcodeop:
+            # NOP-like
+            q.append(next_paddr_ram(paddr))
+            continue
+        
         mn = pcodeop.mnemonic
         if mn == 'CBRANCH':
             dest = parse_paddr_from_pcodeop(paddr, pcodeop, 0)
@@ -163,6 +210,10 @@ def find_pcode_blocks(start_ram_addr):
         block_edges[block_paddr] = []
         while True:
             pcodeop = at(paddr)
+            if not pcodeop:
+                # NOP-like
+                paddr = next_paddr_ram(paddr)
+                continue
             pcodes.append((pcodeop, paddr))
             mn = pcodeop.mnemonic
             if mn == 'CBRANCH':
@@ -575,7 +626,7 @@ def process_block(callstack, block, visit_fn):
                         cur[v] = Fresh()
 
         if mn == 'CALL':
-            call_addr = op.getInputs()[0].getAddress()
+            call_addr = parse_call_addr_from_pcodeop(paddr, op, 0)
             f = find_function_from_addr(call_addr)
 
             instr_addr = paddr[0]

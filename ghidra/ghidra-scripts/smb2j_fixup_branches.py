@@ -6,27 +6,14 @@ runScript('smb2j_util.py')
 # Patch them with a custom "BRA" opcode.
 # It doesn't exist on the 6502, but we define it in the processor for convenience.
 
-# smb1: setByte(toAddr(0x81bb), 0x80)
+# SMB2J only
+addrs = [
+    toAddr('GoombaPoints').add(2),
+    toAddr('StartVMDelay').add(5),
+]
 
-# in BlockObjectsCore, decompilation gets confused and throws off the stack depth
-setByte(toAddr(0x8a82), 0x80)
-
-# smb1...
-# setByte(toAddr(0xbf8a), 0x80)
-# setByte(toAddr(0xbf90), 0x80)
-# setByte(toAddr(0xc348), 0x80)
-# setByte(toAddr(0xc719), 0x80)
-# setByte(toAddr(0xd963), 0x80)
-# setByte(toAddr(0xe234), 0x80)
-# setByte(toAddr(0xf3ab), 0x80)
-# setByte(toAddr(0xf3af), 0x80)
-# setByte(toAddr(0xf419), 0x80)
-# setByte(toAddr(0xf6c6), 0x80)
-
-
-# smb2
-setByte(toAddr(0xa5c1), 0x80)
-setByte(toAddr(0xd37f), 0x80)
+for addr in addrs:
+    setByte(addr, 0x80)
 
 
 # we're just gonna nop out the payload after some of the "JSR FDSBIOS..." instructions

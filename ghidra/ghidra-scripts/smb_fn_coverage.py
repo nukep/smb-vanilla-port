@@ -24,8 +24,12 @@ def create_fallthrough_patch(inst, fnaddr):
     cmd = DisassembleCommand(patches_at, AddressSet(patches_at, patches_at.add(2)), True)
     cmd.applyTo(currentProgram, monitor)
 
-    # Set a flow override so the JMP acts as a tail call
     jmpinst = getInstructionAt(patches_at)
+
+    # Ensure the primary reference is in the same address space
+    setReferencePrimary(addInstructionXref(patches_at, fnaddr, 0, jmpinst.getFlowType()))
+
+    # Set a flow override so the JMP acts as a tail call
     jmpinst.setFlowOverride(FlowOverride.CALL_RETURN)
 
     patches_at = patches_at.add(3)
