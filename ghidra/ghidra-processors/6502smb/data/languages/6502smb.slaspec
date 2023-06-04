@@ -212,6 +212,7 @@ define token smbhack_dword (32) endian=big
 ;
 
 # sta $01,x
+# C40F in SMB1, 9008 in SMB2
 :C40F_HACK is smbh32=0xb998c395; smbh32=0x01c8c8c8; smbh32=0xc8ca10f4 {
 	# lda $c398,y
     # sta $01,x
@@ -234,8 +235,32 @@ define token smbhack_dword (32) endian=big
 	Y = Y + 12;
 	X = 0;
 }
+# SMB2J version of the above hack (lda has a different address)
+:x9008_HACK is smbh32=0xb9838f95; smbh32=0x01c8c8c8; smbh32=0xc8ca10f4 {
+	# lda $8f83,y
+    # sta $01,x
+    # iny
+    # iny
+    # iny
+    # iny
+    # dex
+    # bpl -12
+
+	# assume X is 2
+
+	local p:2;
+	p = 0x8f83 + zext(Y);
+	r01 = *:1 p;
+	p = 0x8f87 + zext(Y);
+	r02 = *:1 p;
+	p = 0x8f8b + zext(Y);
+	r03 = *:1 p;
+	Y = Y + 12;
+	X = 0;
+}
 
 # sta $02,x
+# EFA6 in SMB1, BC81 in SMB2J
 :EFA6_HACK is smbh32=0xbd9eef95; smbh32=0x02ca10f8 {
 	# assume x = 5
 	# lda $ef9e,x
@@ -253,8 +278,27 @@ define token smbhack_dword (32) endian=big
 	N = 1;
 	A = r02;
 }
+# SMB2J version of the above hack (lda has a different address)
+:BC81_HACK is smbh32=0xbd79bc95; smbh32=0x02ca10f8 {
+	# assume x = 5
+	# lda $bc79,x
+	# sta $02,x
+	# dex
+	# bpl -8
+
+	r02 = *:1 (0xbc79:2 + 0);
+	r03 = *:1 (0xbc79:2 + 1);
+	r04 = *:1 (0xbc79:2 + 2);
+	r05 = *:1 (0xbc79:2 + 3);
+	r06 = *:1 (0xbc79:2 + 4);
+	r07 = *:1 (0xbc79:2 + 5);
+	X = 0xFF;
+	N = 1;
+	A = r02;
+}
 
 # sta $0001,y
+# CF47 in SMB1, 9B7C in SMB2J
 :CF47_HACK is smbh8=0xb9; smbh32=0x25cf9901; smbh32=0x008810f7 {
 	# assume Y = 2
 	# lda $CF25,y
@@ -267,9 +311,23 @@ define token smbhack_dword (32) endian=big
 	Y = 0xFF;
 	N = 1;
 }
+# SMB2J version of the above hack (lda has a different address)
+:x9B7C_HACK is smbh8=0xb9; smbh32=0x5a9b9901; smbh32=0x008810f7 {
+	# assume Y = 2
+	# lda $9b5a,y
+    # sta $0001,y
+    # dey
+    # bpl -9
+	r01 = *:1 (0x9b5a:2);
+	r02 = *:1 (0x9b5b:2);
+	r03 = *:1 (0x9b5c:2);
+	Y = 0xFF;
+	N = 1;
+}
 
 # lda $0001,y
-:CFD1_HACK is smbh8=0xb9; smbh16=0x0100 {
+# CFD1 in SMB1, 9C06 in SMB2J
+:CFD1_9C06_HACK is smbh8=0xb9; smbh16=0x0100 {
 	# y is one of: 0, 1, 2. guaranteed to not be anything else (i triple checked!).
 	# lda $0001,y
 	# ignoring setting flags, because there's another load instruction right after this one
@@ -287,6 +345,53 @@ define token smbhack_dword (32) endian=big
 	<on2>
 	A = r03;
 	<end>
+}
+
+# SMB2J self-modifies the code!
+# It changes the instruction byte to either $0E (ASL) or $60 (RTS).
+# We'll implement this by setting and checking a variable
+# This instruction also occurs in SMB1, but it's fine, it'll just always shift in SMB1 (the subroutine it belongs to is otherwise identical)
+:x80F1_HACK is smbh8=0x0e; smbh16=0x0207 {
+	# asl $0702
+	local chkvar:2 = 0x2100;
+	local v:1 = *:1 chkvar;
+
+	if (v != 0x60) goto <shift>;
+	# RTS
+	SP = SP+1;
+	local tmprts:2 = *:2 SP;
+	SP = SP+1;
+	return [tmprts];
+
+<shift>
+	# ASL
+	local tmp22:2 = 0x5702;
+	local tmp:1 = *:1 tmp22;
+	C = tmp >> 7;
+	tmp = tmp << 1;
+	*:1 tmp22 = tmp;
+	resultFlags(tmp);	
+}
+# 8E F1 80
+:C24E_HACK is smbh8=0x8E; smbh16=0xf180 {
+	# stx $80F1
+	local chkvar:2 = 0x2100;
+	*:1 chkvar = X;
+}
+
+# SMB2J once again self-modifies the code!
+# This time, it changes JSR SoundEngine in the NMI to JSR AlternateSoundEngine, and changes it back
+:HACK1 is smbh8=0x8D; smbh16=0x1d61 {
+	# lo byte of JSR address
+	# sta $611d
+	local chkvar:2 = 0x2101;
+	*:1 chkvar = A;
+}
+:HACK2 is smbh8=0x8D; smbh16=0x1e61 {
+	# high byte of JSR address
+	# sta $611e
+	# we won't do anything here, actually
+	# setting the lo byte is enough to know the difference
 }
 
 :MOVA TREG is op=0x1F; TREG {
@@ -392,6 +497,7 @@ ADDRI:  (imm16)   is imm16    { tmp:2 = imm16; export *:2 tmp; }
 }
 
 # Getting rid of BIT for all cases except one, because SMB mostly uses it as a way to ignore the next instruction.
+# BIT $06DD is in both SMB1 and SMB2J
 # Disassembly is extremely obnoxious because of it
 :BIT imm16     is op=0x2C; imm16 & imm16_v=0x06dd
 {
@@ -568,7 +674,7 @@ ADDR16_JMPENGINE: imm16 is imm16 { export imm16; }
 
 define pcodeop jmpengine;
 
-:JMPENGINE is op=0x20; imm16=0x8e04 {
+:JMPENGINE is op=0x20; (imm16=0x8e04 | imm16=0x6c7d) {
 	local p:2 = inst_next;
 	local index:1 = A;
 
