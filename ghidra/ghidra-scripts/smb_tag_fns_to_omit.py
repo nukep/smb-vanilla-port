@@ -2,8 +2,8 @@
 # Give these tags so we can omit them from the decompiled output.
 
 reimplemented = [
-    'Start',
-    'NonMaskableInterrupt',
+    'Reset',
+    'NMI',
     'WriteNTAddr',
     'DrawTitleScreen',
     'UpdateScreen',

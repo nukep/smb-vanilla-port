@@ -1,10 +1,10 @@
-Start                           ,sm2main,0x6000
+Reset                           ,sm2main,0x6000
 WBootCheck                      ,sm2main,0x600F
 ColdBoot                        ,sm2main,0x6022
 EndlessLoop                     ,sm2main,0x605B
 VRAM_AddrTable                  ,sm2main,0x6060
 VRAM_Buffer_Offset              ,sm2main,0x609E
-NMIHandler                      ,sm2main,0x60A0
+NMI                             ,sm2main,0x60A0
 SkipIRQ                         ,sm2main,0x60C3
 ScrnSwch                        ,sm2main,0x60D2
 InitVRAMVars                    ,sm2main,0x6107

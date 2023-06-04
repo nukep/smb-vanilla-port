@@ -20,14 +20,14 @@ def is_register_a_flag(reg):
     return reg.name in 'NVBDIZC'
 
 
-# (address, inputs, outputs, [assumed values])
+# (address, inputs, outputs)
 presolved_functions_list = [
-    (0x8000, [], []),       # Reset
-    (0x8082, [], []),       # NMI
-    (0x8212, [], []),       # OperModeExecutionTree
-    (0x8e6a, ['X'], [],   [('A', 0)]),    # ReadJoypads. Assume A=0. Bitshifts accumulator from caller, but the original value becomes completely lost.
-    (0xc26c, ['X'], []),    # CheckpointEnemyId. Recursive. It's the entrypoint for a call hierarchy that eventually calls itself again.
-    (0xf2d0, [], []),       # SoundEngine. Actually we're ignoring it because this is frightening and we don't want to analyze it right now lol
+    ('Reset',                 [], []),       # Reset
+    ('NMI',                   [], []),       # NMI
+    ('OperModeExecutionTree', [], []),
+    ('ReadPortBits',          ['X'], []),    # Bitshifts accumulator from caller, but the original value becomes completely lost.
+    ('CheckpointEnemyID',     ['X'], []),    # Recursive. It's the entrypoint for a call hierarchy that eventually calls itself again.
+    ('SoundEngine',           [], []),       # Actually we're ignoring it because this is frightening and we don't want to analyze it right now lol
 ]
 
 # Which functions should be analyze, in order? Note: recurses into calls.
@@ -50,25 +50,20 @@ presolved_functions = {
     toAddr(x[0]): x[1:3] for x in presolved_functions_list
 }
 
-# unused. planned to, but didn't get around to implementing it.
-presolved_assumptions = {
-    toAddr(x[0]): x[3] for x in presolved_functions_list if len(x) > 3
-}
-
 # We need a feature to assert that certain calls do not use a register as input or output
 # example is ImposeGravity(), which only uses r01 if A is nonzero
 
 def ImposeGravity_excl(addr):
     # the call at this address does not read or write r01
-    return (addr, ['r01'], ['r01'])
+    return (int(addr.offset), ['r01'], ['r01'])
 
 # addresses are of the instruction. applies to all CALL pcode ops within it
 calls_register_exclusions_list = [
-    ImposeGravity_excl(0xb6cd),
-    ImposeGravity_excl(0xb848),
-    ImposeGravity_excl(0xbae8),
-    ImposeGravity_excl(0xbbdb),
-    ImposeGravity_excl(0xbfb1)
+    ImposeGravity_excl(toAddr('RunFB').add(15)),
+    ImposeGravity_excl(toAddr('WhPull').add(13)),
+    ImposeGravity_excl(toAddr('ProcHammerObj').add(37)),
+    ImposeGravity_excl(toAddr('JCoinRun').add(18)),
+    ImposeGravity_excl(toAddr('ImposeGravitySprObj').add(4))
 ]
 
 calls_register_exclusions = {
@@ -716,17 +711,6 @@ def analyze_start(f):
     return visited_fns
 
 
-# f_addr = toAddr(0x8212)  # main game tree
-# f_addr = toAddr(0x6308)  # a jumptable, 34 items. has a lot of code under it!
-# f_addr = toAddr(0xe0fe)
-# f_addr = toAddr(0x9508)  # eventually uses 0x60b4
-# f_addr = toAddr(0x60b4)  # one of the jumptables, with 47 items. it includes 0x9882
-# f_addr = toAddr(0x9882)  # This is a really good function to use for tests. It has four functions with a variety of inputs/outputs.
-
-# f = find_function_from_addr(f_addr)
-# f.presolved = True
-
-
 for addr in functions_to_analyze:
     visited_fns = set()
     f = find_function_from_addr(toAddr(addr))
@@ -734,14 +718,3 @@ for addr in functions_to_analyze:
     if applyit:
         for f in visited_fns:
             apply_function_inputs_outputs_to_the_real_thing(f)
-
-if False:
-    a = Fresh(fninput=123)
-    b = Fresh()
-    c = Fresh(fnoutput=456)
-
-    a.link(b)
-    a.link(c)
-    b.link(c)
-
-    debug_freshes([c])

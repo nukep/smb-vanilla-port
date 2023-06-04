@@ -4,7 +4,6 @@
 # "it" is the fallthrough preceding the label
 removal_into = [
     'UpdateScreen',             # because it falls through into the same function
-    'DoNothing2',               # because it goes to a function that only contains RTS
     'LoopCmdE',                 # because it goes to a function that only contains RTS
     'ImposeGravitySprObj',      # because they seem to both be a means to call ImposeGravity similarly
     'StarFlagExit',             # because it goes to a function that only contains RTS

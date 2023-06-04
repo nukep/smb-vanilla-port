@@ -1,40 +1,37 @@
-addrs = [
-    0x9264,
-    0xb000,
-    0xb255,
-    0xb315,
-    0xb3ac,
-    0xb732,
-    0xbb6c,
-    0xc82b,
-    0xca58,
-    0xd00f,
-    0xd17b,
-    0xd336,
-    0xd5fe,
-    0xd7bc,
-    0xdb36,
-    0xe0fe,
-    0xe252,
-    0xe27c,
-    0xe289,
-    0xeb64,
-    0xef45,
-    0xf06f,
-    0xf1c0,
-    0xf691,
-    0xf6a4,
-    0xf6c8,
-    0xf6d4,
-    0xf6f1,
-    0xf6f5
+function_names = [
+    'ContinueGame',
+    'ChkPOffscr',
+    'InitChangeSize',
+    'NextArea',
+    'LRAir',
+    'MoveBubl',
+    'JCoinC',
+    'SPBBox',
+    'MoveHammerBroXDir',
+    'MoveD_Bowser',
+    'BowserGfxHandler',
+    'EndAreaPoints',
+    'ChkYPCollision',
+    'EnemySmackScore',
+    'RXSpd',
+    'DoEnemySideCheck',
+    'GetMaskedOffScrBits',
+    'SetupEOffsetFBBox',
+    'MoveBoundBoxOffscreen',
+    'SprObjectOffscrChk',
+    'PlayerGfxProcessing',
+    'AnimationControl',
+    'GetOffScreenBitsSet',
+    'ContinueMusic',
+    'LoadEventMusic',
+    'LoadAreaMusic',
+    'HandleAreaMusicLoopB',
+    'FindEventMusicHeader',
+    'LoadHeader'
 ]
 
-addrs = [toAddr(x) for x in addrs]
+addrs = [toAddr(x) for x in function_names]
 
 for addr in addrs:
     print('creating {}'.format(addr))
     createFunction(addr, None)
-
-# CANNOT make function:
-# 9a48 (because stack change)
