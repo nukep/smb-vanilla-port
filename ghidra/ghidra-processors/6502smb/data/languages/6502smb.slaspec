@@ -78,6 +78,8 @@ macro resultFlags(value) {
 ################################################################
 
 define pcodeop readIRQ;
+define pcodeop disable_interrupt;
+define pcodeop enable_interrupt;
 
 ################################################################
 REL: reloc		is rel	[ reloc = inst_next + rel; ] { export *:2 reloc; } 
@@ -567,7 +569,7 @@ ADDRI:  (imm16)   is imm16    { tmp:2 = imm16; export *:2 tmp; }
 
 :CLI     is op=0x58
 {
-	I = 0;
+	enable_interrupt();
 }
 
 :CLV     is op=0xB8
@@ -967,7 +969,7 @@ define pcodeop jmpenginefail;
 
 :SEI     is op=0x78
 {
-	I = 1;
+	disable_interrupt();
 }
 
 :STA OP1     is (cc=1 & aaa=4) ... & OP1

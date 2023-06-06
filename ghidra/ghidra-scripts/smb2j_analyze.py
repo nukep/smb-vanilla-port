@@ -20,7 +20,7 @@ def run_all_scripts():
     run_script("smb2j_fixup_branches.py")
     run_script("smb2j_getareadataaddr_switcher.py")
     run_script("smb2j_jumptables.py")
-    run_script("smb2j_reset_and_nmi.py")
+    run_script("smb2j_reset_and_nmi_and_irq.py")
     run_script("smb2j_fixup_refs.py")
     run_script("smb_create_extra_fns.py")
     run_script("smb2j_create_extra_fns.py")
@@ -30,6 +30,6 @@ def run_all_scripts():
     run_script("smb_fn_coverage.py")
     run_script("smb2j_remove_fallthru_overrides.py")
     run_script("smb_flow.py")
-    # run_script("smb_tag_fns_to_omit.py")
+    run_script("smb2j_tag_fns_to_omit.py")
 
 run_all_scripts()

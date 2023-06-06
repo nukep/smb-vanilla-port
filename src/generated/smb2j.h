@@ -94,28 +94,6 @@ struct struct_xr00r01 {
     byte r01;
 };
 
-typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
-
-struct struct_axr00 {
-    inline struct_axr00() {}
-    inline struct_axr00(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
-    byte a;
-    byte x;
-    byte r00;
-};
-
 typedef struct struct_nr00i struct_nr00i, *Pstruct_nr00i;
 
 struct struct_nr00i {
@@ -229,28 +207,6 @@ struct struct_ayr02r04r06r07 {
     byte r07;
 };
 
-typedef struct struct_ayi struct_ayi, *Pstruct_ayi;
-
-struct struct_ayi {
-    inline struct_ayi() {}
-    inline struct_ayi(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
-    byte a;
-    byte y;
-    bool i;
-};
-
 typedef struct struct_azr02r04r06r07 struct_azr02r04r06r07, *Pstruct_azr02r04r06r07;
 
 struct struct_azr02r04r06r07 {
@@ -276,6 +232,161 @@ struct struct_azr02r04r06r07 {
     byte r07;
 };
 
+typedef struct struct_r01r02r03 struct_r01r02r03, *Pstruct_r01r02r03;
+
+struct struct_r01r02r03 {
+    inline struct_r01r02r03() {}
+    inline struct_r01r02r03(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
+
+    byte r01;
+    byte r02;
+    byte r03;
+};
+
+typedef struct struct_axzr04 struct_axzr04, *Pstruct_axzr04;
+
+struct struct_axzr04 {
+    inline struct_axzr04() {}
+    inline struct_axzr04(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
+
+    byte a;
+    byte x;
+    bool z;
+    byte r04;
+};
+
+typedef struct struct_xyi struct_xyi, *Pstruct_xyi;
+
+struct struct_xyi {
+    inline struct_xyi() {}
+    inline struct_xyi(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
+
+    byte x;
+    byte y;
+    bool i;
+};
+
+typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
+
+struct struct_axr00 {
+    inline struct_axr00() {}
+    inline struct_axr00(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
+
+    byte a;
+    byte x;
+    byte r00;
+};
+
+typedef struct struct_azi struct_azi, *Pstruct_azi;
+
+struct struct_azi {
+    inline struct_azi() {}
+    inline struct_azi(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
+
+    byte a;
+    bool z;
+    bool i;
+};
+
+typedef struct struct_ayz struct_ayz, *Pstruct_ayz;
+
+struct struct_ayz {
+    inline struct_ayz() {}
+    inline struct_ayz(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
+
+    byte a;
+    byte y;
+    bool z;
+};
+
+typedef struct struct_ayi struct_ayi, *Pstruct_ayi;
+
+struct struct_ayi {
+    inline struct_ayi() {}
+    inline struct_ayi(uint64_t v) {
+        memcpy(this, &v, sizeof(*this));
+    }
+    inline operator uint64_t() const {
+        uint64_t v = 0;
+        memcpy(&v, this, sizeof(*this));
+        return v;
+    }
+    inline uint64_t subpiece(uint64_t a, uint64_t b) {
+        uint64_t v = *this;
+        return (v>>(a*8)) & BITMASK_HELPER(b);
+    }
+
+    byte a;
+    byte y;
+    bool i;
+};
+
 typedef struct struct_axz struct_axz, *Pstruct_axz;
 
 struct struct_axz {
@@ -296,32 +407,6 @@ struct struct_axz {
     byte a;
     byte x;
     bool z;
-};
-
-typedef struct struct_axzr02r04r06r07 struct_axzr02r04r06r07, *Pstruct_axzr02r04r06r07;
-
-struct struct_axzr02r04r06r07 {
-    inline struct_axzr02r04r06r07() {}
-    inline struct_axzr02r04r06r07(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
-    byte a;
-    byte x;
-    bool z;
-    byte r02;
-    byte r04;
-    byte r06;
-    byte r07;
 };
 
 typedef struct struct_yr07i struct_yr07i, *Pstruct_yr07i;
@@ -388,28 +473,6 @@ struct struct_xr05i {
     byte x;
     byte r05;
     bool i;
-};
-
-typedef struct struct_r01r02r03 struct_r01r02r03, *Pstruct_r01r02r03;
-
-struct struct_r01r02r03 {
-    inline struct_r01r02r03() {}
-    inline struct_r01r02r03(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
-    byte r01;
-    byte r02;
-    byte r03;
 };
 
 typedef struct struct_xci struct_xci, *Pstruct_xci;
@@ -500,11 +563,11 @@ struct struct_ar00i {
     bool i;
 };
 
-typedef struct struct_xyi struct_xyi, *Pstruct_xyi;
+typedef struct struct_yr06r07 struct_yr06r07, *Pstruct_yr06r07;
 
-struct struct_xyi {
-    inline struct_xyi() {}
-    inline struct_xyi(uint64_t v) {
+struct struct_yr06r07 {
+    inline struct_yr06r07() {}
+    inline struct_yr06r07(uint64_t v) {
         memcpy(this, &v, sizeof(*this));
     }
     inline operator uint64_t() const {
@@ -517,9 +580,9 @@ struct struct_xyi {
         return (v>>(a*8)) & BITMASK_HELPER(b);
     }
 
-    byte x;
     byte y;
-    bool i;
+    byte r06;
+    byte r07;
 };
 
 typedef struct struct_aci struct_aci, *Pstruct_aci;
@@ -542,28 +605,6 @@ struct struct_aci {
     byte a;
     bool c;
     bool i;
-};
-
-typedef struct struct_yr06r07 struct_yr06r07, *Pstruct_yr06r07;
-
-struct struct_yr06r07 {
-    inline struct_yr06r07() {}
-    inline struct_yr06r07(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
-    byte y;
-    byte r06;
-    byte r07;
 };
 
 typedef struct struct_xr00i struct_xr00i, *Pstruct_xr00i;
@@ -591,43 +632,47 @@ struct struct_xr00i {
 
 
 
-void FUN_3000(byte param_1,byte param_2);
-void FUN_3014(byte param_1);
-void FUN_3028(byte param_1,byte param_2);
-void FUN_3040(byte param_1);
-void FUN_3080(byte param_1);
-void FUN_3090(byte param_1);
-void FUN_30b4(byte param_1,byte param_2,byte param_3);
-void FUN_3174(byte param_1,byte param_2);
-void FUN_3184(byte param_1);
-void FUN_3198(byte param_1);
-void FUN_31d0(byte param_1);
-void FUN_31e4(byte param_1,byte param_2);
-void FUN_320c(byte param_1,byte param_2);
-void FUN_32ec(byte param_1,byte param_2);
-byte FUN_3308(byte param_1,byte param_2);
-byte FUN_3394(byte param_1,byte param_2);
-byte FUN_33ec(byte param_1,byte param_2);
-byte FUN_340c(byte param_1,byte param_2);
+void FUN_3000(void);
+void FUN_300f(byte param_1,byte param_2);
+void FUN_3023(byte param_1,byte param_2);
+void FUN_303f(byte param_1,byte param_2);
+void FUN_307b(byte param_1);
+void FUN_30bf(byte param_1);
+void FUN_30cf(byte param_1);
+void FUN_30f3(byte param_1,byte param_2,byte param_3);
+void FUN_31d3(byte param_1,byte param_2);
+void FUN_31e3(byte param_1);
+void FUN_31fb(byte param_1);
+void FUN_3233(byte param_1);
+void FUN_3247(byte param_1,byte param_2);
+void FUN_327f(byte param_1,byte param_2);
+void FUN_335f(byte param_1,byte param_2);
+byte FUN_337b(byte param_1,byte param_2);
+byte FUN_3407(byte param_1,byte param_2);
+byte FUN_345f(byte param_1,byte param_2);
+byte FUN_347f(byte param_1,byte param_2);
+void FUN_3497(byte param_1);
+void FUN_34b3(byte param_1);
+void FUN_34cb(byte param_1);
+void FUN_34e3(byte param_1);
+void FUN_34fb(byte param_1);
 void PauseRoutine(void);
 void SpriteShuffler(void);
 void OperModeExecutionTree(byte param_1);
 void MoveAllSpritesOffscreen(void);
 void MoveSpritesOffscreen(void);
-void TitleScreenMode(void);
-void GameMenuRoutine(void);
-byte GoContinue(byte param_1);
-void DrawMushroomIcon(void);
-bool DemoEngine(void);
-void VictoryMode(byte param_1);
+void VictoryModeMain(byte param_1);
 void VictoryModeSubroutines(byte param_1);
 void SetupVictoryMode(void);
+void DrawTitleScreen(void);
 void PlayerVictoryWalk(void);
 void PrintVictoryMessages(void);
-void PlayerEndWorld(void);
+void EndCastleAward(void);
+void EndWorld1Thru7(void);
 byte FloateyNumbersRoutine(byte param_1);
 void ScreenRoutines(void);
 void InitScreen(void);
+void InitScreenPalette(void);
 void SetupIntermediate(void);
 void GetAreaPalette(void);
 void GetBackgroundColor(void);
@@ -635,12 +680,13 @@ byte GetPlayerColors(void);
 void GetAlternatePalette1(void);
 void WriteTopStatusLine(void);
 void WriteBottomStatusLine(void);
+byte GetWorldNumForDisplay(void);
 void DisplayTimeUp(void);
+void OtherInter(byte param_1);
 void DisplayIntermediate(void);
 void AreaParserTaskControl(void);
-void ClearBuffersDrawIcon(void);
-void WriteTopScore(void);
 void WriteGameText(byte param_1);
+void WriteWarpZoneMessage(byte param_1);
 void ResetSpritesAndScreenTimer(void);
 void ResetScreenTimer(void);
 void RenderAreaGraphics(void);
@@ -659,21 +705,17 @@ void PrintStatusBarNumbers(byte param_1);
 void OutputNumbers(byte param_1);
 void DigitsMathRoutine(byte param_1);
 void UpdateTopScore(void);
-void TopScoreCheck(byte param_1);
-void InitializeGame(void);
 void InitializeArea(void);
-void PrimaryGameSetup(void);
 void SecondaryGameSetup(void);
 void GetAreaMusic(void);
 void Entrance_GameTimerSetup(byte param_1);
 void PlayerLoseLife(void);
-void GameOverMode(void);
+void GameOverSubs(void);
 void SetupGameOver(void);
 void RunGameOver(void);
 void TerminateGame(void);
 void ContinueGame(void);
-void DoNothing1(void);
-void DoNothing2(void);
+void DoNothing(void);
 void AreaParserTaskHandler(void);
 void AreaParserTasks(byte param_1);
 void IncrementColumnPos(void);
@@ -689,7 +731,8 @@ void KillEnemies(byte param_1);
 void AreaFrenzy(byte param_1);
 void AreaStyleObject(byte param_1);
 void TreeLedge(byte param_1);
-void MushroomLedge(byte param_1);
+void CloudLedge(byte param_1);
+void AllUnder(byte param_1,byte param_2);
 void NoUnder(byte param_1,byte param_2);
 void PulleyRopeObject(byte param_1);
 void CastleObject(byte param_1);
@@ -699,6 +742,7 @@ void ExitPipe(byte param_1);
 struct_yci RenderSidewaysPipe(byte param_1,byte param_2);
 void VerticalPipe(byte param_1,byte param_2);
 struct_yr06r07 GetPipeHeight(byte param_1);
+void SetupPiranhaPlant(byte param_1,byte param_2,byte param_3);
 struct_xci FindEmptyEnemySlot(void);
 void Hole_Water(byte param_1);
 void QuestionBlockRow_High(byte param_1);
@@ -735,15 +779,10 @@ struct_yr07i GetLrgObjAttrib(byte param_1);
 byte GetAreaObjXPosition(void);
 byte GetAreaObjYPosition(byte param_1);
 struct_r06r07i GetBlockBufferAddr(byte param_1);
-void LoadAreaPointer(void);
-byte GetAreaType(byte param_1);
-byte FindAreaPointer(void);
-void GetAreaDataAddrs(void);
-void GameMode(void);
+void GameModeSubs(void);
 void GameCoreRoutine(void);
 void UpdScrollVar(void);
 void ScrollHandler(void);
-void ScrollScreen(byte param_1);
 void ChkPOffscr(void);
 byte GetScreenPosition(void);
 void GameRoutines(void);
@@ -770,6 +809,7 @@ void PlayerEndLevel(void);
 void NextArea(void);
 void PlayerMovementSubs(void);
 void OnGroundStateSub(void);
+void JmpMove(void);
 void FallingSub(void);
 void JumpSwimSub(void);
 void LRAir(void);
@@ -800,8 +840,8 @@ struct_yci FindEmptyMiscSlot(bool param_1);
 void MiscObjectsCore(void);
 byte GiveOneCoin(void);
 byte AddToScore(void);
-byte GetSBNybbles(void);
-byte UpdateNumber(byte param_1);
+byte WriteScoreAndCoinTally(void);
+byte WriteDigits(byte param_1);
 void SetupPowerUp(byte param_1);
 void PwrUpJmp(void);
 byte PowerUpObjHandler(void);
@@ -810,6 +850,7 @@ void InitBlock_XY_Pos(byte param_1);
 void BumpBlock(byte param_1,byte param_2,byte param_3,byte param_4);
 void MushFlowerBlock(byte param_1);
 void StarBlock(byte param_1);
+void PoisonMushBlock(byte param_1);
 void ExtraLifeMushBlock(byte param_1);
 void VineBlock(void);
 struct_yci BlockBumpedChk(byte param_1);
@@ -900,6 +941,7 @@ byte LargePlatformSubroutines(byte param_1);
 byte EraseEnemyObject(byte param_1);
 byte MovePodoboo(byte param_1);
 byte ProcHammerBro(byte param_1);
+byte SetHJ(byte param_1,byte param_2,byte param_3);
 byte MoveHammerBroXDir(byte param_1);
 byte MoveNormalEnemy(byte param_1);
 byte MoveDefeatedEnemy(byte param_1);
@@ -933,6 +975,7 @@ byte RunStarFlagObj(byte param_1);
 void GameTimerFireworks(byte param_1);
 void StarFlagExit(void);
 byte AwardGameTimerPoints(byte param_1);
+byte AwardTimerCastle(void);
 byte EndAreaPoints(void);
 byte RaiseFlagSetoffFWorks(byte param_1);
 byte DrawStarFlag(byte param_1);
@@ -965,10 +1008,11 @@ byte PlayerEnemyCollision(byte param_1);
 byte InjurePlayer(void);
 byte ForceInjury(byte param_1);
 byte SetPRout(byte param_1,byte param_2);
+byte SetBounce(byte param_1);
 byte ChkEnemyFaceRight(byte param_1);
 byte LInj(byte param_1);
 byte EnemyFacePlayer(byte param_1);
-byte SetupFloateyNumber(byte param_1,byte param_2);
+void SetupFloateyNumber(byte param_1,byte param_2);
 byte EnemiesCollision(byte param_1);
 void ProcEnemyCollisions(byte param_1,byte param_2,byte param_3);
 void EnemyTurnAround(byte param_1);
@@ -995,8 +1039,8 @@ bool CheckForClimbMTiles(byte param_1);
 struct_aci CheckForCoinMTiles(byte param_1);
 byte GetMTileAttrib(byte param_1);
 byte EnemyToBGCollisionDet(byte param_1);
-void ChkToStunEnemies(byte param_1,byte param_2);
-void SetStun(byte param_1);
+void ChkToStunEnemies(byte param_1);
+void NoDemote(byte param_1,byte param_2);
 byte ChkForRedKoopa(byte param_1);
 byte DoEnemySideCheck(byte param_1);
 byte ChkForBump_HammerBroJ(byte param_1);
@@ -1006,7 +1050,7 @@ bool SubtEnemyYPos(byte param_1);
 byte EnemyJump(byte param_1);
 byte HammerBroBGColl(byte param_1);
 void KillEnemyAboveBlock(byte param_1);
-struct_axzr02r04r06r07 ChkUnderEnemy(byte param_1);
+struct_axzr04 ChkUnderEnemy(byte param_1);
 bool ChkForNonSolids(byte param_1);
 byte FireballBGCollision(byte param_1);
 byte GetFireballBoundBox(byte param_1);
@@ -1021,7 +1065,7 @@ byte BoundingBoxCore(byte param_1,byte param_2);
 byte CheckRightScreenBBox(byte param_1,byte param_2);
 bool PlayerCollisionCore(byte param_1);
 bool SprObjectCollisionCore(byte param_1,byte param_2);
-struct_axzr02r04r06r07 BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
+struct_axzr04 BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
 struct_axz BlockBufferChk_FBall(byte param_1);
 struct_ayr02r04r06r07 BlockBufferColli_Feet(byte param_1);
 struct_azr02r04r06r07 BlockBufferColli_Head(byte param_1);
@@ -1068,7 +1112,6 @@ byte ThreeFrameExtent(byte param_1);
 byte AnimationControl(byte param_1,byte param_2);
 byte GetGfxOffsetAdder(byte param_1);
 byte HandleChangeSize(void);
-byte GetOffsetFromAnimCtrl(byte param_1,byte param_2);
 void ChkForPlayerAttrib(void);
 byte RelativePlayerPosition(void);
 byte RelativeBubblePosition(byte param_1);
@@ -1091,6 +1134,66 @@ byte GetXOffscreenBits(byte param_1);
 byte GetYOffscreenBits(byte param_1);
 byte DividePDiff(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 struct_xyr02 DrawSpriteObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
+void AttractModeSubs(void);
+void HardWorldsCheckpoint(void);
+void LoadHardWorlds(void);
+void AttractModeDiskRoutines(void);
+void LoadWorlds1Thru4(void);
+void GameModeDiskRoutines(void);
+void LoadWorlds5Thru8(void);
+void ResetDiskIOTask(void);
+void VMDelay(void);
+void StartVMDelay(void);
+void ContinueVMDelay(void);
+void VictoryModeDiskRoutines(void);
+void LoadEnding(void);
+bool CheckFileCount(byte param_1);
+void DiskScreen(void);
+void WaitForEject(void);
+void WaitForReinsert(void);
+void ResetDiskVars(void);
+void DiskErrorHandler(byte param_1);
+void GameOverMenu(void);
+void LoadPhysicsData(void);
+void LoadMarioPhysics(void);
+void ModifyPhysics(byte param_1,byte param_2);
+void LoadAreaPointer(void);
+byte GetAreaType(byte param_1);
+byte FindAreaPointer(void);
+undefined FUN_e149();
+void AltHard_GetAreaDataAddrs(void);
+void ChangeHalfwayPages(void);
+void GetAreaDataAddrs(void);
+void GameMenuRoutine(void);
+void DrawMenuCursor(void);
+void SetupMenuCursor(void);
+bool DemoEngine(void);
+void ClearBuffersDrawIcon(void);
+void WriteTopScore(void);
+void InitializeGame(void);
+void DemoReset(void);
+void PrimaryGameSetup(void);
+void PatchPlayerNamePal(void);
+void UpsideDownPipe_High(byte param_1);
+void UpsideDownPipe_Low(byte param_1);
+void MoveUpsideDownPiranhaP(byte param_1);
+void BlowPlayerAround(void);
+void SimulateWind(void);
+void ModifyLeavesPos(void);
+void WindOn(void);
+void WindOff(void);
+void ScreenSubsForFinalRoom(void);
+void DrawFinalRoom(void);
+void RevealPrincess(void);
+void PrintVictoryMsgsForWorld8(void);
+void EraseEndingCounters(void);
+void AwardExtraLives(void);
+void FadeToBlue(void);
+void EraseLivesLines(void);
+void RunMushroomRetainers(void);
+void EndingDiskRoutines(void);
+void MushroomRetainersForW8(void);
+void WriteNameToVictoryMsg(void);
 
 #pragma pack(pop)
 #include "../smb_functions.h"

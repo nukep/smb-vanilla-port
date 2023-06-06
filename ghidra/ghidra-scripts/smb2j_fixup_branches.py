@@ -8,8 +8,9 @@ runScript('smb2j_util.py')
 
 # SMB2J only
 addrs = [
-    toAddr('GoombaPoints').add(2),
     toAddr('StartVMDelay').add(5),
+    toAddr('UpsideDownPipe_High').add(3),
+    toAddr('WindOn').add(2)
 ]
 
 for addr in addrs:

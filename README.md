@@ -7,7 +7,7 @@ This program only reimplements the code, and does not come with level data or gr
 Progress made:
 
 - [x] Super Mario Bros runs, is beatable
-- [ ] Super Mario Bros 2J (Lost Levels) runs, is beatable
+- [x] Super Mario Bros 2J (Lost Levels) runs, is beatable
 - [ ] Unit and regression tests
 - [ ] Audio for SMB1
 - [ ] Audio for SMB2J (uses 2C33 audio chip)

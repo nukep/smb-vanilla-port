@@ -30,7 +30,7 @@ presolved_functions_list = [
     ('CheckpointEnemyID',     ['X'], []),    # Recursive. It's the entrypoint for a call hierarchy that eventually calls itself again.
     ('SoundEngine',           [], []),       # Actually we're ignoring it because this is frightening and we don't want to analyze it right now lol
 
-    ('FDSBIOS_LoadFiles',     [], ['A', 'Z']),
+    ('FDSBIOS_LoadFiles',     [], ['A', 'Y', 'Z']),
     ('FDSBIOS_WriteFile',     ['A'], ['A', 'Z']),
 ]
 
@@ -140,7 +140,7 @@ def parse_paddr_from_pcodeop(current_paddr, pcodeop, input_num):
         instr = getInstructionAt(current_ram_addr)
         if pcodeop.mnemonic == 'CBRANCH' and is_instr_relative_branch(instr):
             addr = instr.getPrimaryReference(0).toAddress
-        if instr.mnemonicString == 'JMP':
+        if instr.mnemonicString in ['JMP', 'BRA']:
             # Also workaround JMPs entirely
             addr = instr.getPrimaryReference(0).toAddress
 
@@ -152,7 +152,7 @@ def parse_call_addr_from_pcodeop(current_paddr, pcodeop, input_num):
     instr = getInstructionAt(current_ram_addr)
     if pcodeop.mnemonic == 'CBRANCH' and is_instr_relative_branch(instr):
         addr = instr.getPrimaryReference(0).toAddress
-    if instr.mnemonicString == 'JMP':
+    if instr.mnemonicString in ['JMP', 'BRA']:
         # Also workaround JMPs entirely
         addr = instr.getPrimaryReference(0).toAddress
     return addr

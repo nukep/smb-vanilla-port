@@ -370,6 +370,10 @@ Hidden1UpFlag,0x075D,byte
 CoinTally,0x075E,byte
 WorldNumber,0x075F,byte
 AreaNumber,0x0760,byte
+EndControlCntr,0x0761,byte
+BlueColorOfs,0x0762,byte
+BlueDelayFlag,0x0763,byte
+MushroomRetDelay,0x0764,byte
 ScrollFractional,0x0768,byte
 DisableIntermediate,0x0769,byte
 PrimaryHardMode,0x076A,byte
@@ -440,8 +444,10 @@ DisplayDigits_Or_TopScoreDisplay,0x07D7,array
 PlayerScoreDisplay_Or_ScoreAndCoinDisplay,0x07DD,array
 ---PlayerScoreDisplay,0x07DD,array
 ---ScoreAndCoinDisplay,0x07DD,array
-CoinDisplay,0x07E7,byte
-GameTimerDisplaySMB2J,0x07EC,byte
+CoinDisplay,0x07E7,array
+GameTimerDisplaySMB2J,0x07EC,array
+something,0x07EF,byte
+FantasyW9MsgFlag,0x07F5,byte
 FlagpoleMusicFlag,0x07F6,byte
 FileListNumber,0x07F7,byte
 ContinueMenuSelect,0x07F8,byte

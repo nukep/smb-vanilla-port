@@ -8,7 +8,7 @@ tables = [
     (0x64C8,16),
     (0x705A,3),
     (0x70D9,8),
-    (0x7475,8),
+    (0x7475,55),
     (0x759A,3),
     (0x7A3A,5),
     (0x7BA4,13),
@@ -58,6 +58,12 @@ which_map = {
 
     # in jumptable at $64d8
     0xC5D0: 'sm2main_c',
+
+    # in jumptable at $7475
+    0xC470: 'sm2data_24_common',
+    0xC475: 'sm2data_24_common',
+    0xC5BE: 'sm2data_24_common',
+    0xC5C2: 'sm2data_24_common',
 
     # in jumptable at $953c
     0xC4C0: 'sm2data_24_common',

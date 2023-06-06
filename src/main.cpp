@@ -1,9 +1,11 @@
 #include <SDL.h>
 #include <stdio.h>
 
+#include "config.h"
+
 // Declare these - these are the entrypoints of the game
-void Start();
-void NonMaskableInterrupt();
+void Reset();
+void NMI();
 
 typedef unsigned char byte;
 typedef unsigned short ushort;
@@ -94,7 +96,13 @@ void ppuaddr(byte x) {
 void ppudata(byte x) {
     ushort& v = PPU_STATE.v.value;
 
-    PPU_STATE.buffer[v & 0x3FFF] = x;
+    ushort addr = v & 0x3FFF;
+
+    if (addr == 0x3F10) {
+        addr = 0x3F00;
+    }
+
+    PPU_STATE.buffer[addr] = x;
 
     if (PPU_STATE.increment_mode == 0) {
         v += 1;
@@ -140,10 +148,11 @@ byte joy1() {
     case 5: return c.d;
     case 6: return c.l;
     case 7: return c.r;
+    default: return 0;
     }
 }
 byte joy2() {
-    return joy1();
+    return 0;
 }
 
 static byte SCROLL_WITHIN_NT = 0;
@@ -182,7 +191,7 @@ void transfer_sprite_data(const byte *data) {
     }
 }
 
-int load_pattern_tables() {
+void load_pattern_tables() {
     for (int tileidx = 0; tileidx < 512; tileidx++) {
         Tile* t = PPU_STATE.tiles + tileidx;
         const byte* buf = &CHRROM(tileidx * 0x10);
@@ -194,7 +203,6 @@ int load_pattern_tables() {
             }
         }
     }
-    return 1;
 }
 
 void draw_tile(Pixel *pixels, int stride, int tileidx, int paletteidx, bool flip_horz, bool flip_vert, int x, int y) {
@@ -333,6 +341,7 @@ int init_rom(const char* filename) {
         fread(rom_org, 1, 0x8000, f);
         fread(chrrom_org, 1, 0x2000, f);
         fclose(f);
+        load_pattern_tables();
 
         printf("ROM loaded\n");
         return 1;
@@ -341,6 +350,102 @@ int init_rom(const char* filename) {
         return 0;
     }
 }
+
+struct FdsFile {
+    const char *name;
+    size_t file_offset;
+    ushort size;
+    ushort org;
+    int type;
+    void *data;
+};
+
+#define TYPE_PRGRAM 0
+#define TYPE_CHRRAM 1
+
+
+#define FDS_FILES_COUNT 7
+
+// hard-code some offsets for now
+// assuming file has a 16-byte header (starts with 46 44 53, i.e. "FDS")
+static FdsFile FDS_FILES[FDS_FILES_COUNT] = {
+    {"SM2CHAR1", 0x014C, 0x2000, 0x0000, TYPE_CHRRAM},
+    {"SM2CHAR2", 0x215D, 0x0040, 0x0760, TYPE_CHRRAM},
+    {"SM2MAIN ", 0x21AE, 0x8000, 0x6000, TYPE_PRGRAM},
+    {"SM2DATA2", 0xA1BF, 0x0E2F, 0xC470, TYPE_PRGRAM},
+    {"SM2DATA3", 0xAFFF, 0x0CCF, 0xC5D0, TYPE_PRGRAM},
+    {"SM2DATA4", 0xBCDF, 0x0F4C, 0xC2B4, TYPE_PRGRAM},
+    {"SM2SAVE ", 0xCC3C, 0x0001, 0xD29F, TYPE_PRGRAM},
+};
+
+#include <cstring>
+
+
+bool write_games_beaten_to_provider(byte games_beaten) {
+    const char *name = "SM2SAVE ";
+    for (int i = 0; i < FDS_FILES_COUNT; i++) {
+        const FdsFile& a = FDS_FILES[i];
+        bool eq = strncmp(name, a.name, 8) == 0;
+        if (eq) {
+            // Found it!
+            // TODO - persist this somewhere
+            byte *data = (byte*)a.data;
+            data[0] = games_beaten;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool load_file_from_provider(const char *name) {
+    for (int i = 0; i < FDS_FILES_COUNT; i++) {
+        const FdsFile& a = FDS_FILES[i];
+        bool eq = strncmp(name, a.name, 8) == 0;
+        if (eq) {
+            // Found it!
+            if (a.type == TYPE_CHRRAM) {
+                // Copy the bytes over to CHRRAM
+                memcpy(&CHRROM_writable(a.org), a.data, a.size);
+                load_pattern_tables();
+            } else if (a.type == TYPE_PRGRAM) {
+                // Copy the bytes over to RAM
+                memcpy(&RAM(a.org), a.data, a.size);
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
+int init_smb2j_rom(const char* filename) {
+    byte* rom_org = &RAM(0x8000);
+    byte* chrrom_org = &CHRROM_writable(0x0000);
+
+    FILE* f = fopen(filename, "rb");
+    if (f) {
+        for (int i = 0; i < FDS_FILES_COUNT; i++) {
+            // We're not bothering to free it, it lasts as long as the game itself
+            FdsFile &a = FDS_FILES[i];
+            a.data = malloc(a.size);
+            fseek(f, a.file_offset, SEEK_SET);
+            fread(a.data, 1, a.size, f);
+        }
+        fclose(f);
+
+        // Load these automatically
+        load_file_from_provider("SM2CHAR1");
+        load_file_from_provider("SM2MAIN ");
+        load_file_from_provider("SM2SAVE ");
+
+        printf("ROM loaded\n");
+        return 1;
+    } else {
+        printf("Could not open ROM\n");
+        return 0;
+    }
+}
+
+#include "movie.h"
 
 
 #include <thread>
@@ -362,17 +467,23 @@ void run_at_60fps(F callback) {
 const char *ppuram_filename = "ppuram.bin";
 const char *ram_filename = "ram.bin";
 
+int framecounter = 0;
+
 int main(int argc, char* argv[]) {
-    const char *filename = argc > 1 ? argv[1] : "smb.nes";
     if (!load_palette()) {
         return 1;
     }
+#ifdef SMB1_MODE
+    const char* filename = argc > 1 ? argv[1] : "smb.nes";
     if (!init_rom(filename)) {
         return 1;
     }
-    if (!load_pattern_tables()) {
+#elif SMB2J_MODE
+    const char* filename = argc > 1 ? argv[1] : "smb2j.fds";
+    if (!init_smb2j_rom(filename)) {
         return 1;
     }
+#endif
 
     const int video_scale = 3;
 
@@ -398,9 +509,100 @@ int main(int argc, char* argv[]) {
     const int stride = 256 * 2;
 
     // SMB: reset vector
-    Start();
+    Reset();
 
+#ifdef USE_MOVIE
+    auto movie = Movie(USE_MOVIE "-buttons.txt", USE_MOVIE "-ram.bin");
+
+    auto advance_movie = [&movie]() {
+        auto movie_buttons = movie.next();
+        bool use_movie_buttons = movie_buttons.has_value();
+        if (use_movie_buttons) {
+#ifdef USE_MOVIE_COMPARERAM
+            byte rambuf[0x800];
+            if (movie.get_ram(rambuf, 0)) {
+                byte* compareto = &RAM(0x0000);
+
+                // RAM errors start at frame 16600, when we go underwater
+
+                auto mem_eq_range = [&rambuf, &compareto](size_t from, size_t upto) {
+                    const byte* a = rambuf;
+                    const byte* b = compareto;
+                    size_t len = upto + 1 - from;
+                    for (size_t i = from; i <= upto; i++) {
+                        if (a[i] != b[i]) {
+                            printf("Frame %05d: RAM not equal: At %04X: %02X expected vs %02X actual\n", framecounter, i, a[i], b[i]);
+                            //return;
+                        }
+                    }
+                };
+
+                // Missing ranges:
+                // $F0-$FF and $7B0-$7CA are sound related. we haven't implemented sound subroutines yet.
+                // $160-$1FF is the stack (this port doesn't use this)
+
+#ifdef SMB1_MODE
+                mem_eq_range(0x0008, 0x00EF);
+                mem_eq_range(0x0100, 0x015F);
+#elif SMB2J_MODE
+                // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
+                mem_eq_range(0x0010, 0x00EF);
+                mem_eq_range(0x0109, 0x015F);
+#endif
+                mem_eq_range(0x0200, 0x07AF);
+                mem_eq_range(0x07CB, 0x07FF);
+            } else {
+                printf("Could not read ramseq\n");
+            }
+#endif
+
+            const auto& in = *movie_buttons;
+            PLAYER1_INPUTS.u = in.u;
+            PLAYER1_INPUTS.d = in.d;
+            PLAYER1_INPUTS.l = in.l;
+            PLAYER1_INPUTS.r = in.r;
+            PLAYER1_INPUTS.b = in.b;
+            PLAYER1_INPUTS.a = in.a;
+            PLAYER1_INPUTS.select = in.select;
+            PLAYER1_INPUTS.start = in.start;
+        }
+        return use_movie_buttons;
+    };
+
+    int skipto = USE_MOVIE_SKIPAHEAD;
+
+    if (skipto > 0) {
+        bool movie_is_valid = true;
+
+        for (int i = 0; i < skipto; i++) {
+            if (advance_movie()) {
+                NMI();
+                framecounter += 1;
+            } else {
+                movie_is_valid = false;
+                break;
+            }
+        }
+
+#ifdef USE_MOVIE_LOAD_RAM_AFTER_SKIPAHEAD
+        if (movie_is_valid) {
+            movie.get_ram(&RAM(0x0000), 1);
+        }
+#endif
+    }
+#endif
+
+#ifdef USE_MOVIE
+    run_at_60fps([&advance_movie, window, surf]() {
+#else
     run_at_60fps([window, surf]() {
+#endif
+        bool use_movie_buttons = false;
+        
+#ifdef USE_MOVIE
+        use_movie_buttons = advance_movie();
+#endif
+
         SDL_Event eventData;
         while (SDL_PollEvent(&eventData))
         {
@@ -428,15 +630,17 @@ int main(int argc, char* argv[]) {
                         break;
                     }
                 }
-                switch (sc) {
-                case SDL_SCANCODE_W: PLAYER1_INPUTS.u = isdown; break;
-                case SDL_SCANCODE_S: PLAYER1_INPUTS.d = isdown; break;
-                case SDL_SCANCODE_A: PLAYER1_INPUTS.l = isdown; break;
-                case SDL_SCANCODE_D: PLAYER1_INPUTS.r = isdown; break;
-                case SDL_SCANCODE_J: PLAYER1_INPUTS.b = isdown; break;
-                case SDL_SCANCODE_K: PLAYER1_INPUTS.a = isdown; break;
-                case SDL_SCANCODE_U: PLAYER1_INPUTS.select = isdown; break;
-                case SDL_SCANCODE_I: PLAYER1_INPUTS.start = isdown; break;
+                if (!use_movie_buttons) {
+                    switch (sc) {
+                    case SDL_SCANCODE_W: PLAYER1_INPUTS.u = isdown; break;
+                    case SDL_SCANCODE_S: PLAYER1_INPUTS.d = isdown; break;
+                    case SDL_SCANCODE_A: PLAYER1_INPUTS.l = isdown; break;
+                    case SDL_SCANCODE_D: PLAYER1_INPUTS.r = isdown; break;
+                    case SDL_SCANCODE_J: PLAYER1_INPUTS.b = isdown; break;
+                    case SDL_SCANCODE_K: PLAYER1_INPUTS.a = isdown; break;
+                    case SDL_SCANCODE_U: PLAYER1_INPUTS.select = isdown; break;
+                    case SDL_SCANCODE_I: PLAYER1_INPUTS.start = isdown; break;
+                    }
                 }
             }
             break;
@@ -447,17 +651,18 @@ int main(int argc, char* argv[]) {
 
         // SMB: NMI vector
         // runs each frame
-        NonMaskableInterrupt();
+        NMI();
+        framecounter += 1;
 
         // Fill with background color
-        const Pixel &bgcolor = PPU_STATE.palette[PPU_STATE.buffer[0x3f10]];
+        const Pixel &bgcolor = PPU_STATE.palette[PPU_STATE.buffer[0x3f00]];
         SDL_FillRect(surf, NULL, SDL_MapRGB(surf->format, bgcolor.r, bgcolor.g, bgcolor.b));
 
         SDL_LockSurface(surf);
         Pixel* pixels = (Pixel*)surf->pixels;
 
         for (int spriteidx = 0; spriteidx < 64; spriteidx++) {
-            Sprite& s = ACTIVE_SPRITES[spriteidx];
+            Sprite& s = ACTIVE_SPRITES[63-spriteidx];
             if (s.draw_behind) {
                 draw_tile(pixels, stride, s.tileidx, s.palette + 4, s.flip_horz, s.flip_vert, s.x, s.y);
             }
@@ -477,7 +682,7 @@ int main(int argc, char* argv[]) {
         }
 
         for (int spriteidx = 0; spriteidx < 64; spriteidx++) {
-            Sprite& s = ACTIVE_SPRITES[spriteidx];
+            Sprite& s = ACTIVE_SPRITES[63-spriteidx];
             if (!s.draw_behind) {
                 draw_tile(pixels, stride, s.tileidx, s.palette+4, s.flip_horz, s.flip_vert, s.x, s.y);
             }

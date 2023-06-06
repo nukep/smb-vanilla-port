@@ -5,6 +5,9 @@
 #include <cstdint>
 #include <utility>
 
+#include "config.h"
+
+
 typedef unsigned char byte;
 typedef unsigned short ushort;
 //#define warning printf
@@ -31,7 +34,7 @@ inline T& RAM(ushort offset) {
 byte& CHRROM_writable(ushort offset) {
     return _chrrom[offset & 0x1FFF];
 }
-inline const byte& CHRROM(ushort offset) {
+const byte& CHRROM(ushort offset) {
     return _chrrom[offset & 0x1FFF];
 }
 
@@ -227,17 +230,30 @@ __declspec(noinline) static byte force_byte(byte x) {
 /// implemented code! ///
 /////////////////////////
 
+#ifdef SMB1_MODE
+
 #include "generated/smb_romarrays.h"
 #include "generated/smb_vars.h"
 static const ConstRamByteArray AreaAddrOffsets = ConstRamByteArray(0x9CBC, 0x24);
 static const ConstRamByteArray GameText = ConstRamByteArray(0x8752, 0x9B);
 
+#elif SMB2J_MODE
+
+#include "generated/smb2j_romarrays.h"
+#include "generated/smb2j_vars.h"
+
+#endif
+
+
+
 // Set 0's in memory.
 // The provided number is up to which address in the $0700 page to set to zero.
 // e.g. if i=0x14, then clear up to $0714 inclusive.
 // Doesn't set the stack, between $0160 and $01FF inclusive.
+// On SMB2J, doesn't set $0100 to $0108 inclusive.
 // Note that this port, which doesn't target the 6502, doesn't use the stack at $0160-$1FFF at all.
 // 
+#ifdef SMB1_MODE
 // SMB:90CC
 // Signature: [Y] -> [A]
 byte InitializeMemory(byte i) {
@@ -246,6 +262,17 @@ byte InitializeMemory(byte i) {
     memset(&RAM(0x700), 0, (byte)(i+1));
     return 0;
 }
+#elif SMB2J_MODE
+// SM2MAIN:6f08
+// Signature: [Y] -> [A]
+byte InitializeMemory(byte i) {
+    memset(&RAM(0x000), 0, 0x100);
+    memset(&RAM(0x109), 0, (size_t)0x160-0x109);
+    memset(&RAM(0x200), 0, (size_t)0x700 - 0x200);
+    memset(&RAM(0x700), 0, (byte)(i + 1));
+    return 0;
+}
+#endif
 
 void jmpengine_overflow(byte index) {
     warning("JMPENGINE overflow! %02X\n", index);
@@ -270,46 +297,22 @@ typedef uint64_t uint6;
 typedef uint64_t uint7;
 typedef uint64_t undefined3;
 
+#ifdef SMB1_MODE
+
 #include "generated/smb.h"
 #include "generated/smb.cpp"
 #include "smb_functions.h"
 
+#elif SMB2J_MODE
 
-// SMB:8000
-// Signature: [] -> []
-void Start() {
-    ppuctrl(0x10);
-    // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
-    // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
+// read $4032
+byte FDS_drive_status() { return 0; }
 
-    byte initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
+#include "generated/smb2j.h"
+#include "generated/smb2j.cpp"
+#include "smb_functions.h"
 
-    for (int i = 0; i < 6; i++) {
-        if (DisplayDigits_Or_TopScoreDisplay[i] > 9) {
-            initialize_upto = 0xfe;
-            break;
-        }
-    }
-
-    InitializeMemory(initialize_upto);
-    OperMode = 0;
-    apu_dmc_raw(0);
-    WarmBootValidation = 0xa5;
-    PseudoRandomBitReg[0] = 0xa5;
-    apu_snd_chn(0xf);
-    ppumask(6);
-    MoveAllSpritesOffscreen();
-    InitializeNameTables();
-    DisableScreenFlag += 1;
-
-    Mirror_PPU_CTRL_REG1 |= 0x80;
-    ppuctrl(Mirror_PPU_CTRL_REG1);
-
-    // There was an infinite do-nothing loop here for the NES.
-    // At this point, the NMI would interrupt the loop each frame.
-    // But as for the port, we just call the NMI ourselves.
-}
-
+#endif
 
 void announce_main_scroll();
 void transfer_sprite_data(const byte*);
@@ -362,9 +365,82 @@ static inline void dectimer(byte& timer) {
     }
 }
 
+static inline void dectimers() {
+    if (TimerControl >= 2) {
+        TimerControl -= 1;
+    } else {
+        // If TimerControl is 0 or 1...
+        // decrement the timers.
+
+        TimerControl = 0;
+
+        // We unrolled a loop on the timers here
+        // The NES version decrements in reverse order as listed here, but the order doesn't really matter
+
+        dectimer(SelectTimer);      dectimer(PlayerAnimTimer);    dectimer(JumpSwimTimer);   dectimer(RunningTimer);
+        dectimer(BlockBounceTimer); dectimer(SideCollisionTimer); dectimer(JumpspringTimer); dectimer(GameTimerCtrlTimer);
+        dectimer(ClimbSideTimer);
+        for (int i = 0; i < 5; i++) {
+            dectimer(EnemyFrameTimer[i]);
+        }
+        dectimer(FrenzyEnemyTimer); dectimer(BowserFireBreathTimer); dectimer(StompTimer); dectimer(AirBubbleTimer);
+        dectimer(UnusedTimer1);     dectimer(UnusedTimer2);
+        // up to and including the timer at $0794
+
+        IntervalTimerControl -= 1;
+        if (IntervalTimerControl >= 0x80) {
+            IntervalTimerControl = 20;
+            dectimer(ScrollIntervalTimer);
+            for (int i = 0; i < 7; i++) {
+                dectimer(EnemyIntervalTimer[i]);
+            }
+            dectimer(BrickCoinTimer); dectimer(InjuryTimer); dectimer(StarInvincibleTimer); dectimer(ScreenTimer);
+            dectimer(WorldEndTimer);  dectimer(DemoTimer);   dectimer(UnusedTimer3);
+            // up to and including the timer at $07A3
+        }
+    }
+}
+
+#ifdef SMB1_MODE
+
+// SMB:8000
+// Signature: [] -> []
+void Reset() {
+    ppuctrl(0x10);
+    // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
+    // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
+
+    byte initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
+
+    for (int i = 0; i < 6; i++) {
+        if (DisplayDigits_Or_TopScoreDisplay[i] > 9) {
+            initialize_upto = 0xfe;
+            break;
+        }
+    }
+
+    InitializeMemory(initialize_upto);
+    OperMode = 0;
+    apu_dmc_raw(0);
+    WarmBootValidation = 0xa5;
+    PseudoRandomBitReg[0] = 0xa5;
+    apu_snd_chn(0xf);
+    ppumask(6);
+    MoveAllSpritesOffscreen();
+    InitializeNameTables();
+    DisableScreenFlag += 1;
+
+    Mirror_PPU_CTRL_REG1 |= 0x80;
+    ppuctrl(Mirror_PPU_CTRL_REG1);
+
+    // There was an infinite do-nothing loop here for the NES.
+    // At this point, the NMI would interrupt the loop each frame.
+    // But as for the port, we just call the NMI ourselves.
+}
+
 // SMB:8082
 // Signature: [] -> []
-void NonMaskableInterrupt() {
+void NMI() {
     Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & ~0x80;
     ppuctrl(Mirror_PPU_CTRL_REG1 & ~0x81);
 
@@ -380,6 +456,8 @@ void NonMaskableInterrupt() {
     ppuscroll(0);
 
     // The NES wrote to OAM registers to initiate copying sprites
+    // $2003 = 0
+    // $4014 = 2
     transfer_sprite_data(&Sprite_Data);
 
     // VRAM_Buffer_AddrCtrl of 0, 5, 6, 7 are in RAM ($301, $300, $341, $341 respectively). All other ones are in ROM.
@@ -402,39 +480,7 @@ void NonMaskableInterrupt() {
     PauseRoutine();
     UpdateTopScore();
     if ((GamePauseStatus & 1) == 0) {
-        if (TimerControl >= 2) {
-            TimerControl -= 1;
-        } else {
-            // If TimerControl is 0 or 1...
-            // decrement the timers.
-
-            TimerControl = 0;
-
-            // We unrolled a loop on the timers here
-            // The NES version decrements in reverse order as listed here, but the order doesn't really matter
-
-            dectimer(SelectTimer);      dectimer(PlayerAnimTimer);    dectimer(JumpSwimTimer);   dectimer(RunningTimer);
-            dectimer(BlockBounceTimer); dectimer(SideCollisionTimer); dectimer(JumpspringTimer); dectimer(GameTimerCtrlTimer);
-            dectimer(ClimbSideTimer);
-            for (int i = 0; i < 5; i++) {
-                dectimer(EnemyFrameTimer[i]);
-            }
-            dectimer(FrenzyEnemyTimer); dectimer(BowserFireBreathTimer); dectimer(StompTimer); dectimer(AirBubbleTimer);
-            dectimer(UnusedTimer1);     dectimer(UnusedTimer2);
-            // up to and including the timer at $0794
-
-            IntervalTimerControl -= 1;
-            if (IntervalTimerControl >= 0x80) {
-                IntervalTimerControl = 20;
-                dectimer(ScrollIntervalTimer);
-                for (int i = 0; i < 7; i++) {
-                    dectimer(EnemyIntervalTimer[i]);
-                }
-                dectimer(BrickCoinTimer); dectimer(InjuryTimer); dectimer(StarInvincibleTimer); dectimer(ScreenTimer);
-                dectimer(WorldEndTimer);  dectimer(DemoTimer);   dectimer(UnusedTimer3);
-                // up to and including the timer at $07A3
-            }
-        }
+        dectimers();
         FrameCounter += 1;
     }
 
@@ -468,10 +514,378 @@ void NonMaskableInterrupt() {
     announce_main_scroll();
 }
 
+// SMB:86ff
+// Signature: [] -> []
+void DrawTitleScreen() {
+    if (OperMode == 0) {
+        // The drawing data for the title screen is stored in CHR ROM!
+        for (int i = 0; i < 0x13A; i++) {
+            RAM(0x300 + i) = CHRROM(0x1EC0 + i);
+        }
+        VRAM_Buffer_AddrCtrl = 5;
+        ScreenRoutineTask = ScreenRoutineTask + 1;
+    } else {
+        OperMode_Task = OperMode_Task + 1;
+    }
+}
+
+// Switch between Mario and Luigi.
+// Save and restore their states.
+// 
+// SMB:9282
+// Signature: [] -> [C]
+bool TransposePlayers() {
+    // If there are two players, and the other one isn't out of lives
+    if ((NumberOfPlayers != 0) && (OffScr_NumberofLives < 0x80)) {
+        CurrentPlayer ^= 1;
+        // We unrolled a loop here
+        std::swap(NumberofLives, OffScr_NumberofLives);
+        std::swap(HalfwayPage,   OffScr_HalfwayPage);
+        std::swap(LevelNumber,   OffScr_LevelNumber);
+        std::swap(Hidden1UpFlag, OffScr_Hidden1UpFlag);
+        std::swap(CoinTally,     OffScr_CoinTally);
+        std::swap(WorldNumber,   OffScr_WorldNumber);
+        std::swap(AreaNumber,    OffScr_AreaNumber);
+        
+        return false;
+    } else {
+        return true;
+    }
+}
+
+#elif SMB2J_MODE
+
+
+bool load_file_from_provider(const char *);
+bool write_games_beaten_to_provider(byte games_beaten);
+
+void IRQHandler();
+
+static bool RUN_IRQ = false;
+
+void trigger_scroll_irq_if_havent_yet() {
+    if (RUN_IRQ) {
+        IRQHandler();
+        RUN_IRQ = false;
+        if (IRQAckFlag != 0) {
+            printf("IRQAckFlag is non-zero after the IRQ handler. This shouldn't happen!\n");
+        }
+    }
+}
+
+void disable_interrupt() {}
+void enable_interrupt() {}
+
+byte FDS_AcknowledgeIrq() {
+    return 0x01;
+}
+void FDSBIOS_Delay132(byte _) {}
+void FDS_IrqTimer_Ctrl(byte _) {}
+
+// SM2MAIN:c0f4
+// Signature: [] -> [A, Y, Z]
+struct_ayz LoadFiles() {
+    // The FDS version calls FDS BIOS subroutines to read the files from disk, but in the port, we're just gonna load from a buffer.
+    // The BIOS call is responsible for a lot of lag frames on the original hardware! Fortunately we don't deal with those here.
+
+    byte files = 0;
+
+    switch (FileListNumber) {
+    case 0: // Worlds 1-4: SM2CHAR1, SM2MAIN, SM2SAVE
+        load_file_from_provider("SM2CHAR1");
+        load_file_from_provider("SM2MAIN ");
+        load_file_from_provider("SM2SAVE ");
+        files = 3;
+        break;
+    case 1: // Worlds 5-8: SM2DATA2
+        load_file_from_provider("SM2DATA2");
+        files = 1;
+        break;
+    case 2: // Ending, w9: SM2CHAR2, SM2DATA3, SM2SAVE
+        load_file_from_provider("SM2CHAR2");
+        load_file_from_provider("SM2DATA3");
+        load_file_from_provider("SM2SAVE ");
+        files = 3;
+
+        // The FDS BIOS call overwrites some zero-page variables that are used during the ending.
+        // This is a supremely gross hack.
+        // Omitting this hack doesn't break the game, but it'd cause different conditionals to occur regarding Mario's sprites and fail RAM regression tests.
+        
+        // This isn't an issue for the other file loads, because when the worlds are loaded,
+        // the memory is unused and is cleared on the next frame with InitializeMemory.
+
+        // These are values when FileListNumber = 2, during a specific run of the game (idk if this changes):
+        // TODO - set these to their corresponding variables when we're more sure what's going on
+        RAM(0x08) = 0x0F;
+        RAM(0x09) = 0x00;
+        RAM(0x0A) = 0xA0;
+        RAM(0x0B) = 0xD2;
+        RAM(0x0C) = 0xFF;
+        RAM(0x0D) = 0xFF;
+        RAM(0x0E) = 0x03;
+        RAM(0x0F) = 0x01;
+        RAM(0xF9) = 0xF7;
+        RAM(0xFA) = 0x27;
+        break;
+    case 3: // Worlds A-D: SM2DATA4
+        load_file_from_provider("SM2DATA4");
+        files = 1;
+        break;
+    default:
+        break;
+    }
+
+    // this runs long enough for the scroll code of the irq to trigger
+    trigger_scroll_irq_if_havent_yet();
+
+    // A is the error code, should there be an error
+    // Y is how many files were read
+    // Z is set to 1 if the load is successful
+    struct_ayz res;
+    res.a = 0;
+    res.y = files;
+    res.z = true;
+    return res;
+}
+
+void FDS_Ctrl(byte ctrl) {
+    // $4025
+}
+
+
+// SM2MAIN:6000
+// Signature: [] -> []
+void Reset() {
+    FDS_Ctrl(RAM(0xfa) & ~0x08);
+
+    // On a hard reset, the World number is a value such as 0xFF
+    // assuming a hard reset:
+    WorldNumber = 0xFF;
+
+    byte last_worldnumber = WorldNumber;
+
+    byte initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
+
+    for (int i = 0; i < 6; i++) {
+        if (DisplayDigits_Or_TopScoreDisplay[i] > 9) {
+            initialize_upto = 0xfe;
+            break;
+        }
+    }
+
+    InitializeMemory(initialize_upto);
+    OperMode = 0;
+    apu_dmc_raw(0);
+    WorldNumber = last_worldnumber;
+    WarmBootValidation = 0xa5;
+    PseudoRandomBitReg[0] = 0xa5;
+    apu_snd_chn(0xf);
+    ppumask(6);
+    DiskIOTask = 0;
+    MoveAllSpritesOffscreen();
+    InitializeNameTables();
+    DisableScreenFlag += 1;
+
+    FDSBIOS_IRQFlag = 0xc0;
+    enable_interrupt();
+
+    Mirror_PPU_CTRL_REG1 |= 0x80;
+    ppuctrl(Mirror_PPU_CTRL_REG1);
+
+    // There was an infinite do-nothing loop here for the FDS.
+    // At this point, the NMI would interrupt the loop each frame.
+    // But as for the port, we just call the NMI ourselves.
+}
+
+// SM2MAIN:60a0
+// Signature: [] -> []
+void NMI() {
+    Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & ~0x81;
+    ppuctrl(Mirror_PPU_CTRL_REG1);
+
+    disable_interrupt();
+
+    RUN_IRQ = false;
+
+    if (IRQUpdateFlag != 0) {
+        // Set IRQ timer to 0x1658 (until the scanline reaches the bottom of the status bar)
+        // $4020 = 0x58
+        // $4021 = 0x16
+        // Enable IRQ timer
+        // $4022 = 0x02
+        IRQAckFlag += 1;
+        RUN_IRQ = true;
+    }
+
+    if (DisableScreenFlag == 0) {
+        Mirror_PPU_CTRL_REG2 |= 0x1e;
+    } else {
+        Mirror_PPU_CTRL_REG2 &= 0xe6;
+    }
+    ppumask(Mirror_PPU_CTRL_REG2 & 0xe7);
+    
+    ppustatus();
+    ppuscroll(0);
+    ppuscroll(0);
+
+    // The NES wrote to OAM registers to initiate copying sprites
+    // $2003 = 0
+    // $4014 = 2
+    transfer_sprite_data(&Sprite_Data);
+
+    // Unlike SMB1, SMB2J's address table is 16-bit words, not segmented in hi and lo portions
+    // Also unlike SMB1, index 5 (the title screen) is from the ROM.
+    // VRAM_Buffer_AddrCtrl of 0, 6, 7 are in RAM ($301, $341, $341 respectively). All other ones are in ROM.
+    UpdateScreen(&RAM(VRAM_AddrTable[VRAM_Buffer_AddrCtrl*2 + 1]*0x100 + VRAM_AddrTable[VRAM_Buffer_AddrCtrl*2]));
+
+    if (VRAM_Buffer_AddrCtrl == 6) {
+        // in SMB ROM, VRAM_Buffer_Offset[1] = 0x40
+        RAM(0x300 + VRAM_Buffer_Offset[1]) = 0;
+        VRAM_Buffer1[VRAM_Buffer_Offset[1]] = 0;
+    } else {
+        // in SMB ROM, VRAM_Buffer_Offset[0] = 0x00
+        RAM(0x300 + VRAM_Buffer_Offset[0]) = 0;
+        VRAM_Buffer1[VRAM_Buffer_Offset[0]] = 0;
+    }
+
+    VRAM_Buffer_AddrCtrl = 0;
+    ppumask(Mirror_PPU_CTRL_REG2);
+    enable_interrupt();
+    SoundEngine();
+    ReadJoypads();
+    PauseRoutine();
+    UpdateTopScore();
+    if ((GamePauseStatus & 1) == 0) {
+        dectimers();
+        FrameCounter += 1;
+    }
+
+    // Update PRNG (pseudo-random number generator)
+    update_prng(&PseudoRandomBitReg);
+
+    if ((GamePauseStatus & 1) == 0) {
+        if (IRQUpdateFlag != 0) {
+            MoveSpritesOffscreen();
+            SpriteShuffler();
+        }
+        if (WorldNumber > 8) {
+            TerminateGame();
+        }
+        // bug in analyzer. parameter is eventually unused, should not accept one.
+        OperModeExecutionTree(0);
+    }
+
+    // The FDS version loops here until IRQAckFlag is 0.
+    trigger_scroll_irq_if_havent_yet();
+
+    // The scroll is known
+    announce_main_scroll();
+
+    ppustatus();
+
+    // Enable NMI (our port ignores this)
+    Mirror_PPU_CTRL_REG1 |= 0x80;
+    ppuctrl(Mirror_PPU_CTRL_REG1);
+}
+
+// SM2MAIN:61a2
+// Signature: [] -> []
+void IRQHandler() {
+    disable_interrupt();
+    byte status = FDS_AcknowledgeIrq();
+
+    if ((status & 0x02) == 0) {
+        if ((status & 0x01) != 0) {
+            // Scrolling the screen right below the status bar
+            // first 2 bits are 01: not transferring bytes, and an irq occurred
+
+            Mirror_PPU_CTRL_REG1 = (Mirror_PPU_CTRL_REG1 & ~0x08) | NameTableSelect;
+            ppuctrl(Mirror_PPU_CTRL_REG1);
+            FDS_IrqTimer_Ctrl(0x00);  // disable IRQ timer for the rest of the frame
+            ppuscroll(HorizontalScroll);
+            ppuscroll(VerticalScroll);
+            IRQAckFlag = 0;
+        }
+    } else {
+        // FDS is transferring bytes
+        FDSBIOS_Delay132(status);
+    }
+    enable_interrupt();
+}
+
+
+// SM2MAIN:7b20
+// Signature: [Y] -> []
+void ScrollScreen(byte scroll_amount) {
+    // The FDS version loops here until IRQAckFlag is 0.
+    trigger_scroll_irq_if_havent_yet();
+
+    int x_pos = ScreenLeft_X_Pos + scroll_amount;
+
+    ScrollThirtyTwo = ScrollThirtyTwo + scroll_amount;
+    HorizontalScroll = x_pos % 256;
+    if (x_pos >= 256) {
+        ScreenLeft_PageLoc += 1;
+    }
+    NameTableSelect = ScreenLeft_PageLoc % 2;
+    ScreenLeft_X_Pos = HorizontalScroll;
+    ScrollAmount = scroll_amount;
+    GetScreenPosition();
+    ScrollIntervalTimer = 8;
+    ChkPOffscr();
+}
+
+
+// SM2DATA3::c759
+// Signature: [] -> []
+void UpdateGamesBeaten() {
+    // The FDS version would use an FDS BIOS subroutine
+    bool success = write_games_beaten_to_provider(GamesBeatenCount[0]);
+    byte error_code = 0;
+
+    if (!success) {
+        DiskIOTask += 1;
+        DiskErrorHandler(error_code);
+        return;
+    }
+
+    // Revert "JSR SoundEngine" in the NMI back to the original address
+    RAM(0x611e) = 0xd2;
+    RAM(0x611d) = 0xa0;
+
+    DiskIOTask = 0;
+    OperMode_Task = 0;
+    if ((HardWorldFlag == 0) && (CompletedWorlds == 0xff)) {
+        CompletedWorlds = 0;
+        NumberofLives = 0;
+        FantasyW9MsgFlag = 0;
+        AreaNumber = 0;
+        LevelNumber = 0;
+        OperMode_Task = 0;
+        WorldNumber += 1;
+        if (WorldNumber > 7) {
+            WorldNumber = 8;
+        }
+        LoadAreaPointer();
+        FetchNewGameTimerFlag = FetchNewGameTimerFlag + 1;
+        OperMode = 1;
+    } else {
+        CompletedWorlds = 0;
+        OperMode = 0;
+        AttractModeSubs();
+    }
+}
+
+
+
+#endif
+
+
+
 // This is the only subroutine in all of SMB that writes to the PPU! (aside from WriteNTAddr, which blanks a nametable)
 // Each draw buffer item has the format: <ppu_hi> <ppu_lo> <count> <data...>
 // 
-// SMB:8edd, SMB2:6d56
+// SMB:8edd, SM2MAIN:6d56
 // Signature: [r00, r01] -> []
 void UpdateScreen(const byte* buf) {
     while (buf[0] != 0) {
@@ -520,7 +934,7 @@ void UpdateScreen(const byte* buf) {
     ppuscroll(0);
 }
 
-// SMB:8e2d
+// SMB:8e2d, SM2MAIN:6ca6
 // Signature: [A] -> []
 void WriteNTAddr(byte ppu_page) {
     ppuaddr(ppu_page);
@@ -544,47 +958,7 @@ void WriteNTAddr(byte ppu_page) {
     return;
 }
 
-// SMB:86ff
-// Signature: [] -> []
-void DrawTitleScreen() {
-    if (OperMode == 0) {
-        // The drawing data for the title screen is stored in CHR ROM!
-        for (int i = 0; i < 0x13A; i++) {
-            RAM(0x300 + i) = CHRROM(0x1EC0 + i);
-        }
-        VRAM_Buffer_AddrCtrl = 5;
-        ScreenRoutineTask = ScreenRoutineTask + 1;
-    } else {
-        OperMode_Task = OperMode_Task + 1;
-    }
-}
-
-// Switch between Mario and Luigi.
-// Save and restore their states.
-// 
-// SMB:9282
-// Signature: [] -> [C]
-bool TransposePlayers() {
-    // If there are two players, and the other one isn't out of lives
-    if ((NumberOfPlayers != 0) && (OffScr_NumberofLives < 0x80)) {
-        CurrentPlayer ^= 1;
-        // We unrolled a loop here
-        std::swap(NumberofLives, OffScr_NumberofLives);
-        std::swap(HalfwayPage,   OffScr_HalfwayPage);
-        std::swap(LevelNumber,   OffScr_LevelNumber);
-        std::swap(Hidden1UpFlag, OffScr_Hidden1UpFlag);
-        std::swap(CoinTally,     OffScr_CoinTally);
-        std::swap(WorldNumber,   OffScr_WorldNumber);
-        std::swap(AreaNumber,    OffScr_AreaNumber);
-        
-        return false;
-    } else {
-        return true;
-    }
-}
-
-
-// SMB:8e5c
+// SMB:8e5c, SM2MAIN:6cd5
 // Signature: [] -> []
 void ReadJoypads() {
     joystick_strobe(1);
@@ -594,7 +968,7 @@ void ReadJoypads() {
 }
 
 
-// SMB:8e6a
+// SMB:8e6a, SM2MAIN:6ce3
 // Signature: [X] -> []
 void ReadPortBits(byte joynum) {
     static const byte button_lookup[8] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };

@@ -4,19 +4,34 @@
 # But sometimes, search-replacing the decompiled output is the best way to fix some problems.
 #
 # run without arguments: python3 <this-script>
+# for smb2j: python3 <this-script> 2
 
 import shutil
 import re
+import sys
 
-# As outputted by Ghidra
-INPUT_C_FILE = 'rawsmb.c'
-INPUT_H_FILE = 'rawsmb.h'
+IS_SMB2J = len(sys.argv) > 1 and sys.argv[1] == '2'
 
-# As finessed by this script
-TARGET_DIR = 'src/generated/'
-TARGET_CPP_FILE = 'smb.cpp'
-TARGET_H_FILE = 'smb.h'
+IS_SMB1 = not IS_SMB2J
 
+if IS_SMB1:
+    # As outputted by Ghidra
+    INPUT_C_FILE = 'rawsmb.c'
+    INPUT_H_FILE = 'rawsmb.h'
+
+    # As finessed by this script
+    TARGET_DIR = 'src/generated/'
+    TARGET_CPP_FILE = 'smb.cpp'
+    TARGET_H_FILE = 'smb.h'
+else:
+    # As outputted by Ghidra
+    INPUT_C_FILE = 'rawsmb2j.c'
+    INPUT_H_FILE = 'rawsmb2j.h'
+
+    # As finessed by this script
+    TARGET_DIR = 'src/generated/'
+    TARGET_CPP_FILE = 'smb2j.cpp'
+    TARGET_H_FILE = 'smb2j.h'
 
 # Replaces a pattern like:
 # *(byte *)(A + 0x1234) => FooBar[A - 1]
@@ -37,7 +52,8 @@ def fixup_manged_array_access(input_string, offset, array_str):
 
 # We get mangled array accesses in the decompiled output, usually because some arrays "start" in the middle of instructions.
 # (it's really just that the index is assumed to be offset)
-mangled_array_fixups_str = '''
+if IS_SMB1:
+    mangled_array_fixups_str = '''
 A + 0x833f => DemoActionData[A - 1]
 A + 0x85c7 => BGColorCtrl_Addr[A - 4]
 A + 0x92f6 => BSceneDataOffsets[A - 1]
@@ -50,9 +66,12 @@ A - 0x100 => FreqRegLookupTbl[A]
 A - 0xb2d => ExtraLifeFreqData[A - 1]
 A - 0x6f4 => MusicHeaderData[A - 1]
 '''
+else:
+    mangled_array_fixups_str = ''
 
 mangled_array_fixups = []
 for line in mangled_array_fixups_str.strip().split('\n'):
+    if not line: continue
     lhs,rhs = line.split('=>')
     lhs = lhs.strip().split()
     rhs = rhs.strip().replace('[A', '[{}')
@@ -139,6 +158,7 @@ outstr = outstr.replace('WrongChk:', 'WrongChk: 0;')
 
 # Another. We're comparing with an unsigned byte, but Ghidra doesn't know that.
 outstr = outstr.replace('-0x3e', '0xc2')
+outstr = outstr.replace('-0x3d', '0xc3')
 
 writable_hw_registers = [
     ('2000', 'ppuctrl'),
@@ -164,7 +184,9 @@ readable_hw_registers = [
     ('2002', 'ppustatus'),
     ('2007', 'ppudata'),
 
-    ('4016', 'joy1'), ('4017', 'joy2')
+    ('4016', 'joy1'), ('4017', 'joy2'),
+    
+    ('4032', 'FDS_drive_status')
 ]
 
 for name,replacement in writable_hw_registers:
@@ -202,14 +224,31 @@ outstr = outstr.replace(INPUT_H_FILE, TARGET_H_FILE)
 outstr = re.sub(r'byte (in_.*?);', r'byte \1 = 0;', outstr)
 outstr = re.sub(r'bool (in_.*?);', r'bool \1 = false;', outstr)
 
+if IS_SMB1:
+    # SMB1 doesn't replace the opcode of a particular instruction
+    outstr = outstr.replace('DAT_2100', '0x0e')
+else:
+    outstr = outstr.replace('DAT_2100', 'RAM(0xb585)')
 
-# break the infinite loop in Start
-outstr = outstr.replace('// WARNING: Do nothing block with infinite loop', 'break;')
+if IS_SMB2J:
+    outstr = outstr.replace('func_0xc858()', 'WriteNameToVictoryMsg()')
+    # The lo address byte of the JSR SoundEngine call. Used to patch it.
+    outstr = outstr.replace('DAT_2101', 'RAM(0x611d)')
+    # The operand for a comparison in MovePiranhaPlant
+    outstr = outstr.replace('uRAM9ffe', 'RAM(0x9ffe)')
+    # this comparison:
+    outstr = outstr.replace('< 0x21) goto PutinPipe;', '< RAM(0x9ffe)) goto PutinPipe;')
+
+if IS_SMB2J:
+    outstr = re.sub(r'SMB:sm2main_.::', 'SM2MAIN:', outstr)
+    outstr = re.sub(r'SMB:sm2data2::', 'SM2DATA2:', outstr)
+    outstr = re.sub(r'SMB:sm2data3::', 'SM2DATA3:', outstr)
+    outstr = re.sub(r'SMB:sm2data4_.::', 'SM2DATA4:', outstr)
+    outstr = re.sub(r'SMB:sm2data_24_common::', 'SM2DATA2+SM2DATA4:', outstr)
+    outstr = re.sub(r'SMB:', 'SM2MAIN:', outstr)
 
 with open(TARGET_DIR + TARGET_CPP_FILE, 'w') as f:
-    f.write('#include "../smb_functions.h"\n')
     f.write(outstr)
-
 
 # Header file
 
@@ -242,3 +281,4 @@ with open(TARGET_DIR + TARGET_H_FILE, 'w') as f:
     f.write('#pragma pack(push, 1)\n')
     f.write(outstr)
     f.write('#pragma pack(pop)\n')
+    f.write('#include "../smb_functions.h"\n')

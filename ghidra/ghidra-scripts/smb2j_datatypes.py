@@ -51,14 +51,15 @@ for (name,addr,typ),(nextname,nextaddr,nexttyp) in zip(items,items[1:]):
     else:
         pass
 
-# with open(data_filename('smb_romarrays.csv'), 'r') as f:
-#     contents = f.read().strip()
-# for item in contents.split():
-#     name,addr,count = item.split(',')
-#     addr = getaddr(addr)
-#     count = int(count)
-#     createLabel(addr, name, True)
-#     create_byte_array(addr, count)
+with open(data_filename('smb2j_romarrays.csv'), 'r') as f:
+    contents = f.read().strip()
+for item in contents.split('\n'):
+    if not item: continue
+    name,mmap,addr,count = [x.strip() for x in item.split(',')]
+    addr = get_mmap_addr(mmap, addr)
+    count = int(count)
+    createLabel(addr, name, True)
+    create_byte_array(addr, count)
 
 if True:
     with open(data_filename('smb2j_code_labels.csv'), 'r') as f:
