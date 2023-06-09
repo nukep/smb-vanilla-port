@@ -1,7 +1,7 @@
 
 
 // Write to $2000
-void ppuctrl(byte x) {
+static inline void ppuctrl(byte x) {
     PPU_STATE.t.NN = x & 0x03;
     PPU_STATE.increment_mode = (x & 0x04) ? 1 : 0;
 }
@@ -9,7 +9,7 @@ void ppuctrl(byte x) {
 static byte ENCOUNTERED[256];
 
 // Write to $2001
-void ppumask(byte x) {
+static inline void ppumask(byte x) {
     // in smb1 and smb2j, it's only ever:
     // 0x06     (e.g. background and sprites disabled, leftmost column turned on)
     // 0x00     (e.g. everything disabled)
@@ -22,7 +22,7 @@ void ppumask(byte x) {
 }
 
 // Write to $2005
-void ppuscroll(byte x) {
+static inline void ppuscroll(byte x) {
     if (PPU_STATE.w == 0) {
         PPU_STATE.t.XXXXX = x >> 3;
         PPU_STATE.x = x & 0x07;
@@ -34,7 +34,7 @@ void ppuscroll(byte x) {
 }
 
 // Write to $2006
-void ppuaddr(byte x) {
+static inline void ppuaddr(byte x) {
     if (PPU_STATE.w == 0) {
         PPU_STATE.t.hi = x & 0x3F;
     } else {
@@ -45,7 +45,7 @@ void ppuaddr(byte x) {
 }
 
 // Write to $2007
-void ppudata(byte x) {
+static inline void ppudata(byte x) {
     ushort& v = PPU_STATE.v.value;
 
     ushort addr = v & 0x3FFF;
@@ -64,7 +64,7 @@ void ppudata(byte x) {
 }
 
 // Read from $2002
-byte ppustatus() {
+static inline byte ppustatus() {
     PPU_STATE.w = 0;
     return 0x80;
 }

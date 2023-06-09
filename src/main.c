@@ -1,6 +1,6 @@
 //#define HEADLESS_MODE
 
-#define USE_MOVIE_SKIP_TO_BEFORE_FRAME 28000
+//#define USE_MOVIE_SKIP_TO_BEFORE_FRAME 28000
 //#define USE_MOVIE_COMPARERAM
 //#define USE_MOVIE_LOAD_RAM_AFTER_SKIPAHEAD
 
@@ -61,14 +61,13 @@ struct frontend_userdata {
 
 static struct SMB_buttons PLAYER1_INPUTS;
 
-void joy1(void*, struct SMB_buttons *buttons) {
+void joy1(void *userdata, struct SMB_buttons *buttons) {
     *buttons = PLAYER1_INPUTS;
 }
-void joy2(void*, struct SMB_buttons *buttons) {
+void joy2(void *userdata, struct SMB_buttons *buttons) {
 }
 
-void update_pattern_tables(void *_userdata, const byte *chrrom) {
-    struct frontend_userdata *userdata = (struct frontend_userdata*)_userdata;
+void update_pattern_tables(struct frontend_userdata *userdata, const byte *chrrom) {
     for (int tileidx = 0; tileidx < 512; tileidx++) {
         struct Tile *t = userdata->tiles + tileidx;
         const byte *buf = chrrom + tileidx*0x10;
@@ -82,14 +81,11 @@ void update_pattern_tables(void *_userdata, const byte *chrrom) {
     }
 }
 
-void update_palette(void *_userdata, const byte *palette_indices) {
-    struct frontend_userdata *userdata = (struct frontend_userdata*)_userdata;
+void update_palette(struct frontend_userdata *userdata, const byte *palette_indices) {
     memcpy(userdata->palette_indices, palette_indices, 32);
 }
 
-void draw_tile(void *_userdata, const struct SMB_tile tile) {
-    struct frontend_userdata *userdata = (struct frontend_userdata*)_userdata;
-
+void draw_tile(struct frontend_userdata *userdata, const struct SMB_tile tile) {
     if (!userdata->pixels) {
         return;
     }
@@ -113,7 +109,7 @@ void draw_tile(void *_userdata, const struct SMB_tile tile) {
                 continue;
             }
 
-            Pixel *p = userdata->pixels + jj + ii*userdata->pixels_stride;
+            struct Pixel *p = userdata->pixels + jj + ii*userdata->pixels_stride;
             byte v = userdata->tiles[tile.tileidx].val[i][j];
             if (v == 0) {
                 continue;
@@ -130,7 +126,7 @@ bool load_palette(struct frontend_userdata *userdata, const char *filename) {
 
     for (int i = 0; i < 0x40; i++) {
         IOREAD(3, &out);
-        Pixel *p = userdata->palette + i;
+        struct Pixel *p = userdata->palette + i;
         p->r = out[0];
         p->g = out[1];
         p->b = out[2];
@@ -163,10 +159,11 @@ bool dump_ram(struct SMB_state *state, const char *filename) {
     IOCLOSE();
 }
 
-byte smb2j_load_games_beaten(void*) {
+byte smb2j_load_games_beaten(void *userdata) {
+    // A decent test value - lets us test Worlds A-D
     return 8;
 }
-bool smb2j_save_games_beaten(void*, byte games_beaten) {
+bool smb2j_save_games_beaten(void *userdata, byte games_beaten) {
     printf("Pretending to save game...");
     printf("Games beaten: %d\n", games_beaten);
     return true;
@@ -174,21 +171,11 @@ bool smb2j_save_games_beaten(void*, byte games_beaten) {
 
 #include "movie.h"
 
+bool run_at_60fps() {
+    // This needs to be implemented properly, but that'll happen when we get audio
+    SDL_Delay(15);
 
-#include <thread>
-#include <chrono>
-
-template <typename F>
-void run_at_60fps(F callback) {
-    while (true) {
-        auto last_time = std::chrono::high_resolution_clock::now();
-        bool result = callback();
-        if (result) {
-            break;
-        }
-        auto next_time = last_time + std::chrono::duration<double, std::ratio<1, 60>>(1);
-        std::this_thread::sleep_for(next_time - std::chrono::high_resolution_clock::now());
-    }
+    return true;
 }
 
 const char *ppuram_filename = "ppuram.bin";
@@ -239,28 +226,27 @@ bool advance_movie(struct SMB_state *smb_state) {
             // $F0-$FF and $7B0-$7CA are sound related. we haven't implemented sound subroutines yet.
             // $160-$1FF is the stack (this port doesn't use this)
 
-#ifdef SMB1_MODE
-            mem_eq_range(0x0008, 0x00EF);
-            mem_eq_range(0x0100, 0x015F);
-#elif defined(SMB2J_MODE)
-            // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
-            mem_eq_range(0x0010, 0x00EF);
-            mem_eq_range(0x0109, 0x015F);
-#endif
+            if (SMB_which_game(smb_state) == GAME_SMB1) {
+                mem_eq_range(0x0008, 0x00EF);
+                mem_eq_range(0x0100, 0x015F);
+            } else if (SMB_which_game(smb_state) == GAME_SMB2J) {
+                // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
+                mem_eq_range(0x0010, 0x00EF);
+                mem_eq_range(0x0109, 0x015F);
+            }
             mem_eq_range(0x0200, 0x07AF);
             mem_eq_range(0x07CB, 0x07FF);
         }
 #endif
 
-        const auto& in = movie_buttons;
-        PLAYER1_INPUTS.u = in.u;
-        PLAYER1_INPUTS.d = in.d;
-        PLAYER1_INPUTS.l = in.l;
-        PLAYER1_INPUTS.r = in.r;
-        PLAYER1_INPUTS.b = in.b;
-        PLAYER1_INPUTS.a = in.a;
-        PLAYER1_INPUTS.select = in.select;
-        PLAYER1_INPUTS.start = in.start;
+        PLAYER1_INPUTS.u = movie_buttons.u;
+        PLAYER1_INPUTS.d = movie_buttons.d;
+        PLAYER1_INPUTS.l = movie_buttons.l;
+        PLAYER1_INPUTS.r = movie_buttons.r;
+        PLAYER1_INPUTS.b = movie_buttons.b;
+        PLAYER1_INPUTS.a = movie_buttons.a;
+        PLAYER1_INPUTS.select = movie_buttons.select;
+        PLAYER1_INPUTS.start = movie_buttons.start;
     }
     return use_movie_buttons;
 }
@@ -289,7 +275,7 @@ int sdl_frontend(struct SMB_state *smb_state, struct frontend_userdata *userdata
     SDL_Surface *surf = SDL_CreateRGBSurface(0, 256 * 2, 240, 32, 0, 0, 0, 0);
     const int stride = 256 * 2;
 
-    run_at_60fps([smb_state, userdata, window, surf]() {
+    while (run_at_60fps()) {
         bool use_movie_buttons = false;
 
         use_movie_buttons = advance_movie(smb_state);
@@ -336,16 +322,16 @@ int sdl_frontend(struct SMB_state *smb_state, struct frontend_userdata *userdata
             }
             break;
             case SDL_QUIT:
-                return true;
+                goto exit;
             }
         }
 
         // Fill with background color
-        const Pixel& bgcolor = userdata->palette[userdata->palette_indices[0]];
+        const struct Pixel bgcolor = userdata->palette[userdata->palette_indices[0]];
         SDL_FillRect(surf, NULL, SDL_MapRGB(surf->format, bgcolor.r, bgcolor.g, bgcolor.b));
 
         SDL_LockSurface(surf);
-        Pixel *pixels = (Pixel*)surf->pixels;
+        struct Pixel *pixels = surf->pixels;
 
         userdata->pixels = pixels;
         userdata->pixels_stride = stride;
@@ -363,10 +349,9 @@ int sdl_frontend(struct SMB_state *smb_state, struct frontend_userdata *userdata
 
 
         SDL_UpdateWindowSurface(window);
+    }
 
-        return false;
-    });
-
+exit:
     SDL_DestroyWindow(window);
     SDL_Quit();
 
@@ -378,8 +363,6 @@ int sdl_frontend(struct SMB_state *smb_state, struct frontend_userdata *userdata
 #	define USE_MOVIE_SKIP_TO_BEFORE_FRAME 0
 #endif
 
-#include <iostream>
-
 #define HANDLEERR(expr, context) do { \
     set_error_context(context); \
     int val = expr; \
@@ -387,8 +370,7 @@ int sdl_frontend(struct SMB_state *smb_state, struct frontend_userdata *userdata
     if (!val) { return 1; } \
 } while(0)
 
-bool open_rom(void *_userdata, const char *filename) {
-    struct frontend_userdata *userdata = (struct frontend_userdata*)_userdata;
+bool open_rom(struct frontend_userdata *userdata, const char *filename) {
     FILE *f = fopen(filename, "rb");
     userdata->romfile = f;
     return f != 0;
@@ -396,32 +378,38 @@ bool open_rom(void *_userdata, const char *filename) {
 
 
 
-bool read_rom_bytes(void *_userdata, byte *buf, size_t size) {
-    struct frontend_userdata *userdata = (struct frontend_userdata*)_userdata;
+bool read_rom_bytes(struct frontend_userdata *userdata, byte *buf, size_t size) {
     return fread(buf, size, 1, userdata->romfile) == 1;
 }
 
-bool seek_rom(void* _userdata, size_t offset) {
-    struct frontend_userdata *userdata = (struct frontend_userdata*)_userdata;
+bool seek_rom(struct frontend_userdata *userdata, size_t offset) {
     fseek(userdata->romfile, offset, SEEK_SET);
     return true;
 }
 
 int main(int argc, char *argv[]) {
-    struct SMB_state *smb_state = (struct SMB_state*)malloc(SMB_state_size());
+    struct SMB_state *smb_state = malloc(SMB_state_size());
+    struct frontend_userdata *userdata = malloc(sizeof(struct frontend_userdata));
 
-    struct frontend_userdata *userdata = (struct frontend_userdata*)malloc(sizeof(struct frontend_userdata));
+    if (!smb_state || !userdata) {
+        return 1;
+    }
+
     memset(userdata, 0, sizeof(struct frontend_userdata));
+    if (argc <= 1) {
+        printf("Please provide a SMB1 or SMB2J (Lost Levels) rom!\n");
+        return 1;
+    }
 
-    open_rom(userdata, "smb2j.fds");
+    open_rom(userdata, argv[1]);
 
     struct SMB_callbacks callbacks = {
         .userdata = userdata,
 
         .read_rom_bytes = read_rom_bytes,
         .seek_rom = seek_rom,
-        //.smb2j_load_games_beaten = smb2j_load_games_beaten,
-        //.smb2j_save_games_beaten = smb2j_save_games_beaten,
+        .smb2j_load_games_beaten = smb2j_load_games_beaten,
+        .smb2j_save_games_beaten = smb2j_save_games_beaten,
 
         .update_pattern_tables = update_pattern_tables,
         .update_palette = update_palette,
@@ -434,12 +422,12 @@ int main(int argc, char *argv[]) {
 
     printf("Started!\n");
 
-    if (argc > 1) {
-        struct Movie *m = (struct Movie*)malloc(sizeof(struct Movie));
+    if (argc > 2) {
+        struct Movie *m = malloc(sizeof(struct Movie));
         char buttons_filename[1024];
         char ram_filename[1024];
-        snprintf(buttons_filename, sizeof(buttons_filename), "%smovie-buttons.txt", argv[1]);
-        snprintf(ram_filename, sizeof(ram_filename), "%smovie-ram.bin", argv[1]);
+        snprintf(buttons_filename, sizeof(buttons_filename), "%smovie-buttons.txt", argv[2]);
+        snprintf(ram_filename, sizeof(ram_filename), "%smovie-ram.bin", argv[2]);
         if (!movie_init(m, buttons_filename, ram_filename)) {
             printf("Could not load movie\n");
         }

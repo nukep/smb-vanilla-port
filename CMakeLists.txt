@@ -14,17 +14,17 @@ project ("smbport")
 find_package(SDL2 REQUIRED)
 include_directories(smbport ${SDL2_INCLUDE_DIRS})
 
-add_library(smb1 STATIC "src/foundation.cpp")
-target_compile_definitions(smb1 PRIVATE SMB1_MODE)
+add_library(smb1 STATIC "src/smb1.cpp")
 
-add_library(smb2j STATIC "src/foundation.cpp")
-target_compile_definitions(smb2j PRIVATE SMB2J_MODE)
+add_library(smb2j STATIC "src/smb2j.cpp")
+
+add_library(foundation STATIC "src/foundation.cpp" "src/common.cpp")
+target_link_libraries(foundation PRIVATE smb1 smb2j)
 
 # Add source to this project's executable.
-add_executable(smbport "src/main.cpp" "src/movie.c")
+add_executable(smbport "src/main.c" "src/movie.c")
 
-target_compile_definitions(smbport PRIVATE SMB2J_MODE)
-target_link_libraries(smbport smb2j)
+target_link_libraries(smbport foundation)
 target_link_libraries(smbport ${SDL2_LIBRARIES})
 
 

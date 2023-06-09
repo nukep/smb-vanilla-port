@@ -10,6 +10,9 @@ extern "C" {
 typedef unsigned char byte;
 typedef unsigned short ushort;
 
+#define GAME_SMB1 0
+#define GAME_SMB2J 1
+
 struct SMB_buttons {
     bool u:1;
     bool d:1;
@@ -49,6 +52,7 @@ struct SMB_state;
 
 size_t SMB_state_size();
 void SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb);
+int SMB_which_game(const struct SMB_state *state);
 void SMB_tick(struct SMB_state *state);
 byte* SMB_ram(struct SMB_state *state);
 byte* SMB_ppuram(struct SMB_state *state);

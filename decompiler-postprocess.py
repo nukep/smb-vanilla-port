@@ -21,8 +21,8 @@ if IS_SMB1:
 
     # As finessed by this script
     TARGET_DIR = 'src/generated/'
-    TARGET_CPP_FILE = 'smb.cpp'
-    TARGET_H_FILE = 'smb.h'
+    TARGET_CPP_FILE = 'smb1.c'
+    TARGET_H_FILE = 'smb1.h'
 else:
     # As outputted by Ghidra
     INPUT_C_FILE = 'rawsmb2j.c'
@@ -30,7 +30,7 @@ else:
 
     # As finessed by this script
     TARGET_DIR = 'src/generated/'
-    TARGET_CPP_FILE = 'smb2j.cpp'
+    TARGET_CPP_FILE = 'smb2j.c'
     TARGET_H_FILE = 'smb2j.h'
 
 # Replaces a pattern like:
@@ -265,6 +265,11 @@ with open(INPUT_H_FILE, 'r') as f:
     outstr = f.read()
 shutil.copyfile(INPUT_H_FILE, INPUT_H_FILE+'.bak')
 
+# Find all function declarations and prefix them
+# This is a crude way to avoid linker collisions between the two games
+function_prefix = 'smb1_' if IS_SMB1 else 'smb2j_'
+outstr = re.sub(r'^(.+?) (.+?)\((.*)\);$', rf'\1 {function_prefix}\2(\3);\n#define \2 {function_prefix}\2\n', outstr, flags=re.MULTILINE);
+
 # C++ has a bool type. Don't redefine it!
 outstr = outstr.replace('typedef unsigned char    bool;', '')
 
@@ -282,4 +287,3 @@ with open(TARGET_DIR + TARGET_H_FILE, 'w') as f:
     f.write('#pragma pack(push, 1)\n')
     f.write(outstr)
     f.write('#pragma pack(pop)\n')
-    f.write('#include "../smb_functions.h"\n')
