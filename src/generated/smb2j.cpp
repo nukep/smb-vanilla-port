@@ -3081,7 +3081,7 @@ RendBBuf:
                        (byte)((MetatileBuffer[bVar2] & 0xc0) << 1) >> 7)]) {
       bVar5 = 0;
     }
-    RAM(sVar8.subpiece(0,2) + (ushort)bVar4) = bVar5;
+    RAM(SUBPIECE(sVar8,0,2) + (ushort)bVar4) = bVar5;
     bVar4 += 0x10;
     bVar2 += 1;
   } while (bVar2 < 0xd);
@@ -3656,7 +3656,7 @@ struct_yr06r07 GetPipeHeight(byte param_1)
   
   ChkLrgObjFixedLength(param_1,1);
   sVar1 = GetLrgObjAttrib(param_1);
-  return (struct_yr06r07)
+  return CAST_INT_TO_struct_yr06r07
          (CONCAT12(sVar1.r07,CONCAT11(sVar1.y,AreaObjectLength[param_1])) & 0xff07ff);
 }
 
@@ -4286,7 +4286,7 @@ struct_yr07i GetLrgObjAttrib(byte param_1)
 {
   
   
-  return (struct_yr07i)
+  return CAST_INT_TO_struct_yr07i
          (CONCAT12(0,CONCAT11(AreaData[AreaObjOffsetBuffer[param_1]],
                                  AreaData[(byte)(AreaObjOffsetBuffer[param_1] + 1)])) & 0xff0f0f);
 }
@@ -5748,8 +5748,8 @@ byte VineObjectHandler(byte param_1)
       if (0x1f < VineHeight) {
         sVar6 = BlockBufferCollision(1,6,0x1b);
         bVar1 = sVar6.r02;
-        if ((bVar1 < 0xd0) && (RAM(sVar6.subpiece(4,2) + (ushort)bVar1) == 0)) {
-          RAM(sVar6.subpiece(4,2) + (ushort)bVar1) = 0x23;
+        if ((bVar1 < 0xd0) && (RAM(SUBPIECE(sVar6,4,2) + (ushort)bVar1) == 0)) {
+          RAM(SUBPIECE(sVar6,4,2) + (ushort)bVar1) = 0x23;
         }
       }
     }
@@ -8920,7 +8920,7 @@ struct_xr00r06 FirebarCollision(byte param_1,byte param_2,byte param_3,byte para
 {
   ushort uVar1;
   byte bVar2;
-  byte abVar3 [1];
+  byte abVar3;
   byte bVar4;
   struct_xr00r06 sVar5;
   byte bStack0000;
@@ -8935,12 +8935,12 @@ NoColFB:
     return sVar5;
   }
   if ((PlayerSize != 0) ||
-     (bVar2 = 0, abVar3[0] = PlayerOrSprObject_Y_Position[0], CrouchingFlag != 0)) {
+     (bVar2 = 0, abVar3 = PlayerOrSprObject_Y_Position[0], CrouchingFlag != 0)) {
     bVar2 = 2;
-    abVar3[0] = PlayerOrSprObject_Y_Position[0] + 0x18;
+    abVar3 = PlayerOrSprObject_Y_Position[0] + 0x18;
   }
   do {
-    bVar4 = abVar3[0] - param_4;
+    bVar4 = abVar3 - param_4;
     if (0x7f < bVar4) {
       bVar4 = (bVar4 ^ 0xff) + 1;
     }
@@ -8961,7 +8961,7 @@ NoColFB:
     if (bVar2 == 2) goto NoColFB;
     uVar1 = (ushort)bVar2;
     bVar2 += 1;
-    abVar3[0] = PlayerOrSprObject_Y_Position[0] + FirebarYPos[uVar1];
+    abVar3 = PlayerOrSprObject_Y_Position[0] + FirebarYPos[uVar1];
   } while( true );
 }
 
@@ -10110,7 +10110,7 @@ void OffscreenBoundsCheck(byte param_1)
   bool bVar2;
   bool bVar3;
   bool bVar4;
-  byte abVar5 [1];
+  byte abVar5;
   byte bVar6;
   bool bVar7;
   bool bVar8;
@@ -10119,19 +10119,19 @@ void OffscreenBoundsCheck(byte param_1)
     bVar1 = Enemy_ID[param_1];
     bVar7 = 4 < bVar1;
     if (((bVar1 == 5) || (bVar7 = 3 < bVar1, bVar1 == 4)) ||
-       (bVar7 = 0xc < bVar1, abVar5[0] = ScreenEdgeOrLeft_X_Pos[0], bVar1 == 0xd)) {
-      abVar5[0] = ScreenEdgeOrLeft_X_Pos[0] + 0x38 + bVar7;
-      bVar7 = 199 < ScreenEdgeOrLeft_X_Pos[0] || bVar7 && abVar5[0] == 0;
+       (bVar7 = 0xc < bVar1, abVar5 = ScreenEdgeOrLeft_X_Pos[0], bVar1 == 0xd)) {
+      abVar5 = ScreenEdgeOrLeft_X_Pos[0] + 0x38 + bVar7;
+      bVar7 = 199 < ScreenEdgeOrLeft_X_Pos[0] || bVar7 && abVar5 == 0;
     }
-    bVar2 = 0x47 < abVar5[0];
+    bVar2 = 0x47 < abVar5;
     bVar3 = !bVar7;
-    bVar4 = 0x48 < abVar5[0];
+    bVar4 = 0x48 < abVar5;
     bVar8 = (bVar7 && bVar2 || bVar3 && bVar4) ||
             ((!bVar7 || !bVar2) && (!bVar3 || !bVar4)) && ScreenEdgeOrLeft_PageLoc[0] != 0;
     bVar6 = ScreenRight_X_Pos + 0x48 + bVar8;
     if ((0x7f < (byte)((Enemy_PageLoc[param_1] -
                        (ScreenEdgeOrLeft_PageLoc[0] - ((!bVar7 || !bVar2) && (!bVar3 || !bVar4)))) -
-                      (Enemy_X_Position[param_1] < (byte)((abVar5[0] + 0xb8) - !bVar7)))) ||
+                      (Enemy_X_Position[param_1] < (byte)((abVar5 + 0xb8) - !bVar7)))) ||
        ((((((byte)((Enemy_PageLoc[param_1] -
                    (ScreenRight_PageLoc + (0xb7 < ScreenRight_X_Pos || bVar8 && bVar6 == 0))) -
                   (Enemy_X_Position[param_1] < bVar6)) < 0x80 && (Enemy_State[param_1] != 5)) &&
@@ -10828,7 +10828,7 @@ byte SmallPlatformCollision(byte param_1)
       do {
         sVar4 = GetEnemyBoundBoxOfs();
         bVar2 = sVar4.y;
-        if (((uint3)sVar4 & 2) != 0) {
+        if ((CAST_TO_INT(sVar4) & 2) != 0) {
           return ObjectOffset;
         }
         if ((0x1f < BoundingBox_UL_YPos[bVar2]) && (bVar3 = PlayerCollisionCore(bVar2), bVar3)) {
@@ -10951,7 +10951,7 @@ struct_ayi GetEnemyBoundBoxOfsArg(byte param_1)
 {
   
   
-  return (struct_ayi)
+  return CAST_INT_TO_struct_ayi
          (CONCAT12(0,CONCAT11(param_1 * 4 + 4,Enemy_OffscreenBits)) & 0xffff0f);
 }
 
@@ -12158,7 +12158,7 @@ struct_ayr02r04r06r07 BlockBufferColli_Feet(byte param_1)
   
   bVar2 = param_1 + 1;
   sVar4 = BlockBufferCollision(0,0,bVar2);
-  uVar1 = sVar4.subpiece(3,3);
+  uVar1 = SUBPIECE(sVar4,3,3);
   sVar3.r02 = sVar4.r02;
   sVar3.a = sVar4.a;
   sVar3.y = bVar2;
@@ -12217,14 +12217,14 @@ struct_azr02r04r06r07 BlockBufferCollision(byte param_1,byte param_2,byte param_
                                    CARRY1(BlockBuffer_X_Adder[param_3],
                                           PlayerOrSprObject_X_Position[param_2])) * -0x80) >> 3);
   bVar2 = (PlayerOrSprObject_Y_Position[param_2] + BlockBuffer_Y_Adder[param_3] & 0xf0) - 0x20;
-  cVar1 = RAM(sVar4.subpiece(0,2) + (ushort)bVar2);
+  cVar1 = RAM(SUBPIECE(sVar4,0,2) + (ushort)bVar2);
   if (bStack0000 == 0) {
     bVar3 = PlayerOrSprObject_Y_Position[param_2];
   }
   else {
     bVar3 = PlayerOrSprObject_X_Position[param_2];
   }
-  return (struct_azr02r04r06r07)
+  return CAST_INT_TO_struct_azr02r04r06r07
          (CONCAT33(CONCAT12(sVar4.r07,CONCAT11(sVar4.r06,bVar3)),
                    CONCAT12(bVar2,CONCAT11(cVar1 == 0,cVar1))) & 0xffff0fffffff);
 }
@@ -13276,7 +13276,7 @@ void PlayerGfxHandler(void)
 
 {
   byte bVar1;
-  byte abVar2 [1];
+  byte abVar2;
   
   if ((InjuryTimer == 0) || (!(bool)(FrameCounter & 1))) {
     if (GameEngineSubroutine == 0xb) {
@@ -13298,18 +13298,18 @@ void PlayerGfxHandler(void)
     }
     FindPlayerAction();
     if ((FrameCounter & 4) == 0) {
-      abVar2[0] = PlayerOrSprDataOffset[0];
+      abVar2 = PlayerOrSprDataOffset[0];
       if (!(bool)(PlayerFacingDir & 1)) {
-        abVar2[0] = PlayerOrSprDataOffset[0] + 4;
+        abVar2 = PlayerOrSprDataOffset[0] + 4;
       }
       bVar1 = 0;
       if (PlayerSize != 0) {
-        if (Sprite_Data[abVar2[0] + 0x19] == PlayerGraphicsTable[158]) {
+        if (Sprite_Data[abVar2 + 0x19] == PlayerGraphicsTable[158]) {
           return;
         }
         bVar1 = 1;
       }
-      Sprite_Data[abVar2[0] + 0x19] = SwimKickTileNum[bVar1];
+      Sprite_Data[abVar2 + 0x19] = SwimKickTileNum[bVar1];
     }
   }
   return;
@@ -13597,9 +13597,9 @@ byte HandleChangeSize(void)
 void ChkForPlayerAttrib(void)
 
 {
-  byte abVar1 [1];
+  byte abVar1;
   
-  abVar1[0] = PlayerOrSprDataOffset[0];
+  abVar1 = PlayerOrSprDataOffset[0];
   if (GameEngineSubroutine != 0xb) {
     if (((PlayerGfxOffset == 0x50) || (PlayerGfxOffset == 0xb8)) || (PlayerGfxOffset == 0xc0))
     goto C_S_IGAtt;
@@ -13609,10 +13609,10 @@ void ChkForPlayerAttrib(void)
   }
   Sprite_Data[PlayerOrSprDataOffset[0] + 0x12] = Sprite_Data[PlayerOrSprDataOffset[0] + 0x12] & 0x3f
   ;
-  Sprite_Data[abVar1[0] + 0x16] = Sprite_Data[abVar1[0] + 0x16] & 0x3f | 0x40;
+  Sprite_Data[abVar1 + 0x16] = Sprite_Data[abVar1 + 0x16] & 0x3f | 0x40;
 C_S_IGAtt:
-  Sprite_Data[abVar1[0] + 0x1a] = Sprite_Data[abVar1[0] + 0x1a] & 0x3f;
-  Sprite_Data[abVar1[0] + 0x1e] = Sprite_Data[abVar1[0] + 0x1e] & 0x3f | 0x40;
+  Sprite_Data[abVar1 + 0x1a] = Sprite_Data[abVar1 + 0x1a] & 0x3f;
+  Sprite_Data[abVar1 + 0x1e] = Sprite_Data[abVar1 + 0x1e] & 0x3f | 0x40;
   return;
 }
 

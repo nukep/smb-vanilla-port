@@ -53,268 +53,155 @@ typedef unsigned short    undefined2;
 typedef struct struct_ycr07 struct_ycr07, *Pstruct_ycr07;
 
 struct struct_ycr07 {
-    inline struct_ycr07() {}
-    inline struct_ycr07(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte y;
     bool c;
     byte r07;
+};
+static inline struct_ycr07 CAST_INT_TO_struct_ycr07(uint64_t v) {
+    struct_ycr07 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_xr00r01 struct_xr00r01, *Pstruct_xr00r01;
 
 struct struct_xr00r01 {
-    inline struct_xr00r01() {}
-    inline struct_xr00r01(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte x;
     byte r00;
     byte r01;
+};
+static inline struct_xr00r01 CAST_INT_TO_struct_xr00r01(uint64_t v) {
+    struct_xr00r01 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
 
 struct struct_axr00 {
-    inline struct_axr00() {}
-    inline struct_axr00(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     byte x;
     byte r00;
+};
+static inline struct_axr00 CAST_INT_TO_struct_axr00(uint64_t v) {
+    struct_axr00 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_nr00i struct_nr00i, *Pstruct_nr00i;
 
 struct struct_nr00i {
-    inline struct_nr00i() {}
-    inline struct_nr00i(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     bool n;
     byte r00;
     bool i;
+};
+static inline struct_nr00i CAST_INT_TO_struct_nr00i(uint64_t v) {
+    struct_nr00i a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_ncr00 struct_ncr00, *Pstruct_ncr00;
 
 struct struct_ncr00 {
-    inline struct_ncr00() {}
-    inline struct_ncr00(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     bool n;
     bool c;
     byte r00;
+};
+static inline struct_ncr00 CAST_INT_TO_struct_ncr00(uint64_t v) {
+    struct_ncr00 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_xr00r06 struct_xr00r06, *Pstruct_xr00r06;
 
 struct struct_xr00r06 {
-    inline struct_xr00r06() {}
-    inline struct_xr00r06(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte x;
     byte r00;
     byte r06;
+};
+static inline struct_xr00r06 CAST_INT_TO_struct_xr00r06(uint64_t v) {
+    struct_xr00r06 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_r06r07i struct_r06r07i, *Pstruct_r06r07i;
 
 struct struct_r06r07i {
-    inline struct_r06r07i() {}
-    inline struct_r06r07i(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte r06;
     byte r07;
     bool i;
+};
+static inline struct_r06r07i CAST_INT_TO_struct_r06r07i(uint64_t v) {
+    struct_r06r07i a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_ayr02r04r06r07 struct_ayr02r04r06r07, *Pstruct_ayr02r04r06r07;
 
 struct struct_ayr02r04r06r07 {
-    inline struct_ayr02r04r06r07() {}
-    inline struct_ayr02r04r06r07(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     byte y;
     byte r02;
     byte r04;
     byte r06;
     byte r07;
+};
+static inline struct_ayr02r04r06r07 CAST_INT_TO_struct_ayr02r04r06r07(uint64_t v) {
+    struct_ayr02r04r06r07 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_ayi struct_ayi, *Pstruct_ayi;
 
 struct struct_ayi {
-    inline struct_ayi() {}
-    inline struct_ayi(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     byte y;
     bool i;
+};
+static inline struct_ayi CAST_INT_TO_struct_ayi(uint64_t v) {
+    struct_ayi a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_azr02r04r06r07 struct_azr02r04r06r07, *Pstruct_azr02r04r06r07;
 
 struct struct_azr02r04r06r07 {
-    inline struct_azr02r04r06r07() {}
-    inline struct_azr02r04r06r07(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     bool z;
     byte r02;
     byte r04;
     byte r06;
     byte r07;
+};
+static inline struct_azr02r04r06r07 CAST_INT_TO_struct_azr02r04r06r07(uint64_t v) {
+    struct_azr02r04r06r07 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_axz struct_axz, *Pstruct_axz;
 
 struct struct_axz {
-    inline struct_axz() {}
-    inline struct_axz(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     byte x;
     bool z;
+};
+static inline struct_axz CAST_INT_TO_struct_axz(uint64_t v) {
+    struct_axz a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_axzr02r04r06r07 struct_axzr02r04r06r07, *Pstruct_axzr02r04r06r07;
 
 struct struct_axzr02r04r06r07 {
-    inline struct_axzr02r04r06r07() {}
-    inline struct_axzr02r04r06r07(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     byte x;
     bool z;
@@ -323,269 +210,166 @@ struct struct_axzr02r04r06r07 {
     byte r06;
     byte r07;
 };
+static inline struct_axzr02r04r06r07 CAST_INT_TO_struct_axzr02r04r06r07(uint64_t v) {
+    struct_axzr02r04r06r07 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
+};
 
 typedef struct struct_yr07i struct_yr07i, *Pstruct_yr07i;
 
 struct struct_yr07i {
-    inline struct_yr07i() {}
-    inline struct_yr07i(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte y;
     byte r07;
     bool i;
+};
+static inline struct_yr07i CAST_INT_TO_struct_yr07i(uint64_t v) {
+    struct_yr07i a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_axi struct_axi, *Pstruct_axi;
 
 struct struct_axi {
-    inline struct_axi() {}
-    inline struct_axi(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     byte x;
     bool i;
+};
+static inline struct_axi CAST_INT_TO_struct_axi(uint64_t v) {
+    struct_axi a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_xr05i struct_xr05i, *Pstruct_xr05i;
 
 struct struct_xr05i {
-    inline struct_xr05i() {}
-    inline struct_xr05i(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte x;
     byte r05;
     bool i;
+};
+static inline struct_xr05i CAST_INT_TO_struct_xr05i(uint64_t v) {
+    struct_xr05i a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_r01r02r03 struct_r01r02r03, *Pstruct_r01r02r03;
 
 struct struct_r01r02r03 {
-    inline struct_r01r02r03() {}
-    inline struct_r01r02r03(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte r01;
     byte r02;
     byte r03;
+};
+static inline struct_r01r02r03 CAST_INT_TO_struct_r01r02r03(uint64_t v) {
+    struct_r01r02r03 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_xci struct_xci, *Pstruct_xci;
 
 struct struct_xci {
-    inline struct_xci() {}
-    inline struct_xci(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte x;
     bool c;
     bool i;
+};
+static inline struct_xci CAST_INT_TO_struct_xci(uint64_t v) {
+    struct_xci a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_xyr02 struct_xyr02, *Pstruct_xyr02;
 
 struct struct_xyr02 {
-    inline struct_xyr02() {}
-    inline struct_xyr02(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte x;
     byte y;
     byte r02;
+};
+static inline struct_xyr02 CAST_INT_TO_struct_xyr02(uint64_t v) {
+    struct_xyr02 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_yci struct_yci, *Pstruct_yci;
 
 struct struct_yci {
-    inline struct_yci() {}
-    inline struct_yci(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte y;
     bool c;
     bool i;
+};
+static inline struct_yci CAST_INT_TO_struct_yci(uint64_t v) {
+    struct_yci a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_ar00i struct_ar00i, *Pstruct_ar00i;
 
 struct struct_ar00i {
-    inline struct_ar00i() {}
-    inline struct_ar00i(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     byte r00;
     bool i;
+};
+static inline struct_ar00i CAST_INT_TO_struct_ar00i(uint64_t v) {
+    struct_ar00i a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_xyi struct_xyi, *Pstruct_xyi;
 
 struct struct_xyi {
-    inline struct_xyi() {}
-    inline struct_xyi(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte x;
     byte y;
     bool i;
+};
+static inline struct_xyi CAST_INT_TO_struct_xyi(uint64_t v) {
+    struct_xyi a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_aci struct_aci, *Pstruct_aci;
 
 struct struct_aci {
-    inline struct_aci() {}
-    inline struct_aci(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte a;
     bool c;
     bool i;
+};
+static inline struct_aci CAST_INT_TO_struct_aci(uint64_t v) {
+    struct_aci a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_yr06r07 struct_yr06r07, *Pstruct_yr06r07;
 
 struct struct_yr06r07 {
-    inline struct_yr06r07() {}
-    inline struct_yr06r07(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte y;
     byte r06;
     byte r07;
+};
+static inline struct_yr06r07 CAST_INT_TO_struct_yr06r07(uint64_t v) {
+    struct_yr06r07 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 typedef struct struct_xr00i struct_xr00i, *Pstruct_xr00i;
 
 struct struct_xr00i {
-    inline struct_xr00i() {}
-    inline struct_xr00i(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-
     byte x;
     byte r00;
     bool i;
+};
+static inline struct_xr00i CAST_INT_TO_struct_xr00i(uint64_t v) {
+    struct_xr00i a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
 };
 
 

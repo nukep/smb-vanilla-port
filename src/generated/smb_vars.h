@@ -1,450 +1,450 @@
-static byte &ObjectOffset = RAM(0x0008);
-static byte &FrameCounter = RAM(0x0009);
-static byte &A_B_Buttons = RAM(0x000A);
-static byte &Up_Down_Buttons = RAM(0x000B);
-static byte &Left_Right_Buttons = RAM(0x000C);
-static byte &PreviousA_B_Buttons = RAM(0x000D);
-static byte &GameEngineSubroutine = RAM(0x000E);
-static const RamByteArray Enemy_Flag = RamByteArray(0x000F);
-static const RamByteArray Enemy_ID = RamByteArray(0x0016);
-static byte &Player_State = RAM(0x001D);
-static const RamByteArray Enemy_State = RamByteArray(0x001E);
-static const RamByteArray Fireball_State = RamByteArray(0x0024);
-static const RamByteArray Block_State = RamByteArray(0x0026);
-static const RamByteArray Misc_State = RamByteArray(0x002A);
-static byte &PlayerFacingDir = RAM(0x0033);
-static const RamByteArray FireballSpinDirectionOrVictoryDestPageLoc = RamByteArray(0x0034);
-static byte &DestinationPageLoc = RAM(0x0034);
-static const RamByteArray FirebarSpinDirection = RamByteArray(0x0034);
-static byte &VictoryWalkControl = RAM(0x0035);
-static byte &PowerUpType = RAM(0x0039);
-static const RamByteArray FireballBouncingFlag = RamByteArray(0x003A);
-static const RamByteArray HammerBroJumpTimer = RamByteArray(0x003C);
-static byte &Player_MovingDir = RAM(0x0045);
-static const RamByteArray Enemy_MovingDir = RamByteArray(0x0046);
-static const RamByteArray PlayerSpriteVarData1 = RamByteArray(0x0057);
-static byte &Player_X_Speed = RAM(0x0057);
-static const RamByteArray SprObject_X_Speed = RamByteArray(0x0057);
-static const RamByteArray BlooperMoveSpeed = RamByteArray(0x0058);
-static const RamByteArray CheepCheepMoveMFlag = RamByteArray(0x0058);
-static const RamByteArray Enemy_X_Speed = RamByteArray(0x0058);
-static const RamByteArray ExplosionGfxCounter = RamByteArray(0x0058);
-static const RamByteArray FirebarSpinState_Low = RamByteArray(0x0058);
-static const RamByteArray Jumpspring_FixedYPos = RamByteArray(0x0058);
-static const RamByteArray LakituMoveSpeed = RamByteArray(0x0058);
-static const RamByteArray PiranhaPlant_Y_Speed = RamByteArray(0x0058);
-static const RamByteArray RedPTroopaCenterYPos = RamByteArray(0x0058);
-static const RamByteArray XMoveSecondaryCounter = RamByteArray(0x0058);
-static const RamByteArray YPlatformCenterYPos = RamByteArray(0x0058);
-static const RamByteArray Fireball_X_Speed = RamByteArray(0x005E);
-static const RamByteArray Block_X_Speed = RamByteArray(0x0060);
-static const RamByteArray Misc_X_Speed = RamByteArray(0x0064);
-static const RamByteArray PlayerOrSprObject_PageLoc = RamByteArray(0x006D);
-static byte &Player_PageLoc = RAM(0x006D);
-static const RamByteArray SprObject_PageLoc = RamByteArray(0x006D);
-static const RamByteArray Enemy_PageLoc = RamByteArray(0x006E);
-static const RamByteArray Fireball_PageLoc = RamByteArray(0x0074);
-static const RamByteArray Block_PageLoc = RamByteArray(0x0076);
-static const RamByteArray Misc_PageLoc = RamByteArray(0x007A);
-static const RamByteArray Bubble_PageLoc = RamByteArray(0x0083);
-static const RamByteArray PlayerOrSprObject_X_Position = RamByteArray(0x0086);
-static byte &Player_X_Position = RAM(0x0086);
-static const RamByteArray SprObject_X_Position = RamByteArray(0x0086);
-static const RamByteArray Enemy_X_Position = RamByteArray(0x0087);
-static const RamByteArray Fireball_X_Position = RamByteArray(0x008D);
-static const RamByteArray Block_X_Position = RamByteArray(0x008F);
-static const RamByteArray Misc_X_Position = RamByteArray(0x0093);
-static const RamByteArray Bubble_X_Position = RamByteArray(0x009C);
-static const RamByteArray PlayerSpriteVarData2 = RamByteArray(0x009F);
-static byte &Player_Y_Speed = RAM(0x009F);
-static const RamByteArray SprObject_Y_Speed = RamByteArray(0x009F);
-static const RamByteArray BlooperMoveCounter = RamByteArray(0x00A0);
-static const RamByteArray Enemy_Y_Speed = RamByteArray(0x00A0);
-static const RamByteArray ExplosionTimerCounter = RamByteArray(0x00A0);
-static const RamByteArray FirebarSpinState_High = RamByteArray(0x00A0);
-static const RamByteArray LakituMoveDirection = RamByteArray(0x00A0);
-static const RamByteArray PiranhaPlant_MoveFlag = RamByteArray(0x00A0);
-static const RamByteArray XMovePrimaryCounter = RamByteArray(0x00A0);
-static const RamByteArray Fireball_Y_Speed = RamByteArray(0x00A6);
-static const RamByteArray Block_Y_Speed = RamByteArray(0x00A8);
-static const RamByteArray Misc_Y_Speed = RamByteArray(0x00AC);
-static const RamByteArray PlayerOrSprObject_Y_HighPos = RamByteArray(0x00B5);
-static byte &Player_Y_HighPos = RAM(0x00B5);
-static const RamByteArray SprObject_Y_HighPos = RamByteArray(0x00B5);
-static const RamByteArray Enemy_Y_HighPos = RamByteArray(0x00B6);
-static const RamByteArray Fireball_Y_HighPos = RamByteArray(0x00BC);
-static const RamByteArray Block_Y_HighPos = RamByteArray(0x00BE);
-static const RamByteArray Misc_Y_HighPos = RamByteArray(0x00C2);
-static const RamByteArray Bubble_Y_HighPos = RamByteArray(0x00CB);
-static const RamByteArray PlayerOrSprObject_Y_Position = RamByteArray(0x00CE);
-static byte &Player_Y_Position = RAM(0x00CE);
-static const RamByteArray SprObject_Y_Position = RamByteArray(0x00CE);
-static const RamByteArray Enemy_Y_Position = RamByteArray(0x00CF);
-static const RamByteArray Fireball_Y_Position = RamByteArray(0x00D5);
-static const RamByteArray Block_Y_Position = RamByteArray(0x00D7);
-static const RamByteArray Misc_Y_Position = RamByteArray(0x00DB);
-static const RamByteArray Bubble_Y_Position = RamByteArray(0x00E4);
-static RamPtr &AreaData = RAMPtr(0x00E7);
-static RamPtr &EnemyData = RAMPtr(0x00E9);
-static byte &MysterySpriteThing1 = RAM(0x00EB);
-static byte &MysterySpriteThing2 = RAM(0x00EC);
-static byte &MysterySpriteThing3 = RAM(0x00ED);
-static byte &MysterySpriteThing4 = RAM(0x00EF);
-static byte &NoteLenLookupTblOfs = RAM(0x00F0);
-static byte &Square1SoundBuffer = RAM(0x00F1);
-static byte &Square2SoundBuffer = RAM(0x00F2);
-static byte &NoiseSoundBuffer = RAM(0x00F3);
-static byte &AreaMusicBuffer = RAM(0x00F4);
-static RamPtr &MusicData = RAMPtr(0x00F5);
-static byte &MusicOffset_Square2 = RAM(0x00F7);
-static byte &MusicOffset_Square1 = RAM(0x00F8);
-static byte &MusicOffset_Triangle = RAM(0x00F9);
-static byte &PauseSoundQueue = RAM(0x00FA);
-static byte &AreaMusicQueue = RAM(0x00FB);
-static byte &EventMusicQueue = RAM(0x00FC);
-static byte &NoiseSoundQueue = RAM(0x00FD);
-static byte &Square2SoundQueue = RAM(0x00FE);
-static byte &Square1SoundQueue = RAM(0x00FF);
-static byte &VerticalFlipFlag = RAM(0x0109);
-static byte &FlagpoleFNum_Y_Pos = RAM(0x010D);
-static byte &FlagpoleFNum_YMFDummy = RAM(0x010E);
-static byte &FlagpoleScore = RAM(0x010F);
-static const RamByteArray FloateyNum_Control = RamByteArray(0x0110);
-static const RamByteArray FloateyNum_X_Pos = RamByteArray(0x0117);
-static const RamByteArray FloateyNum_Y_Pos = RamByteArray(0x011E);
-static const RamByteArray ShellChainCounter = RamByteArray(0x0125);
-static const RamByteArray FloateyNum_Timer = RamByteArray(0x012C);
-static const RamByteArray DigitModifier_Minus1 = RamByteArray(0x0133);
-static const RamByteArray DigitModifier = RamByteArray(0x0134);
-static const RamByteArray TheStack = RamByteArray(0x0160);
-static const RamByteArray Sprite_Data = RamByteArray(0x0200);
-static const RamByteArray Sprite_Y_Position = RamByteArray(0x0200);
-static const RamByteArray Sprite_Tilenumber = RamByteArray(0x0201);
-static const RamByteArray Sprite_Attributes = RamByteArray(0x0202);
-static const RamByteArray Sprite_X_Position = RamByteArray(0x0203);
-static byte &VRAM_Buffer1_Offset = RAM(0x0300);
-static const RamByteArray VRAM_Buffer1 = RamByteArray(0x0301);
-static byte &VRAM_Buffer2_Offset = RAM(0x0340);
-static const RamByteArray VRAM_Buffer2 = RamByteArray(0x0341);
-static byte &BowserBodyControls = RAM(0x0363);
-static byte &BowserFeetCounter = RAM(0x0364);
-static byte &BowserMovementSpeed = RAM(0x0365);
-static byte &BowserOrigXPos = RAM(0x0366);
-static byte &BowserFlameTimerCtrl = RAM(0x0367);
-static byte &BowserFront_Offset = RAM(0x0368);
-static byte &BridgeCollapseOffset = RAM(0x0369);
-static byte &BowserGfxFlag = RAM(0x036A);
-static const RamByteArray FirebarSpinSpeed = RamByteArray(0x0388);
-static byte &VineFlagOffset = RAM(0x0398);
-static byte &VineHeight = RAM(0x0399);
-static const RamByteArray VineObjOffset = RamByteArray(0x039A);
-static byte &VineStart_Y_Position = RAM(0x039D);
-static byte &BalPlatformAlignment = RAM(0x03A0);
-static byte &Platform_X_Scroll = RAM(0x03A1);
-static const RamByteArray HammerThrowingTimer_Or_PlatformCollisionFlag = RamByteArray(0x03A2);
-static const RamByteArray HammerThrowingTimer = RamByteArray(0x03A2);
-static const RamByteArray PlatformCollisionFlag = RamByteArray(0x03A2);
-static const RamByteArray PlayerOrSprObject_Rel_XPos = RamByteArray(0x03AD);
-static byte &Player_Rel_XPos = RAM(0x03AD);
-static const RamByteArray SprObject_Rel_XPos = RamByteArray(0x03AD);
-static byte &Enemy_Rel_XPos = RAM(0x03AE);
-static byte &Fireball_Rel_XPos = RAM(0x03AF);
-static byte &Bubble_Rel_XPos = RAM(0x03B0);
-static byte &Block_Rel_XPos = RAM(0x03B1);
-static byte &Block_Rel_XPos_2 = RAM(0x03B2);
-static byte &Misc_Rel_XPos = RAM(0x03B3);
-static const RamByteArray PlayerOrSprObject_Rel_YPos = RamByteArray(0x03B8);
-static byte &Player_Rel_YPos = RAM(0x03B8);
-static const RamByteArray SprObject_Rel_YPos = RamByteArray(0x03B8);
-static byte &Enemy_Rel_YPos = RAM(0x03B9);
-static byte &Fireball_Rel_YPos = RAM(0x03BA);
-static byte &Bubble_Rel_YPos = RAM(0x03BB);
-static byte &Block_Rel_YPos = RAM(0x03BC);
-static byte &Block_Rel_YPos_2 = RAM(0x03BD);
-static byte &Misc_Rel_YPos = RAM(0x03BE);
-static byte &Player_SprAttrib = RAM(0x03C4);
-static const RamByteArray Enemy_SprAttrib = RamByteArray(0x03C5);
-static const RamByteArray PlayerOrSprObject_OffscrBits = RamByteArray(0x03D0);
-static byte &Player_OffscreenBits = RAM(0x03D0);
-static const RamByteArray SprObject_OffscrBits = RamByteArray(0x03D0);
-static byte &Enemy_OffscreenBits = RAM(0x03D1);
-static byte &FBall_OffscreenBits = RAM(0x03D2);
-static byte &Bubble_OffscreenBits = RAM(0x03D3);
-static byte &Block_OffscreenBits = RAM(0x03D4);
-static byte &Misc_OffscreenBits = RAM(0x03D6);
-static const RamByteArray EnemyOffscrBitsMasked = RamByteArray(0x03D8);
-static const RamByteArray Block_Orig_YPos = RamByteArray(0x03E4);
-static const RamByteArray Block_BBuf_Low = RamByteArray(0x03E6);
-static const RamByteArray Block_Metatile = RamByteArray(0x03E8);
-static const RamByteArray Block_PageLoc2 = RamByteArray(0x03EA);
-static const RamByteArray Block_RepFlag = RamByteArray(0x03EC);
-static byte &SprDataOffset_Ctrl = RAM(0x03EE);
-static byte &Block_ResidualCounter = RAM(0x03F0);
-static const RamByteArray Block_Orig_XPos = RamByteArray(0x03F1);
-static const RamByteArray AttributeBuffer = RamByteArray(0x03F9);
-static const RamByteArray SprObject_X_MoveForce = RamByteArray(0x0400);
-static const RamByteArray Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos = RamByteArray(0x0401);
-static const RamByteArray Enemy_X_MoveForce = RamByteArray(0x0401);
-static const RamByteArray RedPTroopaOrigXPos = RamByteArray(0x0401);
-static const RamByteArray YPlatformTopYPos = RamByteArray(0x0401);
-static const RamByteArray PlayerOrSprObject_YMF_Dummy = RamByteArray(0x0416);
-static byte &Player_YMF_Dummy = RAM(0x0416);
-static const RamByteArray SprObject_YMF_Dummy = RamByteArray(0x0416);
-static const RamByteArray BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos = RamByteArray(0x0417);
-static const RamByteArray BowserFlamePRandomOfs = RamByteArray(0x0417);
-static const RamByteArray Enemy_YMF_Dummy = RamByteArray(0x0417);
-static const RamByteArray PiranhaPlantUpYPos = RamByteArray(0x0417);
-static const RamByteArray Bubble_YMF_Dummy = RamByteArray(0x042C);
-static const RamByteArray PlayerOrSprObject_Y_MoveForce = RamByteArray(0x0433);
-static byte &Player_Y_MoveForce = RAM(0x0433);
-static const RamByteArray SprObject_Y_MoveForce = RamByteArray(0x0433);
-static const RamByteArray CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos = RamByteArray(0x0434);
-static const RamByteArray CheepCheepOrigYPos = RamByteArray(0x0434);
-static const RamByteArray Enemy_Y_MoveForce = RamByteArray(0x0434);
-static const RamByteArray PiranhaPlantDownYPos = RamByteArray(0x0434);
-static const RamByteArray Block_Y_MoveForce = RamByteArray(0x043C);
-static byte &MaximumLeftSpeed = RAM(0x0450);
-static byte &MaximumRightSpeed = RAM(0x0456);
-static byte &Cannon_Or_Whirlpool_Offset = RAM(0x046A);
-static byte &Cannon_Offset = RAM(0x046A);
-static byte &Whirlpool_Offset = RAM(0x046A);
-static const RamByteArray Cannon_Or_Whirlpool_PageLoc = RamByteArray(0x046B);
-static const RamByteArray Cannon_PageLoc = RamByteArray(0x046B);
-static const RamByteArray Whirlpool_PageLoc = RamByteArray(0x046B);
-static const RamByteArray Cannon_X_Position_Or_Whirlpool_LeftExtent = RamByteArray(0x0471);
-static const RamByteArray Cannon_X_Position = RamByteArray(0x0471);
-static const RamByteArray Whirlpool_LeftExtent = RamByteArray(0x0471);
-static const RamByteArray Cannon_Y_Position_Or_Whirlpool_Length = RamByteArray(0x0477);
-static const RamByteArray Cannon_Y_Position = RamByteArray(0x0477);
-static const RamByteArray Whirlpool_Length = RamByteArray(0x0477);
-static const RamByteArray Cannon_Timer_Or_Whirlpool_Flag = RamByteArray(0x047D);
-static const RamByteArray Cannon_Timer = RamByteArray(0x047D);
-static byte &Whirlpool_Flag = RAM(0x047D);
-static byte &BowserHitPoints = RAM(0x0483);
-static byte &StompChainCounter = RAM(0x0484);
-static byte &Player_CollisionBits = RAM(0x0490);
-static const RamByteArray Enemy_CollisionBits = RamByteArray(0x0491);
-static const RamByteArray PlayerOrSprObj_BoundBoxCtrl = RamByteArray(0x0499);
-static byte &Player_BoundBoxCtrl = RAM(0x0499);
-static const RamByteArray SprObj_BoundBoxCtrl = RamByteArray(0x0499);
-static const RamByteArray Enemy_BoundBoxCtrl = RamByteArray(0x049A);
-static const RamByteArray Fireball_BoundBoxCtrl = RamByteArray(0x04A0);
-static const RamByteArray Misc_BoundBoxCtrl = RamByteArray(0x04A2);
-static const RamByteArray BoundingBox_UL_Corner_Or_XPos = RamByteArray(0x04AC);
-static const RamByteArray BoundingBox_UL_Corner = RamByteArray(0x04AC);
-static const RamByteArray BoundingBox_UL_XPos = RamByteArray(0x04AC);
-static const RamByteArray BoundingBox_UL_YPos = RamByteArray(0x04AD);
-static const RamByteArray BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner = RamByteArray(0x04AE);
-static const RamByteArray BoundingBox_DR_XPos = RamByteArray(0x04AE);
-static const RamByteArray BoundingBox_LR_Corner = RamByteArray(0x04AE);
-static const RamByteArray BoundingBox_DR_YPos = RamByteArray(0x04AF);
-static const RamByteArray EnemyBoundingBoxCoord = RamByteArray(0x04B0);
-static const RamByteArray Block_Buffer_1 = RamByteArray(0x0500);
-static const RamByteArray Block_Buffer_2 = RamByteArray(0x05D0);
-static byte &BlockBufferColumnPos = RAM(0x06A0);
-static const RamByteArray MetatileBuffer = RamByteArray(0x06A1);
-static const RamByteArray HammerEnemyOffset = RamByteArray(0x06AE);
-static byte &JumpCoinMiscOffset = RAM(0x06B7);
-static byte &BrickCoinTimerFlag = RAM(0x06BC);
-static const RamByteArray Misc_Collision_Flag = RamByteArray(0x06BE);
-static byte &EnemyFrenzyBuffer = RAM(0x06CB);
-static byte &SecondaryHardMode = RAM(0x06CC);
-static byte &EnemyFrenzyQueue = RAM(0x06CD);
-static byte &FireballCounter = RAM(0x06CE);
-static byte &DuplicateObj_Offset = RAM(0x06CF);
-static byte &LakituReappearTimer = RAM(0x06D1);
-static byte &NumberofGroupEnemies = RAM(0x06D3);
-static byte &ColorRotateOffset = RAM(0x06D4);
-static byte &PlayerGfxOffset = RAM(0x06D5);
-static byte &WarpZoneControl = RAM(0x06D6);
-static byte &FireworksCounter = RAM(0x06D7);
-static byte &MultiLoopCorrectCntr = RAM(0x06D9);
-static byte &MultiLoopPassCntr = RAM(0x06DA);
-static byte &JumpspringForce = RAM(0x06DB);
-static byte &MaxRangeFromOrigin = RAM(0x06DC);
-static byte &BitMFilter = RAM(0x06DD);
-static byte &ChangeAreaTimer = RAM(0x06DE);
-static byte &SprShuffleAmtOffset = RAM(0x06E0);
-static const RamByteArray SprShuffleAmt = RamByteArray(0x06E1);
-static const RamByteArray PlayerOrSprDataOffset = RamByteArray(0x06E4);
-static byte &Player_SprDataOffset = RAM(0x06E4);
-static const RamByteArray SprDataOffset = RamByteArray(0x06E4);
-static const RamByteArray Enemy_SprDataOffset = RamByteArray(0x06E5);
-static const RamByteArray AltOrBlock_SprDataOffset = RamByteArray(0x06EC);
-static const RamByteArray Alt_SprDataOffset = RamByteArray(0x06EC);
-static const RamByteArray Block_SprDataOffset = RamByteArray(0x06EC);
-static const RamByteArray Bubble_SprDataOffset = RamByteArray(0x06EE);
-static const RamByteArray FBall_SprDataOffset = RamByteArray(0x06F1);
-static const RamByteArray Misc_SprDataOffset = RamByteArray(0x06F3);
-static const RamByteArray SavedJoypadBits = RamByteArray(0x06FC);
-static byte &Player_X_Scroll = RAM(0x06FF);
-static byte &Player_XSpeedAbsolute = RAM(0x0700);
-static byte &FrictionAdderHigh = RAM(0x0701);
-static byte &FrictionAdderLow = RAM(0x0702);
-static byte &RunningSpeed = RAM(0x0703);
-static byte &SwimmingFlag = RAM(0x0704);
-static byte &Player_X_MoveForce = RAM(0x0705);
-static byte &DiffToHaltJump = RAM(0x0706);
-static byte &JumpOrigin_Y_HighPos = RAM(0x0707);
-static byte &JumpOrigin_Y_Position = RAM(0x0708);
-static byte &VerticalForce = RAM(0x0709);
-static byte &VerticalForceDown = RAM(0x070A);
-static byte &PlayerChangeSizeFlag = RAM(0x070B);
-static byte &PlayerAnimTimerSet = RAM(0x070C);
-static byte &PlayerAnimCtrl = RAM(0x070D);
-static byte &JumpspringAnimCtrl = RAM(0x070E);
-static byte &FlagpoleCollisionYPos = RAM(0x070F);
-static byte &PlayerEntranceCtrl = RAM(0x0710);
-static byte &FireballThrowingTimer = RAM(0x0711);
-static byte &DeathMusicLoaded = RAM(0x0712);
-static byte &FlagpoleSoundQueue = RAM(0x0713);
-static byte &CrouchingFlag = RAM(0x0714);
-static byte &GameTimerSetting = RAM(0x0715);
-static byte &DisableCollisionDet = RAM(0x0716);
-static byte &DemoAction = RAM(0x0717);
-static byte &DemoActionTimer = RAM(0x0718);
-static byte &PrimaryMsgCounter = RAM(0x0719);
-static const RamByteArray ScreenEdgeOrLeft_PageLoc = RamByteArray(0x071A);
-static const RamByteArray ScreenEdge_PageLoc = RamByteArray(0x071A);
-static byte &ScreenLeft_PageLoc = RAM(0x071A);
-static byte &ScreenRight_PageLoc = RAM(0x071B);
-static const RamByteArray ScreenEdgeOrLeft_X_Pos = RamByteArray(0x071C);
-static const RamByteArray ScreenEdge_X_Pos = RamByteArray(0x071C);
-static byte &ScreenLeft_X_Pos = RAM(0x071C);
-static byte &ScreenRight_X_Pos = RAM(0x071D);
-static byte &ColumnSets = RAM(0x071E);
-static byte &AreaParserTaskNum = RAM(0x071F);
-static byte &CurrentNTAddr_High = RAM(0x0720);
-static byte &CurrentNTAddr_Low = RAM(0x0721);
-static byte &Sprite0HitDetectFlag = RAM(0x0722);
-static byte &ScrollLock = RAM(0x0723);
-static byte &CurrentPageLoc = RAM(0x0725);
-static byte &CurrentColumnPos = RAM(0x0726);
-static byte &TerrainControl = RAM(0x0727);
-static byte &BackloadingFlag = RAM(0x0728);
-static byte &BehindAreaParserFlag = RAM(0x0729);
-static byte &AreaObjectPageLoc = RAM(0x072A);
-static byte &AreaObjectPageSel = RAM(0x072B);
-static byte &AreaDataOffset = RAM(0x072C);
-static const RamByteArray AreaObjOffsetBuffer = RamByteArray(0x072D);
-static const RamByteArray AreaObjectLength = RamByteArray(0x0730);
-static byte &AreaStyle = RAM(0x0733);
-static byte &StaircaseControl = RAM(0x0734);
-static byte &AreaObjectHeight = RAM(0x0735);
-static const RamByteArray MushroomLedgeHalfLen = RamByteArray(0x0736);
-static byte &EnemyDataOffset = RAM(0x0739);
-static byte &EnemyObjectPageLoc = RAM(0x073A);
-static byte &EnemyObjectPageSel = RAM(0x073B);
-static byte &ScreenRoutineTask = RAM(0x073C);
-static byte &ScrollThirtyTwo = RAM(0x073D);
-static byte &HorizontalScroll = RAM(0x073F);
-static byte &VerticalScroll = RAM(0x0740);
-static byte &ForegroundScenery = RAM(0x0741);
-static byte &BackgroundScenery = RAM(0x0742);
-static byte &CloudTypeOverride = RAM(0x0743);
-static byte &BackgroundColorCtrl = RAM(0x0744);
-static byte &LoopCommand = RAM(0x0745);
-static byte &StarFlagTaskControl = RAM(0x0746);
-static byte &TimerControl = RAM(0x0747);
-static byte &CoinTallyFor1Ups = RAM(0x0748);
-static byte &SecondaryMsgCounter = RAM(0x0749);
-static const RamByteArray JoypadBitMask = RamByteArray(0x074A);
-static byte &AreaType = RAM(0x074E);
-static byte &AreaAddrsLOffset = RAM(0x074F);
-static byte &AreaPointer = RAM(0x0750);
-static byte &EntrancePage = RAM(0x0751);
-static byte &AltEntranceControl = RAM(0x0752);
-static byte &CurrentPlayer = RAM(0x0753);
-static byte &PlayerSize = RAM(0x0754);
-static byte &Player_Pos_ForScroll = RAM(0x0755);
-static byte &PlayerStatus = RAM(0x0756);
-static byte &FetchNewGameTimerFlag = RAM(0x0757);
-static byte &JoypadOverride = RAM(0x0758);
-static byte &GameTimerExpiredFlag = RAM(0x0759);
-static byte &NumberofLives = RAM(0x075A);
-static byte &HalfwayPage = RAM(0x075B);
-static byte &LevelNumber = RAM(0x075C);
-static byte &Hidden1UpFlag = RAM(0x075D);
-static byte &CoinTally = RAM(0x075E);
-static byte &WorldNumber = RAM(0x075F);
-static byte &AreaNumber = RAM(0x0760);
-static byte &OffScr_NumberofLives = RAM(0x0761);
-static byte &OffScr_HalfwayPage = RAM(0x0762);
-static byte &OffScr_LevelNumber = RAM(0x0763);
-static byte &OffScr_Hidden1UpFlag = RAM(0x0764);
-static byte &OffScr_CoinTally = RAM(0x0765);
-static byte &OffScr_WorldNumber = RAM(0x0766);
-static byte &OffScr_AreaNumber = RAM(0x0767);
-static byte &ScrollFractional = RAM(0x0768);
-static byte &DisableIntermediate = RAM(0x0769);
-static byte &PrimaryHardMode = RAM(0x076A);
-static byte &WorldSelectNumber = RAM(0x076B);
-static byte &OperMode = RAM(0x0770);
-static byte &OperMode_Task = RAM(0x0772);
-static byte &VRAM_Buffer_AddrCtrl = RAM(0x0773);
-static byte &DisableScreenFlag = RAM(0x0774);
-static byte &ScrollAmount = RAM(0x0775);
-static byte &GamePauseStatus = RAM(0x0776);
-static byte &GamePauseTimer = RAM(0x0777);
-static byte &Mirror_PPU_CTRL_REG1 = RAM(0x0778);
-static byte &Mirror_PPU_CTRL_REG2 = RAM(0x0779);
-static byte &NumberOfPlayers = RAM(0x077A);
-static byte &IntervalTimerControl = RAM(0x077F);
-static byte &SelectTimer = RAM(0x0780);
-static byte &PlayerAnimTimer = RAM(0x0781);
-static byte &JumpSwimTimer = RAM(0x0782);
-static byte &RunningTimer = RAM(0x0783);
-static byte &BlockBounceTimer = RAM(0x0784);
-static byte &SideCollisionTimer = RAM(0x0785);
-static byte &JumpspringTimer = RAM(0x0786);
-static byte &GameTimerCtrlTimer = RAM(0x0787);
-static byte &ClimbSideTimer = RAM(0x0789);
-static const RamByteArray EnemyFrameTimer = RamByteArray(0x078A);
-static byte &FrenzyEnemyTimer = RAM(0x078F);
-static byte &BowserFireBreathTimer = RAM(0x0790);
-static byte &StompTimer = RAM(0x0791);
-static byte &AirBubbleTimer = RAM(0x0792);
-static byte &UnusedTimer1 = RAM(0x0793);
-static byte &UnusedTimer2 = RAM(0x0794);
-static byte &ScrollIntervalTimer = RAM(0x0795);
-static const RamByteArray EnemyIntervalTimer = RamByteArray(0x0796);
-static byte &BrickCoinTimer = RAM(0x079D);
-static byte &InjuryTimer = RAM(0x079E);
-static byte &StarInvincibleTimer = RAM(0x079F);
-static byte &ScreenTimer = RAM(0x07A0);
-static byte &WorldEndTimer = RAM(0x07A1);
-static byte &DemoTimer = RAM(0x07A2);
-static byte &UnusedTimer3 = RAM(0x07A3);
-static const RamByteArray PseudoRandomBitReg = RamByteArray(0x07A7);
-static byte &MusicOffset_Noise = RAM(0x07B0);
-static byte &EventMusicBuffer = RAM(0x07B1);
-static byte &PauseSoundBuffer = RAM(0x07B2);
-static byte &Squ2_NoteLenBuffer = RAM(0x07B3);
-static byte &Squ2_NoteLenCounter = RAM(0x07B4);
-static byte &Squ2_EnvelopeDataCtrl = RAM(0x07B5);
-static byte &Squ1_NoteLenCounter = RAM(0x07B6);
-static byte &Squ1_EnvelopeDataCtrl = RAM(0x07B7);
-static byte &Tri_NoteLenBuffer = RAM(0x07B8);
-static byte &Tri_NoteLenCounter = RAM(0x07B9);
-static byte &Noise_BeatLenCounter = RAM(0x07BA);
-static byte &Squ1_SfxLenCounter = RAM(0x07BB);
-static byte &Squ2_SfxLenCounter = RAM(0x07BD);
-static byte &Sfx_SecondaryCounter = RAM(0x07BE);
-static byte &Noise_SfxLenCounter = RAM(0x07BF);
-static byte &DAC_Counter = RAM(0x07C0);
-static byte &NoiseDataLoopbackOfs = RAM(0x07C1);
-static byte &NoteLengthTblAdder = RAM(0x07C4);
-static byte &AreaMusicBuffer_Alt = RAM(0x07C5);
-static byte &PauseModeFlag = RAM(0x07C6);
-static byte &GroundMusicHeaderOfs = RAM(0x07C7);
-static byte &AltRegContentFlag = RAM(0x07CA);
-static const RamByteArray DisplayDigits_Or_TopScoreDisplay = RamByteArray(0x07D7);
-static const RamByteArray DisplayDigits = RamByteArray(0x07D7);
-static const RamByteArray TopScoreDisplay = RamByteArray(0x07D7);
-static const RamByteArray PlayerScoreDisplay_Or_ScoreAndCoinDisplay = RamByteArray(0x07DD);
-static const RamByteArray PlayerScoreDisplay = RamByteArray(0x07DD);
-static const RamByteArray ScoreAndCoinDisplay = RamByteArray(0x07DD);
-static const RamByteArray GameTimerDisplay = RamByteArray(0x07F8);
-static byte &WorldSelectEnableFlag = RAM(0x07FC);
-static byte &ContinueWorld = RAM(0x07FD);
-static byte &WarmBootValidation = RAM(0x07FF);
+#define ObjectOffset                     RAM(0x0008)
+#define FrameCounter                     RAM(0x0009)
+#define A_B_Buttons                      RAM(0x000A)
+#define Up_Down_Buttons                  RAM(0x000B)
+#define Left_Right_Buttons               RAM(0x000C)
+#define PreviousA_B_Buttons              RAM(0x000D)
+#define GameEngineSubroutine             RAM(0x000E)
+#define Enemy_Flag                       RAMARRAY(0x000F, 0)
+#define Enemy_ID                         RAMARRAY(0x0016, 0)
+#define Player_State                     RAM(0x001D)
+#define Enemy_State                      RAMARRAY(0x001E, 0)
+#define Fireball_State                   RAMARRAY(0x0024, 0)
+#define Block_State                      RAMARRAY(0x0026, 0)
+#define Misc_State                       RAMARRAY(0x002A, 0)
+#define PlayerFacingDir                  RAM(0x0033)
+#define FireballSpinDirectionOrVictoryDestPageLoc RAMARRAY(0x0034, 0)
+#define DestinationPageLoc               RAM(0x0034)
+#define FirebarSpinDirection             RAMARRAY(0x0034, 0)
+#define VictoryWalkControl               RAM(0x0035)
+#define PowerUpType                      RAM(0x0039)
+#define FireballBouncingFlag             RAMARRAY(0x003A, 0)
+#define HammerBroJumpTimer               RAMARRAY(0x003C, 0)
+#define Player_MovingDir                 RAM(0x0045)
+#define Enemy_MovingDir                  RAMARRAY(0x0046, 0)
+#define PlayerSpriteVarData1             RAMARRAY(0x0057, 0)
+#define Player_X_Speed                   RAM(0x0057)
+#define SprObject_X_Speed                RAMARRAY(0x0057, 0)
+#define BlooperMoveSpeed                 RAMARRAY(0x0058, 0)
+#define CheepCheepMoveMFlag              RAMARRAY(0x0058, 0)
+#define Enemy_X_Speed                    RAMARRAY(0x0058, 0)
+#define ExplosionGfxCounter              RAMARRAY(0x0058, 0)
+#define FirebarSpinState_Low             RAMARRAY(0x0058, 0)
+#define Jumpspring_FixedYPos             RAMARRAY(0x0058, 0)
+#define LakituMoveSpeed                  RAMARRAY(0x0058, 0)
+#define PiranhaPlant_Y_Speed             RAMARRAY(0x0058, 0)
+#define RedPTroopaCenterYPos             RAMARRAY(0x0058, 0)
+#define XMoveSecondaryCounter            RAMARRAY(0x0058, 0)
+#define YPlatformCenterYPos              RAMARRAY(0x0058, 0)
+#define Fireball_X_Speed                 RAMARRAY(0x005E, 0)
+#define Block_X_Speed                    RAMARRAY(0x0060, 0)
+#define Misc_X_Speed                     RAMARRAY(0x0064, 0)
+#define PlayerOrSprObject_PageLoc        RAMARRAY(0x006D, 0)
+#define Player_PageLoc                   RAM(0x006D)
+#define SprObject_PageLoc                RAMARRAY(0x006D, 0)
+#define Enemy_PageLoc                    RAMARRAY(0x006E, 0)
+#define Fireball_PageLoc                 RAMARRAY(0x0074, 0)
+#define Block_PageLoc                    RAMARRAY(0x0076, 0)
+#define Misc_PageLoc                     RAMARRAY(0x007A, 0)
+#define Bubble_PageLoc                   RAMARRAY(0x0083, 0)
+#define PlayerOrSprObject_X_Position     RAMARRAY(0x0086, 0)
+#define Player_X_Position                RAM(0x0086)
+#define SprObject_X_Position             RAMARRAY(0x0086, 0)
+#define Enemy_X_Position                 RAMARRAY(0x0087, 0)
+#define Fireball_X_Position              RAMARRAY(0x008D, 0)
+#define Block_X_Position                 RAMARRAY(0x008F, 0)
+#define Misc_X_Position                  RAMARRAY(0x0093, 0)
+#define Bubble_X_Position                RAMARRAY(0x009C, 0)
+#define PlayerSpriteVarData2             RAMARRAY(0x009F, 0)
+#define Player_Y_Speed                   RAM(0x009F)
+#define SprObject_Y_Speed                RAMARRAY(0x009F, 0)
+#define BlooperMoveCounter               RAMARRAY(0x00A0, 0)
+#define Enemy_Y_Speed                    RAMARRAY(0x00A0, 0)
+#define ExplosionTimerCounter            RAMARRAY(0x00A0, 0)
+#define FirebarSpinState_High            RAMARRAY(0x00A0, 0)
+#define LakituMoveDirection              RAMARRAY(0x00A0, 0)
+#define PiranhaPlant_MoveFlag            RAMARRAY(0x00A0, 0)
+#define XMovePrimaryCounter              RAMARRAY(0x00A0, 0)
+#define Fireball_Y_Speed                 RAMARRAY(0x00A6, 0)
+#define Block_Y_Speed                    RAMARRAY(0x00A8, 0)
+#define Misc_Y_Speed                     RAMARRAY(0x00AC, 0)
+#define PlayerOrSprObject_Y_HighPos      RAMARRAY(0x00B5, 0)
+#define Player_Y_HighPos                 RAM(0x00B5)
+#define SprObject_Y_HighPos              RAMARRAY(0x00B5, 0)
+#define Enemy_Y_HighPos                  RAMARRAY(0x00B6, 0)
+#define Fireball_Y_HighPos               RAMARRAY(0x00BC, 0)
+#define Block_Y_HighPos                  RAMARRAY(0x00BE, 0)
+#define Misc_Y_HighPos                   RAMARRAY(0x00C2, 0)
+#define Bubble_Y_HighPos                 RAMARRAY(0x00CB, 0)
+#define PlayerOrSprObject_Y_Position     RAMARRAY(0x00CE, 0)
+#define Player_Y_Position                RAM(0x00CE)
+#define SprObject_Y_Position             RAMARRAY(0x00CE, 0)
+#define Enemy_Y_Position                 RAMARRAY(0x00CF, 0)
+#define Fireball_Y_Position              RAMARRAY(0x00D5, 0)
+#define Block_Y_Position                 RAMARRAY(0x00D7, 0)
+#define Misc_Y_Position                  RAMARRAY(0x00DB, 0)
+#define Bubble_Y_Position                RAMARRAY(0x00E4, 0)
+#define AreaData                         RAMPTR(0x00E7)
+#define EnemyData                        RAMPTR(0x00E9)
+#define MysterySpriteThing1              RAM(0x00EB)
+#define MysterySpriteThing2              RAM(0x00EC)
+#define MysterySpriteThing3              RAM(0x00ED)
+#define MysterySpriteThing4              RAM(0x00EF)
+#define NoteLenLookupTblOfs              RAM(0x00F0)
+#define Square1SoundBuffer               RAM(0x00F1)
+#define Square2SoundBuffer               RAM(0x00F2)
+#define NoiseSoundBuffer                 RAM(0x00F3)
+#define AreaMusicBuffer                  RAM(0x00F4)
+#define MusicData                        RAMPTR(0x00F5)
+#define MusicOffset_Square2              RAM(0x00F7)
+#define MusicOffset_Square1              RAM(0x00F8)
+#define MusicOffset_Triangle             RAM(0x00F9)
+#define PauseSoundQueue                  RAM(0x00FA)
+#define AreaMusicQueue                   RAM(0x00FB)
+#define EventMusicQueue                  RAM(0x00FC)
+#define NoiseSoundQueue                  RAM(0x00FD)
+#define Square2SoundQueue                RAM(0x00FE)
+#define Square1SoundQueue                RAM(0x00FF)
+#define VerticalFlipFlag                 RAM(0x0109)
+#define FlagpoleFNum_Y_Pos               RAM(0x010D)
+#define FlagpoleFNum_YMFDummy            RAM(0x010E)
+#define FlagpoleScore                    RAM(0x010F)
+#define FloateyNum_Control               RAMARRAY(0x0110, 0)
+#define FloateyNum_X_Pos                 RAMARRAY(0x0117, 0)
+#define FloateyNum_Y_Pos                 RAMARRAY(0x011E, 0)
+#define ShellChainCounter                RAMARRAY(0x0125, 0)
+#define FloateyNum_Timer                 RAMARRAY(0x012C, 0)
+#define DigitModifier_Minus1             RAMARRAY(0x0133, 0)
+#define DigitModifier                    RAMARRAY(0x0134, 0)
+#define TheStack                         RAMARRAY(0x0160, 0)
+#define Sprite_Data                      RAMARRAY(0x0200, 0)
+#define Sprite_Y_Position                RAMARRAY(0x0200, 0)
+#define Sprite_Tilenumber                RAMARRAY(0x0201, 0)
+#define Sprite_Attributes                RAMARRAY(0x0202, 0)
+#define Sprite_X_Position                RAMARRAY(0x0203, 0)
+#define VRAM_Buffer1_Offset              RAM(0x0300)
+#define VRAM_Buffer1                     RAMARRAY(0x0301, 0)
+#define VRAM_Buffer2_Offset              RAM(0x0340)
+#define VRAM_Buffer2                     RAMARRAY(0x0341, 0)
+#define BowserBodyControls               RAM(0x0363)
+#define BowserFeetCounter                RAM(0x0364)
+#define BowserMovementSpeed              RAM(0x0365)
+#define BowserOrigXPos                   RAM(0x0366)
+#define BowserFlameTimerCtrl             RAM(0x0367)
+#define BowserFront_Offset               RAM(0x0368)
+#define BridgeCollapseOffset             RAM(0x0369)
+#define BowserGfxFlag                    RAM(0x036A)
+#define FirebarSpinSpeed                 RAMARRAY(0x0388, 0)
+#define VineFlagOffset                   RAM(0x0398)
+#define VineHeight                       RAM(0x0399)
+#define VineObjOffset                    RAMARRAY(0x039A, 0)
+#define VineStart_Y_Position             RAM(0x039D)
+#define BalPlatformAlignment             RAM(0x03A0)
+#define Platform_X_Scroll                RAM(0x03A1)
+#define HammerThrowingTimer_Or_PlatformCollisionFlag RAMARRAY(0x03A2, 0)
+#define HammerThrowingTimer              RAMARRAY(0x03A2, 0)
+#define PlatformCollisionFlag            RAMARRAY(0x03A2, 0)
+#define PlayerOrSprObject_Rel_XPos       RAMARRAY(0x03AD, 0)
+#define Player_Rel_XPos                  RAM(0x03AD)
+#define SprObject_Rel_XPos               RAMARRAY(0x03AD, 0)
+#define Enemy_Rel_XPos                   RAM(0x03AE)
+#define Fireball_Rel_XPos                RAM(0x03AF)
+#define Bubble_Rel_XPos                  RAM(0x03B0)
+#define Block_Rel_XPos                   RAM(0x03B1)
+#define Block_Rel_XPos_2                 RAM(0x03B2)
+#define Misc_Rel_XPos                    RAM(0x03B3)
+#define PlayerOrSprObject_Rel_YPos       RAMARRAY(0x03B8, 0)
+#define Player_Rel_YPos                  RAM(0x03B8)
+#define SprObject_Rel_YPos               RAMARRAY(0x03B8, 0)
+#define Enemy_Rel_YPos                   RAM(0x03B9)
+#define Fireball_Rel_YPos                RAM(0x03BA)
+#define Bubble_Rel_YPos                  RAM(0x03BB)
+#define Block_Rel_YPos                   RAM(0x03BC)
+#define Block_Rel_YPos_2                 RAM(0x03BD)
+#define Misc_Rel_YPos                    RAM(0x03BE)
+#define Player_SprAttrib                 RAM(0x03C4)
+#define Enemy_SprAttrib                  RAMARRAY(0x03C5, 0)
+#define PlayerOrSprObject_OffscrBits     RAMARRAY(0x03D0, 0)
+#define Player_OffscreenBits             RAM(0x03D0)
+#define SprObject_OffscrBits             RAMARRAY(0x03D0, 0)
+#define Enemy_OffscreenBits              RAM(0x03D1)
+#define FBall_OffscreenBits              RAM(0x03D2)
+#define Bubble_OffscreenBits             RAM(0x03D3)
+#define Block_OffscreenBits              RAM(0x03D4)
+#define Misc_OffscreenBits               RAM(0x03D6)
+#define EnemyOffscrBitsMasked            RAMARRAY(0x03D8, 0)
+#define Block_Orig_YPos                  RAMARRAY(0x03E4, 0)
+#define Block_BBuf_Low                   RAMARRAY(0x03E6, 0)
+#define Block_Metatile                   RAMARRAY(0x03E8, 0)
+#define Block_PageLoc2                   RAMARRAY(0x03EA, 0)
+#define Block_RepFlag                    RAMARRAY(0x03EC, 0)
+#define SprDataOffset_Ctrl               RAM(0x03EE)
+#define Block_ResidualCounter            RAM(0x03F0)
+#define Block_Orig_XPos                  RAMARRAY(0x03F1, 0)
+#define AttributeBuffer                  RAMARRAY(0x03F9, 0)
+#define SprObject_X_MoveForce            RAMARRAY(0x0400, 0)
+#define Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos RAMARRAY(0x0401, 0)
+#define Enemy_X_MoveForce                RAMARRAY(0x0401, 0)
+#define RedPTroopaOrigXPos               RAMARRAY(0x0401, 0)
+#define YPlatformTopYPos                 RAMARRAY(0x0401, 0)
+#define PlayerOrSprObject_YMF_Dummy      RAMARRAY(0x0416, 0)
+#define Player_YMF_Dummy                 RAM(0x0416)
+#define SprObject_YMF_Dummy              RAMARRAY(0x0416, 0)
+#define BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos RAMARRAY(0x0417, 0)
+#define BowserFlamePRandomOfs            RAMARRAY(0x0417, 0)
+#define Enemy_YMF_Dummy                  RAMARRAY(0x0417, 0)
+#define PiranhaPlantUpYPos               RAMARRAY(0x0417, 0)
+#define Bubble_YMF_Dummy                 RAMARRAY(0x042C, 0)
+#define PlayerOrSprObject_Y_MoveForce    RAMARRAY(0x0433, 0)
+#define Player_Y_MoveForce               RAM(0x0433)
+#define SprObject_Y_MoveForce            RAMARRAY(0x0433, 0)
+#define CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos RAMARRAY(0x0434, 0)
+#define CheepCheepOrigYPos               RAMARRAY(0x0434, 0)
+#define Enemy_Y_MoveForce                RAMARRAY(0x0434, 0)
+#define PiranhaPlantDownYPos             RAMARRAY(0x0434, 0)
+#define Block_Y_MoveForce                RAMARRAY(0x043C, 0)
+#define MaximumLeftSpeed                 RAM(0x0450)
+#define MaximumRightSpeed                RAM(0x0456)
+#define Cannon_Or_Whirlpool_Offset       RAM(0x046A)
+#define Cannon_Offset                    RAM(0x046A)
+#define Whirlpool_Offset                 RAM(0x046A)
+#define Cannon_Or_Whirlpool_PageLoc      RAMARRAY(0x046B, 0)
+#define Cannon_PageLoc                   RAMARRAY(0x046B, 0)
+#define Whirlpool_PageLoc                RAMARRAY(0x046B, 0)
+#define Cannon_X_Position_Or_Whirlpool_LeftExtent RAMARRAY(0x0471, 0)
+#define Cannon_X_Position                RAMARRAY(0x0471, 0)
+#define Whirlpool_LeftExtent             RAMARRAY(0x0471, 0)
+#define Cannon_Y_Position_Or_Whirlpool_Length RAMARRAY(0x0477, 0)
+#define Cannon_Y_Position                RAMARRAY(0x0477, 0)
+#define Whirlpool_Length                 RAMARRAY(0x0477, 0)
+#define Cannon_Timer_Or_Whirlpool_Flag   RAMARRAY(0x047D, 0)
+#define Cannon_Timer                     RAMARRAY(0x047D, 0)
+#define Whirlpool_Flag                   RAM(0x047D)
+#define BowserHitPoints                  RAM(0x0483)
+#define StompChainCounter                RAM(0x0484)
+#define Player_CollisionBits             RAM(0x0490)
+#define Enemy_CollisionBits              RAMARRAY(0x0491, 0)
+#define PlayerOrSprObj_BoundBoxCtrl      RAMARRAY(0x0499, 0)
+#define Player_BoundBoxCtrl              RAM(0x0499)
+#define SprObj_BoundBoxCtrl              RAMARRAY(0x0499, 0)
+#define Enemy_BoundBoxCtrl               RAMARRAY(0x049A, 0)
+#define Fireball_BoundBoxCtrl            RAMARRAY(0x04A0, 0)
+#define Misc_BoundBoxCtrl                RAMARRAY(0x04A2, 0)
+#define BoundingBox_UL_Corner_Or_XPos    RAMARRAY(0x04AC, 0)
+#define BoundingBox_UL_Corner            RAMARRAY(0x04AC, 0)
+#define BoundingBox_UL_XPos              RAMARRAY(0x04AC, 0)
+#define BoundingBox_UL_YPos              RAMARRAY(0x04AD, 0)
+#define BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner RAMARRAY(0x04AE, 0)
+#define BoundingBox_DR_XPos              RAMARRAY(0x04AE, 0)
+#define BoundingBox_LR_Corner            RAMARRAY(0x04AE, 0)
+#define BoundingBox_DR_YPos              RAMARRAY(0x04AF, 0)
+#define EnemyBoundingBoxCoord            RAMARRAY(0x04B0, 0)
+#define Block_Buffer_1                   RAMARRAY(0x0500, 0)
+#define Block_Buffer_2                   RAMARRAY(0x05D0, 0)
+#define BlockBufferColumnPos             RAM(0x06A0)
+#define MetatileBuffer                   RAMARRAY(0x06A1, 0)
+#define HammerEnemyOffset                RAMARRAY(0x06AE, 0)
+#define JumpCoinMiscOffset               RAM(0x06B7)
+#define BrickCoinTimerFlag               RAM(0x06BC)
+#define Misc_Collision_Flag              RAMARRAY(0x06BE, 0)
+#define EnemyFrenzyBuffer                RAM(0x06CB)
+#define SecondaryHardMode                RAM(0x06CC)
+#define EnemyFrenzyQueue                 RAM(0x06CD)
+#define FireballCounter                  RAM(0x06CE)
+#define DuplicateObj_Offset              RAM(0x06CF)
+#define LakituReappearTimer              RAM(0x06D1)
+#define NumberofGroupEnemies             RAM(0x06D3)
+#define ColorRotateOffset                RAM(0x06D4)
+#define PlayerGfxOffset                  RAM(0x06D5)
+#define WarpZoneControl                  RAM(0x06D6)
+#define FireworksCounter                 RAM(0x06D7)
+#define MultiLoopCorrectCntr             RAM(0x06D9)
+#define MultiLoopPassCntr                RAM(0x06DA)
+#define JumpspringForce                  RAM(0x06DB)
+#define MaxRangeFromOrigin               RAM(0x06DC)
+#define BitMFilter                       RAM(0x06DD)
+#define ChangeAreaTimer                  RAM(0x06DE)
+#define SprShuffleAmtOffset              RAM(0x06E0)
+#define SprShuffleAmt                    RAMARRAY(0x06E1, 0)
+#define PlayerOrSprDataOffset            RAMARRAY(0x06E4, 0)
+#define Player_SprDataOffset             RAM(0x06E4)
+#define SprDataOffset                    RAMARRAY(0x06E4, 0)
+#define Enemy_SprDataOffset              RAMARRAY(0x06E5, 0)
+#define AltOrBlock_SprDataOffset         RAMARRAY(0x06EC, 0)
+#define Alt_SprDataOffset                RAMARRAY(0x06EC, 0)
+#define Block_SprDataOffset              RAMARRAY(0x06EC, 0)
+#define Bubble_SprDataOffset             RAMARRAY(0x06EE, 0)
+#define FBall_SprDataOffset              RAMARRAY(0x06F1, 0)
+#define Misc_SprDataOffset               RAMARRAY(0x06F3, 0)
+#define SavedJoypadBits                  RAMARRAY(0x06FC, 0)
+#define Player_X_Scroll                  RAM(0x06FF)
+#define Player_XSpeedAbsolute            RAM(0x0700)
+#define FrictionAdderHigh                RAM(0x0701)
+#define FrictionAdderLow                 RAM(0x0702)
+#define RunningSpeed                     RAM(0x0703)
+#define SwimmingFlag                     RAM(0x0704)
+#define Player_X_MoveForce               RAM(0x0705)
+#define DiffToHaltJump                   RAM(0x0706)
+#define JumpOrigin_Y_HighPos             RAM(0x0707)
+#define JumpOrigin_Y_Position            RAM(0x0708)
+#define VerticalForce                    RAM(0x0709)
+#define VerticalForceDown                RAM(0x070A)
+#define PlayerChangeSizeFlag             RAM(0x070B)
+#define PlayerAnimTimerSet               RAM(0x070C)
+#define PlayerAnimCtrl                   RAM(0x070D)
+#define JumpspringAnimCtrl               RAM(0x070E)
+#define FlagpoleCollisionYPos            RAM(0x070F)
+#define PlayerEntranceCtrl               RAM(0x0710)
+#define FireballThrowingTimer            RAM(0x0711)
+#define DeathMusicLoaded                 RAM(0x0712)
+#define FlagpoleSoundQueue               RAM(0x0713)
+#define CrouchingFlag                    RAM(0x0714)
+#define GameTimerSetting                 RAM(0x0715)
+#define DisableCollisionDet              RAM(0x0716)
+#define DemoAction                       RAM(0x0717)
+#define DemoActionTimer                  RAM(0x0718)
+#define PrimaryMsgCounter                RAM(0x0719)
+#define ScreenEdgeOrLeft_PageLoc         RAMARRAY(0x071A, 0)
+#define ScreenEdge_PageLoc               RAMARRAY(0x071A, 0)
+#define ScreenLeft_PageLoc               RAM(0x071A)
+#define ScreenRight_PageLoc              RAM(0x071B)
+#define ScreenEdgeOrLeft_X_Pos           RAMARRAY(0x071C, 0)
+#define ScreenEdge_X_Pos                 RAMARRAY(0x071C, 0)
+#define ScreenLeft_X_Pos                 RAM(0x071C)
+#define ScreenRight_X_Pos                RAM(0x071D)
+#define ColumnSets                       RAM(0x071E)
+#define AreaParserTaskNum                RAM(0x071F)
+#define CurrentNTAddr_High               RAM(0x0720)
+#define CurrentNTAddr_Low                RAM(0x0721)
+#define Sprite0HitDetectFlag             RAM(0x0722)
+#define ScrollLock                       RAM(0x0723)
+#define CurrentPageLoc                   RAM(0x0725)
+#define CurrentColumnPos                 RAM(0x0726)
+#define TerrainControl                   RAM(0x0727)
+#define BackloadingFlag                  RAM(0x0728)
+#define BehindAreaParserFlag             RAM(0x0729)
+#define AreaObjectPageLoc                RAM(0x072A)
+#define AreaObjectPageSel                RAM(0x072B)
+#define AreaDataOffset                   RAM(0x072C)
+#define AreaObjOffsetBuffer              RAMARRAY(0x072D, 0)
+#define AreaObjectLength                 RAMARRAY(0x0730, 0)
+#define AreaStyle                        RAM(0x0733)
+#define StaircaseControl                 RAM(0x0734)
+#define AreaObjectHeight                 RAM(0x0735)
+#define MushroomLedgeHalfLen             RAMARRAY(0x0736, 0)
+#define EnemyDataOffset                  RAM(0x0739)
+#define EnemyObjectPageLoc               RAM(0x073A)
+#define EnemyObjectPageSel               RAM(0x073B)
+#define ScreenRoutineTask                RAM(0x073C)
+#define ScrollThirtyTwo                  RAM(0x073D)
+#define HorizontalScroll                 RAM(0x073F)
+#define VerticalScroll                   RAM(0x0740)
+#define ForegroundScenery                RAM(0x0741)
+#define BackgroundScenery                RAM(0x0742)
+#define CloudTypeOverride                RAM(0x0743)
+#define BackgroundColorCtrl              RAM(0x0744)
+#define LoopCommand                      RAM(0x0745)
+#define StarFlagTaskControl              RAM(0x0746)
+#define TimerControl                     RAM(0x0747)
+#define CoinTallyFor1Ups                 RAM(0x0748)
+#define SecondaryMsgCounter              RAM(0x0749)
+#define JoypadBitMask                    RAMARRAY(0x074A, 0)
+#define AreaType                         RAM(0x074E)
+#define AreaAddrsLOffset                 RAM(0x074F)
+#define AreaPointer                      RAM(0x0750)
+#define EntrancePage                     RAM(0x0751)
+#define AltEntranceControl               RAM(0x0752)
+#define CurrentPlayer                    RAM(0x0753)
+#define PlayerSize                       RAM(0x0754)
+#define Player_Pos_ForScroll             RAM(0x0755)
+#define PlayerStatus                     RAM(0x0756)
+#define FetchNewGameTimerFlag            RAM(0x0757)
+#define JoypadOverride                   RAM(0x0758)
+#define GameTimerExpiredFlag             RAM(0x0759)
+#define NumberofLives                    RAM(0x075A)
+#define HalfwayPage                      RAM(0x075B)
+#define LevelNumber                      RAM(0x075C)
+#define Hidden1UpFlag                    RAM(0x075D)
+#define CoinTally                        RAM(0x075E)
+#define WorldNumber                      RAM(0x075F)
+#define AreaNumber                       RAM(0x0760)
+#define OffScr_NumberofLives             RAM(0x0761)
+#define OffScr_HalfwayPage               RAM(0x0762)
+#define OffScr_LevelNumber               RAM(0x0763)
+#define OffScr_Hidden1UpFlag             RAM(0x0764)
+#define OffScr_CoinTally                 RAM(0x0765)
+#define OffScr_WorldNumber               RAM(0x0766)
+#define OffScr_AreaNumber                RAM(0x0767)
+#define ScrollFractional                 RAM(0x0768)
+#define DisableIntermediate              RAM(0x0769)
+#define PrimaryHardMode                  RAM(0x076A)
+#define WorldSelectNumber                RAM(0x076B)
+#define OperMode                         RAM(0x0770)
+#define OperMode_Task                    RAM(0x0772)
+#define VRAM_Buffer_AddrCtrl             RAM(0x0773)
+#define DisableScreenFlag                RAM(0x0774)
+#define ScrollAmount                     RAM(0x0775)
+#define GamePauseStatus                  RAM(0x0776)
+#define GamePauseTimer                   RAM(0x0777)
+#define Mirror_PPU_CTRL_REG1             RAM(0x0778)
+#define Mirror_PPU_CTRL_REG2             RAM(0x0779)
+#define NumberOfPlayers                  RAM(0x077A)
+#define IntervalTimerControl             RAM(0x077F)
+#define SelectTimer                      RAM(0x0780)
+#define PlayerAnimTimer                  RAM(0x0781)
+#define JumpSwimTimer                    RAM(0x0782)
+#define RunningTimer                     RAM(0x0783)
+#define BlockBounceTimer                 RAM(0x0784)
+#define SideCollisionTimer               RAM(0x0785)
+#define JumpspringTimer                  RAM(0x0786)
+#define GameTimerCtrlTimer               RAM(0x0787)
+#define ClimbSideTimer                   RAM(0x0789)
+#define EnemyFrameTimer                  RAMARRAY(0x078A, 0)
+#define FrenzyEnemyTimer                 RAM(0x078F)
+#define BowserFireBreathTimer            RAM(0x0790)
+#define StompTimer                       RAM(0x0791)
+#define AirBubbleTimer                   RAM(0x0792)
+#define UnusedTimer1                     RAM(0x0793)
+#define UnusedTimer2                     RAM(0x0794)
+#define ScrollIntervalTimer              RAM(0x0795)
+#define EnemyIntervalTimer               RAMARRAY(0x0796, 0)
+#define BrickCoinTimer                   RAM(0x079D)
+#define InjuryTimer                      RAM(0x079E)
+#define StarInvincibleTimer              RAM(0x079F)
+#define ScreenTimer                      RAM(0x07A0)
+#define WorldEndTimer                    RAM(0x07A1)
+#define DemoTimer                        RAM(0x07A2)
+#define UnusedTimer3                     RAM(0x07A3)
+#define PseudoRandomBitReg               RAMARRAY(0x07A7, 0)
+#define MusicOffset_Noise                RAM(0x07B0)
+#define EventMusicBuffer                 RAM(0x07B1)
+#define PauseSoundBuffer                 RAM(0x07B2)
+#define Squ2_NoteLenBuffer               RAM(0x07B3)
+#define Squ2_NoteLenCounter              RAM(0x07B4)
+#define Squ2_EnvelopeDataCtrl            RAM(0x07B5)
+#define Squ1_NoteLenCounter              RAM(0x07B6)
+#define Squ1_EnvelopeDataCtrl            RAM(0x07B7)
+#define Tri_NoteLenBuffer                RAM(0x07B8)
+#define Tri_NoteLenCounter               RAM(0x07B9)
+#define Noise_BeatLenCounter             RAM(0x07BA)
+#define Squ1_SfxLenCounter               RAM(0x07BB)
+#define Squ2_SfxLenCounter               RAM(0x07BD)
+#define Sfx_SecondaryCounter             RAM(0x07BE)
+#define Noise_SfxLenCounter              RAM(0x07BF)
+#define DAC_Counter                      RAM(0x07C0)
+#define NoiseDataLoopbackOfs             RAM(0x07C1)
+#define NoteLengthTblAdder               RAM(0x07C4)
+#define AreaMusicBuffer_Alt              RAM(0x07C5)
+#define PauseModeFlag                    RAM(0x07C6)
+#define GroundMusicHeaderOfs             RAM(0x07C7)
+#define AltRegContentFlag                RAM(0x07CA)
+#define DisplayDigits_Or_TopScoreDisplay RAMARRAY(0x07D7, 0)
+#define DisplayDigits                    RAMARRAY(0x07D7, 0)
+#define TopScoreDisplay                  RAMARRAY(0x07D7, 0)
+#define PlayerScoreDisplay_Or_ScoreAndCoinDisplay RAMARRAY(0x07DD, 0)
+#define PlayerScoreDisplay               RAMARRAY(0x07DD, 0)
+#define ScoreAndCoinDisplay              RAMARRAY(0x07DD, 0)
+#define GameTimerDisplay                 RAMARRAY(0x07F8, 0)
+#define WorldSelectEnableFlag            RAM(0x07FC)
+#define ContinueWorld                    RAM(0x07FD)
+#define WarmBootValidation               RAM(0x07FF)

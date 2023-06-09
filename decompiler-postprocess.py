@@ -200,7 +200,10 @@ outstr = outstr.replace('EnemyData._0_1_', 'EnemyData.lo')
 outstr = outstr.replace('EnemyData._1_1_', 'EnemyData.hi')
 
 # Since Ghidra 10.3, these appear in the structures
-outstr = re.sub(r'\._([0-9])_([0-9])_', r'.subpiece(\1,\2)', outstr)
+outstr = re.sub(r'([a-zA-Z0-9]+)\._([0-9])_([0-9])_', r'SUBPIECE(\1,\2,\3)', outstr)
+
+# Replace integer casts 
+outstr = re.sub(r'\(uint.\)(sVar.)', r'CAST_TO_INT(\1)', outstr)
 
 # Ack! This is so weird! Appeared since Ghidra 10.3
 #   register0x06 = (char)((uint3)uVar1 >> 8);
@@ -223,6 +226,10 @@ outstr = outstr.replace(INPUT_H_FILE, TARGET_H_FILE)
 # Set all undefined "in" variables to 0
 outstr = re.sub(r'byte (in_.*?);', r'byte \1 = 0;', outstr)
 outstr = re.sub(r'bool (in_.*?);', r'bool \1 = false;', outstr)
+
+# Fix "byte abVar1 [1]" and "abVar1[0]", which aren't ever truly accessed as multi-item arrays
+outstr = re.sub(r'(abVar.) \[1\]', r'\1', outstr)
+outstr = re.sub(r'(abVar.)\[0\]', r'\1', outstr)
 
 if IS_SMB1:
     # SMB1 doesn't replace the opcode of a particular instruction
@@ -247,6 +254,8 @@ if IS_SMB2J:
     outstr = re.sub(r'SMB:sm2data_24_common::', 'SM2DATA2+SM2DATA4:', outstr)
     outstr = re.sub(r'SMB:', 'SM2MAIN:', outstr)
 
+outstr = re.sub(r'\(struct_(.*)\)', r'CAST_INT_TO_struct_\1', outstr)
+
 with open(TARGET_DIR + TARGET_CPP_FILE, 'w') as f:
     f.write(outstr)
 
@@ -259,22 +268,14 @@ shutil.copyfile(INPUT_H_FILE, INPUT_H_FILE+'.bak')
 # C++ has a bool type. Don't redefine it!
 outstr = outstr.replace('typedef unsigned char    bool;', '')
 
-# Add more stuff to the data structures, so we can cast integers to/from them (just like Ghidra)
-outstr = re.sub(r'struct (.*?) {', r'''struct \1 {
-    inline \1() {}
-    inline \1(uint64_t v) {
-        memcpy(this, &v, sizeof(*this));
-    }
-    inline operator uint64_t() const {
-        uint64_t v = 0;
-        memcpy(&v, this, sizeof(*this));
-        return v;
-    }
-    inline uint64_t subpiece(uint64_t a, uint64_t b) {
-        uint64_t v = *this;
-        return (v>>(a*8)) & BITMASK_HELPER(b);
-    }
-''', outstr)
+# Add integer casting functions
+outstr = re.sub(r'^struct (.*?) {(.*?)};',
+r'''struct \1 {\2};
+static inline \1 CAST_INT_TO_\1(uint64_t v) {
+    \1 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
+};''', outstr, flags=re.DOTALL|re.MULTILINE)
 
 with open(TARGET_DIR + TARGET_H_FILE, 'w') as f:
     f.write('#pragma once\n')

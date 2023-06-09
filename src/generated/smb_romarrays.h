@@ -1,349 +1,349 @@
-static const ConstRamByteArray VRAM_AddrTable_Low = ConstRamByteArray(0x805A, 19);
-static const ConstRamByteArray VRAM_AddrTable_High = ConstRamByteArray(0x806D, 19);
-static const ConstRamByteArray VRAM_Buffer_Offset = ConstRamByteArray(0x8080, 2);
-static const ConstRamByteArray WSelectBufferTemplate = ConstRamByteArray(0x823F, 6);
-static const ConstRamByteArray MushroomIconData = ConstRamByteArray(0x831D, 8);
-static const ConstRamByteArray DemoActionData = ConstRamByteArray(0x8340, 21);
-static const ConstRamByteArray DemoTimingData = ConstRamByteArray(0x8355, 22);
-static const ConstRamByteArray FloateyNumTileData = ConstRamByteArray(0x849F, 24);
-static const ConstRamByteArray ScoreUpdateData = ConstRamByteArray(0x84B7, 12);
-static const ConstRamByteArray AreaPalette = ConstRamByteArray(0x85BB, 4);
-static const ConstRamByteArray BGColorCtrl_Addr = ConstRamByteArray(0x85CB, 4);
-static const ConstRamByteArray BackgroundColors = ConstRamByteArray(0x85CF, 8);
-static const ConstRamByteArray PlayerColors = ConstRamByteArray(0x85D7, 12);
-static const ConstRamByteArray TopStatusBarLine = ConstRamByteArray(0x8752, 39);
-static const ConstRamByteArray WorldLivesDisplay = ConstRamByteArray(0x8779, 31);
-static const ConstRamByteArray TwoPlayerTimeUp = ConstRamByteArray(0x8798, 8);
-static const ConstRamByteArray OnePlayerTimeUp = ConstRamByteArray(0x87A0, 11);
-static const ConstRamByteArray TwoPlayerGameOver = ConstRamByteArray(0x87AB, 8);
-static const ConstRamByteArray OnePlayerGameOver = ConstRamByteArray(0x87B3, 13);
-static const ConstRamByteArray WarpZoneWelcome = ConstRamByteArray(0x87C0, 45);
-static const ConstRamByteArray LuigiName = ConstRamByteArray(0x87ED, 5);
-static const ConstRamByteArray WarpZoneNumbers = ConstRamByteArray(0x87F2, 12);
-static const ConstRamByteArray GameTextOffsets = ConstRamByteArray(0x87FE, 10);
-static const ConstRamByteArray ColorRotatePalette = ConstRamByteArray(0x89C3, 6);
-static const ConstRamByteArray BlankPalette = ConstRamByteArray(0x89C9, 8);
-static const ConstRamByteArray Palette3Data = ConstRamByteArray(0x89D1, 16);
-static const ConstRamByteArray BlockGfxData = ConstRamByteArray(0x8A39, 20);
-static const ConstRamByteArray MetatileGraphics_Low = ConstRamByteArray(0x8B08, 4);
-static const ConstRamByteArray MetatileGraphics_High = ConstRamByteArray(0x8B0C, 4);
-static const ConstRamByteArray Palette0_MTiles = ConstRamByteArray(0x8B10, 156);
-static const ConstRamByteArray Palette1_MTiles = ConstRamByteArray(0x8BAC, 184);
-static const ConstRamByteArray Palette2_MTiles = ConstRamByteArray(0x8C64, 40);
-static const ConstRamByteArray Palette3_MTiles = ConstRamByteArray(0x8C8C, 24);
-static const ConstRamByteArray WaterPaletteData = ConstRamByteArray(0x8CA4, 36);
-static const ConstRamByteArray GroundPaletteData = ConstRamByteArray(0x8CC8, 36);
-static const ConstRamByteArray UndergroundPaletteData = ConstRamByteArray(0x8CEC, 36);
-static const ConstRamByteArray CastlePaletteData = ConstRamByteArray(0x8D10, 36);
-static const ConstRamByteArray DaySnowPaletteData = ConstRamByteArray(0x8D34, 8);
-static const ConstRamByteArray NightSnowPaletteData = ConstRamByteArray(0x8D3C, 8);
-static const ConstRamByteArray MushroomPaletteData = ConstRamByteArray(0x8D44, 8);
-static const ConstRamByteArray BowserPaletteData = ConstRamByteArray(0x8D4C, 8);
-static const ConstRamByteArray MarioThanksMessage = ConstRamByteArray(0x8D54, 20);
-static const ConstRamByteArray LuigiThanksMessage = ConstRamByteArray(0x8D68, 20);
-static const ConstRamByteArray MushroomRetainerSaved = ConstRamByteArray(0x8D7C, 44);
-static const ConstRamByteArray PrincessSaved1 = ConstRamByteArray(0x8DA8, 23);
-static const ConstRamByteArray PrincessSaved2 = ConstRamByteArray(0x8DBF, 31);
-static const ConstRamByteArray WorldSelectMessage1 = ConstRamByteArray(0x8DDE, 17);
-static const ConstRamByteArray WorldSelectMessage2 = ConstRamByteArray(0x8DEF, 21);
-static const ConstRamByteArray StatusBarData = ConstRamByteArray(0x8EF4, 12);
-static const ConstRamByteArray StatusBarOffset = ConstRamByteArray(0x8F00, 6);
-static const ConstRamByteArray DefaultSprOffsets = ConstRamByteArray(0x8FBC, 15);
-static const ConstRamByteArray Sprite0Data = ConstRamByteArray(0x8FCB, 4);
-static const ConstRamByteArray MusicSelectData = ConstRamByteArray(0x90E7, 6);
-static const ConstRamByteArray PlayerStarting_X_Pos = ConstRamByteArray(0x9116, 4);
-static const ConstRamByteArray AltYPosOffset = ConstRamByteArray(0x911A, 2);
-static const ConstRamByteArray PlayerStarting_Y_Pos = ConstRamByteArray(0x911C, 9);
-static const ConstRamByteArray PlayerBGPriorityData = ConstRamByteArray(0x9125, 8);
-static const ConstRamByteArray GameTimerData = ConstRamByteArray(0x912D, 4);
-static const ConstRamByteArray HalfwayPageNybbles = ConstRamByteArray(0x91BD, 16);
-static const ConstRamByteArray BSceneDataOffsets = ConstRamByteArray(0x92F7, 3);
-static const ConstRamByteArray BackSceneryData = ConstRamByteArray(0x92FA, 144);
-static const ConstRamByteArray BackSceneryMetatiles = ConstRamByteArray(0x938A, 36);
-static const ConstRamByteArray FSceneDataOffsets = ConstRamByteArray(0x93AE, 3);
-static const ConstRamByteArray ForeSceneryData = ConstRamByteArray(0x93B1, 39);
-static const ConstRamByteArray TerrainMetatiles = ConstRamByteArray(0x93D8, 4);
-static const ConstRamByteArray TerrainRenderBits = ConstRamByteArray(0x93DC, 32);
-static const ConstRamByteArray BlockBuffLowBounds = ConstRamByteArray(0x9504, 4);
-static const ConstRamByteArray FrenzyIDData = ConstRamByteArray(0x9728, 3);
-static const ConstRamByteArray PulleyRopeMetatiles = ConstRamByteArray(0x97B7, 3);
-static const ConstRamByteArray CastleMetatiles = ConstRamByteArray(0x97CF, 55);
-static const ConstRamByteArray SidePipeShaftData = ConstRamByteArray(0x989F, 4);
-static const ConstRamByteArray SidePipeTopPart = ConstRamByteArray(0x98A3, 4);
-static const ConstRamByteArray SidePipeBottomPart = ConstRamByteArray(0x98A7, 4);
-static const ConstRamByteArray VerticalPipeData = ConstRamByteArray(0x98DD, 8);
-static const ConstRamByteArray CoinMetatileData = ConstRamByteArray(0x99EE, 4);
-static const ConstRamByteArray C_ObjectRow = ConstRamByteArray(0x99FB, 3);
-static const ConstRamByteArray C_ObjectMetatile = ConstRamByteArray(0x99FE, 3);
-static const ConstRamByteArray SolidBlockMetatiles = ConstRamByteArray(0x9A25, 4);
-static const ConstRamByteArray BrickMetatiles = ConstRamByteArray(0x9A29, 5);
-static const ConstRamByteArray StaircaseHeightData = ConstRamByteArray(0x9AA5, 9);
-static const ConstRamByteArray StaircaseRowData = ConstRamByteArray(0x9AAE, 9);
-static const ConstRamByteArray HoleMetatiles = ConstRamByteArray(0x9B3D, 4);
-static const ConstRamByteArray BlockBufferAddr = ConstRamByteArray(0x9BDD, 4);
-static const ConstRamByteArray AreaDataOfsLoopback = ConstRamByteArray(0x9BF8, 11);
-static const ConstRamByteArray WorldAddrOffsets = ConstRamByteArray(0x9CB4, 8);
-static const ConstRamByteArray World1Areas = ConstRamByteArray(0x9CBC, 5);
-static const ConstRamByteArray World2Areas = ConstRamByteArray(0x9CC1, 5);
-static const ConstRamByteArray World3Areas = ConstRamByteArray(0x9CC6, 4);
-static const ConstRamByteArray World4Areas = ConstRamByteArray(0x9CCA, 5);
-static const ConstRamByteArray World5Areas = ConstRamByteArray(0x9CCF, 4);
-static const ConstRamByteArray World6Areas = ConstRamByteArray(0x9CD3, 4);
-static const ConstRamByteArray World7Areas = ConstRamByteArray(0x9CD7, 5);
-static const ConstRamByteArray World8Areas = ConstRamByteArray(0x9CDC, 4);
-static const ConstRamByteArray EnemyAddrHOffsets = ConstRamByteArray(0x9CE0, 4);
-static const ConstRamByteArray EnemyDataAddrLow = ConstRamByteArray(0x9CE4, 34);
-static const ConstRamByteArray EnemyDataAddrHigh = ConstRamByteArray(0x9D06, 34);
-static const ConstRamByteArray AreaDataHOffsets = ConstRamByteArray(0x9D28, 4);
-static const ConstRamByteArray AreaDataAddrLow = ConstRamByteArray(0x9D2C, 34);
-static const ConstRamByteArray AreaDataAddrHigh = ConstRamByteArray(0x9D4E, 34);
-static const ConstRamByteArray E_CastleArea1 = ConstRamByteArray(0x9D70, 39);
-static const ConstRamByteArray E_CastleArea2 = ConstRamByteArray(0x9D97, 25);
-static const ConstRamByteArray E_CastleArea3 = ConstRamByteArray(0x9DB0, 47);
-static const ConstRamByteArray E_CastleArea4 = ConstRamByteArray(0x9DDF, 43);
-static const ConstRamByteArray E_CastleArea5 = ConstRamByteArray(0x9E0A, 21);
-static const ConstRamByteArray E_CastleArea6 = ConstRamByteArray(0x9E1F, 58);
-static const ConstRamByteArray E_GroundArea1 = ConstRamByteArray(0x9E59, 37);
-static const ConstRamByteArray E_GroundArea2 = ConstRamByteArray(0x9E7E, 29);
-static const ConstRamByteArray E_GroundArea3 = ConstRamByteArray(0x9E9B, 14);
-static const ConstRamByteArray E_GroundArea4 = ConstRamByteArray(0x9EA9, 39);
-static const ConstRamByteArray E_GroundArea5 = ConstRamByteArray(0x9ED0, 49);
-static const ConstRamByteArray E_GroundArea6 = ConstRamByteArray(0x9F01, 30);
-static const ConstRamByteArray E_GroundArea7 = ConstRamByteArray(0x9F1F, 29);
-static const ConstRamByteArray E_GroundArea8 = ConstRamByteArray(0x9F3C, 21);
-static const ConstRamByteArray E_GroundArea9 = ConstRamByteArray(0x9F51, 42);
-static const ConstRamByteArray E_GroundArea10 = ConstRamByteArray(0x9F7B, 1);
-static const ConstRamByteArray E_GroundArea11 = ConstRamByteArray(0x9F7C, 36);
-static const ConstRamByteArray E_GroundArea12 = ConstRamByteArray(0x9FA0, 9);
-static const ConstRamByteArray E_GroundArea13 = ConstRamByteArray(0x9FA9, 37);
-static const ConstRamByteArray E_GroundArea14 = ConstRamByteArray(0x9FCE, 35);
-static const ConstRamByteArray E_GroundArea15 = ConstRamByteArray(0x9FF1, 9);
-static const ConstRamByteArray E_GroundArea16 = ConstRamByteArray(0x9FFA, 1);
-static const ConstRamByteArray E_GroundArea17 = ConstRamByteArray(0x9FFB, 58);
-static const ConstRamByteArray E_GroundArea18 = ConstRamByteArray(0xA035, 43);
-static const ConstRamByteArray E_GroundArea19 = ConstRamByteArray(0xA060, 46);
-static const ConstRamByteArray E_GroundArea20 = ConstRamByteArray(0xA08E, 28);
-static const ConstRamByteArray E_GroundArea21 = ConstRamByteArray(0xA0AA, 9);
-static const ConstRamByteArray E_GroundArea22 = ConstRamByteArray(0xA0B3, 37);
-static const ConstRamByteArray E_UndergroundArea1 = ConstRamByteArray(0xA0D8, 45);
-static const ConstRamByteArray E_UndergroundArea2 = ConstRamByteArray(0xA105, 46);
-static const ConstRamByteArray E_UndergroundArea3 = ConstRamByteArray(0xA133, 45);
-static const ConstRamByteArray E_WaterArea1 = ConstRamByteArray(0xA160, 17);
-static const ConstRamByteArray E_WaterArea2 = ConstRamByteArray(0xA171, 42);
-static const ConstRamByteArray E_WaterArea3 = ConstRamByteArray(0xA19B, 20);
-static const ConstRamByteArray L_CastleArea1 = ConstRamByteArray(0xA1AF, 97);
-static const ConstRamByteArray L_CastleArea2 = ConstRamByteArray(0xA210, 127);
-static const ConstRamByteArray L_CastleArea3 = ConstRamByteArray(0xA28F, 115);
-static const ConstRamByteArray L_CastleArea4 = ConstRamByteArray(0xA302, 109);
-static const ConstRamByteArray L_CastleArea5 = ConstRamByteArray(0xA36F, 139);
-static const ConstRamByteArray L_CastleArea6 = ConstRamByteArray(0xA3FA, 113);
-static const ConstRamByteArray L_GroundArea1 = ConstRamByteArray(0xA46B, 99);
-static const ConstRamByteArray L_GroundArea2 = ConstRamByteArray(0xA4CE, 105);
-static const ConstRamByteArray L_GroundArea3 = ConstRamByteArray(0xA537, 83);
-static const ConstRamByteArray L_GroundArea4 = ConstRamByteArray(0xA58A, 143);
-static const ConstRamByteArray L_GroundArea5 = ConstRamByteArray(0xA619, 117);
-static const ConstRamByteArray L_GroundArea6 = ConstRamByteArray(0xA68E, 101);
-static const ConstRamByteArray L_GroundArea7 = ConstRamByteArray(0xA6F3, 85);
-static const ConstRamByteArray L_GroundArea8 = ConstRamByteArray(0xA748, 133);
-static const ConstRamByteArray L_GroundArea9 = ConstRamByteArray(0xA7CD, 101);
-static const ConstRamByteArray L_GroundArea10 = ConstRamByteArray(0xA832, 9);
-static const ConstRamByteArray L_GroundArea11 = ConstRamByteArray(0xA83B, 63);
-static const ConstRamByteArray L_GroundArea12 = ConstRamByteArray(0xA87A, 21);
-static const ConstRamByteArray L_GroundArea13 = ConstRamByteArray(0xA88F, 103);
-static const ConstRamByteArray L_GroundArea14 = ConstRamByteArray(0xA8F6, 101);
-static const ConstRamByteArray L_GroundArea15 = ConstRamByteArray(0xA95B, 115);
-static const ConstRamByteArray L_GroundArea16 = ConstRamByteArray(0xA9CE, 49);
-static const ConstRamByteArray L_GroundArea17 = ConstRamByteArray(0xA9FF, 147);
-static const ConstRamByteArray L_GroundArea18 = ConstRamByteArray(0xAA92, 115);
-static const ConstRamByteArray L_GroundArea19 = ConstRamByteArray(0xAB05, 121);
-static const ConstRamByteArray L_GroundArea20 = ConstRamByteArray(0xAB7E, 89);
-static const ConstRamByteArray L_GroundArea21 = ConstRamByteArray(0xABD7, 43);
-static const ConstRamByteArray L_GroundArea22 = ConstRamByteArray(0xAC02, 51);
-static const ConstRamByteArray L_UndergroundArea1 = ConstRamByteArray(0xAC35, 163);
-static const ConstRamByteArray L_UndergroundArea2 = ConstRamByteArray(0xACD8, 161);
-static const ConstRamByteArray L_UndergroundArea3 = ConstRamByteArray(0xAD79, 141);
-static const ConstRamByteArray L_WaterArea1 = ConstRamByteArray(0xAE06, 63);
-static const ConstRamByteArray L_WaterArea2 = ConstRamByteArray(0xAE45, 123);
-static const ConstRamByteArray L_WaterArea3 = ConstRamByteArray(0xAEC0, 28);
-static const ConstRamByteArray X_SubtracterData = ConstRamByteArray(0xB034, 2);
-static const ConstRamByteArray OffscrJoypadBitsData = ConstRamByteArray(0xB036, 2);
-static const ConstRamByteArray Hidden1UpCoinAmts = ConstRamByteArray(0xB2C2, 8);
-static const ConstRamByteArray ClimbAdderLow = ConstRamByteArray(0xB3C7, 4);
-static const ConstRamByteArray ClimbAdderHigh = ConstRamByteArray(0xB3CB, 4);
-static const ConstRamByteArray JumpMForceData = ConstRamByteArray(0xB424, 7);
-static const ConstRamByteArray FallMForceData = ConstRamByteArray(0xB42B, 7);
-static const ConstRamByteArray PlayerYSpdData = ConstRamByteArray(0xB432, 7);
-static const ConstRamByteArray InitMForceData = ConstRamByteArray(0xB439, 7);
-static const ConstRamByteArray MaxLeftXSpdData = ConstRamByteArray(0xB440, 3);
-static const ConstRamByteArray MaxRightXSpdData = ConstRamByteArray(0xB443, 4);
-static const ConstRamByteArray FrictionData = ConstRamByteArray(0xB447, 3);
-static const ConstRamByteArray Climb_Y_SpeedData = ConstRamByteArray(0xB44A, 3);
-static const ConstRamByteArray Climb_Y_MForceData = ConstRamByteArray(0xB44D, 3);
-static const ConstRamByteArray PlayerAnimTmrData = ConstRamByteArray(0xB58C, 3);
-static const ConstRamByteArray FireballXSpdData = ConstRamByteArray(0xB687, 2);
-static const ConstRamByteArray Bubble_MForceData = ConstRamByteArray(0xB74B, 2);
-static const ConstRamByteArray BubbleTimerData = ConstRamByteArray(0xB74D, 2);
-static const ConstRamByteArray FlagpoleScoreMods = ConstRamByteArray(0xB84B, 5);
-static const ConstRamByteArray FlagpoleScoreDigits = ConstRamByteArray(0xB850, 5);
-static const ConstRamByteArray Jumpspring_Y_PosData = ConstRamByteArray(0xB8B6, 4);
-static const ConstRamByteArray VineHeightData = ConstRamByteArray(0xB949, 2);
-static const ConstRamByteArray CannonBitmasks = ConstRamByteArray(0xB9BA, 2);
-static const ConstRamByteArray BulletBillXSpdData = ConstRamByteArray(0xBA31, 2);
-static const ConstRamByteArray HammerEnemyOfsData = ConstRamByteArray(0xBA89, 9);
-static const ConstRamByteArray HammerXSpdData = ConstRamByteArray(0xBA92, 2);
-static const ConstRamByteArray CoinTallyOffsets = ConstRamByteArray(0xBBF8, 2);
-static const ConstRamByteArray ScoreOffsets = ConstRamByteArray(0xBBFA, 2);
-static const ConstRamByteArray StatusBarNybbles = ConstRamByteArray(0xBBFC, 2);
-static const ConstRamByteArray BlockYPosAdderData = ConstRamByteArray(0xBCEB, 2);
-static const ConstRamByteArray BrickQBlockMetatiles = ConstRamByteArray(0xBDE8, 14);
-static const ConstRamByteArray MaxSpdBlockData = ConstRamByteArray(0xBF9F, 2);
-static const ConstRamByteArray ResidualGravityCode = ConstRamByteArray(0xBFA1, 3);
-static const ConstRamByteArray LoopCmdWorldNumber = ConstRamByteArray(0xC06B, 11);
-static const ConstRamByteArray LoopCmdPageNumber = ConstRamByteArray(0xC076, 11);
-static const ConstRamByteArray LoopCmdYPosition = ConstRamByteArray(0xC081, 11);
-static const ConstRamByteArray NormalXSpdData = ConstRamByteArray(0xC30C, 2);
-static const ConstRamByteArray HBroWalkingTimerData = ConstRamByteArray(0xC326, 2);
-static const ConstRamByteArray PRDiffAdjustData = ConstRamByteArray(0xC398, 12);
-static const ConstRamByteArray FirebarSpinSpdData = ConstRamByteArray(0xC44F, 5);
-static const ConstRamByteArray FirebarSpinDirData = ConstRamByteArray(0xC454, 5);
-static const ConstRamByteArray FlyCCXPositionData = ConstRamByteArray(0xC488, 16);
-static const ConstRamByteArray FlyCCXSpeedData = ConstRamByteArray(0xC498, 12);
-static const ConstRamByteArray FlyCCTimerData = ConstRamByteArray(0xC4A4, 4);
-static const ConstRamByteArray FlameYPosData = ConstRamByteArray(0xC59D, 4);
-static const ConstRamByteArray FlameYMFAdderData = ConstRamByteArray(0xC5A1, 2);
-static const ConstRamByteArray FireworksXPosData = ConstRamByteArray(0xC631, 6);
-static const ConstRamByteArray FireworksYPosData = ConstRamByteArray(0xC637, 6);
-static const ConstRamByteArray Bitmasks = ConstRamByteArray(0xC68A, 8);
-static const ConstRamByteArray Enemy17YPosData = ConstRamByteArray(0xC692, 8);
-static const ConstRamByteArray SwimCC_IDData = ConstRamByteArray(0xC69A, 2);
-static const ConstRamByteArray PlatPosDataLow = ConstRamByteArray(0xC86B, 3);
-static const ConstRamByteArray PlatPosDataHigh = ConstRamByteArray(0xC86E, 3);
-static const ConstRamByteArray HammerThrowTmrData = ConstRamByteArray(0xC9CE, 2);
-static const ConstRamByteArray XSpeedAdderData = ConstRamByteArray(0xC9D0, 4);
-static const ConstRamByteArray RevivedXSpeed = ConstRamByteArray(0xC9D4, 4);
-static const ConstRamByteArray HammerBroJumpLData = ConstRamByteArray(0xCA10, 2);
-static const ConstRamByteArray BlooberBitmasks = ConstRamByteArray(0xCB87, 2);
-static const ConstRamByteArray SwimCCXMoveData = ConstRamByteArray(0xCC46, 4);
-static const ConstRamByteArray FirebarPosLookupTbl = ConstRamByteArray(0xCCC7, 99);
-static const ConstRamByteArray FirebarMirrorData = ConstRamByteArray(0xCD2A, 4);
-static const ConstRamByteArray FirebarTblOffsets = ConstRamByteArray(0xCD2E, 12);
-static const ConstRamByteArray FirebarYPos = ConstRamByteArray(0xCD3A, 2);
-static const ConstRamByteArray PRandomSubtracter = ConstRamByteArray(0xCED5, 5);
-static const ConstRamByteArray FlyCCBPriority = ConstRamByteArray(0xCEDA, 5);
-static const ConstRamByteArray LakituDiffAdj = ConstRamByteArray(0xCF25, 3);
-static const ConstRamByteArray BridgeCollapseData = ConstRamByteArray(0xCFDD, 15);
-static const ConstRamByteArray PRandomRange = ConstRamByteArray(0xD061, 4);
-static const ConstRamByteArray FlameTimerData = ConstRamByteArray(0xD1D1, 8);
-static const ConstRamByteArray StarFlagYPosAdder = ConstRamByteArray(0xD2CD, 4);
-static const ConstRamByteArray StarFlagXPosAdder = ConstRamByteArray(0xD2D1, 4);
-static const ConstRamByteArray StarFlagTileData = ConstRamByteArray(0xD2D5, 4);
-static const ConstRamByteArray BowserIdentities = ConstRamByteArray(0xD736, 8);
-static const ConstRamByteArray ResidualXSpdData = ConstRamByteArray(0xD84D, 2);
-static const ConstRamByteArray KickedShellXSpdData = ConstRamByteArray(0xD84F, 2);
-static const ConstRamByteArray DemotedKoopaXSpdData = ConstRamByteArray(0xD851, 2);
-static const ConstRamByteArray KickedShellPtsData = ConstRamByteArray(0xD892, 3);
-static const ConstRamByteArray StompedEnemyPtsData = ConstRamByteArray(0xD965, 4);
-static const ConstRamByteArray RevivalRateData = ConstRamByteArray(0xD9D2, 2);
-static const ConstRamByteArray SetBitsMask = ConstRamByteArray(0xDA25, 7);
-static const ConstRamByteArray ClearBitsMask = ConstRamByteArray(0xDA2C, 7);
-static const ConstRamByteArray PlayerPosSPlatData = ConstRamByteArray(0xDC17, 2);
-static const ConstRamByteArray PlayerBGUpperExtent = ConstRamByteArray(0xDC62, 2);
-static const ConstRamByteArray AreaChangeTimerData = ConstRamByteArray(0xDE03, 2);
-static const ConstRamByteArray ClimbXPosAdder = ConstRamByteArray(0xDE25, 2);
-static const ConstRamByteArray ClimbPLocAdder = ConstRamByteArray(0xDE27, 2);
-static const ConstRamByteArray FlagpoleYPosData = ConstRamByteArray(0xDE29, 5);
-static const ConstRamByteArray SolidMTileUpperExt = ConstRamByteArray(0xDF8B, 4);
-static const ConstRamByteArray ClimbMTileUpperExt = ConstRamByteArray(0xDF96, 4);
-static const ConstRamByteArray EnemyBGCStateData = ConstRamByteArray(0xDFB9, 6);
-static const ConstRamByteArray EnemyBGCXSpdData = ConstRamByteArray(0xDFBF, 2);
-static const ConstRamByteArray BoundBoxCtrlData = ConstRamByteArray(0xE1FD, 48);
-static const ConstRamByteArray ResidualMiscObjectCode = ConstRamByteArray(0xE392, 10);
-static const ConstRamByteArray BlockBufferAdderData = ConstRamByteArray(0xE3AD, 3);
-static const ConstRamByteArray BlockBuffer_X_Adder = ConstRamByteArray(0xE3B0, 28);
-static const ConstRamByteArray BlockBuffer_Y_Adder = ConstRamByteArray(0xE3CC, 28);
-static const ConstRamByteArray VineYPosAdder = ConstRamByteArray(0xE433, 2);
-static const ConstRamByteArray FirstSprXPos = ConstRamByteArray(0xE4C0, 4);
-static const ConstRamByteArray FirstSprYPos = ConstRamByteArray(0xE4C4, 4);
-static const ConstRamByteArray SecondSprXPos = ConstRamByteArray(0xE4C8, 4);
-static const ConstRamByteArray SecondSprYPos = ConstRamByteArray(0xE4CC, 4);
-static const ConstRamByteArray FirstSprTilenum = ConstRamByteArray(0xE4D0, 4);
-static const ConstRamByteArray SecondSprTilenum = ConstRamByteArray(0xE4D4, 4);
-static const ConstRamByteArray HammerSprAttrib = ConstRamByteArray(0xE4D8, 4);
-static const ConstRamByteArray FlagpoleScoreNumTiles = ConstRamByteArray(0xE541, 10);
-static const ConstRamByteArray JumpingCoinTiles = ConstRamByteArray(0xE682, 4);
-static const ConstRamByteArray PowerUpGfxTable = ConstRamByteArray(0xE6BE, 16);
-static const ConstRamByteArray PowerUpAttributes = ConstRamByteArray(0xE6CE, 4);
-static const ConstRamByteArray EnemyGraphicsTable = ConstRamByteArray(0xE73E, 258);
-static const ConstRamByteArray EnemyGfxTableOffsets = ConstRamByteArray(0xE840, 27);
-static const ConstRamByteArray EnemyAttributeData = ConstRamByteArray(0xE85B, 27);
-static const ConstRamByteArray EnemyAnimTimingBMask = ConstRamByteArray(0xE876, 2);
-static const ConstRamByteArray JumpspringFrameOffsets = ConstRamByteArray(0xE878, 5);
-static const ConstRamByteArray DefaultBlockObjTiles = ConstRamByteArray(0xEBCD, 4);
-static const ConstRamByteArray ExplosionTiles = ConstRamByteArray(0xED06, 3);
-static const ConstRamByteArray PlayerGfxTblOffsets = ConstRamByteArray(0xEE07, 16);
-static const ConstRamByteArray PlayerGraphicsTable = ConstRamByteArray(0xEE17, 208);
-static const ConstRamByteArray SwimKickTileNum = ConstRamByteArray(0xEEE7, 2);
-static const ConstRamByteArray IntermediatePlayerData = ConstRamByteArray(0xEF9E, 6);
-static const ConstRamByteArray ChangeSizeOffsetAdder = ConstRamByteArray(0xF09C, 20);
-static const ConstRamByteArray ObjOffsetData = ConstRamByteArray(0xF1A5, 3);
-static const ConstRamByteArray XOffscreenBitsData = ConstRamByteArray(0xF1E3, 16);
-static const ConstRamByteArray DefaultXOnscreenOfs = ConstRamByteArray(0xF1F3, 3);
-static const ConstRamByteArray YOffscreenBitsData = ConstRamByteArray(0xF22B, 9);
-static const ConstRamByteArray DefaultYOnscreenOfs = ConstRamByteArray(0xF234, 3);
-static const ConstRamByteArray HighPosUnitData = ConstRamByteArray(0xF237, 2);
-static const ConstRamByteArray SwimStompEnvelopeData = ConstRamByteArray(0xF3B1, 14);
-static const ConstRamByteArray ExtraLifeFreqData = ConstRamByteArray(0xF4D4, 6);
-static const ConstRamByteArray PowerUpGrabFreqData = ConstRamByteArray(0xF4DA, 30);
-static const ConstRamByteArray PUp_VGrow_FreqData = ConstRamByteArray(0xF4F8, 32);
-static const ConstRamByteArray BrickShatterFreqData = ConstRamByteArray(0xF62B, 16);
-static const ConstRamByteArray MusicHeaderData = ConstRamByteArray(0xF90D, 49);
-static const ConstRamByteArray TimeRunningOutHdr = ConstRamByteArray(0xF93E, 5);
-static const ConstRamByteArray Star_CloudHdr = ConstRamByteArray(0xF943, 6);
-static const ConstRamByteArray EndOfLevelMusHdr = ConstRamByteArray(0xF949, 5);
-static const ConstRamByteArray ResidualHeaderData = ConstRamByteArray(0xF94E, 5);
-static const ConstRamByteArray UndergroundMusHdr = ConstRamByteArray(0xF953, 5);
-static const ConstRamByteArray SilenceHdr = ConstRamByteArray(0xF958, 4);
-static const ConstRamByteArray CastleMusHdr = ConstRamByteArray(0xF95C, 5);
-static const ConstRamByteArray VictoryMusHdr = ConstRamByteArray(0xF961, 5);
-static const ConstRamByteArray GameOverMusHdr = ConstRamByteArray(0xF966, 5);
-static const ConstRamByteArray WaterMusHdr = ConstRamByteArray(0xF96B, 6);
-static const ConstRamByteArray WinCastleMusHdr = ConstRamByteArray(0xF971, 5);
-static const ConstRamByteArray GroundLevelPart1Hdr = ConstRamByteArray(0xF976, 6);
-static const ConstRamByteArray GroundLevelPart2AHdr = ConstRamByteArray(0xF97C, 6);
-static const ConstRamByteArray GroundLevelPart2BHdr = ConstRamByteArray(0xF982, 6);
-static const ConstRamByteArray GroundLevelPart2CHdr = ConstRamByteArray(0xF988, 6);
-static const ConstRamByteArray GroundLevelPart3AHdr = ConstRamByteArray(0xF98E, 6);
-static const ConstRamByteArray GroundLevelPart3BHdr = ConstRamByteArray(0xF994, 6);
-static const ConstRamByteArray GroundLevelLeadInHdr = ConstRamByteArray(0xF99A, 6);
-static const ConstRamByteArray GroundLevelPart4AHdr = ConstRamByteArray(0xF9A0, 6);
-static const ConstRamByteArray GroundLevelPart4BHdr = ConstRamByteArray(0xF9A6, 6);
-static const ConstRamByteArray GroundLevelPart4CHdr = ConstRamByteArray(0xF9AC, 6);
-static const ConstRamByteArray DeathMusHdr = ConstRamByteArray(0xF9B2, 6);
-static const ConstRamByteArray Star_CloudMData = ConstRamByteArray(0xF9B8, 73);
-static const ConstRamByteArray GroundM_P1Data = ConstRamByteArray(0xFA01, 27);
-static const ConstRamByteArray SilenceData = ConstRamByteArray(0xFA1C, 45);
-static const ConstRamByteArray GroundM_P2AData = ConstRamByteArray(0xFA49, 44);
-static const ConstRamByteArray GroundM_P2BData = ConstRamByteArray(0xFA75, 40);
-static const ConstRamByteArray GroundM_P2CData = ConstRamByteArray(0xFA9D, 37);
-static const ConstRamByteArray GroundM_P3AData = ConstRamByteArray(0xFAC2, 25);
-static const ConstRamByteArray GroundM_P3BData = ConstRamByteArray(0xFADB, 30);
-static const ConstRamByteArray GroundMLdInData = ConstRamByteArray(0xFAF9, 44);
-static const ConstRamByteArray GroundM_P4AData = ConstRamByteArray(0xFB25, 38);
-static const ConstRamByteArray GroundM_P4BData = ConstRamByteArray(0xFB4B, 39);
-static const ConstRamByteArray DeathMusData = ConstRamByteArray(0xFB72, 2);
-static const ConstRamByteArray GroundM_P4CData = ConstRamByteArray(0xFB74, 48);
-static const ConstRamByteArray CastleMusData = ConstRamByteArray(0xFBA4, 161);
-static const ConstRamByteArray GameOverMusData = ConstRamByteArray(0xFC45, 45);
-static const ConstRamByteArray TimeRunOutMusData = ConstRamByteArray(0xFC72, 62);
-static const ConstRamByteArray WinLevelMusData = ConstRamByteArray(0xFCB0, 97);
-static const ConstRamByteArray UndergroundMusData = ConstRamByteArray(0xFD11, 65);
-static const ConstRamByteArray WaterMusData = ConstRamByteArray(0xFD52, 255);
-static const ConstRamByteArray EndOfCastleMusData = ConstRamByteArray(0xFE51, 119);
-static const ConstRamByteArray VictoryMusData = ConstRamByteArray(0xFEC8, 56);
-static const ConstRamByteArray FreqRegLookupTbl = ConstRamByteArray(0xFF00, 102);
-static const ConstRamByteArray MusicLengthLookupTbl = ConstRamByteArray(0xFF66, 48);
-static const ConstRamByteArray EndOfCastleMusicEnvData = ConstRamByteArray(0xFF96, 4);
-static const ConstRamByteArray AreaMusicEnvData = ConstRamByteArray(0xFF9A, 8);
-static const ConstRamByteArray WaterEventMusEnvData = ConstRamByteArray(0xFFA2, 40);
-static const ConstRamByteArray BowserFlameEnvData = ConstRamByteArray(0xFFCA, 32);
-static const ConstRamByteArray BrickShatterEnvData = ConstRamByteArray(0xFFEA, 16);
+#define VRAM_AddrTable_Low               RAMARRAY_CONST(0x805A, 19)
+#define VRAM_AddrTable_High              RAMARRAY_CONST(0x806D, 19)
+#define VRAM_Buffer_Offset               RAMARRAY_CONST(0x8080, 2)
+#define WSelectBufferTemplate            RAMARRAY_CONST(0x823F, 6)
+#define MushroomIconData                 RAMARRAY_CONST(0x831D, 8)
+#define DemoActionData                   RAMARRAY_CONST(0x8340, 21)
+#define DemoTimingData                   RAMARRAY_CONST(0x8355, 22)
+#define FloateyNumTileData               RAMARRAY_CONST(0x849F, 24)
+#define ScoreUpdateData                  RAMARRAY_CONST(0x84B7, 12)
+#define AreaPalette                      RAMARRAY_CONST(0x85BB, 4)
+#define BGColorCtrl_Addr                 RAMARRAY_CONST(0x85CB, 4)
+#define BackgroundColors                 RAMARRAY_CONST(0x85CF, 8)
+#define PlayerColors                     RAMARRAY_CONST(0x85D7, 12)
+#define TopStatusBarLine                 RAMARRAY_CONST(0x8752, 39)
+#define WorldLivesDisplay                RAMARRAY_CONST(0x8779, 31)
+#define TwoPlayerTimeUp                  RAMARRAY_CONST(0x8798, 8)
+#define OnePlayerTimeUp                  RAMARRAY_CONST(0x87A0, 11)
+#define TwoPlayerGameOver                RAMARRAY_CONST(0x87AB, 8)
+#define OnePlayerGameOver                RAMARRAY_CONST(0x87B3, 13)
+#define WarpZoneWelcome                  RAMARRAY_CONST(0x87C0, 45)
+#define LuigiName                        RAMARRAY_CONST(0x87ED, 5)
+#define WarpZoneNumbers                  RAMARRAY_CONST(0x87F2, 12)
+#define GameTextOffsets                  RAMARRAY_CONST(0x87FE, 10)
+#define ColorRotatePalette               RAMARRAY_CONST(0x89C3, 6)
+#define BlankPalette                     RAMARRAY_CONST(0x89C9, 8)
+#define Palette3Data                     RAMARRAY_CONST(0x89D1, 16)
+#define BlockGfxData                     RAMARRAY_CONST(0x8A39, 20)
+#define MetatileGraphics_Low             RAMARRAY_CONST(0x8B08, 4)
+#define MetatileGraphics_High            RAMARRAY_CONST(0x8B0C, 4)
+#define Palette0_MTiles                  RAMARRAY_CONST(0x8B10, 156)
+#define Palette1_MTiles                  RAMARRAY_CONST(0x8BAC, 184)
+#define Palette2_MTiles                  RAMARRAY_CONST(0x8C64, 40)
+#define Palette3_MTiles                  RAMARRAY_CONST(0x8C8C, 24)
+#define WaterPaletteData                 RAMARRAY_CONST(0x8CA4, 36)
+#define GroundPaletteData                RAMARRAY_CONST(0x8CC8, 36)
+#define UndergroundPaletteData           RAMARRAY_CONST(0x8CEC, 36)
+#define CastlePaletteData                RAMARRAY_CONST(0x8D10, 36)
+#define DaySnowPaletteData               RAMARRAY_CONST(0x8D34, 8)
+#define NightSnowPaletteData             RAMARRAY_CONST(0x8D3C, 8)
+#define MushroomPaletteData              RAMARRAY_CONST(0x8D44, 8)
+#define BowserPaletteData                RAMARRAY_CONST(0x8D4C, 8)
+#define MarioThanksMessage               RAMARRAY_CONST(0x8D54, 20)
+#define LuigiThanksMessage               RAMARRAY_CONST(0x8D68, 20)
+#define MushroomRetainerSaved            RAMARRAY_CONST(0x8D7C, 44)
+#define PrincessSaved1                   RAMARRAY_CONST(0x8DA8, 23)
+#define PrincessSaved2                   RAMARRAY_CONST(0x8DBF, 31)
+#define WorldSelectMessage1              RAMARRAY_CONST(0x8DDE, 17)
+#define WorldSelectMessage2              RAMARRAY_CONST(0x8DEF, 21)
+#define StatusBarData                    RAMARRAY_CONST(0x8EF4, 12)
+#define StatusBarOffset                  RAMARRAY_CONST(0x8F00, 6)
+#define DefaultSprOffsets                RAMARRAY_CONST(0x8FBC, 15)
+#define Sprite0Data                      RAMARRAY_CONST(0x8FCB, 4)
+#define MusicSelectData                  RAMARRAY_CONST(0x90E7, 6)
+#define PlayerStarting_X_Pos             RAMARRAY_CONST(0x9116, 4)
+#define AltYPosOffset                    RAMARRAY_CONST(0x911A, 2)
+#define PlayerStarting_Y_Pos             RAMARRAY_CONST(0x911C, 9)
+#define PlayerBGPriorityData             RAMARRAY_CONST(0x9125, 8)
+#define GameTimerData                    RAMARRAY_CONST(0x912D, 4)
+#define HalfwayPageNybbles               RAMARRAY_CONST(0x91BD, 16)
+#define BSceneDataOffsets                RAMARRAY_CONST(0x92F7, 3)
+#define BackSceneryData                  RAMARRAY_CONST(0x92FA, 144)
+#define BackSceneryMetatiles             RAMARRAY_CONST(0x938A, 36)
+#define FSceneDataOffsets                RAMARRAY_CONST(0x93AE, 3)
+#define ForeSceneryData                  RAMARRAY_CONST(0x93B1, 39)
+#define TerrainMetatiles                 RAMARRAY_CONST(0x93D8, 4)
+#define TerrainRenderBits                RAMARRAY_CONST(0x93DC, 32)
+#define BlockBuffLowBounds               RAMARRAY_CONST(0x9504, 4)
+#define FrenzyIDData                     RAMARRAY_CONST(0x9728, 3)
+#define PulleyRopeMetatiles              RAMARRAY_CONST(0x97B7, 3)
+#define CastleMetatiles                  RAMARRAY_CONST(0x97CF, 55)
+#define SidePipeShaftData                RAMARRAY_CONST(0x989F, 4)
+#define SidePipeTopPart                  RAMARRAY_CONST(0x98A3, 4)
+#define SidePipeBottomPart               RAMARRAY_CONST(0x98A7, 4)
+#define VerticalPipeData                 RAMARRAY_CONST(0x98DD, 8)
+#define CoinMetatileData                 RAMARRAY_CONST(0x99EE, 4)
+#define C_ObjectRow                      RAMARRAY_CONST(0x99FB, 3)
+#define C_ObjectMetatile                 RAMARRAY_CONST(0x99FE, 3)
+#define SolidBlockMetatiles              RAMARRAY_CONST(0x9A25, 4)
+#define BrickMetatiles                   RAMARRAY_CONST(0x9A29, 5)
+#define StaircaseHeightData              RAMARRAY_CONST(0x9AA5, 9)
+#define StaircaseRowData                 RAMARRAY_CONST(0x9AAE, 9)
+#define HoleMetatiles                    RAMARRAY_CONST(0x9B3D, 4)
+#define BlockBufferAddr                  RAMARRAY_CONST(0x9BDD, 4)
+#define AreaDataOfsLoopback              RAMARRAY_CONST(0x9BF8, 11)
+#define WorldAddrOffsets                 RAMARRAY_CONST(0x9CB4, 8)
+#define World1Areas                      RAMARRAY_CONST(0x9CBC, 5)
+#define World2Areas                      RAMARRAY_CONST(0x9CC1, 5)
+#define World3Areas                      RAMARRAY_CONST(0x9CC6, 4)
+#define World4Areas                      RAMARRAY_CONST(0x9CCA, 5)
+#define World5Areas                      RAMARRAY_CONST(0x9CCF, 4)
+#define World6Areas                      RAMARRAY_CONST(0x9CD3, 4)
+#define World7Areas                      RAMARRAY_CONST(0x9CD7, 5)
+#define World8Areas                      RAMARRAY_CONST(0x9CDC, 4)
+#define EnemyAddrHOffsets                RAMARRAY_CONST(0x9CE0, 4)
+#define EnemyDataAddrLow                 RAMARRAY_CONST(0x9CE4, 34)
+#define EnemyDataAddrHigh                RAMARRAY_CONST(0x9D06, 34)
+#define AreaDataHOffsets                 RAMARRAY_CONST(0x9D28, 4)
+#define AreaDataAddrLow                  RAMARRAY_CONST(0x9D2C, 34)
+#define AreaDataAddrHigh                 RAMARRAY_CONST(0x9D4E, 34)
+#define E_CastleArea1                    RAMARRAY_CONST(0x9D70, 39)
+#define E_CastleArea2                    RAMARRAY_CONST(0x9D97, 25)
+#define E_CastleArea3                    RAMARRAY_CONST(0x9DB0, 47)
+#define E_CastleArea4                    RAMARRAY_CONST(0x9DDF, 43)
+#define E_CastleArea5                    RAMARRAY_CONST(0x9E0A, 21)
+#define E_CastleArea6                    RAMARRAY_CONST(0x9E1F, 58)
+#define E_GroundArea1                    RAMARRAY_CONST(0x9E59, 37)
+#define E_GroundArea2                    RAMARRAY_CONST(0x9E7E, 29)
+#define E_GroundArea3                    RAMARRAY_CONST(0x9E9B, 14)
+#define E_GroundArea4                    RAMARRAY_CONST(0x9EA9, 39)
+#define E_GroundArea5                    RAMARRAY_CONST(0x9ED0, 49)
+#define E_GroundArea6                    RAMARRAY_CONST(0x9F01, 30)
+#define E_GroundArea7                    RAMARRAY_CONST(0x9F1F, 29)
+#define E_GroundArea8                    RAMARRAY_CONST(0x9F3C, 21)
+#define E_GroundArea9                    RAMARRAY_CONST(0x9F51, 42)
+#define E_GroundArea10                   RAMARRAY_CONST(0x9F7B, 1)
+#define E_GroundArea11                   RAMARRAY_CONST(0x9F7C, 36)
+#define E_GroundArea12                   RAMARRAY_CONST(0x9FA0, 9)
+#define E_GroundArea13                   RAMARRAY_CONST(0x9FA9, 37)
+#define E_GroundArea14                   RAMARRAY_CONST(0x9FCE, 35)
+#define E_GroundArea15                   RAMARRAY_CONST(0x9FF1, 9)
+#define E_GroundArea16                   RAMARRAY_CONST(0x9FFA, 1)
+#define E_GroundArea17                   RAMARRAY_CONST(0x9FFB, 58)
+#define E_GroundArea18                   RAMARRAY_CONST(0xA035, 43)
+#define E_GroundArea19                   RAMARRAY_CONST(0xA060, 46)
+#define E_GroundArea20                   RAMARRAY_CONST(0xA08E, 28)
+#define E_GroundArea21                   RAMARRAY_CONST(0xA0AA, 9)
+#define E_GroundArea22                   RAMARRAY_CONST(0xA0B3, 37)
+#define E_UndergroundArea1               RAMARRAY_CONST(0xA0D8, 45)
+#define E_UndergroundArea2               RAMARRAY_CONST(0xA105, 46)
+#define E_UndergroundArea3               RAMARRAY_CONST(0xA133, 45)
+#define E_WaterArea1                     RAMARRAY_CONST(0xA160, 17)
+#define E_WaterArea2                     RAMARRAY_CONST(0xA171, 42)
+#define E_WaterArea3                     RAMARRAY_CONST(0xA19B, 20)
+#define L_CastleArea1                    RAMARRAY_CONST(0xA1AF, 97)
+#define L_CastleArea2                    RAMARRAY_CONST(0xA210, 127)
+#define L_CastleArea3                    RAMARRAY_CONST(0xA28F, 115)
+#define L_CastleArea4                    RAMARRAY_CONST(0xA302, 109)
+#define L_CastleArea5                    RAMARRAY_CONST(0xA36F, 139)
+#define L_CastleArea6                    RAMARRAY_CONST(0xA3FA, 113)
+#define L_GroundArea1                    RAMARRAY_CONST(0xA46B, 99)
+#define L_GroundArea2                    RAMARRAY_CONST(0xA4CE, 105)
+#define L_GroundArea3                    RAMARRAY_CONST(0xA537, 83)
+#define L_GroundArea4                    RAMARRAY_CONST(0xA58A, 143)
+#define L_GroundArea5                    RAMARRAY_CONST(0xA619, 117)
+#define L_GroundArea6                    RAMARRAY_CONST(0xA68E, 101)
+#define L_GroundArea7                    RAMARRAY_CONST(0xA6F3, 85)
+#define L_GroundArea8                    RAMARRAY_CONST(0xA748, 133)
+#define L_GroundArea9                    RAMARRAY_CONST(0xA7CD, 101)
+#define L_GroundArea10                   RAMARRAY_CONST(0xA832, 9)
+#define L_GroundArea11                   RAMARRAY_CONST(0xA83B, 63)
+#define L_GroundArea12                   RAMARRAY_CONST(0xA87A, 21)
+#define L_GroundArea13                   RAMARRAY_CONST(0xA88F, 103)
+#define L_GroundArea14                   RAMARRAY_CONST(0xA8F6, 101)
+#define L_GroundArea15                   RAMARRAY_CONST(0xA95B, 115)
+#define L_GroundArea16                   RAMARRAY_CONST(0xA9CE, 49)
+#define L_GroundArea17                   RAMARRAY_CONST(0xA9FF, 147)
+#define L_GroundArea18                   RAMARRAY_CONST(0xAA92, 115)
+#define L_GroundArea19                   RAMARRAY_CONST(0xAB05, 121)
+#define L_GroundArea20                   RAMARRAY_CONST(0xAB7E, 89)
+#define L_GroundArea21                   RAMARRAY_CONST(0xABD7, 43)
+#define L_GroundArea22                   RAMARRAY_CONST(0xAC02, 51)
+#define L_UndergroundArea1               RAMARRAY_CONST(0xAC35, 163)
+#define L_UndergroundArea2               RAMARRAY_CONST(0xACD8, 161)
+#define L_UndergroundArea3               RAMARRAY_CONST(0xAD79, 141)
+#define L_WaterArea1                     RAMARRAY_CONST(0xAE06, 63)
+#define L_WaterArea2                     RAMARRAY_CONST(0xAE45, 123)
+#define L_WaterArea3                     RAMARRAY_CONST(0xAEC0, 28)
+#define X_SubtracterData                 RAMARRAY_CONST(0xB034, 2)
+#define OffscrJoypadBitsData             RAMARRAY_CONST(0xB036, 2)
+#define Hidden1UpCoinAmts                RAMARRAY_CONST(0xB2C2, 8)
+#define ClimbAdderLow                    RAMARRAY_CONST(0xB3C7, 4)
+#define ClimbAdderHigh                   RAMARRAY_CONST(0xB3CB, 4)
+#define JumpMForceData                   RAMARRAY_CONST(0xB424, 7)
+#define FallMForceData                   RAMARRAY_CONST(0xB42B, 7)
+#define PlayerYSpdData                   RAMARRAY_CONST(0xB432, 7)
+#define InitMForceData                   RAMARRAY_CONST(0xB439, 7)
+#define MaxLeftXSpdData                  RAMARRAY_CONST(0xB440, 3)
+#define MaxRightXSpdData                 RAMARRAY_CONST(0xB443, 4)
+#define FrictionData                     RAMARRAY_CONST(0xB447, 3)
+#define Climb_Y_SpeedData                RAMARRAY_CONST(0xB44A, 3)
+#define Climb_Y_MForceData               RAMARRAY_CONST(0xB44D, 3)
+#define PlayerAnimTmrData                RAMARRAY_CONST(0xB58C, 3)
+#define FireballXSpdData                 RAMARRAY_CONST(0xB687, 2)
+#define Bubble_MForceData                RAMARRAY_CONST(0xB74B, 2)
+#define BubbleTimerData                  RAMARRAY_CONST(0xB74D, 2)
+#define FlagpoleScoreMods                RAMARRAY_CONST(0xB84B, 5)
+#define FlagpoleScoreDigits              RAMARRAY_CONST(0xB850, 5)
+#define Jumpspring_Y_PosData             RAMARRAY_CONST(0xB8B6, 4)
+#define VineHeightData                   RAMARRAY_CONST(0xB949, 2)
+#define CannonBitmasks                   RAMARRAY_CONST(0xB9BA, 2)
+#define BulletBillXSpdData               RAMARRAY_CONST(0xBA31, 2)
+#define HammerEnemyOfsData               RAMARRAY_CONST(0xBA89, 9)
+#define HammerXSpdData                   RAMARRAY_CONST(0xBA92, 2)
+#define CoinTallyOffsets                 RAMARRAY_CONST(0xBBF8, 2)
+#define ScoreOffsets                     RAMARRAY_CONST(0xBBFA, 2)
+#define StatusBarNybbles                 RAMARRAY_CONST(0xBBFC, 2)
+#define BlockYPosAdderData               RAMARRAY_CONST(0xBCEB, 2)
+#define BrickQBlockMetatiles             RAMARRAY_CONST(0xBDE8, 14)
+#define MaxSpdBlockData                  RAMARRAY_CONST(0xBF9F, 2)
+#define ResidualGravityCode              RAMARRAY_CONST(0xBFA1, 3)
+#define LoopCmdWorldNumber               RAMARRAY_CONST(0xC06B, 11)
+#define LoopCmdPageNumber                RAMARRAY_CONST(0xC076, 11)
+#define LoopCmdYPosition                 RAMARRAY_CONST(0xC081, 11)
+#define NormalXSpdData                   RAMARRAY_CONST(0xC30C, 2)
+#define HBroWalkingTimerData             RAMARRAY_CONST(0xC326, 2)
+#define PRDiffAdjustData                 RAMARRAY_CONST(0xC398, 12)
+#define FirebarSpinSpdData               RAMARRAY_CONST(0xC44F, 5)
+#define FirebarSpinDirData               RAMARRAY_CONST(0xC454, 5)
+#define FlyCCXPositionData               RAMARRAY_CONST(0xC488, 16)
+#define FlyCCXSpeedData                  RAMARRAY_CONST(0xC498, 12)
+#define FlyCCTimerData                   RAMARRAY_CONST(0xC4A4, 4)
+#define FlameYPosData                    RAMARRAY_CONST(0xC59D, 4)
+#define FlameYMFAdderData                RAMARRAY_CONST(0xC5A1, 2)
+#define FireworksXPosData                RAMARRAY_CONST(0xC631, 6)
+#define FireworksYPosData                RAMARRAY_CONST(0xC637, 6)
+#define Bitmasks                         RAMARRAY_CONST(0xC68A, 8)
+#define Enemy17YPosData                  RAMARRAY_CONST(0xC692, 8)
+#define SwimCC_IDData                    RAMARRAY_CONST(0xC69A, 2)
+#define PlatPosDataLow                   RAMARRAY_CONST(0xC86B, 3)
+#define PlatPosDataHigh                  RAMARRAY_CONST(0xC86E, 3)
+#define HammerThrowTmrData               RAMARRAY_CONST(0xC9CE, 2)
+#define XSpeedAdderData                  RAMARRAY_CONST(0xC9D0, 4)
+#define RevivedXSpeed                    RAMARRAY_CONST(0xC9D4, 4)
+#define HammerBroJumpLData               RAMARRAY_CONST(0xCA10, 2)
+#define BlooberBitmasks                  RAMARRAY_CONST(0xCB87, 2)
+#define SwimCCXMoveData                  RAMARRAY_CONST(0xCC46, 4)
+#define FirebarPosLookupTbl              RAMARRAY_CONST(0xCCC7, 99)
+#define FirebarMirrorData                RAMARRAY_CONST(0xCD2A, 4)
+#define FirebarTblOffsets                RAMARRAY_CONST(0xCD2E, 12)
+#define FirebarYPos                      RAMARRAY_CONST(0xCD3A, 2)
+#define PRandomSubtracter                RAMARRAY_CONST(0xCED5, 5)
+#define FlyCCBPriority                   RAMARRAY_CONST(0xCEDA, 5)
+#define LakituDiffAdj                    RAMARRAY_CONST(0xCF25, 3)
+#define BridgeCollapseData               RAMARRAY_CONST(0xCFDD, 15)
+#define PRandomRange                     RAMARRAY_CONST(0xD061, 4)
+#define FlameTimerData                   RAMARRAY_CONST(0xD1D1, 8)
+#define StarFlagYPosAdder                RAMARRAY_CONST(0xD2CD, 4)
+#define StarFlagXPosAdder                RAMARRAY_CONST(0xD2D1, 4)
+#define StarFlagTileData                 RAMARRAY_CONST(0xD2D5, 4)
+#define BowserIdentities                 RAMARRAY_CONST(0xD736, 8)
+#define ResidualXSpdData                 RAMARRAY_CONST(0xD84D, 2)
+#define KickedShellXSpdData              RAMARRAY_CONST(0xD84F, 2)
+#define DemotedKoopaXSpdData             RAMARRAY_CONST(0xD851, 2)
+#define KickedShellPtsData               RAMARRAY_CONST(0xD892, 3)
+#define StompedEnemyPtsData              RAMARRAY_CONST(0xD965, 4)
+#define RevivalRateData                  RAMARRAY_CONST(0xD9D2, 2)
+#define SetBitsMask                      RAMARRAY_CONST(0xDA25, 7)
+#define ClearBitsMask                    RAMARRAY_CONST(0xDA2C, 7)
+#define PlayerPosSPlatData               RAMARRAY_CONST(0xDC17, 2)
+#define PlayerBGUpperExtent              RAMARRAY_CONST(0xDC62, 2)
+#define AreaChangeTimerData              RAMARRAY_CONST(0xDE03, 2)
+#define ClimbXPosAdder                   RAMARRAY_CONST(0xDE25, 2)
+#define ClimbPLocAdder                   RAMARRAY_CONST(0xDE27, 2)
+#define FlagpoleYPosData                 RAMARRAY_CONST(0xDE29, 5)
+#define SolidMTileUpperExt               RAMARRAY_CONST(0xDF8B, 4)
+#define ClimbMTileUpperExt               RAMARRAY_CONST(0xDF96, 4)
+#define EnemyBGCStateData                RAMARRAY_CONST(0xDFB9, 6)
+#define EnemyBGCXSpdData                 RAMARRAY_CONST(0xDFBF, 2)
+#define BoundBoxCtrlData                 RAMARRAY_CONST(0xE1FD, 48)
+#define ResidualMiscObjectCode           RAMARRAY_CONST(0xE392, 10)
+#define BlockBufferAdderData             RAMARRAY_CONST(0xE3AD, 3)
+#define BlockBuffer_X_Adder              RAMARRAY_CONST(0xE3B0, 28)
+#define BlockBuffer_Y_Adder              RAMARRAY_CONST(0xE3CC, 28)
+#define VineYPosAdder                    RAMARRAY_CONST(0xE433, 2)
+#define FirstSprXPos                     RAMARRAY_CONST(0xE4C0, 4)
+#define FirstSprYPos                     RAMARRAY_CONST(0xE4C4, 4)
+#define SecondSprXPos                    RAMARRAY_CONST(0xE4C8, 4)
+#define SecondSprYPos                    RAMARRAY_CONST(0xE4CC, 4)
+#define FirstSprTilenum                  RAMARRAY_CONST(0xE4D0, 4)
+#define SecondSprTilenum                 RAMARRAY_CONST(0xE4D4, 4)
+#define HammerSprAttrib                  RAMARRAY_CONST(0xE4D8, 4)
+#define FlagpoleScoreNumTiles            RAMARRAY_CONST(0xE541, 10)
+#define JumpingCoinTiles                 RAMARRAY_CONST(0xE682, 4)
+#define PowerUpGfxTable                  RAMARRAY_CONST(0xE6BE, 16)
+#define PowerUpAttributes                RAMARRAY_CONST(0xE6CE, 4)
+#define EnemyGraphicsTable               RAMARRAY_CONST(0xE73E, 258)
+#define EnemyGfxTableOffsets             RAMARRAY_CONST(0xE840, 27)
+#define EnemyAttributeData               RAMARRAY_CONST(0xE85B, 27)
+#define EnemyAnimTimingBMask             RAMARRAY_CONST(0xE876, 2)
+#define JumpspringFrameOffsets           RAMARRAY_CONST(0xE878, 5)
+#define DefaultBlockObjTiles             RAMARRAY_CONST(0xEBCD, 4)
+#define ExplosionTiles                   RAMARRAY_CONST(0xED06, 3)
+#define PlayerGfxTblOffsets              RAMARRAY_CONST(0xEE07, 16)
+#define PlayerGraphicsTable              RAMARRAY_CONST(0xEE17, 208)
+#define SwimKickTileNum                  RAMARRAY_CONST(0xEEE7, 2)
+#define IntermediatePlayerData           RAMARRAY_CONST(0xEF9E, 6)
+#define ChangeSizeOffsetAdder            RAMARRAY_CONST(0xF09C, 20)
+#define ObjOffsetData                    RAMARRAY_CONST(0xF1A5, 3)
+#define XOffscreenBitsData               RAMARRAY_CONST(0xF1E3, 16)
+#define DefaultXOnscreenOfs              RAMARRAY_CONST(0xF1F3, 3)
+#define YOffscreenBitsData               RAMARRAY_CONST(0xF22B, 9)
+#define DefaultYOnscreenOfs              RAMARRAY_CONST(0xF234, 3)
+#define HighPosUnitData                  RAMARRAY_CONST(0xF237, 2)
+#define SwimStompEnvelopeData            RAMARRAY_CONST(0xF3B1, 14)
+#define ExtraLifeFreqData                RAMARRAY_CONST(0xF4D4, 6)
+#define PowerUpGrabFreqData              RAMARRAY_CONST(0xF4DA, 30)
+#define PUp_VGrow_FreqData               RAMARRAY_CONST(0xF4F8, 32)
+#define BrickShatterFreqData             RAMARRAY_CONST(0xF62B, 16)
+#define MusicHeaderData                  RAMARRAY_CONST(0xF90D, 49)
+#define TimeRunningOutHdr                RAMARRAY_CONST(0xF93E, 5)
+#define Star_CloudHdr                    RAMARRAY_CONST(0xF943, 6)
+#define EndOfLevelMusHdr                 RAMARRAY_CONST(0xF949, 5)
+#define ResidualHeaderData               RAMARRAY_CONST(0xF94E, 5)
+#define UndergroundMusHdr                RAMARRAY_CONST(0xF953, 5)
+#define SilenceHdr                       RAMARRAY_CONST(0xF958, 4)
+#define CastleMusHdr                     RAMARRAY_CONST(0xF95C, 5)
+#define VictoryMusHdr                    RAMARRAY_CONST(0xF961, 5)
+#define GameOverMusHdr                   RAMARRAY_CONST(0xF966, 5)
+#define WaterMusHdr                      RAMARRAY_CONST(0xF96B, 6)
+#define WinCastleMusHdr                  RAMARRAY_CONST(0xF971, 5)
+#define GroundLevelPart1Hdr              RAMARRAY_CONST(0xF976, 6)
+#define GroundLevelPart2AHdr             RAMARRAY_CONST(0xF97C, 6)
+#define GroundLevelPart2BHdr             RAMARRAY_CONST(0xF982, 6)
+#define GroundLevelPart2CHdr             RAMARRAY_CONST(0xF988, 6)
+#define GroundLevelPart3AHdr             RAMARRAY_CONST(0xF98E, 6)
+#define GroundLevelPart3BHdr             RAMARRAY_CONST(0xF994, 6)
+#define GroundLevelLeadInHdr             RAMARRAY_CONST(0xF99A, 6)
+#define GroundLevelPart4AHdr             RAMARRAY_CONST(0xF9A0, 6)
+#define GroundLevelPart4BHdr             RAMARRAY_CONST(0xF9A6, 6)
+#define GroundLevelPart4CHdr             RAMARRAY_CONST(0xF9AC, 6)
+#define DeathMusHdr                      RAMARRAY_CONST(0xF9B2, 6)
+#define Star_CloudMData                  RAMARRAY_CONST(0xF9B8, 73)
+#define GroundM_P1Data                   RAMARRAY_CONST(0xFA01, 27)
+#define SilenceData                      RAMARRAY_CONST(0xFA1C, 45)
+#define GroundM_P2AData                  RAMARRAY_CONST(0xFA49, 44)
+#define GroundM_P2BData                  RAMARRAY_CONST(0xFA75, 40)
+#define GroundM_P2CData                  RAMARRAY_CONST(0xFA9D, 37)
+#define GroundM_P3AData                  RAMARRAY_CONST(0xFAC2, 25)
+#define GroundM_P3BData                  RAMARRAY_CONST(0xFADB, 30)
+#define GroundMLdInData                  RAMARRAY_CONST(0xFAF9, 44)
+#define GroundM_P4AData                  RAMARRAY_CONST(0xFB25, 38)
+#define GroundM_P4BData                  RAMARRAY_CONST(0xFB4B, 39)
+#define DeathMusData                     RAMARRAY_CONST(0xFB72, 2)
+#define GroundM_P4CData                  RAMARRAY_CONST(0xFB74, 48)
+#define CastleMusData                    RAMARRAY_CONST(0xFBA4, 161)
+#define GameOverMusData                  RAMARRAY_CONST(0xFC45, 45)
+#define TimeRunOutMusData                RAMARRAY_CONST(0xFC72, 62)
+#define WinLevelMusData                  RAMARRAY_CONST(0xFCB0, 97)
+#define UndergroundMusData               RAMARRAY_CONST(0xFD11, 65)
+#define WaterMusData                     RAMARRAY_CONST(0xFD52, 255)
+#define EndOfCastleMusData               RAMARRAY_CONST(0xFE51, 119)
+#define VictoryMusData                   RAMARRAY_CONST(0xFEC8, 56)
+#define FreqRegLookupTbl                 RAMARRAY_CONST(0xFF00, 102)
+#define MusicLengthLookupTbl             RAMARRAY_CONST(0xFF66, 48)
+#define EndOfCastleMusicEnvData          RAMARRAY_CONST(0xFF96, 4)
+#define AreaMusicEnvData                 RAMARRAY_CONST(0xFF9A, 8)
+#define WaterEventMusEnvData             RAMARRAY_CONST(0xFFA2, 40)
+#define BowserFlameEnvData               RAMARRAY_CONST(0xFFCA, 32)
+#define BrickShatterEnvData              RAMARRAY_CONST(0xFFEA, 16)

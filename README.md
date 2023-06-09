@@ -13,6 +13,7 @@ Progress made:
 - [ ] Audio for SMB2J (uses 2C33 audio chip)
 - [ ] Refactor of code
 - [ ] A decent UI/UX, customizable controls
+- [ ] Get the core games compiling in C (to make sure it's portable to older and embedded systems)
 
 ## What's supported
 

@@ -5,38 +5,380 @@
 #include <cstdint>
 #include <utility>
 
-#include "config.h"
-
+#include "mario.h"
 
 typedef unsigned char byte;
 typedef unsigned short ushort;
 //#define warning printf
 #define warning(...)
+
+#ifdef _MSC_VER
+#define NOINLINE __declspec(noinline)
+#define thread_local __declspec(thread)
+#else
 #define NOINLINE __attribute__ ((noinline))
+#define thread_local _Thread_local
+#endif
 
+void SMB1_Reset();
+void SMB1_NMI();
+void SMB2J_Reset();
+void SMB2J_NMI();
 
-// A global RAM buffer
-static byte _rammem[0x10000];
+// Represents the internal PPU register.
+union ppureg {
+    struct {
+        // least to most significant order
+        byte XXXXX : 5;
+        byte YYYYY : 5;
+        byte NN : 2;
+        byte yyy : 3;
+    };
+    struct {
+        byte lo : 8;
+        byte hi : 7;
+    };
+    ushort value;
+};
 
-// And a copy of CHR ROM
-static byte _chrrom[0x2000];
+struct ppu_state {
+    // internal regs
+    ppureg v;
+    ppureg t;
+    byte x;
+    byte w;
+    byte increment_mode;
+    bool screen_on;
+};
 
-byte& RAM(ushort offset) {
-    return _rammem[offset];
+#define GAME_SMB1 0
+#define GAME_SMB2J 1
+
+struct sprite {
+    struct SMB_tile tile;
+    bool draw_behind;
+};
+
+struct SMB_state {
+    byte rammem[0x10000];
+    byte chrrom[0x2000];
+    byte ppuram[0x4000];
+    int which_game;
+    bool reset_occurred;
+
+    struct SMB_callbacks callbacks;
+    size_t smb2j_disk_offset;
+    ppu_state ppu;
+    unsigned short scroll_x;
+    struct sprite sprites[64];
+};
+
+thread_local static struct SMB_state *SMB_STATE;
+
+#define RAM(offset) (SMB_STATE->rammem[offset])
+#define PPURAM(offset) (SMB_STATE->ppuram[offset])
+#define CHRROM(offset) (SMB_STATE->chrrom[offset])
+
+// Write to $4016
+void joystick_strobe(byte x) {
 }
-template<typename T>
-inline T& RAM(ushort offset) {
-    byte* ptr = _rammem + offset;
-    T* dataptr = (T*)ptr;
-    return *dataptr;
+// Write to $4011
+void apu_dmc_raw(byte x) {
+}
+// Write to $4015
+void apu_snd_chn(byte x) {
 }
 
-byte& CHRROM_writable(ushort offset) {
-    return _chrrom[offset & 0x1FFF];
+static void joy1(struct SMB_buttons *buttons) {
+    if (SMB_STATE->callbacks.joy1) {
+        return SMB_STATE->callbacks.joy1(SMB_STATE->callbacks.userdata, buttons);
+    }
 }
-const byte& CHRROM(ushort offset) {
-    return _chrrom[offset & 0x1FFF];
+static void joy2(struct SMB_buttons *buttons) {
+    if (SMB_STATE->callbacks.joy2) {
+        return SMB_STATE->callbacks.joy2(SMB_STATE->callbacks.userdata, buttons);
+    }
 }
+static void announce_main_scroll(unsigned short scroll_x) {
+    SMB_STATE->scroll_x = scroll_x;
+}
+static void transfer_sprite_data(const byte *data) {
+    struct sprite *s = SMB_STATE->sprites;
+    for (int i = 0; i < 64; i++) {
+        s[i].tile.y = data[i * 4 + 0] + 1;
+        s[i].tile.tileidx = data[i * 4 + 1];
+        byte attr = data[i * 4 + 2];
+        s[i].tile.x = data[i * 4 + 3];
+
+        s[i].tile.paletteidx = (attr & 0x03) + 4;
+        s[i].tile.flip_horz = (attr & 0x40) != 0;
+        s[i].tile.flip_vert = (attr & 0x80) != 0;
+
+        s[i].draw_behind = (attr & 0x20) != 0;
+    }
+}
+
+static bool seek_rom(struct SMB_state *state, size_t offset) {
+    return state->callbacks.seek_rom(state->callbacks.userdata, offset);
+}
+static bool read_rom_bytes(struct SMB_state *state, byte* buf, size_t size) {
+    return state->callbacks.read_rom_bytes(state->callbacks.userdata, buf, size);
+}
+
+static bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset) {
+    if (!seek_rom(state, prg_offset)) { return false; }
+    if (!read_rom_bytes(state, state->rammem+0x8000, 0x8000)) { return false; }
+    if (!seek_rom(state, chr_offset)) { return false; }
+    if (!read_rom_bytes(state, state->chrrom, 0x2000)) { return false; }
+    state->which_game = GAME_SMB1;
+    state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
+    return true;
+}
+
+
+struct FdsFile {
+    const char *name;
+    size_t file_offset;
+    ushort size;
+    ushort org;
+    int type;
+};
+
+#define TYPE_PRGRAM 0
+#define TYPE_CHRRAM 1
+
+
+#define SMB2J_FDS_FILES_COUNT 6
+
+// hard-code some offsets for now
+// assuming file has a 16-byte header (starts with 46 44 53, i.e. "FDS")
+static FdsFile SMB2J_FDS_FILES[SMB2J_FDS_FILES_COUNT] = {
+    {"SM2CHAR1", 0x013C, 0x2000, 0x0000, TYPE_CHRRAM},
+    {"SM2CHAR2", 0x214D, 0x0040, 0x0760, TYPE_CHRRAM},
+    {"SM2MAIN ", 0x219E, 0x8000, 0x6000, TYPE_PRGRAM},
+    {"SM2DATA2", 0xA1AF, 0x0E2F, 0xC470, TYPE_PRGRAM},
+    {"SM2DATA3", 0xAFEF, 0x0CCF, 0xC5D0, TYPE_PRGRAM},
+    {"SM2DATA4", 0xBCCF, 0x0F4C, 0xC2B4, TYPE_PRGRAM},
+};
+
+bool smb2j_load_file(struct SMB_state *state, const char *name) {
+    if (strncmp(name, "SM2SAVE ", 8) == 0) {
+        // treat the save byte specially
+
+        if (state->callbacks.smb2j_load_games_beaten) {
+            state->rammem[0xD29F] = state->callbacks.smb2j_load_games_beaten(state->callbacks.userdata);
+        } else {
+            state->rammem[0xD29F] = 0;
+        }
+
+        return true;
+    }
+
+    for (int i = 0; i < SMB2J_FDS_FILES_COUNT; i++) {
+        const FdsFile& a = SMB2J_FDS_FILES[i];
+        bool eq = strncmp(name, a.name, 8) == 0;
+        if (eq) {
+            // Found it!
+            byte *copy_to;
+            if (a.type == TYPE_CHRRAM) {
+                // Copy the bytes over to CHRRAM
+                copy_to = state->chrrom + a.org;
+            } else if (a.type == TYPE_PRGRAM) {
+                // Copy the bytes over to RAM
+                copy_to = state->rammem + a.org;
+            }
+            if (!seek_rom(state, state->smb2j_disk_offset + a.file_offset)) { return false; }
+            if (!read_rom_bytes(state, copy_to, a.size)) { return false; }
+
+            if (a.type == TYPE_CHRRAM) {
+                state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
+bool smb2j_save_games_beaten(struct SMB_state *state, byte games_beaten) {
+    if (state->callbacks.smb2j_save_games_beaten) {
+        return state->callbacks.smb2j_save_games_beaten(state->callbacks.userdata, games_beaten);
+    } else {
+        return false;
+    }
+}
+
+static bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
+    // In this case, the 16 bit header is this:
+    static char fds_disk_verification[16] = {0x01, '*','N','I','N','T','E','N','D','O','-','H','V','C','*', 0x01};
+    byte headerbuf[16];
+    if (!seek_rom(state, disk_offset)) { return false; }
+    if (!read_rom_bytes(state, headerbuf, 16)) { return false; }
+
+    bool match = memcmp(headerbuf, fds_disk_verification, 16) == 0;
+    if (!match) { return false; }
+    state->which_game = GAME_SMB2J;
+    state->smb2j_disk_offset = disk_offset;
+
+    // Load these automatically
+    smb2j_load_file(state, "SM2CHAR1");
+    smb2j_load_file(state, "SM2MAIN ");
+    smb2j_load_file(state, "SM2SAVE ");
+    return true;
+}
+
+static bool detect_and_load_rom(struct SMB_state *state) {
+    byte headerbuf[16];
+    if (!read_rom_bytes(state, headerbuf, 16)) {
+        return false;
+    }
+    if (headerbuf[0] == 'N' && headerbuf[1] == 'E' && headerbuf[2] == 'S' && headerbuf[3] == 0x1A) {
+        // An INES header. Probably SMB1.
+        return load_smb1(state, 0x10, 0x8010);
+    } else if (headerbuf[0] == 'F' && headerbuf[1] == 'D' && headerbuf[2] == 'S' && headerbuf[3] == 0x1A) {
+        // An FDS header. Probably SMB2J.
+        // TODO: there's an FDS version of SMB1. Maybe handle it?
+        return load_smb2j(state, 0x10);
+    } else {
+        // There are some ROMs that don't include an FDS header, but just the single disk image.
+        return load_smb2j(state, 0);
+    }
+}
+
+struct SMB_state *SMB_get_state() {
+    return SMB_STATE;
+}
+size_t SMB_state_size() {
+    return sizeof(struct SMB_state);
+}
+void SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb) {
+    memset(state, 0, sizeof(struct SMB_state));
+    state->callbacks = *cb;
+    detect_and_load_rom(state);
+}
+
+byte* SMB_ram(struct SMB_state *state) {
+    return state->rammem;
+}
+byte* SMB_ppuram(struct SMB_state *state) {
+    return state->ppuram;
+}
+
+
+void SMB_tick(struct SMB_state *state) {
+    // Set a global variable while it's being ticked
+    SMB_STATE = state;
+#ifdef SMB1_MODE
+    if (state->which_game == GAME_SMB1) {
+        if (!state->reset_occurred) {
+            SMB1_Reset();
+            state->reset_occurred = true;
+        }
+        SMB1_NMI();
+    }
+#endif
+#ifdef SMB2J_MODE
+    if (state->which_game == GAME_SMB2J) {
+        if (!state->reset_occurred) {
+            SMB2J_Reset();
+            state->reset_occurred = true;
+        }
+        SMB2J_NMI();
+    }
+#endif
+}
+
+
+#define PPU_STATE (SMB_STATE->ppu)
+#include "ppu.h"
+#undef PPU_STATE
+
+static inline void draw_nametable_tile(const struct SMB_state *state, int x, int y, ushort ppu_offset, int tilex, int tiley) {
+    int j = tilex;
+    int i = tiley;
+    int off = i * 32 + j;
+    int tileidx = state->ppuram[ppu_offset + off] + 0x100;
+    // Find which part of the pallete to use
+    // Look it up in the attribute table
+
+    byte a = state->ppuram[ppu_offset + 0x03c0 + (i / 4) * 8 + (j / 4)];
+    a >>= ((j / 2) % 2) * 2;
+    a >>= ((i / 2) % 2) * 4;
+    a &= 0x03;
+    int paletteidx = a;
+
+    struct SMB_tile tile;
+    tile.x = x;
+    tile.y = y;
+    tile.tileidx = tileidx;
+    tile.paletteidx = paletteidx;
+    tile.flip_horz = false;
+    tile.flip_vert = false;
+
+    state->callbacks.draw_tile(state->callbacks.userdata, tile);
+}
+
+static inline void draw_nametable_rect(const struct SMB_state *state, int x, int y, ushort ppu_offset, int fromx, int fromy, int tox, int toy) {
+    for (int i = fromy; i < toy; i++) {
+        for (int j = fromx; j < tox; j++) {
+            draw_nametable_tile(state, x + (j - fromx) * 8, y + (i-fromy) * 8, ppu_offset, j, i);
+        }
+    }
+}
+
+void draw_graphics(struct SMB_state* state) {
+    if (state->callbacks.update_palette) {
+        // The palette can change even if the screen is off (the background color, namely)
+        state->callbacks.update_palette(state->callbacks.userdata, state->ppuram + 0x3F00);
+    }
+
+    if (!state->ppu.screen_on) {
+        return;
+    }
+    if (!state->callbacks.draw_tile) {
+        return;
+    }
+
+    for (int spriteidx = 0; spriteidx < 64; spriteidx++) {
+        const struct sprite *s = state->sprites + (63 - spriteidx);
+        if (s->draw_behind) {
+            state->callbacks.draw_tile(state->callbacks.userdata, s->tile);
+        }
+    }
+
+    // Status bar
+    draw_nametable_rect(state, 0, 0, 0x2000, 0, 0, 32, 4);
+
+    int scroll_off = -(state->scroll_x % 256);
+    int scroll_nametable = state->scroll_x / 256;
+
+    if (scroll_nametable == 0) {
+        draw_nametable_rect(state, scroll_off, 32, 0x2000, 0, 4, 32, 30);
+        draw_nametable_rect(state, 256 + scroll_off, 32, 0x2400, 0, 4, 32, 30);
+    } else {
+        draw_nametable_rect(state, scroll_off, 32, 0x2400, 0, 4, 32, 30);
+        draw_nametable_rect(state, 256 + scroll_off, 32, 0x2000, 0, 4, 32, 30);
+    }
+
+    for (int spriteidx = 0; spriteidx < 64; spriteidx++) {
+        const struct sprite *s = state->sprites + (63 - spriteidx);
+        if (!s->draw_behind) {
+            state->callbacks.draw_tile(state->callbacks.userdata, s->tile);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Implementation of Ghidra decompiler functions.
 
@@ -55,6 +397,20 @@ const byte& CHRROM(ushort offset) {
 #define SUBimpl(x,y) static inline uint64_t SUB##x##y(uint64_t a, uint64_t b) { \
     return ((a & BITMASK_HELPER(x)) >> (8*b)) & BITMASK_HELPER(y); \
 }
+
+static inline uint64_t CAST_TO_INT_helper(void *var, size_t sz) {
+    uint64_t v = 0;
+    if (sz > sizeof(v)) {
+        printf("Nope\n");
+        return 0;
+    }
+    memcpy(&v, var, sz);
+    return v;
+}
+
+#define CAST_TO_INT(var) CAST_TO_INT_helper(&(var), sizeof(var))
+
+#define SUBPIECE(var,a,b) ((CAST_TO_INT(var)>>(a*8)) & BITMASK_HELPER(b))
 
 CONCATimpl(1,1)
 CONCATimpl(1,2)
@@ -96,7 +452,7 @@ public:
 };
 
 RamPtr& RAMPtr(ushort offset) {
-    RamPtr *ptr = (RamPtr*)(_rammem + offset);
+    RamPtr *ptr = (RamPtr*)(&RAM(offset));
     return *ptr;
 }
 
@@ -165,70 +521,36 @@ public:
     }
 };
 
-
-// An iterator that implements the "do-while i != 0" pattern.
-// if i starts at 0, then it iterates 256 times (0, 255, 254, 253, ..., 1)
-class countdown_zero {
-private:
-    byte i;
-    bool started;
-public:
-    countdown_zero(): i(1), started(true) {}
-    countdown_zero(byte i): i(i), started(false) {}
-
-    countdown_zero begin() { return *this; }
-    countdown_zero end() { return countdown_zero(); }
-    byte operator*() { return i; }
-
-    bool operator!=(const countdown_zero &other) {
-        if (!started || !other.started) {
-            return true;
-        }
-        return !(i == 0 || other.i == 0);
-    }
-
-    void operator++() {
-        i -= 1;
-        started = true;
-    }
-};
-
-// An iterator that implements the "do-while (char)i >= 0" pattern.
-// Never includes a "negative" number. Only yields 0-127 inclusive.
-class countdown_positive {
-private:
-    byte i;
-    bool started;
-public:
-    countdown_positive(): i(0), started(true) {}
-    countdown_positive(byte i): i(i), started(false) {}
-
-    countdown_positive begin() { return *this; }
-    countdown_positive end() { return countdown_positive(); }
-    byte operator*() { return i; }
-
-    bool operator!=(const countdown_positive &other) {
-        if (!started || !other.started) {
-            return true;
-        }
-        return  !(i >= 128 || other.i >= 128);
-    }
-
-    void operator++() {
-        i -= 1;
-        started = true;
-    }
-};
-
 // Workaround!!!
 // Used to avoid some undefined behavior in MSVC
-__declspec(noinline) static byte force_byte(byte x) {
+NOINLINE static byte force_byte(byte x) {
     return x;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /////////////////////////
 /// implemented code! ///
 /////////////////////////
+
+#define RAMPTR RAMPtr
+#define RAMARRAY RamByteArray
+#define RAMARRAY_CONST ConstRamByteArray
 
 #ifdef SMB1_MODE
 
@@ -237,13 +559,12 @@ __declspec(noinline) static byte force_byte(byte x) {
 static const ConstRamByteArray AreaAddrOffsets = ConstRamByteArray(0x9CBC, 0x24);
 static const ConstRamByteArray GameText = ConstRamByteArray(0x8752, 0x9B);
 
-#elif SMB2J_MODE
+#elif defined(SMB2J_MODE)
 
 #include "generated/smb2j_romarrays.h"
 #include "generated/smb2j_vars.h"
 
 #endif
-
 
 
 // Set 0's in memory.
@@ -252,44 +573,34 @@ static const ConstRamByteArray GameText = ConstRamByteArray(0x8752, 0x9B);
 // Doesn't set the stack, between $0160 and $01FF inclusive.
 // On SMB2J, doesn't set $0100 to $0108 inclusive.
 // Note that this port, which doesn't target the 6502, doesn't use the stack at $0160-$1FFF at all.
-// 
+
 #ifdef SMB1_MODE
-// SMB:90CC
-// Signature: [Y] -> [A]
-byte InitializeMemory(byte i) {
-    memset(&RAM(0x000), 0, 0x160);
-    memset(&RAM(0x200), 0, (size_t)0x700-0x200);
-    memset(&RAM(0x700), 0, (byte)(i+1));
-    return 0;
-}
-#elif SMB2J_MODE
-// SM2MAIN:6f08
-// Signature: [Y] -> [A]
-byte InitializeMemory(byte i) {
-    memset(&RAM(0x000), 0, 0x100);
-    memset(&RAM(0x109), 0, (size_t)0x160-0x109);
-    memset(&RAM(0x200), 0, (size_t)0x700 - 0x200);
-    memset(&RAM(0x700), 0, (byte)(i + 1));
-    return 0;
-}
+    // SMB:90CC
+    // Signature: [Y] -> [A]
+    byte InitializeMemory(byte i) {
+        memset(&RAM(0x000), 0, 0x160);
+        memset(&RAM(0x200), 0, (size_t)0x700 - 0x200);
+        memset(&RAM(0x700), 0, (byte)(i + 1));
+        return 0;
+    }
+
+#elif defined(SMB2J_MODE)
+
+    // SM2MAIN:6f08
+    // Signature: [Y] -> [A]
+    byte InitializeMemory(byte i) {
+        memset(&RAM(0x000), 0, 0x100);
+        memset(&RAM(0x109), 0, (size_t)0x160 - 0x109);
+        memset(&RAM(0x200), 0, (size_t)0x700 - 0x200);
+        memset(&RAM(0x700), 0, (byte)(i + 1));
+        return 0;
+    }
 #endif
 
 void jmpengine_overflow(byte index) {
     warning("JMPENGINE overflow! %02X\n", index);
 }
-void ppuctrl(byte x);
-void ppumask(byte x);
-void ppuscroll(byte x);
-void ppuaddr(byte x);
-void ppudata(byte x);
-void joystick_strobe(byte x);
-void apu_dmc_raw(byte x);
-void apu_snd_chn(byte x);
 
-byte ppustatus();
-byte ppudata();
-byte joy1();
-byte joy2();
 
 typedef uint64_t int3;
 typedef uint64_t uint3;
@@ -297,31 +608,35 @@ typedef uint64_t uint6;
 typedef uint64_t uint7;
 typedef uint64_t undefined3;
 
+
 #ifdef SMB1_MODE
 
 #include "generated/smb.h"
+#include "common.h"
+
+void DrawTitleScreen();
+bool TransposePlayers();
+
 #include "generated/smb.cpp"
 #include "smb_functions.h"
 
-#elif SMB2J_MODE
+#elif defined(SMB2J_MODE)
 
 // read $4032
 byte FDS_drive_status() { return 0; }
 
 #include "generated/smb2j.h"
+#include "common.h"
+
+void ScrollScreen(byte);
+struct_ayz LoadFiles();
+void UpdateGamesBeaten();
+
 #include "generated/smb2j.cpp"
 #include "smb_functions.h"
 
 #endif
 
-void announce_main_scroll();
-void transfer_sprite_data(const byte*);
-
-
-void SoundEngine() {
-    // Stubbed out for now
-    // Sound code is horrifying, so we're dealing with it later
-}
 
 // SMB1 and SMBLL's Pseudo-Random Number Generator
 //
@@ -359,53 +674,11 @@ static void update_prng(byte *prng) {
     }
 }
 
-static inline void dectimer(byte& timer) {
-    if (timer != 0) {
-        timer--;
-    }
-}
-
-static inline void dectimers() {
-    if (TimerControl >= 2) {
-        TimerControl -= 1;
-    } else {
-        // If TimerControl is 0 or 1...
-        // decrement the timers.
-
-        TimerControl = 0;
-
-        // We unrolled a loop on the timers here
-        // The NES version decrements in reverse order as listed here, but the order doesn't really matter
-
-        dectimer(SelectTimer);      dectimer(PlayerAnimTimer);    dectimer(JumpSwimTimer);   dectimer(RunningTimer);
-        dectimer(BlockBounceTimer); dectimer(SideCollisionTimer); dectimer(JumpspringTimer); dectimer(GameTimerCtrlTimer);
-        dectimer(ClimbSideTimer);
-        for (int i = 0; i < 5; i++) {
-            dectimer(EnemyFrameTimer[i]);
-        }
-        dectimer(FrenzyEnemyTimer); dectimer(BowserFireBreathTimer); dectimer(StompTimer); dectimer(AirBubbleTimer);
-        dectimer(UnusedTimer1);     dectimer(UnusedTimer2);
-        // up to and including the timer at $0794
-
-        IntervalTimerControl -= 1;
-        if (IntervalTimerControl >= 0x80) {
-            IntervalTimerControl = 20;
-            dectimer(ScrollIntervalTimer);
-            for (int i = 0; i < 7; i++) {
-                dectimer(EnemyIntervalTimer[i]);
-            }
-            dectimer(BrickCoinTimer); dectimer(InjuryTimer); dectimer(StarInvincibleTimer); dectimer(ScreenTimer);
-            dectimer(WorldEndTimer);  dectimer(DemoTimer);   dectimer(UnusedTimer3);
-            // up to and including the timer at $07A3
-        }
-    }
-}
-
 #ifdef SMB1_MODE
 
 // SMB:8000
 // Signature: [] -> []
-void Reset() {
+void SMB1_Reset() {
     ppuctrl(0x10);
     // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
     // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
@@ -440,7 +713,7 @@ void Reset() {
 
 // SMB:8082
 // Signature: [] -> []
-void NMI() {
+void SMB1_NMI() {
     Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & ~0x80;
     ppuctrl(Mirror_PPU_CTRL_REG1 & ~0x81);
 
@@ -511,7 +784,8 @@ void NMI() {
     ppuctrl(prev_mirror_ppu_ctrl | 0x80);
 
     // The scroll is known
-    announce_main_scroll();
+    announce_main_scroll(SMB_STATE->ppu.t.NN * 256 + SMB_STATE->ppu.t.XXXXX * 8 + SMB_STATE->ppu.x);
+    draw_graphics(SMB_STATE);
 }
 
 // SMB:86ff
@@ -529,6 +803,8 @@ void DrawTitleScreen() {
     }
 }
 
+#define SWAP(a, b) do { byte tmp = a; a = b; b = tmp; } while (0)
+
 // Switch between Mario and Luigi.
 // Save and restore their states.
 // 
@@ -539,13 +815,13 @@ bool TransposePlayers() {
     if ((NumberOfPlayers != 0) && (OffScr_NumberofLives < 0x80)) {
         CurrentPlayer ^= 1;
         // We unrolled a loop here
-        std::swap(NumberofLives, OffScr_NumberofLives);
-        std::swap(HalfwayPage,   OffScr_HalfwayPage);
-        std::swap(LevelNumber,   OffScr_LevelNumber);
-        std::swap(Hidden1UpFlag, OffScr_Hidden1UpFlag);
-        std::swap(CoinTally,     OffScr_CoinTally);
-        std::swap(WorldNumber,   OffScr_WorldNumber);
-        std::swap(AreaNumber,    OffScr_AreaNumber);
+        SWAP(NumberofLives, OffScr_NumberofLives);
+        SWAP(HalfwayPage,   OffScr_HalfwayPage);
+        SWAP(LevelNumber,   OffScr_LevelNumber);
+        SWAP(Hidden1UpFlag, OffScr_Hidden1UpFlag);
+        SWAP(CoinTally,     OffScr_CoinTally);
+        SWAP(WorldNumber,   OffScr_WorldNumber);
+        SWAP(AreaNumber,    OffScr_AreaNumber);
         
         return false;
     } else {
@@ -553,11 +829,7 @@ bool TransposePlayers() {
     }
 }
 
-#elif SMB2J_MODE
-
-
-bool load_file_from_provider(const char *);
-bool write_games_beaten_to_provider(byte games_beaten);
+#elif defined(SMB2J_MODE)
 
 void IRQHandler();
 
@@ -589,22 +861,26 @@ struct_ayz LoadFiles() {
     // The BIOS call is responsible for a lot of lag frames on the original hardware! Fortunately we don't deal with those here.
 
     byte files = 0;
+    bool success = false;
 
     switch (FileListNumber) {
     case 0: // Worlds 1-4: SM2CHAR1, SM2MAIN, SM2SAVE
-        load_file_from_provider("SM2CHAR1");
-        load_file_from_provider("SM2MAIN ");
-        load_file_from_provider("SM2SAVE ");
+        if (!smb2j_load_file(SMB_STATE, "SM2CHAR1")) { goto end; }
+        if (!smb2j_load_file(SMB_STATE, "SM2MAIN ")) { goto end; }
+        if (!smb2j_load_file(SMB_STATE, "SM2SAVE ")) { goto end; }
+        success = true;
         files = 3;
         break;
     case 1: // Worlds 5-8: SM2DATA2
-        load_file_from_provider("SM2DATA2");
+        if (!smb2j_load_file(SMB_STATE, "SM2DATA2")) { goto end; }
+        success = true;
         files = 1;
         break;
     case 2: // Ending, w9: SM2CHAR2, SM2DATA3, SM2SAVE
-        load_file_from_provider("SM2CHAR2");
-        load_file_from_provider("SM2DATA3");
-        load_file_from_provider("SM2SAVE ");
+        if (!smb2j_load_file(SMB_STATE, "SM2CHAR2")) { goto end; }
+        if (!smb2j_load_file(SMB_STATE, "SM2DATA3")) { goto end; }
+        if (!smb2j_load_file(SMB_STATE, "SM2SAVE ")) { goto end; }
+        success = true;
         files = 3;
 
         // The FDS BIOS call overwrites some zero-page variables that are used during the ending.
@@ -628,13 +904,15 @@ struct_ayz LoadFiles() {
         RAM(0xFA) = 0x27;
         break;
     case 3: // Worlds A-D: SM2DATA4
-        load_file_from_provider("SM2DATA4");
+        smb2j_load_file(SMB_STATE, "SM2DATA4");
+        success = true;
         files = 1;
         break;
     default:
         break;
     }
 
+end:
     // this runs long enough for the scroll code of the irq to trigger
     trigger_scroll_irq_if_havent_yet();
 
@@ -644,7 +922,7 @@ struct_ayz LoadFiles() {
     struct_ayz res;
     res.a = 0;
     res.y = files;
-    res.z = true;
+    res.z = success;
     return res;
 }
 
@@ -655,7 +933,7 @@ void FDS_Ctrl(byte ctrl) {
 
 // SM2MAIN:6000
 // Signature: [] -> []
-void Reset() {
+void SMB2J_Reset() {
     FDS_Ctrl(RAM(0xfa) & ~0x08);
 
     // On a hard reset, the World number is a value such as 0xFF
@@ -699,7 +977,7 @@ void Reset() {
 
 // SM2MAIN:60a0
 // Signature: [] -> []
-void NMI() {
+void SMB2J_NMI() {
     Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & ~0x81;
     ppuctrl(Mirror_PPU_CTRL_REG1);
 
@@ -779,7 +1057,8 @@ void NMI() {
     trigger_scroll_irq_if_havent_yet();
 
     // The scroll is known
-    announce_main_scroll();
+    announce_main_scroll(SMB_STATE->ppu.t.NN * 256 + SMB_STATE->ppu.t.XXXXX * 8 + SMB_STATE->ppu.x);
+    draw_graphics(SMB_STATE);
 
     ppustatus();
 
@@ -840,7 +1119,7 @@ void ScrollScreen(byte scroll_amount) {
 // Signature: [] -> []
 void UpdateGamesBeaten() {
     // The FDS version would use an FDS BIOS subroutine
-    bool success = write_games_beaten_to_provider(GamesBeatenCount[0]);
+    bool success = smb2j_save_games_beaten(SMB_STATE, GamesBeatenCount[0]);
     byte error_code = 0;
 
     if (!success) {
@@ -876,118 +1155,4 @@ void UpdateGamesBeaten() {
     }
 }
 
-
-
 #endif
-
-
-
-// This is the only subroutine in all of SMB that writes to the PPU! (aside from WriteNTAddr, which blanks a nametable)
-// Each draw buffer item has the format: <ppu_hi> <ppu_lo> <count> <data...>
-// 
-// SMB:8edd, SM2MAIN:6d56
-// Signature: [r00, r01] -> []
-void UpdateScreen(const byte* buf) {
-    while (buf[0] != 0) {
-        // Start writing to the PPU address
-        ppustatus();
-        ppuaddr(buf[0]);
-        ppuaddr(buf[1]);
-
-        if (buf[2] & 0x80) {
-            // Draw vertically
-            Mirror_PPU_CTRL_REG1 |= 0x04;
-        } else {
-            // Draw horizontally
-            Mirror_PPU_CTRL_REG1 &= ~0x04;
-        }
-        ppuctrl(Mirror_PPU_CTRL_REG1);
-
-        int count = buf[2] & 0x3F;
-        if (count == 0) {
-            // The original SMB does a do-while loop, and so a count of 0 is actually 256
-            count = 256;
-        }
-
-        if (buf[2] & 0x40) {
-            // Run-length encoding
-            for (int i = 0; i < count; i++) {
-                ppudata(buf[3]);
-            }
-            buf += 3 + 1;
-        } else {
-            // Variable-length
-            for (int i = 0; i < count; i++) {
-                ppudata(buf[3 + i]);
-            }
-            buf += 3 + count;
-        }
-
-        // The original SMB does these extra, seemingly pointless assignments to the ppuaddr register
-        ppuaddr(0x3f);
-        ppuaddr(0);
-        ppuaddr(0);
-        ppuaddr(0);
-    }
-    ppustatus();
-    ppuscroll(0);
-    ppuscroll(0);
-}
-
-// SMB:8e2d, SM2MAIN:6ca6
-// Signature: [A] -> []
-void WriteNTAddr(byte ppu_page) {
-    ppuaddr(ppu_page);
-    ppuaddr(0);
-
-    // Fill the nametable with blank tiles
-    for (int i = 0; i < 0x3C0; i++) {
-        ppudata(0x24);
-    }
-    // ... and clear the colors of all metatiles to the first palette
-    for (int i = 0; i < 0x40; i++) {
-        ppudata(0x00);
-    }
-
-    VRAM_Buffer1_Offset = 0;
-    VRAM_Buffer1[0] = 0;
-    HorizontalScroll = 0;
-    VerticalScroll = 0;
-    ppuscroll(0);
-    ppuscroll(0);
-    return;
-}
-
-// SMB:8e5c, SM2MAIN:6cd5
-// Signature: [] -> []
-void ReadJoypads() {
-    joystick_strobe(1);
-    joystick_strobe(0);
-    ReadPortBits(0);
-    ReadPortBits(1);
-}
-
-
-// SMB:8e6a, SM2MAIN:6ce3
-// Signature: [X] -> []
-void ReadPortBits(byte joynum) {
-    static const byte button_lookup[8] = { 0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01 };
-
-    byte buttons = 0;
-
-    for (int i = 0; i < 8; i++) {
-        byte j = joynum == 0 ? joy1() : joy2();
-        if ((j & 0x03) != 0) {
-            buttons |= button_lookup[i];
-        }
-    }
-
-    SavedJoypadBits[joynum] = buttons;
-
-    // If Select or Start were pressed last time this was called, then "unpress" them.
-    if ((buttons & (0x20 | 0x10) & JoypadBitMask[joynum]) != 0) {
-        SavedJoypadBits[joynum] = buttons & ~(0x20 | 0x10);
-    } else {
-        JoypadBitMask[joynum] = buttons;
-    }
-}
