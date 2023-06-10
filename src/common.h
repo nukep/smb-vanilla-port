@@ -8,7 +8,6 @@ byte InitializeMemory(byte);
 void ReadJoypads();
 void ReadPortBits(byte joynum);
 
-void SoundEngine();
 void dectimers();
 
 #ifdef __cplusplus

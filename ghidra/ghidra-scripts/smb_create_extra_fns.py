@@ -22,12 +22,65 @@ function_names = [
     'PlayerGfxProcessing',
     'AnimationControl',
     'GetOffScreenBitsSet',
-    'ContinueMusic',
+
+
+    # sound engine stuff
     'LoadEventMusic',
     'LoadAreaMusic',
-    'HandleAreaMusicLoopB',
+    'ContinueMusic',
+    'SkipSoundSubroutines',
+
+    'PlayBeat',
+    'PlayBigJump',
+    'PlayBlast',
+    'PlayBowserFall',
+    'PlayBowserFlame',
+    'PlayBrickShatter',
+    'PlayBump',
+    'PlayCoinGrab',
+    'PlayExtraLife',
+    'PlayFireballThrow',
+    'PlayFlagpoleSlide',
+    'PlayGrowPowerUp',
+    'PlayGrowVine',
+    'PlayNoiseSfx',
+    'PlayPipeDownInj',
+    'PlayPowerUpGrab',
+    'PlaySmackEnemy',
+    'PlaySmallJump',
+    'PlaySqu1Sfx',
+    'PlaySqu2Sfx',
+    'PlaySwimStomp',
+    'PlayTimerTick',
+
+    'ContinueBlast',
+    'ContinueBowserFall',
+    'ContinueBowserFlame',
+    'ContinueBrickShatter',
+    'ContinueBumpThrow',
+    'ContinueCGrabTTick',
+    'ContinueExtraLife',
+    'ContinueGrowItems',
+    'ContinueMusic',
+    'ContinuePipeDownInj',
+    'ContinuePowerUpGrab',
+    'ContinueSmackEnemy',
+    'ContinueSndJump',
+    'ContinueSwimStomp',
+
     'FindEventMusicHeader',
-    'LoadHeader'
+    'FindAreaMusicHeader',
+    'LoadHeader',
+
+    'HandleSquare2Music',
+    'HandleSquare1Music',
+    'HandleTriangleMusic',
+    'HandleNoiseMusic',
+
+    'DecrementSfx2Length',
+    'DecrementSfx3Length',
+    'Dump_Freq_Regs',
+    'HandleAreaMusicLoopB',
 ]
 
 addrs = [toAddr(x) for x in function_names]

@@ -10,7 +10,12 @@ runScript('smb2j_util.py')
 addrs = [
     toAddr('StartVMDelay').add(5),
     toAddr('UpsideDownPipe_High').add(3),
-    toAddr('WindOn').add(2)
+    toAddr('WindOn').add(2),
+
+    # smb2j soundengine stuff
+    toAddr('PlayBrickShatter').subtract(2),
+    toAddr('WindBranch'),
+    toAddr('ContinueMusic').subtract(2),
 ]
 
 for addr in addrs:

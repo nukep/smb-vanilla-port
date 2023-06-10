@@ -88,12 +88,32 @@ static inline bool read_rom_bytes(struct SMB_state *state, byte* buf, size_t siz
 // Write to $4016
 static void joystick_strobe(byte x) {
 }
-// Write to $4011
-static void apu_dmc_raw(byte x) {
+
+#define APU_REG(name, addr) static void name(byte x) { \
 }
-// Write to $4015
-static void apu_snd_chn(byte x) {
-}
+
+APU_REG(apu_sq1_vol, 0x4000)
+APU_REG(apu_sq1_sweep, 0x4001)
+APU_REG(apu_sq1_lo, 0x4002)
+APU_REG(apu_sq1_hi, 0x4003)
+APU_REG(apu_sq2_vol, 0x4004)
+APU_REG(apu_sq2_sweep, 0x4005)
+APU_REG(apu_sq2_lo, 0x4006)
+APU_REG(apu_sq2_hi, 0x4007)
+APU_REG(apu_tri_linear, 0x4008)
+APU_REG(apu_tri_lo, 0x400a)
+APU_REG(apu_tri_hi, 0x400b)
+APU_REG(apu_noise_vol, 0x400c)
+APU_REG(apu_noise_lo, 0x400e)
+APU_REG(apu_noise_hi, 0x400f)
+APU_REG(apu_dmc_freq, 0x4010)
+APU_REG(apu_dmc_raw, 0x4011)
+APU_REG(apu_dmc_start, 0x4012)
+APU_REG(apu_dmc_len, 0x4013)
+APU_REG(apu_snd_chn, 0x4015)
+APU_REG(apu_framecounter_ctrl, 0x4017)
+
+#undef APU_REG
 
 static void joy1(struct SMB_buttons *buttons) {
     if (SMB_STATE->callbacks.joy1) {

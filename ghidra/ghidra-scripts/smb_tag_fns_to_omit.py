@@ -10,7 +10,8 @@ reimplemented = [
     'InitializeMemory',
     'TransposePlayers',
     'ReadJoypads',
-    'ReadPortBits'
+    'ReadPortBits',
+    'Dump_Freq_Regs',
 ]
 
 unused = [
@@ -19,9 +20,3 @@ unused = [
 
 for name in reimplemented + unused:
     getFunction(name).addTag('skip')
-
-# Skip all functions at and after SoundEngine. They're all sound related.
-fn = getFunction('SoundEngine')
-while fn:
-    fn.addTag('skip')
-    fn = getFunctionAfter(fn)

@@ -1,5 +1,10 @@
 function_names = [
-    'ModifyPhysics'
+    'ModifyPhysics',
+
+    'PlaySkidSfx',
+    'PlayWindSfx',
+    'ContinueSkidSfx',
+    'ContinueWindSfx',
 ]
 
 addrs = [toAddr(x) for x in function_names]

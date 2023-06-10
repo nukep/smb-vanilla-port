@@ -14,8 +14,6 @@ removal_into = [
     'DumpFourSpr',
     'DumpThreeSpr',
     'DumpTwoSpr',
-
-    # worry about audio stuff later
 ]
 
 removals = [getInstructionAt(toAddr(x)).previous.address for x in removal_into]

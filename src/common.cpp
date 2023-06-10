@@ -28,12 +28,6 @@ byte InitializeMemory(byte i) {
     return 0;
 }
 
-
-void SoundEngine() {
-    // Stubbed out for now
-    // Sound code is horrifying, so we're dealing with it later
-}
-
 static inline void dectimer(byte& timer) {
     if (timer != 0) {
         timer--;

@@ -31,6 +31,7 @@ void DrawTitleScreen();
 bool TransposePlayers();
 
 #include "common.h"
+#include "common_inc.h"
 #include "generated/smb1.c"
 
 
@@ -137,8 +138,7 @@ void SMB1_NMI() {
     byte prev_mirror_ppu_ctrl = Mirror_PPU_CTRL_REG1;
     ppuctrl(Mirror_PPU_CTRL_REG1);
     if ((GamePauseStatus & 1) == 0) {
-        // bug in analyzer. parameter is eventually unused, should not accept one.
-        OperModeExecutionTree(0);
+        OperModeExecutionTree();
     }
     ppustatus();
 

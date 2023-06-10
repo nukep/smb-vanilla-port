@@ -200,6 +200,20 @@ static inline struct_xyi CAST_INT_TO_struct_xyi(uint64_t v) {
     return a;
 };
 
+typedef struct struct_axyz struct_axyz, *Pstruct_axyz;
+
+struct struct_axyz {
+    byte a;
+    byte x;
+    byte y;
+    bool z;
+};
+static inline struct_axyz CAST_INT_TO_struct_axyz(uint64_t v) {
+    struct_axyz a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
+};
+
 typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
 
 struct struct_axr00 {
@@ -248,6 +262,19 @@ struct struct_ayi {
 };
 static inline struct_ayi CAST_INT_TO_struct_ayi(uint64_t v) {
     struct_ayi a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
+};
+
+typedef struct struct_axy struct_axy, *Pstruct_axy;
+
+struct struct_axy {
+    byte a;
+    byte x;
+    byte y;
+};
+static inline struct_axy CAST_INT_TO_struct_axy(uint64_t v) {
+    struct_axy a;
     memcpy(&a, &v, sizeof(a));
     return a;
 };
@@ -476,7 +503,7 @@ void smb2j_PauseRoutine(void);
 void smb2j_SpriteShuffler(void);
 #define SpriteShuffler smb2j_SpriteShuffler
 
-void smb2j_OperModeExecutionTree(byte param_1);
+void smb2j_OperModeExecutionTree(void);
 #define OperModeExecutionTree smb2j_OperModeExecutionTree
 
 void smb2j_MoveAllSpritesOffscreen(void);
@@ -1187,6 +1214,9 @@ byte smb2j_SmallBBox(byte param_1);
 void smb2j_InitRedPTroopa(byte param_1,bool param_2);
 #define InitRedPTroopa smb2j_InitRedPTroopa
 
+void smb2j_TallBBox(byte param_1);
+#define TallBBox smb2j_TallBBox
+
 byte smb2j_InitVStf(byte param_1);
 #define InitVStf smb2j_InitVStf
 
@@ -1249,6 +1279,9 @@ void smb2j_EndFrenzy(byte param_1);
 
 void smb2j_InitJumpGPTroopa(byte param_1);
 #define InitJumpGPTroopa smb2j_InitJumpGPTroopa
+
+void smb2j_TallBBox2(byte param_1);
+#define TallBBox2 smb2j_TallBBox2
 
 void smb2j_InitBalPlatform(byte param_1);
 #define InitBalPlatform smb2j_InitBalPlatform
@@ -1982,7 +2015,214 @@ byte smb2j_GetAreaType(byte param_1);
 byte smb2j_FindAreaPointer(void);
 #define FindAreaPointer smb2j_FindAreaPointer
 
-undefined smb2j_FUN_e149();
+void smb2j_SoundEngine(void);
+#define SoundEngine smb2j_SoundEngine
+
+void smb2j_SkipSoundSubroutines(void);
+#define SkipSoundSubroutines smb2j_SkipSoundSubroutines
+
+void smb2j_Dump_Squ1_Regs(byte param_1,byte param_2);
+#define Dump_Squ1_Regs smb2j_Dump_Squ1_Regs
+
+bool smb2j_PlaySqu1Sfx(byte param_1,byte param_2,byte param_3);
+#define PlaySqu1Sfx smb2j_PlaySqu1Sfx
+
+struct_axyz smb2j_SetFreq_Squ1(byte param_1);
+#define SetFreq_Squ1 smb2j_SetFreq_Squ1
+
+void smb2j_Dump_Sq2_Regs(byte param_1,byte param_2);
+#define Dump_Sq2_Regs smb2j_Dump_Sq2_Regs
+
+void smb2j_PlaySqu2Sfx(byte param_1,byte param_2,byte param_3);
+#define PlaySqu2Sfx smb2j_PlaySqu2Sfx
+
+struct_axyz smb2j_SetFreq_Squ2(byte param_1);
+#define SetFreq_Squ2 smb2j_SetFreq_Squ2
+
+void smb2j_SetFreq_Tri(byte param_1);
+#define SetFreq_Tri smb2j_SetFreq_Tri
+
+void smb2j_PlayFlagpoleSlide(void);
+#define PlayFlagpoleSlide smb2j_PlayFlagpoleSlide
+
+void smb2j_PlaySmallJump(void);
+#define PlaySmallJump smb2j_PlaySmallJump
+
+void smb2j_PlayBigJump(void);
+#define PlayBigJump smb2j_PlayBigJump
+
+void smb2j_ContinueSndJump(void);
+#define ContinueSndJump smb2j_ContinueSndJump
+
+void smb2j_PlayFireballThrow(void);
+#define PlayFireballThrow smb2j_PlayFireballThrow
+
+void smb2j_PlayBump(void);
+#define PlayBump smb2j_PlayBump
+
+void smb2j_ContinueBumpThrow(void);
+#define ContinueBumpThrow smb2j_ContinueBumpThrow
+
+void smb2j_Square1SfxHandler(void);
+#define Square1SfxHandler smb2j_Square1SfxHandler
+
+void smb2j_PlaySwimStomp(void);
+#define PlaySwimStomp smb2j_PlaySwimStomp
+
+void smb2j_ContinueSwimStomp(void);
+#define ContinueSwimStomp smb2j_ContinueSwimStomp
+
+void smb2j_PlaySmackEnemy(void);
+#define PlaySmackEnemy smb2j_PlaySmackEnemy
+
+void smb2j_ContinueSmackEnemy(void);
+#define ContinueSmackEnemy smb2j_ContinueSmackEnemy
+
+void smb2j_StopSquare1Sfx(void);
+#define StopSquare1Sfx smb2j_StopSquare1Sfx
+
+void smb2j_PlayPipeDownInj(void);
+#define PlayPipeDownInj smb2j_PlayPipeDownInj
+
+void smb2j_ContinuePipeDownInj(void);
+#define ContinuePipeDownInj smb2j_ContinuePipeDownInj
+
+void smb2j_PlayCoinGrab(void);
+#define PlayCoinGrab smb2j_PlayCoinGrab
+
+void smb2j_PlayTimerTick(void);
+#define PlayTimerTick smb2j_PlayTimerTick
+
+void smb2j_ContinueCGrabTTick(void);
+#define ContinueCGrabTTick smb2j_ContinueCGrabTTick
+
+void smb2j_PlayBlast(void);
+#define PlayBlast smb2j_PlayBlast
+
+void smb2j_ContinueBlast(void);
+#define ContinueBlast smb2j_ContinueBlast
+
+void smb2j_PlayPowerUpGrab(void);
+#define PlayPowerUpGrab smb2j_PlayPowerUpGrab
+
+void smb2j_ContinuePowerUpGrab(void);
+#define ContinuePowerUpGrab smb2j_ContinuePowerUpGrab
+
+void smb2j_DecrementSfx2Length(void);
+#define DecrementSfx2Length smb2j_DecrementSfx2Length
+
+void smb2j_StopSquare2Sfx(void);
+#define StopSquare2Sfx smb2j_StopSquare2Sfx
+
+void smb2j_Square2SfxHandler(void);
+#define Square2SfxHandler smb2j_Square2SfxHandler
+
+void smb2j_PlayBowserFall(void);
+#define PlayBowserFall smb2j_PlayBowserFall
+
+void smb2j_ContinueBowserFall(void);
+#define ContinueBowserFall smb2j_ContinueBowserFall
+
+void smb2j_PlayExtraLife(void);
+#define PlayExtraLife smb2j_PlayExtraLife
+
+void smb2j_ContinueExtraLife(void);
+#define ContinueExtraLife smb2j_ContinueExtraLife
+
+void smb2j_PlayGrowPowerUp(void);
+#define PlayGrowPowerUp smb2j_PlayGrowPowerUp
+
+void smb2j_PlayGrowVine(void);
+#define PlayGrowVine smb2j_PlayGrowVine
+
+void smb2j_ContinueGrowItems(void);
+#define ContinueGrowItems smb2j_ContinueGrowItems
+
+void smb2j_PlaySkidSfx(byte param_1);
+#define PlaySkidSfx smb2j_PlaySkidSfx
+
+void smb2j_ContinueSkidSfx(void);
+#define ContinueSkidSfx smb2j_ContinueSkidSfx
+
+void smb2j_PlayBrickShatter(byte param_1);
+#define PlayBrickShatter smb2j_PlayBrickShatter
+
+void smb2j_ContinueBrickShatter(void);
+#define ContinueBrickShatter smb2j_ContinueBrickShatter
+
+void smb2j_PlayNoiseSfx(byte param_1,byte param_2);
+#define PlayNoiseSfx smb2j_PlayNoiseSfx
+
+void smb2j_DecrementSfx3Length(void);
+#define DecrementSfx3Length smb2j_DecrementSfx3Length
+
+void smb2j_NoiseSfxHandler(void);
+#define NoiseSfxHandler smb2j_NoiseSfxHandler
+
+void smb2j_PlayBowserFlame(byte param_1);
+#define PlayBowserFlame smb2j_PlayBowserFlame
+
+void smb2j_ContinueBowserFlame(void);
+#define ContinueBowserFlame smb2j_ContinueBowserFlame
+
+void smb2j_PlayWindSfx(byte param_1);
+#define PlayWindSfx smb2j_PlayWindSfx
+
+void smb2j_ContinueWindSfx(void);
+#define ContinueWindSfx smb2j_ContinueWindSfx
+
+void smb2j_ContinueMusic(void);
+#define ContinueMusic smb2j_ContinueMusic
+
+void smb2j_MusicHandler(void);
+#define MusicHandler smb2j_MusicHandler
+
+void smb2j_LoadEventMusic(byte param_1);
+#define LoadEventMusic smb2j_LoadEventMusic
+
+void smb2j_LoadAreaMusic(byte param_1);
+#define LoadAreaMusic smb2j_LoadAreaMusic
+
+void smb2j_HandleAreaMusicLoopB(byte param_1);
+#define HandleAreaMusicLoopB smb2j_HandleAreaMusicLoopB
+
+void smb2j_FindAreaMusicHeader(byte param_1);
+#define FindAreaMusicHeader smb2j_FindAreaMusicHeader
+
+void smb2j_FindEventMusicHeader(byte param_1,byte param_2);
+#define FindEventMusicHeader smb2j_FindEventMusicHeader
+
+void smb2j_LoadHeader(byte param_1);
+#define LoadHeader smb2j_LoadHeader
+
+void smb2j_HandleSquare2Music(void);
+#define HandleSquare2Music smb2j_HandleSquare2Music
+
+void smb2j_HandleSquare1Music(void);
+#define HandleSquare1Music smb2j_HandleSquare1Music
+
+void smb2j_HandleTriangleMusic(void);
+#define HandleTriangleMusic smb2j_HandleTriangleMusic
+
+void smb2j_HandleNoiseMusic(void);
+#define HandleNoiseMusic smb2j_HandleNoiseMusic
+
+void smb2j_PlayBeat(byte param_1,byte param_2,byte param_3);
+#define PlayBeat smb2j_PlayBeat
+
+struct_axy smb2j_AlternateLengthHandler(byte param_1);
+#define AlternateLengthHandler smb2j_AlternateLengthHandler
+
+struct_ayi smb2j_ProcessLengthData(byte param_1);
+#define ProcessLengthData smb2j_ProcessLengthData
+
+struct_axy smb2j_LoadControlRegs(void);
+#define LoadControlRegs smb2j_LoadControlRegs
+
+byte smb2j_LoadEnvelopeData(byte param_1);
+#define LoadEnvelopeData smb2j_LoadEnvelopeData
+
+void smb2j_FUN_e149(void);
 #define FUN_e149 smb2j_FUN_e149
 
 void smb2j_AltHard_GetAreaDataAddrs(void);

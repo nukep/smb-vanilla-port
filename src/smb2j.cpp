@@ -116,6 +116,7 @@ struct_ayz LoadFiles();
 void UpdateGamesBeaten();
 
 #include "common.h"
+#include "common_inc.h"
 #include "generated/smb2j.c"
 
 
@@ -338,8 +339,7 @@ void SMB2J_NMI() {
         if (WorldNumber > 8) {
             TerminateGame();
         }
-        // bug in analyzer. parameter is eventually unused, should not accept one.
-        OperModeExecutionTree(0);
+        OperModeExecutionTree();
     }
 
     // The FDS version loops here until IRQAckFlag is 0.

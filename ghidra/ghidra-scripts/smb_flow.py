@@ -28,8 +28,14 @@ presolved_functions_list = [
     ('OperModeExecutionTree', [], []),
     ('ReadPortBits',          ['X'], []),    # Bitshifts accumulator from caller, but the original value becomes completely lost.
     ('CheckpointEnemyID',     ['X'], []),    # Recursive. It's the entrypoint for a call hierarchy that eventually calls itself again.
-    ('SoundEngine',           [], []),       # Actually we're ignoring it because this is frightening and we don't want to analyze it right now lol
 
+    # Sound engine stuff! Wowee!
+    ('SoundEngine',           [], []),
+    ('AlternateLengthHandler', ['A'], ['A', 'X', 'Y']),     # There was a bitshift and assumed carry was an input.
+    ('HandleSquare2Music',    [], []),          # this took a while to confirm!
+    ('HandleAreaMusicLoopB',  ['A'], []),
+
+    # FDS stuff!
     ('FDSBIOS_LoadFiles',     [], ['A', 'Y', 'Z']),
     ('FDSBIOS_WriteFile',     ['A'], ['A', 'Z']),
 ]
@@ -39,7 +45,12 @@ functions_to_analyze = [
     'Reset',
     'NMI',
     'CheckpointEnemyID',
-    'OperModeExecutionTree'
+    'OperModeExecutionTree',
+
+    'SoundEngine',
+    'AlternateLengthHandler',
+    'HandleSquare2Music',
+    'HandleAreaMusicLoopB',
 ]
 
 # Should we apply the solved inputs/outputs? False means we just log them.
@@ -747,10 +758,11 @@ def analyze_start(f):
     for f in sorted(set(ins_m.keys()).union(set(outs_m.keys()))):
         i = sorted_registers(ins_m.get(f, []))
         o = sorted_registers(outs_m.get(f, []))
-        for r in i:
-            f.add_input_reg(r)
-        for r in o:
-            f.add_output_reg(r)
+        if not f.presolved:
+            for r in i:
+                f.add_input_reg(r)
+            for r in o:
+                f.add_output_reg(r)
         print('function_io(0x{}, {}, {})'.format(f.addr, [str(x) for x in i], [str(x) for x in o]))
     
     def chunks(xs, n):

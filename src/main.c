@@ -210,32 +210,30 @@ bool advance_movie(struct SMB_state *smb_state) {
 
             // RAM errors start at frame 16600, when we go underwater
 
-            auto mem_eq_range = [ram, &compareto](size_t from, size_t upto) {
-                const byte *a = ram;
-                const byte *b = compareto;
-                size_t len = upto + 1 - from;
-                for (size_t i = from; i <= upto; i++) {
-                    if (a[i] != b[i]) {
-                        printf("Caused by frame %05d: RAM not equal: At %04lX: %02X expected vs %02X actual\n", framecounter-1, i, a[i], b[i]);
-                        //return;
-                    }
-                }
-            };
+#define mem_eq_range(from, upto) do { \
+                const byte *a = ram; \
+                const byte *b = compareto; \
+                size_t len = (upto) + 1 - (from); \
+                for (size_t i = (from); i <= (upto); i++) { \
+                    if (a[i] != b[i]) { \
+                        printf("Caused by frame %05d: RAM not equal: At %04lX: %02X expected vs %02X actual\n", framecounter-1, i, a[i], b[i]); \
+                    } \
+                } \
+            } while (0)
 
             // Missing ranges:
-            // $F0-$FF and $7B0-$7CA are sound related. we haven't implemented sound subroutines yet.
             // $160-$1FF is the stack (this port doesn't use this)
 
             if (SMB_which_game(smb_state) == GAME_SMB1) {
-                mem_eq_range(0x0008, 0x00EF);
+                mem_eq_range(0x0008, 0x00FF);
                 mem_eq_range(0x0100, 0x015F);
+                mem_eq_range(0x0200, 0x07FF);
             } else if (SMB_which_game(smb_state) == GAME_SMB2J) {
                 // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
                 mem_eq_range(0x0010, 0x00EF);
                 mem_eq_range(0x0109, 0x015F);
+                mem_eq_range(0x0200, 0x07FF);
             }
-            mem_eq_range(0x0200, 0x07AF);
-            mem_eq_range(0x07CB, 0x07FF);
         }
 #endif
 

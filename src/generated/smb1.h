@@ -76,6 +76,20 @@ static inline struct_xr00r01 CAST_INT_TO_struct_xr00r01(uint64_t v) {
     return a;
 };
 
+typedef struct struct_axyz struct_axyz, *Pstruct_axyz;
+
+struct struct_axyz {
+    byte a;
+    byte x;
+    byte y;
+    bool z;
+};
+static inline struct_axyz CAST_INT_TO_struct_axyz(uint64_t v) {
+    struct_axyz a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
+};
+
 typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
 
 struct struct_axr00 {
@@ -124,6 +138,19 @@ struct struct_xr00r06 {
 };
 static inline struct_xr00r06 CAST_INT_TO_struct_xr00r06(uint64_t v) {
     struct_xr00r06 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
+};
+
+typedef struct struct_ayz struct_ayz, *Pstruct_ayz;
+
+struct struct_ayz {
+    byte a;
+    byte y;
+    bool z;
+};
+static inline struct_ayz CAST_INT_TO_struct_ayz(uint64_t v) {
+    struct_ayz a;
     memcpy(&a, &v, sizeof(a));
     return a;
 };
@@ -182,6 +209,19 @@ struct struct_azr02r04r06r07 {
 };
 static inline struct_azr02r04r06r07 CAST_INT_TO_struct_azr02r04r06r07(uint64_t v) {
     struct_azr02r04r06r07 a;
+    memcpy(&a, &v, sizeof(a));
+    return a;
+};
+
+typedef struct struct_axy struct_axy, *Pstruct_axy;
+
+struct struct_axy {
+    byte a;
+    byte x;
+    byte y;
+};
+static inline struct_axy CAST_INT_TO_struct_axy(uint64_t v) {
+    struct_axy a;
     memcpy(&a, &v, sizeof(a));
     return a;
 };
@@ -435,7 +475,7 @@ void smb1_PauseRoutine(void);
 void smb1_SpriteShuffler(void);
 #define SpriteShuffler smb1_SpriteShuffler
 
-void smb1_OperModeExecutionTree(byte param_1);
+void smb1_OperModeExecutionTree(void);
 #define OperModeExecutionTree smb1_OperModeExecutionTree
 
 void smb1_MoveAllSpritesOffscreen(void);
@@ -1874,6 +1914,201 @@ byte smb1_DividePDiff(byte param_1,byte param_2,byte param_3,byte param_4,byte p
 
 struct_xyr02 smb1_DrawSpriteObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
 #define DrawSpriteObject smb1_DrawSpriteObject
+
+void smb1_SoundEngine(void);
+#define SoundEngine smb1_SoundEngine
+
+void smb1_SkipSoundSubroutines(void);
+#define SkipSoundSubroutines smb1_SkipSoundSubroutines
+
+void smb1_Dump_Squ1_Regs(byte param_1,byte param_2);
+#define Dump_Squ1_Regs smb1_Dump_Squ1_Regs
+
+bool smb1_PlaySqu1Sfx(byte param_1,byte param_2,byte param_3);
+#define PlaySqu1Sfx smb1_PlaySqu1Sfx
+
+struct_axyz smb1_SetFreq_Squ1(byte param_1);
+#define SetFreq_Squ1 smb1_SetFreq_Squ1
+
+void smb1_Dump_Sq2_Regs(byte param_1,byte param_2);
+#define Dump_Sq2_Regs smb1_Dump_Sq2_Regs
+
+void smb1_PlaySqu2Sfx(byte param_1,byte param_2,byte param_3);
+#define PlaySqu2Sfx smb1_PlaySqu2Sfx
+
+struct_axyz smb1_SetFreq_Squ2(byte param_1);
+#define SetFreq_Squ2 smb1_SetFreq_Squ2
+
+void smb1_SetFreq_Tri(byte param_1);
+#define SetFreq_Tri smb1_SetFreq_Tri
+
+void smb1_PlayFlagpoleSlide(void);
+#define PlayFlagpoleSlide smb1_PlayFlagpoleSlide
+
+void smb1_PlaySmallJump(void);
+#define PlaySmallJump smb1_PlaySmallJump
+
+void smb1_PlayBigJump(void);
+#define PlayBigJump smb1_PlayBigJump
+
+void smb1_ContinueSndJump(void);
+#define ContinueSndJump smb1_ContinueSndJump
+
+void smb1_PlayFireballThrow(void);
+#define PlayFireballThrow smb1_PlayFireballThrow
+
+void smb1_PlayBump(void);
+#define PlayBump smb1_PlayBump
+
+void smb1_ContinueBumpThrow(void);
+#define ContinueBumpThrow smb1_ContinueBumpThrow
+
+void smb1_Square1SfxHandler(void);
+#define Square1SfxHandler smb1_Square1SfxHandler
+
+void smb1_PlaySwimStomp(void);
+#define PlaySwimStomp smb1_PlaySwimStomp
+
+void smb1_ContinueSwimStomp(void);
+#define ContinueSwimStomp smb1_ContinueSwimStomp
+
+void smb1_PlaySmackEnemy(void);
+#define PlaySmackEnemy smb1_PlaySmackEnemy
+
+void smb1_ContinueSmackEnemy(void);
+#define ContinueSmackEnemy smb1_ContinueSmackEnemy
+
+void smb1_StopSquare1Sfx(void);
+#define StopSquare1Sfx smb1_StopSquare1Sfx
+
+void smb1_PlayPipeDownInj(void);
+#define PlayPipeDownInj smb1_PlayPipeDownInj
+
+void smb1_ContinuePipeDownInj(void);
+#define ContinuePipeDownInj smb1_ContinuePipeDownInj
+
+void smb1_PlayCoinGrab(void);
+#define PlayCoinGrab smb1_PlayCoinGrab
+
+void smb1_PlayTimerTick(void);
+#define PlayTimerTick smb1_PlayTimerTick
+
+void smb1_ContinueCGrabTTick(void);
+#define ContinueCGrabTTick smb1_ContinueCGrabTTick
+
+void smb1_PlayBlast(void);
+#define PlayBlast smb1_PlayBlast
+
+void smb1_ContinueBlast(void);
+#define ContinueBlast smb1_ContinueBlast
+
+void smb1_PlayPowerUpGrab(void);
+#define PlayPowerUpGrab smb1_PlayPowerUpGrab
+
+void smb1_ContinuePowerUpGrab(void);
+#define ContinuePowerUpGrab smb1_ContinuePowerUpGrab
+
+void smb1_DecrementSfx2Length(void);
+#define DecrementSfx2Length smb1_DecrementSfx2Length
+
+void smb1_StopSquare2Sfx(void);
+#define StopSquare2Sfx smb1_StopSquare2Sfx
+
+void smb1_Square2SfxHandler(void);
+#define Square2SfxHandler smb1_Square2SfxHandler
+
+void smb1_PlayBowserFall(void);
+#define PlayBowserFall smb1_PlayBowserFall
+
+void smb1_ContinueBowserFall(void);
+#define ContinueBowserFall smb1_ContinueBowserFall
+
+void smb1_PlayExtraLife(void);
+#define PlayExtraLife smb1_PlayExtraLife
+
+void smb1_ContinueExtraLife(void);
+#define ContinueExtraLife smb1_ContinueExtraLife
+
+void smb1_PlayGrowPowerUp(void);
+#define PlayGrowPowerUp smb1_PlayGrowPowerUp
+
+void smb1_PlayGrowVine(void);
+#define PlayGrowVine smb1_PlayGrowVine
+
+void smb1_ContinueGrowItems(void);
+#define ContinueGrowItems smb1_ContinueGrowItems
+
+void smb1_PlayBrickShatter(void);
+#define PlayBrickShatter smb1_PlayBrickShatter
+
+void smb1_ContinueBrickShatter(void);
+#define ContinueBrickShatter smb1_ContinueBrickShatter
+
+void smb1_PlayNoiseSfx(byte param_1,byte param_2);
+#define PlayNoiseSfx smb1_PlayNoiseSfx
+
+void smb1_DecrementSfx3Length(void);
+#define DecrementSfx3Length smb1_DecrementSfx3Length
+
+void smb1_NoiseSfxHandler(void);
+#define NoiseSfxHandler smb1_NoiseSfxHandler
+
+void smb1_PlayBowserFlame(void);
+#define PlayBowserFlame smb1_PlayBowserFlame
+
+void smb1_ContinueBowserFlame(void);
+#define ContinueBowserFlame smb1_ContinueBowserFlame
+
+void smb1_ContinueMusic(void);
+#define ContinueMusic smb1_ContinueMusic
+
+void smb1_MusicHandler(void);
+#define MusicHandler smb1_MusicHandler
+
+void smb1_LoadEventMusic(byte param_1);
+#define LoadEventMusic smb1_LoadEventMusic
+
+void smb1_LoadAreaMusic(byte param_1);
+#define LoadAreaMusic smb1_LoadAreaMusic
+
+void smb1_HandleAreaMusicLoopB(byte param_1);
+#define HandleAreaMusicLoopB smb1_HandleAreaMusicLoopB
+
+void smb1_FindAreaMusicHeader(byte param_1);
+#define FindAreaMusicHeader smb1_FindAreaMusicHeader
+
+void smb1_FindEventMusicHeader(byte param_1,byte param_2);
+#define FindEventMusicHeader smb1_FindEventMusicHeader
+
+void smb1_LoadHeader(byte param_1);
+#define LoadHeader smb1_LoadHeader
+
+void smb1_HandleSquare2Music(void);
+#define HandleSquare2Music smb1_HandleSquare2Music
+
+void smb1_HandleSquare1Music(void);
+#define HandleSquare1Music smb1_HandleSquare1Music
+
+void smb1_HandleTriangleMusic(void);
+#define HandleTriangleMusic smb1_HandleTriangleMusic
+
+void smb1_HandleNoiseMusic(void);
+#define HandleNoiseMusic smb1_HandleNoiseMusic
+
+void smb1_PlayBeat(byte param_1,byte param_2,byte param_3);
+#define PlayBeat smb1_PlayBeat
+
+struct_axy smb1_AlternateLengthHandler(byte param_1);
+#define AlternateLengthHandler smb1_AlternateLengthHandler
+
+struct_ayi smb1_ProcessLengthData(byte param_1);
+#define ProcessLengthData smb1_ProcessLengthData
+
+struct_axy smb1_LoadControlRegs(void);
+#define LoadControlRegs smb1_LoadControlRegs
+
+byte smb1_LoadEnvelopeData(byte param_1);
+#define LoadEnvelopeData smb1_LoadEnvelopeData
 
 
 #pragma pack(pop)

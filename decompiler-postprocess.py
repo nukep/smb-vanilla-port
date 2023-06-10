@@ -16,8 +16,8 @@ IS_SMB1 = not IS_SMB2J
 
 if IS_SMB1:
     # As outputted by Ghidra
-    INPUT_C_FILE = 'rawsmb.c'
-    INPUT_H_FILE = 'rawsmb.h'
+    INPUT_C_FILE = 'rawsmb1.c'
+    INPUT_H_FILE = 'rawsmb1.h'
 
     # As finessed by this script
     TARGET_DIR = 'src/generated/'
@@ -153,6 +153,11 @@ outstr = outstr.replace(
     r'C_ObjectRow[param_1 - 2]'
 )
 
+outstr = outstr.replace(
+    r'(byte)SetFreq_Tri[Squ1_SfxLenCounter + 3]',
+    r'SwimStompEnvelopeData[Squ1_SfxLenCounter - 1]'
+)
+
 # Another one. There's no statement after this label, and clang hates that.
 outstr = outstr.replace('WrongChk:', 'WrongChk: 0;')
 
@@ -198,6 +203,8 @@ for name,replacement in readable_hw_registers:
 
 outstr = outstr.replace('EnemyData._0_1_', 'EnemyData.lo')
 outstr = outstr.replace('EnemyData._1_1_', 'EnemyData.hi')
+outstr = outstr.replace('MusicData._0_1_', 'MusicData.lo')
+outstr = outstr.replace('MusicData._1_1_', 'MusicData.hi')
 
 # Since Ghidra 10.3, these appear in the structures
 outstr = re.sub(r'([a-zA-Z0-9]+)\._([0-9])_([0-9])_', r'SUBPIECE(\1,\2,\3)', outstr)
