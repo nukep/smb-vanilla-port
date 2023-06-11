@@ -11,6 +11,7 @@ reimplemented = [
     'ReadJoypads',
     'ReadPortBits',
     'Dump_Freq_Regs',
+    'NoiseSfxHandler',
 
     'LoadFiles',
     'ScrollScreen',

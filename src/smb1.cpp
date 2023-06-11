@@ -1,3 +1,4 @@
+#define SMB1_MODE
 #include "foundation.h"
 
 extern "C" {

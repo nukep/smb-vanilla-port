@@ -2156,9 +2156,6 @@ void smb2j_PlayNoiseSfx(byte param_1,byte param_2);
 void smb2j_DecrementSfx3Length(void);
 #define DecrementSfx3Length smb2j_DecrementSfx3Length
 
-void smb2j_NoiseSfxHandler(void);
-#define NoiseSfxHandler smb2j_NoiseSfxHandler
-
 void smb2j_PlayBowserFlame(byte param_1);
 #define PlayBowserFlame smb2j_PlayBowserFlame
 

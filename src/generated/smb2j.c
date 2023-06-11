@@ -15497,61 +15497,6 @@ void DecrementSfx3Length(void)
 
 
 
-// SM2MAIN:d677
-// Signature: [] -> []
-
-void NoiseSfxHandler(void)
-
-{
-  byte bVar1;
-  byte bVar2;
-  
-  bVar2 = NoiseSoundQueue;
-  if (0x7f < NoiseSoundBuffer) {
-    ContinueSkidSfx();
-    return;
-  }
-  if (0x7f < NoiseSoundQueue) {
-    PlaySkidSfx(NoiseSoundQueue);
-    return;
-  }
-  bVar1 = NoiseSoundQueue >> 1;
-  if ((bool)(NoiseSoundQueue & 1)) {
-    NoiseSoundQueue = bVar1;
-    PlayBrickShatter(bVar2);
-    return;
-  }
-  if ((bool)(NoiseSoundBuffer & 1)) {
-    NoiseSoundQueue = bVar1;
-    ContinueBrickShatter();
-    return;
-  }
-  bVar1 = NoiseSoundQueue >> 2;
-  if ((bool)(bVar1 & 1)) {
-    NoiseSoundQueue = bVar1;
-    PlayBowserFlame(bVar2);
-    return;
-  }
-  if ((bool)(NoiseSoundBuffer >> 1 & 1)) {
-    NoiseSoundQueue = bVar1;
-    ContinueBowserFlame();
-    return;
-  }
-  if ((bool)(NoiseSoundBuffer >> 2 & 1)) {
-    NoiseSoundQueue = bVar1;
-    ContinueWindSfx();
-    return;
-  }
-  NoiseSoundQueue >>= 3;
-  if ((bool)(bVar1 & 1)) {
-    PlayWindSfx(bVar2);
-    return;
-  }
-  return;
-}
-
-
-
 // SM2MAIN:d695
 // Signature: [Y] -> []
 

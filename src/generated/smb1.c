@@ -14800,43 +14800,6 @@ void DecrementSfx3Length(void)
 
 
 
-// SMB:f667
-// Signature: [] -> []
-
-void NoiseSfxHandler(void)
-
-{
-  byte bVar1;
-  
-  if (NoiseSoundQueue != 0) {
-    NoiseSoundBuffer = NoiseSoundQueue;
-    bVar1 = NoiseSoundQueue >> 1;
-    if ((bool)(NoiseSoundQueue & 1)) {
-      NoiseSoundQueue = bVar1;
-      PlayBrickShatter();
-      return;
-    }
-    NoiseSoundQueue >>= 2;
-    if ((bool)(bVar1 & 1)) {
-      PlayBowserFlame();
-      return;
-    }
-  }
-  if (NoiseSoundBuffer != 0) {
-    if ((bool)(NoiseSoundBuffer & 1)) {
-      ContinueBrickShatter();
-      return;
-    }
-    if ((bool)(NoiseSoundBuffer >> 1 & 1)) {
-      ContinueBowserFlame();
-      return;
-    }
-  }
-  return;
-}
-
-
-
 // SMB:f680
 // Signature: [] -> []
 

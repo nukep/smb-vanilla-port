@@ -1,3 +1,4 @@
+#define SMB2J_MODE
 #include "foundation.h"
 
 extern "C" {

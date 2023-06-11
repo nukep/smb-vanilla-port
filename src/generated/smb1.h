@@ -2050,9 +2050,6 @@ void smb1_PlayNoiseSfx(byte param_1,byte param_2);
 void smb1_DecrementSfx3Length(void);
 #define DecrementSfx3Length smb1_DecrementSfx3Length
 
-void smb1_NoiseSfxHandler(void);
-#define NoiseSfxHandler smb1_NoiseSfxHandler
-
 void smb1_PlayBowserFlame(void);
 #define PlayBowserFlame smb1_PlayBowserFlame
 
