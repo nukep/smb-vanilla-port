@@ -30,6 +30,16 @@ void joy1(struct testrunner_userdata *userdata, struct SMB_buttons *buttons) {
     *buttons = userdata->joy1_buttons;
 }
 
+byte smb2j_load_games_beaten(void *userdata) {
+    // A decent test value - lets us test Worlds A-D
+    return 8;
+}
+bool smb2j_save_games_beaten(void *userdata, byte games_beaten) {
+    printf("Pretending to save game...");
+    printf("Games beaten: %d\n", games_beaten);
+    return true;
+}
+
 bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32_t upto_frame) {
     byte ram[0x800];
     struct MovieButtons movie_buttons;
@@ -146,6 +156,8 @@ int main(int argc, char *argv[]) {
     callbacks.read_rom_bytes = read_rom_bytes;
     callbacks.seek_rom = seek_rom;
     callbacks.joy1 = joy1;
+    callbacks.smb2j_load_games_beaten = smb2j_load_games_beaten;
+    callbacks.smb2j_save_games_beaten = smb2j_save_games_beaten;
 
     open_rom(&userdata, rom_filename);
     SMB_state_init(smb_state, &callbacks);
