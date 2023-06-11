@@ -32,6 +32,10 @@ target_link_libraries(smbport ${SDL2_LIBRARIES})
 target_link_libraries(smbport Nes_Snd_Emu)
 
 
+add_executable(smbport-testrunner "src/main_testrunner.c"  "src/movie.c")
+target_link_libraries(smbport-testrunner foundation)
+
+
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET smbport PROPERTY CXX_STANDARD 20)
 endif()

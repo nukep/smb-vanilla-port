@@ -14,7 +14,9 @@ bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset) {
     if (!seek_rom(state, chr_offset)) { return false; }
     if (!read_rom_bytes(state, state->chrrom, 0x2000)) { return false; }
     state->which_game = GAME_SMB1;
-    state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
+    if (state->callbacks.update_pattern_tables) {
+        state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
+    }
     return true;
 }
 

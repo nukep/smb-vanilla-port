@@ -63,7 +63,9 @@ bool smb2j_load_file(struct SMB_state *state, const char *name) {
             if (!read_rom_bytes(state, copy_to, a.size)) { return false; }
 
             if (a.type == TYPE_CHRRAM) {
-                state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
+                if (state->callbacks.update_pattern_tables) {
+                    state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
+                }
             }
 
             return true;

@@ -193,51 +193,8 @@ bool advance_movie(struct SMB_state *smb_state) {
 
     struct MovieButtons movie_buttons;
 
-    byte *ram = 0;
-#ifdef USE_MOVIE_COMPARERAM
-    byte rambuf[0x800];
-    ram = rambuf;
-#endif
-
-    bool use_movie_buttons = movie_next(CURRENT_MOVIE, &movie_buttons, ram);
+    bool use_movie_buttons = movie_next(CURRENT_MOVIE, &movie_buttons, 0);
     if (use_movie_buttons) {
-#ifdef USE_MOVIE_COMPARERAM
-        if (framecounter != 0) {
-            // Don't compare the first frame, because the movie's ramseq's first frame occurs after Reset and before the first NMI.
-            // SMB_tick calls Reset if it hasn't been called before. If we're here, then Reset has never been called.
-            // Additionally, we can go without comparing it, as memory before the first NMI is not very interesting.
-
-            byte *compareto = SMB_ram(smb_state);
-
-            // RAM errors start at frame 16600, when we go underwater
-
-#define mem_eq_range(from, upto) do { \
-                const byte *a = ram; \
-                const byte *b = compareto; \
-                size_t len = (upto) + 1 - (from); \
-                for (size_t i = (from); i <= (upto); i++) { \
-                    if (a[i] != b[i]) { \
-                        printf("Caused by frame %05d: RAM not equal: At %04lX: %02X expected vs %02X actual\n", framecounter-1, i, a[i], b[i]); \
-                    } \
-                } \
-            } while (0)
-
-            // Missing ranges:
-            // $160-$1FF is the stack (this port doesn't use this)
-
-            if (SMB_which_game(smb_state) == GAME_SMB1) {
-                mem_eq_range(0x0008, 0x00FF);
-                mem_eq_range(0x0100, 0x015F);
-                mem_eq_range(0x0200, 0x07FF);
-            } else if (SMB_which_game(smb_state) == GAME_SMB2J) {
-                // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
-                mem_eq_range(0x0010, 0x00EF);
-                mem_eq_range(0x0109, 0x015F);
-                mem_eq_range(0x0200, 0x07FF);
-            }
-        }
-#endif
-
         PLAYER1_INPUTS.u = movie_buttons.u;
         PLAYER1_INPUTS.d = movie_buttons.d;
         PLAYER1_INPUTS.l = movie_buttons.l;
