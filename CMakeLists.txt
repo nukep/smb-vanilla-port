@@ -11,6 +11,9 @@ endif()
 
 project ("smbport")
 
+
+add_subdirectory( Nes_Snd_Emu )
+
 find_package(SDL2 REQUIRED)
 include_directories(smbport ${SDL2_INCLUDE_DIRS})
 
@@ -22,10 +25,11 @@ add_library(foundation STATIC "src/foundation.cpp" "src/common.cpp")
 target_link_libraries(foundation PRIVATE smb1 smb2j)
 
 # Add source to this project's executable.
-add_executable(smbport "src/main.c" "src/movie.c")
+add_executable(smbport "src/main.c" "src/movie.c" "src/audio.cpp" "src/time.c")
 
 target_link_libraries(smbport foundation)
 target_link_libraries(smbport ${SDL2_LIBRARIES})
+target_link_libraries(smbport Nes_Snd_Emu)
 
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

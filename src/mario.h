@@ -44,19 +44,21 @@ struct SMB_callbacks {
     void (*update_palette)(void *userdata, const byte *palette_indices);
     void (*draw_tile)(void *userdata, const struct SMB_tile tile);
 
+    void (*apu_write_register)(void *userdata, ushort addr, byte data);
+    void (*apu_end_frame)(void *userdata);
+
     void (*joy1)(void *userdata, struct SMB_buttons *buttons);
     void (*joy2)(void *userdata, struct SMB_buttons *buttons);
 };
 
 struct SMB_state;
 
-size_t SMB_state_size();
+size_t SMB_state_size(void);
 void SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb);
 int SMB_which_game(const struct SMB_state *state);
 void SMB_tick(struct SMB_state *state);
 byte* SMB_ram(struct SMB_state *state);
 byte* SMB_ppuram(struct SMB_state *state);
-//byte* SMB_get_chrrom();
 
 #ifdef __cplusplus
 }

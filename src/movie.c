@@ -45,6 +45,7 @@ bool movie_readram(struct Movie* m, void* ram) {
             // Couldn't read the RAM
             return false;
         }
+        return true;
     } else {
         // The caller asked for RAM, which we can't provide, so it's an error.
         return false;

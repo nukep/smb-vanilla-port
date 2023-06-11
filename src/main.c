@@ -13,6 +13,9 @@
 #include <errno.h>
 
 #include "mario.h"
+#include "movie.h"
+#include "audio.h"
+#include "time.h"
 
 typedef void (*error_callback_t)(const char*);
 
@@ -52,9 +55,16 @@ struct Tile {
 
 struct frontend_userdata {
     FILE *romfile;
-    byte palette_indices[32];
-    size_t pixels_stride;
+    struct SMB_state *smb_state;
+    struct SMB_Audio *audio;
+
+    SDL_Window *window;
+    SDL_Surface *surf;
+    int video_scale;
     struct Pixel *pixels;
+    size_t pixels_stride;
+
+    byte palette_indices[32];
     struct Pixel palette[0x40];
     struct Tile tiles[0x200];
 };
@@ -169,15 +179,6 @@ bool smb2j_save_games_beaten(void *userdata, byte games_beaten) {
     return true;
 }
 
-#include "movie.h"
-
-bool run_at_60fps() {
-    // This needs to be implemented properly, but that'll happen when we get audio
-    SDL_Delay(15);
-
-    return true;
-}
-
 const char *ppuram_filename = "ppuram.bin";
 const char *ram_filename = "ram.bin";
 
@@ -249,8 +250,85 @@ bool advance_movie(struct SMB_state *smb_state) {
     return use_movie_buttons;
 }
 
-int sdl_frontend(struct SMB_state *smb_state, struct frontend_userdata *userdata) {
-    const int video_scale = 3;
+int sdl_tick(struct frontend_userdata *userdata) {
+    struct SMB_state *smb_state = userdata->smb_state;
+    SDL_Surface *surf = userdata->surf;
+    bool use_movie_buttons = false;
+
+    use_movie_buttons = advance_movie(smb_state);
+
+    SDL_Event eventData;
+    while (SDL_PollEvent(&eventData))
+    {
+        switch (eventData.type)
+        {
+        case SDL_KEYDOWN:
+        case SDL_KEYUP:
+        {
+            bool isdown = eventData.key.state == SDL_PRESSED;
+            auto sc = eventData.key.keysym.scancode;
+            if (isdown && !eventData.key.repeat) {
+                switch (sc) {
+                case SDL_SCANCODE_1:
+                    if (load_ppuram(smb_state, ppuram_filename)) {
+                        if (!load_ram(smb_state, ram_filename)) {
+                            // Couldn't load RAM - exit
+                            return true;
+                        }
+                    }
+                    break;
+                case SDL_SCANCODE_0:
+                    // dump the RAM and PPU
+                    dump_ppuram(smb_state, ppuram_filename);
+                    dump_ram(smb_state, ram_filename);
+                    break;
+                }
+            }
+            if (!use_movie_buttons) {
+                switch (sc) {
+                case SDL_SCANCODE_W: PLAYER1_INPUTS.u = isdown; break;
+                case SDL_SCANCODE_S: PLAYER1_INPUTS.d = isdown; break;
+                case SDL_SCANCODE_A: PLAYER1_INPUTS.l = isdown; break;
+                case SDL_SCANCODE_D: PLAYER1_INPUTS.r = isdown; break;
+                case SDL_SCANCODE_J: PLAYER1_INPUTS.b = isdown; break;
+                case SDL_SCANCODE_K: PLAYER1_INPUTS.a = isdown; break;
+                case SDL_SCANCODE_U: PLAYER1_INPUTS.select = isdown; break;
+                case SDL_SCANCODE_I: PLAYER1_INPUTS.start = isdown; break;
+                }
+            }
+        }
+        break;
+        case SDL_QUIT:
+            return 1;
+        }
+    }
+
+    // Fill with background color
+    const struct Pixel bgcolor = userdata->palette[userdata->palette_indices[0]];
+    SDL_FillRect(surf, NULL, SDL_MapRGB(surf->format, bgcolor.r, bgcolor.g, bgcolor.b));
+
+    SDL_LockSurface(surf);
+    struct Pixel *pixels = surf->pixels;
+
+    userdata->pixels = pixels;
+
+    SMB_tick(smb_state);
+    framecounter += 1;
+
+    userdata->pixels = 0;
+
+    SDL_UnlockSurface(surf);
+
+    const SDL_Rect srcrect = { 0, 0, 256, 240 };
+    SDL_Rect dstrect = { 0, 0, 256 * userdata->video_scale, 240 * userdata->video_scale };
+    SDL_BlitScaled(surf, &srcrect, SDL_GetWindowSurface(userdata->window), &dstrect);
+
+    SDL_UpdateWindowSurface(userdata->window);
+    return 0;
+}
+
+int sdl_frontend(struct frontend_userdata *userdata) {
+    userdata->video_scale = 3;
 
     SDL_Window *window = NULL;
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -260,7 +338,7 @@ int sdl_frontend(struct SMB_state *smb_state, struct frontend_userdata *userdata
     window = SDL_CreateWindow(
         "smb-port",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        256 * video_scale, 240 * video_scale,
+        256 * userdata->video_scale, 240 * userdata->video_scale,
         SDL_WINDOW_SHOWN
     );
     if (window == NULL) {
@@ -270,86 +348,17 @@ int sdl_frontend(struct SMB_state *smb_state, struct frontend_userdata *userdata
     SDL_FillRect(SDL_GetWindowSurface(window), NULL, SDL_MapRGB(SDL_GetWindowSurface(window)->format, 0x00, 0x00, 0x00));
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
-    SDL_Surface *surf = SDL_CreateRGBSurface(0, 256 * 2, 240, 32, 0, 0, 0, 0);
-    const int stride = 256 * 2;
+    SDL_Surface *surf = SDL_CreateRGBSurface(0, 256, 240, 32, 0, 0, 0, 0);
+    userdata->surf = surf;
+    userdata->pixels_stride = 256;
+    userdata->window = window;
 
-    while (run_at_60fps()) {
-        bool use_movie_buttons = false;
+    // On an NTSC NES: clocks per second, divided by clocks per frame
+    // (approx 60.0988 fps)
+    const double fps = 1789773.0/29780.5;
 
-        use_movie_buttons = advance_movie(smb_state);
+    time_run_at_frequency(fps, userdata, sdl_tick);
 
-        SDL_Event eventData;
-        while (SDL_PollEvent(&eventData))
-        {
-            switch (eventData.type)
-            {
-            case SDL_KEYDOWN:
-            case SDL_KEYUP:
-            {
-                bool isdown = eventData.key.state == SDL_PRESSED;
-                auto sc = eventData.key.keysym.scancode;
-                if (isdown && !eventData.key.repeat) {
-                    switch (sc) {
-                    case SDL_SCANCODE_1:
-                        if (load_ppuram(smb_state, ppuram_filename)) {
-                            if (!load_ram(smb_state, ram_filename)) {
-                                // Couldn't load RAM - exit
-                                return true;
-                            }
-                        }
-                        break;
-                    case SDL_SCANCODE_0:
-                        // dump the RAM and PPU
-                        dump_ppuram(smb_state, ppuram_filename);
-                        dump_ram(smb_state, ram_filename);
-                        break;
-                    }
-                }
-                if (!use_movie_buttons) {
-                    switch (sc) {
-                    case SDL_SCANCODE_W: PLAYER1_INPUTS.u = isdown; break;
-                    case SDL_SCANCODE_S: PLAYER1_INPUTS.d = isdown; break;
-                    case SDL_SCANCODE_A: PLAYER1_INPUTS.l = isdown; break;
-                    case SDL_SCANCODE_D: PLAYER1_INPUTS.r = isdown; break;
-                    case SDL_SCANCODE_J: PLAYER1_INPUTS.b = isdown; break;
-                    case SDL_SCANCODE_K: PLAYER1_INPUTS.a = isdown; break;
-                    case SDL_SCANCODE_U: PLAYER1_INPUTS.select = isdown; break;
-                    case SDL_SCANCODE_I: PLAYER1_INPUTS.start = isdown; break;
-                    }
-                }
-            }
-            break;
-            case SDL_QUIT:
-                goto exit;
-            }
-        }
-
-        // Fill with background color
-        const struct Pixel bgcolor = userdata->palette[userdata->palette_indices[0]];
-        SDL_FillRect(surf, NULL, SDL_MapRGB(surf->format, bgcolor.r, bgcolor.g, bgcolor.b));
-
-        SDL_LockSurface(surf);
-        struct Pixel *pixels = surf->pixels;
-
-        userdata->pixels = pixels;
-        userdata->pixels_stride = stride;
-
-        SMB_tick(smb_state);
-        framecounter += 1;
-
-        userdata->pixels = 0;
-
-        SDL_UnlockSurface(surf);
-
-        const SDL_Rect srcrect = { 0, 0, 256, 240 };
-        SDL_Rect dstrect = { 0, 0, 256 * video_scale, 240 * video_scale };
-        SDL_BlitScaled(surf, &srcrect, SDL_GetWindowSurface(window), &dstrect);
-
-
-        SDL_UpdateWindowSurface(window);
-    }
-
-exit:
     SDL_DestroyWindow(window);
     SDL_Quit();
 
@@ -385,11 +394,23 @@ bool seek_rom(struct frontend_userdata *userdata, size_t offset) {
     return true;
 }
 
+void apu_write_register(struct frontend_userdata* userdata, ushort addr, byte data) {
+    if (userdata->audio) {
+        SMB_audio_write_register(userdata->audio, addr, data);
+    }
+}
+void apu_end_frame(struct frontend_userdata* userdata) {
+    if (userdata->audio) {
+        SMB_audio_end_frame(userdata->audio);
+    }
+}
+
 int main(int argc, char *argv[]) {
     struct SMB_state *smb_state = malloc(SMB_state_size());
     struct frontend_userdata *userdata = malloc(sizeof(struct frontend_userdata));
+    struct SMB_audio *audio = malloc(SMB_audio_size());
 
-    if (!smb_state || !userdata) {
+    if (!smb_state || !userdata || !audio) {
         return 1;
     }
 
@@ -399,24 +420,37 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    bool audio_enabled = true;
+
+    if (!SMB_audio_init(audio)) {
+        printf("Could not initialize audio!\n");
+        free(audio);
+        audio = 0;
+        audio_enabled = false;
+    }
+    userdata->audio = audio;
+
     open_rom(userdata, argv[1]);
 
-    struct SMB_callbacks callbacks = {
-        .userdata = userdata,
+    struct SMB_callbacks callbacks = {0};
+    callbacks.userdata = userdata;
 
-        .read_rom_bytes = read_rom_bytes,
-        .seek_rom = seek_rom,
-        .smb2j_load_games_beaten = smb2j_load_games_beaten,
-        .smb2j_save_games_beaten = smb2j_save_games_beaten,
+    callbacks.read_rom_bytes = read_rom_bytes;
+    callbacks.seek_rom = seek_rom;
+    callbacks.smb2j_load_games_beaten = smb2j_load_games_beaten;
+    callbacks.smb2j_save_games_beaten = smb2j_save_games_beaten;
 
-        .update_pattern_tables = update_pattern_tables,
-        .update_palette = update_palette,
-        .draw_tile = draw_tile,
-        .joy1 = joy1,
-        .joy2 = joy2,
-    };
+    callbacks.apu_write_register = apu_write_register;
+    callbacks.apu_end_frame = apu_end_frame;
+
+    callbacks.update_pattern_tables = update_pattern_tables;
+    callbacks.update_palette = update_palette;
+    callbacks.draw_tile = draw_tile;
+    callbacks.joy1 = joy1;
+    callbacks.joy2 = joy2;
 
     SMB_state_init(smb_state, &callbacks);
+    userdata->smb_state = smb_state;
 
     printf("Started!\n");
 
@@ -455,5 +489,11 @@ int main(int argc, char *argv[]) {
     }
 
     HANDLEERR(load_palette(userdata, "palette.pal"), "Could not load palette");
-    return sdl_frontend(smb_state, userdata);
+    int exitcode = sdl_frontend(userdata);
+
+    if (audio) {
+        SMB_audio_fini(audio);
+    }
+
+    return exitcode;
 }

@@ -89,8 +89,18 @@ static inline bool read_rom_bytes(struct SMB_state *state, byte* buf, size_t siz
 static void joystick_strobe(byte x) {
 }
 
-#define APU_REG(name, addr) static void name(byte x) { \
+static inline void apu_write_register(struct SMB_state *state, ushort addr, byte data) {
+    if (state->callbacks.apu_write_register) {
+        state->callbacks.apu_write_register(state->callbacks.userdata, addr, data);
+    }
 }
+static inline void apu_end_frame(struct SMB_state* state) {
+    if (state->callbacks.apu_end_frame) {
+        state->callbacks.apu_end_frame(state->callbacks.userdata);
+    }
+}
+
+#define APU_REG(name, addr) static inline void name(byte x) { apu_write_register(SMB_STATE, addr, x); }
 
 APU_REG(apu_sq1_vol, 0x4000)
 APU_REG(apu_sq1_sweep, 0x4001)

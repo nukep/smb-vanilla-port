@@ -112,6 +112,7 @@ void SMB1_NMI() {
     VRAM_Buffer_AddrCtrl = 0;
     ppumask(Mirror_PPU_CTRL_REG2);
     SoundEngine();
+    apu_end_frame(SMB_STATE);
     ReadJoypads();
     PauseRoutine();
     UpdateTopScore();

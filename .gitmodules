@@ -1,0 +1,3 @@
+[submodule "Nes_Snd_Emu"]
+	path = Nes_Snd_Emu
+	url = git@github.com:jamesathey/Nes_Snd_Emu.git

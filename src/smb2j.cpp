@@ -320,6 +320,7 @@ void SMB2J_NMI() {
     ppumask(Mirror_PPU_CTRL_REG2);
     enable_interrupt();
     SoundEngine();
+    apu_end_frame(SMB_STATE);
     ReadJoypads();
     PauseRoutine();
     UpdateTopScore();
