@@ -2138,36 +2138,6 @@ void smb2j_PlayGrowVine(void);
 void smb2j_ContinueGrowItems(void);
 #define ContinueGrowItems smb2j_ContinueGrowItems
 
-void smb2j_PlaySkidSfx(byte param_1);
-#define PlaySkidSfx smb2j_PlaySkidSfx
-
-void smb2j_ContinueSkidSfx(void);
-#define ContinueSkidSfx smb2j_ContinueSkidSfx
-
-void smb2j_PlayBrickShatter(byte param_1);
-#define PlayBrickShatter smb2j_PlayBrickShatter
-
-void smb2j_ContinueBrickShatter(void);
-#define ContinueBrickShatter smb2j_ContinueBrickShatter
-
-void smb2j_PlayNoiseSfx(byte param_1,byte param_2);
-#define PlayNoiseSfx smb2j_PlayNoiseSfx
-
-void smb2j_DecrementSfx3Length(void);
-#define DecrementSfx3Length smb2j_DecrementSfx3Length
-
-void smb2j_PlayBowserFlame(byte param_1);
-#define PlayBowserFlame smb2j_PlayBowserFlame
-
-void smb2j_ContinueBowserFlame(void);
-#define ContinueBowserFlame smb2j_ContinueBowserFlame
-
-void smb2j_PlayWindSfx(byte param_1);
-#define PlayWindSfx smb2j_PlayWindSfx
-
-void smb2j_ContinueWindSfx(void);
-#define ContinueWindSfx smb2j_ContinueWindSfx
-
 void smb2j_ContinueMusic(void);
 #define ContinueMusic smb2j_ContinueMusic
 

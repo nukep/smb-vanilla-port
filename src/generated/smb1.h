@@ -2038,24 +2038,6 @@ void smb1_PlayGrowVine(void);
 void smb1_ContinueGrowItems(void);
 #define ContinueGrowItems smb1_ContinueGrowItems
 
-void smb1_PlayBrickShatter(void);
-#define PlayBrickShatter smb1_PlayBrickShatter
-
-void smb1_ContinueBrickShatter(void);
-#define ContinueBrickShatter smb1_ContinueBrickShatter
-
-void smb1_PlayNoiseSfx(byte param_1,byte param_2);
-#define PlayNoiseSfx smb1_PlayNoiseSfx
-
-void smb1_DecrementSfx3Length(void);
-#define DecrementSfx3Length smb1_DecrementSfx3Length
-
-void smb1_PlayBowserFlame(void);
-#define PlayBowserFlame smb1_PlayBowserFlame
-
-void smb1_ContinueBowserFlame(void);
-#define ContinueBowserFlame smb1_ContinueBowserFlame
-
 void smb1_ContinueMusic(void);
 #define ContinueMusic smb1_ContinueMusic
 
