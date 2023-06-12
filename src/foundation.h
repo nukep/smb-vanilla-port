@@ -11,11 +11,10 @@ typedef unsigned short ushort;
 #define warning(...)
 
 #ifdef _MSC_VER
-#define NOINLINE __declspec(noinline)
-#define thread_local __declspec(thread)
-#else
-#define NOINLINE __attribute__ ((noinline))
-#define thread_local _Thread_local
+#   define NOINLINE __declspec(noinline)
+#   define thread_local __declspec(thread)
+#elif __GNUC__
+#   define NOINLINE __attribute__ ((noinline))
 #endif
 
 
@@ -222,7 +221,7 @@ typedef uint64_t undefined3;
 
 
 // Represents a pointer type. Size is 2 bytes.
-static class RamPtr {
+class RamPtr {
 public:
     // fields, as laid out in 6502 memory
     union {

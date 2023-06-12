@@ -1,5 +1,5 @@
 .vs
-out
+/out*
 /bin
 
 /rawsmb.*
