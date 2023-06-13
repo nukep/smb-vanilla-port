@@ -1214,9 +1214,6 @@ byte smb2j_SmallBBox(byte param_1);
 void smb2j_InitRedPTroopa(byte param_1,bool param_2);
 #define InitRedPTroopa smb2j_InitRedPTroopa
 
-void smb2j_TallBBox(byte param_1);
-#define TallBBox smb2j_TallBBox
-
 byte smb2j_InitVStf(byte param_1);
 #define InitVStf smb2j_InitVStf
 
@@ -1279,9 +1276,6 @@ void smb2j_EndFrenzy(byte param_1);
 
 void smb2j_InitJumpGPTroopa(byte param_1);
 #define InitJumpGPTroopa smb2j_InitJumpGPTroopa
-
-void smb2j_TallBBox2(byte param_1);
-#define TallBBox2 smb2j_TallBBox2
 
 void smb2j_InitBalPlatform(byte param_1);
 #define InitBalPlatform smb2j_InitBalPlatform
@@ -1787,6 +1781,9 @@ byte smb2j_DrawPowerUp(void);
 byte smb2j_EnemyGfxHandler(byte param_1);
 #define EnemyGfxHandler smb2j_EnemyGfxHandler
 
+byte smb2j_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+#define DrawEnemyObject smb2j_DrawEnemyObject
+
 byte smb2j_SprObjectOffscrChk(void);
 #define SprObjectOffscrChk smb2j_SprObjectOffscrChk
 
@@ -1870,6 +1867,9 @@ byte smb2j_GetGfxOffsetAdder(byte param_1);
 
 byte smb2j_HandleChangeSize(void);
 #define HandleChangeSize smb2j_HandleChangeSize
+
+byte smb2j_GetOffsetFromAnimCtrl(byte param_1,byte param_2);
+#define GetOffsetFromAnimCtrl smb2j_GetOffsetFromAnimCtrl
 
 void smb2j_ChkForPlayerAttrib(void);
 #define ChkForPlayerAttrib smb2j_ChkForPlayerAttrib

@@ -22,6 +22,7 @@ function_names = [
     'PlayerGfxProcessing',
     'AnimationControl',
     'GetOffScreenBitsSet',
+    'DrawEnemyObject',
 
 
     # sound engine stuff

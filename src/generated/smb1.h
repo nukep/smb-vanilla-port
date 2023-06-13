@@ -1762,6 +1762,9 @@ byte smb1_DrawPowerUp(void);
 byte smb1_EnemyGfxHandler(byte param_1);
 #define EnemyGfxHandler smb1_EnemyGfxHandler
 
+byte smb1_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+#define DrawEnemyObject smb1_DrawEnemyObject
+
 byte smb1_SprObjectOffscrChk(void);
 #define SprObjectOffscrChk smb1_SprObjectOffscrChk
 

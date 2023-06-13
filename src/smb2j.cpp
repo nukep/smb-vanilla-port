@@ -108,6 +108,7 @@ bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
 
 #include "generated/smb2j_romarrays.h"
 #include "generated/vars.h"
+static const ConstRamByteArray AreaAddrOffsets = ConstRamByteArray(0xC360, 0x28);
 
 // read $4032
 byte FDS_drive_status() { return 0; }

@@ -12463,13 +12463,11 @@ byte EnemyGfxHandler(byte param_1)
   byte bVar3;
   byte bVar4;
   byte bVar5;
-  bool bVar6;
-  struct_xyr02 sVar7;
   
   bVar5 = Enemy_Y_Position[param_1];
   MysterySpriteThing1 = Enemy_SprDataOffset[param_1];
   VerticalFlipFlag = 0;
-  bVar1 = Enemy_MovingDir[param_1];
+  bVar2 = Enemy_MovingDir[param_1];
   bVar3 = Enemy_SprAttrib[param_1];
   if (((Enemy_ID[param_1] == 0xd) && (PlayerSpriteVarData1[param_1 + 1] < 0x80)) &&
      (EnemyFrameTimer[param_1] != 0)) {
@@ -12480,7 +12478,7 @@ byte EnemyGfxHandler(byte param_1)
   MysterySpriteThing4 = Enemy_ID[param_1];
   if (MysterySpriteThing4 == 0x35) {
     MysterySpriteThing2 = 0;
-    bVar1 = 1;
+    bVar2 = 1;
     MysterySpriteThing4 = 0x15;
   }
   if (MysterySpriteThing4 == 0x33) {
@@ -12508,191 +12506,212 @@ byte EnemyGfxHandler(byte param_1)
       MysterySpriteThing2 = 4;
     }
     if (((Enemy_State[ObjectOffset] & 0x20 | TimerControl) == 0) && ((FrameCounter & 8) == 0)) {
-      bVar1 ^= 3;
+      bVar2 ^= 3;
     }
   }
   bVar3 = EnemyAttributeData[MysterySpriteThing4] | bVar3;
   bVar4 = EnemyGfxTableOffsets[MysterySpriteThing4];
-  if (BowserGfxFlag == 0) {
-    if (bVar4 != 0x24) {
-      if (bVar4 != 0x90) {
-        if (((MysterySpriteThing4 < 4) && (1 < MysterySpriteThing2)) &&
-           (bVar4 = 0x5a, MysterySpriteThing4 == 2)) {
-          bVar4 = 0x7e;
-          bVar5 += 1;
-        }
-        if (MysterySpriteThing2 == 4) {
-          bVar4 = 0x72;
-          bVar2 = bVar5 + 1;
-          if (MysterySpriteThing4 != 2) {
-            bVar4 = 0x66;
-            bVar2 = bVar5 + 2;
-          }
-          bVar5 = bVar2;
-          if ((MysterySpriteThing4 == 6) && (bVar4 = 0x54, (MysterySpriteThing3 & 0x20) == 0)) {
-            bVar4 = 0x8a;
-            bVar5 -= 1;
-          }
-        }
-        goto CheckForHammerBro;
+  if (BowserGfxFlag != 0) {
+    if (BowserGfxFlag == 1) {
+      if (0x7f < BowserBodyControls) {
+        bVar4 = 0xde;
       }
+      if ((MysterySpriteThing3 & 0x20) == 0) goto DrawBowser;
+    }
+    else {
+      if ((BowserBodyControls & 1) != 0) {
+        bVar4 = 0xe4;
+      }
+      if ((MysterySpriteThing3 & 0x20) == 0) goto DrawBowser;
+      bVar5 -= 0x10;
+    }
+    VerticalFlipFlag = bVar4;
+DrawBowser:
+    bVar5 = DrawEnemyObject(bVar4,bVar5,bVar2,bVar3,Enemy_Rel_XPos);
+    return bVar5;
+  }
+  if (bVar4 == 0x24) {
+    if (MysterySpriteThing2 == 5) {
+      bVar4 = 0x30;
+      bVar2 = 2;
+      MysterySpriteThing2 = 5;
+    }
+  }
+  else {
+    if (bVar4 == 0x90) {
       if (((MysterySpriteThing3 & 0x20) == 0) && (FrenzyEnemyTimer < 0x10)) {
         bVar4 = 0x96;
       }
       goto CheckDefeatedState;
     }
-    if (MysterySpriteThing2 == 5) {
-      bVar4 = 0x30;
-      bVar1 = 2;
-      MysterySpriteThing2 = 5;
+    if (((MysterySpriteThing4 < 4) && (1 < MysterySpriteThing2)) &&
+       (bVar4 = 0x5a, MysterySpriteThing4 == 2)) {
+      bVar4 = 0x7e;
+      bVar5 += 1;
     }
-CheckForHammerBro:
-    if (MysterySpriteThing4 == 5) {
-      if (MysterySpriteThing3 != 0) {
-        if ((MysterySpriteThing3 & 8) == 0) goto CheckDefeatedState;
-        bVar4 = 0xb4;
+    if (MysterySpriteThing2 == 4) {
+      bVar4 = 0x72;
+      bVar1 = bVar5 + 1;
+      if (MysterySpriteThing4 != 2) {
+        bVar4 = 0x66;
+        bVar1 = bVar5 + 2;
       }
-CheckToAnimateEnemy:
-      if ((((MysterySpriteThing4 != 6) && (MysterySpriteThing4 != 8)) &&
-          (MysterySpriteThing4 != 0xc)) && (MysterySpriteThing4 < 0x18)) {
-        if (MysterySpriteThing4 == 0x15) {
-          if (WorldNumber < 7) {
-            bVar4 = 0xa2;
-            MysterySpriteThing2 = 3;
-          }
-        }
-        else if ((FrameCounter & EnemyAnimTimingBMask[0]) == 0) goto CheckAnimationStop;
+      bVar5 = bVar1;
+      if ((MysterySpriteThing4 == 6) && (bVar4 = 0x54, (MysterySpriteThing3 & 0x20) == 0)) {
+        bVar4 = 0x8a;
+        bVar5 -= 1;
       }
-    }
-    else {
-      if (bVar4 == 0x48) goto CheckToAnimateEnemy;
-      if (EnemyIntervalTimer[ObjectOffset] < 5) {
-        if (bVar4 != 0x3c) goto CheckToAnimateEnemy;
-        if (EnemyIntervalTimer[ObjectOffset] == 1) goto CheckDefeatedState;
-        bVar5 += 3;
-CheckAnimationStop:
-        if ((MysterySpriteThing3 & 0xa0 | TimerControl) == 0) {
-          bVar4 += 6;
-        }
-      }
-    }
-CheckDefeatedState:
-    if (((MysterySpriteThing3 & 0x20) != 0) && (3 < MysterySpriteThing4)) {
-      VerticalFlipFlag = 1;
-      MysterySpriteThing2 = 0;
     }
   }
-  else if (BowserGfxFlag == 1) {
-    if (0x7f < BowserBodyControls) {
-      bVar4 = 0xde;
+  if (MysterySpriteThing4 == 5) {
+    if (MysterySpriteThing3 != 0) {
+      if ((MysterySpriteThing3 & 8) == 0) goto CheckDefeatedState;
+      bVar4 = 0xb4;
     }
-    if ((MysterySpriteThing3 & 0x20) != 0) {
-FlipBowserOver:
-      VerticalFlipFlag = bVar4;
+CheckToAnimateEnemy:
+    if (((MysterySpriteThing4 == 6) || (MysterySpriteThing4 == 8)) ||
+       ((MysterySpriteThing4 == 0xc || (0x17 < MysterySpriteThing4)))) goto CheckDefeatedState;
+    if (MysterySpriteThing4 == 0x15) {
+      if (WorldNumber < 7) {
+        bVar4 = 0xa2;
+        MysterySpriteThing2 = 3;
+      }
+      goto CheckDefeatedState;
     }
+    if ((FrameCounter & EnemyAnimTimingBMask[0]) != 0) goto CheckDefeatedState;
   }
   else {
-    if ((BowserBodyControls & 1) != 0) {
-      bVar4 = 0xe4;
-    }
-    if ((MysterySpriteThing3 & 0x20) != 0) {
-      bVar5 -= 0x10;
-      goto FlipBowserOver;
-    }
+    if (bVar4 == 0x48) goto CheckToAnimateEnemy;
+    if (4 < EnemyIntervalTimer[ObjectOffset]) goto CheckDefeatedState;
+    if (bVar4 != 0x3c) goto CheckToAnimateEnemy;
+    if (EnemyIntervalTimer[ObjectOffset] == 1) goto CheckDefeatedState;
+    bVar5 += 3;
   }
-  bVar2 = Enemy_Rel_XPos;
-  sVar7 = DrawEnemyObjRow(bVar4,MysterySpriteThing1,bVar5,bVar1,bVar3,Enemy_Rel_XPos);
-  sVar7 = DrawEnemyObjRow(sVar7.x,sVar7.y,sVar7.r02,bVar1,bVar3,bVar2);
-  DrawEnemyObjRow(sVar7.x,sVar7.y,sVar7.r02,bVar1,bVar3,bVar2);
-  bVar5 = Enemy_SprDataOffset[ObjectOffset];
+  if ((MysterySpriteThing3 & 0xa0 | TimerControl) == 0) {
+    bVar4 += 6;
+  }
+CheckDefeatedState:
+  if ((MysterySpriteThing3 & 0x20) == 0) {
+    bVar5 = DrawEnemyObject(bVar4,bVar5,bVar2,bVar3,Enemy_Rel_XPos);
+    return bVar5;
+  }
+  if (MysterySpriteThing4 < 4) {
+    bVar5 = DrawEnemyObject(bVar4,bVar5,bVar2,bVar3,Enemy_Rel_XPos);
+    return bVar5;
+  }
+  VerticalFlipFlag = 1;
+  MysterySpriteThing2 = 0;
+  bVar5 = DrawEnemyObject(bVar4,bVar5,bVar2,bVar3,Enemy_Rel_XPos);
+  return bVar5;
+}
+
+
+
+// SMB:ea4b
+// Signature: [X, r02, r03, r04, r05] -> [X]
+
+byte DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5)
+
+{
+  byte bVar1;
+  byte bVar2;
+  byte bVar3;
+  byte bVar4;
+  bool bVar5;
+  struct_xyr02 sVar6;
+  
+  sVar6 = DrawEnemyObjRow(param_1,MysterySpriteThing1,param_2,param_3,param_4,param_5);
+  sVar6 = DrawEnemyObjRow(sVar6.x,sVar6.y,sVar6.r02,param_3,param_4,param_5);
+  DrawEnemyObjRow(sVar6.x,sVar6.y,sVar6.r02,param_3,param_4,param_5);
+  bVar3 = Enemy_SprDataOffset[ObjectOffset];
   if (MysterySpriteThing4 == 8) {
 SkipToOffScrChk:
-    bVar5 = SprObjectOffscrChk();
-    return bVar5;
+    bVar3 = SprObjectOffscrChk();
+    return bVar3;
   }
   if (VerticalFlipFlag != 0) {
-    bVar3 = bVar5 + 2;
-    DumpSixSpr(Sprite_Data[bVar5 + 2] | 0x80,bVar3);
-    bVar5 = bVar3 - 2;
-    bVar1 = bVar5;
+    bVar4 = bVar3 + 2;
+    DumpSixSpr(Sprite_Data[bVar3 + 2] | 0x80,bVar4);
+    bVar3 = bVar4 - 2;
+    bVar2 = bVar3;
     if (((MysterySpriteThing4 != 5) && (MysterySpriteThing4 != 0x11)) &&
        (MysterySpriteThing4 < 0x15)) {
-      bVar1 = bVar3 + 6;
+      bVar2 = bVar4 + 6;
     }
-    bVar3 = Sprite_Data[bVar1 + 1];
-    bVar4 = Sprite_Data[bVar1 + 5];
-    Sprite_Data[bVar1 + 1] = Sprite_Data[bVar5 + 0x11];
-    Sprite_Data[bVar1 + 5] = Sprite_Data[bVar5 + 0x15];
-    Sprite_Data[bVar5 + 0x15] = bVar4;
-    Sprite_Data[bVar5 + 0x11] = bVar3;
+    bVar4 = Sprite_Data[bVar2 + 1];
+    bVar1 = Sprite_Data[bVar2 + 5];
+    Sprite_Data[bVar2 + 1] = Sprite_Data[bVar3 + 0x11];
+    Sprite_Data[bVar2 + 5] = Sprite_Data[bVar3 + 0x15];
+    Sprite_Data[bVar3 + 0x15] = bVar1;
+    Sprite_Data[bVar3 + 0x11] = bVar4;
   }
-  bVar1 = MysterySpriteThing2;
+  bVar2 = MysterySpriteThing2;
   if (BowserGfxFlag != 0) goto SkipToOffScrChk;
   if (MysterySpriteThing4 == 5) {
-    bVar5 = SprObjectOffscrChk();
-    return bVar5;
+    bVar3 = SprObjectOffscrChk();
+    return bVar3;
   }
   if (((MysterySpriteThing4 != 7) && (MysterySpriteThing4 != 0xd)) && (MysterySpriteThing4 != 0xc))
   {
     if ((MysterySpriteThing4 == 0x12) && (MysterySpriteThing2 != 5)) goto CheckToMirrorLakitu;
     if (MysterySpriteThing4 == 0x15) {
-      Sprite_Data[bVar5 + 0x16] = 0x42;
+      Sprite_Data[bVar3 + 0x16] = 0x42;
     }
-    if (bVar1 < 2) goto CheckToMirrorLakitu;
+    if (bVar2 < 2) goto CheckToMirrorLakitu;
   }
   if (BowserGfxFlag == 0) {
-    bVar3 = Sprite_Data[bVar5 + 2] & 0xa3;
-    Sprite_Data[bVar5 + 2] = bVar3;
-    Sprite_Data[bVar5 + 10] = bVar3;
-    Sprite_Data[bVar5 + 0x12] = bVar3;
-    bVar4 = bVar3 | 0x40;
-    if (bVar1 == 5) {
-      bVar4 = bVar3 | 0xc0;
+    bVar4 = Sprite_Data[bVar3 + 2] & 0xa3;
+    Sprite_Data[bVar3 + 2] = bVar4;
+    Sprite_Data[bVar3 + 10] = bVar4;
+    Sprite_Data[bVar3 + 0x12] = bVar4;
+    bVar1 = bVar4 | 0x40;
+    if (bVar2 == 5) {
+      bVar1 = bVar4 | 0xc0;
     }
-    Sprite_Data[bVar5 + 6] = bVar4;
-    Sprite_Data[bVar5 + 0xe] = bVar4;
-    Sprite_Data[bVar5 + 0x16] = bVar4;
-    if (bVar1 == 4) {
-      bVar1 = Sprite_Data[bVar5 + 10];
-      bVar3 = bVar1 | 0x80;
-      Sprite_Data[bVar5 + 10] = bVar3;
-      Sprite_Data[bVar5 + 0x12] = bVar3;
-      bVar1 |= 0xc0;
-      Sprite_Data[bVar5 + 0xe] = bVar1;
-      Sprite_Data[bVar5 + 0x16] = bVar1;
+    Sprite_Data[bVar3 + 6] = bVar1;
+    Sprite_Data[bVar3 + 0xe] = bVar1;
+    Sprite_Data[bVar3 + 0x16] = bVar1;
+    if (bVar2 == 4) {
+      bVar2 = Sprite_Data[bVar3 + 10];
+      bVar4 = bVar2 | 0x80;
+      Sprite_Data[bVar3 + 10] = bVar4;
+      Sprite_Data[bVar3 + 0x12] = bVar4;
+      bVar2 |= 0xc0;
+      Sprite_Data[bVar3 + 0xe] = bVar2;
+      Sprite_Data[bVar3 + 0x16] = bVar2;
     }
   }
 CheckToMirrorLakitu:
   if (MysterySpriteThing4 == 0x11) {
     if (VerticalFlipFlag == 0) {
-      Sprite_Data[bVar5 + 0x12] = Sprite_Data[bVar5 + 0x12] & 0x81;
-      bVar1 = Sprite_Data[bVar5 + 0x16] | 0x41;
-      Sprite_Data[bVar5 + 0x16] = bVar1;
-      bVar6 = 0xf < FrenzyEnemyTimer;
-      if (bVar6) {
-        bVar5 = SprObjectOffscrChk();
-        return bVar5;
+      Sprite_Data[bVar3 + 0x12] = Sprite_Data[bVar3 + 0x12] & 0x81;
+      bVar2 = Sprite_Data[bVar3 + 0x16] | 0x41;
+      Sprite_Data[bVar3 + 0x16] = bVar2;
+      bVar5 = 0xf < FrenzyEnemyTimer;
+      if (bVar5) {
+        bVar3 = SprObjectOffscrChk();
+        return bVar3;
       }
-      Sprite_Data[bVar5 + 0xe] = bVar1;
-      Sprite_Data[bVar5 + 10] = bVar1 & 0x81;
-      if (!bVar6) {
-        bVar5 = SprObjectOffscrChk();
-        return bVar5;
+      Sprite_Data[bVar3 + 0xe] = bVar2;
+      Sprite_Data[bVar3 + 10] = bVar2 & 0x81;
+      if (!bVar5) {
+        bVar3 = SprObjectOffscrChk();
+        return bVar3;
       }
     }
-    Sprite_Data[bVar5 + 2] = Sprite_Data[bVar5 + 2] & 0x81;
-    Sprite_Data[bVar5 + 6] = Sprite_Data[bVar5 + 6] | 0x41;
+    Sprite_Data[bVar3 + 2] = Sprite_Data[bVar3 + 2] & 0x81;
+    Sprite_Data[bVar3 + 6] = Sprite_Data[bVar3 + 6] | 0x41;
   }
   if (MysterySpriteThing4 < 0x18) {
-    bVar5 = SprObjectOffscrChk();
-    return bVar5;
+    bVar3 = SprObjectOffscrChk();
+    return bVar3;
   }
-  Sprite_Data[bVar5 + 10] = 0x82;
-  Sprite_Data[bVar5 + 0x12] = 0x82;
-  Sprite_Data[bVar5 + 0xe] = 0xc2;
-  Sprite_Data[bVar5 + 0x16] = 0xc2;
-  bVar5 = SprObjectOffscrChk();
-  return bVar5;
+  Sprite_Data[bVar3 + 10] = 0x82;
+  Sprite_Data[bVar3 + 0x12] = 0x82;
+  Sprite_Data[bVar3 + 0xe] = 0xc2;
+  Sprite_Data[bVar3 + 0x16] = 0xc2;
+  bVar3 = SprObjectOffscrChk();
+  return bVar3;
 }
 
 

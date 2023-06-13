@@ -13,6 +13,12 @@ reimplemented = [
     'ReadPortBits',
     'Dump_Freq_Regs',
     'NoiseSfxHandler',
+    'PlayBrickShatter',
+    'ContinueBrickShatter',
+    'PlayNoiseSfx',
+    'DecrementSfx3Length',
+    'PlayBowserFlame',
+    'ContinueBowserFlame',
 ]
 
 unused = [

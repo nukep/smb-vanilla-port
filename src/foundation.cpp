@@ -35,7 +35,7 @@ static bool detect_and_load_rom(struct SMB_state *state) {
     }
 }
 
-size_t SMB_state_size() {
+size_t SMB_state_size(void) {
     return sizeof(struct SMB_state);
 }
 void SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb) {
