@@ -55,6 +55,8 @@ struct SMB_state {
     byte ppuram[0x4000];
     int which_game;
     bool reset_occurred;
+    byte start_on_world;
+    byte start_on_level;
 
     struct SMB_callbacks callbacks;
     size_t smb2j_disk_offset;

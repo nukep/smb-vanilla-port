@@ -3,6 +3,24 @@
 
 #include "generated/vars.h"
 
+void set_world_and_level(byte world, byte level) {
+    WorldNumber = world;
+    LevelNumber = level;
+
+    ushort WorldAddrOffsets = SMB1_ONLY ? 0x9CB4 : 0xC357;
+    ushort AreaAddrOffsetsPtr = SMB1_ONLY ? 0x9CBC : 0xC360;
+
+    byte off = 0;
+    for (int i = 0; i < level; i++) {
+        // skip "intermission" areas
+        if (RAM(AreaAddrOffsetsPtr + RAM(WorldAddrOffsets + world) + off) == 0x29) {
+            off += 1;
+        }
+        off += 1;
+    }
+    AreaNumber = off;
+}
+
 
 // Set 0's in memory.
 // The provided number is up to which address in the $0700 page to set to zero.

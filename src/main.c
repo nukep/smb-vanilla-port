@@ -56,7 +56,7 @@ struct Tile {
 struct frontend_userdata {
     FILE *romfile;
     struct SMB_state *smb_state;
-    struct SMB_Audio *audio;
+    struct SMB_audio *audio;
 
     SDL_Window *window;
     SDL_Surface *surf;
@@ -77,9 +77,10 @@ void joy1(void *userdata, struct SMB_buttons *buttons) {
 void joy2(void *userdata, struct SMB_buttons *buttons) {
 }
 
-void update_pattern_tables(struct frontend_userdata *userdata, const byte *chrrom) {
+void update_pattern_tables(void *userdata, const byte *chrrom) {
+    struct frontend_userdata *fe = userdata;
     for (int tileidx = 0; tileidx < 512; tileidx++) {
-        struct Tile *t = userdata->tiles + tileidx;
+        struct Tile *t = fe->tiles + tileidx;
         const byte *buf = chrrom + tileidx*0x10;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -91,12 +92,14 @@ void update_pattern_tables(struct frontend_userdata *userdata, const byte *chrro
     }
 }
 
-void update_palette(struct frontend_userdata *userdata, const byte *palette_indices) {
-    memcpy(userdata->palette_indices, palette_indices, 32);
+void update_palette(void *userdata, const byte *palette_indices) {
+    struct frontend_userdata *fe = userdata;
+    memcpy(fe->palette_indices, palette_indices, 32);
 }
 
-void draw_tile(struct frontend_userdata *userdata, const struct SMB_tile tile) {
-    if (!userdata->pixels) {
+void draw_tile(void *userdata, const struct SMB_tile tile) {
+    struct frontend_userdata *fe = userdata;
+    if (!fe->pixels) {
         return;
     }
 
@@ -119,24 +122,25 @@ void draw_tile(struct frontend_userdata *userdata, const struct SMB_tile tile) {
                 continue;
             }
 
-            struct Pixel *p = userdata->pixels + jj + ii*userdata->pixels_stride;
-            byte v = userdata->tiles[tile.tileidx].val[i][j];
+            struct Pixel *p = fe->pixels + jj + ii*fe->pixels_stride;
+            byte v = fe->tiles[tile.tileidx].val[i][j];
             if (v == 0) {
                 continue;
             }
             
-            *p = userdata->palette[userdata->palette_indices[tile.paletteidx * 4 + v] & 0x3F];
+            *p = fe->palette[fe->palette_indices[tile.paletteidx * 4 + v] & 0x3F];
         }
     }
 }
 
-bool load_palette(struct frontend_userdata *userdata, const char *filename) {
+bool load_palette(void *userdata, const char *filename) {
+    struct frontend_userdata *fe = userdata;
     IOOPEN_READONLY(filename);
     byte out[3];
 
     for (int i = 0; i < 0x40; i++) {
         IOREAD(3, &out);
-        struct Pixel *p = userdata->palette + i;
+        struct Pixel *p = fe->palette + i;
         p->r = out[0];
         p->g = out[1];
         p->b = out[2];
@@ -207,9 +211,10 @@ bool advance_movie(struct SMB_state *smb_state) {
     return use_movie_buttons;
 }
 
-int sdl_tick(struct frontend_userdata *userdata) {
-    struct SMB_state *smb_state = userdata->smb_state;
-    SDL_Surface *surf = userdata->surf;
+int sdl_tick(void *userdata) {
+    struct frontend_userdata *fe = userdata;
+    struct SMB_state *smb_state = fe->smb_state;
+    SDL_Surface *surf = fe->surf;
     bool use_movie_buttons = false;
 
     use_movie_buttons = advance_movie(smb_state);
@@ -223,7 +228,7 @@ int sdl_tick(struct frontend_userdata *userdata) {
         case SDL_KEYUP:
         {
             bool isdown = eventData.key.state == SDL_PRESSED;
-            auto sc = eventData.key.keysym.scancode;
+            SDL_Scancode sc = eventData.key.keysym.scancode;
             if (isdown && !eventData.key.repeat) {
                 switch (sc) {
                 case SDL_SCANCODE_1:
@@ -261,31 +266,32 @@ int sdl_tick(struct frontend_userdata *userdata) {
     }
 
     // Fill with background color
-    const struct Pixel bgcolor = userdata->palette[userdata->palette_indices[0]];
+    const struct Pixel bgcolor = fe->palette[fe->palette_indices[0]];
     SDL_FillRect(surf, NULL, SDL_MapRGB(surf->format, bgcolor.r, bgcolor.g, bgcolor.b));
 
     SDL_LockSurface(surf);
     struct Pixel *pixels = surf->pixels;
 
-    userdata->pixels = pixels;
+    fe->pixels = pixels;
 
     SMB_tick(smb_state);
     framecounter += 1;
 
-    userdata->pixels = 0;
+    fe->pixels = 0;
 
     SDL_UnlockSurface(surf);
 
     const SDL_Rect srcrect = { 0, 0, 256, 240 };
-    SDL_Rect dstrect = { 0, 0, 256 * userdata->video_scale, 240 * userdata->video_scale };
-    SDL_BlitScaled(surf, &srcrect, SDL_GetWindowSurface(userdata->window), &dstrect);
+    SDL_Rect dstrect = { 0, 0, 256 * fe->video_scale, 240 * fe->video_scale };
+    SDL_BlitScaled(surf, &srcrect, SDL_GetWindowSurface(fe->window), &dstrect);
 
-    SDL_UpdateWindowSurface(userdata->window);
+    SDL_UpdateWindowSurface(fe->window);
     return 0;
 }
 
-int sdl_frontend(struct frontend_userdata *userdata) {
-    userdata->video_scale = 3;
+int sdl_frontend(void *userdata) {
+    struct frontend_userdata *fe = userdata;
+    fe->video_scale = 3;
 
     SDL_Window *window = NULL;
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -295,7 +301,7 @@ int sdl_frontend(struct frontend_userdata *userdata) {
     window = SDL_CreateWindow(
         "smb-port",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        256 * userdata->video_scale, 240 * userdata->video_scale,
+        256 * fe->video_scale, 240 * fe->video_scale,
         SDL_WINDOW_SHOWN
     );
     if (window == NULL) {
@@ -306,9 +312,9 @@ int sdl_frontend(struct frontend_userdata *userdata) {
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 
     SDL_Surface *surf = SDL_CreateRGBSurface(0, 256, 240, 32, 0, 0, 0, 0);
-    userdata->surf = surf;
-    userdata->pixels_stride = 256;
-    userdata->window = window;
+    fe->surf = surf;
+    fe->pixels_stride = 256;
+    fe->window = window;
 
     // On an NTSC NES: clocks per second, divided by clocks per frame
     // (approx 60.0988 fps)
@@ -334,35 +340,105 @@ int sdl_frontend(struct frontend_userdata *userdata) {
     if (!val) { return 1; } \
 } while(0)
 
-bool open_rom(struct frontend_userdata *userdata, const char *filename) {
+bool open_rom(void *userdata, const char *filename) {
+    struct frontend_userdata *fe = userdata;
     FILE *f = fopen(filename, "rb");
-    userdata->romfile = f;
+    fe->romfile = f;
     return f != 0;
 }
 
 
 
-bool read_rom_bytes(struct frontend_userdata *userdata, byte *buf, size_t size) {
-    return fread(buf, size, 1, userdata->romfile) == 1;
+bool read_rom_bytes(void *userdata, byte *buf, size_t size) {
+    struct frontend_userdata *fe = userdata;
+    return fread(buf, size, 1, fe->romfile) == 1;
 }
 
-bool seek_rom(struct frontend_userdata *userdata, size_t offset) {
-    fseek(userdata->romfile, offset, SEEK_SET);
+bool seek_rom(void *userdata, size_t offset) {
+    struct frontend_userdata *fe = userdata;
+    fseek(fe->romfile, offset, SEEK_SET);
     return true;
 }
 
-void apu_write_register(struct frontend_userdata* userdata, ushort addr, byte data) {
-    if (userdata->audio) {
-        SMB_audio_write_register(userdata->audio, addr, data);
+void apu_write_register(void *userdata, ushort addr, byte data) {
+    struct frontend_userdata *fe = userdata;
+    if (fe->audio) {
+        SMB_audio_write_register(fe->audio, addr, data);
     }
 }
-void apu_end_frame(struct frontend_userdata* userdata) {
-    if (userdata->audio) {
-        SMB_audio_end_frame(userdata->audio);
+void apu_end_frame(void *userdata) {
+    struct frontend_userdata *fe = userdata;
+    if (fe->audio) {
+        SMB_audio_end_frame(fe->audio);
     }
 }
 
+struct cli_args {
+    const char *rom_filename;
+    const char *movie_prefix;
+    int world;
+    int level;
+};
+
+#define PEEK_EQ(s) (i < argc && (strcmp(argv[i], s) == 0))
+#define POP_IF_EXISTS() if (i >= argc) { ptr = 0; } ptr = argv[i++]
+#define POP() if (i >= argc) { return false; } ptr = argv[i++]
+
+bool parse_cli_args(int argc, char *argv[], struct cli_args *out) {
+    char *ptr = 0;
+    int i = 1;
+    int last_i;
+
+    out->world = 1;
+    out->level = 1;
+
+    // The rom is the first argument by default
+    if (!out->rom_filename) {
+        POP_IF_EXISTS();
+        out->rom_filename = ptr;
+    }
+
+    do {
+        last_i = i;
+        if (PEEK_EQ("--rom")) { 
+            POP();
+            POP();
+            out->rom_filename = ptr;
+        }
+        if (PEEK_EQ("--movie") || PEEK_EQ("-m")) {
+            POP();
+            POP();
+            out->movie_prefix = ptr;
+        }
+        if (PEEK_EQ("--level") || PEEK_EQ("-l")) {
+            int world=0;
+            int level=0;
+            POP();
+            POP();
+            if (sscanf(ptr, "%d-%d", &world, &level) == 2) {
+                out->world = world;
+                out->level = level;
+            } else {
+                return false;
+            }
+        }
+    } while (last_i != i);
+
+    return true;
+}
+
+#undef POP
+#undef POP_IF_EXISTS
+#undef PEEK_EQ
+
 int main(int argc, char *argv[]) {
+    struct cli_args args = {0};
+
+    if (!parse_cli_args(argc, argv, &args)) {
+        printf("Could not parse args\n");
+        return 1;
+    }
+
     struct SMB_state *smb_state = malloc(SMB_state_size());
     struct frontend_userdata *userdata = malloc(sizeof(struct frontend_userdata));
     struct SMB_audio *audio = malloc(SMB_audio_size());
@@ -372,7 +448,7 @@ int main(int argc, char *argv[]) {
     }
 
     memset(userdata, 0, sizeof(struct frontend_userdata));
-    if (argc <= 1) {
+    if (!args.rom_filename) {
         printf("Please provide a SMB1 or SMB2J (Lost Levels) rom!\n");
         return 1;
     }
@@ -387,7 +463,7 @@ int main(int argc, char *argv[]) {
     }
     userdata->audio = audio;
 
-    open_rom(userdata, argv[1]);
+    open_rom(userdata, args.rom_filename);
 
     struct SMB_callbacks callbacks = {0};
     callbacks.userdata = userdata;
@@ -407,16 +483,17 @@ int main(int argc, char *argv[]) {
     callbacks.joy2 = joy2;
 
     SMB_state_init(smb_state, &callbacks);
+    SMB_start_on_level(smb_state, args.world, args.level);
     userdata->smb_state = smb_state;
 
     printf("Started!\n");
 
-    if (argc > 2) {
+    if (args.movie_prefix) {
         struct Movie *m = malloc(sizeof(struct Movie));
         char buttons_filename[1024];
         char ram_filename[1024];
-        snprintf(buttons_filename, sizeof(buttons_filename), "%smovie-buttons.txt", argv[2]);
-        snprintf(ram_filename, sizeof(ram_filename), "%smovie-ram.bin", argv[2]);
+        snprintf(buttons_filename, sizeof(buttons_filename), "%smovie-buttons.txt", args.movie_prefix);
+        snprintf(ram_filename, sizeof(ram_filename), "%smovie-ram.bin", args.movie_prefix);
         if (!movie_init(m, buttons_filename, ram_filename)) {
             printf("Could not load movie\n");
         }

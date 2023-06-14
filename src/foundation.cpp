@@ -12,6 +12,8 @@ extern "C" {
     void SMB2J_NMI();
 }
 
+#include "common.h"
+
 thread_local struct SMB_state *SMB_STATE;
 
 static bool detect_and_load_rom(struct SMB_state *state) {
@@ -39,7 +41,13 @@ size_t SMB_state_size() {
 void SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb) {
     memset(state, 0, sizeof(struct SMB_state));
     state->callbacks = *cb;
+    state->start_on_world = 1;
+    state->start_on_level = 1;
     detect_and_load_rom(state);
+}
+void SMB_start_on_level(struct SMB_state *state, byte world, byte level) {
+    state->start_on_world = world;
+    state->start_on_level = level;
 }
 int SMB_which_game(const struct SMB_state* state) {
     return state->which_game;
@@ -59,16 +67,23 @@ void SMB_tick(struct SMB_state *state) {
     if (state->which_game == GAME_SMB1) {
         if (!state->reset_occurred) {
             SMB1_Reset();
+            SMB1_NMI();
+            set_world_and_level(state->start_on_world-1, state->start_on_level-1);
             state->reset_occurred = true;
+        } else {
+            SMB1_NMI();
         }
-        SMB1_NMI();
     }
     if (state->which_game == GAME_SMB2J) {
         if (!state->reset_occurred) {
             SMB2J_Reset();
+            SMB2J_NMI();
+            // this hack doesn't work for smb2j
+            set_world_and_level(state->start_on_world-1, state->start_on_level-1);
             state->reset_occurred = true;
+        } else {
+            SMB2J_NMI();
         }
-        SMB2J_NMI();
     }
 }
 

@@ -56,6 +56,7 @@ struct SMB_state;
 size_t SMB_state_size(void);
 void SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb);
 int SMB_which_game(const struct SMB_state *state);
+void SMB_start_on_level(struct SMB_state *state, byte world, byte level);
 void SMB_tick(struct SMB_state *state);
 byte* SMB_ram(struct SMB_state *state);
 byte* SMB_ppuram(struct SMB_state *state);
