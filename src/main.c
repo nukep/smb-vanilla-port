@@ -433,6 +433,7 @@ bool parse_cli_args(int argc, char *argv[], struct cli_args *out) {
 
 int main(int argc, char *argv[]) {
     struct cli_args args = {0};
+    bool audio_enabled = true;
 
     if (!parse_cli_args(argc, argv, &args)) {
         printf("Could not parse args\n");
@@ -441,10 +442,15 @@ int main(int argc, char *argv[]) {
 
     struct SMB_state *smb_state = malloc(SMB_state_size());
     struct frontend_userdata *userdata = malloc(sizeof(struct frontend_userdata));
-    struct SMB_audio *audio = malloc(SMB_audio_size());
 
-    if (!smb_state || !userdata || !audio) {
+    if (!smb_state || !userdata) {
         return 1;
+    }
+
+    struct SMB_audio *audio = 0;
+
+    if (audio_enabled) {
+        audio = malloc(SMB_audio_size());
     }
 
     memset(userdata, 0, sizeof(struct frontend_userdata));
@@ -453,15 +459,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    bool audio_enabled = true;
-
-    if (!SMB_audio_init(audio)) {
+    if (audio && !SMB_audio_init(audio)) {
         printf("Could not initialize audio!\n");
         free(audio);
         audio = 0;
         audio_enabled = false;
     }
-    userdata->audio = audio;
 
     open_rom(userdata, args.rom_filename);
 
@@ -521,6 +524,7 @@ int main(int argc, char *argv[]) {
         }
 #endif
     }
+    userdata->audio = audio;
 
     HANDLEERR(load_palette(userdata, "palette.pal"), "Could not load palette");
     int exitcode = sdl_frontend(userdata);
