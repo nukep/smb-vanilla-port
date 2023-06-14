@@ -4,7 +4,7 @@ extern "C" {
 
 void set_world_and_level(byte world, byte level);
 
-void UpdateScreen(const byte*);
+void UpdateScreen(const byte *);
 void WriteNTAddr(byte);
 byte InitializeMemory(byte);
 void ReadJoypads();

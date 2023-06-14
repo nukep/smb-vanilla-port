@@ -1,0 +1,8 @@
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 2
+ColumnLimit: 0
+BreakBeforeBinaryOperators: All
+IndentGotoLabels: false
+AllowShortBlocksOnASingleLine: Always
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
