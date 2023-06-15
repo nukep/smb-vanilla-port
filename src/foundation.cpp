@@ -100,6 +100,9 @@ static inline void draw_nametable_tile(const struct SMB_state *state, int x, int
   tile.paletteidx = paletteidx;
   tile.flip_horz = false;
   tile.flip_vert = false;
+  tile.extra_type = TILE_TYPE_BG;
+  tile.extra_bg.x = tilex;
+  tile.extra_bg.y = tilex;
 
   state->callbacks.draw_tile(state->callbacks.userdata, tile);
 }

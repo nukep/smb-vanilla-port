@@ -153,6 +153,9 @@ static void transfer_sprite_data(const byte *data) {
     s[i].tile.flip_horz = (attr & 0x40) != 0;
     s[i].tile.flip_vert = (attr & 0x80) != 0;
 
+    s[i].tile.extra_type = TILE_TYPE_SPRITE;
+    s[i].tile.extra_spriteidx = i;
+
     s[i].draw_behind = (attr & 0x20) != 0;
   }
 }

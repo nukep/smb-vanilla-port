@@ -26,6 +26,9 @@ struct SMB_buttons {
   bool start : 1;
 };
 
+#define TILE_TYPE_SPRITE 0
+#define TILE_TYPE_BG 1
+
 struct SMB_tile {
   int tileidx;
   int paletteidx;
@@ -33,6 +36,15 @@ struct SMB_tile {
   bool flip_vert;
   int x;
   int y;
+
+  byte extra_type;
+  union {
+	byte extra_spriteidx;
+	struct {
+	  ushort x;
+	  ushort y;
+	} extra_bg;
+  };
 };
 
 struct SMB_callbacks {
