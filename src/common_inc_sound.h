@@ -1,7 +1,6 @@
 // The sound engine for SMB1 for SMB2J are nearly identical, with the exception of SMB2J's Wind and Skid sfxs.
 // There's also the FDS alternate sound engine, but that's only used for SMB2J's ending (not included here).
 
-
 #ifdef SMB2J_MODE
 static void PlaySkidSfx(void);
 static void ContinueSkidSfx(void);
@@ -78,6 +77,8 @@ static struct_ayi ProcessLengthData(byte param_1);
 static struct_axy LoadControlRegs(void);
 static byte LoadEnvelopeData(byte param_1);
 
+
+#define BIT(v, n) (((v) & (1 << n)) != 0)
 
 // SMB:f38d, SM2MAIN:d35d
 // Signature: [A, X] -> [A, Y, Z]
@@ -199,24 +200,22 @@ void ContinueSkidSfx(void) {
 void PlayWindSfx(void) {
   // SMB2J set NoiseSoundBuffer here, but we moved that to the caller
   Noise_SfxLenCounter = 0xc0;
-  ContinueWindSfx();
+
+  if (BIT(NoiseSoundQueue, 3)) {
+    // This branch never happens in practice
+    ContinueWindSfx();
+  }
 }
 
 // SM2MAIN:d6af
 // Signature: [] -> []
 void ContinueWindSfx(void) {
-  byte bVar1;
-
-  bVar1 = NoiseSoundQueue & 1;
-  NoiseSoundQueue >>= 1;
-  if (bVar1 != 0) {
-    PlayNoiseSfx(WindFreqEnvData[Noise_SfxLenCounter >> 3] >> 4 | 0x10,
-                 WindFreqEnvData[Noise_SfxLenCounter >> 3] & 0xf | 0x10);
-  }
+  // SMBJ tested for the NoiseSoundQueue bit here, but it tests for either bit 2 or 3, depending on who called it.
+  // We moved these checks to the callers
+  PlayNoiseSfx(WindFreqEnvData[Noise_SfxLenCounter >> 3] >> 4 | 0x10,
+               WindFreqEnvData[Noise_SfxLenCounter >> 3] & 0xf | 0x10);
 }
 #endif
-
-#define BIT(v, n) (((v) & (1 << n)) != 0)
 
 #ifdef SMB1_MODE
 
@@ -225,14 +224,11 @@ void ContinueWindSfx(void) {
 void NoiseSfxHandler(void) {
   byte nsq = NoiseSoundQueue;
 
-  // Bitshifts were originally done to test for bits in 6502.
-  // A side-effect is that it modifies the NoiseSoundQueue variable.
+  // The original game modified (bit-shifted) NoiseSoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
 
   if (nsq != 0) {
     NoiseSoundBuffer = nsq;
-    NoiseSoundQueue >>= 1;
     if (BIT(nsq, 0)) { return PlayBrickShatter(); }
-    NoiseSoundQueue >>= 1;
     if (BIT(nsq, 1)) { return PlayBowserFlame(); }
   }
   byte nsb = NoiseSoundBuffer;
@@ -257,17 +253,14 @@ void NoiseSfxHandler(void) {
     return PlaySkidSfx();
   }
 
-  // Bitshifts were originally done to test for bits in 6502.
-  // A side-effect is that it modifies the NoiseSoundQueue variable.
+  // The original game modified (bit-shifted) NoiseSoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
 
-  NoiseSoundQueue >>= 1;
   if (BIT(nsq, 0)) {
     NoiseSoundBuffer = nsq;
     return PlayBrickShatter();
   }
   if (BIT(nsb, 0)) { return ContinueBrickShatter(); }
 
-  NoiseSoundQueue >>= 1;
   if (BIT(nsq, 1)) {
     NoiseSoundBuffer = nsq;
     return PlayBowserFlame();
@@ -275,8 +268,7 @@ void NoiseSfxHandler(void) {
   if (BIT(nsb, 1)) { return ContinueBowserFlame(); }
 
   // yes, these are in the opposite order
-  if (BIT(nsb, 2)) { return ContinueWindSfx(); }
-  NoiseSoundQueue >>= 1;
+  if (BIT(nsb, 2) && BIT(nsq, 2)) { return ContinueWindSfx(); }
   if (BIT(nsq, 2)) {
     NoiseSoundBuffer = nsq;
     return PlayWindSfx();
@@ -284,8 +276,6 @@ void NoiseSfxHandler(void) {
 }
 
 #endif
-
-#undef BIT
 
 
 // SMB:f2d0
@@ -561,90 +551,42 @@ void ContinueBumpThrow(void) {
 // SM2MAIN:d3eb
 // Signature: [] -> []
 void Square1SfxHandler(void) {
-  byte bVar1;
+  byte ssq = Square1SoundQueue;
 
-  if (Square1SoundQueue != 0) {
-    Square1SoundBuffer = Square1SoundQueue;
-    if (0x7f < Square1SoundQueue) {
-      PlaySmallJump();
-      return;
-    }
-    if ((bool)(Square1SoundQueue & 1)) {
-      Square1SoundQueue = Square1SoundQueue >> 1;
-      PlayBigJump();
-      return;
-    }
-    if ((bool)(Square1SoundQueue >> 1 & 1)) {
-      Square1SoundQueue = Square1SoundQueue >> 2;
-      PlayBump();
-      return;
-    }
-    if ((bool)(Square1SoundQueue >> 2 & 1)) {
-      Square1SoundQueue = Square1SoundQueue >> 3;
-      PlaySwimStomp();
-      return;
-    }
-    if ((bool)(Square1SoundQueue >> 3 & 1)) {
-      Square1SoundQueue = Square1SoundQueue >> 4;
-      PlaySmackEnemy();
-      return;
-    }
-    if ((bool)(Square1SoundQueue >> 4 & 1)) {
-      Square1SoundQueue = Square1SoundQueue >> 5;
-      PlayPipeDownInj();
-      return;
-    }
-    bVar1 = Square1SoundQueue >> 6;
-    if ((bool)(Square1SoundQueue >> 5 & 1)) {
-      Square1SoundQueue = bVar1;
-      PlayFireballThrow();
-      return;
-    }
-    Square1SoundQueue >>= 7;
-    if ((bool)(bVar1 & 1)) {
-      PlayFlagpoleSlide();
-      return;
-    }
+  // The original game modified (bit-shifted) Square1SoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
+
+  if (ssq != 0) {
+    Square1SoundBuffer = ssq;
+    if (BIT(ssq, 7)) { return PlaySmallJump(); }
+    if (BIT(ssq, 0)) { return PlayBigJump(); }
+    if (BIT(ssq, 1)) { return PlayBump(); }
+    if (BIT(ssq, 2)) { return PlaySwimStomp(); }
+    if (BIT(ssq, 3)) { return PlaySmackEnemy(); }
+    if (BIT(ssq, 4)) { return PlayPipeDownInj(); }
+    if (BIT(ssq, 5)) { return PlayFireballThrow(); }
+    if (BIT(ssq, 6)) { return PlayFlagpoleSlide(); }
+    return;
   }
-  if (Square1SoundBuffer != 0) {
-    if (0x7f < Square1SoundBuffer) {
-      ContinueSndJump();
-      return;
-    }
-    if ((bool)(Square1SoundBuffer & 1)) {
-      ContinueSndJump();
-      return;
-    }
-    if ((bool)(Square1SoundBuffer >> 1 & 1)) {
-      ContinueBumpThrow();
-      return;
-    }
-    if ((bool)(Square1SoundBuffer >> 2 & 1)) {
-      ContinueSwimStomp();
-      return;
-    }
-    if ((bool)(Square1SoundBuffer >> 3 & 1)) {
-      ContinueSmackEnemy();
-      return;
-    }
-    if ((bool)(Square1SoundBuffer >> 4 & 1)) {
-      ContinuePipeDownInj();
-      return;
-    }
-    if ((bool)(Square1SoundBuffer >> 5 & 1)) {
-      ContinueBumpThrow();
-      return;
-    }
-    if ((bool)(Square1SoundBuffer >> 6 & 1)) {
+
+  // Square1SoundQueue is 0
+  // Continuing to play previous sfx
+
+  byte ssb = Square1SoundBuffer;
+  if (ssb != 0) {
+    if (BIT(ssb, 7)) { return ContinueSndJump(); }
+    if (BIT(ssb, 0)) { return ContinueSndJump(); }
+    if (BIT(ssb, 1)) { return ContinueBumpThrow(); }
+    if (BIT(ssb, 2)) { return ContinueSwimStomp(); }
+    if (BIT(ssb, 3)) { return ContinueSmackEnemy(); }
+    if (BIT(ssb, 4)) { return ContinuePipeDownInj(); }
+    if (BIT(ssb, 5)) { return ContinueBumpThrow(); }
+    if (BIT(ssb, 6)) {
       Squ1_SfxLenCounter -= 1;
       if (Squ1_SfxLenCounter == 0) {
         StopSquare1Sfx();
-        return;
       }
-      return;
     }
   }
-  return;
 }
 
 // SMB:f45b
@@ -851,89 +793,37 @@ void StopSquare2Sfx(void) {
 // SM2MAIN:d54c
 // Signature: [] -> []
 void Square2SfxHandler(void) {
-  byte bVar1;
+  if (BIT(Square2SoundBuffer, 6)) { return ContinueExtraLife(); }
 
-  if ((Square2SoundBuffer & 0x40) != 0) {
-    ContinueExtraLife();
+  // The original game modified (bit-shifted) Square2SoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
+
+  byte ssq = Square2SoundQueue;
+
+  if (ssq != 0) {
+    Square2SoundBuffer = ssq;
+    if (BIT(ssq, 7)) { return PlayBowserFall(); }
+    if (BIT(ssq, 0)) { return PlayCoinGrab(); }
+    if (BIT(ssq, 1)) { return PlayGrowPowerUp(); }
+    if (BIT(ssq, 2)) { return PlayGrowVine(); }
+    if (BIT(ssq, 3)) { return PlayBlast(); }
+    if (BIT(ssq, 4)) { return PlayTimerTick(); }
+    if (BIT(ssq, 5)) { return PlayPowerUpGrab(); }
+    if (BIT(ssq, 6)) { return PlayExtraLife(); }
+  }
+
+  byte ssb = Square2SoundBuffer;
+
+  if (ssb == 0) {
     return;
   }
-  if (Square2SoundQueue != 0) {
-    Square2SoundBuffer = Square2SoundQueue;
-    if (0x7f < Square2SoundQueue) {
-      PlayBowserFall();
-      return;
-    }
-    if ((bool)(Square2SoundQueue & 1)) {
-      Square2SoundQueue = Square2SoundQueue >> 1;
-      PlayCoinGrab();
-      return;
-    }
-    if ((bool)(Square2SoundQueue >> 1 & 1)) {
-      Square2SoundQueue = Square2SoundQueue >> 2;
-      PlayGrowPowerUp();
-      return;
-    }
-    if ((bool)(Square2SoundQueue >> 2 & 1)) {
-      Square2SoundQueue = Square2SoundQueue >> 3;
-      PlayGrowVine();
-      return;
-    }
-    if ((bool)(Square2SoundQueue >> 3 & 1)) {
-      Square2SoundQueue = Square2SoundQueue >> 4;
-      PlayBlast();
-      return;
-    }
-    if ((bool)(Square2SoundQueue >> 4 & 1)) {
-      Square2SoundQueue = Square2SoundQueue >> 5;
-      PlayTimerTick();
-      return;
-    }
-    bVar1 = Square2SoundQueue >> 6;
-    if ((bool)(Square2SoundQueue >> 5 & 1)) {
-      Square2SoundQueue = bVar1;
-      PlayPowerUpGrab();
-      return;
-    }
-    Square2SoundQueue >>= 7;
-    if ((bool)(bVar1 & 1)) {
-      PlayExtraLife();
-      return;
-    }
-  }
-  if (Square2SoundBuffer == 0) {
-    return;
-  }
-  if (0x7f < Square2SoundBuffer) {
-    ContinueBowserFall();
-    return;
-  }
-  if (!(bool)(Square2SoundBuffer & 1)) {
-    if ((bool)(Square2SoundBuffer >> 1 & 1)) {
-      ContinueGrowItems();
-      return;
-    }
-    if ((bool)(Square2SoundBuffer >> 2 & 1)) {
-      ContinueGrowItems();
-      return;
-    }
-    if ((bool)(Square2SoundBuffer >> 3 & 1)) {
-      ContinueBlast();
-      return;
-    }
-    if (!(bool)(Square2SoundBuffer >> 4 & 1)) {
-      if ((bool)(Square2SoundBuffer >> 5 & 1)) {
-        ContinuePowerUpGrab();
-        return;
-      }
-      if (!(bool)(Square2SoundBuffer >> 6 & 1)) {
-        return;
-      }
-      ContinueExtraLife();
-      return;
-    }
-  }
-  ContinueCGrabTTick();
-  return;
+  if (BIT(ssb, 7)) { return ContinueBowserFall(); }
+  if (BIT(ssb, 0)) { return ContinueCGrabTTick(); }
+  if (BIT(ssb, 1)) { return ContinueGrowItems(); }
+  if (BIT(ssb, 2)) { return ContinueGrowItems(); }
+  if (BIT(ssb, 3)) { return ContinueBlast(); }
+  if (BIT(ssb, 4)) { return ContinueCGrabTTick(); }
+  if (BIT(ssb, 5)) { return ContinuePowerUpGrab(); }
+  if (BIT(ssb, 6)) { return ContinueExtraLife(); }
 }
 
 // SMB:f5c8
@@ -1234,7 +1124,6 @@ void HandleSquare2Music(void) {
 // SM2MAIN:d7f8
 // Signature: [] -> []
 void HandleSquare1Music(void) {
-  ushort uVar1;
   byte bVar2;
   byte bVar3;
   byte bVar4;
@@ -1247,16 +1136,13 @@ void HandleSquare1Music(void) {
   }
   Squ1_NoteLenCounter -= 1;
   if (Squ1_NoteLenCounter == 0) {
-    uVar1 = (ushort)MusicOffset_Square1;
     while (MusicData[MusicOffset_Square1] == 0) {
       apu_sq1_vol(0x83);
       apu_sq1_sweep(0x94);
       AltRegContentFlag = 0x94;
       MusicOffset_Square1 += 1;
-      uVar1 = (ushort)MusicOffset_Square1;
     }
-    MusicOffset_Square1 += 1;
-    sVar6 = AlternateLengthHandler(MusicData[uVar1]);
+    sVar6 = AlternateLengthHandler(MusicData[MusicOffset_Square1++]);
     Squ1_NoteLenCounter = sVar6.a;
     if (Square1SoundBuffer != 0) {
       HandleTriangleMusic();
@@ -1456,3 +1342,5 @@ byte LoadEnvelopeData(byte param_1) {
     return WaterEventMusEnvData[param_1];
   }
 }
+
+#undef BIT
