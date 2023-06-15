@@ -70,7 +70,7 @@ void SMB_tick(struct SMB_state *state) {
       SMB2J_Reset();
       SMB2J_NMI();
       // this hack doesn't work for smb2j
-      set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
+      //set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
     } else {
       SMB2J_NMI();

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,8 @@ typedef unsigned char byte;
 typedef unsigned short ushort;
 // #define warning printf
 #define warning(...)
+
+#define assert_smb_crashbug(condition, message) assert(condition)
 
 #ifdef _MSC_VER
 #define NOINLINE __declspec(noinline)
