@@ -1,6 +1,6 @@
 // Functions to render SMB with OpenGL.
 // Designed to be called anywhere an OpenGL context exists. The caller is responsible for managing the context.
-// Requires at least OpenGL 4.
+// Requires at least OpenGL 3.3.
 // Uses GLEW. Avoids platform-specific libraries such as SDL, by design.
 
 #include "mario.h"
@@ -273,11 +273,11 @@ static bool gl_initshaders(struct SMBgl *gl) {
   // Transforms the vertex using the view matrix.
   // Passes the texture coordinates and palette index to fragment shader.
   static const GLchar *vertex_shader_source[1] = {
-    "#version 420\n"
+    "#version 330\n"
     "layout(location = 0) in vec3 position;\n"
     "layout(location = 1) in vec2 st;\n"
     "layout(location = 2) in int palidx_in;\n"
-    "out int palidx;\n"
+    "flat out int palidx;\n"
     "out vec2 texcoord;\n"
     "uniform mat4 viewmat;\n"
     "void main() { palidx = int(palidx_in); texcoord = st; gl_Position = viewmat * vec4( position, 1.0 ); }"};
@@ -285,13 +285,14 @@ static bool gl_initshaders(struct SMBgl *gl) {
   // Fragment shader.
   // Performs a lookup of the correct palette color.
   static const GLchar *fragment_shader_source[1] = {
-    "#version 420\n"
+    "#version 330\n"
     "layout(location = 0) out vec4 color;\n"
     "flat in int palidx;\n"
     "in vec2 texcoord;\n"
     "uniform vec4 palette[32];\n"
-    "layout(binding=0) uniform sampler2D patterntable;\n"
+    "uniform sampler2D patterntable;\n"
     "void main() { vec4 idx = texture(patterntable, texcoord); int n = int(idx.x*4.0); color = palette[palidx*4+n]; }"};
+
 
   GLuint vshader = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vshader, 1, vertex_shader_source, 0);
