@@ -15,20 +15,25 @@ project ("smbport")
 add_subdirectory( Nes_Snd_Emu )
 
 find_package(SDL2 REQUIRED)
+find_package(OpenGL)
+find_package(GLEW)
 include_directories(smbport ${SDL2_INCLUDE_DIRS})
+include_directories(smbport ${GLEW_INCLUDE_DIRS})
 
-add_library(foundation STATIC "src/foundation.cpp" "src/common.cpp" "src/smb1.cpp" "src/smb2j.cpp")
+add_library(smbcore STATIC "src/foundation.cpp" "src/common.cpp" "src/smb1.cpp" "src/smb2j.cpp")
 
 # Add source to this project's executable.
-add_executable(smbport "src/main.c" "src/movie.c" "src/audio.cpp" "src/time.c")
+add_executable(smbport "src/main_sdl.c" "src/movie.c" "src/audio.cpp" "src/time.c" "src/render_opengl.c"  "src/render_raster.c")
 
-target_link_libraries(smbport foundation)
+target_link_libraries(smbport smbcore)
 target_link_libraries(smbport ${SDL2_LIBRARIES})
+target_link_libraries(smbport ${OPENGL_LIBRARIES})
+target_link_libraries(smbport ${GLEW_LIBRARIES})
 target_link_libraries(smbport Nes_Snd_Emu)
 
 
 add_executable(smbport-testrunner "src/main_testrunner.c"  "src/movie.c")
-target_link_libraries(smbport-testrunner foundation)
+target_link_libraries(smbport-testrunner smbcore)
 
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

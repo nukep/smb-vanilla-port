@@ -39,11 +39,11 @@ struct SMB_tile {
 
   byte extra_type;
   union {
-	byte extra_spriteidx;
-	struct {
-	  ushort x;
-	  ushort y;
-	} extra_bg;
+  byte extra_spriteidx;
+  struct {
+    ushort x;
+    ushort y;
+  } extra_bg;
   };
 };
 
@@ -68,7 +68,7 @@ struct SMB_callbacks {
 struct SMB_state;
 
 size_t SMB_state_size(void);
-void SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb);
+bool SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb);
 int SMB_which_game(const struct SMB_state *state);
 void SMB_start_on_level(struct SMB_state *state, byte world, byte level);
 void SMB_tick(struct SMB_state *state);

@@ -36,12 +36,12 @@ static bool detect_and_load_rom(struct SMB_state *state) {
 }
 
 size_t SMB_state_size(void) { return sizeof(struct SMB_state); }
-void SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb) {
+bool SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb) {
   memset(state, 0, sizeof(struct SMB_state));
   state->callbacks = *cb;
   state->start_on_world = 1;
   state->start_on_level = 1;
-  detect_and_load_rom(state);
+  return detect_and_load_rom(state);
 }
 void SMB_start_on_level(struct SMB_state *state, byte world, byte level) {
   state->start_on_world = world;
