@@ -28,6 +28,17 @@ struct RGB {
 #define ATTRIB_ST_LOCATION 1
 #define ATTRIB_PALIDX_LOCATION 2
 
+struct gl_vbo_item {
+  GLfloat pos[3];
+  GLfloat st[2];
+  GLbyte pal;
+};
+
+// On the NES, there's a limit of 1024 tiles on the screen at a time (32x30 bg tiles, plus 64 sprites = 960+64 = 1024).
+// We render a tile with 4 vertices each.
+// 1024 is an okay limit, but we wanna add more tiles for contingency.
+#define MAX_VBO_ITEMS (8192*4)
+
 struct SMBgl {
   struct RGB palette[0x40];
   byte palette_indices[0x20];
@@ -37,12 +48,8 @@ struct SMBgl {
   GLuint gl_shader_program;
   GLint gl_pos_attrib;
   struct pattern_buffer *gl_update_texture;
-};
-
-struct gl_vbo {
-  GLfloat pos[4][3];
-  GLfloat st[4][2];
-  GLbyte pal[4];
+  struct gl_vbo_item *vbo_buffer;
+  size_t vbo_cur;
 };
 
 size_t SMBgl_size(void) {
@@ -62,25 +69,32 @@ bool SMBgl_init(struct SMBgl *gl) {
     return false;
   }
 
+  gl->vbo_buffer = malloc(sizeof(struct gl_vbo_item) * MAX_VBO_ITEMS);
+  gl->vbo_cur = 0;
+
   glGenTextures(1, &gl->gltexture);
   glGenVertexArrays(1, &gl->glvao);
   glGenBuffers(1, &gl->glvbo);
 
-
+  size_t stride = sizeof(struct gl_vbo_item);
   glBindVertexArray(gl->glvao);
   glBindBuffer(GL_ARRAY_BUFFER, gl->glvbo);
   glEnableVertexAttribArray(ATTRIB_POS_LOCATION);
-  glVertexAttribPointer(ATTRIB_POS_LOCATION, 3, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(ATTRIB_POS_LOCATION, 3, GL_FLOAT, GL_FALSE, stride, offsetof(struct gl_vbo_item, pos));
   glEnableVertexAttribArray(ATTRIB_ST_LOCATION);
-  glVertexAttribPointer(ATTRIB_ST_LOCATION, 2, GL_FLOAT, GL_FALSE, 0, offsetof(struct gl_vbo, st));
+  glVertexAttribPointer(ATTRIB_ST_LOCATION, 2, GL_FLOAT, GL_FALSE, stride, offsetof(struct gl_vbo_item, st));
   glEnableVertexAttribArray(ATTRIB_PALIDX_LOCATION);
-  glVertexAttribIPointer(ATTRIB_PALIDX_LOCATION, 1, GL_BYTE, 0, offsetof(struct gl_vbo, pal));
+  glVertexAttribIPointer(ATTRIB_PALIDX_LOCATION, 1, GL_BYTE, stride, offsetof(struct gl_vbo_item, pal));
 
   return true;
 }
 
 void SMBgl_fini(struct SMBgl *gl) {
-
+  glDeleteBuffers(1, &gl->glvbo);
+  glDeleteVertexArrays(1, &gl->glvao);
+  glDeleteTextures(1, &gl->gltexture);
+  free(gl->vbo_buffer);
+  glDeleteProgram(gl->gl_shader_program);
 }
 
 void SMBgl_update_pattern_tables(struct SMBgl *gl, const unsigned char *chrrom) {
@@ -159,30 +173,20 @@ void SMBgl_draw_tile(struct SMBgl *gl, const struct SMB_tile tile) {
     t1 = tmp;
   }
 
-  const struct gl_vbo vtxdata = {
-    // position
-    {
-      {tile.x,      tile.y,      z},
-      {tile.x+8.0f, tile.y,      z},
-      {tile.x,      tile.y+8.0f, z},
-      {tile.x+8.0f, tile.y+8.0f, z},
-    },
-    // texture coordinates
-    {
-      {s1, t1},
-      {s2, t1},
-      {s1, t2},
-      {s2, t2},
-    },
-    // palette index (used by fragment shader)
-    { tile.paletteidx, tile.paletteidx, tile.paletteidx, tile.paletteidx }
+  const struct gl_vbo_item items[4] = {
+    {{tile.x,      tile.y,      z}, {s1, t1}, tile.paletteidx},
+    {{tile.x+8.0f, tile.y,      z}, {s2, t1}, tile.paletteidx},
+    {{tile.x,      tile.y+8.0f, z}, {s1, t2}, tile.paletteidx},
+    {{tile.x+8.0f, tile.y+8.0f, z}, {s2, t2}, tile.paletteidx}
   };
 
-  glBindBuffer(GL_ARRAY_BUFFER, gl->glvbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vtxdata), &vtxdata, GL_STREAM_DRAW);
+  if (gl->vbo_cur+4 <= MAX_VBO_ITEMS) {
+    memcpy(gl->vbo_buffer + gl->vbo_cur, &items[0], sizeof(items));
 
-  glBindVertexArray(gl->glvao);
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    gl->vbo_cur = gl->vbo_cur+4;
+  } else {
+    log_error("Too many VBO items");
+  }
 }
 
 bool SMBgl_render_frame(struct SMBgl *gl) {
@@ -243,6 +247,17 @@ bool SMBgl_render_frame(struct SMBgl *gl) {
   glBindTexture(GL_TEXTURE_2D, gl->gltexture);
   glActiveTexture(GL_TEXTURE0);
   glUniform1i(glGetUniformLocation(gl->gl_shader_program, "patterntable"), 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, gl->glvbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(gl->vbo_buffer[0])*gl->vbo_cur, gl->vbo_buffer, GL_STREAM_DRAW);
+
+  glBindVertexArray(gl->glvao);
+  for (size_t i = 0; i < gl->vbo_cur; i+=4) {
+    glDrawArrays(GL_TRIANGLE_STRIP, i, 4);
+  }
+
+  gl->vbo_cur = 0;
+
   return true;
 }
 
