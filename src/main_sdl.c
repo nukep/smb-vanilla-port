@@ -11,8 +11,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct rom_extension {
+  char s[8];
+};
+
 #define log_error(msg, ...) fprintf(stderr, "ERROR: " msg "\n", ##__VA_ARGS__)
 #define log_info(msg, ...)  fprintf(stdout, "INFO: " msg "\n", ##__VA_ARGS__)
+
+#include "config.h"
 
 static bool io_readtobuffer(const char *filename, size_t size, void *buf) {
   FILE *f = fopen(filename, "rb");
@@ -48,6 +54,10 @@ static bool io_writefrombuffer(const char *filename, size_t size, void *buf) {
   return true;
 }
 
+struct sdl_key_scancodes {
+  SDL_Scancode u,d,l,r,select,start,b,a;
+};
+
 struct frontend_userdata {
   FILE *romfile;
   struct SMB_state *smb_state;
@@ -55,9 +65,12 @@ struct frontend_userdata {
   struct Movie *movie;
   struct SMB_buttons player1_buttons;
   struct SMB_buttons player2_buttons;
+  bool rendering_enabled;
+  struct config *cfg;
 
   SDL_Window *window;
   int video_scale;
+  struct sdl_key_scancodes sdl_key_scancodes;
 
   // OpenGL mode
   struct SMBgl *smb_gl;
@@ -101,6 +114,10 @@ void update_palette(void *userdata, const byte *palette_indices) {
 void draw_tile(void *userdata, const struct SMB_tile tile) {
   struct frontend_userdata *fe = userdata;
 
+  if (!fe->rendering_enabled) {
+    return;
+  }
+
   if (fe->smb_gl) {
     SMBgl_draw_tile(fe->smb_gl, tile);
   } else if (fe->smb_raster) {
@@ -137,9 +154,6 @@ bool smb2j_save_games_beaten(void *userdata, byte games_beaten) {
   log_info("Games beaten: %d", games_beaten);
   return true;
 }
-
-const char *ppuram_filename = "ppuram.bin";
-const char *ram_filename = "ram.bin";
 
 bool advance_movie(struct frontend_userdata *fe) {
   if (!fe->movie) {
@@ -179,8 +193,8 @@ int sdl_tick(void *userdata) {
       if (isdown && !eventData.key.repeat) {
         switch (sc) {
         case SDL_SCANCODE_1:
-          if (load_ppuram(smb_state, ppuram_filename)) {
-            if (!load_ram(smb_state, ram_filename)) {
+          if (load_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename)) {
+            if (!load_ram(smb_state, fe->cfg->debug.dump_ram_filename)) {
               // Couldn't load RAM - exit
               return 1;
             }
@@ -188,38 +202,22 @@ int sdl_tick(void *userdata) {
           break;
         case SDL_SCANCODE_0:
           // dump the RAM and PPU
-          dump_ppuram(smb_state, ppuram_filename);
-          dump_ram(smb_state, ram_filename);
+          dump_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename);
+          dump_ram(smb_state, fe->cfg->debug.dump_ram_filename);
           break;
         }
       }
       if (!use_movie_buttons) {
-        switch (sc) {
-        case SDL_SCANCODE_W:
-          fe->player1_buttons.u = isdown;
-          break;
-        case SDL_SCANCODE_S:
-          fe->player1_buttons.d = isdown;
-          break;
-        case SDL_SCANCODE_A:
-          fe->player1_buttons.l = isdown;
-          break;
-        case SDL_SCANCODE_D:
-          fe->player1_buttons.r = isdown;
-          break;
-        case SDL_SCANCODE_J:
-          fe->player1_buttons.b = isdown;
-          break;
-        case SDL_SCANCODE_K:
-          fe->player1_buttons.a = isdown;
-          break;
-        case SDL_SCANCODE_U:
-          fe->player1_buttons.select = isdown;
-          break;
-        case SDL_SCANCODE_I:
-          fe->player1_buttons.start = isdown;
-          break;
-        }
+#define KEY(key)  if (sc == fe->sdl_key_scancodes.key) { fe->player1_buttons.key = isdown; }
+        KEY(u);
+        KEY(d);
+        KEY(l);
+        KEY(r);
+        KEY(select);
+        KEY(start);
+        KEY(b);
+        KEY(a);
+#undef KEY
       }
     } break;
     case SDL_QUIT:
@@ -228,11 +226,11 @@ int sdl_tick(void *userdata) {
   }
 
   if (fe->smb_gl) {
+    SMB_tick(smb_state);
+
     if (!SMBgl_render_frame(fe->smb_gl)) {
       log_error("Error rendering GL frame");
     }
-
-    SMB_tick(smb_state);
 
     SDL_GL_SwapWindow(fe->window);
     return 0;
@@ -284,8 +282,6 @@ void apu_end_frame(void *userdata) {
   }
 }
 
-#include "cli_args.h"
-
 // Go with one unashamedly-long main. (keep it simple!)
 
 int main(int argc, char *argv[]) {
@@ -293,9 +289,7 @@ int main(int argc, char *argv[]) {
 
   struct SMB_state *smb_state = malloc(SMB_state_size());
   struct frontend_userdata *fe = malloc(sizeof(struct frontend_userdata));
-  struct cli_args args = {0};
-  struct SMB_audio *audio = 0;
-  SDL_Window *window = 0;
+  struct config cfg = {0};
   SDL_GLContext glcontext = 0;
   struct SMB_callbacks callbacks = {0};
 
@@ -304,45 +298,70 @@ int main(int argc, char *argv[]) {
   }
   memset(fe, 0, sizeof(struct frontend_userdata));
 
+  if (!config_init(&cfg)) {
+    goto exit;
+  }
 
-  /******** Parse arguments ********/
+  fe->cfg = &cfg;
 
-  bool audio_enabled = true;
 
-  if (!parse_cli_args(argc, argv, &args)) {
-    log_error("Could not parse args");
+  /******** Config defaults ********/
+
+  cfg.audio.enabled = true;
+  cfg.audio.samplerate = 44100;
+  cfg.audio.maxlatency_ms = 100;
+
+
+  /******** Parse config, arguments ********/
+
+  if (!parse_options("smbport.ini", argc, argv, &cfg)) {
+    log_error("Could not parse options");
     goto exit;
   }
 
 
   /******** Validate arguments ********/
 
-  if (!args.rom_filename) {
+  if (!cfg.general.rom_filename) {
     log_error("Please provide a SMB1 or SMB2J (Lost Levels) rom!");
     goto exit;
+  }
+
+  if (1) {
+    SDL_Scancode *key_scancodes = &cfg.bindings.keys[0];
+    fe->sdl_key_scancodes.u      = key_scancodes[0];
+    fe->sdl_key_scancodes.d      = key_scancodes[1];
+    fe->sdl_key_scancodes.l      = key_scancodes[2];
+    fe->sdl_key_scancodes.r      = key_scancodes[3];
+    fe->sdl_key_scancodes.select = key_scancodes[4];
+    fe->sdl_key_scancodes.start  = key_scancodes[5];
+    fe->sdl_key_scancodes.b      = key_scancodes[6];
+    fe->sdl_key_scancodes.a      = key_scancodes[7];
   }
 
 
   /******** Initialize audio ********/
 
-  if (audio_enabled) {
-    audio = malloc(SMB_audio_size());
+  if (cfg.audio.enabled) {
+    fe->audio = malloc(SMB_audio_size());
   }
 
-  if (audio && !SMB_audio_init(audio)) {
+  if (fe->audio && !SMB_audio_init(fe->audio, cfg.audio.samplerate, cfg.audio.maxlatency_ms)) {
     log_error("Could not initialize audio!");
-    free(audio);
-    audio = 0;
-    audio_enabled = false;
+    free(fe->audio);
+    fe->audio = 0;
   }
 
 
   /******** Initialize SDL / OpenGL ********/
 
-  unsigned char pal_rgb[0x40][3];
-  if (!load_palette(&pal_rgb[0][0], "palette.pal")) {
-    log_error("Could not load palette");
-    goto exit;
+  byte palette_rgb[0x40][3];
+
+  if (cfg.general.palette_filename) {
+    if (!load_palette(&palette_rgb[0], cfg.general.palette_filename)) {
+      log_error("Could not load palette from file %s", cfg.general.palette_filename);
+      goto exit;
+    }
   }
 
   fe->video_scale = 3;
@@ -356,26 +375,28 @@ int main(int argc, char *argv[]) {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-  window = SDL_CreateWindow("smb-port", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256 * fe->video_scale,
+  fe->window = SDL_CreateWindow("smb-port", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256 * fe->video_scale,
                             240 * fe->video_scale, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-  if (!window) {
+  if (!fe->window) {
     log_error("Could not create SDL2 window: %s", SDL_GetError());
     goto exit;
   }
 
-  glcontext = SDL_GL_CreateContext(window);
-  if (glcontext) {
-    fe->smb_gl = malloc(SMBgl_size());
-    if (!SMBgl_init(fe->smb_gl)) {
-      log_error("Could not initialize OpenGL");
-      free(fe->smb_gl);
-      fe->smb_gl = 0;
-      SDL_GL_DeleteContext(glcontext);
-      glcontext = 0;
+  if (cfg.graphics.opengl) {
+    glcontext = SDL_GL_CreateContext(fe->window);
+    if (glcontext) {
+      fe->smb_gl = malloc(SMBgl_size());
+      if (!SMBgl_init(fe->smb_gl)) {
+        log_error("Could not initialize OpenGL");
+        free(fe->smb_gl);
+        fe->smb_gl = 0;
+        SDL_GL_DeleteContext(glcontext);
+        glcontext = 0;
+      }
     }
   }
 
-  if (!fe->smb_gl) {
+  if (cfg.graphics.software && !fe->smb_gl) {
     // Fallback to raster
     fe->smb_raster = malloc(SMBraster_size());
     if (!SMBraster_init(fe->smb_raster)) {
@@ -388,19 +409,28 @@ int main(int argc, char *argv[]) {
   if (fe->smb_gl) {
     log_info("Using OpenGL renderer");
 
-    SMBgl_provide_palette_lookup(fe->smb_gl, &pal_rgb[0][0]);
+    SMBgl_provide_palette_lookup(fe->smb_gl, &palette_rgb[0]);
   } else if (fe->smb_raster) {
     log_info("Using software renderer");
-    SMBraster_provide_palette_lookup(fe->smb_raster, &pal_rgb[0][0]);
+    SMBraster_provide_palette_lookup(fe->smb_raster, &palette_rgb[0]);
   } else {
     log_error("No renderer available");
     goto exit;
   }
 
+  if (fe->smb_raster) {
+    fe->surf = SDL_CreateRGBSurface(0, 256, 240, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
+    if (!fe->surf) {
+      log_error("Could not create SDL2 surface: %s", SDL_GetError());
+      goto exit;
+    }
+    fe->pixels_stride = 256;
+  }
+
 
   /******** Load ROM, initialize SMB state ********/
 
-  fe->romfile = fopen(args.rom_filename, "rb");
+  fe->romfile = fopen(cfg.general.rom_filename, "rb");
   if (!fe->romfile) {
     goto exit;
   }
@@ -426,7 +456,7 @@ int main(int argc, char *argv[]) {
     log_error("Could not initialize game");
     goto exit;
   }
-  SMB_start_on_level(smb_state, args.world, args.level);
+  SMB_start_on_level(smb_state, cfg.world, cfg.level);
   fe->smb_state = smb_state;
 
   log_info("Started!");
@@ -434,17 +464,17 @@ int main(int argc, char *argv[]) {
 
   /******** Step through the movie, if one is provided ********/
 
-  if (args.movie_prefix) {
+  if (cfg.movie_prefix) {
     static const size_t filename_size = 1024;
     char *buttons_filename = 0;
     char *ram_filename = 0;
 
     buttons_filename = malloc(filename_size);
-    snprintf(buttons_filename, filename_size, "%smovie-buttons.txt", args.movie_prefix);
+    snprintf(buttons_filename, filename_size, "%smovie-buttons.txt", cfg.movie_prefix);
 
-    if (args.movie_readram) {
+    if (cfg.movie_readram) {
       ram_filename = malloc(filename_size);
-      snprintf(ram_filename, filename_size, "%smovie-ram.bin", args.movie_prefix);
+      snprintf(ram_filename, filename_size, "%smovie-ram.bin", cfg.movie_prefix);
     }
 
     fe->movie = malloc(sizeof(struct Movie));
@@ -462,7 +492,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  int skipto = args.movie_skip_to_before_frame;
+  int skipto = cfg.movie_skip_to_before_frame;
 
   if (skipto > 0) {
     bool movie_is_valid = true;
@@ -476,31 +506,30 @@ int main(int argc, char *argv[]) {
           break;
         }
       }
-      if (movie_is_valid && args.movie_readram) {
+      if (movie_is_valid && cfg.movie_readram) {
         movie_readram(fe->movie, SMB_ram(smb_state));
       }
     }
-  }
-  fe->audio = audio;
-  fe->window = window;
-
-  if (fe->smb_raster) {
-    fe->surf = SDL_CreateRGBSurface(0, 256, 240, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
-    if (!fe->surf) {
-      log_error("Could not create SDL2 surface: %s", SDL_GetError());
-      goto exit;
-    }
-    fe->pixels_stride = 256;
   }
 
 
   /******** Start game loop ********/
 
+  fe->rendering_enabled = true;
+
   // On an NTSC NES: clocks per second, divided by clocks per frame
   // (approx 60.0988 fps)
   const double fps = 1789773.0 / 29780.5;
 
-  time_run_at_frequency(fps, fe, sdl_tick);
+  if (cfg.general.maxspeed) {
+    while (1) {
+      if (sdl_tick(fe) != 0) {
+        break;
+      }
+    }
+  } else {
+    time_run_at_frequency(fps, fe, sdl_tick);
+  }
 
 
   /******** Cleanup ********/
@@ -527,17 +556,16 @@ exit:
       movie_fini(fe->movie);
       free(fe->movie);
     }
+    if (fe->window) {
+      SDL_DestroyWindow(fe->window);
+    }
+    if (fe->audio) {
+      SMB_audio_fini(fe->audio);
+    }
     free(fe);
   }
   if (glcontext) {
     SDL_GL_DeleteContext(glcontext);
-  }
-
-  if (window) {
-    SDL_DestroyWindow(window);
-  }
-  if (audio) {
-    SMB_audio_fini(audio);
   }
   SDL_Quit();
 

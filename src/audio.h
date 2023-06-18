@@ -11,7 +11,7 @@ extern "C" {
 
 struct SMB_audio;
 
-bool SMB_audio_init(struct SMB_audio *audio);
+bool SMB_audio_init(struct SMB_audio *audio, int32_t samplerate, int32_t maxlatency_ms);
 void SMB_audio_fini(struct SMB_audio *audio);
 size_t SMB_audio_size();
 void SMB_audio_write_register(struct SMB_audio *audio, uint16_t addr, uint8_t data);

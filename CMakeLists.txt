@@ -23,7 +23,7 @@ include_directories(smbport ${GLEW_INCLUDE_DIRS})
 add_library(smbcore STATIC "src/foundation.cpp" "src/common.cpp" "src/smb1.cpp" "src/smb2j.cpp")
 
 # Add source to this project's executable.
-add_executable(smbport "src/main_sdl.c" "src/movie.c" "src/audio.cpp" "src/time.c" "src/render_opengl.c"  "src/render_raster.c")
+add_executable(smbport "src/main_sdl.c" "src/movie.c" "src/audio.cpp" "src/time.c" "src/render_opengl.c"  "src/render_raster.c" "src/thirdparty/ini.c")
 
 target_link_libraries(smbport smbcore)
 target_link_libraries(smbport ${SDL2_LIBRARIES})
