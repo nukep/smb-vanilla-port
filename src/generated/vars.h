@@ -132,6 +132,7 @@
 
 #define Sprite_Data                      RAMARRAY(0x0200, 0)
 
+#define VRAM_Page                        RAMARRAY(0x300, 0x100)
 #define VRAM_Buffer1_Offset              RAM(0x0300)
 #define VRAM_Buffer1                     RAMARRAY(0x0301, 0)
 #define VRAM_Buffer2_Offset              RAM(0x0340)
@@ -251,8 +252,11 @@
 #define BoundingBox_LR_Corner            RAMARRAY(0x04AE, 0)
 #define BoundingBox_DR_YPos              RAMARRAY(0x04AF, 0)
 #define EnemyBoundingBoxCoord            RAMARRAY(0x04B0, 0)
-#define Block_Buffer_1                   RAMARRAY(0x0500, 0)
-#define Block_Buffer_2                   RAMARRAY(0x05D0, 0)
+
+#define Block_Buffers                    RAMARRAY(0x0500, 0x1A0)
+#define Block_Buffer_1                   RAMARRAY(0x0500, 0xD0)
+#define Block_Buffer_2                   RAMARRAY(0x05D0, 0xD0)
+
 #define BlockBufferColumnPos             RAM(0x06A0)
 #define MetatileBuffer                   RAMARRAY(0x06A1, 0)
 #define HammerEnemyOffset                RAMARRAY(0x06AE, 0)
@@ -393,6 +397,8 @@
 #define Mirror_PPU_CTRL_REG1             RAM(0x0778)
 #define Mirror_PPU_CTRL_REG2             RAM(0x0779)
 #define IntervalTimerControl             RAM(0x077F)
+
+#define Timers                           RAMARRAY(0x0780, 0x24)
 #define SelectTimer                      RAM(0x0780)
 #define PlayerAnimTimer                  RAM(0x0781)
 #define JumpSwimTimer                    RAM(0x0782)
@@ -418,7 +424,10 @@
 #define WorldEndTimer                    RAM(0x07A1)
 #define DemoTimer                        RAM(0x07A2)
 #define UnusedTimer3                     RAM(0x07A3)
-#define PseudoRandomBitReg               RAMARRAY(0x07A7, 0)
+
+#define PseudoRandomBitReg               RAMARRAY(0x07A7, 7)
+
+#define SoundMemory                      RAMARRAY(0x07B0, 0x20)
 #define MusicOffset_Noise                RAM(0x07B0)
 #define EventMusicBuffer                 RAM(0x07B1)
 #define PauseSoundBuffer                 RAM(0x07B2)
@@ -441,6 +450,7 @@
 #define PauseModeFlag                    RAM(0x07C6)
 #define GroundMusicHeaderOfs             RAM(0x07C7)
 #define AltRegContentFlag                RAM(0x07CA)
+
 #define DisplayDigits                    RAMARRAY(0x07D7, 0)
 #define DisplayDigits_Or_TopScoreDisplay RAMARRAY(0x07D7, 0)
 #define TopScoreDisplay                  RAMARRAY(0x07D7, 0)

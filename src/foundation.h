@@ -215,6 +215,13 @@ static inline bool CARRY1(byte a, byte b) {
   return r >= 256;
 }
 
+// Negate the byte, assuming the value is signed two's complement.
+// e.g. 255 => -1  => 1
+//      240 => -16 => 16
+static inline byte NEGATE(byte x) {
+  return (x ^ 0xFF) + 1;
+}
+
 typedef uint64_t int3;
 typedef uint64_t uint3;
 typedef uint64_t uint6;

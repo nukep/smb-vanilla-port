@@ -1260,13 +1260,13 @@ SelectBLogic:
       SelectTimer = 0x10;
       if (bVar3) {
         WorldSelectNumber = WorldSelectNumber + 1 & 7;
-        bVar2 = GoContinue(WorldSelectNumber);
-        do {
-          (&VRAM_Buffer1_Offset)[force_byte(bVar2)] = WSelectBufferTemplate[bVar2];
-          bVar1 = bVar2 - 5;
-          bVar2 = bVar2 + 1;
-        } while (bVar1 >= 0x80);
-        VRAM_Buffer1[3] = WorldNumber + 1;
+        GoContinue(WorldSelectNumber);
+        for (int i = 0; i < 6; i++) {
+          VRAM_Page[i] = WSelectBufferTemplate[i];
+        }
+        bVar1 = 0;
+        bVar2 = 6;
+        VRAM_Page[4] = WorldNumber + 1;
       } else {
         NumberOfPlayers ^= 1;
         DrawMushroomIcon();
@@ -1313,13 +1313,9 @@ byte GoContinue(byte param_1) {
 // SMB:8325
 // Signature: [] -> []
 void DrawMushroomIcon(void) {
-  byte bVar1;
-
-  bVar1 = 7;
-  do {
-    (&VRAM_Buffer1_Offset)[force_byte(bVar1)] = MushroomIconData[bVar1];
-    bVar1 -= 1;
-  } while (bVar1 < 0x80);
+  for (int i = 0; i < 8; i++) {
+    VRAM_Page[i] = MushroomIconData[i];
+  }
   if (NumberOfPlayers != 0) {
     VRAM_Buffer1[3] = 0x24;
     VRAM_Buffer1[5] = 0xce;
@@ -1722,9 +1718,9 @@ void ClearBuffersDrawIcon(void) {
   if (OperMode == 0) {
     bVar1 = 0;
     do {
-      (&VRAM_Buffer1_Offset)[force_byte(bVar1)] = 0;
+      VRAM_Page[bVar1] = 0;
       SprObject_X_MoveForce[bVar1] = 0;
-      bVar1 -= 1;
+      bVar1 += 1;
     } while (bVar1 != 0);
     DrawMushroomIcon();
     ScreenRoutineTask = ScreenRoutineTask + 1;
@@ -2030,7 +2026,7 @@ void RemBridge(byte param_1, byte param_2, byte param_3, byte param_4, byte para
   VRAM_Buffer1[param_2 + 8] = BlockGfxData[param_1 + 3];
   VRAM_Buffer1[param_2] = param_4;
   VRAM_Buffer1[param_2 + 5] = param_4 + 0x20;
-  (&VRAM_Buffer1_Offset)[force_byte(param_2)] = param_5;
+  VRAM_Page[param_2] = param_5;
   VRAM_Buffer1[param_2 + 4] = param_5;
   VRAM_Buffer1[param_2 + 1] = 2;
   VRAM_Buffer1[param_2 + 6] = 2;
@@ -2175,12 +2171,10 @@ void InitializeGame(void) {
   byte bVar1;
   byte bVar2;
 
-  bVar1 = InitializeMemory(0x6f);
-  bVar2 = 0x1f;
-  do {
-    (&MusicOffset_Noise)[force_byte(bVar2)] = bVar1;
-    bVar2 -= 1;
-  } while (bVar2 < 0x80);
+  InitializeMemory(0x6f);
+  for (int i = 0; i < 0x20; i++) {
+    SoundMemory[i] = 0;
+  }
   DemoTimer = 0x18;
   LoadAreaPointer();
   InitializeArea();
@@ -2193,11 +2187,9 @@ void InitializeArea(void) {
   byte bVar1;
 
   InitializeMemory(0x4b);
-  bVar1 = 0x21;
-  do {
-    (&SelectTimer)[force_byte(bVar1)] = 0;
-    bVar1 -= 1;
-  } while (bVar1 < 0x80);
+  for (int i = 0; i < 34; i++) {
+    Timers[i] = 0;
+  }
   ScreenEdgeOrLeft_PageLoc[0] = HalfwayPage;
   if (AltEntranceControl != 0) {
     ScreenEdgeOrLeft_PageLoc[0] = EntrancePage;
@@ -2247,7 +2239,7 @@ void SecondaryGameSetup(void) {
   DisableScreenFlag = 0;
   bVar1 = 0;
   do {
-    (&VRAM_Buffer1_Offset)[force_byte(bVar1)] = 0;
+    VRAM_Page[bVar1] = 0;
     bVar1 += 1;
   } while (bVar1 != 0);
   GameTimerExpiredFlag = 0;
@@ -4336,7 +4328,7 @@ RghtFrict:
 XSpdSign:
   Player_XSpeedAbsolute = PlayerSpriteVarData1[0];
   if (PlayerSpriteVarData1[0] >= 0x80) {
-    Player_XSpeedAbsolute = (PlayerSpriteVarData1[0] ^ 0xff) + 1;
+    Player_XSpeedAbsolute = NEGATE(PlayerSpriteVarData1[0]);
   }
   return;
 }
@@ -5352,22 +5344,19 @@ void BlockObjMT_Updater(void) {
   byte bVar1;
   byte bVar2;
   byte bVar3;
-  byte bVar4;
 
-  bVar4 = 1;
-  do {
-    ObjectOffset = bVar4;
-    if ((VRAM_Buffer1[0] == 0) && (Block_RepFlag[bVar4] != 0)) {
-      bVar1 = Block_BBuf_Low[bVar4];
-      bVar2 = Block_Orig_YPos[bVar4];
-      bVar3 = Block_Metatile[bVar4];
-      RAM(CONCAT11(5, bVar1) + (ushort)bVar2) = bVar3;
-      ReplaceBlockMetatile(bVar3, bVar4, bVar2, bVar1);
-      Block_RepFlag[bVar4] = 0;
+  for (int j = 0; j < 2; j++) {
+    int i = 1-j;
+    ObjectOffset = i;
+    if ((VRAM_Buffer1[0] == 0) && (Block_RepFlag[i] != 0)) {
+      bVar1 = Block_BBuf_Low[i];
+      bVar2 = Block_Orig_YPos[i];
+      byte metatile = Block_Metatile[i];
+      Block_Buffers[(int)bVar1 + (int)bVar2] = metatile;
+      ReplaceBlockMetatile(metatile, i, bVar2, bVar1);
+      Block_RepFlag[i] = 0;
     }
-    bVar4 -= 1;
-  } while (bVar4 < 0x80);
-  return;
+  }
 }
 
 // SMB:bf02
@@ -5590,7 +5579,7 @@ void ImposeGravity(byte param_1, byte param_2, byte param_3, byte param_4, byte 
     SprObject_Y_MoveForce[param_2] = 0;
   }
   if (param_1 != 0) {
-    bVar5 = (param_5 ^ 0xff) + 1;
+    bVar5 = NEGATE(param_5);
     bVar3 = SprObject_Y_MoveForce[param_2];
     SprObject_Y_MoveForce[param_2] = bVar3 - param_4;
     bVar3 = PlayerSpriteVarData2[param_2] - (bVar3 < param_4);
@@ -6091,7 +6080,7 @@ void InitFlyingCheepCheep(byte param_1) {
       SpriteVarData1[param_1] = FlyCCXSpeedData[bVar4];
       Enemy_MovingDir[param_1] = 1;
       if ((PlayerSpriteVarData1[0] == 0) && (bVar4 = bVar3, (bVar3 & 2) != 0)) {
-        SpriteVarData1[param_1] = (SpriteVarData1[param_1] ^ 0xff) + 1;
+        SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
         Enemy_MovingDir[param_1] = Enemy_MovingDir[param_1] + 1;
       }
       if ((bVar4 & 2) == 0) {
@@ -6431,7 +6420,7 @@ void InitVertPlatform(byte param_1) {
   cVar2 = 0x40;
   bVar1 = Enemy_Y_Position[param_1];
   if (bVar1 >= 0x80) {
-    bVar1 = (bVar1 ^ 0xff) + 1;
+    bVar1 = NEGATE(bVar1);
     cVar2 = -0x40;
   }
   Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] = bVar1;
@@ -6917,7 +6906,7 @@ struct_xr00i MoveWithXMCntrs(byte param_1) {
   bStack0000 = SpriteVarData1[param_1];
   bVar1 = 1;
   if ((SpriteVarData2[param_1] & 2) == 0) {
-    SpriteVarData1[param_1] = (SpriteVarData1[param_1] ^ 0xff) + 1;
+    SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
     bVar1 = 2;
   }
   Enemy_MovingDir[param_1] = bVar1;
@@ -7065,7 +7054,7 @@ byte MoveSwimmingCheepCheep(byte param_1) {
     bVar3 = Enemy_Y_Position[param_1] - CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
     if (bVar3 >= 0x80) {
       bVar2 = 0x10;
-      bVar3 = (bVar3 ^ 0xff) + 1;
+      bVar3 = NEGATE(bVar3);
     }
     if (bVar3 > 0xe) {
       SpriteVarData1[param_1] = bVar2;
@@ -7135,7 +7124,7 @@ struct_xr00r06 DrawFirebar_Collision(byte param_1, byte param_2, byte param_3, b
   struct_xr00r06 sVar4;
 
   if (!(bool)(param_4 & 1)) {
-    param_2 = (param_2 ^ 0xff) + 1 + (param_4 & 1);
+    param_2 = NEGATE(param_2);
   }
   bVar1 = param_2 + Enemy_Rel_XPos;
   Sprite_Data[param_5 + 3] = bVar1;
@@ -7149,7 +7138,7 @@ struct_xr00r06 DrawFirebar_Collision(byte param_1, byte param_2, byte param_3, b
     if (Enemy_Rel_YPos != 0xf8) {
       bVar3 = (bool)(param_4 >> 1 & 1);
       if (!bVar3) {
-        param_3 = (param_3 ^ 0xff) + 1 + bVar3;
+        param_3 = NEGATE(param_3);
       }
       bVar2 = param_3 + Enemy_Rel_YPos;
     }
@@ -7187,12 +7176,12 @@ NoColFB:
   do {
     bVar4 = abVar3 - param_4;
     if (bVar4 >= 0x80) {
-      bVar4 = (bVar4 ^ 0xff) + 1;
+      bVar4 = NEGATE(bVar4);
     }
     if ((bVar4 < 8) && (param_3 < 0xf0)) {
       bVar4 = (Sprite_Data[7] + 4) - param_3;
       if (bVar4 >= 0x80) {
-        bVar4 = (bVar4 ^ 0xff) + 1;
+        bVar4 = NEGATE(bVar4);
       }
       if (bVar4 < 8) {
         Enemy_MovingDir[0] = 1;
@@ -7254,7 +7243,7 @@ byte MoveFlyingCheepCheep(byte param_1) {
   bVar3 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar2] >> 4;
   bVar1 = Enemy_Y_Position[bVar2] - PRandomSubtracter[bVar3];
   if (bVar1 >= 0x80) {
-    bVar1 = (bVar1 ^ 0xff) + 1;
+    bVar1 = NEGATE(bVar1);
   }
   if (bVar1 < 8) {
     bVar1 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar2];
@@ -7283,7 +7272,7 @@ byte MoveLakitu(byte param_1) {
     SpriteVarData1[param_1] = bVar1;
     bVar1 = 1;
     if ((SpriteVarData2[param_1] & 1) == 0) {
-      SpriteVarData1[param_1] = (SpriteVarData1[param_1] ^ 0xff) + 1;
+      SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
       bVar1 = 2;
     }
     Enemy_MovingDir[param_1] = bVar1;
@@ -7307,7 +7296,7 @@ byte PlayerLakituDiff(byte param_1, byte param_2, byte param_3, byte param_4) {
   bVar1 = sVar4.r00;
   if (sVar4.n != false) {
     bVar2 += 1;
-    bVar1 = (bVar1 ^ 0xff) + 1;
+    bVar1 = NEGATE(bVar1);
   }
   if (((bVar1 >= 0x3c) && (bVar1 = 0x3c, Enemy_ID[param_1] == 0x11)) && (bVar2 != SpriteVarData2[param_1])) {
     if (SpriteVarData2[param_1] != 0) {
@@ -7438,7 +7427,7 @@ byte RunBowser(byte param_1) {
         bVar2 = 0xff;
         bVar1 -= BowserOrigXPos;
         if (bVar1 >= 0x80) {
-          bVar1 = (bVar1 ^ 0xff) + 1;
+          bVar1 = NEGATE(bVar1);
           bVar2 = 1;
         }
         if (MaxRangeFromOrigin <= bVar1) {
@@ -7782,13 +7771,13 @@ void MovePiranhaPlant(byte param_1) {
         sVar4 = PlayerEnemyDiff(param_1);
         bVar3 = sVar4.r00;
         if (sVar4.n != false) {
-          bVar3 = (bVar3 ^ 0xff) + 1;
+          bVar3 = NEGATE(bVar3);
         }
         if (bVar3 <= 0x20) {
           goto PutinPipe;
         }
       }
-      SpriteVarData1[param_1] = (SpriteVarData1[param_1] ^ 0xff) + 1;
+      SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
       SpriteVarData2[param_1] = SpriteVarData2[param_1] + 1;
     }
     bVar3 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
@@ -8297,7 +8286,7 @@ byte PlayerHammerCollision(byte param_1) {
     if (bVar2) {
       if (Misc_Collision_Flag[ObjectOffset] == 0) {
         Misc_Collision_Flag[ObjectOffset] = 1;
-        Misc_X_Speed[param_1] = (Misc_X_Speed[param_1] ^ 0xff) + 1;
+        Misc_X_Speed[param_1] = NEGATE(Misc_X_Speed[param_1]);
         if (StarInvincibleTimer == 0) {
           bVar1 = InjurePlayer();
           return bVar1;
@@ -8659,7 +8648,7 @@ void EnemyTurnAround(byte param_1) {
 // SMB:db36
 // Signature: [X] -> []
 void RXSpd(byte param_1) {
-  SpriteVarData1[param_1] = (SpriteVarData1[param_1] ^ 0xff) + 1;
+  SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
   Enemy_MovingDir[param_1] = Enemy_MovingDir[param_1] ^ 3;
   return;
 }
