@@ -1,56 +1,10 @@
 #pragma once
 #pragma pack(push, 1)
-typedef unsigned char   undefined;
 
 
 typedef unsigned char    byte;
-typedef unsigned char    undefined1;
-typedef unsigned short    undefined2;
-#define unkbyte9   unsigned long long
-#define unkbyte10   unsigned long long
-#define unkbyte11   unsigned long long
-#define unkbyte12   unsigned long long
-#define unkbyte13   unsigned long long
-#define unkbyte14   unsigned long long
-#define unkbyte15   unsigned long long
-#define unkbyte16   unsigned long long
 
-#define unkuint9   unsigned long long
-#define unkuint10   unsigned long long
-#define unkuint11   unsigned long long
-#define unkuint12   unsigned long long
-#define unkuint13   unsigned long long
-#define unkuint14   unsigned long long
-#define unkuint15   unsigned long long
-#define unkuint16   unsigned long long
-
-#define unkint9   long long
-#define unkint10   long long
-#define unkint11   long long
-#define unkint12   long long
-#define unkint13   long long
-#define unkint14   long long
-#define unkint15   long long
-#define unkint16   long long
-
-#define unkfloat1   float
-#define unkfloat2   float
-#define unkfloat3   float
-#define unkfloat5   double
-#define unkfloat6   double
-#define unkfloat7   double
-#define unkfloat9   long double
-#define unkfloat11   long double
-#define unkfloat12   long double
-#define unkfloat13   long double
-#define unkfloat14   long double
-#define unkfloat15   long double
-#define unkfloat16   long double
-
-#define BADSPACEBASE   void
-#define code   void
-
-typedef struct struct_ycr07 struct_ycr07, *Pstruct_ycr07;
+typedef struct struct_ycr07 struct_ycr07;
 
 struct struct_ycr07 {
   byte y;
@@ -59,7 +13,7 @@ struct struct_ycr07 {
 };
 
 
-typedef struct struct_xr00r01 struct_xr00r01, *Pstruct_xr00r01;
+typedef struct struct_xr00r01 struct_xr00r01;
 
 struct struct_xr00r01 {
   byte x;
@@ -68,7 +22,7 @@ struct struct_xr00r01 {
 };
 
 
-typedef struct struct_axyz struct_axyz, *Pstruct_axyz;
+typedef struct struct_axyz struct_axyz;
 
 struct struct_axyz {
   byte a;
@@ -78,7 +32,7 @@ struct struct_axyz {
 };
 
 
-typedef struct struct_axr00 struct_axr00, *Pstruct_axr00;
+typedef struct struct_axr00 struct_axr00;
 
 struct struct_axr00 {
   byte a;
@@ -87,7 +41,7 @@ struct struct_axr00 {
 };
 
 
-typedef struct struct_nr00i struct_nr00i, *Pstruct_nr00i;
+typedef struct struct_nr00i struct_nr00i;
 
 struct struct_nr00i {
   bool n;
@@ -96,7 +50,7 @@ struct struct_nr00i {
 };
 
 
-typedef struct struct_ncr00 struct_ncr00, *Pstruct_ncr00;
+typedef struct struct_ncr00 struct_ncr00;
 
 struct struct_ncr00 {
   bool n;
@@ -105,7 +59,7 @@ struct struct_ncr00 {
 };
 
 
-typedef struct struct_xr00r06 struct_xr00r06, *Pstruct_xr00r06;
+typedef struct struct_xr00r06 struct_xr00r06;
 
 struct struct_xr00r06 {
   byte x;
@@ -114,7 +68,7 @@ struct struct_xr00r06 {
 };
 
 
-typedef struct struct_ayz struct_ayz, *Pstruct_ayz;
+typedef struct struct_ayz struct_ayz;
 
 struct struct_ayz {
   byte a;
@@ -123,7 +77,7 @@ struct struct_ayz {
 };
 
 
-typedef struct struct_r06r07i struct_r06r07i, *Pstruct_r06r07i;
+typedef struct struct_r06r07i struct_r06r07i;
 
 struct struct_r06r07i {
   byte r06;
@@ -132,7 +86,7 @@ struct struct_r06r07i {
 };
 
 
-typedef struct struct_ayr02r04r06r07 struct_ayr02r04r06r07, *Pstruct_ayr02r04r06r07;
+typedef struct struct_ayr02r04r06r07 struct_ayr02r04r06r07;
 
 struct struct_ayr02r04r06r07 {
   byte a;
@@ -144,7 +98,7 @@ struct struct_ayr02r04r06r07 {
 };
 
 
-typedef struct struct_ayi struct_ayi, *Pstruct_ayi;
+typedef struct struct_ayi struct_ayi;
 
 struct struct_ayi {
   byte a;
@@ -153,7 +107,7 @@ struct struct_ayi {
 };
 
 
-typedef struct struct_azr02r04r06r07 struct_azr02r04r06r07, *Pstruct_azr02r04r06r07;
+typedef struct struct_azr02r04r06r07 struct_azr02r04r06r07;
 
 struct struct_azr02r04r06r07 {
   byte a;
@@ -165,7 +119,7 @@ struct struct_azr02r04r06r07 {
 };
 
 
-typedef struct struct_axy struct_axy, *Pstruct_axy;
+typedef struct struct_axy struct_axy;
 
 struct struct_axy {
   byte a;
@@ -174,7 +128,7 @@ struct struct_axy {
 };
 
 
-typedef struct struct_axz struct_axz, *Pstruct_axz;
+typedef struct struct_axz struct_axz;
 
 struct struct_axz {
   byte a;
@@ -183,7 +137,7 @@ struct struct_axz {
 };
 
 
-typedef struct struct_axzr02r04r06r07 struct_axzr02r04r06r07, *Pstruct_axzr02r04r06r07;
+typedef struct struct_axzr02r04r06r07 struct_axzr02r04r06r07;
 
 struct struct_axzr02r04r06r07 {
   byte a;
@@ -196,7 +150,7 @@ struct struct_axzr02r04r06r07 {
 };
 
 
-typedef struct struct_yr07i struct_yr07i, *Pstruct_yr07i;
+typedef struct struct_yr07i struct_yr07i;
 
 struct struct_yr07i {
   byte y;
@@ -205,7 +159,7 @@ struct struct_yr07i {
 };
 
 
-typedef struct struct_axi struct_axi, *Pstruct_axi;
+typedef struct struct_axi struct_axi;
 
 struct struct_axi {
   byte a;
@@ -214,7 +168,7 @@ struct struct_axi {
 };
 
 
-typedef struct struct_xr05i struct_xr05i, *Pstruct_xr05i;
+typedef struct struct_xr05i struct_xr05i;
 
 struct struct_xr05i {
   byte x;
@@ -223,7 +177,7 @@ struct struct_xr05i {
 };
 
 
-typedef struct struct_r01r02r03 struct_r01r02r03, *Pstruct_r01r02r03;
+typedef struct struct_r01r02r03 struct_r01r02r03;
 
 struct struct_r01r02r03 {
   byte r01;
@@ -232,7 +186,7 @@ struct struct_r01r02r03 {
 };
 
 
-typedef struct struct_axzr04 struct_axzr04, *Pstruct_axzr04;
+typedef struct struct_axzr04 struct_axzr04;
 
 struct struct_axzr04 {
   byte a;
@@ -242,7 +196,7 @@ struct struct_axzr04 {
 };
 
 
-typedef struct struct_xci struct_xci, *Pstruct_xci;
+typedef struct struct_xci struct_xci;
 
 struct struct_xci {
   byte x;
@@ -251,7 +205,7 @@ struct struct_xci {
 };
 
 
-typedef struct struct_xyr02 struct_xyr02, *Pstruct_xyr02;
+typedef struct struct_xyr02 struct_xyr02;
 
 struct struct_xyr02 {
   byte x;
@@ -260,7 +214,7 @@ struct struct_xyr02 {
 };
 
 
-typedef struct struct_yci struct_yci, *Pstruct_yci;
+typedef struct struct_yci struct_yci;
 
 struct struct_yci {
   byte y;
@@ -269,7 +223,7 @@ struct struct_yci {
 };
 
 
-typedef struct struct_ar00i struct_ar00i, *Pstruct_ar00i;
+typedef struct struct_ar00i struct_ar00i;
 
 struct struct_ar00i {
   byte a;
@@ -278,7 +232,7 @@ struct struct_ar00i {
 };
 
 
-typedef struct struct_xyi struct_xyi, *Pstruct_xyi;
+typedef struct struct_xyi struct_xyi;
 
 struct struct_xyi {
   byte x;
@@ -287,7 +241,7 @@ struct struct_xyi {
 };
 
 
-typedef struct struct_aci struct_aci, *Pstruct_aci;
+typedef struct struct_aci struct_aci;
 
 struct struct_aci {
   byte a;
@@ -296,7 +250,7 @@ struct struct_aci {
 };
 
 
-typedef struct struct_yr06r07 struct_yr06r07, *Pstruct_yr06r07;
+typedef struct struct_yr06r07 struct_yr06r07;
 
 struct struct_yr06r07 {
   byte y;
@@ -305,7 +259,7 @@ struct struct_yr06r07 {
 };
 
 
-typedef struct struct_xr00i struct_xr00i, *Pstruct_xr00i;
+typedef struct struct_xr00i struct_xr00i;
 
 struct struct_xr00i {
   byte x;

@@ -385,12 +385,10 @@ bool PlaySqu1Sfx(byte param_1, byte param_2, byte param_3) {
 struct_axyz SetFreq_Squ1(byte param_1) {
   struct_axyz sVar2;
   struct_ayz sVar3;
-  undefined uVar1;
 
-  uVar1 = 0;
   sVar3 = Dump_Freq_Regs(param_1, 0);
   sVar2.a = sVar3.a;
-  sVar2.x = uVar1;
+  sVar2.x = 0;
   sVar2.y = (char)SUBPIECE(sVar3, 1, 2);
   sVar2.z = (bool)(char)((ushort)SUBPIECE(sVar3, 1, 2) >> 8);
   return sVar2;

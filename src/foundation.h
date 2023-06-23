@@ -244,12 +244,6 @@ static inline byte NEGATE(byte x) {
   return (x ^ 0xFF) + 1;
 }
 
-typedef uint64_t int3;
-typedef uint64_t uint3;
-typedef uint64_t uint6;
-typedef uint64_t uint7;
-typedef uint64_t undefined3;
-
 // Represents a pointer type. Size is 2 bytes.
 class RamPtr {
 public:

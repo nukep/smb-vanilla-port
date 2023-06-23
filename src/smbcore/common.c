@@ -5255,9 +5255,7 @@ void ImposeGravitySprObj(byte param_1, byte param_2, byte param_3) {
 // Signature: [X] -> [X]
 byte MovePlatformDown(byte param_1) {
   byte bVar1;
-  undefined uStack0000;
 
-  uStack0000 = 0;
   bVar1 = 5;
   if (Enemy_ID[param_1] == 0x29) {
     bVar1 = 9;
@@ -5272,9 +5270,7 @@ byte MovePlatformDown(byte param_1) {
 // Signature: [X] -> [X]
 byte MovePlatformUp(byte param_1) {
   byte bVar1;
-  undefined uStack0000;
 
-  uStack0000 = 1;
   bVar1 = 5;
   if (Enemy_ID[param_1] == 0x29) {
     bVar1 = 9;
