@@ -41,12 +41,11 @@ struct struct_axr00 {
 };
 
 
-typedef struct struct_nr00i struct_nr00i;
+typedef struct struct_nr00 struct_nr00;
 
-struct struct_nr00i {
+struct struct_nr00 {
   bool n;
   byte r00;
-  bool i;
 };
 
 
@@ -77,12 +76,11 @@ struct struct_ayz {
 };
 
 
-typedef struct struct_r06r07i struct_r06r07i;
+typedef struct struct_r06r07 struct_r06r07;
 
-struct struct_r06r07i {
+struct struct_r06r07 {
   byte r06;
   byte r07;
-  bool i;
 };
 
 
@@ -98,12 +96,11 @@ struct struct_ayr02r04r06r07 {
 };
 
 
-typedef struct struct_ayi struct_ayi;
+typedef struct struct_ay struct_ay;
 
-struct struct_ayi {
+struct struct_ay {
   byte a;
   byte y;
-  bool i;
 };
 
 
@@ -150,30 +147,27 @@ struct struct_axzr02r04r06r07 {
 };
 
 
-typedef struct struct_yr07i struct_yr07i;
+typedef struct struct_yr07 struct_yr07;
 
-struct struct_yr07i {
+struct struct_yr07 {
   byte y;
   byte r07;
-  bool i;
 };
 
 
-typedef struct struct_axi struct_axi;
+typedef struct struct_ax struct_ax;
 
-struct struct_axi {
+struct struct_ax {
   byte a;
   byte x;
-  bool i;
 };
 
 
-typedef struct struct_xr05i struct_xr05i;
+typedef struct struct_xr05 struct_xr05;
 
-struct struct_xr05i {
+struct struct_xr05 {
   byte x;
   byte r05;
-  bool i;
 };
 
 
@@ -196,12 +190,11 @@ struct struct_axzr04 {
 };
 
 
-typedef struct struct_xci struct_xci;
+typedef struct struct_xc struct_xc;
 
-struct struct_xci {
+struct struct_xc {
   byte x;
   bool c;
-  bool i;
 };
 
 
@@ -214,39 +207,35 @@ struct struct_xyr02 {
 };
 
 
-typedef struct struct_yci struct_yci;
+typedef struct struct_yc struct_yc;
 
-struct struct_yci {
+struct struct_yc {
   byte y;
   bool c;
-  bool i;
 };
 
 
-typedef struct struct_ar00i struct_ar00i;
+typedef struct struct_ar00 struct_ar00;
 
-struct struct_ar00i {
+struct struct_ar00 {
   byte a;
   byte r00;
-  bool i;
 };
 
 
-typedef struct struct_xyi struct_xyi;
+typedef struct struct_xy struct_xy;
 
-struct struct_xyi {
+struct struct_xy {
   byte x;
   byte y;
-  bool i;
 };
 
 
-typedef struct struct_aci struct_aci;
+typedef struct struct_ac struct_ac;
 
-struct struct_aci {
+struct struct_ac {
   byte a;
   bool c;
-  bool i;
 };
 
 
@@ -259,12 +248,11 @@ struct struct_yr06r07 {
 };
 
 
-typedef struct struct_xr00i struct_xr00i;
+typedef struct struct_xr00 struct_xr00;
 
-struct struct_xr00i {
+struct struct_xr00 {
   byte x;
   byte r00;
-  bool i;
 };
 
 
@@ -586,7 +574,7 @@ void smb1_IntroPipe(byte param_1);
 void smb1_ExitPipe(byte param_1);
 #define ExitPipe smb1_ExitPipe
 
-struct_yci smb1_RenderSidewaysPipe(byte param_1,byte param_2);
+struct_yc smb1_RenderSidewaysPipe(byte param_1,byte param_2);
 #define RenderSidewaysPipe smb1_RenderSidewaysPipe
 
 void smb1_VerticalPipe(byte param_1,byte param_2);
@@ -595,7 +583,7 @@ void smb1_VerticalPipe(byte param_1,byte param_2);
 struct_yr06r07 smb1_GetPipeHeight(byte param_1);
 #define GetPipeHeight smb1_GetPipeHeight
 
-struct_xci smb1_FindEmptyEnemySlot(void);
+struct_xc smb1_FindEmptyEnemySlot(void);
 #define FindEmptyEnemySlot smb1_FindEmptyEnemySlot
 
 void smb1_Hole_Water(byte param_1);
@@ -691,7 +679,7 @@ struct_ycr07 smb1_ChkLrgObjLength(byte param_1);
 bool smb1_ChkLrgObjFixedLength(byte param_1,byte param_2);
 #define ChkLrgObjFixedLength smb1_ChkLrgObjFixedLength
 
-struct_yr07i smb1_GetLrgObjAttrib(byte param_1);
+struct_yr07 smb1_GetLrgObjAttrib(byte param_1);
 #define GetLrgObjAttrib smb1_GetLrgObjAttrib
 
 byte smb1_GetAreaObjXPosition(void);
@@ -700,7 +688,7 @@ byte smb1_GetAreaObjXPosition(void);
 byte smb1_GetAreaObjYPosition(byte param_1);
 #define GetAreaObjYPosition smb1_GetAreaObjYPosition
 
-struct_r06r07i smb1_GetBlockBufferAddr(byte param_1);
+struct_r06r07 smb1_GetBlockBufferAddr(byte param_1);
 #define GetBlockBufferAddr smb1_GetBlockBufferAddr
 
 void smb1_LoadAreaPointer(void);
@@ -871,7 +859,7 @@ void smb1_ProcessCannons(void);
 byte smb1_BulletBillHandler(byte param_1);
 #define BulletBillHandler smb1_BulletBillHandler
 
-struct_xci smb1_SpawnHammerObj(void);
+struct_xc smb1_SpawnHammerObj(void);
 #define SpawnHammerObj smb1_SpawnHammerObj
 
 byte smb1_ProcHammerObj(byte param_1);
@@ -886,7 +874,7 @@ byte smb1_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
 byte smb1_JCoinC(byte param_1,byte param_2);
 #define JCoinC smb1_JCoinC
 
-struct_yci smb1_FindEmptyMiscSlot(bool param_1);
+struct_yc smb1_FindEmptyMiscSlot(bool param_1);
 #define FindEmptyMiscSlot smb1_FindEmptyMiscSlot
 
 void smb1_MiscObjectsCore(void);
@@ -934,13 +922,13 @@ void smb1_ExtraLifeMushBlock(byte param_1);
 void smb1_VineBlock(void);
 #define VineBlock smb1_VineBlock
 
-struct_yci smb1_BlockBumpedChk(byte param_1);
+struct_yc smb1_BlockBumpedChk(byte param_1);
 #define BlockBumpedChk smb1_BlockBumpedChk
 
 void smb1_BrickShatter(byte param_1,byte param_2,byte param_3);
 #define BrickShatter smb1_BrickShatter
 
-struct_xr05i smb1_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
+struct_xr05 smb1_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
 #define CheckTopOfBlock smb1_CheckTopOfBlock
 
 void smb1_SpawnBrickChunks(byte param_1);
@@ -952,7 +940,7 @@ byte smb1_BlockObjectsCore(byte param_1);
 void smb1_BlockObjMT_Updater(void);
 #define BlockObjMT_Updater smb1_BlockObjMT_Updater
 
-struct_axi smb1_MoveEnemyHorizontally(byte param_1);
+struct_ax smb1_MoveEnemyHorizontally(byte param_1);
 #define MoveEnemyHorizontally smb1_MoveEnemyHorizontally
 
 byte smb1_MovePlayerHorizontally(void);
@@ -1225,7 +1213,7 @@ void smb1_XMoveCntr_GreenPTroopa(byte param_1);
 void smb1_XMoveCntr_Platform(byte param_1,byte param_2);
 #define XMoveCntr_Platform smb1_XMoveCntr_Platform
 
-struct_xr00i smb1_MoveWithXMCntrs(byte param_1);
+struct_xr00 smb1_MoveWithXMCntrs(byte param_1);
 #define MoveWithXMCntrs smb1_MoveWithXMCntrs
 
 byte smb1_MoveBloober(byte param_1,bool param_2);
@@ -1444,10 +1432,10 @@ void smb1_PositionPlayerOnVPlat(byte param_1);
 bool smb1_CheckPlayerVertical(void);
 #define CheckPlayerVertical smb1_CheckPlayerVertical
 
-struct_ayi smb1_GetEnemyBoundBoxOfs(void);
+struct_ay smb1_GetEnemyBoundBoxOfs(void);
 #define GetEnemyBoundBoxOfs smb1_GetEnemyBoundBoxOfs
 
-struct_ayi smb1_GetEnemyBoundBoxOfsArg(byte param_1);
+struct_ay smb1_GetEnemyBoundBoxOfsArg(byte param_1);
 #define GetEnemyBoundBoxOfsArg smb1_GetEnemyBoundBoxOfsArg
 
 void smb1_PlayerBGCollision(void);
@@ -1480,7 +1468,7 @@ bool smb1_CheckForSolidMTiles(byte param_1);
 bool smb1_CheckForClimbMTiles(byte param_1);
 #define CheckForClimbMTiles smb1_CheckForClimbMTiles
 
-struct_aci smb1_CheckForCoinMTiles(byte param_1);
+struct_ac smb1_CheckForCoinMTiles(byte param_1);
 #define CheckForCoinMTiles smb1_CheckForCoinMTiles
 
 byte smb1_GetMTileAttrib(byte param_1);
@@ -1765,16 +1753,16 @@ byte smb1_GetMiscOffscreenBits(byte param_1);
 byte smb1_GetProperObjOffset(byte param_1,byte param_2);
 #define GetProperObjOffset smb1_GetProperObjOffset
 
-struct_xyi smb1_GetEnemyOffscreenBits(byte param_1);
+struct_xy smb1_GetEnemyOffscreenBits(byte param_1);
 #define GetEnemyOffscreenBits smb1_GetEnemyOffscreenBits
 
 byte smb1_GetBlockOffscreenBits(byte param_1);
 #define GetBlockOffscreenBits smb1_GetBlockOffscreenBits
 
-struct_xyi smb1_GetOffScreenBitsSet(byte param_1,byte param_2);
+struct_xy smb1_GetOffScreenBitsSet(byte param_1,byte param_2);
 #define GetOffScreenBitsSet smb1_GetOffScreenBitsSet
 
-struct_ar00i smb1_RunOffscrBitsSubs(byte param_1);
+struct_ar00 smb1_RunOffscrBitsSubs(byte param_1);
 #define RunOffscrBitsSubs smb1_RunOffscrBitsSubs
 
 byte smb1_GetXOffscreenBits(byte param_1);

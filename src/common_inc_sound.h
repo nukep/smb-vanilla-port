@@ -73,7 +73,7 @@ static void HandleTriangleMusic(void);
 static void HandleNoiseMusic(void);
 static void PlayBeat(byte param_1,byte param_2,byte param_3);
 static struct_axy AlternateLengthHandler(byte param_1);
-static struct_ayi ProcessLengthData(byte param_1);
+static struct_ay ProcessLengthData(byte param_1);
 static struct_axy LoadControlRegs(void);
 static byte LoadEnvelopeData(byte param_1);
 
@@ -1056,7 +1056,7 @@ void LoadHeader(byte param_1) {
 // Signature: [] -> []
 void HandleSquare2Music(void) {
   byte bVar1;
-  struct_ayi sVar4;
+  struct_ay sVar4;
   struct_axyz sVar5;
   struct_axy sVar6;
 
@@ -1181,7 +1181,7 @@ void HandleSquare1Music(void) {
 void HandleTriangleMusic(void) {
   byte bVar1;
   byte bVar2;
-  struct_ayi sVar3;
+  struct_ay sVar3;
 
   Tri_NoteLenCounter -= 1;
   if (Tri_NoteLenCounter != 0) {
@@ -1273,7 +1273,7 @@ void PlayBeat(byte param_1, byte param_2, byte param_3) {
 // SM2MAIN:d901
 // Signature: [A] -> [A, X, Y]
 struct_axy AlternateLengthHandler(byte param_1) {
-  struct_ayi sVar1;
+  struct_ay sVar1;
   struct_axy sVar2;
 
   // Given the bitfield: abcdefgh
@@ -1289,10 +1289,10 @@ struct_axy AlternateLengthHandler(byte param_1) {
 // SMB:f8cb
 // SM2MAIN:d907
 // Signature: [A] -> [A, Y]
-struct_ayi ProcessLengthData(byte param_1) {
+struct_ay ProcessLengthData(byte param_1) {
   byte offset;
 
-  struct_ayi sVar2;
+  struct_ay sVar2;
 
   // normally, the addition never carries. but we're keeping the oversight in, in case of glitches (confirm this?).
   // NoteLenLookupTblOffs is meant to be 0x00, 08, 10, 18, or 20.
@@ -1303,7 +1303,6 @@ struct_ayi ProcessLengthData(byte param_1) {
 
   sVar2.a = MusicLengthLookupTbl[offset];
   sVar2.y = offset;
-  sVar2.i = (bool)0;
   return sVar2;
 }
 

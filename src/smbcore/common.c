@@ -2008,7 +2008,7 @@ void AreaParserCore(void) {
   byte bVar5;
   byte bVar6;
   bool bVar7;
-  struct_r06r07i sVar8;
+  struct_r06r07 sVar8;
 
   if (BackloadingFlag != 0) {
     ProcessAreaData();
@@ -2328,7 +2328,7 @@ void AreaStyleObject(byte param_1) {
 // Signature: [X] -> []
 void TreeLedge(byte param_1) {
   byte bVar1;
-  struct_yr07i sVar2;
+  struct_yr07 sVar2;
 
   sVar2 = GetLrgObjAttrib(param_1);
   bVar1 = sVar2.r07;
@@ -2381,8 +2381,8 @@ void CastleObject(byte param_1) {
   byte bVar2;
   byte bVar3;
   byte bVar4;
-  struct_yr07i sVar5;
-  struct_xci sVar6;
+  struct_yr07 sVar5;
+  struct_xc sVar6;
   byte bStack0000;
 
   sVar5 = GetLrgObjAttrib(param_1);
@@ -2425,7 +2425,7 @@ void CastleObject(byte param_1) {
 // SM2MAIN:76bb
 // Signature: [X] -> []
 void WaterPipe(byte param_1) {
-  struct_yr07i sVar1;
+  struct_yr07 sVar1;
 
   sVar1 = GetLrgObjAttrib(param_1);
   MetatileBuffer[sVar1.r07] = ssw(0x6b, 0x6d);
@@ -2439,7 +2439,7 @@ void WaterPipe(byte param_1) {
 // Signature: [X] -> []
 void IntroPipe(byte param_1) {
   byte bVar1;
-  struct_yci sVar2;
+  struct_yc sVar2;
 
   ChkLrgObjFixedLength(param_1, 3);
   sVar2 = RenderSidewaysPipe(param_1, 10);
@@ -2459,7 +2459,7 @@ void IntroPipe(byte param_1) {
 // SM2MAIN:76f7
 // Signature: [X] -> []
 void ExitPipe(byte param_1) {
-  struct_yr07i sVar1;
+  struct_yr07 sVar1;
 
   ChkLrgObjFixedLength(param_1, 3);
   sVar1 = GetLrgObjAttrib(param_1);
@@ -2471,12 +2471,12 @@ void ExitPipe(byte param_1) {
 // SMB:98b3
 // SM2MAIN:76ff
 // Signature: [X, Y] -> [Y, C]
-struct_yci RenderSidewaysPipe(byte param_1, byte param_2) {
+struct_yc RenderSidewaysPipe(byte param_1, byte param_2) {
   byte bVar1;
   byte bVar2;
   byte bVar3;
 
-  struct_yci sVar4;
+  struct_yc sVar4;
 
   bVar3 = param_2 - 1;
   bVar2 = AreaObjectLength[param_1];
@@ -2488,7 +2488,6 @@ struct_yci RenderSidewaysPipe(byte param_1, byte param_2) {
   MetatileBuffer[bVar3 + 1] = SidePipeBottomPart[bVar2];
   sVar4.c = bVar1 == 0;
   sVar4.y = bVar2;
-  sVar4.i = (bool)0;
   return sVar4;
 }
 
@@ -2497,7 +2496,7 @@ struct_yci RenderSidewaysPipe(byte param_1, byte param_2) {
 // SM2MAIN:7761
 // Signature: [X] -> [Y, r06, r07]
 struct_yr06r07 GetPipeHeight(byte param_1) {
-  struct_yr07i sVar1;
+  struct_yr07 sVar1;
 
   ChkLrgObjFixedLength(param_1, 1);
   sVar1 = GetLrgObjAttrib(param_1);
@@ -2513,11 +2512,11 @@ struct_yr06r07 GetPipeHeight(byte param_1) {
 // SMB:994a
 // SM2MAIN:7791
 // Signature: [] -> [X, C]
-struct_xci FindEmptyEnemySlot(void) {
+struct_xc FindEmptyEnemySlot(void) {
   byte bVar1;
 
   bool bVar2;
-  struct_xci sVar3;
+  struct_xc sVar3;
 
   bVar1 = 0;
   do {
@@ -2529,7 +2528,6 @@ struct_xci FindEmptyEnemySlot(void) {
   } while (bVar1 != 5);
   sVar3.c = bVar2;
   sVar3.x = bVar1;
-  sVar3.i = (bool)0;
   return sVar3;
 }
 
@@ -2617,7 +2615,7 @@ void Bridge_Low(byte param_1) {
 // SM2MAIN:77db
 // Signature: [X] -> []
 void FlagBalls_Residual(byte param_1) {
-  struct_yr07i sVar1;
+  struct_yr07 sVar1;
 
   sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(ssw(0x6d, 0x6f), 2, sVar1.y);
@@ -2658,7 +2656,7 @@ void EndlessRope(void) {
 // SM2MAIN:781e
 // Signature: [X] -> []
 void BalancePlatRope(byte param_1) {
-  struct_yr07i sVar1;
+  struct_yr07 sVar1;
   byte bStack0000;
 
   bStack0000 = param_1;
@@ -2716,7 +2714,7 @@ void ChainObj(byte param_1) {
 // SM2MAIN:7860
 // Signature: [X] -> []
 void EmptyBlock(byte param_1) {
-  struct_yr07i sVar1;
+  struct_yr07 sVar1;
 
   sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(ssw(0xc4, 0xc5), sVar1.r07, 0);
@@ -2761,7 +2759,7 @@ void RowOfSolidBlocks(byte param_1) {
 // SM2MAIN:7897
 // Signature: [X] -> []
 void ColumnOfBricks(byte param_1) {
-  struct_yr07i sVar1;
+  struct_yr07 sVar1;
   byte bStack0000;
 
   bStack0000 = BrickMetatiles[AreaType];
@@ -2775,7 +2773,7 @@ void ColumnOfBricks(byte param_1) {
 // SM2MAIN:78a0
 // Signature: [X] -> []
 void ColumnOfSolidBlocks(byte param_1) {
-  struct_yr07i sVar1;
+  struct_yr07 sVar1;
   byte bStack0000;
 
   bStack0000 = SolidBlockMetatiles[AreaType];
@@ -2791,7 +2789,7 @@ void ColumnOfSolidBlocks(byte param_1) {
 void BulletBillCannon(byte param_1) {
   byte bVar1;
   byte bVar2;
-  struct_yr07i sVar3;
+  struct_yr07 sVar3;
 
   sVar3 = GetLrgObjAttrib(param_1);
   bVar1 = sVar3.r07;
@@ -2840,8 +2838,8 @@ void Jumpspring(byte param_1) {
   byte bVar1;
   byte bVar2;
   byte bVar3;
-  struct_yr07i sVar4;
-  struct_xci sVar5;
+  struct_yr07 sVar4;
+  struct_xc sVar5;
 
   sVar4 = GetLrgObjAttrib(param_1);
   bVar1 = sVar4.r07;
@@ -2883,7 +2881,7 @@ void Hidden1UpBlock(byte param_1, byte param_2) {
 // Signature: [X, r00] -> []
 void QuestionBlock(byte param_1, byte param_2) {
   byte bVar1;
-  struct_yr07i sVar2;
+  struct_yr07 sVar2;
   byte bStack0000;
 
   bVar1 = GetAreaObjectID(param_2);
@@ -2910,7 +2908,7 @@ void BrickWithCoins(byte param_1, byte param_2) {
 void BrickWithItem(byte param_1, byte param_2) {
   char cVar1;
   byte bVar2;
-  struct_yr07i sVar3;
+  struct_yr07 sVar3;
   byte bStack0000;
 
   bVar2 = GetAreaObjectID(param_2);
@@ -2989,7 +2987,7 @@ struct_ycr07 ChkLrgObjLength(byte param_1) {
   byte bVar1;
   byte bVar2;
   struct_ycr07 sVar3;
-  struct_yr07i sVar4;
+  struct_yr07 sVar4;
 
   sVar4 = GetLrgObjAttrib(param_1);
   bVar1 = sVar4.r07;
@@ -3018,11 +3016,10 @@ bool ChkLrgObjFixedLength(byte param_1, byte param_2) {
 // SMB:9bbb
 // SM2MAIN:79fc
 // Signature: [X] -> [Y, r07]
-struct_yr07i GetLrgObjAttrib(byte param_1) {
-  struct_yr07i res;
+struct_yr07 GetLrgObjAttrib(byte param_1) {
+  struct_yr07 res;
   res.y = AreaData[(byte)(AreaObjOffsetBuffer[param_1] + 1)] & 0xf;
   res.r07 = AreaData[AreaObjOffsetBuffer[param_1]] & 0xf;
-  res.i = false;
   return res;
 }
 
@@ -3042,13 +3039,12 @@ byte GetAreaObjYPosition(byte param_1) { return param_1 * 0x10 + 0x20; }
 // SMB:9be1
 // SM2MAIN:7a22
 // Signature: [A] -> [r06, r07]
-struct_r06r07i GetBlockBufferAddr(byte param_1) {
+struct_r06r07 GetBlockBufferAddr(byte param_1) {
 
-  struct_r06r07i sVar1;
+  struct_r06r07 sVar1;
 
   sVar1.r07 = BlockBufferAddr[(param_1 >> 4) + 2];
   sVar1.r06 = (param_1 & 0xf) + BlockBufferAddr[param_1 >> 4];
-  sVar1.i = (bool)0;
   return sVar1;
 }
 
@@ -4221,7 +4217,7 @@ void FlagpoleRoutine(void) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
-  struct_xyi sVar4;
+  struct_xy sVar4;
   struct_axr00 sVar5;
 
   bVar2 = 5;
@@ -4261,7 +4257,7 @@ void FlagpoleRoutine(void) {
 byte JumpspringHandler(byte param_1) {
   byte bVar1;
   byte bVar2;
-  struct_xyi sVar3;
+  struct_xy sVar3;
   struct_axr00 sVar4;
 
   sVar3 = GetEnemyOffscreenBits(param_1);
@@ -4392,7 +4388,7 @@ byte VineObjectHandler(byte param_1) {
 void ProcessCannons(void) {
   byte bVar1;
   byte bVar2;
-  struct_xyi sVar3;
+  struct_xy sVar3;
 
   if (AreaType != 0) {
     bVar2 = 2;
@@ -4442,8 +4438,8 @@ Chk_BB:
 byte BulletBillHandler(byte param_1) {
   byte bVar1;
   struct_ncr00 sVar2;
-  struct_axi sVar3;
-  struct_xyi sVar4;
+  struct_ax sVar3;
+  struct_xy sVar4;
   struct_axr00 sVar5;
 
   if (TimerControl == 0) {
@@ -4485,12 +4481,12 @@ KillBB:
 // SMB:ba94
 // SM2MAIN:865f
 // Signature: [] -> [X, C]
-struct_xci SpawnHammerObj(void) {
+struct_xc SpawnHammerObj(void) {
   byte bVar1;
   byte bVar2;
 
-  struct_xci sVar3;
-  struct_xci sVar4;
+  struct_xc sVar3;
+  struct_xc sVar4;
 
   bVar1 = ObjectOffset;
   bVar2 = PseudoRandomBitReg[1] & 7;
@@ -4503,12 +4499,10 @@ struct_xci SpawnHammerObj(void) {
     Misc_BoundBoxCtrl[bVar2] = 7;
     sVar3.c = true;
     sVar3.x = bVar1;
-    sVar3.i = (bool)0;
     return sVar3;
   }
   sVar4.c = false;
   sVar4.x = ObjectOffset;
-  sVar4.i = (bool)0;
   return sVar4;
 }
 
@@ -4555,7 +4549,7 @@ RunHSubs:
 // Signature: [X, C] -> []
 void CoinBlock(byte param_1, bool param_2) {
   byte bVar1;
-  struct_yci sVar2;
+  struct_yc sVar2;
 
   sVar2 = FindEmptyMiscSlot(param_2);
   bVar1 = sVar2.y;
@@ -4573,7 +4567,7 @@ void CoinBlock(byte param_1, bool param_2) {
 byte SetupJumpCoin(byte param_1, byte param_2, byte param_3) {
   byte bVar1;
   bool in_C = false;
-  struct_yci sVar2;
+  struct_yc sVar2;
 
   sVar2 = FindEmptyMiscSlot(in_C);
   bVar1 = sVar2.y;
@@ -4605,9 +4599,9 @@ byte JCoinC(byte param_1, byte param_2) {
 // SMB:bb84
 // SM2MAIN:874f
 // Signature: [C] -> [Y, C]
-struct_yci FindEmptyMiscSlot(bool param_1) {
+struct_yc FindEmptyMiscSlot(bool param_1) {
 
-  struct_yci sVar1;
+  struct_yc sVar1;
 
   JumpCoinMiscOffset = 8;
   do {
@@ -4621,7 +4615,6 @@ struct_yci FindEmptyMiscSlot(bool param_1) {
 UseMiscS:
   sVar1.c = param_1;
   sVar1.y = JumpCoinMiscOffset;
-  sVar1.i = (bool)0;
   return sVar1;
 }
 
@@ -4720,7 +4713,7 @@ byte PowerUpObjHandler(void) {
   byte bVar1;
   bool bVar2;
   struct_axr00 sVar3;
-  struct_xyi sVar4;
+  struct_xy sVar4;
 
   bVar1 = 5;
   ObjectOffset = 5;
@@ -4772,7 +4765,7 @@ void PlayerHeadCollision(byte param_1, byte param_2, byte param_3, byte param_4)
   byte bVar2;
   byte bVar3;
   byte bVar4;
-  struct_yci sVar5;
+  struct_yc sVar5;
   byte bStack0000;
 
   bVar4 = SprDataOffset_Ctrl;
@@ -4849,8 +4842,8 @@ void InitBlock_XY_Pos(byte param_1) {
 void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
   byte bVar1;
   byte bVar2;
-  struct_xr05i sVar3;
-  struct_yci sVar4;
+  struct_xr05 sVar3;
+  struct_yc sVar4;
 
   sVar3 = CheckTopOfBlock(param_1, param_2, param_3, param_4);
   bVar2 = sVar3.x;
@@ -4914,11 +4907,11 @@ void VineBlock(void) {
 // SMB:bdf6
 // SM2MAIN:89c7
 // Signature: [A] -> [Y, C]
-struct_yci BlockBumpedChk(byte param_1) {
+struct_yc BlockBumpedChk(byte param_1) {
   byte bVar1;
 
   bool bVar2;
-  struct_yci sVar3;
+  struct_yc sVar3;
 
   bVar1 = ssw(0xd, 0x12);
   do {
@@ -4932,7 +4925,6 @@ struct_yci BlockBumpedChk(byte param_1) {
 MatchBump:
   sVar3.c = bVar2;
   sVar3.y = bVar1;
-  sVar3.i = (bool)0;
   return sVar3;
 }
 
@@ -4942,7 +4934,7 @@ MatchBump:
 // Signature: [r02, r06, r07] -> []
 void BrickShatter(byte param_1, byte param_2, byte param_3) {
   byte in_r05 = 0;
-  struct_xr05i sVar1;
+  struct_xr05 sVar1;
 
   sVar1 = CheckTopOfBlock(param_1, in_r05, param_2, param_3);
   Block_RepFlag[sVar1.x] = 1;
@@ -4958,12 +4950,12 @@ void BrickShatter(byte param_1, byte param_2, byte param_3) {
 // SMB:be1f
 // SM2MAIN:89f0
 // Signature: [r02, r05, r06, r07] -> [X, r05]
-struct_xr05i CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
+struct_xr05 CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
   byte bVar1;
   short sVar2;
   byte bVar3;
 
-  struct_xr05i sVar4;
+  struct_xr05 sVar4;
 
   sVar2 = CONCAT11(param_4, param_3);
   bVar3 = SprDataOffset_Ctrl;
@@ -4974,7 +4966,6 @@ struct_xr05i CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte para
   }
   sVar4.r05 = param_2;
   sVar4.x = bVar3;
-  sVar4.i = (bool)0;
   return sVar4;
 }
 
@@ -5072,13 +5063,12 @@ void BlockObjMT_Updater(void) {
 // SMB:bf02
 // SM2MAIN:8ad3
 // Signature: [X] -> [A, X]
-struct_axi MoveEnemyHorizontally(byte param_1) {
+struct_ax MoveEnemyHorizontally(byte param_1) {
 
-  struct_axi sVar1;
+  struct_ax sVar1;
 
   sVar1.a = MoveObjectHorizontally(param_1 + 1);
   sVar1.x = ObjectOffset;
-  sVar1.i = (bool)0;
   return sVar1;
 }
 
@@ -6394,7 +6384,7 @@ void NoRunCode(void) { return; }
 // Signature: [X] -> [X]
 byte RunRetainerObj(byte param_1) {
   byte bVar1;
-  struct_xyi sVar2;
+  struct_xy sVar2;
   struct_axr00 sVar3;
 
   sVar2 = GetEnemyOffscreenBits(param_1);
@@ -6409,7 +6399,7 @@ byte RunRetainerObj(byte param_1) {
 // Signature: [X] -> [X]
 byte RunNormalEnemies(byte param_1) {
   byte bVar1;
-  struct_xyi sVar2;
+  struct_xy sVar2;
   struct_axr00 sVar3;
 
   Enemy_SprAttrib[param_1] = 0;
@@ -6450,7 +6440,7 @@ void NoMoveCode(void) { return; }
 // Signature: [X] -> [X]
 byte RunBowserFlame(byte param_1) {
   byte bVar1;
-  struct_xyi sVar2;
+  struct_xy sVar2;
   struct_axr00 sVar3;
 
   bVar1 = ProcBowserFlame(param_1);
@@ -6480,7 +6470,7 @@ byte RunFirebarObj(byte param_1) {
 // Signature: [X] -> [X]
 byte RunSmallPlatform(byte param_1) {
   byte bVar1;
-  struct_xyi sVar2;
+  struct_xy sVar2;
   struct_axr00 sVar3;
 
   sVar2 = GetEnemyOffscreenBits(param_1);
@@ -6500,7 +6490,7 @@ byte RunSmallPlatform(byte param_1) {
 // Signature: [X] -> [X]
 byte RunLargePlatform(byte param_1) {
   byte bVar1;
-  struct_xyi sVar2;
+  struct_xy sVar2;
   struct_axr00 sVar3;
 
   sVar2 = GetEnemyOffscreenBits(param_1);
@@ -6567,7 +6557,7 @@ byte MovePodoboo(byte param_1) {
 // Signature: [X] -> [X]
 byte ProcHammerBro(byte param_1) {
   byte bVar1;
-  struct_xci sVar2;
+  struct_xc sVar2;
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
     bVar1 = MoveDefeatedEnemy(param_1);
@@ -6662,7 +6652,7 @@ byte MoveHammerBroXDir(byte param_1) {
 byte MoveNormalEnemy(byte param_1) {
   byte bVar1;
   byte bVar2;
-  struct_axi sVar3;
+  struct_ax sVar3;
   byte bStack0000;
 
   bVar2 = 0;
@@ -6725,7 +6715,7 @@ MEHor:
 // Signature: [X] -> [X]
 byte MoveDefeatedEnemy(byte param_1) {
   byte bVar1;
-  struct_axi sVar2;
+  struct_ax sVar2;
 
   bVar1 = MoveD_EnemyVertically(param_1);
   sVar2 = MoveEnemyHorizontally(bVar1);
@@ -6738,7 +6728,7 @@ byte MoveDefeatedEnemy(byte param_1) {
 // Signature: [X] -> [X]
 byte MoveJumpingEnemy(byte param_1) {
   byte bVar1;
-  struct_axi sVar2;
+  struct_ax sVar2;
 
   bVar1 = MoveJ_EnemyVertically(param_1);
   sVar2 = MoveEnemyHorizontally(bVar1);
@@ -6776,7 +6766,7 @@ byte ProcMoveRedPTroopa(byte param_1) {
 byte MoveFlyGreenPTroopa(byte param_1) {
   byte bVar1;
   char cVar2;
-  struct_xr00i sVar3;
+  struct_xr00 sVar3;
 
   XMoveCntr_GreenPTroopa(param_1);
   sVar3 = MoveWithXMCntrs(param_1);
@@ -6825,10 +6815,10 @@ void XMoveCntr_Platform(byte param_1, byte param_2) {
 // SMB:cb66
 // SM2MAIN:979b
 // Signature: [X] -> [X, r00]
-struct_xr00i MoveWithXMCntrs(byte param_1) {
+struct_xr00 MoveWithXMCntrs(byte param_1) {
   byte bVar1;
-  struct_axi sVar2;
-  struct_xr00i sVar3;
+  struct_ax sVar2;
+  struct_xr00 sVar3;
   byte bStack0000;
 
   bStack0000 = SpriteVarData1[param_1];
@@ -6839,7 +6829,6 @@ struct_xr00i MoveWithXMCntrs(byte param_1) {
   }
   Enemy_MovingDir[param_1] = bVar1;
   sVar2 = MoveEnemyHorizontally(param_1);
-  sVar3.i = sVar2.i;
   sVar3.x = sVar2.x;
   SpriteVarData1[sVar3.x] = bStack0000;
   sVar3.r00 = sVar2.a;
@@ -6938,7 +6927,7 @@ void ProcSwimmingB(byte param_1, bool param_2) {
 // Signature: [X] -> [X]
 byte MoveBulletBill(byte param_1) {
   byte bVar1;
-  struct_axi sVar2;
+  struct_ax sVar2;
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
     bVar1 = MoveJ_EnemyVertically(param_1);
@@ -7007,7 +6996,7 @@ byte ProcFirebar(byte param_1) {
   byte bVar1;
   byte bVar2;
   byte bVar3;
-  struct_xyi sVar4;
+  struct_xy sVar4;
   struct_axr00 sVar5;
   struct_r01r02r03 sVar6;
   struct_xr00r06 sVar7;
@@ -7177,7 +7166,7 @@ byte MoveFlyingCheepCheep(byte param_1) {
   byte bVar1;
   byte bVar2;
   byte bVar3;
-  struct_axi sVar4;
+  struct_ax sVar4;
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
     Enemy_SprAttrib[param_1] = 0;
@@ -7206,7 +7195,7 @@ byte MoveFlyingCheepCheep(byte param_1) {
 // Signature: [X] -> [X]
 byte MoveLakitu(byte param_1) {
   byte bVar1;
-  struct_axi sVar2;
+  struct_ax sVar2;
 
   if ((Enemy_State[param_1] & 0x20) == 0) {
     if (Enemy_State[param_1] == 0) {
@@ -7340,7 +7329,7 @@ byte MoveD_Bowser(byte param_1) {
 byte RunBowser(byte param_1) {
   byte bVar1;
   byte bVar2;
-  struct_xci sVar3;
+  struct_xc sVar3;
   struct_ncr00 sVar4;
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
@@ -7516,7 +7505,7 @@ byte ProcBowserFlame(byte param_1) {
   byte bVar3;
   byte bVar4;
   byte bVar5;
-  struct_xyi sVar6;
+  struct_xy sVar6;
   struct_axr00 sVar7;
 
   if (TimerControl == 0) {
@@ -7920,7 +7909,7 @@ struct_xr00r01 SetupPlatformRope(byte param_1, byte param_2) {
 byte InitPlatformFall(byte param_1) {
   byte bVar1;
   byte bVar2;
-  struct_xyi sVar3;
+  struct_xy sVar3;
 
   sVar3 = GetEnemyOffscreenBits(param_1);
   bVar2 = sVar3.y;
@@ -8006,7 +7995,7 @@ void ChkYPCollision(byte param_1) {
 // Signature: [X] -> [X]
 byte XMovingPlatform(byte param_1) {
   byte bVar1;
-  struct_xr00i sVar2;
+  struct_xr00 sVar2;
 
   XMoveCntr_Platform(0xe, param_1);
   sVar2 = MoveWithXMCntrs(param_1);
@@ -8054,7 +8043,7 @@ byte DropPlatform(byte param_1) {
 // Signature: [X] -> [X]
 byte RightPlatform(byte param_1) {
   byte bVar1;
-  struct_axi sVar2;
+  struct_ax sVar2;
 
   sVar2 = MoveEnemyHorizontally(param_1);
   bVar1 = sVar2.x;
@@ -8480,7 +8469,7 @@ void SetupFloateyNumber(byte param_1, byte param_2) {
 byte EnemiesCollision(byte param_1) {
   byte bVar1;
   bool bVar2;
-  struct_ayi sVar3;
+  struct_ay sVar3;
   byte bStack0000;
 
   if (((FrameCounter & 1) == 0) || (AreaType == 0)) {
@@ -8610,7 +8599,7 @@ byte ChkForPlayerC_LargeP(byte param_1) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
-  struct_ayi sVar4;
+  struct_ay sVar4;
   byte bStack0000;
 
   bVar3 = CheckPlayerVertical();
@@ -8635,7 +8624,7 @@ byte SmallPlatformCollision(byte param_1) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
-  struct_ayi sVar4;
+  struct_ay sVar4;
 
   if (TimerControl == 0) {
     HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = 0;
@@ -8737,8 +8726,8 @@ bool CheckPlayerVertical(void) {
 // SMB:dc52
 // SM2MAIN:a8c0
 // Signature: [] -> [A, Y]
-struct_ayi GetEnemyBoundBoxOfs(void) {
-  struct_ayi sVar1;
+struct_ay GetEnemyBoundBoxOfs(void) {
+  struct_ay sVar1;
 
   sVar1 = GetEnemyBoundBoxOfsArg(ObjectOffset);
   return sVar1;
@@ -8748,11 +8737,10 @@ struct_ayi GetEnemyBoundBoxOfs(void) {
 // SMB:dc54
 // SM2MAIN:a8c2
 // Signature: [A] -> [A, Y]
-struct_ayi GetEnemyBoundBoxOfsArg(byte param_1) {
-  struct_ayi res;
+struct_ay GetEnemyBoundBoxOfsArg(byte param_1) {
+  struct_ay res;
   res.a = Enemy_OffscreenBits & 0xf;
   res.y = param_1 * 4 + 4;
-  res.i = false;
   return res;
 }
 
@@ -8770,7 +8758,7 @@ void PlayerBGCollision(void) {
   byte bVar7;
   bool bVar8;
   struct_azr02r04r06r07 sVar9;
-  struct_aci sVar10;
+  struct_ac sVar10;
   struct_ayr02r04r06r07 sVar11;
 
   if (((DisableCollisionDet != 0) || (GameEngineSubroutine == 0xb)) || (GameEngineSubroutine < 4)) {
@@ -9158,11 +9146,11 @@ bool CheckForClimbMTiles(byte param_1) {
 // SMB:dfa1
 // SM2MAIN:ac2a
 // Signature: [A] -> [A, C]
-struct_aci CheckForCoinMTiles(byte param_1) {
+struct_ac CheckForCoinMTiles(byte param_1) {
 
   bool bVar1;
-  struct_aci sVar2;
-  struct_aci sVar3;
+  struct_ac sVar2;
+  struct_ac sVar3;
 
   bVar1 = param_1 >= ssw(0xc2, 0xc3);
   if (param_1 != ssw(0xc2, 0xc3)) {
@@ -9170,14 +9158,12 @@ struct_aci CheckForCoinMTiles(byte param_1) {
     if (param_1 != ssw(0xc3, 0xc4)) {
       sVar2.c = false;
       sVar2.a = param_1;
-      sVar2.i = (bool)0;
       return sVar2;
     }
   }
   Square2SoundQueue = 1;
   sVar3.c = bVar1;
   sVar3.a = 1;
-  sVar3.i = (bool)0;
   return sVar3;
 }
 
@@ -9857,7 +9843,7 @@ struct_azr02r04r06r07 BlockBufferCollision(byte param_1, byte param_2, byte para
   char cVar1;
   byte bVar2;
   byte bVar3;
-  struct_r06r07i sVar4;
+  struct_r06r07 sVar4;
   byte bStack0000;
 
   bStack0000 = param_1;
@@ -11294,7 +11280,7 @@ void GetPlayerOffscreenBits(void) {
 // Signature: [X] -> [X]
 byte GetFireballOffscreenBits(byte param_1) {
   byte bVar1;
-  struct_xyi sVar2;
+  struct_xy sVar2;
 
   bVar1 = GetProperObjOffset(param_1, 0);
   sVar2 = GetOffScreenBitsSet(bVar1, 2);
@@ -11307,7 +11293,7 @@ byte GetFireballOffscreenBits(byte param_1) {
 // Signature: [X] -> [X]
 byte GetBubbleOffscreenBits(byte param_1) {
   byte bVar1;
-  struct_xyi sVar2;
+  struct_xy sVar2;
 
   bVar1 = GetProperObjOffset(param_1, 1);
   sVar2 = GetOffScreenBitsSet(bVar1, 3);
@@ -11320,7 +11306,7 @@ byte GetBubbleOffscreenBits(byte param_1) {
 // Signature: [X] -> [X]
 byte GetMiscOffscreenBits(byte param_1) {
   byte bVar1;
-  struct_xyi sVar2;
+  struct_xy sVar2;
 
   bVar1 = GetProperObjOffset(param_1, 2);
   sVar2 = GetOffScreenBitsSet(bVar1, 6);
@@ -11337,8 +11323,8 @@ byte GetProperObjOffset(byte param_1, byte param_2) { return param_1 + ObjOffset
 // SMB:f1af
 // SM2MAIN:be94
 // Signature: [X] -> [X, Y]
-struct_xyi GetEnemyOffscreenBits(byte param_1) {
-  struct_xyi sVar1;
+struct_xy GetEnemyOffscreenBits(byte param_1) {
+  struct_xy sVar1;
 
   sVar1 = GetOffScreenBitsSet(param_1 + 1, 1);
   return sVar1;
@@ -11349,7 +11335,7 @@ struct_xyi GetEnemyOffscreenBits(byte param_1) {
 // SM2MAIN:be9b
 // Signature: [X] -> [X]
 byte GetBlockOffscreenBits(byte param_1) {
-  struct_xyi sVar1;
+  struct_xy sVar1;
 
   sVar1 = GetOffScreenBitsSet(param_1 + 9, 4);
   return sVar1.x;
@@ -11359,14 +11345,13 @@ byte GetBlockOffscreenBits(byte param_1) {
 // SMB:f1c0
 // SM2MAIN:bea5
 // Signature: [X, Y] -> [X, Y]
-struct_xyi GetOffScreenBitsSet(byte param_1, byte param_2) {
-  struct_xyi sVar1;
-  struct_ar00i sVar2;
+struct_xy GetOffScreenBitsSet(byte param_1, byte param_2) {
+  struct_xy sVar1;
+  struct_ar00 sVar2;
   byte bStack0000;
 
   bStack0000 = param_2;
   sVar2 = RunOffscrBitsSubs(param_1);
-  sVar1.i = sVar2.i;
   SprObject_OffscrBits[bStack0000] = sVar2.a << 4 | sVar2.r00;
   sVar1.y = bStack0000;
   sVar1.x = ObjectOffset;
@@ -11377,16 +11362,15 @@ struct_xyi GetOffScreenBitsSet(byte param_1, byte param_2) {
 // SMB:f1d7
 // SM2MAIN:bebc
 // Signature: [X] -> [A, r00]
-struct_ar00i RunOffscrBitsSubs(byte param_1) {
+struct_ar00 RunOffscrBitsSubs(byte param_1) {
   byte bVar1;
 
-  struct_ar00i sVar2;
+  struct_ar00 sVar2;
 
   bVar1 = GetXOffscreenBits(param_1);
   bVar1 >>= 4;
   sVar2.a = GetYOffscreenBits(param_1);
   sVar2.r00 = bVar1;
-  sVar2.i = (bool)0;
   return sVar2;
 }
 

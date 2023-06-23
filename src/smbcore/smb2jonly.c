@@ -979,7 +979,7 @@ void VerticalPipe(byte param_1, byte param_2) {
   byte bVar1;
   byte bVar2;
   struct_yr06r07 sVar3;
-  struct_xci sVar4;
+  struct_xc sVar4;
   byte bStack0000;
 
   sVar3 = GetPipeHeight(param_1);
@@ -1374,7 +1374,7 @@ byte PlayerEnemyCollision(byte param_1) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
-  struct_ayi sVar4;
+  struct_ay sVar4;
   byte bStack0000;
 
   if ((bool)(FrameCounter & 1)) {
@@ -2326,7 +2326,7 @@ void UpsideDownPipe_High(byte param_1) {
   byte bVar3;
   byte bVar4;
   byte bVar5;
-  struct_xci sVar6;
+  struct_xc sVar6;
   struct_yr06r07 sVar7;
   byte bStack0000;
 
@@ -2363,7 +2363,7 @@ void UpsideDownPipe_Low(byte param_1) {
   byte bVar4;
   byte bVar5;
   struct_yr06r07 sVar6;
-  struct_xci sVar7;
+  struct_xc sVar7;
   byte bStack0000;
 
   bStack0000 = 4;

@@ -22,12 +22,11 @@ struct struct_xr00r01 {
 };
 
 
-typedef struct struct_nr00i struct_nr00i;
+typedef struct struct_nr00 struct_nr00;
 
-struct struct_nr00i {
+struct struct_nr00 {
   bool n;
   byte r00;
-  bool i;
 };
 
 
@@ -49,12 +48,11 @@ struct struct_xr00r06 {
 };
 
 
-typedef struct struct_r06r07i struct_r06r07i;
+typedef struct struct_r06r07 struct_r06r07;
 
-struct struct_r06r07i {
+struct struct_r06r07 {
   byte r06;
   byte r07;
-  bool i;
 };
 
 
@@ -101,12 +99,11 @@ struct struct_axzr04 {
 };
 
 
-typedef struct struct_xyi struct_xyi;
+typedef struct struct_xy struct_xy;
 
-struct struct_xyi {
+struct struct_xy {
   byte x;
   byte y;
-  bool i;
 };
 
 
@@ -129,12 +126,11 @@ struct struct_axr00 {
 };
 
 
-typedef struct struct_azi struct_azi;
+typedef struct struct_az struct_az;
 
-struct struct_azi {
+struct struct_az {
   byte a;
   bool z;
-  bool i;
 };
 
 
@@ -147,12 +143,11 @@ struct struct_ayz {
 };
 
 
-typedef struct struct_ayi struct_ayi;
+typedef struct struct_ay struct_ay;
 
-struct struct_ayi {
+struct struct_ay {
   byte a;
   byte y;
-  bool i;
 };
 
 
@@ -174,39 +169,35 @@ struct struct_axz {
 };
 
 
-typedef struct struct_yr07i struct_yr07i;
+typedef struct struct_yr07 struct_yr07;
 
-struct struct_yr07i {
+struct struct_yr07 {
   byte y;
   byte r07;
-  bool i;
 };
 
 
-typedef struct struct_axi struct_axi;
+typedef struct struct_ax struct_ax;
 
-struct struct_axi {
+struct struct_ax {
   byte a;
   byte x;
-  bool i;
 };
 
 
-typedef struct struct_xr05i struct_xr05i;
+typedef struct struct_xr05 struct_xr05;
 
-struct struct_xr05i {
+struct struct_xr05 {
   byte x;
   byte r05;
-  bool i;
 };
 
 
-typedef struct struct_xci struct_xci;
+typedef struct struct_xc struct_xc;
 
-struct struct_xci {
+struct struct_xc {
   byte x;
   bool c;
-  bool i;
 };
 
 
@@ -219,21 +210,19 @@ struct struct_xyr02 {
 };
 
 
-typedef struct struct_yci struct_yci;
+typedef struct struct_yc struct_yc;
 
-struct struct_yci {
+struct struct_yc {
   byte y;
   bool c;
-  bool i;
 };
 
 
-typedef struct struct_ar00i struct_ar00i;
+typedef struct struct_ar00 struct_ar00;
 
-struct struct_ar00i {
+struct struct_ar00 {
   byte a;
   byte r00;
-  bool i;
 };
 
 
@@ -246,21 +235,19 @@ struct struct_yr06r07 {
 };
 
 
-typedef struct struct_aci struct_aci;
+typedef struct struct_ac struct_ac;
 
-struct struct_aci {
+struct struct_ac {
   byte a;
   bool c;
-  bool i;
 };
 
 
-typedef struct struct_xr00i struct_xr00i;
+typedef struct struct_xr00 struct_xr00;
 
-struct struct_xr00i {
+struct struct_xr00 {
   byte x;
   byte r00;
-  bool i;
 };
 
 
@@ -582,7 +569,7 @@ void smb2j_IntroPipe(byte param_1);
 void smb2j_ExitPipe(byte param_1);
 #define ExitPipe smb2j_ExitPipe
 
-struct_yci smb2j_RenderSidewaysPipe(byte param_1,byte param_2);
+struct_yc smb2j_RenderSidewaysPipe(byte param_1,byte param_2);
 #define RenderSidewaysPipe smb2j_RenderSidewaysPipe
 
 void smb2j_VerticalPipe(byte param_1,byte param_2);
@@ -594,7 +581,7 @@ struct_yr06r07 smb2j_GetPipeHeight(byte param_1);
 void smb2j_SetupPiranhaPlant(byte param_1,byte param_2,byte param_3);
 #define SetupPiranhaPlant smb2j_SetupPiranhaPlant
 
-struct_xci smb2j_FindEmptyEnemySlot(void);
+struct_xc smb2j_FindEmptyEnemySlot(void);
 #define FindEmptyEnemySlot smb2j_FindEmptyEnemySlot
 
 void smb2j_Hole_Water(byte param_1);
@@ -690,7 +677,7 @@ struct_ycr07 smb2j_ChkLrgObjLength(byte param_1);
 bool smb2j_ChkLrgObjFixedLength(byte param_1,byte param_2);
 #define ChkLrgObjFixedLength smb2j_ChkLrgObjFixedLength
 
-struct_yr07i smb2j_GetLrgObjAttrib(byte param_1);
+struct_yr07 smb2j_GetLrgObjAttrib(byte param_1);
 #define GetLrgObjAttrib smb2j_GetLrgObjAttrib
 
 byte smb2j_GetAreaObjXPosition(void);
@@ -699,7 +686,7 @@ byte smb2j_GetAreaObjXPosition(void);
 byte smb2j_GetAreaObjYPosition(byte param_1);
 #define GetAreaObjYPosition smb2j_GetAreaObjYPosition
 
-struct_r06r07i smb2j_GetBlockBufferAddr(byte param_1);
+struct_r06r07 smb2j_GetBlockBufferAddr(byte param_1);
 #define GetBlockBufferAddr smb2j_GetBlockBufferAddr
 
 void smb2j_GameMode(void);
@@ -855,7 +842,7 @@ void smb2j_ProcessCannons(void);
 byte smb2j_BulletBillHandler(byte param_1);
 #define BulletBillHandler smb2j_BulletBillHandler
 
-struct_xci smb2j_SpawnHammerObj(void);
+struct_xc smb2j_SpawnHammerObj(void);
 #define SpawnHammerObj smb2j_SpawnHammerObj
 
 byte smb2j_ProcHammerObj(byte param_1);
@@ -870,7 +857,7 @@ byte smb2j_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
 byte smb2j_JCoinC(byte param_1,byte param_2);
 #define JCoinC smb2j_JCoinC
 
-struct_yci smb2j_FindEmptyMiscSlot(bool param_1);
+struct_yc smb2j_FindEmptyMiscSlot(bool param_1);
 #define FindEmptyMiscSlot smb2j_FindEmptyMiscSlot
 
 void smb2j_MiscObjectsCore(void);
@@ -921,13 +908,13 @@ void smb2j_ExtraLifeMushBlock(byte param_1);
 void smb2j_VineBlock(void);
 #define VineBlock smb2j_VineBlock
 
-struct_yci smb2j_BlockBumpedChk(byte param_1);
+struct_yc smb2j_BlockBumpedChk(byte param_1);
 #define BlockBumpedChk smb2j_BlockBumpedChk
 
 void smb2j_BrickShatter(byte param_1,byte param_2,byte param_3);
 #define BrickShatter smb2j_BrickShatter
 
-struct_xr05i smb2j_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
+struct_xr05 smb2j_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
 #define CheckTopOfBlock smb2j_CheckTopOfBlock
 
 void smb2j_SpawnBrickChunks(byte param_1);
@@ -939,7 +926,7 @@ byte smb2j_BlockObjectsCore(byte param_1);
 void smb2j_BlockObjMT_Updater(void);
 #define BlockObjMT_Updater smb2j_BlockObjMT_Updater
 
-struct_axi smb2j_MoveEnemyHorizontally(byte param_1);
+struct_ax smb2j_MoveEnemyHorizontally(byte param_1);
 #define MoveEnemyHorizontally smb2j_MoveEnemyHorizontally
 
 byte smb2j_MovePlayerHorizontally(void);
@@ -1212,7 +1199,7 @@ void smb2j_XMoveCntr_GreenPTroopa(byte param_1);
 void smb2j_XMoveCntr_Platform(byte param_1,byte param_2);
 #define XMoveCntr_Platform smb2j_XMoveCntr_Platform
 
-struct_xr00i smb2j_MoveWithXMCntrs(byte param_1);
+struct_xr00 smb2j_MoveWithXMCntrs(byte param_1);
 #define MoveWithXMCntrs smb2j_MoveWithXMCntrs
 
 byte smb2j_MoveBloober(byte param_1,bool param_2);
@@ -1434,10 +1421,10 @@ void smb2j_PositionPlayerOnVPlat(byte param_1);
 bool smb2j_CheckPlayerVertical(void);
 #define CheckPlayerVertical smb2j_CheckPlayerVertical
 
-struct_ayi smb2j_GetEnemyBoundBoxOfs(void);
+struct_ay smb2j_GetEnemyBoundBoxOfs(void);
 #define GetEnemyBoundBoxOfs smb2j_GetEnemyBoundBoxOfs
 
-struct_ayi smb2j_GetEnemyBoundBoxOfsArg(byte param_1);
+struct_ay smb2j_GetEnemyBoundBoxOfsArg(byte param_1);
 #define GetEnemyBoundBoxOfsArg smb2j_GetEnemyBoundBoxOfsArg
 
 void smb2j_PlayerBGCollision(void);
@@ -1470,7 +1457,7 @@ bool smb2j_CheckForSolidMTiles(byte param_1);
 bool smb2j_CheckForClimbMTiles(byte param_1);
 #define CheckForClimbMTiles smb2j_CheckForClimbMTiles
 
-struct_aci smb2j_CheckForCoinMTiles(byte param_1);
+struct_ac smb2j_CheckForCoinMTiles(byte param_1);
 #define CheckForCoinMTiles smb2j_CheckForCoinMTiles
 
 byte smb2j_GetMTileAttrib(byte param_1);
@@ -1749,16 +1736,16 @@ byte smb2j_GetMiscOffscreenBits(byte param_1);
 byte smb2j_GetProperObjOffset(byte param_1,byte param_2);
 #define GetProperObjOffset smb2j_GetProperObjOffset
 
-struct_xyi smb2j_GetEnemyOffscreenBits(byte param_1);
+struct_xy smb2j_GetEnemyOffscreenBits(byte param_1);
 #define GetEnemyOffscreenBits smb2j_GetEnemyOffscreenBits
 
 byte smb2j_GetBlockOffscreenBits(byte param_1);
 #define GetBlockOffscreenBits smb2j_GetBlockOffscreenBits
 
-struct_xyi smb2j_GetOffScreenBitsSet(byte param_1,byte param_2);
+struct_xy smb2j_GetOffScreenBitsSet(byte param_1,byte param_2);
 #define GetOffScreenBitsSet smb2j_GetOffScreenBitsSet
 
-struct_ar00i smb2j_RunOffscrBitsSubs(byte param_1);
+struct_ar00 smb2j_RunOffscrBitsSubs(byte param_1);
 #define RunOffscrBitsSubs smb2j_RunOffscrBitsSubs
 
 byte smb2j_GetXOffscreenBits(byte param_1);
