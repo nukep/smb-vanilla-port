@@ -2501,7 +2501,12 @@ struct_yr06r07 GetPipeHeight(byte param_1) {
 
   ChkLrgObjFixedLength(param_1, 1);
   sVar1 = GetLrgObjAttrib(param_1);
-  return CAST_INT_TO_struct_yr06r07(CONCAT12(sVar1.r07, CONCAT11(sVar1.y, AreaObjectLength[param_1])) & 0xff07ff);
+
+  struct_yr06r07 res;
+  res.y = AreaObjectLength[param_1];
+  res.r06 = sVar1.y & 0x7;
+  res.r07 = sVar1.r07;
+  return res;
 }
 
 
@@ -3014,10 +3019,11 @@ bool ChkLrgObjFixedLength(byte param_1, byte param_2) {
 // SM2MAIN:79fc
 // Signature: [X] -> [Y, r07]
 struct_yr07i GetLrgObjAttrib(byte param_1) {
-
-  return CAST_INT_TO_struct_yr07i(
-      CONCAT12(0, CONCAT11(AreaData[AreaObjOffsetBuffer[param_1]], AreaData[(byte)(AreaObjOffsetBuffer[param_1] + 1)]))
-      & 0xff0f0f);
+  struct_yr07i res;
+  res.y = AreaData[(byte)(AreaObjOffsetBuffer[param_1] + 1)] & 0xf;
+  res.r07 = AreaData[AreaObjOffsetBuffer[param_1]] & 0xf;
+  res.i = false;
+  return res;
 }
 
 
@@ -9871,9 +9877,15 @@ struct_azr02r04r06r07 BlockBufferCollision(byte param_1, byte param_2, byte para
   } else {
     bVar3 = SprObject_X_Position[param_2];
   }
-  return CAST_INT_TO_struct_azr02r04r06r07(
-      CONCAT33(CONCAT12(sVar4.r07, CONCAT11(sVar4.r06, bVar3)), CONCAT12(bVar2, CONCAT11(cVar1 == 0, cVar1)))
-      & 0xffff0fffffff);
+
+  struct_azr02r04r06r07 res;
+  res.a = cVar1;
+  res.z = cVar1 == 0;
+  res.r02 = bVar2;
+  res.r04 = bVar3 & 0xf;
+  res.r06 = sVar4.r06;
+  res.r07 = sVar4.r07;
+  return res;
 }
 
 
