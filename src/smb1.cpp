@@ -17,9 +17,9 @@ bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset) {
   return true;
 }
 
-#include "generated/smb_romarrays.h"
-#include "generated/vars.h"
-#include "generated/smb1.h"
+#include "smbcore/smb_romarrays.h"
+#include "smbcore/vars.h"
+#include "smbcore/smb1.h"
 
 void DrawTitleScreen();
 bool TransposePlayers();
@@ -28,7 +28,8 @@ bool TransposePlayers();
 
 #include "common.h"
 #include "common_inc.h"
-#include "generated/smb1.c"
+#include "smbcore/common.c"
+#include "smbcore/smb1only.c"
 
 // SMB:8000
 // Signature: [] -> []

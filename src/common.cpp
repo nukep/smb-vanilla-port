@@ -1,7 +1,7 @@
 #include "foundation.h"
 #include "common.h"
 
-#include "generated/vars.h"
+#include "smbcore/vars.h"
 
 void set_world_and_level(byte world, byte level) {
   WorldNumber = world;
