@@ -308,6 +308,20 @@ static inline struct_r01r02r03 CAST_INT_TO_struct_r01r02r03(uint64_t v) {
   return a;
 };
 
+typedef struct struct_axzr04 struct_axzr04, *Pstruct_axzr04;
+
+struct struct_axzr04 {
+  byte a;
+  byte x;
+  bool z;
+  byte r04;
+};
+static inline struct_axzr04 CAST_INT_TO_struct_axzr04(uint64_t v) {
+  struct_axzr04 a;
+  memcpy(&a, &v, sizeof(a));
+  return a;
+};
+
 typedef struct struct_xci struct_xci, *Pstruct_xci;
 
 struct struct_xci {
@@ -415,59 +429,59 @@ static inline struct_xr00i CAST_INT_TO_struct_xr00i(uint64_t v) {
 
 
 
-void smb1_FUN_3000(byte param_1,byte param_2);
-#define FUN_3000 smb1_FUN_3000
+void smb1_jumptable_OperModeExecutionTree(byte param_1,byte param_2);
+#define jumptable_OperModeExecutionTree smb1_jumptable_OperModeExecutionTree
 
-void smb1_FUN_3014(byte param_1);
-#define FUN_3014 smb1_FUN_3014
+void smb1_jumptable_TitleScreenMode(byte param_1);
+#define jumptable_TitleScreenMode smb1_jumptable_TitleScreenMode
 
-void smb1_FUN_3028(byte param_1,byte param_2);
-#define FUN_3028 smb1_FUN_3028
+void smb1_jumptable_VictoryModeSubroutines(byte param_1,byte param_2);
+#define jumptable_VictoryModeSubroutines smb1_jumptable_VictoryModeSubroutines
 
-void smb1_FUN_3040(byte param_1);
-#define FUN_3040 smb1_FUN_3040
+void smb1_jumptable_ScreenRoutines(byte param_1);
+#define jumptable_ScreenRoutines smb1_jumptable_ScreenRoutines
 
-void smb1_FUN_3080(byte param_1);
-#define FUN_3080 smb1_FUN_3080
+void smb1_jumptable_GameOverMode(byte param_1);
+#define jumptable_GameOverMode smb1_jumptable_GameOverMode
 
-void smb1_FUN_3090(byte param_1);
-#define FUN_3090 smb1_FUN_3090
+void smb1_jumptable_AreaParserTasks(byte param_1);
+#define jumptable_AreaParserTasks smb1_jumptable_AreaParserTasks
 
-void smb1_FUN_30b4(byte param_1,byte param_2,byte param_3);
-#define FUN_30b4 smb1_FUN_30b4
+void smb1_jumptable_DecodeAreaData(byte param_1,byte param_2,byte param_3);
+#define jumptable_DecodeAreaData smb1_jumptable_DecodeAreaData
 
-void smb1_FUN_3174(byte param_1,byte param_2);
-#define FUN_3174 smb1_FUN_3174
+void smb1_jumptable_AreaStyleObject(byte param_1,byte param_2);
+#define jumptable_AreaStyleObject smb1_jumptable_AreaStyleObject
 
-void smb1_FUN_3184(byte param_1);
-#define FUN_3184 smb1_FUN_3184
+void smb1_jumptable_GameMode(byte param_1);
+#define jumptable_GameMode smb1_jumptable_GameMode
 
-void smb1_FUN_3198(byte param_1);
-#define FUN_3198 smb1_FUN_3198
+void smb1_jumptable_GameRoutines(byte param_1);
+#define jumptable_GameRoutines smb1_jumptable_GameRoutines
 
-void smb1_FUN_31d0(byte param_1);
-#define FUN_31d0 smb1_FUN_31d0
+void smb1_jumptable_PlayerMovementSubs(byte param_1);
+#define jumptable_PlayerMovementSubs smb1_jumptable_PlayerMovementSubs
 
-void smb1_FUN_31e4(byte param_1,byte param_2);
-#define FUN_31e4 smb1_FUN_31e4
+void smb1_jumptable_BumpBlock(byte param_1,byte param_2);
+#define jumptable_BumpBlock smb1_jumptable_BumpBlock
 
-void smb1_FUN_320c(byte param_1,byte param_2);
-#define FUN_320c smb1_FUN_320c
+void smb1_jumptable_CheckpointEnemyID(byte param_1,byte param_2);
+#define jumptable_CheckpointEnemyID smb1_jumptable_CheckpointEnemyID
 
-void smb1_FUN_32ec(byte param_1,byte param_2);
-#define FUN_32ec smb1_FUN_32ec
+void smb1_jumptable_InitEnemyFrenzy(byte param_1,byte param_2);
+#define jumptable_InitEnemyFrenzy smb1_jumptable_InitEnemyFrenzy
 
-byte smb1_FUN_3308(byte param_1,byte param_2);
-#define FUN_3308 smb1_FUN_3308
+byte smb1_jumptable_RunEnemyObjectsCore(byte param_1,byte param_2);
+#define jumptable_RunEnemyObjectsCore smb1_jumptable_RunEnemyObjectsCore
 
-byte smb1_FUN_3394(byte param_1,byte param_2);
-#define FUN_3394 smb1_FUN_3394
+byte smb1_jumptable_EnemyMovementSubs(byte param_1,byte param_2);
+#define jumptable_EnemyMovementSubs smb1_jumptable_EnemyMovementSubs
 
-byte smb1_FUN_33ec(byte param_1,byte param_2);
-#define FUN_33ec smb1_FUN_33ec
+byte smb1_jumptable_LargePlatformSubroutines(byte param_1,byte param_2);
+#define jumptable_LargePlatformSubroutines smb1_jumptable_LargePlatformSubroutines
 
-byte smb1_FUN_340c(byte param_1,byte param_2);
-#define FUN_340c smb1_FUN_340c
+byte smb1_jumptable_RunStarFlagObj(byte param_1,byte param_2);
+#define jumptable_RunStarFlagObj smb1_jumptable_RunStarFlagObj
 
 void smb1_PauseRoutine(void);
 #define PauseRoutine smb1_PauseRoutine
@@ -658,8 +672,8 @@ void smb1_TerminateGame(void);
 void smb1_ContinueGame(void);
 #define ContinueGame smb1_ContinueGame
 
-void smb1_DoNothing1(void);
-#define DoNothing1 smb1_DoNothing1
+void smb1_DoNothing(void);
+#define DoNothing smb1_DoNothing
 
 void smb1_DoNothing2(void);
 #define DoNothing2 smb1_DoNothing2
@@ -1045,8 +1059,8 @@ byte smb1_AddToScore(void);
 byte smb1_GetSBNybbles(void);
 #define GetSBNybbles smb1_GetSBNybbles
 
-byte smb1_UpdateNumber(byte param_1);
-#define UpdateNumber smb1_UpdateNumber
+byte smb1_WriteDigits(byte param_1);
+#define WriteDigits smb1_WriteDigits
 
 void smb1_SetupPowerUp(byte param_1);
 #define SetupPowerUp smb1_SetupPowerUp
@@ -1441,6 +1455,9 @@ void smb1_StarFlagExit(void);
 byte smb1_AwardGameTimerPoints(byte param_1);
 #define AwardGameTimerPoints smb1_AwardGameTimerPoints
 
+byte smb1_AwardTimerCastle(void);
+#define AwardTimerCastle smb1_AwardTimerCastle
+
 byte smb1_EndAreaPoints(void);
 #define EndAreaPoints smb1_EndAreaPoints
 
@@ -1546,7 +1563,7 @@ byte smb1_LInj(byte param_1);
 byte smb1_EnemyFacePlayer(byte param_1);
 #define EnemyFacePlayer smb1_EnemyFacePlayer
 
-byte smb1_SetupFloateyNumber(byte param_1,byte param_2);
+void smb1_SetupFloateyNumber(byte param_1,byte param_2);
 #define SetupFloateyNumber smb1_SetupFloateyNumber
 
 byte smb1_EnemiesCollision(byte param_1);
@@ -1660,8 +1677,11 @@ byte smb1_HammerBroBGColl(byte param_1);
 void smb1_KillEnemyAboveBlock(byte param_1);
 #define KillEnemyAboveBlock smb1_KillEnemyAboveBlock
 
-struct_axzr02r04r06r07 smb1_ChkUnderEnemy(byte param_1);
+struct_axzr04 smb1_ChkUnderEnemy(byte param_1);
 #define ChkUnderEnemy smb1_ChkUnderEnemy
+
+struct_axzr02r04r06r07 smb1_ChkUnderEnemy_Ext(byte param_1);
+#define ChkUnderEnemy_Ext smb1_ChkUnderEnemy_Ext
 
 bool smb1_ChkForNonSolids(byte param_1);
 #define ChkForNonSolids smb1_ChkForNonSolids
@@ -1705,8 +1725,11 @@ bool smb1_PlayerCollisionCore(byte param_1);
 bool smb1_SprObjectCollisionCore(byte param_1,byte param_2);
 #define SprObjectCollisionCore smb1_SprObjectCollisionCore
 
-struct_axzr02r04r06r07 smb1_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
+struct_axzr04 smb1_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
 #define BlockBufferChk_Enemy smb1_BlockBufferChk_Enemy
+
+struct_axzr02r04r06r07 smb1_BlockBufferChk_Enemy_Ext(byte param_1,byte param_2,byte param_3);
+#define BlockBufferChk_Enemy_Ext smb1_BlockBufferChk_Enemy_Ext
 
 struct_axz smb1_BlockBufferChk_FBall(byte param_1);
 #define BlockBufferChk_FBall smb1_BlockBufferChk_FBall

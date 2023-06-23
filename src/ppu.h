@@ -6,8 +6,6 @@ static inline void ppuctrl(byte x) {
   PPU_STATE.increment_mode = (x & 0x04) ? 1 : 0;
 }
 
-static byte ENCOUNTERED[256];
-
 // Write to $2001
 static inline void ppumask(byte x) {
   // in smb1 and smb2j, it's only ever:

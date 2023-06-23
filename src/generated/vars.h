@@ -468,7 +468,7 @@
 #define OffScr_WorldNumber               RAM(0x0766)
 #define OffScr_AreaNumber                RAM(0x0767)
 #define NumberOfPlayers                  RAM(0x077A)
-#define GameTimerDisplay                 RAMARRAY(0x07F8, 0)
+#define GameTimerDisplaySMB1             RAMARRAY(0x07F8, 0)
 #define WorldSelectEnableFlag            RAM(0x07FC)
 #define ContinueWorld                    RAM(0x07FD)
 /* smb2j ----------------------- */

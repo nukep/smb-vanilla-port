@@ -15,7 +15,7 @@ typedef unsigned short ushort;
 
 #ifdef _MSC_VER
 #define NOINLINE __declspec(noinline)
-#define thread_local __declspec(thread)
+//#define thread_local __declspec(thread)
 #elif __GNUC__
 #define NOINLINE __attribute__((noinline))
 #endif
@@ -69,26 +69,11 @@ struct SMB_state {
 
 extern thread_local struct SMB_state *SMB_STATE;
 
-#define RAM(offset) (SMB_STATE->rammem[offset])
-#define PPURAM(offset) (SMB_STATE->ppuram[offset])
-#define CHRROM(offset) (SMB_STATE->chrrom[offset])
-
-#define SMB1_ONLY (SMB_STATE->which_game == GAME_SMB1)
-#define SMB2J_ONLY (SMB_STATE->which_game == GAME_SMB2J)
-
-#define PPU_STATE (SMB_STATE->ppu)
-#include "ppu.h"
-#undef PPU_STATE
-
 static inline bool seek_rom(struct SMB_state *state, size_t offset) {
   return state->callbacks.seek_rom(state->callbacks.userdata, offset);
 }
 static inline bool read_rom_bytes(struct SMB_state *state, byte *buf, size_t size) {
   return state->callbacks.read_rom_bytes(state->callbacks.userdata, buf, size);
-}
-
-// Write to $4016
-static void joystick_strobe(byte x) {
 }
 
 static inline void apu_write_register(struct SMB_state *state, ushort addr, byte data) {
@@ -100,6 +85,53 @@ static inline void apu_end_frame(struct SMB_state *state) {
   if (state->callbacks.apu_end_frame) {
     state->callbacks.apu_end_frame(state->callbacks.userdata);
   }
+}
+static void joy1(struct SMB_buttons *buttons) {
+  if (SMB_STATE->callbacks.joy1) {
+    return SMB_STATE->callbacks.joy1(SMB_STATE->callbacks.userdata, buttons);
+  }
+}
+static void joy2(struct SMB_buttons *buttons) {
+  if (SMB_STATE->callbacks.joy2) {
+    return SMB_STATE->callbacks.joy2(SMB_STATE->callbacks.userdata, buttons);
+  }
+}
+static void update_pattern_tables(struct SMB_state *state) {
+  if (state->callbacks.update_pattern_tables) {
+    state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
+  }
+}
+static byte smb2j_load_games_beaten(struct SMB_state *state) {
+  if (state->callbacks.smb2j_load_games_beaten) {
+    return state->callbacks.smb2j_load_games_beaten(state->callbacks.userdata);
+  } else {
+    return 0;
+  }
+}
+static bool smb2j_save_games_beaten(struct SMB_state *state, byte games_beaten) {
+  if (state->callbacks.smb2j_save_games_beaten) {
+    return state->callbacks.smb2j_save_games_beaten(state->callbacks.userdata, games_beaten);
+  } else {
+    return false;
+  }
+}
+
+#define RAM(offset) (SMB_STATE->rammem[offset])
+#define PPURAM(offset) (SMB_STATE->ppuram[offset])
+#define CHRROM(offset) (SMB_STATE->chrrom[offset])
+
+#define SMB1_ONLY (SMB_STATE->which_game == GAME_SMB1)
+#define SMB2J_ONLY (SMB_STATE->which_game == GAME_SMB2J)
+#define SMB1_2J_SWITCH(smb1, smb2j) (SMB1_ONLY ? (smb1) : (smb2j))
+#define ssw SMB1_2J_SWITCH
+
+#define PPU_STATE (SMB_STATE->ppu)
+#include "ppu.h"
+#undef PPU_STATE
+
+
+// Write to $4016
+static void joystick_strobe(byte x) {
 }
 
 #define APU_REG(name, addr) \
@@ -128,16 +160,6 @@ APU_REG(apu_framecounter_ctrl, 0x4017)
 
 #undef APU_REG
 
-static void joy1(struct SMB_buttons *buttons) {
-  if (SMB_STATE->callbacks.joy1) {
-    return SMB_STATE->callbacks.joy1(SMB_STATE->callbacks.userdata, buttons);
-  }
-}
-static void joy2(struct SMB_buttons *buttons) {
-  if (SMB_STATE->callbacks.joy2) {
-    return SMB_STATE->callbacks.joy2(SMB_STATE->callbacks.userdata, buttons);
-  }
-}
 static void announce_main_scroll(unsigned short scroll_x) {
   SMB_STATE->scroll_x = scroll_x;
 }
@@ -323,14 +345,8 @@ public:
   }
 };
 
-// Workaround!!!
-// Used to avoid some undefined behavior in MSVC
-NOINLINE static byte force_byte(byte x) {
-  return x;
-}
-
-#define RAMPTR RAMPtr
-#define RAMARRAY RamByteArray
-#define RAMARRAY_CONST ConstRamByteArray
+#define RAMPTR(addr) RAMPtr(addr)
+#define RAMARRAY(addr, length) RamByteArray(addr, length)
+#define RAMARRAY_CONST(addr, length) ConstRamByteArray(addr, length)
 
 void update_prng(byte *prng);

@@ -35,11 +35,7 @@ bool smb2j_load_file(struct SMB_state *state, const char *name) {
   if (strncmp(name, "SM2SAVE ", 8) == 0) {
     // treat the save byte specially
 
-    if (state->callbacks.smb2j_load_games_beaten) {
-      state->rammem[0xD29F] = state->callbacks.smb2j_load_games_beaten(state->callbacks.userdata);
-    } else {
-      state->rammem[0xD29F] = 0;
-    }
+    state->rammem[0xD29F] = smb2j_load_games_beaten(state);
 
     return true;
   }
@@ -61,22 +57,13 @@ bool smb2j_load_file(struct SMB_state *state, const char *name) {
       if (!read_rom_bytes(state, copy_to, a.size)) { return false; }
 
       if (a.type == TYPE_CHRRAM) {
-        if (state->callbacks.update_pattern_tables) {
-          state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
-        }
+        update_pattern_tables(state);
       }
 
       return true;
     }
   }
   return false;
-}
-bool smb2j_save_games_beaten(struct SMB_state *state, byte games_beaten) {
-  if (state->callbacks.smb2j_save_games_beaten) {
-    return state->callbacks.smb2j_save_games_beaten(state->callbacks.userdata, games_beaten);
-  } else {
-    return false;
-  }
 }
 
 bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
@@ -100,7 +87,7 @@ bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
 
 #include "generated/smb2j_romarrays.h"
 #include "generated/vars.h"
-static const ConstRamByteArray AreaAddrOffsets = ConstRamByteArray(0xC360, 0x28);
+#define AreaAddrOffsets RAMARRAY_CONST(0xC360, 0x28)
 
 // read $4032
 byte FDS_drive_status() { return 0; }
@@ -110,6 +97,8 @@ byte FDS_drive_status() { return 0; }
 void ScrollScreen(byte);
 struct_ayz LoadFiles();
 void UpdateGamesBeaten();
+
+#define GameTimerDisplay GameTimerDisplaySMB2J
 
 #include "common.h"
 #include "common_inc.h"

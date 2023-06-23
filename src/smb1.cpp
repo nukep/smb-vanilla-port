@@ -13,21 +13,18 @@ bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset) {
   if (!seek_rom(state, chr_offset)) { return false; }
   if (!read_rom_bytes(state, state->chrrom, 0x2000)) { return false; }
   state->which_game = GAME_SMB1;
-  if (state->callbacks.update_pattern_tables) {
-    state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
-  }
+  update_pattern_tables(state);
   return true;
 }
 
 #include "generated/smb_romarrays.h"
 #include "generated/vars.h"
-static const ConstRamByteArray AreaAddrOffsets = ConstRamByteArray(0x9CBC, 0x24);
-static const ConstRamByteArray GameText = ConstRamByteArray(0x8752, 0x9B);
-
 #include "generated/smb1.h"
 
 void DrawTitleScreen();
 bool TransposePlayers();
+
+#define GameTimerDisplay GameTimerDisplaySMB1
 
 #include "common.h"
 #include "common_inc.h"

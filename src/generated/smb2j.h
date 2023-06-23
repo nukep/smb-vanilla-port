@@ -425,77 +425,74 @@ static inline struct_xr00i CAST_INT_TO_struct_xr00i(uint64_t v) {
 
 
 
-void smb2j_FUN_3000(void);
-#define FUN_3000 smb2j_FUN_3000
+void smb2j_jumptable_OperModeExecutionTree(byte param_1,byte param_2);
+#define jumptable_OperModeExecutionTree smb2j_jumptable_OperModeExecutionTree
 
-void smb2j_FUN_300f(byte param_1,byte param_2);
-#define FUN_300f smb2j_FUN_300f
+void smb2j_jumptable_VictoryModeSubroutines(byte param_1,byte param_2);
+#define jumptable_VictoryModeSubroutines smb2j_jumptable_VictoryModeSubroutines
 
-void smb2j_FUN_3023(byte param_1,byte param_2);
-#define FUN_3023 smb2j_FUN_3023
+void smb2j_jumptable_VictoryModeSubroutines_forW8(byte param_1,byte param_2);
+#define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
 
-void smb2j_FUN_303f(byte param_1,byte param_2);
-#define FUN_303f smb2j_FUN_303f
+void smb2j_jumptable_ScreenRoutines(byte param_1);
+#define jumptable_ScreenRoutines smb2j_jumptable_ScreenRoutines
 
-void smb2j_FUN_307b(byte param_1);
-#define FUN_307b smb2j_FUN_307b
+void smb2j_jumptable_GameOverMode(byte param_1);
+#define jumptable_GameOverMode smb2j_jumptable_GameOverMode
 
-void smb2j_FUN_30bf(byte param_1);
-#define FUN_30bf smb2j_FUN_30bf
+void smb2j_jumptable_AreaParserTasks(byte param_1);
+#define jumptable_AreaParserTasks smb2j_jumptable_AreaParserTasks
 
-void smb2j_FUN_30cf(byte param_1);
-#define FUN_30cf smb2j_FUN_30cf
+void smb2j_jumptable_DecodeAreaData(byte param_1,byte param_2,byte param_3);
+#define jumptable_DecodeAreaData smb2j_jumptable_DecodeAreaData
 
-void smb2j_FUN_30f3(byte param_1,byte param_2,byte param_3);
-#define FUN_30f3 smb2j_FUN_30f3
+void smb2j_jumptable_AreaStyleObject(byte param_1,byte param_2);
+#define jumptable_AreaStyleObject smb2j_jumptable_AreaStyleObject
 
-void smb2j_FUN_31d3(byte param_1,byte param_2);
-#define FUN_31d3 smb2j_FUN_31d3
+void smb2j_jumptable_GameMode(byte param_1);
+#define jumptable_GameMode smb2j_jumptable_GameMode
 
-void smb2j_FUN_31e3(byte param_1);
-#define FUN_31e3 smb2j_FUN_31e3
+void smb2j_jumptable_GameRoutines(byte param_1);
+#define jumptable_GameRoutines smb2j_jumptable_GameRoutines
 
-void smb2j_FUN_31fb(byte param_1);
-#define FUN_31fb smb2j_FUN_31fb
+void smb2j_jumptable_PlayerMovementSubs(byte param_1);
+#define jumptable_PlayerMovementSubs smb2j_jumptable_PlayerMovementSubs
 
-void smb2j_FUN_3233(byte param_1);
-#define FUN_3233 smb2j_FUN_3233
+void smb2j_jumptable_BumpBlock(byte param_1,byte param_2);
+#define jumptable_BumpBlock smb2j_jumptable_BumpBlock
 
-void smb2j_FUN_3247(byte param_1,byte param_2);
-#define FUN_3247 smb2j_FUN_3247
+void smb2j_jumptable_CheckpointEnemyID(byte param_1,byte param_2);
+#define jumptable_CheckpointEnemyID smb2j_jumptable_CheckpointEnemyID
 
-void smb2j_FUN_327f(byte param_1,byte param_2);
-#define FUN_327f smb2j_FUN_327f
+void smb2j_jumptable_InitEnemyFrenzy(byte param_1,byte param_2);
+#define jumptable_InitEnemyFrenzy smb2j_jumptable_InitEnemyFrenzy
 
-void smb2j_FUN_335f(byte param_1,byte param_2);
-#define FUN_335f smb2j_FUN_335f
+byte smb2j_jumptable_RunEnemyObjectsCore(byte param_1,byte param_2);
+#define jumptable_RunEnemyObjectsCore smb2j_jumptable_RunEnemyObjectsCore
 
-byte smb2j_FUN_337b(byte param_1,byte param_2);
-#define FUN_337b smb2j_FUN_337b
+byte smb2j_jumptable_EnemyMovementSubs(byte param_1,byte param_2);
+#define jumptable_EnemyMovementSubs smb2j_jumptable_EnemyMovementSubs
 
-byte smb2j_FUN_3407(byte param_1,byte param_2);
-#define FUN_3407 smb2j_FUN_3407
+byte smb2j_jumptable_LargePlatformSubroutines(byte param_1,byte param_2);
+#define jumptable_LargePlatformSubroutines smb2j_jumptable_LargePlatformSubroutines
 
-byte smb2j_FUN_345f(byte param_1,byte param_2);
-#define FUN_345f smb2j_FUN_345f
+byte smb2j_jumptable_RunStarFlagObj(byte param_1,byte param_2);
+#define jumptable_RunStarFlagObj smb2j_jumptable_RunStarFlagObj
 
-byte smb2j_FUN_347f(byte param_1,byte param_2);
-#define FUN_347f smb2j_FUN_347f
+void smb2j_jumptable_AttractModeSubs(byte param_1);
+#define jumptable_AttractModeSubs smb2j_jumptable_AttractModeSubs
 
-void smb2j_FUN_3497(byte param_1);
-#define FUN_3497 smb2j_FUN_3497
+void smb2j_jumptable_HardWorldsCheckpoint(byte param_1);
+#define jumptable_HardWorldsCheckpoint smb2j_jumptable_HardWorldsCheckpoint
 
-void smb2j_FUN_34b3(byte param_1);
-#define FUN_34b3 smb2j_FUN_34b3
+void smb2j_jumptable_AttractModeDiskRoutines(byte param_1);
+#define jumptable_AttractModeDiskRoutines smb2j_jumptable_AttractModeDiskRoutines
 
-void smb2j_FUN_34cb(byte param_1);
-#define FUN_34cb smb2j_FUN_34cb
+void smb2j_jumptable_GameModeDiskRoutines(byte param_1);
+#define jumptable_GameModeDiskRoutines smb2j_jumptable_GameModeDiskRoutines
 
-void smb2j_FUN_34e3(byte param_1);
-#define FUN_34e3 smb2j_FUN_34e3
-
-void smb2j_FUN_34fb(byte param_1);
-#define FUN_34fb smb2j_FUN_34fb
+void smb2j_jumptable_VictoryModeDiskRoutines(byte param_1);
+#define jumptable_VictoryModeDiskRoutines smb2j_jumptable_VictoryModeDiskRoutines
 
 void smb2j_PauseRoutine(void);
 #define PauseRoutine smb2j_PauseRoutine
@@ -512,8 +509,8 @@ void smb2j_MoveAllSpritesOffscreen(void);
 void smb2j_MoveSpritesOffscreen(void);
 #define MoveSpritesOffscreen smb2j_MoveSpritesOffscreen
 
-void smb2j_VictoryModeMain(byte param_1);
-#define VictoryModeMain smb2j_VictoryModeMain
+void smb2j_VictoryMode(byte param_1);
+#define VictoryMode smb2j_VictoryMode
 
 void smb2j_VictoryModeSubroutines(byte param_1);
 #define VictoryModeSubroutines smb2j_VictoryModeSubroutines
@@ -533,8 +530,8 @@ void smb2j_PrintVictoryMessages(void);
 void smb2j_EndCastleAward(void);
 #define EndCastleAward smb2j_EndCastleAward
 
-void smb2j_EndWorld1Thru7(void);
-#define EndWorld1Thru7 smb2j_EndWorld1Thru7
+void smb2j_PlayerEndWorld(void);
+#define PlayerEndWorld smb2j_PlayerEndWorld
 
 byte smb2j_FloateyNumbersRoutine(byte param_1);
 #define FloateyNumbersRoutine smb2j_FloateyNumbersRoutine
@@ -574,9 +571,6 @@ byte smb2j_GetWorldNumForDisplay(void);
 
 void smb2j_DisplayTimeUp(void);
 #define DisplayTimeUp smb2j_DisplayTimeUp
-
-void smb2j_OtherInter(byte param_1);
-#define OtherInter smb2j_OtherInter
 
 void smb2j_DisplayIntermediate(void);
 #define DisplayIntermediate smb2j_DisplayIntermediate
@@ -659,8 +653,8 @@ void smb2j_Entrance_GameTimerSetup(byte param_1);
 void smb2j_PlayerLoseLife(void);
 #define PlayerLoseLife smb2j_PlayerLoseLife
 
-void smb2j_GameOverSubs(void);
-#define GameOverSubs smb2j_GameOverSubs
+void smb2j_GameOverMode(void);
+#define GameOverMode smb2j_GameOverMode
 
 void smb2j_SetupGameOver(void);
 #define SetupGameOver smb2j_SetupGameOver
@@ -724,9 +718,6 @@ void smb2j_TreeLedge(byte param_1);
 
 void smb2j_CloudLedge(byte param_1);
 #define CloudLedge smb2j_CloudLedge
-
-void smb2j_AllUnder(byte param_1,byte param_2);
-#define AllUnder smb2j_AllUnder
 
 void smb2j_NoUnder(byte param_1,byte param_2);
 #define NoUnder smb2j_NoUnder
@@ -866,8 +857,8 @@ byte smb2j_GetAreaObjYPosition(byte param_1);
 struct_r06r07i smb2j_GetBlockBufferAddr(byte param_1);
 #define GetBlockBufferAddr smb2j_GetBlockBufferAddr
 
-void smb2j_GameModeSubs(void);
-#define GameModeSubs smb2j_GameModeSubs
+void smb2j_GameMode(void);
+#define GameMode smb2j_GameMode
 
 void smb2j_GameCoreRoutine(void);
 #define GameCoreRoutine smb2j_GameCoreRoutine
@@ -955,9 +946,6 @@ void smb2j_PlayerMovementSubs(void);
 
 void smb2j_OnGroundStateSub(void);
 #define OnGroundStateSub smb2j_OnGroundStateSub
-
-void smb2j_JmpMove(void);
-#define JmpMove smb2j_JmpMove
 
 void smb2j_FallingSub(void);
 #define FallingSub smb2j_FallingSub
