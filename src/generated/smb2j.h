@@ -638,6 +638,9 @@ void smb2j_DigitsMathRoutine(byte param_1);
 void smb2j_UpdateTopScore(void);
 #define UpdateTopScore smb2j_UpdateTopScore
 
+void smb2j_TopScoreCheck(byte param_1);
+#define TopScoreCheck smb2j_TopScoreCheck
+
 void smb2j_InitializeArea(void);
 #define InitializeArea smb2j_InitializeArea
 
@@ -1639,6 +1642,9 @@ void smb2j_ChkToStunEnemies(byte param_1);
 
 void smb2j_NoDemote(byte param_1,byte param_2);
 #define NoDemote smb2j_NoDemote
+
+void smb2j_SetStun2(byte param_1);
+#define SetStun2 smb2j_SetStun2
 
 byte smb2j_ChkForRedKoopa(byte param_1);
 #define ChkForRedKoopa smb2j_ChkForRedKoopa

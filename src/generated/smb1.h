@@ -1356,6 +1356,9 @@ byte smb1_MovePodoboo(byte param_1);
 byte smb1_ProcHammerBro(byte param_1);
 #define ProcHammerBro smb1_ProcHammerBro
 
+byte smb1_SetHJ(byte param_1,byte param_2,byte param_3);
+#define SetHJ smb1_SetHJ
+
 byte smb1_MoveHammerBroXDir(byte param_1);
 #define MoveHammerBroXDir smb1_MoveHammerBroXDir
 
@@ -1649,6 +1652,9 @@ void smb1_ChkToStunEnemies(byte param_1,byte param_2);
 
 void smb1_SetStun(byte param_1);
 #define SetStun smb1_SetStun
+
+void smb1_SetStun2(byte param_1);
+#define SetStun2 smb1_SetStun2
 
 byte smb1_ChkForRedKoopa(byte param_1);
 #define ChkForRedKoopa smb1_ChkForRedKoopa
