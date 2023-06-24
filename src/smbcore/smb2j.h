@@ -1826,9 +1826,6 @@ void smb2j_LoadPhysicsData(void);
 void smb2j_LoadMarioPhysics(void);
 #define LoadMarioPhysics smb2j_LoadMarioPhysics
 
-void smb2j_ModifyPhysics(byte param_1,byte param_2);
-#define ModifyPhysics smb2j_ModifyPhysics
-
 void smb2j_LoadAreaPointer(void);
 #define LoadAreaPointer smb2j_LoadAreaPointer
 

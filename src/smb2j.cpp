@@ -392,7 +392,7 @@ void ScrollScreen(byte scroll_amount) {
 // Signature: [] -> []
 void UpdateGamesBeaten() {
   // The FDS version would use an FDS BIOS subroutine
-  bool success = smb2j_save_games_beaten(SMB_STATE, GamesBeatenCount[0]);
+  bool success = smb2j_save_games_beaten(SMB_STATE, GamesBeatenCount);
   byte error_code = 0;
 
   if (!success) {

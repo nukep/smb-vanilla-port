@@ -738,7 +738,7 @@ void PauseRoutine(void) {
       GamePauseTimer = GamePauseTimer - 1;
       return;
     }
-    if ((SavedJoypadBits[0] & 0x10) == 0) {
+    if ((SavedJoypadBits[0] & BUTTON_START) == 0) {
       GamePauseStatus &= 0x7f;
     } else if ((GamePauseStatus & 0x80) == 0) {
       GamePauseTimer = 0x2b;
@@ -916,7 +916,7 @@ void PlayerEndWorld(void) {
   // For SMB2J, only used for worlds 1 thru 7
   if (WorldEndTimer == 0) {
     if (SMB1_ONLY && WorldNumber >= 7) {
-      if (((SavedJoypadBits[0] | SavedJoypadBits[1]) & 0x40) != 0) {
+      if (((SavedJoypadBits[0] | SavedJoypadBits[1]) & BUTTON_B) != 0) {
         WorldSelectEnableFlag = 1;
         NumberofLives = 0xff;
         TerminateGame();
@@ -1898,7 +1898,7 @@ void SetupGameOver(void) {
 void RunGameOver(void) {
   DisableScreenFlag = 0;
 #ifdef SMB1_MODE
-  if ((SavedJoypadBits[0] & 0x10) != 0) {
+  if ((SavedJoypadBits[0] & BUTTON_START) != 0) {
     TerminateGame();
     return;
   }
@@ -3312,10 +3312,10 @@ void PlayerCtrlRoutine(void) {
     if ((AreaType == 0) && ((SprObject_Y_HighPos[0] != 1 || (SprObject_Y_Position[0] >= 0xd0)))) {
       SavedJoypadBits[0] = 0;
     }
-    A_B_Buttons = SavedJoypadBits[0] & 0xc0;
-    Left_Right_Buttons = SavedJoypadBits[0] & 3;
-    Up_Down_Buttons = SavedJoypadBits[0] & 0xc;
-    if ((((SavedJoypadBits[0] & 4) != 0) && (Player_State == 0)) && (Left_Right_Buttons != 0)) {
+    A_B_Buttons = SavedJoypadBits[0] & (BUTTON_A | BUTTON_B);
+    Up_Down_Buttons = SavedJoypadBits[0] & (BUTTON_U | BUTTON_D);
+    Left_Right_Buttons = SavedJoypadBits[0] & (BUTTON_L | BUTTON_R);
+    if ((((SavedJoypadBits[0] & BUTTON_D) != 0) && (Player_State == 0)) && (Left_Right_Buttons != 0)) {
       Left_Right_Buttons = 0;
       Up_Down_Buttons = 0;
     }
@@ -3881,9 +3881,12 @@ GetXPhy:
   FrictionAdderLow = FrictionData[bVar1];
   FrictionAdderHigh = 0;
   if (PlayerFacingDir != Player_MovingDir) {
-    if (SMB2J_ONLY && RAM(0xb585) == 0x60) {
+#ifdef SMB2J_MODE
+    // either 0x0e (ASL) or 0x60 (RTS)
+    if (PhysicsInstructionOpcode == 0x60) {
       return;
     }
+#endif
     FrictionAdderHigh = FrictionAdderLow >> 7;
     FrictionAdderLow <<= 1;
   }
@@ -3906,8 +3909,8 @@ void GetPlayerAnimSpeed(void) {
       bVar2 = 2;
     }
     bVar1 = RunningSpeed;
-    if ((SavedJoypadBits[0] & 0x7f) != 0) {
-      if ((SavedJoypadBits[0] & 3) == Player_MovingDir) {
+    if ((SavedJoypadBits[0] & ~(BUTTON_A)) != 0) {
+      if ((SavedJoypadBits[0] & (BUTTON_L | BUTTON_R)) == Player_MovingDir) {
         bVar1 = 0;
       } else if (Player_XSpeedAbsolute < 0xb) {
         Player_MovingDir = PlayerFacingDir;

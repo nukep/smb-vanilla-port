@@ -1883,11 +1883,11 @@ void LoadEnding(void) {
   if (sVar2.z != false) {
     bVar1 = CheckFileCount(sVar2.y);
     if (!bVar1) {
-      GamesBeatenCount[0] = 0;
+      GamesBeatenCount = 0;
     }
-    GamesBeatenCount[0] += 1;
-    if (GamesBeatenCount[0] > 0x18) {
-      GamesBeatenCount[0] = 0x18;
+    GamesBeatenCount += 1;
+    if (GamesBeatenCount > 0x18) {
+      GamesBeatenCount = 0x18;
     }
     InitializeNameTables();
     ResetDiskIOTask();
@@ -1990,9 +1990,13 @@ void DiskErrorHandler(byte param_1) {
 void GameOverMenu(void) {
   byte bVar1;
 
-  if ((SavedJoypadBits[0] & 0x10) == 0) {
-    if (((SavedJoypadBits[0] & 0x20) != 0) && (SelectTimer == 0)) {
-      SelectTimer = (SavedJoypadBits[0] & 0x20) >> 1;
+  if ((SavedJoypadBits[0] & BUTTON_START) == 0) {
+    if (((SavedJoypadBits[0] & BUTTON_SELECT) != 0) && (SelectTimer == 0)) {
+      if ((SavedJoypadBits[0] & BUTTON_SELECT) != 0) {
+        SelectTimer = 0x10;
+      } else {
+        SelectTimer = 0;
+      }
       ContinueMenuSelect ^= 1;
     }
     bVar1 = 2;
@@ -2022,40 +2026,49 @@ void GameOverMenu(void) {
   return;
 }
 
+static void LoadLuigiPhysics(void);
 
 // SM2MAIN:c241
 // Signature: [] -> []
 void LoadPhysicsData(void) {
-  if (CurrentPlayer != 0) {
-    ModifyPhysics(0x60, 0x21);
-    return;
+  if (CurrentPlayer == 0) {
+    LoadMarioPhysics();
+  } else {
+    LoadLuigiPhysics();
   }
-  LoadMarioPhysics();
-  return;
 }
 
 
 // SM2MAIN:c24a
 // Signature: [] -> []
 void LoadMarioPhysics(void) {
-  ModifyPhysics(0xe, 0x10);
-  return;
+  // The original game modifies an instruction to "ASL" (restores a bitshift intruction that's there by default)
+  PhysicsInstructionOpcode = 0x0e;
+
+  for (int i = 0; i < 7; i++) {
+    JumpMForceData[i] = JumpMForceData_Mario[i];
+  }
+  for (int i = 0; i < 7; i++) {
+    FallMForceData[i] = FallMForceData_Mario[i];
+  }
+  for (int i = 0; i < 3; i++) {
+    FrictionData[i] = FrictionData_Mario[i];
+  }
 }
 
+static void LoadLuigiPhysics(void) {
+  // The original game modifies an instruction to "RTS" (early-returns from that subroutine)
+  PhysicsInstructionOpcode = 0x60;
 
-// SM2MAIN:c24e
-// Signature: [X, Y] -> []
-void ModifyPhysics(byte param_1, byte param_2) {
-  byte bVar1;
-
-  bVar1 = 0x10;
-  RAM(0xb585) = param_1;
-  do {
-    JumpMForceData[bVar1] = JumpFrictionData[param_2];
-    param_2 -= 1;
-    bVar1 -= 1;
-  } while (bVar1 < 0x80);
-  return;
+  for (int i = 0; i < 7; i++) {
+    JumpMForceData[i] = JumpMForceData_Luigi[i];
+  }
+  for (int i = 0; i < 7; i++) {
+    FallMForceData[i] = FallMForceData_Luigi[i];
+  }
+  for (int i = 0; i < 3; i++) {
+    FrictionData[i] = FrictionData_Luigi[i];
+  }
 }
 
 
@@ -2108,11 +2121,11 @@ void GameMenuRoutine(void) {
   byte bVar1;
   bool bVar2;
 
-  if ((SavedJoypadBits[0] & 0x10) != 0) {
+  if ((SavedJoypadBits[0] & BUTTON_START) != 0) {
     CompletedWorlds = 0;
     DiskIOTask = 0;
     HardWorldFlag = 0;
-    if ((GamesBeatenCount[0] >= 8) && ((SavedJoypadBits[0] & 0x80) != 0)) {
+    if ((GamesBeatenCount >= 8) && ((SavedJoypadBits[0] & BUTTON_A) != 0)) {
       HardWorldFlag = 1;
     }
     if (DemoTimer != 0) {
@@ -2130,7 +2143,7 @@ void GameMenuRoutine(void) {
     }
     goto ResetTitle;
   }
-  if (SavedJoypadBits[0] == 0x20) {
+  if (SavedJoypadBits[0] == BUTTON_SELECT) {
 SelectLogic:
     if (DemoTimer == 0) {
       goto ResetTitle;
@@ -2234,32 +2247,21 @@ void ClearBuffersDrawIcon(void) {
 // SM2MAIN:c592
 // Signature: [] -> []
 void InitializeGame(void) {
-  char cVar1;
-  byte bVar2;
-  byte bVar3;
-  byte bVar4;
-
   CompletedWorlds = 0;
   HardWorldFlag = 0;
   CurrentPlayer = 0;
   PatchPlayerNamePal();
   SetupMenuCursor();
-  bVar4 = 0x33;
-  cVar1 = 0x0C;
-  bVar3 = 0;
-  do {
-    bVar2 = 0x26;
-    if (bVar3 < GamesBeatenCount[0]) {
-      bVar2 = 0xf1;
-    }
-    TitleScreenGfxData[bVar4] = bVar2;
-    bVar4 += 1;
-    cVar1 += -1;
-    if (cVar1 == 0) {
-      bVar4 = 0x4d;
-    }
-    bVar3 += 1;
-  } while (bVar3 != 0x18);
+
+  // Draw a star for each beaten game on the title screen
+
+  for (int i = 0; i < 12; i++) {
+    TitleScreenGfxData[0x33 + i] = i < GamesBeatenCount ? 0xf1 : 0x26;
+  }
+  for (int i = 12; i < 24; i++) {
+    TitleScreenGfxData[0x4d + i-12] = i < GamesBeatenCount ? 0xf1 : 0x26;
+  }
+
   InitializeMemory(0x6f);
   for (int i = 0; i < 0x20; i++) {
     SoundMemory[i] = 0;
@@ -2293,31 +2295,17 @@ void PrimaryGameSetup(void) {
 // SM2MAIN:c5ff
 // Signature: [] -> []
 void PatchPlayerNamePal(void) {
-  byte bVar1;
-  byte bVar2;
-  char cVar3;
-  byte bVar4;
-  byte bVar5;
+  byte off = PlayerNameOffsets[CurrentPlayer];
+  for (int i = 0; i < 5; i++) {
+    byte j = (byte)(off-4 + i);
+    TopStatusBarLine[i + 3] = PlayerNameData[j];
+    ThankYouMessage[i + 13] = PlayerNameData[j];
+  }
 
-  bVar5 = PlayerNameOffsets[CurrentPlayer];
-  cVar3 = CurrentPlayer + 1;
-  bVar2 = 4;
-  bVar4 = bVar5;
-  do {
-    bVar1 = PlayerNameData[bVar4];
-    TopStatusBarLine[bVar2 + 3] = bVar1;
-    ThankYouMessage[bVar2 + 0xd] = bVar1;
-    bVar4 -= 1;
-    bVar2 -= 1;
-  } while (bVar2 < 0x80);
-  bVar5 -= cVar3;
-  bVar4 = 3;
-  do {
-    PlayerColors[bVar4] = PlayerPaletteData[bVar5];
-    bVar5 -= 1;
-    bVar4 -= 1;
-  } while (bVar4 < 0x80);
-  return;
+  for (int i = 0; i < 4; i++) {
+    byte j = (byte)(off-4-CurrentPlayer + i);
+    PlayerColors[i] = PlayerPaletteData[j];
+  }
 }
 
 
@@ -2470,16 +2458,10 @@ void SimulateWind(void) {
 // SM2DATA2+SM2DATA4:c5a1
 // Signature: [] -> []
 void ModifyLeavesPos(void) {
-  byte bVar1;
-
-  bVar1 = 0xb;
-  do {
-    LeavesXPos[bVar1] = LeavesXPos[bVar1] + LeavesPosAdder[bVar1] + LeavesPosAdder[bVar1]
-                        + CARRY1(LeavesXPos[bVar1], LeavesPosAdder[bVar1]);
-    LeavesYPos[bVar1] = LeavesYPos[bVar1] + LeavesPosAdder[bVar1];
-    bVar1 -= 1;
-  } while (bVar1 < 0x80);
-  return;
+  for (int i = 0; i < 12; i++) {
+    LeavesXPos[i] = LeavesXPos[i] + LeavesPosAdder[i] + LeavesPosAdder[i] + CARRY1(LeavesXPos[i], LeavesPosAdder[i]);
+    LeavesYPos[i] = LeavesYPos[i] + LeavesPosAdder[i];
+  }
 }
 
 
@@ -2777,24 +2759,18 @@ void MushroomRetainersForW8(void) {
 // SM2DATA3:c858
 // Signature: [] -> []
 void WriteNameToVictoryMsg(void) {
-  byte bVar1;
-  byte bVar2;
-  byte bVar3;
-
   ScreenRoutineTask = 0;
-  bVar2 = 4;
-  if (CurrentPlayer != 0) {
-    bVar2 = 9;
+  if (CurrentPlayer == 0) {
+    for (int i = 0; i < 5; i++) {
+      ThankYouMessageFinal[i + 0xd] = EndPlayerName_Mario[i];
+      HurrahMsg[i + 0xe] = EndPlayerName_Mario[i];
+    }
+  } else {
+    for (int i = 0; i < 5; i++) {
+      ThankYouMessageFinal[i + 0xd] = EndPlayerName_Luigi[i];
+      HurrahMsg[i + 0xe] = EndPlayerName_Luigi[i];
+    }
   }
-  bVar3 = 4;
-  do {
-    bVar1 = EndPlayerNameData[bVar2];
-    ThankYouMessageFinal[bVar3 + 0xd] = bVar1;
-    HurrahMsg[bVar3 + 0xe] = bVar1;
-    bVar2 -= 1;
-    bVar3 -= 1;
-  } while (bVar3 < 0x80);
-  return;
 }
 
 
@@ -2839,14 +2815,7 @@ void AltHard_GetAreaDataAddrs(void) {
 // SM2DATA4:c3d6
 // Signature: [] -> []
 void ChangeHalfwayPages(void) {
-  byte bVar1;
-
-  bVar1 = 7;
-  do {
-    HalfwayPageNybbles[bVar1] = AtoDHalfwayPages[bVar1];
-    bVar1 -= 1;
-  } while (bVar1 < 0x80);
-  return;
+  for (int i = 0; i < 8; i++) {
+    HalfwayPageNybbles[i] = AtoDHalfwayPages[i];
+  }
 }
-
-
