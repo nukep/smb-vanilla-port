@@ -1,3 +1,6 @@
+#ifndef SMBCORE_VARS_H
+#define SMBCORE_VARS_H
+
 /* common ----------------------- */
 #define ObjectOffset                     RAM(0x0008)
 #define FrameCounter                     RAM(0x0009)
@@ -493,3 +496,5 @@
 #define HardWorldFlag                    RAM(0x07FB)
 #define DiskIOTask                       RAM(0x07FC)
 #define NotColdFlag                      RAM(0x07FD)
+
+#endif

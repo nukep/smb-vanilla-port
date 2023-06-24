@@ -2,6 +2,7 @@
 #include "common.h"
 
 #include "smbcore/vars.h"
+#include "smbcore/types.h"
 
 void set_world_and_level(byte world, byte level) {
   WorldNumber = world;
@@ -200,20 +201,20 @@ void ReadPortBits(byte joynum) {
     joy2(&buttons);
   }
 
-  bits |= buttons.a ? 0x80 : 0;
-  bits |= buttons.b ? 0x40 : 0;
-  bits |= buttons.select ? 0x20 : 0;
-  bits |= buttons.start ? 0x10 : 0;
-  bits |= buttons.u ? 0x08 : 0;
-  bits |= buttons.d ? 0x04 : 0;
-  bits |= buttons.l ? 0x02 : 0;
-  bits |= buttons.r ? 0x01 : 0;
+  bits |= buttons.a      ? BUTTON_A : 0;
+  bits |= buttons.b      ? BUTTON_B : 0;
+  bits |= buttons.select ? BUTTON_SELECT : 0;
+  bits |= buttons.start  ? BUTTON_START : 0;
+  bits |= buttons.u      ? BUTTON_U : 0;
+  bits |= buttons.d      ? BUTTON_D : 0;
+  bits |= buttons.l      ? BUTTON_L : 0;
+  bits |= buttons.r      ? BUTTON_R : 0;
 
   SavedJoypadBits[joynum] = bits;
 
   // If Select or Start were pressed last time this was called, then "unpress" them.
-  if ((bits & (0x20 | 0x10) & JoypadBitMask[joynum]) != 0) {
-    SavedJoypadBits[joynum] = bits & ~(0x20 | 0x10);
+  if ((bits & (BUTTON_SELECT | BUTTON_START) & JoypadBitMask[joynum]) != 0) {
+    SavedJoypadBits[joynum] = bits & ~(BUTTON_SELECT | BUTTON_START);
   } else {
     JoypadBitMask[joynum] = bits;
   }

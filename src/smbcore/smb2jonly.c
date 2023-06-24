@@ -1,3 +1,6 @@
+#include "types.h"
+#include "vars.h"
+
 // SM2MAIN:n/a
 // Signature: [A, r00] -> []
 void jumptable_OperModeExecutionTree(byte param_1, byte param_2) {

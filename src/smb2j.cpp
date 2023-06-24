@@ -87,12 +87,14 @@ bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
 
 #include "smbcore/smb2j_romarrays.h"
 #include "smbcore/vars.h"
+#include "smbcore/smb2j.h"
+#include "smbcore/types.h"
+
 #define AreaAddrOffsets RAMARRAY_CONST(0xC360, 0x28)
 
 // read $4032
 byte FDS_drive_status() { return 0; }
 
-#include "smbcore/smb2j.h"
 
 void ScrollScreen(byte);
 struct_ayz LoadFiles();

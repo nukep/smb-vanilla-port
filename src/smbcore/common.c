@@ -1,3 +1,6 @@
+#include "types.h"
+#include "vars.h"
+
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A] -> []

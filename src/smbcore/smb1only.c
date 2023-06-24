@@ -1,3 +1,6 @@
+#include "types.h"
+#include "vars.h"
+
 // SMB:n/a
 // Signature: [A, r00] -> []
 void jumptable_OperModeExecutionTree(byte param_1, byte param_2) {
@@ -455,85 +458,102 @@ void TitleScreenMode(void) {
 }
 
 
-// SMB:8245
-// Signature: [] -> []
-void GameMenuRoutine(void) {
-  byte bVar1;
-  byte bVar2;
-  bool bVar3;
-
-  bVar3 = false;
-  bVar2 = SavedJoypadBits[0] | SavedJoypadBits[1];
-  if ((bVar2 == 0x10) || (bVar2 == 0x90)) {
-    if (DemoTimer != 0) {
-      if ((char)bVar2 < 0) {
-        GoContinue(ContinueWorld);
-      }
-      LoadAreaPointer();
-      Hidden1UpFlag += 1;
-      OffScr_Hidden1UpFlag += 1;
-      FetchNewGameTimerFlag += 1;
-      OperMode += 1;
-      PrimaryHardMode = WorldSelectEnableFlag;
-      OperMode_Task = 0;
-      DemoTimer = 0;
-      bVar2 = 0x17;
-      do {
-        PlayerScoreDisplay_Or_ScoreAndCoinDisplay[bVar2] = 0;
-        bVar2 -= 1;
-      } while (bVar2 < 0x80);
-      return;
-    }
-    goto ResetTitle;
-  }
-  if (bVar2 == 0x20) {
-SelectBLogic:
-    if (DemoTimer == 0) {
-      goto ResetTitle;
-    }
-    DemoTimer = 0x18;
-    if (SelectTimer == 0) {
-      SelectTimer = 0x10;
-      if (bVar3) {
-        WorldSelectNumber = WorldSelectNumber + 1 & 7;
-        GoContinue(WorldSelectNumber);
-        for (int i = 0; i < 6; i++) {
-          VRAM_Page[i] = WSelectBufferTemplate[i];
-        }
-        bVar1 = 0;
-        bVar2 = 6;
-        VRAM_Page[4] = WorldNumber + 1;
-      } else {
-        NumberOfPlayers ^= 1;
-        DrawMushroomIcon();
-      }
-    }
-NullJoypad:
-    SavedJoypadBits[0] = 0;
-  } else {
-    if (DemoTimer != 0) {
-      if ((WorldSelectEnableFlag != 0) && (bVar2 == 0x40)) {
-        bVar3 = true;
-        goto SelectBLogic;
-      }
-      goto NullJoypad;
-    }
-    SelectTimer = bVar2;
-    bVar3 = DemoEngine();
-    if (bVar3) {
-      goto ResetTitle;
-    }
-  }
-  GameCoreRoutine();
-  if (GameEngineSubroutine != 6) {
-    return;
-  }
-ResetTitle:
+static void GameMenuRoutine_ResetTitle() {
   OperMode = 0;
   OperMode_Task = 0;
   Sprite0HitDetectFlag = 0;
   DisableScreenFlag = DisableScreenFlag + 1;
-  return;
+}
+
+static void GameMenuRoutine_StartGame(bool button_a_pushed) {
+  if (button_a_pushed) {
+    GoContinue(ContinueWorld);
+  }
+  LoadAreaPointer();
+  Hidden1UpFlag += 1;
+  OffScr_Hidden1UpFlag += 1;
+  FetchNewGameTimerFlag += 1;
+  OperMode += 1;
+  PrimaryHardMode = WorldSelectEnableFlag;
+  OperMode_Task = 0;
+  DemoTimer = 0;
+  for (int i = 0; i < 0x18; i++) {
+    PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
+  }
+}
+
+// SMB:8245
+// Signature: [] -> []
+void GameMenuRoutine(void) {
+  byte buttons = SavedJoypadBits[0] | SavedJoypadBits[1];
+
+  bool button_start_and_maybe_a_pushed_only = (buttons == BUTTON_START) || (buttons == (BUTTON_A | BUTTON_START));
+  bool button_a_pushed = (buttons & BUTTON_A) != 0;
+  bool button_select_pushed_only = buttons == BUTTON_SELECT;
+  bool button_b_pushed_only = buttons == BUTTON_B;
+
+  // if the demo is running...
+  if (DemoTimer == 0) {
+    // and Start or Select is pushed...
+    if (button_start_and_maybe_a_pushed_only || button_select_pushed_only) {
+      // then reset to the title
+      GameMenuRoutine_ResetTitle();
+      return;
+    }
+    
+    // not really sure why this is done. seems pointless
+    SelectTimer = buttons;
+
+    if (DemoEngine()) {
+      // when the demo is finished, then reset to the title
+      GameMenuRoutine_ResetTitle();
+      return;
+    }
+
+    GameCoreRoutine();
+    if (GameEngineSubroutine == 6) {
+      GameMenuRoutine_ResetTitle();
+    }
+    return;
+  }
+
+  // demo is not running
+  
+  if (button_start_and_maybe_a_pushed_only) {
+    // Let'sa go!
+    // (start the game)
+    GameMenuRoutine_StartGame(button_a_pushed);
+    return;
+  }
+  
+  if (button_select_pushed_only) {
+    DemoTimer = 0x18;
+    if (SelectTimer == 0) {
+      SelectTimer = 0x10;
+      NumberOfPlayers ^= 1;
+      DrawMushroomIcon();
+    }
+  }
+  
+  if (button_b_pushed_only && (WorldSelectEnableFlag != 0)) {
+    DemoTimer = 0x18;
+    if (SelectTimer == 0) {
+      SelectTimer = 0x10;
+      WorldSelectNumber = WorldSelectNumber + 1 & 7;
+      GoContinue(WorldSelectNumber);
+      for (int i = 0; i < 6; i++) {
+        VRAM_Page[i] = WSelectBufferTemplate[i];
+      }
+      VRAM_Page[4] = WorldNumber + 1;
+    }
+  }
+  
+  SavedJoypadBits[0] = 0;
+
+  GameCoreRoutine();
+  if (GameEngineSubroutine == 6) {
+    GameMenuRoutine_ResetTitle();
+  }
 }
 
 

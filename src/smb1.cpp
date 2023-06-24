@@ -20,6 +20,7 @@ bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset) {
 #include "smbcore/smb_romarrays.h"
 #include "smbcore/vars.h"
 #include "smbcore/smb1.h"
+#include "smbcore/types.h"
 
 void DrawTitleScreen();
 bool TransposePlayers();

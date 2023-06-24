@@ -1,3 +1,6 @@
+#ifndef SMBCORE_SMB2JROMARRAYS_H
+#define SMBCORE_SMB2JROMARRAYS_H
+
 #define VRAM_AddrTable                   RAMARRAY(0x6060, 62)
 #define VRAM_Buffer_Offset               RAMARRAY(0x609E, 2)
 #define WorldBits                        RAMARRAY(0x62F7, 8)
@@ -341,3 +344,5 @@
 #define AltHard_AreaDataHOffsets         RAMARRAY(0xC3A0, 4)
 #define AltHard_AreaDataAddrs            RAMARRAY(0xC3A4, 42)
 #define AtoDHalfwayPages                 RAMARRAY(0xC3CE, 8)
+
+#endif
