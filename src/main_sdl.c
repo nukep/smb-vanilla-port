@@ -72,6 +72,8 @@ struct frontend_userdata {
   int video_scale;
   struct sdl_key_scancodes sdl_key_scancodes;
 
+  byte smb2j_games_beaten;
+
   // OpenGL mode
   struct SMBgl *smb_gl;
 
@@ -146,12 +148,14 @@ bool dump_ram(struct SMB_state *state, const char *filename) {
 }
 
 byte smb2j_load_games_beaten(void *userdata) {
-  // A decent test value - lets us test Worlds A-D
-  return 8;
+  struct frontend_userdata *fe = userdata;
+  return fe->smb2j_games_beaten;
 }
 bool smb2j_save_games_beaten(void *userdata, byte games_beaten) {
+  struct frontend_userdata *fe = userdata;
   log_info("Pretending to save game...");
   log_info("Games beaten: %d", games_beaten);
+  fe->smb2j_games_beaten = games_beaten;
   return true;
 }
 
@@ -310,6 +314,7 @@ int main(int argc, char *argv[]) {
   cfg.audio.enabled = true;
   cfg.audio.samplerate = 44100;
   cfg.audio.maxlatency_ms = 100;
+  cfg.smb2j.override_games_beaten = -1;
 
 
   /******** Parse config, arguments ********/
@@ -337,6 +342,10 @@ int main(int argc, char *argv[]) {
     fe->sdl_key_scancodes.start  = key_scancodes[5];
     fe->sdl_key_scancodes.b      = key_scancodes[6];
     fe->sdl_key_scancodes.a      = key_scancodes[7];
+  }
+
+  if (cfg.smb2j.override_games_beaten >= 0) {
+    fe->smb2j_games_beaten = (byte)cfg.smb2j.override_games_beaten;
   }
 
 

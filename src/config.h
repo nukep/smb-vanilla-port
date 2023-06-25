@@ -125,6 +125,14 @@ static bool parse_cli_args(int argc, char *argv[], struct config *cfg) {
         return false;
       }
     }
+    if (PEEK_EQ("--maxspeed")) {
+      POP();
+      cfg->general.maxspeed = true;
+    }
+    if (PEEK_EQ("--noaudio")) {
+      POP();
+      cfg->audio.enabled = false;
+    }
   } while (last_i != i);
 
   return true;

@@ -6,6 +6,9 @@ section(general,
 
         cbool(maxspeed));
 
+section(smb2j,
+        cint(override_games_beaten));
+
 section(debug,
         cstr(dump_ram_filename)
         cstr(dump_ppu_filename));
