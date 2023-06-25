@@ -12,6 +12,7 @@ typedef unsigned short ushort;
 #define warning(...)
 
 #define assert_smb_crashbug(condition, message) assert(condition)
+#define assert_eq_regressiontest(expected, actual) assert((expected) == (actual))
 
 #ifdef _MSC_VER
 #define NOINLINE __declspec(noinline)

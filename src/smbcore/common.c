@@ -11323,51 +11323,124 @@ struct_ar00 RunOffscrBitsSubs(byte param_1) {
 }
 
 
+// keeping the original version for now, in case of regressions (though I made extra sure there aren't any)
+static byte original_xoff_f(byte param_1, byte bVar3) {
+  byte bVar1, bVar2;
+  bVar1 = (ScreenEdgeOrLeft_PageLoc[bVar3] - SprObject_PageLoc[param_1])
+          - (ScreenEdgeOrLeft_X_Pos[bVar3] < SprObject_X_Position[param_1]);
+  bVar2 = DefaultXOnscreenOfs[bVar3];
+  if ((bVar1 < 0x80) && (bVar2 = DefaultXOnscreenOfs[bVar3 + 1], 0x7f < (byte)(bVar1 - 1))) {
+    bVar2 = DividePDiff(8, bVar2, bVar3, 0x38, ScreenEdgeOrLeft_X_Pos[bVar3] - SprObject_X_Position[param_1]);
+  }
+  return bVar2;
+}
+
+static byte xoff_f(byte param_1, byte a) {
+  // a seriously inlined/simplified version of the original.
+  // part of GetXOffscreenBits
+
+  int j = ScreenEdgeOrLeft_PageLoc[a] - SprObject_PageLoc[param_1];
+  int ik = ScreenEdgeOrLeft_X_Pos[a] - SprObject_X_Position[param_1];
+
+  int z = ik + j*256;
+
+  // wraparound as a signed 16-bit number to achieve the same glitchy behavior
+  if (z >= 0x8000) { z -= 0x10000; }
+  if (z < -0x8000) { z += 0x10000; }
+
+  byte v;
+  if (z < 0) {
+    v = 0x7;
+  } else if (z < 56) {
+    // 8 to e
+    v = z/8 + 8;
+  } else  {
+    v = 0xf;
+  }
+
+  if (a) {
+    v = (v+8)%16;
+  }
+  return v;
+}
+
 // SMB:f1f6
 // SM2MAIN:bedb
 // Signature: [X] -> [A]
 byte GetXOffscreenBits(byte param_1) {
-  byte bVar1;
-  byte bVar2;
-  byte bVar3;
-
-  bVar3 = 1;
-  do {
-    bVar1 = (ScreenEdgeOrLeft_PageLoc[bVar3] - SprObject_PageLoc[param_1])
-            - (ScreenEdgeOrLeft_X_Pos[bVar3] < SprObject_X_Position[param_1]);
-    bVar2 = DefaultXOnscreenOfs[bVar3];
-    if ((bVar1 < 0x80) && (bVar2 = DefaultXOnscreenOfs[bVar3 + 1], 0x7f < (byte)(bVar1 - 1))) {
-      bVar2 = DividePDiff(8, bVar2, bVar3, 0x38, ScreenEdgeOrLeft_X_Pos[bVar3] - SprObject_X_Position[param_1]);
-    }
-    if (XOffscreenBitsData[bVar2] != 0) {
-      break;
-    }
-  } Nplus1_TIMES(bVar3);
-  return XOffscreenBitsData[bVar2];
+  byte i;
+  i = xoff_f(param_1, 1);
+  if (XOffscreenBitsData[i] != 0) {
+    return XOffscreenBitsData[i];
+  }
+  i = xoff_f(param_1, 0);
+  return XOffscreenBitsData[i];
 }
 
+// keeping the original version for now, in case of regressions (though I made extra sure there aren't any)
+static byte original_yoff_f(byte param_1, byte bVar3) {
+  byte bVar1, bVar2;
+  bVar1
+      = (1 - SprObject_Y_HighPos[param_1]) - (HighPosUnitData[bVar3] < SprObject_Y_Position[param_1]);
+  bVar2 = DefaultYOnscreenOfs[bVar3];
+  if ((bVar1 < 0x80) && (bVar2 = DefaultYOnscreenOfs[bVar3 + 1], 0x7f < (byte)(bVar1 - 1))) {
+    bVar2 = DividePDiff(4, bVar2, bVar3, 0x20, HighPosUnitData[bVar3] - SprObject_Y_Position[param_1]);
+  }
+  return bVar2;
+}
+
+static byte yoff_f(byte param_1, bool a) {
+  // a seriously inlined/simplified version of the original.
+  // part of GetYOffscreenBits
+
+  bool is_smb2j = false;
+  #ifdef SMB2J_MODE
+  is_smb2j = true;
+  #endif
+
+  int i = SprObject_Y_HighPos[param_1];
+  int j = SprObject_Y_Position[param_1];
+
+  int z = 256 - i*256 - j;
+
+  // SMB2J toggles when the offset is applied
+  if (is_smb2j == a) {
+    z += 255;
+  }
+
+  // wraparound as a signed 16-bit number to achieve the same glitchy behavior
+  if (z >= 0x8000) { z -= 0x10000; }
+  if (z < -0x8000) { z += 0x10000; }
+
+  byte v;
+  if (z < 0) {
+    v = 4;
+  } else if (z < 32) {
+    // 4 to 7
+    v = z/8 + 4;
+  } else {
+    v = 0;
+  }
+
+  if (a) {
+    v = (v+4)%8;
+  }
+  return v;
+}
 
 // SMB:f239
 // SM2MAIN:bf1e
 // Signature: [X] -> [A]
 byte GetYOffscreenBits(byte param_1) {
-  byte bVar1;
-  byte bVar2;
-  byte bVar3;
-
-  bVar3 = 1;
-  do {
-    bVar1
-        = (1 - SprObject_Y_HighPos[param_1]) - (HighPosUnitData[bVar3] < SprObject_Y_Position[param_1]);
-    bVar2 = DefaultYOnscreenOfs[bVar3];
-    if ((bVar1 < 0x80) && (bVar2 = DefaultYOnscreenOfs[bVar3 + 1], 0x7f < (byte)(bVar1 - 1))) {
-      bVar2 = DividePDiff(4, bVar2, bVar3, 0x20, HighPosUnitData[bVar3] - SprObject_Y_Position[param_1]);
-    }
-    if (YOffscreenBitsData[bVar2] != 0) {
-      break;
-    }
-  } Nplus1_TIMES(bVar3);
-  return YOffscreenBitsData[bVar2];
+  byte i;
+  i = yoff_f(param_1, 1);
+  assert_eq_regressiontest(original_yoff_f(param_1, 1), i);
+  if (YOffscreenBitsData[i] != 0) {
+    return YOffscreenBitsData[i];
+  }
+  i = yoff_f(param_1, 0);
+  assert_eq_regressiontest(original_yoff_f(param_1, 0), i);
+  return YOffscreenBitsData[i];
 }
 
 
@@ -11375,6 +11448,7 @@ byte GetYOffscreenBits(byte param_1) {
 // SM2MAIN:bf52
 // Signature: [A, X, Y, r06, r07] -> [X]
 byte DividePDiff(byte param_1, byte param_2, bool param_3, byte param_4, byte param_5) {
+  // note: to be removed once other old code is removed
   if (param_5 >= param_4) {
     return param_2;
   }
