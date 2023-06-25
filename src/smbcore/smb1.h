@@ -688,7 +688,7 @@ byte smb1_GetAreaObjXPosition(void);
 byte smb1_GetAreaObjYPosition(byte param_1);
 #define GetAreaObjYPosition smb1_GetAreaObjYPosition
 
-struct_r06r07 smb1_GetBlockBufferAddr(byte param_1);
+ushort smb1_GetBlockBufferAddr(byte param_1);
 #define GetBlockBufferAddr smb1_GetBlockBufferAddr
 
 void smb1_LoadAreaPointer(void);
@@ -1570,7 +1570,7 @@ struct_axzr02r04r06r07 smb1_BlockBufferChk_Enemy_Ext(byte param_1,byte param_2,b
 struct_axz smb1_BlockBufferChk_FBall(byte param_1);
 #define BlockBufferChk_FBall smb1_BlockBufferChk_FBall
 
-struct_ayr02r04r06r07 smb1_BlockBufferColli_Feet(byte param_1);
+struct_azr02r04r06r07 smb1_BlockBufferColli_Feet(byte param_1);
 #define BlockBufferColli_Feet smb1_BlockBufferColli_Feet
 
 struct_azr02r04r06r07 smb1_BlockBufferColli_Head(byte param_1);
@@ -1771,7 +1771,7 @@ byte smb1_GetXOffscreenBits(byte param_1);
 byte smb1_GetYOffscreenBits(byte param_1);
 #define GetYOffscreenBits smb1_GetYOffscreenBits
 
-byte smb1_DividePDiff(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+byte smb1_DividePDiff(byte param_1,byte param_2,bool param_3,byte param_4,byte param_5);
 #define DividePDiff smb1_DividePDiff
 
 struct_xyr02 smb1_DrawSpriteObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);

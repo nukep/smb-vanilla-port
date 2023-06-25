@@ -125,6 +125,12 @@ static bool smb2j_save_games_beaten(struct SMB_state *state, byte games_beaten) 
 #define SMB1_2J_SWITCH(smb1, smb2j) (SMB1_ONLY ? (smb1) : (smb2j))
 #define ssw SMB1_2J_SWITCH
 
+#define N_TIMES(v) while (v -= 1, v != 0)
+#define Nplus1_TIMES(v) while (v -= 1, v < 0x80)
+#define FOR_LT(v, count) while (v += 1, v < count)
+#define FOR_NE(v, count) while (v += 1, v != count)
+
+
 #define PPU_STATE (SMB_STATE->ppu)
 #include "ppu.h"
 #undef PPU_STATE

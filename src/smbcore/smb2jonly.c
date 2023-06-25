@@ -806,31 +806,36 @@ byte GetWorldNumForDisplay(void) {
 // SM2MAIN:671b
 // Signature: [A] -> []
 void WriteGameText(byte param_1) {
-  byte bVar1;
-  byte bVar2;
-  byte bStack0000;
+  byte offset = GameTextOffsets[param_1];
 
-  bVar1 = GameTextOffsets[param_1];
-  bVar2 = 0;
-  do {
-    if (TopStatusBarLine[bVar1] == 0xff)
+  bool terminated = false;
+  for (int i = 0; i < 256; i++) {
+    if (TopStatusBarLine[offset] == 0xff) {
+      VRAM_Buffer1[i] = 0;
+      terminated = true;
       break;
-    VRAM_Buffer1[bVar2] = TopStatusBarLine[bVar1];
-    bVar1 += 1;
-    bVar2 += 1;
-  } while (bVar2 != 0);
-  VRAM_Buffer1[bVar2] = 0;
-  if ((param_1 != 0) && (param_1 == 1)) {
+    }
+    VRAM_Buffer1[i] = TopStatusBarLine[offset];
+    offset += 1;
+  }
+  if (!terminated) {
+    VRAM_Buffer1[0] = 0;
+  }
+
+  if (param_1 == 1) {
+    // Wrote the world and lives display screen
+
+    // Write number of lives (and crown if over 9)
     VRAM_Buffer1[8] = NumberofLives + 1;
     if (VRAM_Buffer1[8] >= 10) {
-      VRAM_Buffer1[8] = (NumberofLives - 9) - (VRAM_Buffer1[8] < 10);
+      VRAM_Buffer1[8] = NumberofLives - 9;
       VRAM_Buffer1[7] = 0x9f;
     }
-    bStack0000 = param_1;
+
+    // Write the world and level numbers
     VRAM_Buffer1[19] = GetWorldNumForDisplay();
     VRAM_Buffer1[21] = LevelNumber + 1;
   }
-  return;
 }
 
 
@@ -1975,8 +1980,7 @@ void DiskErrorHandler(byte param_1) {
   do {
     DiskErrorMainMsg[bVar2 + 3] = DiskErrorMsgs[bVar1];
     bVar1 -= 1;
-    bVar2 -= 1;
-  } while (bVar2 < 0x80);
+  } Nplus1_TIMES(bVar2);
   VRAM_Buffer_AddrCtrl = 0x19;
   bStack0000 = param_1;
   MoveAllSpritesOffscreen();
@@ -2002,8 +2006,7 @@ void GameOverMenu(void) {
     bVar1 = 2;
     do {
       Sprite_Data[bVar1 + 1] = GameOverCursorData[bVar1];
-      bVar1 -= 1;
-    } while (bVar1 < 0x80);
+    } Nplus1_TIMES(bVar1);
     Sprite_Data[0] = GameOverCursorY[ContinueMenuSelect];
     return;
   }
@@ -2016,11 +2019,9 @@ void GameOverMenu(void) {
   LevelNumber = ContinueMenuSelect;
   AreaNumber = ContinueMenuSelect;
   CoinTally = ContinueMenuSelect;
-  bVar1 = 0xb;
-  do {
-    PlayerScoreDisplay_Or_ScoreAndCoinDisplay[bVar1] = 0;
-    bVar1 -= 1;
-  } while (bVar1 < 0x80);
+  for (int i = 0; i < 12; i++) {
+    PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
+  }
   Hidden1UpFlag += 1;
   ContinueGame();
   return;
@@ -2101,11 +2102,11 @@ void GetAreaDataAddrs(void) {
     BackgroundColorCtrl = bVar4;
   }
   PlayerEntranceCtrl = (bVar3 & 0x38) >> 3;
-  GameTimerSetting = (bVar3 >> 7) << 1 | (byte)((bVar3 & 0xc0) << 1) >> 7;
+  GameTimerSetting = bVar3 >> 6;
   bVar3 = AreaData[1];
   TerrainControl = bVar3 & 0xf;
   BackgroundScenery = (bVar3 & 0x30) >> 4;
-  AreaStyle = (bVar3 >> 7) << 1 | (byte)((bVar3 & 0xc0) << 1) >> 7;
+  AreaStyle = bVar3 >> 6;
   if (AreaStyle == 3) {
     AreaStyle = 0;
     CloudTypeOverride = 3;
@@ -2134,11 +2135,9 @@ void GameMenuRoutine(void) {
       WorldNumber = 0;
       LevelNumber = 0;
       AreaNumber = 0;
-      bVar1 = 0xb;
-      do {
-        PlayerScoreDisplay_Or_ScoreAndCoinDisplay[bVar1] = 0;
-        bVar1 -= 1;
-      } while (bVar1 < 0x80);
+      for (int i = 0; i < 12; i++) {
+        PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
+      }
       return;
     }
     goto ResetTitle;
@@ -2226,12 +2225,10 @@ void ClearBuffersDrawIcon(void) {
   byte bVar1;
 
   if (OperMode == 0) {
-    bVar1 = 0;
-    do {
-      VRAM_Page[bVar1] = 0;
-      SprObject_X_MoveForce[bVar1] = 0;
-      bVar1 += 1;
-    } while (bVar1 != 0);
+    for (int i = 0; i < 256; i++) {
+      VRAM_Page[i] = 0;
+      SprObject_X_MoveForce[i] = 0;
+    }
     DrawMenuCursor();
     ScreenRoutineTask = ScreenRoutineTask + 1;
     return;
@@ -2617,8 +2614,7 @@ void FadeToBlue(void) {
   do {
     VRAM_Buffer1[bVar2] = BlueTransPalette[bVar2];
     bVar1 = BlueColorOfs;
-    bVar2 -= 1;
-  } while (bVar2 < 0x80);
+  } Nplus1_TIMES(bVar2);
   bVar2 = 0xc;
   do {
     VRAM_Buffer1[bVar2 + 3] = BlueTints[bVar1];
@@ -2640,8 +2636,7 @@ void EraseLivesLines(void) {
   bVar1 = 8;
   do {
     VRAM_Buffer1[bVar1] = TwoBlankRows[bVar1];
-    bVar1 -= 1;
-  } while (bVar1 < 0x80);
+  } Nplus1_TIMES(bVar1);
   OperMode_Task += 1;
   EraseEndingCounters();
   MushroomRetDelay = 0x60;
@@ -2746,8 +2741,7 @@ void MushroomRetainersForW8(void) {
       ObjectOffset = 0;
       EnemyGfxHandler(0);
     }
-    BlueColorOfs -= 1;
-  } while (BlueColorOfs != 0);
+  } N_TIMES(BlueColorOfs);
   BlueColorOfs = bVar1;
   WorldNumber = bStack0000;
   Enemy_SprDataOffset[0] = 0x30;
@@ -2798,11 +2792,11 @@ void AltHard_GetAreaDataAddrs(void) {
     BackgroundColorCtrl = bVar4;
   }
   PlayerEntranceCtrl = (bVar3 & 0x38) >> 3;
-  GameTimerSetting = (bVar3 >> 7) << 1 | (byte)((bVar3 & 0xc0) << 1) >> 7;
+  GameTimerSetting = bVar3 >> 6;
   bVar3 = AreaData[1];
   TerrainControl = bVar3 & 0xf;
   BackgroundScenery = (bVar3 & 0x30) >> 4;
-  AreaStyle = (bVar3 >> 7) << 1 | (byte)((bVar3 & 0xc0) << 1) >> 7;
+  AreaStyle = bVar3 >> 6;
   if (AreaStyle == 3) {
     AreaStyle = 0;
     CloudTypeOverride = 3;

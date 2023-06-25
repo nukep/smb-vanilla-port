@@ -284,7 +284,7 @@
 #define BitMFilter                       RAM(0x06DD)
 #define ChangeAreaTimer                  RAM(0x06DE)
 #define SprShuffleAmtOffset              RAM(0x06E0)
-#define SprShuffleAmt                    RAMARRAY(0x06E1, 0)
+#define SprShuffleAmt                    RAMARRAY(0x06E1, 3)
 #define PlayerOrSprDataOffset            RAMARRAY(0x06E4, 0)
 #define Player_SprDataOffset             RAM(0x06E4)
 #define SprDataOffset                    RAMARRAY(0x06E4, 0)
@@ -454,11 +454,11 @@
 #define GroundMusicHeaderOfs             RAM(0x07C7)
 #define AltRegContentFlag                RAM(0x07CA)
 
-#define DisplayDigits                    RAMARRAY(0x07D7, 0)
 #define DisplayDigits_Or_TopScoreDisplay RAMARRAY(0x07D7, 0)
+#define DisplayDigits                    RAMARRAY(0x07D7, 0)
 #define TopScoreDisplay                  RAMARRAY(0x07D7, 0)
-#define PlayerScoreDisplay               RAMARRAY(0x07DD, 0)
 #define PlayerScoreDisplay_Or_ScoreAndCoinDisplay RAMARRAY(0x07DD, 0)
+#define PlayerScoreDisplay               RAMARRAY(0x07DD, 0)
 #define ScoreAndCoinDisplay              RAMARRAY(0x07DD, 0)
 #define WarmBootValidation               RAM(0x07FF)
 /* smb1 ----------------------- */

@@ -686,7 +686,7 @@ byte smb2j_GetAreaObjXPosition(void);
 byte smb2j_GetAreaObjYPosition(byte param_1);
 #define GetAreaObjYPosition smb2j_GetAreaObjYPosition
 
-struct_r06r07 smb2j_GetBlockBufferAddr(byte param_1);
+ushort smb2j_GetBlockBufferAddr(byte param_1);
 #define GetBlockBufferAddr smb2j_GetBlockBufferAddr
 
 void smb2j_GameMode(void);
@@ -1553,7 +1553,7 @@ struct_axzr04 smb2j_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3)
 struct_axz smb2j_BlockBufferChk_FBall(byte param_1);
 #define BlockBufferChk_FBall smb2j_BlockBufferChk_FBall
 
-struct_ayr02r04r06r07 smb2j_BlockBufferColli_Feet(byte param_1);
+struct_azr02r04r06r07 smb2j_BlockBufferColli_Feet(byte param_1);
 #define BlockBufferColli_Feet smb2j_BlockBufferColli_Feet
 
 struct_azr02r04r06r07 smb2j_BlockBufferColli_Head(byte param_1);
@@ -1754,7 +1754,7 @@ byte smb2j_GetXOffscreenBits(byte param_1);
 byte smb2j_GetYOffscreenBits(byte param_1);
 #define GetYOffscreenBits smb2j_GetYOffscreenBits
 
-byte smb2j_DividePDiff(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+byte smb2j_DividePDiff(byte param_1,byte param_2,bool param_3,byte param_4,byte param_5);
 #define DividePDiff smb2j_DividePDiff
 
 struct_xyr02 smb2j_DrawSpriteObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);

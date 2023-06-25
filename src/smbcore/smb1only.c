@@ -477,7 +477,7 @@ static void GameMenuRoutine_StartGame(bool button_a_pushed) {
   PrimaryHardMode = WorldSelectEnableFlag;
   OperMode_Task = 0;
   DemoTimer = 0;
-  for (int i = 0; i < 0x18; i++) {
+  for (int i = 0; i < 12*2; i++) {
     PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
   }
 }
@@ -684,15 +684,11 @@ SetEndTimer:
 // SMB:8732
 // Signature: [] -> []
 void ClearBuffersDrawIcon(void) {
-  byte bVar1;
-
   if (OperMode == 0) {
-    bVar1 = 0;
-    do {
-      VRAM_Page[bVar1] = 0;
-      SprObject_X_MoveForce[bVar1] = 0;
-      bVar1 += 1;
-    } while (bVar1 != 0);
+    for (int i = 0; i < 256; i++) {
+      VRAM_Page[i] = 0;
+      SprObject_X_MoveForce[i] = 0;
+    }
     DrawMushroomIcon();
     ScreenRoutineTask = ScreenRoutineTask + 1;
     return;
@@ -708,60 +704,70 @@ void ClearBuffersDrawIcon(void) {
 // SMB:8808
 // Signature: [A] -> []
 void WriteGameText(byte param_1) {
-  byte bVar1;
-  byte bVar2;
+  // param_1 is 0,1,2,3, 4,5,6
 
-  bVar1 = param_1 << 1;
-  if (bVar1 >= 4) {
-    if (bVar1 >= 8) {
-      bVar1 = 8;
-    }
-    if (NumberOfPlayers == 0) {
-      bVar1 += 1;
-    }
+  static byte p1_l[7] = {0,2,5,7,9,9,9};
+  static byte p2_l[7] = {0,2,4,6,8,8,8};
+
+  byte offset;
+  if (NumberOfPlayers == 0) {
+    offset = GameTextOffsets[p1_l[param_1]];
+  } else {
+    offset = GameTextOffsets[p2_l[param_1]];
   }
-  bVar1 = GameTextOffsets[bVar1];
-  bVar2 = 0;
-  do {
-    if (GameText[bVar1] == 0xff)
+
+  bool terminated = false;
+  for (int i = 0; i < 256; i++) {
+    if (GameText[offset] == 0xff) {
+      VRAM_Buffer1[i] = 0;
+      terminated = true;
       break;
-    VRAM_Buffer1[bVar2] = GameText[bVar1];
-    bVar1 += 1;
-    bVar2 += 1;
-  } while (bVar2 != 0);
-  VRAM_Buffer1[bVar2] = 0;
+    }
+    VRAM_Buffer1[i] = GameText[offset];
+    offset += 1;
+  }
+  if (!terminated) {
+    VRAM_Buffer1[0] = 0;
+  }
+
   if (param_1 >= 4) {
-    bVar1 = ((param_1 - 4) - (3 >= param_1)) * 4;
-    bVar2 = 0;
-    do {
-      VRAM_Buffer1[bVar2 + 0x1b] = WarpZoneNumbers[bVar1];
-      bVar1 += 1;
-      bVar2 += 4;
-    } while (bVar2 < 0xc);
+    // Wrote the "Welcome to warp zone!" message
+
+    // Write the specific warp zone numbers
+    for (int i = 0; i < 3; i++) {
+      VRAM_Buffer1[0x1b + i*4] = WarpZoneNumbers[(param_1 - 4) * 4 + i];
+    }
     VRAM_Buffer1_Offset = 0x2c;
     return;
   }
+
   if (param_1 == 1) {
+    // Wrote the world and lives display screen
+
+    // Write number of lives (and crown if over 9)
     VRAM_Buffer1[8] = NumberofLives + 1;
     if (VRAM_Buffer1[8] >= 10) {
-      VRAM_Buffer1[8] = (NumberofLives - 9) - (VRAM_Buffer1[8] < 10);
+      VRAM_Buffer1[8] = NumberofLives - 9;
       VRAM_Buffer1[7] = 0x9f;
     }
+
+    // Write the world and level numbers
     VRAM_Buffer1[19] = WorldNumber + 1;
     VRAM_Buffer1[21] = LevelNumber + 1;
     return;
   }
+
   if (NumberOfPlayers != 0) {
-    bVar1 = CurrentPlayer;
+    byte bVar1;
     if ((param_1 == 2) && (OperMode != 3)) {
       bVar1 = CurrentPlayer ^ 1;
+    } else {
+      bVar1 = CurrentPlayer;
     }
     if ((bVar1 & 1) != 0) {
-      bVar1 = 4;
-      do {
-        VRAM_Buffer1[bVar1 + 3] = LuigiName[bVar1];
-        bVar1 -= 1;
-      } while (bVar1 < 0x80);
+      for (int i = 0; i < 5; i++) {
+        VRAM_Buffer1[i + 3] = LuigiName[i];
+      }
     }
   }
   return;
@@ -852,14 +858,16 @@ void DoNothing2(void) { return; }
 // SMB:96f2
 // Signature: [] -> []
 void ScrollLockObject_Warp(void) {
-  WarpZoneControl = 4;
-  if ((WorldNumber != 0) && (WarpZoneControl = 5, AreaType == 1)) {
+  if (WorldNumber == 0) {
+    WarpZoneControl = 4;
+  } else if (AreaType != 1) {
+    WarpZoneControl = 5;
+  } else {
     WarpZoneControl = 6;
   }
   WriteGameText(WarpZoneControl);
   KillEnemies(0xd);
   ScrollLockObject();
-  return;
 }
 
 
@@ -1012,11 +1020,11 @@ void GetAreaDataAddrs(void) {
     BackgroundColorCtrl = bVar3;
   }
   PlayerEntranceCtrl = (bVar2 & 0x38) >> 3;
-  GameTimerSetting = (bVar2 >> 7) << 1 | (byte)((bVar2 & 0xc0) << 1) >> 7;
+  GameTimerSetting = bVar2 >> 6;
   bVar2 = AreaData[1];
   TerrainControl = bVar2 & 0xf;
   BackgroundScenery = (bVar2 & 0x30) >> 4;
-  AreaStyle = (bVar2 >> 7) << 1 | (byte)((bVar2 & 0xc0) << 1) >> 7;
+  AreaStyle = bVar2 >> 6;
   if (AreaStyle == 3) {
     AreaStyle = 0;
     CloudTypeOverride = 3;
