@@ -1,5 +1,5 @@
-#include "foundation.h"
-#include "common.h"
+#include "smbcore.h"
+#include "smbcommon.h"
 
 #include "smbcore/vars.h"
 #include "smbcore/types.h"

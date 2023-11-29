@@ -1,20 +1,9 @@
 #define SMB1_MODE
-#include "foundation.h"
+#include "smbcore.h"
 
 extern "C" {
-bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset);
 void SMB1_Reset();
 void SMB1_NMI();
-}
-
-bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset) {
-  if (!seek_rom(state, prg_offset)) { return false; }
-  if (!read_rom_bytes(state, state->rammem + 0x8000, 0x8000)) { return false; }
-  if (!seek_rom(state, chr_offset)) { return false; }
-  if (!read_rom_bytes(state, state->chrrom, 0x2000)) { return false; }
-  state->which_game = GAME_SMB1;
-  update_pattern_tables(state);
-  return true;
 }
 
 #include "smbcore/smb_romarrays.h"
@@ -27,8 +16,8 @@ bool TransposePlayers();
 
 #define GameTimerDisplay GameTimerDisplaySMB1
 
-#include "common.h"
-#include "common_inc.h"
+#include "smbcommon.h"
+#include "smbcore/common_sound.c"
 #include "smbcore/common.c"
 #include "smbcore/smb1only.c"
 
@@ -105,7 +94,7 @@ void SMB1_NMI() {
   VRAM_Buffer_AddrCtrl = 0;
   ppumask(Mirror_PPU_CTRL_REG2);
   SoundEngine();
-  apu_end_frame(SMB_STATE);
+  apu_end_frame();
   ReadJoypads();
   PauseRoutine();
   UpdateTopScore();

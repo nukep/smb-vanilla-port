@@ -1,88 +1,10 @@
 #define SMB2J_MODE
-#include "foundation.h"
+#include "smbcore.h"
 
 extern "C" {
-bool load_smb2j(struct SMB_state *state, size_t disk_offset);
+bool smb2j_load_file(struct SMB_state *state, const char *name);
 void SMB2J_Reset();
 void SMB2J_NMI();
-}
-
-struct FdsFile {
-  const char *name;
-  size_t file_offset;
-  ushort size;
-  ushort org;
-  int type;
-};
-
-#define TYPE_PRGRAM 0
-#define TYPE_CHRRAM 1
-
-#define SMB2J_FDS_FILES_COUNT 6
-
-// hard-code some offsets for now
-// the offsets are relative to after the 16-byte FDS header
-static FdsFile SMB2J_FDS_FILES[SMB2J_FDS_FILES_COUNT] = {
-    {"SM2CHAR1", 0x013C, 0x2000, 0x0000, TYPE_CHRRAM},
-    {"SM2CHAR2", 0x214D, 0x0040, 0x0760, TYPE_CHRRAM},
-    {"SM2MAIN ", 0x219E, 0x8000, 0x6000, TYPE_PRGRAM},
-    {"SM2DATA2", 0xA1AF, 0x0E2F, 0xC470, TYPE_PRGRAM},
-    {"SM2DATA3", 0xAFEF, 0x0CCF, 0xC5D0, TYPE_PRGRAM},
-    {"SM2DATA4", 0xBCCF, 0x0F4C, 0xC2B4, TYPE_PRGRAM},
-};
-
-bool smb2j_load_file(struct SMB_state *state, const char *name) {
-  if (strncmp(name, "SM2SAVE ", 8) == 0) {
-    // treat the save byte specially
-
-    state->rammem[0xD29F] = smb2j_load_games_beaten(state);
-
-    return true;
-  }
-
-  for (int i = 0; i < SMB2J_FDS_FILES_COUNT; i++) {
-    const FdsFile &a = SMB2J_FDS_FILES[i];
-    bool eq = strncmp(name, a.name, 8) == 0;
-    if (eq) {
-      // Found it!
-      byte *copy_to;
-      if (a.type == TYPE_CHRRAM) {
-        // Copy the bytes over to CHRRAM
-        copy_to = state->chrrom + a.org;
-      } else if (a.type == TYPE_PRGRAM) {
-        // Copy the bytes over to RAM
-        copy_to = state->rammem + a.org;
-      }
-      if (!seek_rom(state, state->smb2j_disk_offset + a.file_offset)) { return false; }
-      if (!read_rom_bytes(state, copy_to, a.size)) { return false; }
-
-      if (a.type == TYPE_CHRRAM) {
-        update_pattern_tables(state);
-      }
-
-      return true;
-    }
-  }
-  return false;
-}
-
-bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
-  // In this case, the 16 bit header is this:
-  static char fds_disk_verification[16] = {0x01, '*', 'N', 'I', 'N', 'T', 'E', 'N', 'D', 'O', '-', 'H', 'V', 'C', '*', 0x01};
-  byte headerbuf[16];
-  if (!seek_rom(state, disk_offset)) { return false; }
-  if (!read_rom_bytes(state, headerbuf, 16)) { return false; }
-
-  bool match = memcmp(headerbuf, fds_disk_verification, 16) == 0;
-  if (!match) { return false; }
-  state->which_game = GAME_SMB2J;
-  state->smb2j_disk_offset = disk_offset;
-
-  // Load these automatically
-  smb2j_load_file(state, "SM2CHAR1");
-  smb2j_load_file(state, "SM2MAIN ");
-  smb2j_load_file(state, "SM2SAVE ");
-  return true;
 }
 
 #include "smbcore/smb2j_romarrays.h"
@@ -102,8 +24,8 @@ void UpdateGamesBeaten();
 
 #define GameTimerDisplay GameTimerDisplaySMB2J
 
-#include "common.h"
-#include "common_inc.h"
+#include "smbcommon.h"
+#include "smbcore/common_sound.c"
 #include "smbcore/common.c"
 #include "smbcore/smb2jonly.c"
 
@@ -305,7 +227,7 @@ void SMB2J_NMI() {
   ppumask(Mirror_PPU_CTRL_REG2);
   enable_interrupt();
   SoundEngine();
-  apu_end_frame(SMB_STATE);
+  apu_end_frame();
   ReadJoypads();
   PauseRoutine();
   UpdateTopScore();
@@ -392,7 +314,7 @@ void ScrollScreen(byte scroll_amount) {
 // Signature: [] -> []
 void UpdateGamesBeaten() {
   // The FDS version would use an FDS BIOS subroutine
-  bool success = smb2j_save_games_beaten(SMB_STATE, GamesBeatenCount);
+  bool success = smb2j_save_games_beaten(GamesBeatenCount);
   byte error_code = 0;
 
   if (!success) {

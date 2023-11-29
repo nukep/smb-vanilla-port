@@ -156,7 +156,7 @@ static bool read_i32(const char *s, int32_t *v) {
 }
 
 
-static size_t parse_whitespace_delimited(const char *input, void* (*map)(const char*, void*), void *output, size_t max_count) {
+static size_t parse_comma_delimited(const char *input, void* (*map)(const char*, void*), void *output, size_t max_count) {
   char buf[16] = {0};
   const char *s = input;
   bool done = false;
@@ -170,7 +170,7 @@ static size_t parse_whitespace_delimited(const char *input, void* (*map)(const c
 
     for (i = 0; ; i++) {
       char c = *s++;
-      if (c == ' ') {
+      if (c == ',') {
         break;
       }
       if (c == 0) {
@@ -227,7 +227,7 @@ static void *read_key_binding(const char *key, void *buf) {
 #define clist(key, f, dtype, count)                            \
   if (strcmp(name, #key) == 0) {                               \
     p->key##_present = true;                                   \
-    parse_whitespace_delimited(value, f, &p->key[0], (count)); \
+    parse_comma_delimited(value, f, &p->key[0], (count)); \
   }
 
 static int get_ini_entry(void *user, const char *section, const char *name, const char *value) {

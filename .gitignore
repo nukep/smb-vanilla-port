@@ -1,6 +1,12 @@
 .vs
+.vscode
 /out*
 /bin
 
 /rawsmb.*
 /smb.*
+
+/build
+archive
+*.nes
+*.fds

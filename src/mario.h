@@ -11,6 +11,8 @@ extern "C" {
 
 typedef unsigned char byte;
 typedef unsigned short ushort;
+typedef unsigned char u8;
+typedef unsigned short u16;
 
 #define GAME_SMB1 0
 #define GAME_SMB2J 1

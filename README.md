@@ -1,6 +1,6 @@
 # smb-vanilla-port
 
-A C++ decompilation of the NES games "Super Mario Bros" and "Super Mario Bros 2 Japan" (aka Lost Levels).
+A C (and some C++) decompilation of the NES games "Super Mario Bros" and "Super Mario Bros 2 Japan" (aka Lost Levels).
 
 This program only reimplements the code, and does not come with level data or graphical assets.
 
@@ -14,6 +14,56 @@ Progress made:
 - [ ] Refactor of code
 - [ ] A decent UI/UX, customizable controls
 - [ ] Get the core games compiling in C (to make sure it's portable to older and embedded systems)
+
+## Running the game
+
+Provide a copy of "smb.nes" and put in the same directory as the executable. Alternatively, modify the file paths in smbport.ini.
+
+smbport.ini also has options to change key bindings if they're not tasteful for you.
+
+When all is set up, run smbport.exe (or smbport on *nix). The first CLI argument can be the ROM filename to override the value in smbport.ini. On Windows you can also drag the ROM onto the executable.
+
+To play SMB2J (Lost Levels), modify smbport.ini.
+
+Known-to-work hashes:
+- SHA-1 hashes for smb.nes (NTSC): ea343f4e445a9050d4b4fbac2c77d0693b1d0922
+- SHA-1 hashes for smb2j.fds: 3b8c8998b4887d6dd676965943d69a320738ab9c or 20e50128742162ee47561db9e82b2836399c880c
+
+## Build instructions
+
+You'll need a C and C++ compiler and Meson.
+
+This project depends on SDL2 (required) and GLEW (optional). These are available as packages on most Linux distros.
+
+If GLEW is missing, the project will be built without OpenGL support.
+
+On Ubuntu 22.04:
+
+```sh
+sudo apt install build-essential meson libsdl2-dev libglew-dev
+```
+
+On Fedora 39 or Rocky Linux 9:
+```sh
+sudo dnf install gcc gcc-c++ meson SDL2-devel glew-devel
+```
+
+
+Build:
+
+```sh
+mkdir build
+cd build
+
+meson ..
+meson compile
+```
+
+Run:
+
+```sh
+./build/smbport
+```
 
 ## What's supported
 

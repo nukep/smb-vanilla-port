@@ -8,6 +8,8 @@
 
 typedef unsigned char byte;
 typedef unsigned short ushort;
+typedef unsigned char u8;
+typedef unsigned short u16;
 // #define warning printf
 #define warning(...)
 
@@ -68,52 +70,68 @@ struct SMB_state {
   struct sprite sprites[64];
 };
 
+// The singleton SMB_state used during the SMB_tick() invocation. This is considered internal and should not be used by callers of the library.
 extern thread_local struct SMB_state *SMB_STATE;
 
-static inline bool seek_rom(struct SMB_state *state, size_t offset) {
-  return state->callbacks.seek_rom(state->callbacks.userdata, offset);
-}
 static inline bool read_rom_bytes(struct SMB_state *state, byte *buf, size_t size) {
   return state->callbacks.read_rom_bytes(state->callbacks.userdata, buf, size);
 }
+static inline bool seek_rom(struct SMB_state *state, size_t offset) {
+  return state->callbacks.seek_rom(state->callbacks.userdata, offset);
+}
+static byte smb2j_load_games_beaten() {
+  if (SMB_STATE->callbacks.smb2j_load_games_beaten) {
+    return SMB_STATE->callbacks.smb2j_load_games_beaten(SMB_STATE->callbacks.userdata);
+  } else {
+    return 0;
+  }
+}
+static bool smb2j_save_games_beaten(byte games_beaten) {
+  if (SMB_STATE->callbacks.smb2j_save_games_beaten) {
+    return SMB_STATE->callbacks.smb2j_save_games_beaten(SMB_STATE->callbacks.userdata, games_beaten);
+  } else {
+    return false;
+  }
+}
 
-static inline void apu_write_register(struct SMB_state *state, ushort addr, byte data) {
-  if (state->callbacks.apu_write_register) {
-    state->callbacks.apu_write_register(state->callbacks.userdata, addr, data);
-  }
-}
-static inline void apu_end_frame(struct SMB_state *state) {
-  if (state->callbacks.apu_end_frame) {
-    state->callbacks.apu_end_frame(state->callbacks.userdata);
-  }
-}
-static void joy1(struct SMB_buttons *buttons) {
-  if (SMB_STATE->callbacks.joy1) {
-    return SMB_STATE->callbacks.joy1(SMB_STATE->callbacks.userdata, buttons);
-  }
-}
-static void joy2(struct SMB_buttons *buttons) {
-  if (SMB_STATE->callbacks.joy2) {
-    return SMB_STATE->callbacks.joy2(SMB_STATE->callbacks.userdata, buttons);
-  }
-}
 static void update_pattern_tables(struct SMB_state *state) {
   if (state->callbacks.update_pattern_tables) {
     state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
   }
 }
-static byte smb2j_load_games_beaten(struct SMB_state *state) {
-  if (state->callbacks.smb2j_load_games_beaten) {
-    return state->callbacks.smb2j_load_games_beaten(state->callbacks.userdata);
-  } else {
-    return 0;
+
+static bool can_draw_tile() {
+  return SMB_STATE->callbacks.draw_tile != 0;
+}
+
+static void draw_tile(const struct SMB_tile tile) {
+  if (SMB_STATE->callbacks.draw_tile) {
+    SMB_STATE->callbacks.draw_tile(SMB_STATE->callbacks.userdata, tile);
   }
 }
-static bool smb2j_save_games_beaten(struct SMB_state *state, byte games_beaten) {
-  if (state->callbacks.smb2j_save_games_beaten) {
-    return state->callbacks.smb2j_save_games_beaten(state->callbacks.userdata, games_beaten);
+
+static inline void apu_write_register(ushort addr, byte data) {
+  if (SMB_STATE->callbacks.apu_write_register) {
+    SMB_STATE->callbacks.apu_write_register(SMB_STATE->callbacks.userdata, addr, data);
+  }
+}
+static inline void apu_end_frame() {
+  if (SMB_STATE->callbacks.apu_end_frame) {
+    SMB_STATE->callbacks.apu_end_frame(SMB_STATE->callbacks.userdata);
+  }
+}
+static void joy1(struct SMB_buttons *buttons) {
+  if (SMB_STATE->callbacks.joy1) {
+    return SMB_STATE->callbacks.joy1(SMB_STATE->callbacks.userdata, buttons);
   } else {
-    return false;
+    *buttons = {0};
+  }
+}
+static void joy2(struct SMB_buttons *buttons) {
+  if (SMB_STATE->callbacks.joy2) {
+    return SMB_STATE->callbacks.joy2(SMB_STATE->callbacks.userdata, buttons);
+  } else {
+    *buttons = {0};
   }
 }
 
@@ -142,7 +160,7 @@ static void joystick_strobe(byte x) {
 }
 
 #define APU_REG(name, addr) \
-  static inline void name(byte x) { apu_write_register(SMB_STATE, addr, x); }
+  static inline void name(byte x) { apu_write_register(addr, x); }
 
 APU_REG(apu_sq1_vol, 0x4000)
 APU_REG(apu_sq1_sweep, 0x4001)
@@ -349,5 +367,3 @@ public:
 #define RAMPTR(addr) RAMPtr(addr)
 #define RAMARRAY(addr, length) RamByteArray(addr, length)
 #define RAMARRAY_CONST(addr, length) ConstRamByteArray(addr, length)
-
-void update_prng(byte *prng);

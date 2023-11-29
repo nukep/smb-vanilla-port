@@ -441,6 +441,7 @@ int main(int argc, char *argv[]) {
 
   fe->romfile = fopen(cfg.general.rom_filename, "rb");
   if (!fe->romfile) {
+    log_error("Could not open ROM %s: %s", cfg.general.rom_filename, strerror(errno));
     goto exit;
   }
 

@@ -11,6 +11,7 @@ void ReadJoypads();
 void ReadPortBits(byte joynum);
 
 void dectimers();
+void update_prng(byte *prng);
 
 #ifdef __cplusplus
 }

@@ -1,20 +1,110 @@
 // The start of something magical! ✨
 
-#include "foundation.h"
+#include "smbcore.h"
 
 extern "C" {
-bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset);
 void SMB1_Reset();
 void SMB1_NMI();
 
-bool load_smb2j(struct SMB_state *state, size_t disk_offset);
+bool smb2j_load_file(struct SMB_state *state, const char *name);
 void SMB2J_Reset();
 void SMB2J_NMI();
 }
 
-#include "common.h"
+#include "smbcommon.h"
 
 thread_local struct SMB_state *SMB_STATE;
+
+
+static bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset) {
+  if (!seek_rom(state, prg_offset)) { return false; }
+  if (!read_rom_bytes(state, state->rammem + 0x8000, 0x8000)) { return false; }
+  if (!seek_rom(state, chr_offset)) { return false; }
+  if (!read_rom_bytes(state, state->chrrom, 0x2000)) { return false; }
+  state->which_game = GAME_SMB1;
+  update_pattern_tables(state);
+  return true;
+}
+
+
+struct FdsFile {
+  const char *name;
+  size_t file_offset;
+  ushort size;
+  ushort org;
+  int type;
+};
+
+#define TYPE_PRGRAM 0
+#define TYPE_CHRRAM 1
+
+#define SMB2J_FDS_FILES_COUNT 6
+
+// hard-code some offsets for now
+// the offsets are relative to after the 16-byte FDS header
+static FdsFile SMB2J_FDS_FILES[SMB2J_FDS_FILES_COUNT] = {
+  {"SM2CHAR1", 0x013C, 0x2000, 0x0000, TYPE_CHRRAM},
+  {"SM2CHAR2", 0x214D, 0x0040, 0x0760, TYPE_CHRRAM},
+  {"SM2MAIN ", 0x219E, 0x8000, 0x6000, TYPE_PRGRAM},
+  {"SM2DATA2", 0xA1AF, 0x0E2F, 0xC470, TYPE_PRGRAM},
+  {"SM2DATA3", 0xAFEF, 0x0CCF, 0xC5D0, TYPE_PRGRAM},
+  {"SM2DATA4", 0xBCCF, 0x0F4C, 0xC2B4, TYPE_PRGRAM},
+};
+
+bool smb2j_load_file(struct SMB_state *state, const char *name) {
+  if (strncmp(name, "SM2SAVE ", 8) == 0) {
+    // treat the save byte specially
+
+    state->rammem[0xD29F] = smb2j_load_games_beaten();
+
+    return true;
+  }
+
+  for (int i = 0; i < SMB2J_FDS_FILES_COUNT; i++) {
+    const FdsFile &a = SMB2J_FDS_FILES[i];
+    bool eq = strncmp(name, a.name, 8) == 0;
+    if (eq) {
+      // Found it!
+      byte *copy_to;
+      if (a.type == TYPE_CHRRAM) {
+        // Copy the bytes over to CHRRAM
+        copy_to = state->chrrom + a.org;
+      } else if (a.type == TYPE_PRGRAM) {
+        // Copy the bytes over to RAM
+        copy_to = state->rammem + a.org;
+      }
+      if (!seek_rom(state, state->smb2j_disk_offset + a.file_offset)) { return false; }
+      if (!read_rom_bytes(state, copy_to, a.size)) { return false; }
+
+      if (a.type == TYPE_CHRRAM) {
+        update_pattern_tables(state);
+      }
+
+      return true;
+    }
+  }
+  return false;
+}
+
+bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
+  // In this case, the 16 bit header is this:
+  static char fds_disk_verification[16] = {0x01, '*', 'N', 'I', 'N', 'T', 'E', 'N', 'D', 'O', '-', 'H', 'V', 'C', '*', 0x01};
+  byte headerbuf[16];
+  if (!seek_rom(state, disk_offset)) { return false; }
+  if (!read_rom_bytes(state, headerbuf, 16)) { return false; }
+
+  bool match = memcmp(headerbuf, fds_disk_verification, 16) == 0;
+  if (!match) { return false; }
+  state->which_game = GAME_SMB2J;
+  state->smb2j_disk_offset = disk_offset;
+
+  // Load these automatically
+  smb2j_load_file(state, "SM2CHAR1");
+  smb2j_load_file(state, "SM2MAIN ");
+  smb2j_load_file(state, "SM2SAVE ");
+  return true;
+}
+
 
 static bool detect_and_load_rom(struct SMB_state *state) {
   byte headerbuf[16];
@@ -37,6 +127,7 @@ static bool detect_and_load_rom(struct SMB_state *state) {
 
 size_t SMB_state_size(void) { return sizeof(struct SMB_state); }
 bool SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb) {
+  SMB_STATE = state;
   memset(state, 0, sizeof(struct SMB_state));
   state->callbacks = *cb;
   state->start_on_world = 1;
@@ -104,7 +195,7 @@ static inline void draw_nametable_tile(const struct SMB_state *state, int x, int
   tile.extra_bg.x = tilex;
   tile.extra_bg.y = tilex;
 
-  state->callbacks.draw_tile(state->callbacks.userdata, tile);
+  draw_tile(tile);
 }
 
 static inline void draw_nametable_rect(const struct SMB_state *state, int x, int y, ushort ppu_offset, int fromx,
@@ -125,14 +216,14 @@ void draw_graphics(struct SMB_state *state) {
   if (!state->ppu.screen_on) {
     return;
   }
-  if (!state->callbacks.draw_tile) {
+  if (!can_draw_tile()) {
     return;
   }
 
   for (int spriteidx = 0; spriteidx < 64; spriteidx++) {
     const struct sprite *s = state->sprites + (63 - spriteidx);
     if (s->draw_behind) {
-      state->callbacks.draw_tile(state->callbacks.userdata, s->tile);
+      draw_tile(s->tile);
     }
   }
 
@@ -153,7 +244,7 @@ void draw_graphics(struct SMB_state *state) {
   for (int spriteidx = 0; spriteidx < 64; spriteidx++) {
     const struct sprite *s = state->sprites + (63 - spriteidx);
     if (!s->draw_behind) {
-      state->callbacks.draw_tile(state->callbacks.userdata, s->tile);
+      draw_tile(s->tile);
     }
   }
 }

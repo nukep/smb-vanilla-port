@@ -1,0 +1,2 @@
+option('opengl', type: 'feature', value: 'auto',
+       description: 'Build with OpenGL support')
