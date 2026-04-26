@@ -209,6 +209,8 @@ int sdl_tick(void *userdata) {
           dump_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename);
           dump_ram(smb_state, fe->cfg->debug.dump_ram_filename);
           break;
+        default:
+          break;
         }
       }
       if (!use_movie_buttons) {
@@ -367,7 +369,7 @@ int main(int argc, char *argv[]) {
   byte palette_rgb[0x40][3];
 
   if (cfg.general.palette_filename) {
-    if (!load_palette(&palette_rgb[0], cfg.general.palette_filename)) {
+    if (!load_palette(&palette_rgb[0][0], cfg.general.palette_filename)) {
       log_error("Could not load palette from file %s", cfg.general.palette_filename);
       goto exit;
     }
@@ -387,7 +389,7 @@ int main(int argc, char *argv[]) {
   fe->window = SDL_CreateWindow("smb-port", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256 * fe->video_scale,
                             240 * fe->video_scale, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
   if (!fe->window) {
-    log_error("Could not create SDL2 window: %s", SDL_GetError());
+    log_error("Could not create SDL window: %s", SDL_GetError());
     goto exit;
   }
 
@@ -418,10 +420,10 @@ int main(int argc, char *argv[]) {
   if (fe->smb_gl) {
     log_info("Using OpenGL renderer");
 
-    SMBgl_provide_palette_lookup(fe->smb_gl, &palette_rgb[0]);
+    SMBgl_provide_palette_lookup(fe->smb_gl, &palette_rgb[0][0]);
   } else if (fe->smb_raster) {
     log_info("Using software renderer");
-    SMBraster_provide_palette_lookup(fe->smb_raster, &palette_rgb[0]);
+    SMBraster_provide_palette_lookup(fe->smb_raster, &palette_rgb[0][0]);
   } else {
     log_error("No renderer available");
     goto exit;
@@ -430,7 +432,7 @@ int main(int argc, char *argv[]) {
   if (fe->smb_raster) {
     fe->surf = SDL_CreateRGBSurface(0, 256, 240, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
     if (!fe->surf) {
-      log_error("Could not create SDL2 surface: %s", SDL_GetError());
+      log_error("Could not create SDL surface: %s", SDL_GetError());
       goto exit;
     }
     fe->pixels_stride = 256;
