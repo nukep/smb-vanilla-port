@@ -80,11 +80,11 @@ bool SMBgl_init(struct SMBgl *gl) {
   glBindVertexArray(gl->glvao);
   glBindBuffer(GL_ARRAY_BUFFER, gl->glvbo);
   glEnableVertexAttribArray(ATTRIB_POS_LOCATION);
-  glVertexAttribPointer(ATTRIB_POS_LOCATION, 3, GL_FLOAT, GL_FALSE, stride, offsetof(struct gl_vbo_item, pos));
+  glVertexAttribPointer(ATTRIB_POS_LOCATION, 3, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(struct gl_vbo_item, pos));
   glEnableVertexAttribArray(ATTRIB_ST_LOCATION);
-  glVertexAttribPointer(ATTRIB_ST_LOCATION, 2, GL_FLOAT, GL_FALSE, stride, offsetof(struct gl_vbo_item, st));
+  glVertexAttribPointer(ATTRIB_ST_LOCATION, 2, GL_FLOAT, GL_FALSE, stride, (void *)offsetof(struct gl_vbo_item, st));
   glEnableVertexAttribArray(ATTRIB_PALIDX_LOCATION);
-  glVertexAttribIPointer(ATTRIB_PALIDX_LOCATION, 1, GL_BYTE, stride, offsetof(struct gl_vbo_item, pal));
+  glVertexAttribIPointer(ATTRIB_PALIDX_LOCATION, 1, GL_BYTE, stride, (void *)offsetof(struct gl_vbo_item, pal));
 
   return true;
 }
@@ -221,7 +221,7 @@ bool SMBgl_render_frame(struct SMBgl *gl) {
     }
   }
   GLint palette_location = glGetUniformLocation(gl->gl_shader_program, "palette");
-  glUniform4fv(palette_location, 32, palbuf);
+  glUniform4fv(palette_location, 32, &palbuf[0][0]);
 
   glClearColor((float)bgcolor.r/255.0f, (float)bgcolor.g/255.0f, (float)bgcolor.b/255.0f, 1.0f);
   glClearDepth(1.0f);
@@ -236,7 +236,7 @@ bool SMBgl_render_frame(struct SMBgl *gl) {
     {       0.0f,        0.0f, 0.0f,  1.0f}
   };
 
-  glUniformMatrix4fv(glGetUniformLocation(gl->gl_shader_program, "viewmat"), 1, 1, &view_matrix);
+  glUniformMatrix4fv(glGetUniformLocation(gl->gl_shader_program, "viewmat"), 1, 1, &view_matrix[0][0]);
 
   // enable alpha blending
   glEnable(GL_BLEND);

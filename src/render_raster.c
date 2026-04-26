@@ -96,7 +96,7 @@ void SMBraster_draw_tile(struct SMBraster *r, const struct SMB_tile tile) {
 
 
 void SMBraster_set_buffer(struct SMBraster *r, unsigned char *rgb_pixels, int stride) {
-  r->pixels = rgb_pixels;
+  r->pixels = (struct Pixel *)rgb_pixels;
   r->pixels_stride = stride;
 }
 
