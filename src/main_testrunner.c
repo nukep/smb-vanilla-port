@@ -16,16 +16,21 @@ bool open_rom(struct testrunner_userdata *userdata, const char *filename) {
   return f != 0;
 }
 
-bool read_rom_bytes(struct testrunner_userdata *userdata, byte *buf, size_t size) {
-  return fread(buf, size, 1, userdata->romfile) == 1;
+bool read_rom_bytes(void *userdata, byte *buf, size_t size) {
+  struct testrunner_userdata *ud = userdata;
+  return fread(buf, size, 1, ud->romfile) == 1;
 }
 
-bool seek_rom(struct testrunner_userdata *userdata, size_t offset) {
-  fseek(userdata->romfile, offset, SEEK_SET);
+bool seek_rom(void *userdata, size_t offset) {
+  struct testrunner_userdata *ud = userdata;
+  fseek(ud->romfile, offset, SEEK_SET);
   return true;
 }
 
-void joy1(struct testrunner_userdata *userdata, struct SMB_buttons *buttons) { *buttons = userdata->joy1_buttons; }
+void joy1(void *userdata, struct SMB_buttons *buttons) {
+  struct testrunner_userdata *ud = userdata;
+  *buttons = ud->joy1_buttons;
+}
 
 byte smb2j_load_games_beaten(void *userdata) {
   // A decent test value - lets us test Worlds A-D
