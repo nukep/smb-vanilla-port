@@ -1,7 +1,20 @@
 project('smbport', ['c', 'cpp'],
         default_options: 'default_library=static')
 
-sdl2 = dependency('sdl2')
+if get_option('sdl2')
+  sdl = dependency('sdl2')
+  use_sdl3 = false
+else
+  sdl3 = dependency('sdl3', required: false)
+  if sdl3.found()
+    sdl = sdl3
+    use_sdl3 = true
+  else
+    sdl = dependency('sdl2')
+    use_sdl3 = false
+  endif
+endif
+
 glew = dependency('glew', required: get_option('opengl'))
 
 if glew.found()
@@ -35,15 +48,33 @@ executable('smb_testrunner',
            ['src/main_testrunner.c', 'src/movie.c'],
            link_with: smbcore)
 
-executable('smbport',
-           ['src/main_sdl.c',
-            'src/movie.c',
-            'src/audio.cpp',
-            'src/time.c',
-            'src/render_opengl.c',
-            'src/render_raster.c',
-            'src/thirdparty/ini.c'],
+if use_sdl3
+  executable('smbport',
+             ['src/main_sdl3.c',
+              'src/audio_sdl3.cpp',
+              'src/time.c',
+              'src/movie.c',
+              'src/render_opengl.c',
+              'src/render_raster.c',
+              'src/thirdparty/ini.c'],
 
-           include_directories: ['Nes_Snd_Emu'],
-           link_with: [smbcore, nessndemu],
-           dependencies: [sdl2, glew])
+             include_directories: ['Nes_Snd_Emu'],
+             link_with: [smbcore, nessndemu],
+             dependencies: [sdl, glew])
+else
+  executable('smbport',
+             ['src/main_sdl2.c',
+              'src/audio_sdl2.cpp',
+              'src/time.c',
+              'src/movie.c',
+              'src/render_opengl.c',
+              'src/render_raster.c',
+              'src/thirdparty/ini.c'],
+
+             include_directories: ['Nes_Snd_Emu'],
+             link_with: [smbcore, nessndemu],
+             dependencies: [sdl, glew],
+             c_args:   ['-DUSE_SDL2'],
+             cpp_args: ['-DUSE_SDL2'])
+endif
+

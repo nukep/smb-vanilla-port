@@ -1,2 +1,6 @@
 option('opengl', type: 'feature', value: 'auto',
        description: 'Build with OpenGL support')
+
+option('sdl2', type: 'boolean', value: false,
+       description: 'Use SDL2 instead of SDL3')
+

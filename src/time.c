@@ -1,10 +1,16 @@
 #include "time.h"
-#include <SDL.h>
+#ifdef USE_SDL2
+#include <SDL2/SDL.h>
+#else
+#include <SDL3/SDL.h>
+#endif
 #include <math.h>
 
 // Run the callback at the specified frequency (events per second, such as the fps).
 int time_run_at_frequency(double hz, void *userdata, int (*cb)(void *userdata)) {
+#ifdef USE_SDL2
   SDL_Init(SDL_INIT_TIMER);
+#endif
 
   uint64_t perffreq = SDL_GetPerformanceFrequency();
   uint64_t begin = SDL_GetPerformanceCounter();
