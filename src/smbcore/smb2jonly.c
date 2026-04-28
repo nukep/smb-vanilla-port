@@ -426,26 +426,6 @@ void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
 
 
 // SM2MAIN:n/a
-// Signature: [A, X] -> []
-void jumptable_AreaStyleObject(byte param_1, byte param_2) {
-  if (param_1 == 0) {
-    TreeLedge(param_2);
-    return;
-  }
-  if (param_1 == 1) {
-    CloudLedge(param_2);
-    return;
-  }
-  if (param_1 == 2) {
-    BulletBillCannon(param_2);
-    return;
-  }
-  jmpengine_overflow(param_1);
-  return;
-}
-
-
-// SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_GameMode(byte param_1) {
   if (param_1 == 0) {
@@ -979,57 +959,9 @@ void CloudLedge(byte param_1) {
 // Common: IntroPipe
 // Common: ExitPipe
 // Common: RenderSidewaysPipe
-
-
-// SM2MAIN:7731
-// Signature: [X, r00] -> []
-void VerticalPipe(byte param_1, byte param_2) {
-  byte bVar1;
-  byte bVar2;
-  struct_yr06r07 sVar3;
-  struct_xc sVar4;
-  byte bStack0000;
-
-  sVar3 = GetPipeHeight(param_1);
-  bVar2 = sVar3.r07;
-  bVar1 = sVar3.r06;
-  bStack0000 = sVar3.y;
-  if (param_2 != 0) {
-    bStack0000 += 4;
-  }
-  if (AreaObjectLength[param_1] != 0) {
-    sVar4 = FindEmptyEnemySlot();
-    if (!sVar4.c) {
-      SetupPiranhaPlant(0xd, sVar4.x, bVar2);
-    }
-  }
-  MetatileBuffer[bVar2] = VerticalPipeData[bStack0000];
-  RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar2 + 1, bVar1 - 1);
-  return;
-}
-
-
+// Common: VerticalPipe
 // Common: GetPipeHeight
-
-
-// SM2MAIN:7772
-// Signature: [A, X, r07] -> []
-void SetupPiranhaPlant(byte param_1, byte param_2, byte param_3) {
-  byte bVar1;
-
-  Enemy_ID[param_2] = param_1;
-  bVar1 = GetAreaObjXPosition();
-  Enemy_X_Position[param_2] = bVar1 + 8;
-  Enemy_PageLoc[param_2] = CurrentPageLoc + (bVar1 >= 0xf8);
-  Enemy_Y_HighPos[param_2] = 1;
-  Enemy_Flag[param_2] = 1;
-  bVar1 = GetAreaObjYPosition(param_3);
-  Enemy_Y_Position[param_2] = bVar1;
-  InitPiranhaPlant(param_2);
-  return;
-}
-
-
+// Common: SetupPiranhaPlant
 // Common: FindEmptyEnemySlot
 // Common: Hole_Water
 // Common: QuestionBlockRow_High
@@ -1124,25 +1056,7 @@ void SetupPiranhaPlant(byte param_1, byte param_2, byte param_3) {
 // Common: JCoinC
 // Common: FindEmptyMiscSlot
 // Common: MiscObjectsCore
-
-
-// SM2MAIN:87c3
-// Signature: [] -> [X]
-byte GiveOneCoin(void) {
-  byte bVar1;
-
-  DigitModifier[5] = 1;
-  DigitsMathRoutine(0x11);
-  CoinTally += 1;
-  if (CoinTally == 100) {
-    CoinTally = 0;
-    NumberofLives += 1;
-    Square2SoundQueue = 0x40;
-  }
-  DigitModifier[4] = 2;
-  bVar1 = AddToScore();
-  return bVar1;
-}
+// Common: GiveOneCoin
 
 
 // SM2MAIN:87e8
@@ -1540,15 +1454,7 @@ byte SetBounce(byte param_1) {
 // Common: PlayerBGCollision
 // Common: ErACM
 // Common: HandleClimbing
-
-
-// SM2MAIN:ab40
-// Signature: [A] -> [Z]
-bool ChkInvisibleMTiles(byte mtile) {
-  return mtile == 0x5e || mtile == 0x5f || mtile == 0x60 || mtile == 0x61;
-}
-
-
+// Common: ChkInvisibleMTiles
 // Common: ChkForLandJumpSpring
 // Common: ChkJumpspringMetatiles
 // Common: HandlePipeEntry
@@ -2076,44 +1982,7 @@ static void LoadLuigiPhysics(void) {
 // Common: LoadAreaPointer
 // Common: GetAreaType
 // Common: FindAreaPointer
-
-
-// SM2MAIN:c2c3
-// Signature: [] -> []
-void GetAreaDataAddrs(void) {
-  byte bVar1;
-  byte bVar2;
-  byte bVar3;
-  byte bVar4;
-
-  bVar3 = GetAreaType(AreaPointer);
-  AreaAddrsLOffset = AreaPointer & 0x1f;
-  bVar3 = (EnemyAddrHOffsets[bVar3] + AreaAddrsLOffset) * 2;
-  EnemyData.hi = EnemyDataAddrs[bVar3 + 1];
-  EnemyData.lo = EnemyDataAddrs[bVar3];
-  bVar2 = (AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
-  bVar1 = AreaDataAddrs[bVar2];
-  AreaData = CONCAT11(AreaDataAddrs[bVar2 + 1], bVar1);
-  bVar3 = *AreaData;
-  bVar4 = bVar3 & 7;
-  ForegroundScenery = bVar4;
-  if (bVar4 >= 4) {
-    ForegroundScenery = 0;
-    BackgroundColorCtrl = bVar4;
-  }
-  PlayerEntranceCtrl = (bVar3 & 0x38) >> 3;
-  GameTimerSetting = bVar3 >> 6;
-  bVar3 = AreaData[1];
-  TerrainControl = bVar3 & 0xf;
-  BackgroundScenery = (bVar3 & 0x30) >> 4;
-  AreaStyle = bVar3 >> 6;
-  if (AreaStyle == 3) {
-    AreaStyle = 0;
-    CloudTypeOverride = 3;
-  }
-  AreaData = CONCAT11(AreaDataAddrs[bVar2 + 1] + (bVar1 >= 0xfe), bVar1 + 2);
-  return;
-}
+// Common: GetAreaDataAddrs
 
 
 // SM2MAIN:c46e
@@ -2200,44 +2069,8 @@ void SetupMenuCursor(void) {
 }
 
 
-// SM2MAIN:c553
-// Signature: [] -> [C]
-bool DemoEngine(void) {
-  byte bVar1;
-
-  if (DemoActionTimer == 0) {
-    bVar1 = DemoAction + 1;
-    DemoAction += 1;
-    DemoActionTimer = DemoActionData[bVar1 + 0x10];
-    if (DemoActionTimer == 0) {
-      return true;
-    }
-  }
-  DemoActionTimer = DemoActionTimer - 1;
-  SavedJoypadBits[0] = DemoActionData[DemoAction - 1];
-  return false;
-}
-
-
-// SM2MAIN:c573
-// Signature: [] -> []
-void ClearBuffersDrawIcon(void) {
-  byte bVar1;
-
-  if (OperMode == 0) {
-    for (int i = 0; i < 256; i++) {
-      VRAM_Page[i] = 0;
-      SprObject_X_MoveForce[i] = 0;
-    }
-    DrawMenuCursor();
-    ScreenRoutineTask = ScreenRoutineTask + 1;
-    return;
-  }
-  OperMode_Task = OperMode_Task + 1;
-  return;
-}
-
-
+// Common: DemoEngine
+// Common: ClearBuffersDrawIcon
 // Common: WriteTopScore
 
 
@@ -2278,15 +2111,7 @@ void DemoReset(void) {
 }
 
 
-// SM2MAIN:c5db
-// Signature: [] -> []
-void PrimaryGameSetup(void) {
-  FetchNewGameTimerFlag = 1;
-  PlayerSize = 1;
-  NumberofLives = 2;
-  SecondaryGameSetup();
-  return;
-}
+// Common: PrimaryGameSetup
 
 
 // SM2MAIN:c5ff

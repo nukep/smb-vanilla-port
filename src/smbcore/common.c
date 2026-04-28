@@ -819,6 +819,21 @@ void MoveSpritesOffscreen(void) {
   return;
 }
 
+// SMB:836b
+// SM2MAIN:c553
+// Signature: [] -> [C]
+bool DemoEngine(void) {
+  if (DemoActionTimer == 0) {
+    DemoActionTimer = DemoTimingData[DemoAction];
+    DemoAction += 1;
+    if (DemoActionTimer == 0) {
+      return true;
+    }
+  }
+  DemoActionTimer = DemoActionTimer - 1;
+  SavedJoypadBits[0] = DemoActionData[DemoAction - 1];
+  return false;
+}
 
 // SMB:838b
 // SM2MAIN:6298
@@ -1216,6 +1231,29 @@ void AreaParserTaskControl(void) {
     ScreenRoutineTask += 1;
   }
   VRAM_Buffer_AddrCtrl = 6;
+  return;
+}
+
+
+// SMB:8732
+// SM2MAIN:c573
+// Signature: [] -> []
+void ClearBuffersDrawIcon(void) {
+  if (OperMode == 0) {
+    for (int i = 0; i < 256; i++) {
+      VRAM_Page[i] = 0;
+      SprObject_X_MoveForce[i] = 0;
+    }
+#ifdef SMB1_MODE
+    DrawMushroomIcon();
+#endif
+#ifdef SMB2J_MODE
+    DrawMenuCursor();
+#endif
+    ScreenRoutineTask = ScreenRoutineTask + 1;
+    return;
+  }
+  OperMode_Task = OperMode_Task + 1;
   return;
 }
 
@@ -1679,6 +1717,21 @@ void InitializeArea(void) {
   LoadPhysicsData();
 #endif
   OperMode_Task = OperMode_Task + 1;
+  return;
+}
+
+
+// SMB:9061
+// SM2MAIN:c5db
+// Signature: [] -> []
+void PrimaryGameSetup(void) {
+  FetchNewGameTimerFlag = 1;
+  PlayerSize = 1;
+  NumberofLives = 2;
+#ifdef SMB1_MODE
+  OffScr_NumberofLives = 2;
+#endif
+  SecondaryGameSetup();
   return;
 }
 
@@ -2282,6 +2335,35 @@ void AreaFrenzy(byte param_1) {
 }
 
 
+// SMB:n/a
+// SM2MAIN:n/a
+// Signature: [A, X] -> []
+void jumptable_AreaStyleObject(byte param_1, byte param_2) {
+  if (param_1 == 0) {
+    TreeLedge(param_2);
+    return;
+  }
+
+  if (param_1 == 1) {
+#ifdef SMB1_MODE
+    MushroomLedge(param_2);
+#endif
+#ifdef SMB2J_MODE
+    CloudLedge(param_2);
+#endif
+    return;
+  }
+
+  if (param_1 == 2) {
+    BulletBillCannon(param_2);
+    return;
+  }
+
+  jmpengine_overflow(param_1);
+  return;
+}
+
+
 // SMB:9740
 // SM2MAIN:7597
 // Signature: [X] -> []
@@ -2454,6 +2536,73 @@ struct_yc RenderSidewaysPipe(byte param_1, byte param_2) {
   sVar4.c = bVar1 == 0;
   sVar4.y = bVar2;
   return sVar4;
+}
+
+
+// SMB:N/A (inlined in VerticalPipe)
+// SM2MAIN:7772
+// Signature: [A, X, r07] -> []
+void SetupPiranhaPlant(byte param_1, byte param_2, byte param_3) {
+  byte bVar1;
+
+  // The order of Enemy_ID[param_2] differs between SMB and SMB2J.
+  // It might matter if there are bugs. I'm not sure yet.
+
+#ifdef SMB2J_MODE
+  Enemy_ID[param_2] = param_1;
+#endif
+  bVar1 = GetAreaObjXPosition();
+  Enemy_X_Position[param_2] = bVar1 + 8;
+  Enemy_PageLoc[param_2] = CurrentPageLoc + (bVar1 >= 0xf8);
+  Enemy_Y_HighPos[param_2] = 1;
+  Enemy_Flag[param_2] = 1;
+  bVar1 = GetAreaObjYPosition(param_3);
+  Enemy_Y_Position[param_2] = bVar1;
+#ifdef SMB1_MODE
+  Enemy_ID[param_2] = param_1;
+#endif
+
+  InitPiranhaPlant(param_2);
+}
+
+
+// SMB:98e5
+// SM2MAIN:7731
+// Signature: [X, r00] -> []
+void VerticalPipe(byte param_1, byte param_2) {
+  byte bVar1;
+  byte bVar2;
+  byte bVar3;
+  struct_yr06r07 sVar5;
+  struct_xc sVar6;
+  byte bStack0000;
+
+  sVar5 = GetPipeHeight(param_1);
+  bVar2 = sVar5.r07;
+  bVar1 = sVar5.r06;
+  bStack0000 = sVar5.y;
+  if (param_2 != 0) {
+    bStack0000 += 4;
+  }
+
+  bool check = AreaObjectLength[param_1] != 0;
+
+#ifdef SMB1_MODE
+  if (AreaNumber == 0 && WorldNumber == 0) {
+    check = false;
+  }
+#endif
+
+  if (check) {
+    sVar6 = FindEmptyEnemySlot();
+    if (!sVar6.c) {
+      SetupPiranhaPlant(0xd, sVar6.x, bVar2);
+    }
+  }
+
+  MetatileBuffer[bVar2] = VerticalPipeData[bStack0000];
+  RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar2 + 1, bVar1 - 1);
+  return;
 }
 
 
@@ -3041,6 +3190,70 @@ byte GetAreaType(byte param_1) {
 // SM2MAIN:c2b4
 // Signature: [] -> [A]
 byte FindAreaPointer(void) { return AreaAddrOffsets[(byte)(WorldAddrOffsets[WorldNumber] + AreaNumber)]; }
+
+
+// SMB:9c22
+// SM2MAIN:c2c3
+// Signature: [] -> []
+void GetAreaDataAddrs(void) {
+  byte bVar1;
+  byte bVar2;
+  byte bVar3;
+
+  bVar2 = GetAreaType(AreaPointer);
+  AreaAddrsLOffset = AreaPointer & 0x1f;
+  byte off = (byte)(EnemyAddrHOffsets[bVar2] + AreaAddrsLOffset);
+
+#ifdef SMB1_MODE
+  EnemyData.lo = EnemyDataAddrLow[off];
+  EnemyData.hi = EnemyDataAddrHigh[off];
+#endif
+#ifdef SMB2J_MODE
+  EnemyData.hi = EnemyDataAddrs[(byte)(off * 2) + 1];
+  EnemyData.lo = EnemyDataAddrs[(byte)(off * 2)];
+#endif
+
+#ifdef SMB1_MODE
+  byte bVar2_off = (byte)(AreaDataHOffsets[AreaType] + AreaAddrsLOffset);
+  byte lo = AreaDataAddrLow[bVar2_off];
+  byte hi = AreaDataAddrHigh[bVar2_off];
+#endif
+#ifdef SMB2J_MODE
+  byte bVar2_off = (AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
+  byte lo = AreaDataAddrs[bVar2_off];
+  byte hi = AreaDataAddrs[bVar2_off + 1];
+#endif
+
+  AreaData = (hi << 8) | lo;
+
+  bVar2 = AreaData[0];
+  bVar3 = bVar2 & 7;
+  ForegroundScenery = bVar3;
+  if (bVar3 >= 4) {
+    ForegroundScenery = 0;
+    BackgroundColorCtrl = bVar3;
+  }
+  PlayerEntranceCtrl = (bVar2 & 0x38) >> 3;
+  GameTimerSetting = bVar2 >> 6;
+  bVar2 = AreaData[1];
+  TerrainControl = bVar2 & 0xf;
+  BackgroundScenery = (bVar2 & 0x30) >> 4;
+  AreaStyle = bVar2 >> 6;
+  if (AreaStyle == 3) {
+    AreaStyle = 0;
+    CloudTypeOverride = 3;
+  }
+
+#ifdef SMB1_MODE
+  hi = AreaDataAddrHigh[(byte)(AreaDataHOffsets[AreaType] + AreaAddrsLOffset)];
+#endif
+#ifdef SMB2J_MODE
+  hi = AreaDataAddrs[bVar2_off + 1];
+#endif
+
+  AreaData = ((hi << 8) | lo) + 2;
+  return;
+}
 
 
 // SMB:aedc
@@ -4628,6 +4841,30 @@ MiscLoopBack:
       return;
     }
   } while (true);
+}
+
+
+// SMB:bbfe
+// SM2MAIN:87c3
+// Signature: [] -> [X]
+byte GiveOneCoin(void) {
+  DigitModifier[5] = 1;
+
+#ifdef SMB1_MODE
+  DigitsMathRoutine(CoinTallyOffsets[CurrentPlayer]);
+#endif
+#ifdef SMB2J_MODE
+  DigitsMathRoutine(0x11);
+#endif
+
+  CoinTally += 1;
+  if (CoinTally == 100) {
+    CoinTally = 0;
+    NumberofLives += 1;
+    Square2SoundQueue = 0x40;
+  }
+  DigitModifier[4] = 2;
+  return AddToScore();
 }
 
 
@@ -8964,6 +9201,19 @@ void HandleClimbing(byte param_1, byte param_2, byte param_3) {
     SprObject_PageLoc[0] = ScreenRight_PageLoc + ClimbXPosAdder[PlayerFacingDir + 1];
   }
   return;
+}
+
+
+// SMB:debd
+// SM2MAIN:ab40
+// Signature: [A] -> [Z]
+bool ChkInvisibleMTiles(byte mtile) {
+#ifdef SMB1_MODE
+  return mtile == 0x5f || mtile == 0x60;
+#endif
+#ifdef SMB2J_MODE
+  return mtile == 0x5e || mtile == 0x5f || mtile == 0x60 || mtile == 0x61;
+#endif
 }
 
 
