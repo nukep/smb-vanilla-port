@@ -259,9 +259,6 @@ struct struct_xr00 {
 
 
 
-void smb1_jumptable_OperModeExecutionTree(byte param_1,byte param_2);
-#define jumptable_OperModeExecutionTree smb1_jumptable_OperModeExecutionTree
-
 void smb1_jumptable_TitleScreenMode(byte param_1);
 #define jumptable_TitleScreenMode smb1_jumptable_TitleScreenMode
 
@@ -886,8 +883,8 @@ byte smb1_GiveOneCoin(void);
 byte smb1_AddToScore(void);
 #define AddToScore smb1_AddToScore
 
-byte smb1_GetSBNybbles(void);
-#define GetSBNybbles smb1_GetSBNybbles
+byte smb1_WriteScoreAndCoinTally(void);
+#define WriteScoreAndCoinTally smb1_WriteScoreAndCoinTally
 
 byte smb1_WriteDigits(byte param_1);
 #define WriteDigits smb1_WriteDigits

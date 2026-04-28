@@ -254,9 +254,6 @@ struct struct_xr00 {
 
 
 
-void smb2j_jumptable_OperModeExecutionTree(byte param_1,byte param_2);
-#define jumptable_OperModeExecutionTree smb2j_jumptable_OperModeExecutionTree
-
 void smb2j_jumptable_VictoryModeSubroutines(byte param_1,byte param_2);
 #define jumptable_VictoryModeSubroutines smb2j_jumptable_VictoryModeSubroutines
 

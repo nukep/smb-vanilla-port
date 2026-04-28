@@ -3,30 +3,6 @@
 
 // SM2MAIN:n/a
 // Signature: [A, r00] -> []
-void jumptable_OperModeExecutionTree(byte param_1, byte param_2) {
-  if (param_1 == 0) {
-    AttractModeSubs();
-    return;
-  }
-  if (param_1 == 1) {
-    GameMode();
-    return;
-  }
-  if (param_1 == 2) {
-    VictoryMode(param_2);
-    return;
-  }
-  if (param_1 == 3) {
-    GameOverMode();
-    return;
-  }
-  jmpengine_overflow(param_1);
-  return;
-}
-
-
-// SM2MAIN:n/a
-// Signature: [A, r00] -> []
 void jumptable_VictoryModeSubroutines(byte param_1, byte param_2) {
   if (param_1 == 0) {
     BridgeCollapse(param_2);
@@ -1057,29 +1033,8 @@ void CloudLedge(byte param_1) {
 // Common: FindEmptyMiscSlot
 // Common: MiscObjectsCore
 // Common: GiveOneCoin
-
-
-// SM2MAIN:87e8
-// Signature: [] -> [X]
-byte AddToScore(void) {
-  byte bVar1;
-
-  DigitsMathRoutine(0xb);
-  bVar1 = WriteScoreAndCoinTally();
-  return bVar1;
-}
-
-
-// SM2MAIN:87ed
-// Signature: [] -> [X]
-byte WriteScoreAndCoinTally(void) {
-  byte bVar1;
-
-  bVar1 = WriteDigits(1);
-  return bVar1;
-}
-
-
+// Common: AddToScore
+// Common: WriteScoreAndCoinTally
 // Common: WriteDigits
 // Common: SetupPowerUp
 // Common: PwrUpJmp
@@ -1251,16 +1206,7 @@ void GameTimerFireworks(byte param_1) {
 // Common: StarFlagExit
 // Common: AwardGameTimerPoints
 // Common: AwardTimerCastle
-
-
-// SM2MAIN:9f70
-// Signature: [] -> [X]
-byte EndAreaPoints(void) {
-  DigitsMathRoutine(0xb);
-  return WriteDigits(2);
-}
-
-
+// Common: EndAreaPoints
 // Common: RaiseFlagSetoffFWorks
 // Common: DrawStarFlag
 // Common: DelayToAreaEnd

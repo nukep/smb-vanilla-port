@@ -783,9 +783,31 @@ void SpriteShuffler(void) {
 // SM2MAIN:6279
 // Signature: [] -> []
 void OperModeExecutionTree(void) {
+  byte param_1 = OperMode;
   byte in_r00 = 0;
 
-  jumptable_OperModeExecutionTree(OperMode, in_r00);
+  if (param_1 == 0) {
+#ifdef SMB1_MODE
+    TitleScreenMode();
+#endif
+#ifdef SMB2J_MODE
+    AttractModeSubs();
+#endif
+    return;
+  }
+  if (param_1 == 1) {
+    GameMode();
+    return;
+  }
+  if (param_1 == 2) {
+    VictoryMode(in_r00);
+    return;
+  }
+  if (param_1 == 3) {
+    GameOverMode();
+    return;
+  }
+  jmpengine_overflow(param_1);
   return;
 }
 
@@ -1137,12 +1159,7 @@ void WriteTopStatusLine(void) {
 // SM2MAIN:65af
 // Signature: [] -> []
 void WriteBottomStatusLine(void) {
-#ifdef SMB1_MODE
-  GetSBNybbles();
-#endif
-#ifdef SMB2J_MODE
   WriteScoreAndCoinTally();
-#endif
   VRAM_Buffer1[VRAM_Buffer1_Offset] = 0x20;
   VRAM_Buffer1[VRAM_Buffer1_Offset + 1] = 0x73;
   VRAM_Buffer1[VRAM_Buffer1_Offset + 2] = 3;
@@ -4868,6 +4885,38 @@ byte GiveOneCoin(void) {
 }
 
 
+// SMB:bc27
+// SM2MAIN:87e8
+// Signature: [] -> [X]
+byte AddToScore(void) {
+#ifdef SMB1_MODE
+  DigitsMathRoutine(ScoreOffsets[CurrentPlayer]);
+#endif
+
+#ifdef SMB2J_MODE
+  DigitsMathRoutine(0xb);
+#endif
+
+  return WriteScoreAndCoinTally();
+}
+
+
+// SMB:bc30
+// SM2MAIN:87ed
+// Signature: [] -> [X]
+byte WriteScoreAndCoinTally(void) {
+  // Also called "GetSBNybbles" in the SMB1 disassembly
+
+  #ifdef SMB1_MODE
+    return WriteDigits(StatusBarNybbles[CurrentPlayer]);
+  #endif
+
+  #ifdef SMB2J_MODE
+    return WriteDigits(1);
+  #endif
+}
+
+
 // SMB:bc36
 // SM2MAIN:87ef
 // Signature: [A] -> [X]
@@ -7838,6 +7887,22 @@ byte AwardTimerCastle(void) {
   DigitsMathRoutine(ssw(0x23, 0x17));
   DigitModifier[5] = 5;
   return EndAreaPoints();
+}
+
+
+// SMB:d336
+// SM2MAIN:9f70
+// Signature: [] -> [X]
+byte EndAreaPoints(void) {
+#ifdef SMB1_MODE
+  DigitsMathRoutine(CurrentPlayer == 0 ? 0xb : 0x11);
+  return WriteDigits((CurrentPlayer * 16) + 4);
+#endif
+
+#ifdef SMB2J_MODE
+  DigitsMathRoutine(0xb);
+  return WriteDigits(2);
+#endif
 }
 
 

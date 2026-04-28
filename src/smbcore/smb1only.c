@@ -2,30 +2,6 @@
 #include "vars.h"
 
 // SMB:n/a
-// Signature: [A, r00] -> []
-void jumptable_OperModeExecutionTree(byte param_1, byte param_2) {
-  if (param_1 == 0) {
-    TitleScreenMode();
-    return;
-  }
-  if (param_1 == 1) {
-    GameMode();
-    return;
-  }
-  if (param_1 == 2) {
-    VictoryMode(param_2);
-    return;
-  }
-  if (param_1 == 3) {
-    GameOverMode();
-    return;
-  }
-  jmpengine_overflow(param_1);
-  return;
-}
-
-
-// SMB:n/a
 // Signature: [A] -> []
 void jumptable_TitleScreenMode(byte param_1) {
   if (param_1 == 0) {
@@ -966,29 +942,8 @@ void ScrollScreen(byte param_1) {
 // Common: FindEmptyMiscSlot
 // Common: MiscObjectsCore
 // Common: GiveOneCoin
-
-
-// SMB:bc27
-// Signature: [] -> [X]
-byte AddToScore(void) {
-  byte bVar1;
-
-  DigitsMathRoutine(ScoreOffsets[CurrentPlayer]);
-  bVar1 = GetSBNybbles();
-  return bVar1;
-}
-
-
-// SMB:bc30
-// Signature: [] -> [X]
-byte GetSBNybbles(void) {
-  byte bVar1;
-
-  bVar1 = WriteDigits(StatusBarNybbles[CurrentPlayer]);
-  return bVar1;
-}
-
-
+// Common: AddToScore
+// Common: WriteScoreAndCoinTally
 // Common: WriteDigits
 // Common: SetupPowerUp
 // Common: PwrUpJmp
@@ -1145,16 +1100,7 @@ void GameTimerFireworks(byte param_1) {
 // Common: StarFlagExit
 // Common: AwardGameTimerPoints
 // Common: AwardTimerCastle
-
-
-// SMB:d336
-// Signature: [] -> [X]
-byte EndAreaPoints(void) {
-  DigitsMathRoutine(CurrentPlayer == 0 ? 0xb : 0x11);
-  return WriteDigits(CurrentPlayer << 4 | 4);
-}
-
-
+// Common: EndAreaPoints
 // Common: RaiseFlagSetoffFWorks
 // Common: DrawStarFlag
 // Common: DelayToAreaEnd
