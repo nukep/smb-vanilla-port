@@ -420,16 +420,13 @@ byte jumptable_RunEnemyObjectsCore(byte param_1, byte param_2) {
   byte bVar1;
 
   if (param_1 == 0) {
-    bVar1 = RunNormalEnemies(param_2);
-    return bVar1;
+    return RunNormalEnemies(param_2);
   }
   if (param_1 == 1) {
-    bVar1 = RunBowserFlame(param_2);
-    return bVar1;
+    return RunBowserFlame(param_2);
   }
   if (param_1 == 2) {
-    bVar1 = RunFireworks(param_2);
-    return bVar1;
+    return RunFireworks(param_2);
   }
   if (param_1 == 3) {
     NoRunCode();
@@ -448,100 +445,78 @@ byte jumptable_RunEnemyObjectsCore(byte param_1, byte param_2) {
     return param_2;
   }
   if (param_1 == 7) {
-    bVar1 = RunFirebarObj(param_2);
-    return bVar1;
+    return RunFirebarObj(param_2);
   }
   if (param_1 == 8) {
-    bVar1 = RunFirebarObj(param_2);
-    return bVar1;
+    return RunFirebarObj(param_2);
   }
   if (param_1 == 9) {
-    bVar1 = RunFirebarObj(param_2);
-    return bVar1;
+    return RunFirebarObj(param_2);
   }
   if (param_1 == 10) {
-    bVar1 = RunFirebarObj(param_2);
-    return bVar1;
+    return RunFirebarObj(param_2);
   }
   if (param_1 == 0xb) {
-    bVar1 = RunFirebarObj(param_2);
-    return bVar1;
+    return RunFirebarObj(param_2);
   }
   if (param_1 == 0xc) {
-    bVar1 = RunFirebarObj(param_2);
-    return bVar1;
+    return RunFirebarObj(param_2);
   }
   if (param_1 == 0xd) {
-    bVar1 = RunFirebarObj(param_2);
-    return bVar1;
+    return RunFirebarObj(param_2);
   }
   if (param_1 == 0xe) {
-    bVar1 = RunFirebarObj(param_2);
-    return bVar1;
+    return RunFirebarObj(param_2);
   }
   if (param_1 == 0xf) {
     NoRunCode();
     return param_2;
   }
   if (param_1 == 0x10) {
-    bVar1 = RunLargePlatform(param_2);
-    return bVar1;
+    return RunLargePlatform(param_2);
   }
   if (param_1 == 0x11) {
-    bVar1 = RunLargePlatform(param_2);
-    return bVar1;
+    return RunLargePlatform(param_2);
   }
   if (param_1 == 0x12) {
-    bVar1 = RunLargePlatform(param_2);
-    return bVar1;
+    return RunLargePlatform(param_2);
   }
   if (param_1 == 0x13) {
-    bVar1 = RunLargePlatform(param_2);
-    return bVar1;
+    return RunLargePlatform(param_2);
   }
   if (param_1 == 0x14) {
-    bVar1 = RunLargePlatform(param_2);
-    return bVar1;
+    return RunLargePlatform(param_2);
   }
   if (param_1 == 0x15) {
-    bVar1 = RunLargePlatform(param_2);
-    return bVar1;
+    return RunLargePlatform(param_2);
   }
   if (param_1 == 0x16) {
-    bVar1 = RunLargePlatform(param_2);
-    return bVar1;
+    return RunLargePlatform(param_2);
   }
   if (param_1 == 0x17) {
-    bVar1 = RunSmallPlatform(param_2);
-    return bVar1;
+    return RunSmallPlatform(param_2);
   }
   if (param_1 == 0x18) {
-    bVar1 = RunSmallPlatform(param_2);
-    return bVar1;
+    return RunSmallPlatform(param_2);
   }
   if (param_1 == 0x19) {
-    bVar1 = RunBowser(param_2);
-    return bVar1;
+    return RunBowser(param_2);
   }
   if (param_1 == 0x1a) {
-    bVar1 = PowerUpObjHandler();
-    return bVar1;
+    return PowerUpObjHandler();
   }
   if (param_1 == 0x1b) {
-    bVar1 = VineObjectHandler(param_2);
-    return bVar1;
+    return VineObjectHandler(param_2);
   }
   if (param_1 == 0x1c) {
     NoRunCode();
     return param_2;
   }
   if (param_1 == 0x1d) {
-    bVar1 = RunStarFlagObj(param_2);
-    return bVar1;
+    return RunStarFlagObj(param_2);
   }
   if (param_1 == 0x1e) {
-    bVar1 = JumpspringHandler(param_2);
-    return bVar1;
+    return JumpspringHandler(param_2);
   }
   if (param_1 == 0x1f) {
     NoRunCode();
@@ -552,8 +527,7 @@ byte jumptable_RunEnemyObjectsCore(byte param_1, byte param_2) {
     return param_2;
   }
   if (param_1 == 0x21) {
-    bVar1 = RunRetainerObj(param_2);
-    return bVar1;
+    return RunRetainerObj(param_2);
   }
   jmpengine_overflow(param_1);
   return param_2;
@@ -567,20 +541,16 @@ byte jumptable_EnemyMovementSubs(byte param_1, byte param_2) {
   byte bVar1;
 
   if (param_1 == 0) {
-    bVar1 = MoveNormalEnemy(param_2);
-    return bVar1;
+    return MoveNormalEnemy(param_2);
   }
   if (param_1 == 1) {
-    bVar1 = MoveNormalEnemy(param_2);
-    return bVar1;
+    return MoveNormalEnemy(param_2);
   }
   if (param_1 == 2) {
-    bVar1 = MoveNormalEnemy(param_2);
-    return bVar1;
+    return MoveNormalEnemy(param_2);
   }
   if (param_1 == 3) {
-    bVar1 = MoveNormalEnemy(param_2);
-    return bVar1;
+    return MoveNormalEnemy(param_2);
   }
   if (param_1 == 4) {
     #ifdef SMB2J_MODE
@@ -591,68 +561,55 @@ byte jumptable_EnemyMovementSubs(byte param_1, byte param_2) {
     #endif
   }
   if (param_1 == 5) {
-    bVar1 = ProcHammerBro(param_2);
-    return bVar1;
+    return ProcHammerBro(param_2);
   }
   if (param_1 == 6) {
-    bVar1 = MoveNormalEnemy(param_2);
-    return bVar1;
+    return MoveNormalEnemy(param_2);
   }
   if (param_1 == 7) {
-    bVar1 = MoveBloober(param_2, false);
-    return bVar1;
+    return MoveBloober(param_2, false);
   }
   if (param_1 == 8) {
-    bVar1 = MoveBulletBill(param_2);
-    return bVar1;
+    return MoveBulletBill(param_2);
   }
   if (param_1 == 9) {
     NoMoveCode();
     return param_2;
   }
   if (param_1 == 10) {
-    bVar1 = MoveSwimmingCheepCheep(param_2);
-    return bVar1;
+    return MoveSwimmingCheepCheep(param_2);
   }
   if (param_1 == 0xb) {
-    bVar1 = MoveSwimmingCheepCheep(param_2);
-    return bVar1;
+    return MoveSwimmingCheepCheep(param_2);
   }
   if (param_1 == 0xc) {
-    bVar1 = MovePodoboo(param_2);
-    return bVar1;
+    return MovePodoboo(param_2);
   }
   if (param_1 == 0xd) {
     MovePiranhaPlant(param_2);
     return param_2;
   }
   if (param_1 == 0xe) {
-    bVar1 = MoveJumpingEnemy(param_2);
-    return bVar1;
+    return MoveJumpingEnemy(param_2);
   }
   if (param_1 == 0xf) {
-    bVar1 = ProcMoveRedPTroopa(param_2);
-    return bVar1;
+    return ProcMoveRedPTroopa(param_2);
   }
   if (param_1 == 0x10) {
-    bVar1 = MoveFlyGreenPTroopa(param_2);
-    return bVar1;
+    return MoveFlyGreenPTroopa(param_2);
   }
   if (param_1 == 0x11) {
-    bVar1 = MoveLakitu(param_2);
-    return bVar1;
+    return MoveLakitu(param_2);
   }
   if (param_1 == 0x12) {
-    bVar1 = MoveNormalEnemy(param_2);
-    return bVar1;
+    return MoveNormalEnemy(param_2);
   }
   if (param_1 == 0x13) {
     NoMoveCode();
     return param_2;
   }
   if (param_1 == 0x14) {
-    bVar1 = MoveFlyingCheepCheep(param_2);
-    return bVar1;
+    return MoveFlyingCheepCheep(param_2);
   }
   jmpengine_overflow(param_1);
   return param_2;
@@ -666,12 +623,10 @@ byte jumptable_LargePlatformSubroutines(byte param_1, byte param_2) {
   byte bVar1;
 
   if (param_1 == 0) {
-    bVar1 = BalancePlatform(param_2);
-    return bVar1;
+    return BalancePlatform(param_2);
   }
   if (param_1 == 1) {
-    bVar1 = YMovingPlatform(param_2);
-    return bVar1;
+    return YMovingPlatform(param_2);
   }
   if (param_1 == 2) {
     MoveLargeLiftPlat(param_2);
@@ -682,16 +637,13 @@ byte jumptable_LargePlatformSubroutines(byte param_1, byte param_2) {
     return param_2;
   }
   if (param_1 == 4) {
-    bVar1 = XMovingPlatform(param_2);
-    return bVar1;
+    return XMovingPlatform(param_2);
   }
   if (param_1 == 5) {
-    bVar1 = DropPlatform(param_2);
-    return bVar1;
+    return DropPlatform(param_2);
   }
   if (param_1 == 6) {
-    bVar1 = RightPlatform(param_2);
-    return bVar1;
+    return RightPlatform(param_2);
   }
   jmpengine_overflow(param_1);
   return param_2;
@@ -713,16 +665,13 @@ byte jumptable_RunStarFlagObj(byte param_1, byte param_2) {
     return param_2;
   }
   if (param_1 == 2) {
-    bVar1 = AwardGameTimerPoints(param_2);
-    return bVar1;
+    return AwardGameTimerPoints(param_2);
   }
   if (param_1 == 3) {
-    bVar1 = RaiseFlagSetoffFWorks(param_2);
-    return bVar1;
+    return RaiseFlagSetoffFWorks(param_2);
   }
   if (param_1 == 4) {
-    bVar1 = DelayToAreaEnd(param_2);
-    return bVar1;
+    return DelayToAreaEnd(param_2);
   }
   jmpengine_overflow(param_1);
   return param_2;
@@ -4670,8 +4619,7 @@ KillBB:
   sVar5 = RelativeEnemyPosition(sVar4.x);
   bVar1 = GetEnemyBoundBox(sVar5.x);
   bVar1 = PlayerEnemyCollision(bVar1);
-  bVar1 = EnemyGfxHandler(bVar1);
-  return bVar1;
+  return EnemyGfxHandler(bVar1);
 }
 
 
@@ -4736,8 +4684,7 @@ RunHSubs:
   bVar2 = GetMiscOffscreenBits(param_1);
   bVar2 = RelativeMiscPosition(bVar2);
   bVar2 = GetMiscBoundBox(bVar2);
-  bVar2 = DrawHammer(bVar2);
-  return bVar2;
+  return DrawHammer(bVar2);
 }
 
 
@@ -4771,8 +4718,7 @@ byte SetupJumpCoin(byte param_1, byte param_2, byte param_3) {
   Misc_PageLoc[bVar1] = Block_PageLoc2[param_1];
   Misc_X_Position[bVar1] = param_3 << 4 | 5;
   Misc_Y_Position[bVar1] = (param_2 + 0x20) - ((char)(param_3 << 3) >> 7);
-  bVar1 = JCoinC(param_1, bVar1);
-  return bVar1;
+  return JCoinC(param_1, bVar1);
 }
 
 
@@ -5332,8 +5278,7 @@ byte MovePlayerHorizontally(void) {
   byte bVar1;
 
   if (JumpspringAnimCtrl == 0) {
-    bVar1 = MoveObjectHorizontally(0);
-    return bVar1;
+    return MoveObjectHorizontally(0);
   }
   return JumpspringAnimCtrl;
 }
@@ -5387,11 +5332,9 @@ byte MoveD_EnemyVertically(byte param_1) {
   byte bVar1;
 
   if (Enemy_State[param_1] == 5) {
-    bVar1 = MoveFallingPlatform(param_1);
-    return bVar1;
+    return MoveFallingPlatform(param_1);
   }
-  bVar1 = SetXMoveAmt(3, param_1, 0x3d);
-  return bVar1;
+  return SetXMoveAmt(3, param_1, 0x3d);
 }
 
 
@@ -5401,8 +5344,7 @@ byte MoveD_EnemyVertically(byte param_1) {
 byte MoveFallingPlatform(byte param_1) {
   byte bVar1;
 
-  bVar1 = SetXMoveAmt(3, param_1, 0x20);
-  return bVar1;
+  return SetXMoveAmt(3, param_1, 0x20);
 }
 
 
@@ -5412,8 +5354,7 @@ byte MoveFallingPlatform(byte param_1) {
 byte MoveRedPTroopaDown(byte param_1) {
   byte bVar1;
 
-  bVar1 = RedPTroopaGrav(0, param_1 + 1, 3, 6, 2);
-  return bVar1;
+  return RedPTroopaGrav(0, param_1 + 1, 3, 6, 2);
 }
 
 
@@ -5423,8 +5364,7 @@ byte MoveRedPTroopaDown(byte param_1) {
 byte MoveRedPTroopaUp(byte param_1) {
   byte bVar1;
 
-  bVar1 = RedPTroopaGrav(1, param_1 + 1, 3, 6, 2);
-  return bVar1;
+  return RedPTroopaGrav(1, param_1 + 1, 3, 6, 2);
 }
 
 
@@ -5434,8 +5374,7 @@ byte MoveRedPTroopaUp(byte param_1) {
 byte MoveDropPlatform(byte param_1) {
   byte bVar1;
 
-  bVar1 = SetXMoveAmt(2, param_1, 0x7f);
-  return bVar1;
+  return SetXMoveAmt(2, param_1, 0x7f);
 }
 
 
@@ -5445,8 +5384,7 @@ byte MoveDropPlatform(byte param_1) {
 byte MoveEnemySlowVert(byte param_1) {
   byte bVar1;
 
-  bVar1 = SetXMoveAmt(2, param_1, 0xf);
-  return bVar1;
+  return SetXMoveAmt(2, param_1, 0xf);
 }
 
 
@@ -5456,8 +5394,7 @@ byte MoveEnemySlowVert(byte param_1) {
 byte MoveJ_EnemyVertically(byte param_1) {
   byte bVar1;
 
-  bVar1 = SetXMoveAmt(3, param_1, 0x1c);
-  return bVar1;
+  return SetXMoveAmt(3, param_1, 0x1c);
 }
 
 
@@ -5502,8 +5439,7 @@ byte MovePlatformDown(byte param_1) {
   if (Enemy_ID[param_1] == 0x29) {
     bVar1 = 9;
   }
-  bVar1 = RedPTroopaGrav(0, param_1 + 1, bVar1, 10, 3);
-  return bVar1;
+  return RedPTroopaGrav(0, param_1 + 1, bVar1, 10, 3);
 }
 
 
@@ -5517,8 +5453,7 @@ byte MovePlatformUp(byte param_1) {
   if (Enemy_ID[param_1] == 0x29) {
     bVar1 = 9;
   }
-  bVar1 = RedPTroopaGrav(1, param_1 + 1, bVar1, 10, 3);
-  return bVar1;
+  return RedPTroopaGrav(1, param_1 + 1, bVar1, 10, 3);
 }
 
 
@@ -5590,12 +5525,10 @@ byte EnemiesAndLoopsCore(byte param_1) {
     }
   } else {
     if (bStack0000 != 0) {
-      bVar1 = RunEnemyObjectsCore();
-      return bVar1;
+      return RunEnemyObjectsCore();
     }
     if ((AreaParserTaskNum & 7) != 7) {
-      bVar1 = ProcLoopCommand(param_1);
-      return bVar1;
+      return ProcLoopCommand(param_1);
     }
   }
   return param_1;
@@ -5721,13 +5654,11 @@ CheckFrenzyBuffer:
         Enemy_Y_Position[param_1] = bVar1 * 0x10;
         if ((byte)(bVar1 * 0x10) != 0xe0) {
           if (((EnemyData[bVar5] & 0x40) != 0) && (SecondaryHardMode == 0)) {
-            bVar4 = Inc2B();
-            return bVar4;
+            return Inc2B();
           }
           bVar4 = EnemyData[bVar5] & 0x3f;
           if ((bVar4 > 0x36) && (bVar4 < 0x3f)) {
-            bVar4 = HandleGroupEnemies(bVar4);
-            return bVar4;
+            return HandleGroupEnemies(bVar4);
           }
           if ((bVar4 == 6) && (PrimaryHardMode != 0)) {
             bVar4 = 2;
@@ -5738,20 +5669,17 @@ CheckFrenzyBuffer:
           if (Enemy_Flag[param_1] == 0) {
             return param_1;
           }
-          bVar4 = Inc2B();
-          return bVar4;
+          return Inc2B();
         }
       } else if ((EnemyData[bVar4] & 0xf) != 0xe) {
-        bVar4 = CheckThreeBytes();
-        return bVar4;
+        return CheckThreeBytes();
       }
       if ((SMB2J_ONLY && WorldNumber == 8) || (EnemyData[(byte)(bVar4 + 2)] >> 5 == WorldNumber)) {
         AreaPointer = EnemyData[(byte)(bVar4 + 1)];
         EntrancePage = EnemyData[(byte)(bVar4 + 2)] & 0x1f;
       }
       EnemyDataOffset += 1;
-      bVar4 = Inc2B();
-      return bVar4;
+      return Inc2B();
     }
     EnemyObjectPageLoc = EnemyData[bVar5] & 0x3f;
     EnemyDataOffset += 2;
@@ -5777,12 +5705,10 @@ byte CheckThreeBytes(void) {
   byte bVar1;
 
   if ((EnemyData[EnemyDataOffset] & 0xf) != 0xe) {
-    bVar1 = Inc2B();
-    return bVar1;
+    return Inc2B();
   }
   EnemyDataOffset += 1;
-  bVar1 = Inc2B();
-  return bVar1;
+  return Inc2B();
 }
 
 
@@ -5918,8 +5844,7 @@ byte SmallBBox(byte param_1) {
 
   Enemy_BoundBoxCtrl[param_1] = 9;
   Enemy_MovingDir[param_1] = 2;
-  bVar1 = InitVStf(param_1);
-  return bVar1;
+  return InitVStf(param_1);
 }
 
 
@@ -6625,8 +6550,7 @@ byte RunEnemyObjectsCore(void) {
   if (bVar2 >= 0x15) {
     bVar1 = (bVar2 - 0x14) - (bVar2 < 0x15);
   }
-  bVar2 = jumptable_RunEnemyObjectsCore(bVar1, ObjectOffset);
-  return bVar2;
+  return jumptable_RunEnemyObjectsCore(bVar1, ObjectOffset);
 }
 
 
@@ -6646,8 +6570,7 @@ byte RunRetainerObj(byte param_1) {
 
   sVar2 = GetEnemyOffscreenBits(param_1);
   sVar3 = RelativeEnemyPosition(sVar2.x);
-  bVar1 = EnemyGfxHandler(sVar3.x);
-  return bVar1;
+  return EnemyGfxHandler(sVar3.x);
 }
 
 
@@ -6681,8 +6604,7 @@ byte RunNormalEnemies(byte param_1) {
 byte EnemyMovementSubs(byte param_1) {
   byte bVar1;
 
-  bVar1 = jumptable_EnemyMovementSubs(Enemy_ID[param_1], param_1);
-  return bVar1;
+  return jumptable_EnemyMovementSubs(Enemy_ID[param_1], param_1);
 }
 
 
@@ -6770,8 +6692,7 @@ byte RunLargePlatform(byte param_1) {
 byte LargePlatformSubroutines(byte param_1) {
   byte bVar1;
 
-  bVar1 = jumptable_LargePlatformSubroutines(Enemy_ID[param_1] - 0x24, param_1);
-  return bVar1;
+  return jumptable_LargePlatformSubroutines(Enemy_ID[param_1] - 0x24, param_1);
 }
 
 
@@ -6804,8 +6725,7 @@ byte MovePodoboo(byte param_1) {
     EnemyIntervalTimer[param_1] = bVar1 & 0xf | 6;
     SpriteVarData2[param_1] = 0xf9;
   }
-  bVar1 = MoveJ_EnemyVertically(param_1);
-  return bVar1;
+  return MoveJ_EnemyVertically(param_1);
 }
 
 
@@ -6817,14 +6737,12 @@ byte ProcHammerBro(byte param_1) {
   struct_xc sVar2;
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
-    bVar1 = MoveDefeatedEnemy(param_1);
-    return bVar1;
+    return MoveDefeatedEnemy(param_1);
   }
   if (HammerBroJumpTimer[param_1] != 0) {
     HammerBroJumpTimer[param_1] = HammerBroJumpTimer[param_1] - 1;
     if ((Enemy_OffscreenBits & 0xc) != 0) {
-      bVar1 = MoveHammerBroXDir(param_1);
-      return bVar1;
+      return MoveHammerBroXDir(param_1);
     }
     if (HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] == 0) {
       HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = HammerThrowTmrData[SecondaryHardMode];
@@ -6832,32 +6750,25 @@ byte ProcHammerBro(byte param_1) {
       param_1 = sVar2.x;
       if (sVar2.c != false) {
         Enemy_State[param_1] = Enemy_State[param_1] | 8;
-        bVar1 = MoveHammerBroXDir(param_1);
-        return bVar1;
+        return MoveHammerBroXDir(param_1);
       }
     }
     HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] - 1;
-    bVar1 = MoveHammerBroXDir(param_1);
-    return bVar1;
+    return MoveHammerBroXDir(param_1);
   }
   if ((Enemy_State[param_1] & 7) == 1) {
-    bVar1 = MoveHammerBroXDir(param_1);
-    return bVar1;
+    return MoveHammerBroXDir(param_1);
   }
   if (Enemy_Y_Position[param_1] >= 0x80) {
-    bVar1 = SetHJ(param_1, 0xfa, 0);
-    return bVar1;
+    return SetHJ(param_1, 0xfa, 0);
   }
   if (Enemy_Y_Position[param_1] < 0x70) {
-    bVar1 = SetHJ(param_1, 0xfd, 1);
-    return bVar1;
+    return SetHJ(param_1, 0xfd, 1);
   }
   if ((PseudoRandomBitReg[param_1 + 1] & 1) != 0) {
-    bVar1 = SetHJ(param_1, 0xfd, 0);
-    return bVar1;
+    return SetHJ(param_1, 0xfd, 0);
   }
-  bVar1 = SetHJ(param_1, 0xfa, 0);
-  return bVar1;
+  return SetHJ(param_1, 0xfa, 0);
 }
 
 
@@ -6875,8 +6786,7 @@ byte SetHJ(byte param_1, byte param_2, byte param_3) {
   }
   EnemyFrameTimer[param_1] = HammerBroJumpLData[bVar1];
   HammerBroJumpTimer[param_1] = PseudoRandomBitReg[param_1 + 1] | 0xc0;
-  bVar1 = MoveHammerBroXDir(param_1);
-  return bVar1;
+  return MoveHammerBroXDir(param_1);
 }
 
 
@@ -6898,8 +6808,7 @@ byte MoveHammerBroXDir(byte param_1) {
     SpriteVarData1[param_1] = 0xf8;
   }
   Enemy_MovingDir[param_1] = bVar1;
-  bVar1 = MoveNormalEnemy(param_1);
-  return bVar1;
+  return MoveNormalEnemy(param_1);
 }
 
 
@@ -6918,8 +6827,7 @@ byte MoveNormalEnemy(byte param_1) {
       goto SteadM;
     }
     if ((Enemy_State[param_1] & 0x20) != 0) {
-      bVar2 = MoveDefeatedEnemy(param_1);
-      return bVar2;
+      return MoveDefeatedEnemy(param_1);
     }
     bVar1 = Enemy_State[param_1] & 7;
     if (bVar1 == 0) {
@@ -7009,11 +6917,9 @@ byte ProcMoveRedPTroopa(byte param_1) {
     return param_1;
   }
   if (SpriteVarData1[param_1] <= Enemy_Y_Position[param_1]) {
-    bVar1 = MoveRedPTroopaUp(param_1);
-    return bVar1;
+    return MoveRedPTroopaUp(param_1);
   }
-  bVar1 = MoveRedPTroopaDown(param_1);
-  return bVar1;
+  return MoveRedPTroopaDown(param_1);
 }
 
 
@@ -7102,8 +7008,7 @@ byte MoveBloober(byte param_1, bool param_2) {
   struct_ncr00 sVar3;
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
-    bVar2 = MoveEnemySlowVert(param_1);
-    return bVar2;
+    return MoveEnemySlowVert(param_1);
   }
   if ((PseudoRandomBitReg[param_1 + 1] & BlooberBitmasks[SecondaryHardMode]) == 0) {
     param_2 = (bool)(param_1 & 1);
@@ -7187,8 +7092,7 @@ byte MoveBulletBill(byte param_1) {
   struct_ax sVar2;
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
-    bVar1 = MoveJ_EnemyVertically(param_1);
-    return bVar1;
+    return MoveJ_EnemyVertically(param_1);
   }
   SpriteVarData1[param_1] = 0xe8;
   sVar2 = MoveEnemyHorizontally(param_1);
@@ -7205,8 +7109,7 @@ byte MoveSwimmingCheepCheep(byte param_1) {
   byte bVar3;
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
-    bVar3 = MoveEnemySlowVert(param_1);
-    return bVar3;
+    return MoveEnemySlowVert(param_1);
   }
   bVar1 = Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1]
           < SwimCCXMoveData[(byte)(Enemy_ID[param_1] - 10)];
@@ -7332,8 +7235,7 @@ struct_xr00r06 DrawFirebar_Collision(byte param_1, byte param_2, byte param_3, b
     bVar2 = 0xf8;
   }
   Sprite_Data[param_5] = bVar2;
-  sVar4 = FirebarCollision(param_5, param_1, bVar1, bVar2);
-  return sVar4;
+  return FirebarCollision(param_5, param_1, bVar1, bVar2);
 }
 
 
@@ -7427,8 +7329,7 @@ byte MoveFlyingCheepCheep(byte param_1) {
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
     Enemy_SprAttrib[param_1] = 0;
-    bVar1 = MoveJ_EnemyVertically(param_1);
-    return bVar1;
+    return MoveJ_EnemyVertically(param_1);
   }
   sVar4 = MoveEnemyHorizontally(param_1);
   bVar2 = SetXMoveAmt(5, sVar4.x, 0xd);
@@ -7473,8 +7374,7 @@ byte MoveLakitu(byte param_1) {
     sVar2 = MoveEnemyHorizontally(param_1);
     return sVar2.x;
   }
-  bVar1 = MoveD_EnemyVertically(param_1);
-  return bVar1;
+  return MoveD_EnemyVertically(param_1);
 }
 
 
@@ -7574,8 +7474,7 @@ byte MoveD_Bowser(byte param_1) {
   byte bVar1;
 
   bVar1 = MoveEnemySlowVert(param_1);
-  bVar1 = BowserGfxHandler(bVar1);
-  return bVar1;
+  return BowserGfxHandler(bVar1);
 }
 
 
@@ -7590,11 +7489,9 @@ byte RunBowser(byte param_1) {
 
   if ((Enemy_State[param_1] & 0x20) != 0) {
     if (Enemy_Y_Position[param_1] >= 0xe0) {
-      bVar1 = KillAllEnemies();
-      return bVar1;
+      return KillAllEnemies();
     }
-    bVar1 = MoveD_Bowser(param_1);
-    return bVar1;
+    return MoveD_Bowser(param_1);
   }
   EnemyFrenzyBuffer = 0;
   if (TimerControl != 0) {
@@ -7655,12 +7552,10 @@ HammerChk:
 ChkFireB:
   do {
     if ((WorldNumber != 7) && (WorldNumber >= 5)) {
-      bVar1 = BowserGfxHandler(param_1);
-      return bVar1;
+      return BowserGfxHandler(param_1);
     }
     if (BowserFireBreathTimer != 0) {
-      bVar1 = BowserGfxHandler(param_1);
-      return bVar1;
+      return BowserGfxHandler(param_1);
     }
     BowserFireBreathTimer = 0x20;
     BowserBodyControls ^= 0x80;
@@ -7670,8 +7565,7 @@ ChkFireB:
     BowserFireBreathTimer -= 0x10;
   }
   EnemyFrenzyBuffer = 0x15;
-  bVar1 = BowserGfxHandler(param_1);
-  return bVar1;
+  return BowserGfxHandler(param_1);
 }
 
 
@@ -7729,8 +7623,7 @@ byte ProcessBowserHalf(byte param_1) {
   if (Enemy_State[bVar1] == 0) {
     Enemy_BoundBoxCtrl[bVar1] = 10;
     bVar1 = GetEnemyBoundBox(bVar1);
-    bVar1 = PlayerEnemyCollision(bVar1);
-    return bVar1;
+    return PlayerEnemyCollision(bVar1);
   }
   return bVar1;
 }
@@ -7831,15 +7724,13 @@ byte RunFireworks(byte param_1) {
       Enemy_Flag[param_1] = 0;
       Square2SoundQueue = 8;
       DigitModifier[4] = 5;
-      bVar1 = EndAreaPoints();
-      return bVar1;
+      return EndAreaPoints();
     }
   }
   sVar2 = RelativeEnemyPosition(param_1);
   Fireball_Rel_YPos = Enemy_Rel_YPos;
   Fireball_Rel_XPos = Enemy_Rel_XPos;
-  bVar1 = DrawExplosion_Fireworks(SpriteVarData1[sVar2.x], Enemy_SprDataOffset[sVar2.x]);
-  return bVar1;
+  return DrawExplosion_Fireworks(SpriteVarData1[sVar2.x], Enemy_SprDataOffset[sVar2.x]);
 }
 
 
@@ -7851,8 +7742,7 @@ byte RunStarFlagObj(byte param_1) {
 
   EnemyFrenzyBuffer = 0;
   if (StarFlagTaskControl < 5) {
-    bVar1 = jumptable_RunStarFlagObj(StarFlagTaskControl, param_1);
-    return bVar1;
+    return jumptable_RunStarFlagObj(StarFlagTaskControl, param_1);
   }
   return param_1;
 }
@@ -7914,13 +7804,11 @@ byte RaiseFlagSetoffFWorks(byte param_1) {
 
   if (Enemy_Y_Position[param_1] >= 0x72) {
     Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
-    bVar1 = DrawStarFlag(param_1);
-    return bVar1;
+    return DrawStarFlag(param_1);
   }
   if ((FireworksCounter != 0) && (FireworksCounter < 0x80)) {
     EnemyFrenzyBuffer = 0x16;
-    bVar1 = DrawStarFlag(param_1);
-    return bVar1;
+    return DrawStarFlag(param_1);
   }
   bVar1 = DrawStarFlag(param_1);
   EnemyIntervalTimer[bVar1] = 6;
@@ -8043,8 +7931,7 @@ byte BalancePlatform(byte param_1) {
     return param_1;
   }
   if (Enemy_MovingDir[param_1] != 0) {
-    bVar3 = PlatformFall(param_1, bVar3);
-    return bVar3;
+    return PlatformFall(param_1, bVar3);
   }
   if (Enemy_Y_Position[param_1] < 0x2e) {
     if (bVar3 != HammerThrowingTimer_Or_PlatformCollisionFlag[param_1]) {
@@ -8053,8 +7940,7 @@ byte BalancePlatform(byte param_1) {
       return param_1;
     }
 MakePlatformFall:
-    bVar3 = InitPlatformFall(bVar3);
-    return bVar3;
+    return InitPlatformFall(bVar3);
   }
   if (Enemy_Y_Position[bVar3] < 0x2e) {
     if (param_1 != HammerThrowingTimer_Or_PlatformCollisionFlag[param_1]) {
@@ -8576,8 +8462,7 @@ byte PlayerHammerCollision(byte param_1) {
         Misc_Collision_Flag[ObjectOffset] = 1;
         Misc_X_Speed[param_1] = NEGATE(Misc_X_Speed[param_1]);
         if (StarInvincibleTimer == 0) {
-          bVar1 = InjurePlayer();
-          return bVar1;
+          return InjurePlayer();
         }
       }
     } else {
@@ -8847,8 +8732,7 @@ byte ForceInjury(byte param_1) {
     GetPlayerColors();
     bVar1 = 10;
   }
-  bVar1 = SetPRout(bVar1, 1);
-  return bVar1;
+  return SetPRout(bVar1, 1);
 }
 
 
@@ -8871,11 +8755,9 @@ byte ChkEnemyFaceRight(byte param_1) {
   byte bVar1;
 
   if (Enemy_MovingDir[param_1] != 1) {
-    bVar1 = LInj(param_1);
-    return bVar1;
+    return LInj(param_1);
   }
-  bVar1 = InjurePlayer();
-  return bVar1;
+  return InjurePlayer();
 }
 
 
@@ -8886,8 +8768,7 @@ byte LInj(byte param_1) {
   byte bVar1;
 
   EnemyTurnAround(param_1);
-  bVar1 = InjurePlayer();
-  return bVar1;
+  return InjurePlayer();
 }
 
 
@@ -9038,12 +8919,10 @@ byte LargePlatformCollision(byte param_1) {
   HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = 0xff;
   if ((TimerControl == 0) && (Enemy_State[param_1] < 0x80)) {
     if (Enemy_ID[param_1] != 0x24) {
-      bVar1 = ChkForPlayerC_LargeP(param_1);
-      return bVar1;
+      return ChkForPlayerC_LargeP(param_1);
     }
     bVar1 = ChkForPlayerC_LargeP(Enemy_State[param_1]);
-    bVar1 = ChkForPlayerC_LargeP(bVar1);
-    return bVar1;
+    return ChkForPlayerC_LargeP(bVar1);
   }
   return ObjectOffset;
 }
@@ -9095,8 +8974,7 @@ byte SmallPlatformCollision(byte param_1) {
           return ObjectOffset;
         }
         if ((BoundingBox_UL_YPos[bVar2] >= 0x20) && (bVar3 = PlayerCollisionCore(bVar2), bVar3)) {
-          bVar1 = ProcLPlatCollisions(ObjectOffset, bVar2, bVar1);
-          return bVar1;
+          return ProcLPlatCollisions(ObjectOffset, bVar2, bVar1);
         }
         BoundingBox_UL_YPos[bVar2] = BoundingBox_UL_YPos[bVar2] + 0x80;
         BoundingBox_DR_YPos[bVar2] = BoundingBox_DR_YPos[bVar2] + 0x80;
@@ -9185,8 +9063,7 @@ bool CheckPlayerVertical(void) {
 struct_ay GetEnemyBoundBoxOfs(void) {
   struct_ay sVar1;
 
-  sVar1 = GetEnemyBoundBoxOfsArg(ObjectOffset);
-  return sVar1;
+  return GetEnemyBoundBoxOfsArg(ObjectOffset);
 }
 
 
@@ -9657,12 +9534,10 @@ byte EnemyToBGCollisionDet(byte param_1) {
     return param_1;
   }
   if (bVarAA == 0xe) {
-    bVarAA = EnemyJump(param_1);
-    return bVarAA;
+    return EnemyJump(param_1);
   }
   if (bVarAA == 5) {
-    bVarAA = HammerBroBGColl(param_1);
-    return bVarAA;
+    return HammerBroBGColl(param_1);
   }
   if ((bVarAA != 0x12) && (bVarAA != 0x2e) && (ssw(false, bVarAA == 4) || (bVarAA > 6))) {
     return param_1;
@@ -9679,8 +9554,7 @@ byte EnemyToBGCollisionDet(byte param_1) {
 
   bVarCC = sVar6.x;
   if ((sVar6.z != false) || (bVarDD = ChkForNonSolids(sVar6.a), bVarDD)) {
-    bVarAA = ChkForRedKoopa(sVar6.x);
-    return bVarAA;
+    return ChkForRedKoopa(sVar6.x);
   }
 
 #ifdef SMB1_MODE
@@ -9715,13 +9589,11 @@ byte EnemyToBGCollisionDet(byte param_1) {
 #endif
 
   if ((byte)(sVar6.r04 - 8) > 4) {
-    bVarAA = ChkForRedKoopa(bVarCC);
-    return bVarAA;
+    return ChkForRedKoopa(bVarCC);
   }
   if ((Enemy_State[bVarCC] & 0x40) == 0) {
     if (((char)Enemy_State[bVarCC] < 0) || (bVarAA = Enemy_State[bVarCC], bVarAA == 0)) {
-      bVarAA = DoEnemySideCheck(bVarCC);
-      return bVarAA;
+      return DoEnemySideCheck(bVarCC);
     }
     if (bVarAA != 5) {
       if (bVarAA > 2) {
@@ -9800,8 +9672,7 @@ byte ChkForRedKoopa(byte param_1) {
   byte bVar1;
 
   if ((Enemy_ID[param_1] == 3) && (Enemy_State[param_1] == 0)) {
-    bVar1 = ChkForBump_HammerBroJ(param_1);
-    return bVar1;
+    return ChkForBump_HammerBroJ(param_1);
   }
   if ((char)Enemy_State[param_1] < 0) {
     bVar1 = Enemy_State[param_1] | 0x40;
@@ -9809,8 +9680,7 @@ byte ChkForRedKoopa(byte param_1) {
     bVar1 = EnemyBGCStateData[Enemy_State[param_1]];
   }
   Enemy_State[param_1] = bVar1;
-  bVar1 = DoEnemySideCheck(param_1);
-  return bVar1;
+  return DoEnemySideCheck(param_1);
 }
 
 
@@ -9852,8 +9722,7 @@ byte ChkForBump_HammerBroJ(byte param_1) {
     Square1SoundQueue = 2;
   }
   if (Enemy_ID[param_1] == 5) {
-    bVar1 = SetHJ(param_1, 0xfa, 0);
-    return bVar1;
+    return SetHJ(param_1, 0xfa, 0);
   }
   RXSpd(param_1);
   return param_1;
@@ -9913,8 +9782,7 @@ byte EnemyJump(byte param_1) {
       }
     }
   }
-  bVar1 = DoEnemySideCheck(param_1);
-  return bVar1;
+  return DoEnemySideCheck(param_1);
 }
 
 
@@ -9935,8 +9803,7 @@ byte HammerBroBGColl(byte param_1) {
     if (EnemyFrameTimer[bVar1] == 0) {
       Enemy_State[bVar1] = Enemy_State[bVar1] & 0x88;
       EnemyLanding(bVar1);
-      bVar1 = DoEnemySideCheck(bVar1);
-      return bVar1;
+      return DoEnemySideCheck(bVar1);
     }
   }
   Enemy_State[bVar1] = Enemy_State[bVar1] | 1;
@@ -9960,8 +9827,7 @@ void KillEnemyAboveBlock(byte param_1) {
 struct_axzr04 ChkUnderEnemy(byte param_1) {
   struct_axzr04 sVar1;
 
-  sVar1 = BlockBufferChk_Enemy(0, param_1, 0x15);
-  return sVar1;
+  return BlockBufferChk_Enemy(0, param_1, 0x15);
 }
 
 
@@ -10017,8 +9883,7 @@ byte GetFireballBoundBox(byte param_1) {
 
   bVar1 = param_1 + 7;
   bVar2 = BoundingBoxCore(bVar1, 2);
-  bVar1 = CheckRightScreenBBox(bVar1, bVar2);
-  return bVar1;
+  return CheckRightScreenBBox(bVar1, bVar2);
 }
 
 
@@ -10031,8 +9896,7 @@ byte GetMiscBoundBox(byte param_1) {
 
   bVar1 = param_1 + 9;
   bVar2 = BoundingBoxCore(bVar1, 6);
-  bVar1 = CheckRightScreenBBox(bVar1, bVar2);
-  return bVar1;
+  return CheckRightScreenBBox(bVar1, bVar2);
 }
 
 
@@ -10042,8 +9906,7 @@ byte GetMiscBoundBox(byte param_1) {
 byte GetEnemyBoundBox(byte param_1) {
   byte bVar1;
 
-  bVar1 = GetMaskedOffScrBits(param_1, 0x44, 0x48);
-  return bVar1;
+  return GetMaskedOffScrBits(param_1, 0x44, 0x48);
 }
 
 
@@ -10053,8 +9916,7 @@ byte GetEnemyBoundBox(byte param_1) {
 byte SmallPlatformBoundBox(byte param_1) {
   byte bVar1;
 
-  bVar1 = GetMaskedOffScrBits(param_1, 4, 8);
-  return bVar1;
+  return GetMaskedOffScrBits(param_1, 4, 8);
 }
 
 
@@ -10075,8 +9937,7 @@ byte GetMaskedOffScrBits(byte param_1, byte param_2, byte param_3) {
     MoveBoundBoxOffscreen(param_1);
     return param_1;
   }
-  bVar1 = SetupEOffsetFBBox(param_1);
-  return bVar1;
+  return SetupEOffsetFBBox(param_1);
 }
 
 
@@ -10094,8 +9955,7 @@ byte LargePlatformBoundBox(byte param_1) {
     MoveBoundBoxOffscreen(bVar2);
     return bVar2;
   }
-  bVar1 = SetupEOffsetFBBox(bVar2);
-  return bVar1;
+  return SetupEOffsetFBBox(bVar2);
 }
 
 
@@ -10108,8 +9968,7 @@ byte SetupEOffsetFBBox(byte param_1) {
 
   bVar1 = param_1 + 1;
   bVar2 = BoundingBoxCore(bVar1, 1);
-  bVar1 = CheckRightScreenBBox(bVar1, bVar2);
-  return bVar1;
+  return CheckRightScreenBBox(bVar1, bVar2);
 }
 
 
@@ -10183,8 +10042,7 @@ byte CheckRightScreenBBox(byte param_1, byte param_2) {
 bool PlayerCollisionCore(byte param_1) {
   bool bVar1;
 
-  bVar1 = SprObjectCollisionCore(0, param_1);
-  return bVar1;
+  return SprObjectCollisionCore(0, param_1);
 }
 
 
@@ -10269,8 +10127,7 @@ struct_azr02r04r06r07 BlockBufferColli_Feet(byte param_1) {
   // the original implementation returned Y (increments the Y parameter by 1)
   // but we decided to move that to the caller for this port
 
-  sVar1 = BlockBufferCollision(0, 0, param_1 + 1);
-  return sVar1;
+  return BlockBufferCollision(0, 0, param_1 + 1);
 }
 
 
@@ -10280,8 +10137,7 @@ struct_azr02r04r06r07 BlockBufferColli_Feet(byte param_1) {
 struct_azr02r04r06r07 BlockBufferColli_Head(byte param_1) {
   struct_azr02r04r06r07 sVar1;
 
-  sVar1 = BlockBufferCollision(0, 0, param_1);
-  return sVar1;
+  return BlockBufferCollision(0, 0, param_1);
 }
 
 
@@ -10291,8 +10147,7 @@ struct_azr02r04r06r07 BlockBufferColli_Head(byte param_1) {
 struct_azr02r04r06r07 BlockBufferColli_Side(byte param_1) {
   struct_azr02r04r06r07 sVar1;
 
-  sVar1 = BlockBufferCollision(1, 0, param_1);
-  return sVar1;
+  return BlockBufferCollision(1, 0, param_1);
 }
 
 
@@ -10654,8 +10509,7 @@ byte DrawPowerUp(void) {
     Sprite_Data[bVar1 + 6] = Sprite_Data[bVar1 + 6] | 0x40;
     Sprite_Data[bVar1 + 0xe] = Sprite_Data[bVar1 + 0xe] | 0x40;
   }
-  bVar6 = SprObjectOffscrChk();
-  return bVar6;
+  return SprObjectOffscrChk();
 }
 
 
@@ -10742,8 +10596,7 @@ byte EnemyGfxHandler(byte param_1) {
     }
     VerticalFlipFlag = bVar4;
 DrawBowser:
-    bVar5 = DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
-    return bVar5;
+    return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
   }
   if (bVar4 == 0x24) {
     if (MysterySpriteThing2 == 5) {
@@ -10821,18 +10674,15 @@ CheckToAnimateEnemy:
 CheckDefeatedState:
   if (ssw(true, MysterySpriteThing4 != 4)) {
     if ((MysterySpriteThing3 & 0x20) == 0) {
-      bVar5 = DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
-      return bVar5;
+      return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
     }
     if (MysterySpriteThing4 < 4) {
-      bVar5 = DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
-      return bVar5;
+      return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
     }
   }
   VerticalFlipFlag = 1;
   MysterySpriteThing2 = 0;
-  bVar5 = DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
-  return bVar5;
+  return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
 }
 
 
@@ -10853,8 +10703,7 @@ byte DrawEnemyObject(byte param_1, byte param_2, byte param_3, byte param_4, byt
   bVar3 = Enemy_SprDataOffset[ObjectOffset];
   if (MysterySpriteThing4 == 8) {
 SkipToOffScrChk:
-    bVar3 = SprObjectOffscrChk();
-    return bVar3;
+    return SprObjectOffscrChk();
   }
   if (VerticalFlipFlag != 0) {
     bVar4 = bVar3 + 2;
@@ -10876,8 +10725,7 @@ SkipToOffScrChk:
     goto SkipToOffScrChk;
   }
   if (MysterySpriteThing4 == 5) {
-    bVar3 = SprObjectOffscrChk();
-    return bVar3;
+    return SprObjectOffscrChk();
   }
   if ((MysterySpriteThing4 != 7) && (MysterySpriteThing4 != 0xd) && ssw(true, (MysterySpriteThing4 != 4)) && (MysterySpriteThing4 != 0xc)) {
     if ((MysterySpriteThing4 == 0x12) && (MysterySpriteThing2 != 5)) {
@@ -10920,30 +10768,26 @@ CheckToMirrorLakitu:
       Sprite_Data[bVar3 + 0x16] = bVar2;
       bVar5 = FrenzyEnemyTimer >= 0x10;
       if (bVar5) {
-        bVar3 = SprObjectOffscrChk();
-        return bVar3;
+        return SprObjectOffscrChk();
       }
       Sprite_Data[bVar3 + 0xe] = bVar2;
       Sprite_Data[bVar3 + 10] = bVar2 & 0x81;
       if (!bVar5) {
-        bVar3 = SprObjectOffscrChk();
-        return bVar3;
+        return SprObjectOffscrChk();
       }
     }
     Sprite_Data[bVar3 + 2] = Sprite_Data[bVar3 + 2] & 0x81;
     Sprite_Data[bVar3 + 6] = Sprite_Data[bVar3 + 6] | 0x41;
   }
   if (MysterySpriteThing4 < 0x18) {
-    bVar3 = SprObjectOffscrChk();
-    return bVar3;
+    return SprObjectOffscrChk();
   }
   byte ead = ssw(0x02, EnemyAttributeData[24]);
   Sprite_Data[bVar3 + 10] = ead | 0x80;
   Sprite_Data[bVar3 + 0x12] = ead | 0x80;
   Sprite_Data[bVar3 + 0xe] = ead | 0xc0;
   Sprite_Data[bVar3 + 0x16] = ead | 0xc0;
-  bVar3 = SprObjectOffscrChk();
-  return bVar3;
+  return SprObjectOffscrChk();
 }
 
 
@@ -10991,9 +10835,8 @@ byte SprObjectOffscrChk(void) {
 struct_xyr02 DrawEnemyObjRow(byte param_1, byte param_2, byte param_3, byte param_4, byte param_5, byte param_6) {
   struct_xyr02 sVar1;
 
-  sVar1 = DrawOneSpriteRow(EnemyGraphicsTable[param_1 + 1], param_1, param_2, EnemyGraphicsTable[param_1], param_3,
+  return DrawOneSpriteRow(EnemyGraphicsTable[param_1 + 1], param_1, param_2, EnemyGraphicsTable[param_1], param_3,
                            param_4, param_5, param_6);
-  return sVar1;
 }
 
 
@@ -11004,8 +10847,7 @@ struct_xyr02 DrawOneSpriteRow(byte param_1, byte param_2, byte param_3, byte par
                               byte param_7, byte param_8) {
   struct_xyr02 sVar1;
 
-  sVar1 = DrawSpriteObject(param_2, param_3, param_4, param_1, param_5, param_6, param_7, param_8);
-  return sVar1;
+  return DrawSpriteObject(param_2, param_3, param_4, param_1, param_5, param_6, param_7, param_8);
 }
 
 
@@ -11454,28 +11296,23 @@ byte ProcessPlayerAction(void) {
     bVar1 = 5;
     if (PlayerSpriteVarData2[0] != 0) {
       bVar1 = GetGfxOffsetAdder(5);
-      bVar1 = ThreeFrameExtent(bVar1);
-      return bVar1;
+      return ThreeFrameExtent(bVar1);
     }
   } else {
     if (Player_State == 2) {
       bVar1 = GetGfxOffsetAdder(4);
-      bVar1 = GetCurrentAnimOffset(bVar1);
-      return bVar1;
+      return GetCurrentAnimOffset(bVar1);
     }
     if (Player_State == 1) {
       if (SwimmingFlag != 0) {
         bVar1 = GetGfxOffsetAdder(1);
         if ((JumpSwimTimer | PlayerAnimCtrl) != 0) {
-          bVar1 = FourFrameExtent(bVar1);
-          return bVar1;
+          return FourFrameExtent(bVar1);
         }
         if ((bool)(A_B_Buttons >> 7)) {
-          bVar1 = FourFrameExtent(bVar1);
-          return bVar1;
+          return FourFrameExtent(bVar1);
         }
-        bVar1 = GetCurrentAnimOffset(bVar1);
-        return bVar1;
+        return GetCurrentAnimOffset(bVar1);
       }
       bVar1 = 6;
       if (CrouchingFlag == 0) {
@@ -11486,8 +11323,7 @@ byte ProcessPlayerAction(void) {
       if ((CrouchingFlag == 0) && (bVar1 = 2, (PlayerSpriteVarData1[0] | Left_Right_Buttons) != 0)) {
         if ((Player_XSpeedAbsolute < 9) || ((Player_MovingDir & PlayerFacingDir) != 0)) {
           bVar1 = GetGfxOffsetAdder(4);
-          bVar1 = FourFrameExtent(bVar1);
-          return bVar1;
+          return FourFrameExtent(bVar1);
         }
         if (SMB2J_ONLY && GameEngineSubroutine < 9) {
           NoiseSoundQueue = 0x80;
@@ -11508,8 +11344,7 @@ byte ProcessPlayerAction(void) {
 byte GetCurrentAnimOffset(byte param_1) {
   byte bVar1;
 
-  bVar1 = GetOffsetFromAnimCtrl(PlayerAnimCtrl, param_1);
-  return bVar1;
+  return GetOffsetFromAnimCtrl(PlayerAnimCtrl, param_1);
 }
 
 
@@ -11519,8 +11354,7 @@ byte GetCurrentAnimOffset(byte param_1) {
 byte FourFrameExtent(byte param_1) {
   byte bVar1;
 
-  bVar1 = AnimationControl(3, param_1);
-  return bVar1;
+  return AnimationControl(3, param_1);
 }
 
 
@@ -11530,8 +11364,7 @@ byte FourFrameExtent(byte param_1) {
 byte ThreeFrameExtent(byte param_1) {
   byte bVar1;
 
-  bVar1 = AnimationControl(2, param_1);
-  return bVar1;
+  return AnimationControl(2, param_1);
 }
 
 
@@ -11581,8 +11414,7 @@ byte HandleChangeSize(void) {
     }
     return PlayerGfxTblOffsets[bVar1];
   }
-  bVar1 = GetOffsetFromAnimCtrl(ChangeSizeOffsetAdder[PlayerAnimCtrl], 0xf);
-  return bVar1;
+  return GetOffsetFromAnimCtrl(ChangeSizeOffsetAdder[PlayerAnimCtrl], 0xf);
 }
 
 
@@ -11678,8 +11510,7 @@ byte RelativeMiscPosition(byte param_1) {
 struct_axr00 RelativeEnemyPosition(byte param_1) {
   struct_axr00 sVar1;
 
-  sVar1 = VariableObjOfsRelPos(1, param_1, 1);
-  return sVar1;
+  return VariableObjOfsRelPos(1, param_1, 1);
 }
 
 
@@ -11783,8 +11614,7 @@ byte GetProperObjOffset(byte param_1, byte param_2) { return param_1 + ObjOffset
 struct_xy GetEnemyOffscreenBits(byte param_1) {
   struct_xy sVar1;
 
-  sVar1 = GetOffScreenBitsSet(param_1 + 1, 1);
-  return sVar1;
+  return GetOffScreenBitsSet(param_1 + 1, 1);
 }
 
 

@@ -786,10 +786,7 @@ void SetStun(byte param_1) {
 // SMB:e1ae
 // Signature: [X] -> [A, X, Z, r02, r04, r06, r07]
 struct_axzr02r04r06r07 ChkUnderEnemy_Ext(byte param_1) {
-  struct_axzr02r04r06r07 sVar1;
-
-  sVar1 = BlockBufferChk_Enemy_Ext(0, param_1, 0x15);
-  return sVar1;
+  return BlockBufferChk_Enemy_Ext(0, param_1, 0x15);
 }
 
 
