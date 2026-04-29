@@ -1188,7 +1188,6 @@ void ResetDiskVars(void) {
 void DiskErrorHandler(byte param_1) {
   byte bVar1;
   byte bVar2;
-  byte bStack0000;
 
   DiskErrorMainMsg[19] = param_1 & 0xf;
   DiskErrorMainMsg[18] = param_1 >> 4;
@@ -1203,7 +1202,6 @@ void DiskErrorHandler(byte param_1) {
     bVar1 -= 1;
   } Nplus1_TIMES(bVar2);
   VRAM_Buffer_AddrCtrl = 0x19;
-  bStack0000 = param_1;
   MoveAllSpritesOffscreen();
   InitializeNameTables();
   return;
@@ -1297,7 +1295,6 @@ static void LoadLuigiPhysics(void) {
 // SM2MAIN:c46e
 // Signature: [] -> []
 void GameMenuRoutine(void) {
-  byte bVar1;
   bool bVar2;
 
   if ((SavedJoypadBits[0] & BUTTON_START) != 0) {

@@ -212,8 +212,7 @@ void PlayWindSfx(void) {
 void ContinueWindSfx(void) {
   // SMBJ tested for the NoiseSoundQueue bit here, but it tests for either bit 2 or 3, depending on who called it.
   // We moved these checks to the callers
-  PlayNoiseSfx(WindFreqEnvData[Noise_SfxLenCounter >> 3] >> 4 | 0x10,
-               WindFreqEnvData[Noise_SfxLenCounter >> 3] & 0xf | 0x10);
+  PlayNoiseSfx((WindFreqEnvData[Noise_SfxLenCounter >> 3] >> 4) | 0x10, (WindFreqEnvData[Noise_SfxLenCounter >> 3] & 0xf) | 0x10);
 }
 #endif
 
@@ -1122,9 +1121,6 @@ void HandleSquare2Music(void) {
 // SM2MAIN:d7f8
 // Signature: [] -> []
 void HandleSquare1Music(void) {
-  byte bVar2;
-  byte bVar3;
-  byte bVar4;
   struct_axyz sVar5;
   struct_axy sVar6;
 
@@ -1179,7 +1175,6 @@ void HandleSquare1Music(void) {
 // SM2MAIN:d856
 // Signature: [] -> []
 void HandleTriangleMusic(void) {
-  byte bVar1;
   byte bVar2;
   struct_ay sVar3;
 
@@ -1279,7 +1274,7 @@ struct_axy AlternateLengthHandler(byte param_1) {
   // Given the bitfield: abcdefgh
   // computes the value: 00000hab
 
-  sVar1 = ProcessLengthData((param_1 << 2)&0x04 | (param_1 >> 6)&0x03);
+  sVar1 = ProcessLengthData(((param_1 << 2)&0x04) | ((param_1 >> 6)&0x03));
   sVar2.y = sVar1.y;
   sVar2.a = sVar1.a;
   sVar2.x = param_1;
