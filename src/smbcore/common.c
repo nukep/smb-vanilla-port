@@ -687,7 +687,6 @@ void PauseRoutine(void) {
       GamePauseStatus = (GamePauseStatus ^ 1) | 0x80;
     }
   }
-  return;
 }
 
 
@@ -716,7 +715,6 @@ void SpriteShuffler(void) {
     FBall_SprDataOffset[i*3 + 2 + 1] = Enemy_SprDataOffset[i + 4] + 8;
     Misc_SprDataOffset[i*3 + 2]      = Enemy_SprDataOffset[i + 4] + 16;
   }
-  return;
 }
 
 
@@ -749,7 +747,6 @@ void OperModeExecutionTree(void) {
     return;
   }
   jmpengine_overflow(param_1);
-  return;
 }
 
 
@@ -764,7 +761,6 @@ void MoveAllSpritesOffscreen(void) {
     Sprite_Data[bVar1] = 0xf8;
     bVar1 += 4;
   } while (bVar1 != 0);
-  return;
 }
 
 
@@ -779,7 +775,6 @@ void MoveSpritesOffscreen(void) {
     Sprite_Data[bVar1] = 0xf8;
     bVar1 += 4;
   } while (bVar1 != 0);
-  return;
 }
 
 // SMB:836b
@@ -812,7 +807,6 @@ void VictoryMode(byte param_1) {
   }
   RelativePlayerPosition();
   PlayerGfxHandler();
-  return;
 }
 
 
@@ -827,7 +821,6 @@ void VictoryModeSubroutines(byte param_1) {
   }
 #endif
   jumptable_VictoryModeSubroutines(OperMode_Task, param_1);
-  return;
 }
 
 
@@ -844,7 +837,6 @@ void SetupVictoryMode(void) {
   #endif
   EventMusicQueue = 8;
   OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -870,11 +862,9 @@ void PlayerVictoryWalk(void) {
     UpdScrollVar();
     VictoryWalkControl += 1;
   }
-  if (VictoryWalkControl != 0) {
-    return;
+  if (VictoryWalkControl == 0) {
+    OperMode_Task = OperMode_Task + 1;
   }
-  OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -903,7 +893,6 @@ void PlayerEndWorld(void) {
     FetchNewGameTimerFlag += 1;
     OperMode = 1;
   }
-  return;
 }
 
 
@@ -970,7 +959,6 @@ byte FloateyNumbersRoutine(byte param_1) {
 // Signature: [] -> []
 void ScreenRoutines(void) {
   jumptable_ScreenRoutines(ScreenRoutineTask);
-  return;
 }
 
 
@@ -984,7 +972,6 @@ void InitScreen(void) {
     VRAM_Buffer_AddrCtrl = 3;
   }
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -1003,7 +990,6 @@ void SetupIntermediate(void) {
   PlayerStatus = bVar1;
   BackgroundColorCtrl = bStack0000;
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -1013,7 +999,6 @@ void SetupIntermediate(void) {
 void GetAreaPalette(void) {
   VRAM_Buffer_AddrCtrl = AreaPalette[AreaType];
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -1026,7 +1011,6 @@ void GetBackgroundColor(void) {
   }
   ScreenRoutineTask += 1;
   GetPlayerColors();
-  return;
 }
 
 
@@ -1082,7 +1066,6 @@ void GetAlternatePalette1(void) {
     VRAM_Buffer_AddrCtrl = 0xb;
   }
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -1092,7 +1075,6 @@ void GetAlternatePalette1(void) {
 void WriteTopStatusLine(void) {
   WriteGameText(0);
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -1115,7 +1097,6 @@ void WriteBottomStatusLine(void) {
   VRAM_Buffer1[VRAM_Buffer1_Offset + 6] = 0;
   VRAM_Buffer1_Offset = VRAM_Buffer1_Offset + 6;
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -1128,10 +1109,9 @@ void DisplayTimeUp(void) {
     WriteGameText(2);
     ResetScreenTimer();
     DisableScreenFlag = 0;
-    return;
+  } else {
+    ScreenRoutineTask = ScreenRoutineTask + 2;
   }
-  ScreenRoutineTask = ScreenRoutineTask + 2;
-  return;
 }
 
 
@@ -1189,7 +1169,6 @@ void AreaParserTaskControl(void) {
     ScreenRoutineTask += 1;
   }
   VRAM_Buffer_AddrCtrl = 6;
-  return;
 }
 
 
@@ -1209,10 +1188,9 @@ void ClearBuffersDrawIcon(void) {
     DrawMenuCursor();
 #endif
     ScreenRoutineTask = ScreenRoutineTask + 1;
-    return;
+  } else {
+    OperMode_Task = OperMode_Task + 1;
   }
-  OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -1222,7 +1200,6 @@ void ClearBuffersDrawIcon(void) {
 void WriteTopScore(void) {
   WriteDigits(0xfa);
   OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -1233,9 +1210,7 @@ void ResetSpritesAndScreenTimer(void) {
   if (ScreenTimer == 0) {
     MoveAllSpritesOffscreen();
     ResetScreenTimer();
-    return;
   }
-  return;
 }
 
 
@@ -1245,7 +1220,6 @@ void ResetSpritesAndScreenTimer(void) {
 void ResetScreenTimer(void) {
   ScreenTimer = 7;
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -1338,7 +1312,6 @@ void RenderAttributeTables(void) {
   }
   VRAM_Buffer2[VRAM_Buffer2_Offset] = 0;
   VRAM_Buffer_AddrCtrl = 6;
-  return;
 }
 
 
@@ -1367,7 +1340,6 @@ void ColorRotation(void) {
       ColorRotateOffset = 0;
     }
   }
-  return;
 }
 
 
@@ -1394,7 +1366,6 @@ void ReplaceBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4
   WriteBlockMetatile(param_1, param_2, param_3, param_4);
   Block_ResidualCounter += 1;
   Block_RepFlag[param_2] = Block_RepFlag[param_2] - 1;
-  return;
 }
 
 
@@ -1403,7 +1374,6 @@ void ReplaceBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4
 // Signature: [X, r02, r06] -> []
 void DestroyBlockMetatile(byte param_1, byte param_2, byte param_3) {
   WriteBlockMetatile(0, param_1, param_2, param_3);
-  return;
 }
 
 
@@ -1430,7 +1400,6 @@ void WriteBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4) 
   bVar2 = VRAM_Buffer1_Offset + 1;
   PutBlockMetatile(bVar1, param_2, bVar2, param_3, param_4);
   MoveVOffset(bVar2);
-  return;
 }
 
 
@@ -1439,7 +1408,6 @@ void WriteBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4) 
 // Signature: [Y] -> []
 void MoveVOffset(byte param_1) {
   VRAM_Buffer1_Offset = param_1 + 9;
-  return;
 }
 
 
@@ -1480,7 +1448,6 @@ void RemBridge(byte param_1, byte param_2, byte param_3, byte param_4, byte para
   VRAM_Buffer1[param_2 + 1] = 2;
   VRAM_Buffer1[param_2 + 6] = 2;
   VRAM_Buffer1[param_2 + 9] = 0;
-  return;
 }
 
 
@@ -1492,7 +1459,6 @@ void InitializeNameTables(void) {
   WritePPUReg1((Mirror_PPU_CTRL_REG1 & 0xf0) | 0x10);
   WriteNTAddr(0x24);
   WriteNTAddr(0x20);
-  return;
 }
 
 
@@ -1502,7 +1468,6 @@ void InitializeNameTables(void) {
 void WritePPUReg1(byte param_1) {
   ppuctrl(param_1);
   Mirror_PPU_CTRL_REG1 = param_1;
-  return;
 }
 
 
@@ -1512,7 +1477,6 @@ void WritePPUReg1(byte param_1) {
 void PrintStatusBarNumbers(byte param_1) {
   OutputNumbers(param_1);
   OutputNumbers(param_1 >> 4);
-  return;
 }
 
 
@@ -1545,7 +1509,6 @@ void OutputNumbers(byte param_1) {
     VRAM_Buffer1[(byte)(bVar3 + 1) + 3] = 0;
     VRAM_Buffer1_Offset = bVar3 + 4;
   }
-  return;
 }
 
 
@@ -1577,7 +1540,6 @@ void DigitsMathRoutine(byte param_1) {
   do {
     DigitModifier_Minus1[bVar2] = 0;
   } Nplus1_TIMES(bVar2);
-  return;
 }
 
 
@@ -1672,7 +1634,6 @@ void InitializeArea(void) {
   LoadPhysicsData();
 #endif
   OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -1687,7 +1648,6 @@ void PrimaryGameSetup(void) {
   OffScr_NumberofLives = 2;
 #endif
   SecondaryGameSetup();
-  return;
 }
 
 
@@ -1737,7 +1697,6 @@ void SecondaryGameSetup(void) {
   IRQUpdateFlag = IRQUpdateFlag + 1;
 #endif
   OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -1753,9 +1712,7 @@ void GetAreaMusic(void) {
       bVar1 = 4;
     }
     AreaMusicQueue = MusicSelectData[bVar1];
-    return;
   }
-  return;
 }
 
 
@@ -1799,7 +1756,6 @@ void Entrance_GameTimerSetup(byte param_1) {
     SetupBubble(bVar1, param_1);
   }
   GameEngineSubroutine = 7;
-  return;
 }
 
 
@@ -1839,7 +1795,6 @@ void PlayerLoseLife(void) {
   TransposePlayers();
 #endif
   ContinueGame();
-  return;
 }
 
 
@@ -1848,7 +1803,6 @@ void PlayerLoseLife(void) {
 // Signature: [] -> []
 void GameOverMode(void) {
   jumptable_GameOverMode(OperMode_Task);
-  return;
 }
 
 
@@ -1867,7 +1821,6 @@ void SetupGameOver(void) {
   EventMusicQueue = 2;
   DisableScreenFlag = DisableScreenFlag + 1;
   OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -1890,9 +1843,7 @@ void RunGameOver(void) {
 #endif
   if (ScreenTimer == 0) {
     TerminateGame();
-    return;
   }
-  return;
 }
 
 
@@ -1911,7 +1862,6 @@ void TerminateGame(void) {
   OperMode_Task = 0;
   ScreenTimer = 0;
   OperMode = 0;
-  return;
 }
 
 
@@ -1927,7 +1877,6 @@ void ContinueGame(void) {
   GameEngineSubroutine = 0;
   OperMode_Task = 0;
   OperMode = 1;
-  return;
 }
 
 
@@ -1936,7 +1885,6 @@ void ContinueGame(void) {
 // Signature: [] -> []
 void DoNothing(void) {
   Misc_Collision_Flag[11] = 0xff;
-  return;
 }
 
 
@@ -1952,7 +1900,6 @@ void AreaParserTaskHandler(void) {
   if (AreaParserTaskNum == 0) {
     RenderAttributeTables();
   }
-  return;
 }
 
 
@@ -1961,7 +1908,6 @@ void AreaParserTaskHandler(void) {
 // Signature: [A] -> []
 void AreaParserTasks(byte param_1) {
   jumptable_AreaParserTasks(param_1);
-  return;
 }
 
 
@@ -1975,7 +1921,6 @@ void IncrementColumnPos(void) {
     CurrentColumnPos = 0;
   }
   BlockBufferColumnPos = (BlockBufferColumnPos + 1) & 0x1f;
-  return;
 }
 
 static void AreaParserCore_step2();
@@ -2078,7 +2023,6 @@ static void RendBBuf() {
     }
     RAM(addr + (i*0x10)) = bVar5;
   }
-  return;
 }
 
 
@@ -2139,7 +2083,6 @@ CheckRear:
 void IncAreaObjOffset(void) {
   AreaDataOffset = AreaDataOffset + 2;
   AreaObjectPageSel = 0;
-  return;
 }
 
 
@@ -2212,7 +2155,6 @@ NormObj:
     IncAreaObjOffset();
   }
   jumptable_DecodeAreaData(bVar1 + cVar2, bVar3, bVar1);
-  return;
 }
 
 
@@ -2240,7 +2182,6 @@ void AlterAreaAttributes(byte param_1) {
     ForegroundScenery = 0;
     BackgroundColorCtrl = bVar1;
   }
-  return;
 }
 
 
@@ -2249,7 +2190,6 @@ void AlterAreaAttributes(byte param_1) {
 // Signature: [] -> []
 void ScrollLockObject(void) {
   ScrollLock = ScrollLock ^ 1;
-  return;
 }
 
 
@@ -2265,7 +2205,6 @@ void KillEnemies(byte param_1) {
       Enemy_Flag[bVar1] = 0;
     }
   } Nplus1_TIMES(bVar1);
-  return;
 }
 
 
@@ -2284,7 +2223,6 @@ void AreaFrenzy(byte param_1) {
     }
   } while (FrenzyIDData[param_1 - 8] != Enemy_ID[bVar1]);
   EnemyFrenzyQueue = 0;
-  return;
 }
 
 
@@ -2313,7 +2251,6 @@ void jumptable_AreaStyleObject(byte param_1, byte param_2) {
   }
 
   jmpengine_overflow(param_1);
-  return;
 }
 
 
@@ -2322,7 +2259,6 @@ void jumptable_AreaStyleObject(byte param_1, byte param_2) {
 // Signature: [X] -> []
 void AreaStyleObject(byte param_1) {
   jumptable_AreaStyleObject(AreaStyle, param_1);
-  return;
 }
 
 
@@ -2346,7 +2282,6 @@ void TreeLedge(byte param_1) {
   }
   MetatileBuffer[bVar1] = 0x17;
   RenderUnderPart(0x4c, bVar1 + 1, 0xf);
-  return;
 }
 
 
@@ -2355,7 +2290,6 @@ void TreeLedge(byte param_1) {
 // Signature: [A, r07] -> []
 void NoUnder(byte param_1, byte param_2) {
   RenderUnderPart(param_1, param_2, 0);
-  return;
 }
 
 
@@ -2372,7 +2306,6 @@ void PulleyRopeObject(byte param_1) {
     bVar1 = 2;
   }
   MetatileBuffer[0] = PulleyRopeMetatiles[bVar1];
-  return;
 }
 
 
@@ -2420,7 +2353,6 @@ void CastleObject(byte param_1) {
       return;
     }
   }
-  return;
 }
 
 
@@ -2433,7 +2365,6 @@ void WaterPipe(byte param_1) {
   sVar1 = GetLrgObjAttrib(param_1);
   MetatileBuffer[sVar1.r07] = ssw(0x6b, 0x6d);
   MetatileBuffer[sVar1.r07 + 1] = ssw(0x6c, 0x6e);
-  return;
 }
 
 
@@ -2451,7 +2382,6 @@ void IntroPipe(byte param_1) {
     }
     MetatileBuffer[7] = VerticalPipeData[sVar2.y];
   }
-  return;
 }
 
 
@@ -2464,7 +2394,6 @@ void ExitPipe(byte param_1) {
   ChkLrgObjFixedLength(param_1, 3);
   sVar1 = GetLrgObjAttrib(param_1);
   RenderSidewaysPipe(param_1, sVar1.y);
-  return;
 }
 
 
@@ -2554,7 +2483,6 @@ void VerticalPipe(byte param_1, byte param_2) {
 
   MetatileBuffer[bVar2] = VerticalPipeData[bStack0000];
   RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar2 + 1, bVar1 - 1);
-  return;
 }
 
 
@@ -2605,7 +2533,6 @@ void Hole_Water(byte param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[10] = 0x86;
   RenderUnderPart(0x87, 0xb, 1);
-  return;
 }
 
 
@@ -2618,7 +2545,6 @@ void QuestionBlockRow_High(byte param_1) {
   bStack0000 = 3;
   ChkLrgObjLength(param_1);
   MetatileBuffer[bStack0000] = 0xc0;
-  return;
 }
 
 
@@ -2631,7 +2557,6 @@ void QuestionBlockRow_Low(byte param_1) {
   bStack0000 = 7;
   ChkLrgObjLength(param_1);
   MetatileBuffer[bStack0000] = 0xc0;
-  return;
 }
 
 
@@ -2645,7 +2570,6 @@ void Bridge_High(byte param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[bStack0000] = 0xb;
   RenderUnderPart(ssw(0x63, 0x64), bStack0000 + 1, 0);
-  return;
 }
 
 
@@ -2659,7 +2583,6 @@ void Bridge_Middle(byte param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[bStack0000] = 0xb;
   RenderUnderPart(ssw(0x63, 0x64), bStack0000 + 1, 0);
-  return;
 }
 
 
@@ -2673,7 +2596,6 @@ void Bridge_Low(byte param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[bStack0000] = 0xb;
   RenderUnderPart(ssw(0x63, 0x64), bStack0000 + 1, 0);
-  return;
 }
 
 
@@ -2685,7 +2607,6 @@ void FlagBalls_Residual(byte param_1) {
 
   sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(ssw(0x6d, 0x6f), 2, sVar1.y);
-  return;
 }
 
 
@@ -2705,7 +2626,6 @@ void FlagpoleObject(void) {
   FlagpoleFNum_Y_Pos = 0xb0;
   Enemy_ID[5] = 0x30;
   Enemy_Flag[5] = Enemy_Flag[5] + 1;
-  return;
 }
 
 
@@ -2714,7 +2634,6 @@ void FlagpoleObject(void) {
 // Signature: [] -> []
 void EndlessRope(void) {
   RenderUnderPart(0x40, 0, 0xf);
-  return;
 }
 
 
@@ -2729,7 +2648,6 @@ void BalancePlatRope(byte param_1) {
   RenderUnderPart(0x44, 1, 0xf);
   sVar1 = GetLrgObjAttrib(bStack0000);
   RenderUnderPart(0x40, 1, sVar1.y);
-  return;
 }
 
 
@@ -2743,7 +2661,6 @@ void RowOfCoins(byte param_1) {
   bStack0000 = CoinMetatileData[AreaType];
   sVar1 = ChkLrgObjLength(param_1);
   RenderUnderPart(bStack0000, sVar1.r07, 0);
-  return;
 }
 
 
@@ -2753,7 +2670,6 @@ void RowOfCoins(byte param_1) {
 void CastleBridgeObj(byte param_1, byte param_2) {
   ChkLrgObjFixedLength(param_1, 0xc);
   ChainObj(param_2);
-  return;
 }
 
 
@@ -2763,7 +2679,6 @@ void CastleBridgeObj(byte param_1, byte param_2) {
 void AxeObj(byte param_1) {
   VRAM_Buffer_AddrCtrl = 8;
   ChainObj(param_1);
-  return;
 }
 
 
@@ -2772,7 +2687,6 @@ void AxeObj(byte param_1) {
 // Signature: [r00] -> []
 void ChainObj(byte param_1) {
   RenderUnderPart(C_ObjectRow[param_1 + 1], C_ObjectRow[param_1 - 2], 0);
-  return;
 }
 
 
@@ -2784,7 +2698,6 @@ void EmptyBlock(byte param_1) {
 
   sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(ssw(0xc4, 0xc5), sVar1.r07, 0);
-  return;
 }
 
 
@@ -2803,7 +2716,6 @@ void RowOfBricks(byte param_1) {
   bStack0000 = BrickMetatiles[bVar1];
   sVar2 = ChkLrgObjLength(param_1);
   RenderUnderPart(bStack0000, sVar2.r07, 0);
-  return;
 }
 
 
@@ -2817,7 +2729,6 @@ void RowOfSolidBlocks(byte param_1) {
   bStack0000 = SolidBlockMetatiles[AreaType];
   sVar1 = ChkLrgObjLength(param_1);
   RenderUnderPart(bStack0000, sVar1.r07, 0);
-  return;
 }
 
 
@@ -2831,7 +2742,6 @@ void ColumnOfBricks(byte param_1) {
   bStack0000 = BrickMetatiles[AreaType];
   sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(bStack0000, sVar1.r07, sVar1.y);
-  return;
 }
 
 
@@ -2845,7 +2755,6 @@ void ColumnOfSolidBlocks(byte param_1) {
   bStack0000 = SolidBlockMetatiles[AreaType];
   sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(bStack0000, sVar1.r07, sVar1.y);
-  return;
 }
 
 
@@ -2877,7 +2786,6 @@ void BulletBillCannon(byte param_1) {
   if (Cannon_Or_Whirlpool_Offset > 5) {
     Cannon_Or_Whirlpool_Offset = 0;
   }
-  return;
 }
 
 
@@ -2893,7 +2801,6 @@ void StaircaseObject(byte param_1) {
   }
   StaircaseControl -= 1;
   RenderUnderPart(ssw(0x61, 0x62), StaircaseRowData[StaircaseControl], StaircaseHeightData[StaircaseControl]);
-  return;
 }
 
 
@@ -2925,7 +2832,6 @@ void Jumpspring(byte param_1) {
   Enemy_Flag[bVar3] = Enemy_Flag[bVar3] + 1;
   MetatileBuffer[bVar1] = ssw(0x67, 0x68);
   MetatileBuffer[bVar1 + 1] = ssw(0x68, 0x69);
-  return;
 }
 
 
@@ -2936,9 +2842,7 @@ void Hidden1UpBlock(byte param_1, byte param_2) {
   if (Hidden1UpFlag != 0) {
     Hidden1UpFlag = 0;
     BrickWithItem(param_1, param_2);
-    return;
   }
-  return;
 }
 
 
@@ -2954,7 +2858,6 @@ void QuestionBlock(byte param_1, byte param_2) {
   bStack0000 = BrickQBlockMetatiles[bVar1];
   sVar2 = GetLrgObjAttrib(param_1);
   RenderUnderPart(bStack0000, sVar2.r07, 0);
-  return;
 }
 
 
@@ -2964,7 +2867,6 @@ void QuestionBlock(byte param_1, byte param_2) {
 void BrickWithCoins(byte param_1, byte param_2) {
   BrickCoinTimerFlag = 0;
   BrickWithItem(param_1, param_2);
-  return;
 }
 
 
@@ -2985,7 +2887,6 @@ void BrickWithItem(byte param_1, byte param_2) {
   bStack0000 = BrickQBlockMetatiles[(byte)(cVar1 + bVar2)];
   sVar3 = GetLrgObjAttrib(param_1);
   RenderUnderPart(bStack0000, sVar3.r07, 0);
-  return;
 }
 
 
@@ -3016,7 +2917,6 @@ void Hole_Empty(byte param_1) {
     }
   }
   RenderUnderPart(HoleMetatiles[AreaType], 8, 0xf);
-  return;
 }
 
 
@@ -3125,7 +3025,6 @@ ushort GetBlockBufferAddr(byte column) {
 void LoadAreaPointer(void) {
   AreaPointer = FindAreaPointer();
   GetAreaType(AreaPointer);
-  return;
 }
 
 
@@ -3203,7 +3102,6 @@ void GetAreaDataAddrs(void) {
 #endif
 
   AreaData = ((hi << 8) | lo) + 2;
-  return;
 }
 
 
@@ -3212,7 +3110,6 @@ void GetAreaDataAddrs(void) {
 // Signature: [] -> []
 void GameMode(void) {
   jumptable_GameMode(OperMode_Task);
-  return;
 }
 
 
@@ -3273,7 +3170,6 @@ end:
   PreviousA_B_Buttons = A_B_Buttons;
   Left_Right_Buttons = 0;
   UpdScrollVar();
-  return;
 }
 
 
@@ -3291,7 +3187,6 @@ void UpdScrollVar(void) {
     }
     AreaParserTaskHandler();
   }
-  return;
 }
 
 
@@ -3317,7 +3212,6 @@ void ScrollHandler(void) {
     return;
   }
   ScrollScreen(Player_X_Scroll);
-  return;
 }
 
 
@@ -3339,7 +3233,6 @@ void ChkPOffscr(void) {
     }
   }
   Platform_X_Scroll = 0;
-  return;
 }
 
 
@@ -3358,7 +3251,6 @@ byte GetScreenPosition(void) {
 // Signature: [] -> []
 void GameRoutines(void) {
   jumptable_GameRoutines(GameEngineSubroutine);
-  return;
 }
 
 
@@ -3415,7 +3307,6 @@ void PlayerEntrance(void) {
   DisableCollisionDet = 0;
   PlayerFacingDir = 1;
   GameEngineSubroutine = 8;
-  return;
 }
 
 
@@ -3425,7 +3316,6 @@ void PlayerEntrance(void) {
 void AutoControlPlayer(byte param_1) {
   SavedJoypadBits[0] = param_1;
   PlayerCtrlRoutine();
-  return;
 }
 
 
@@ -3489,7 +3379,6 @@ void PlayerCtrlRoutine(void) {
       }
     }
   }
-  return;
 }
 
 
@@ -3499,12 +3388,11 @@ void PlayerCtrlRoutine(void) {
 void Vine_AutoClimb(void) {
   if ((SprObject_Y_HighPos[0] == 0) && (SprObject_Y_Position[0] < 0xe4)) {
     SetEntr();
-    return;
+  } else {
+    JoypadOverride = 8;
+    Player_State = 3;
+    AutoControlPlayer(8);
   }
-  JoypadOverride = 8;
-  Player_State = 3;
-  AutoControlPlayer(8);
-  return;
 }
 
 
@@ -3514,7 +3402,6 @@ void Vine_AutoClimb(void) {
 void SetEntr(void) {
   AltEntranceControl = 2;
   ChgAreaMode();
-  return;
 }
 
 
@@ -3534,9 +3421,7 @@ void VerticalPipeEntry(void) {
   if (ChangeAreaTimer == 0) {
     AltEntranceControl = bVar1;
     ChgAreaMode();
-    return;
   }
-  return;
 }
 
 
@@ -3545,7 +3430,6 @@ void VerticalPipeEntry(void) {
 // Signature: [A] -> []
 void MovePlayerYAxis(byte param_1) {
   SprObject_Y_Position[0] = param_1 + SprObject_Y_Position[0];
-  return;
 }
 
 
@@ -3558,9 +3442,7 @@ void SideExitPipeEntry(void) {
   if (ChangeAreaTimer == 0) {
     AltEntranceControl = 2;
     ChgAreaMode();
-    return;
   }
-  return;
 }
 
 
@@ -3592,7 +3474,6 @@ void EnterSidePipe(void) {
     PlayerSpriteVarData1[0] = 0;
   }
   AutoControlPlayer(!bVar1);
-  return;
 }
 
 
@@ -3602,12 +3483,9 @@ void EnterSidePipe(void) {
 void PlayerChangeSize(void) {
   if (TimerControl == 0xf8) {
     InitChangeSize();
-    return;
-  }
-  if (TimerControl == 0xc4) {
+  } else if (TimerControl == 0xc4) {
     DonePlayerTask();
   }
-  return;
 }
 
 
@@ -3618,16 +3496,12 @@ void PlayerInjuryBlink(void) {
   if (TimerControl >= 0xf0) {
     if (TimerControl == 0xf0) {
       InitChangeSize();
-      return;
     }
-    return;
-  }
-  if (TimerControl == 200) {
+  } else if (TimerControl == 200) {
     DonePlayerTask();
-    return;
+  } else {
+    PlayerCtrlRoutine();
   }
-  PlayerCtrlRoutine();
-  return;
 }
 
 
@@ -3640,7 +3514,6 @@ void InitChangeSize(void) {
     PlayerChangeSizeFlag = 1;
     PlayerSize ^= 1;
   }
-  return;
 }
 
 
@@ -3650,9 +3523,7 @@ void InitChangeSize(void) {
 void PlayerDeath(void) {
   if (TimerControl < 0xf0) {
     PlayerCtrlRoutine();
-    return;
   }
-  return;
 }
 
 
@@ -3662,7 +3533,6 @@ void PlayerDeath(void) {
 void DonePlayerTask(void) {
   TimerControl = 0;
   GameEngineSubroutine = 8;
-  return;
 }
 
 
@@ -3672,11 +3542,10 @@ void DonePlayerTask(void) {
 void PlayerFireFlower(void) {
   if (TimerControl != 0xc0) {
     CyclePlayerPalette(FrameCounter >> 2);
-    return;
+  } else {
+    DonePlayerTask();
+    ResetPalStar();
   }
-  DonePlayerTask();
-  ResetPalStar();
-  return;
 }
 
 
@@ -3685,7 +3554,6 @@ void PlayerFireFlower(void) {
 // Signature: [A] -> []
 void CyclePlayerPalette(byte param_1) {
   Player_SprAttrib = (Player_SprAttrib & 0xfc) | (param_1 & 3);
-  return;
 }
 
 
@@ -3694,7 +3562,6 @@ void CyclePlayerPalette(byte param_1) {
 // Signature: [] -> []
 void ResetPalStar(void) {
   Player_SprAttrib = Player_SprAttrib & 0xfc;
-  return;
 }
 
 
@@ -3712,10 +3579,9 @@ void FlagpoleSlide(void) {
       bVar1 = 4;
     }
     AutoControlPlayer(bVar1);
-    return;
+  } else {
+    GameEngineSubroutine = GameEngineSubroutine + 1;
   }
-  GameEngineSubroutine = GameEngineSubroutine + 1;
-  return;
 }
 
 
@@ -3773,7 +3639,6 @@ void NextArea(void) {
   FetchNewGameTimerFlag += 1;
   HalfwayPage = ChgAreaMode();
   EventMusicQueue = 0x80;
-  return;
 }
 
 
@@ -3796,7 +3661,6 @@ void PlayerMovementSubs(void) {
     ClimbSideTimer = 0x18;
   }
   jumptable_PlayerMovementSubs(Player_State);
-  return;
 }
 
 
@@ -3815,7 +3679,6 @@ void OnGroundStateSub(void) {
     BlowPlayerAround();
   }
 #endif
-  return;
 }
 
 
@@ -3825,7 +3688,6 @@ void OnGroundStateSub(void) {
 void FallingSub(void) {
   VerticalForce = VerticalForceDown;
   LRAir();
-  return;
 }
 
 
@@ -3838,21 +3700,16 @@ void JumpSwimSub(void) {
            && (DiffToHaltJump <= (byte)(JumpOrigin_Y_Position - SprObject_Y_Position[0]))))) {
     VerticalForce = VerticalForceDown;
   }
-  if (SwimmingFlag == 0) {
-    LRAir();
-    return;
+  if (SwimmingFlag != 0) {
+    GetPlayerAnimSpeed();
+    if (SprObject_Y_Position[0] < 0x14) {
+      VerticalForce = 0x18;
+    }
+    if (Left_Right_Buttons != 0) {
+      PlayerFacingDir = Left_Right_Buttons;
+    }
   }
-  GetPlayerAnimSpeed();
-  if (SprObject_Y_Position[0] < 0x14) {
-    VerticalForce = 0x18;
-  }
-  if (Left_Right_Buttons == 0) {
-    LRAir();
-    return;
-  }
-  PlayerFacingDir = Left_Right_Buttons;
   LRAir();
-  return;
 }
 
 
@@ -3873,7 +3730,6 @@ void LRAir(void) {
     VerticalForce = 0x28;
   }
   MovePlayerVertically();
-  return;
 }
 
 
@@ -3913,10 +3769,9 @@ void ClimbingSub(void) {
       PlayerFacingDir = Left_Right_Buttons ^ 3;
       SprObject_X_Position[0] = SprObject_X_Position[0] + ClimbAdderLow[bVar4];
     }
-    return;
+  } else {
+    ClimbSideTimer = bVar3;
   }
-  ClimbSideTimer = bVar3;
-  return;
 }
 
 
@@ -4019,7 +3874,6 @@ GetXPhy:
     FrictionAdderHigh = FrictionAdderLow >> 7;
     FrictionAdderLow <<= 1;
   }
-  return;
 }
 
 
@@ -4050,7 +3904,6 @@ void GetPlayerAnimSpeed(void) {
   }
   RunningSpeed = bVar1;
   PlayerAnimTimerSet = PlayerAnimTmrData[bVar2];
-  return;
 }
 
 
@@ -4099,7 +3952,6 @@ XSpdSign:
   if (PlayerSpriteVarData1[0] >= 0x80) {
     Player_XSpeedAbsolute = NEGATE(PlayerSpriteVarData1[0]);
   }
-  return;
 }
 
 
@@ -4132,7 +3984,6 @@ void ProcFireball_Bubble(void) {
       // note: counter gets modified!
     } Nplus1_TIMES(bVar1);
   }
-  return;
 }
 
 
@@ -4179,7 +4030,6 @@ void FireballObjCore(byte param_1) {
     }
     Fireball_State[bVar2] = 0;
   }
-  return;
 }
 
 
@@ -4189,13 +4039,9 @@ void FireballObjCore(byte param_1) {
 void BubbleCheck(byte param_1) {
   if (Bubble_Y_Position[param_1] != 0xf8) {
     MoveBubl(param_1, PseudoRandomBitReg[param_1 + 1] & 1);
-    return;
-  }
-  if (AirBubbleTimer == 0) {
+  } else if (AirBubbleTimer == 0) {
     SetupBubble(param_1, PseudoRandomBitReg[param_1 + 1] & 1);
-    return;
   }
-  return;
 }
 
 
@@ -4221,7 +4067,6 @@ void SetupBubble(byte param_1, byte param_2) {
   Bubble_Y_HighPos[param_1] = 1;
   AirBubbleTimer = BubbleTimerData[param_2];
   MoveBubl(param_1, param_2);
-  return;
 }
 
 
@@ -4240,7 +4085,6 @@ void MoveBubl(byte param_1, byte param_2) {
     bVar2 = 0xf8;
   }
   Bubble_Y_Position[param_1] = bVar2;
-  return;
 }
 
 
@@ -4270,7 +4114,6 @@ void RunGameTimer(void) {
     ForceInjury(0);
     GameTimerExpiredFlag += 1;
   }
-  return;
 }
 
 
@@ -4284,9 +4127,7 @@ void WarpZoneObject(byte param_1) {
     }
     ScrollLock = SprObject_Y_Position[0] & SprObject_Y_HighPos[0];
     EraseEnemyObject(param_1);
-    return;
   }
-  return;
 }
 
 
@@ -4339,7 +4180,6 @@ WhPull:
       }
     } Nplus1_TIMES(bVar3);
   }
-  return;
 }
 
 
@@ -4378,7 +4218,6 @@ void FlagpoleRoutine(void) {
     sVar5 = RelativeEnemyPosition(sVar4.x);
     FlagpoleGfxHandler(sVar5.x);
   }
-  return;
 }
 
 
@@ -4441,7 +4280,6 @@ void Setup_Vine(byte param_1, byte param_2) {
   VineObjOffset[VineFlagOffset] = param_1;
   VineFlagOffset = VineFlagOffset + 1;
   Square2SoundQueue = 4;
-  return;
 }
 
 
@@ -4557,7 +4395,6 @@ Chk_BB:
       }
     } Nplus1_TIMES(bVar2);
   }
-  return;
 }
 
 
@@ -4684,7 +4521,6 @@ void CoinBlock(byte param_1, bool param_2) {
   Misc_X_Position[bVar1] = Block_X_Position[param_1] | 5;
   Misc_Y_Position[bVar1] = (Block_Y_Position[param_1] - 0x10) - !sVar2.c;
   JCoinC(param_1, bVar1);
-  return;
 }
 
 
@@ -4868,7 +4704,6 @@ void SetupPowerUp(byte param_1) {
   Enemy_Y_HighPos[5] = 1;
   Enemy_Y_Position[5] = Block_Y_Position[param_1] - 8;
   PwrUpJmp();
-  return;
 }
 
 
@@ -4884,7 +4719,6 @@ void PwrUpJmp(void) {
   }
   Enemy_SprAttrib[5] = 0x20;
   Square2SoundQueue = 2;
-  return;
 }
 
 
@@ -4997,7 +4831,6 @@ void PlayerHeadCollision(byte param_1, byte param_2, byte param_3, byte param_4)
     BrickShatter(param_2, (byte)sVar1, bVar4);
   }
   SprDataOffset_Ctrl = SprDataOffset_Ctrl ^ 1;
-  return;
 }
 
 
@@ -5014,7 +4847,6 @@ void InitBlock_XY_Pos(byte param_1) {
   Block_PageLoc[param_1] = bVar2;
   Block_PageLoc2[param_1] = bVar2;
   Block_Y_HighPos[param_1] = SprObject_Y_HighPos[0];
-  return;
 }
 
 
@@ -5041,9 +4873,7 @@ void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
       bVar1 = bVar1 - ssw(5, 6);
     }
     jumptable_BumpBlock(bVar1, bVar2);
-    return;
   }
-  return;
 }
 
 
@@ -5053,7 +4883,6 @@ void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
 void MushFlowerBlock(byte param_1) {
   PowerUpType = 0;
   SetupPowerUp(param_1);
-  return;
 }
 
 
@@ -5063,7 +4892,6 @@ void MushFlowerBlock(byte param_1) {
 void StarBlock(byte param_1) {
   PowerUpType = 2;
   SetupPowerUp(param_1);
-  return;
 }
 
 
@@ -5073,7 +4901,6 @@ void StarBlock(byte param_1) {
 void ExtraLifeMushBlock(byte param_1) {
   PowerUpType = 3;
   SetupPowerUp(param_1);
-  return;
 }
 
 
@@ -5082,7 +4909,6 @@ void ExtraLifeMushBlock(byte param_1) {
 // Signature: [] -> []
 void VineBlock(void) {
   Setup_Vine(5, SprDataOffset_Ctrl);
-  return;
 }
 
 
@@ -5124,7 +4950,6 @@ void BrickShatter(byte param_1, byte param_2, byte param_3) {
   PlayerSpriteVarData2[0] = 0xfe;
   DigitModifier[5] = 5;
   AddToScore();
-  return;
 }
 
 
@@ -5166,7 +4991,6 @@ void SpawnBrickChunks(byte param_1) {
   Block_X_Position[param_1 + 2] = Block_X_Position[param_1];
   Block_Y_Position[param_1 + 2] = Block_Y_Position[param_1] + 8;
   Block_Y_Speed[param_1] = 0xfa;
-  return;
 }
 
 
@@ -5296,11 +5120,9 @@ byte MoveObjectHorizontally(byte param_1) {
 // SM2MAIN:8b1e
 // Signature: [] -> []
 void MovePlayerVertically(void) {
-  if ((TimerControl == 0) && (JumpspringAnimCtrl != 0)) {
-    return;
+  if ((TimerControl != 0) || (JumpspringAnimCtrl == 0)) {
+    ImposeGravitySprObj(4, 0, VerticalForce);
   }
-  ImposeGravitySprObj(4, 0, VerticalForce);
-  return;
 }
 
 
@@ -5379,7 +5201,6 @@ void ImposeGravityBlock(byte param_1) {
   byte in_r01 = 0;
 
   ImposeGravity(0, param_1, 0x50, in_r01, MaxSpdBlockData[1]);
-  return;
 }
 
 
@@ -5390,7 +5211,6 @@ void ImposeGravitySprObj(byte param_1, byte param_2, byte param_3) {
   byte in_r01 = 0;
 
   ImposeGravity(0, param_2, param_3, in_r01, param_1);
-  return;
 }
 
 
@@ -5471,7 +5291,6 @@ void ImposeGravity(byte param_1, byte param_2, byte param_3, byte param_4, byte 
       SprObject_Y_MoveForce[param_2] = 0xff;
     }
   }
-  return;
 }
 
 
@@ -5512,7 +5331,6 @@ void ExecGameLoopback(byte param_1) {
   EnemyDataOffset = 0;
   EnemyObjectPageLoc = 0;
   AreaDataOffset = AreaDataOfsLoopback[param_1];
-  return;
 }
 
 
@@ -5657,7 +5475,6 @@ CheckFrenzyBuffer:
 void InitEnemyObject(byte param_1) {
   Enemy_State[param_1] = 0;
   CheckpointEnemyID(param_1);
-  return;
 }
 
 
@@ -5695,7 +5512,6 @@ void CheckpointEnemyID(byte param_1) {
     EnemyOffscrBitsMasked[param_1] = 1;
   }
   jumptable_CheckpointEnemyID(bVar1, param_1);
-  return;
 }
 
 
@@ -5711,7 +5527,6 @@ void NoInitCode(void) { return; }
 void InitGoomba(byte param_1) {
   InitNormalEnemy(param_1);
   SmallBBox(param_1);
-  return;
 }
 
 
@@ -5724,7 +5539,6 @@ void InitPodoboo(byte param_1) {
   EnemyIntervalTimer[param_1] = 1;
   Enemy_State[param_1] = 0;
   SmallBBox(param_1);
-  return;
 }
 
 
@@ -5733,7 +5547,6 @@ void InitPodoboo(byte param_1) {
 // Signature: [X] -> []
 void InitRetainerObj(byte param_1) {
   Enemy_Y_Position[param_1] = 0xb8;
-  return;
 }
 
 
@@ -5745,7 +5558,6 @@ void InitNormalEnemy(byte param_1) {
   Enemy_BoundBoxCtrl[param_1] = 3;
   Enemy_MovingDir[param_1] = 2;
   InitVStf(param_1);
-  return;
 }
 
 
@@ -5755,7 +5567,6 @@ void InitNormalEnemy(byte param_1) {
 void InitRedKoopa(byte param_1) {
   InitNormalEnemy(param_1);
   Enemy_State[param_1] = 1;
-  return;
 }
 
 
@@ -5771,7 +5582,6 @@ void InitHammerBro(byte param_1) {
   Enemy_BoundBoxCtrl[param_1] = 0xb;
   Enemy_MovingDir[param_1] = 2;
   InitVStf(param_1);
-  return;
 }
 
 
@@ -5783,7 +5593,6 @@ void InitHorizFlySwimEnemy(byte param_1) {
   Enemy_BoundBoxCtrl[param_1] = 3;
   Enemy_MovingDir[param_1] = 2;
   InitVStf(param_1);
-  return;
 }
 
 
@@ -5793,7 +5602,6 @@ void InitHorizFlySwimEnemy(byte param_1) {
 void InitBloober(byte param_1) {
   SpriteVarData1[param_1] = 0;
   SmallBBox(param_1);
-  return;
 }
 
 
@@ -5822,7 +5630,6 @@ void InitRedPTroopa(byte param_1, bool param_2) {
   Enemy_BoundBoxCtrl[param_1] = 3;
   Enemy_MovingDir[param_1] = 2;
   InitVStf(param_1);
-  return;
 }
 
 
@@ -5842,7 +5649,6 @@ byte InitVStf(byte param_1) {
 void InitBulletBill(byte param_1) {
   Enemy_MovingDir[param_1] = 2;
   Enemy_BoundBoxCtrl[param_1] = 9;
-  return;
 }
 
 
@@ -5853,7 +5659,6 @@ void InitCheepCheep(byte param_1) {
   SmallBBox(param_1);
   SpriteVarData1[param_1] = PseudoRandomBitReg[param_1] & 0x10;
   CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = Enemy_Y_Position[param_1];
-  return;
 }
 
 
@@ -5863,10 +5668,9 @@ void InitCheepCheep(byte param_1) {
 void InitLakitu(byte param_1) {
   if (EnemyFrenzyBuffer == 0) {
     SetupLakitu(param_1);
-    return;
+  } else {
+    EraseEnemyObject(param_1);
   }
-  EraseEnemyObject(param_1);
-  return;
 }
 
 
@@ -5877,7 +5681,6 @@ void SetupLakitu(byte param_1) {
   LakituReappearTimer = 0;
   InitHorizFlySwimEnemy(param_1);
   Enemy_BoundBoxCtrl[param_1] = 3;
-  return;
 }
 
 
@@ -5944,7 +5747,6 @@ CreateL:
       }
     }
   }
-  return;
 }
 
 
@@ -5954,7 +5756,6 @@ CreateL:
 void InitLongFirebar(byte param_1) {
   DuplicateEnemyObj(param_1);
   InitShortFirebar(param_1);
-  return;
 }
 
 
@@ -5972,7 +5773,6 @@ void InitShortFirebar(byte param_1) {
   Enemy_X_Position[param_1] = bVar1 + 4;
   Enemy_PageLoc[param_1] = Enemy_PageLoc[param_1] + (bVar1 >= 0xfc);
   Enemy_BoundBoxCtrl[param_1] = 3;
-  return;
 }
 
 
@@ -6023,10 +5823,8 @@ void InitFlyingCheepCheep(byte param_1) {
       Enemy_Flag[param_1] = 1;
       Enemy_Y_HighPos[param_1] = 1;
       Enemy_Y_Position[param_1] = 0xf8;
-      return;
     }
   }
-  return;
 }
 
 
@@ -6056,7 +5854,6 @@ void InitBowser(byte param_1) {
   EnemyFrameTimer[param_1] = 0x20;
   BowserHitPoints = 5;
   BowserMovementSpeed = 2;
-  return;
 }
 
 
@@ -6077,7 +5874,6 @@ void DuplicateEnemyObj(byte param_1) {
   Enemy_Flag[param_1] = 1;
   Enemy_Y_HighPos[bVar1] = 1;
   Enemy_Y_Position[bVar1] = Enemy_Y_Position[param_1];
-  return;
 }
 
 
@@ -6115,7 +5911,6 @@ void InitBowserFlame(byte param_1) {
   Enemy_Flag[param_1] = 1;
   Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] = 0;
   Enemy_State[param_1] = 0;
-  return;
 }
 
 
@@ -6168,7 +5963,6 @@ void InitFireworks(byte param_1) {
     SpriteVarData1[param_1] = 0;
     SpriteVarData2[param_1] = 8;
   }
-  return;
 }
 
 
@@ -6217,7 +6011,6 @@ Set17ID:
       } while ((Enemy_Flag[bVar1] == 0) || (Enemy_ID[bVar1] != 8));
     }
   }
-  return;
 }
 
 
@@ -6301,7 +6094,6 @@ void InitPiranhaPlant(byte param_1) {
   CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = Enemy_Y_Position[param_1];
   BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = Enemy_Y_Position[param_1] - 0x18;
   Enemy_BoundBoxCtrl[param_1] = 9;
-  return;
 }
 
 
@@ -6311,7 +6103,6 @@ void InitPiranhaPlant(byte param_1) {
 void InitEnemyFrenzy(byte param_1) {
   EnemyFrenzyBuffer = Enemy_ID[param_1];
   jumptable_InitEnemyFrenzy(EnemyFrenzyBuffer - 0x12, param_1);
-  return;
 }
 
 
@@ -6335,7 +6126,6 @@ void EndFrenzy(byte param_1) {
   } Nplus1_TIMES(bVar1);
   EnemyFrenzyBuffer = 0;
   Enemy_Flag[param_1] = 0;
-  return;
 }
 
 
@@ -6346,7 +6136,6 @@ void InitJumpGPTroopa(byte param_1) {
   Enemy_MovingDir[param_1] = 2;
   SpriteVarData1[param_1] = ssw(0xf8, 0xf4);
   Enemy_BoundBoxCtrl[param_1] = 3;
-  return;
 }
 
 
@@ -6370,7 +6159,6 @@ void InitBalPlatform(byte param_1) {
   Enemy_MovingDir[param_1] = 0;
   PosPlatform(param_1, 0);
   InitDropPlatform(param_1);
-  return;
 }
 
 
@@ -6381,7 +6169,6 @@ void InitDropPlatform(byte param_1) {
   HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = 0xff;
   InitVStf(param_1);
   SPBBox(param_1);
-  return;
 }
 
 
@@ -6392,7 +6179,6 @@ void InitHoriPlatform(byte param_1) {
   SpriteVarData1[param_1] = 0;
   InitVStf(param_1);
   SPBBox(param_1);
-  return;
 }
 
 
@@ -6413,7 +6199,6 @@ void InitVertPlatform(byte param_1) {
   SpriteVarData1[param_1] = cVar2 + Enemy_Y_Position[param_1];
   InitVStf(param_1);
   SPBBox(param_1);
-  return;
 }
 
 
@@ -6428,7 +6213,6 @@ void SPBBox(byte param_1) {
     bVar1 = 6;
   }
   Enemy_BoundBoxCtrl[param_1] = bVar1;
-  return;
 }
 
 
@@ -6438,7 +6222,6 @@ void SPBBox(byte param_1) {
 void LargeLiftUp(byte param_1) {
   PlatLiftUp(param_1);
   SPBBox(param_1);
-  return;
 }
 
 
@@ -6448,7 +6231,6 @@ void LargeLiftUp(byte param_1) {
 void LargeLiftDown(byte param_1) {
   PlatLiftDown(param_1);
   SPBBox(param_1);
-  return;
 }
 
 
@@ -6460,7 +6242,6 @@ void PlatLiftUp(byte param_1) {
   SpriteVarData2[param_1] = 0xff;
   PosPlatform(param_1, 1);
   Enemy_BoundBoxCtrl[param_1] = 4;
-  return;
 }
 
 
@@ -6472,7 +6253,6 @@ void PlatLiftDown(byte param_1) {
   SpriteVarData2[param_1] = 0;
   PosPlatform(param_1, 1);
   Enemy_BoundBoxCtrl[param_1] = 4;
-  return;
 }
 
 
@@ -6487,7 +6267,6 @@ void PosPlatform(byte param_1, byte param_2) {
   bVar2 = PlatPosDataLow[param_2];
   Enemy_X_Position[param_1] = bVar1 + bVar2;
   Enemy_PageLoc[param_1] = Enemy_PageLoc[param_1] + PlatPosDataHigh[param_2] + CARRY1(bVar1, bVar2);
-  return;
 }
 
 
@@ -6901,7 +6680,6 @@ byte MoveFlyGreenPTroopa(byte param_1) {
 // Signature: [X] -> []
 void XMoveCntr_GreenPTroopa(byte param_1) {
   XMoveCntr_Platform(0x13, param_1);
-  return;
 }
 
 
@@ -6922,7 +6700,6 @@ void XMoveCntr_Platform(byte param_1, byte param_2) {
     return;
   }
   SpriteVarData2[param_2] = SpriteVarData2[param_2] + 1;
-  return;
 }
 
 
@@ -7010,9 +6787,7 @@ void ProcSwimmingB(byte param_1, bool param_2) {
           SpriteVarData2[param_1] = SpriteVarData2[param_1] + 1;
         }
       }
-      return;
-    }
-    if ((FrameCounter & 7) == 0) {
+    } else if ((FrameCounter & 7) == 0) {
       bVar1 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] - 1;
       CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = bVar1;
       SpriteVarData1[param_1] = bVar1;
@@ -7021,17 +6796,12 @@ void ProcSwimmingB(byte param_1, bool param_2) {
         EnemyIntervalTimer[param_1] = 2;
       }
     }
-    return;
-  }
-  if ((EnemyIntervalTimer[param_1] == 0)
+  } else if ((EnemyIntervalTimer[param_1] == 0)
       && (SprObject_Y_Position[0] <= (byte)(Enemy_Y_Position[param_1] + 0x10 + param_2))) {
     SpriteVarData2[param_1] = 0;
-    return;
-  }
-  if (!(bool)(FrameCounter & 1)) {
+  } else if (!(bool)(FrameCounter & 1)) {
     Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 1;
   }
-  return;
 }
 
 
@@ -7412,7 +7182,6 @@ void BridgeCollapse(byte param_1) {
   EventMusicQueue = 0x80;
   OperMode_Task += 1;
   KillAllEnemies();
-  return;
 }
 
 
@@ -7837,7 +7606,6 @@ void MovePiranhaPlant(byte param_1) {
   }
 PutinPipe:
   Enemy_SprAttrib[param_1] = 0x20;
-  return;
 }
 
 
@@ -8028,7 +7796,6 @@ void StopPlatforms(byte param_1, byte param_2) {
   bVar1 = InitVStf(param_1);
   SpriteVarData2[param_2] = bVar1;
   CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_2] = bVar1;
-  return;
 }
 
 
@@ -8082,7 +7849,6 @@ void ChkYPCollision(byte param_1) {
   if (HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] < 0x80) {
     PositionPlayerOnVPlat(param_1);
   }
-  return;
 }
 
 
@@ -8118,7 +7884,6 @@ void PositionPlayerOnHPlat(byte param_1, byte param_2) {
   SprObject_X_Position[0] = SprObject_X_Position[0] + param_2;
   Platform_X_Scroll = param_2;
   PositionPlayerOnVPlat(param_1);
-  return;
 }
 
 
@@ -8157,7 +7922,6 @@ byte RightPlatform(byte param_1) {
 void MoveLargeLiftPlat(byte param_1) {
   MoveLiftPlatforms(param_1);
   ChkYPCollision(param_1);
-  return;
 }
 
 
@@ -8167,7 +7931,6 @@ void MoveLargeLiftPlat(byte param_1) {
 void MoveSmallPlatform(byte param_1) {
   MoveLiftPlatforms(param_1);
   ChkSmallPlatCollision(param_1);
-  return;
 }
 
 
@@ -8184,9 +7947,7 @@ void MoveLiftPlatforms(byte param_1) {
     Enemy_Y_Position[param_1]
         = Enemy_Y_Position[param_1] + SpriteVarData2[param_1]
           + CARRY1(bVar1, CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1]);
-    return;
   }
-  return;
 }
 
 
@@ -8197,7 +7958,6 @@ void ChkSmallPlatCollision(byte param_1) {
   if (HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] != 0) {
     PositionPlayerOnS_Plat(HammerThrowingTimer_Or_PlatformCollisionFlag[param_1], param_1);
   }
-  return;
 }
 
 
@@ -8341,7 +8101,6 @@ void HandleEnemyFBallCol(byte param_1, byte param_2) {
   Enemy_State[bVar2] = bVar3;
   Square2SoundQueue = 0x80;
   EnemySmackScore(9, param_2);
-  return;
 }
 
 
@@ -8387,7 +8146,6 @@ void ShellOrBlockDefeat(byte param_1) {
 void EnemySmackScore(byte param_1, byte param_2) {
   SetupFloateyNumber(param_1, param_2);
   Square1SoundQueue = 8;
-  return;
 }
 
 
@@ -8736,7 +8494,6 @@ void SetupFloateyNumber(byte param_1, byte param_2) {
   FloateyNum_Timer[param_2] = 0x30;
   FloateyNum_Y_Pos[param_2] = Enemy_Y_Position[param_2];
   FloateyNum_X_Pos[param_2] = Enemy_Rel_XPos;
-  return;
 }
 
 
@@ -8810,7 +8567,6 @@ void ProcEnemyCollisions(byte param_1, byte param_2, byte param_3) {
       ShellChainCounter[ObjectOffset] = ShellChainCounter[ObjectOffset] + 1;
     }
   }
-  return;
 }
 
 
@@ -8824,18 +8580,14 @@ void EnemyTurnAround(byte param_1) {
   if (bVar1 != 0xd && ssw(true, bVar1 != 4) && bVar1 != 0x11 && bVar1 != 5) {
     if (bVar1 == 0x12) {
       RXSpd(param_1);
-      return;
     }
     if (bVar1 == 0xe) {
       RXSpd(param_1);
-      return;
     }
     if (bVar1 < 7) {
       RXSpd(param_1);
-      return;
     }
   }
-  return;
 }
 
 
@@ -8845,7 +8597,6 @@ void EnemyTurnAround(byte param_1) {
 void RXSpd(byte param_1) {
   SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
   Enemy_MovingDir[param_1] = Enemy_MovingDir[param_1] ^ 3;
-  return;
 }
 
 
@@ -8965,7 +8716,6 @@ void PositionPlayerOnS_Plat(byte param_1, byte param_2) {
     PlayerSpriteVarData2[0] = 0;
     SprObject_Y_MoveForce[0] = 0;
   }
-  return;
 }
 
 
@@ -8979,7 +8729,6 @@ void PositionPlayerOnVPlat(byte param_1) {
     PlayerSpriteVarData2[0] = 0;
     SprObject_Y_MoveForce[0] = 0;
   }
-  return;
 }
 
 
@@ -9219,7 +8968,6 @@ HandleCoinMetatile:
     }
     ImpedePlayerMove(bVar1);
   }
-  return;
 }
 
 
@@ -9229,7 +8977,6 @@ HandleCoinMetatile:
 void ErACM(byte param_1, byte param_2, byte param_3) {
   RAM(CONCAT11(param_3, param_2) + (ushort)param_1) = 0;
   RemoveCoin_Axe(param_1, param_2);
-  return;
 }
 
 
@@ -9273,7 +9020,6 @@ void HandleClimbing(byte param_1, byte param_2, byte param_3) {
   if (param_3 == 0) {
     SprObject_PageLoc[0] = ScreenRight_PageLoc + ClimbXPosAdder[PlayerFacingDir + 1];
   }
-  return;
 }
 
 
@@ -9306,7 +9052,6 @@ void ChkForLandJumpSpring(byte param_1) {
     JumpspringTimer = 3;
     JumpspringAnimCtrl = 1;
   }
-  return;
 }
 
 
@@ -9363,7 +9108,6 @@ void HandlePipeEntry(byte param_1, byte param_2) {
       FetchNewGameTimerFlag += 1;
     }
   }
-  return;
 }
 
 
@@ -9398,7 +9142,6 @@ void ImpedePlayerMove(byte param_1) {
   SprObject_X_Position[0] = bVar1 + SprObject_X_Position[0];
 ExIPM:
   Player_CollisionBits = (bVar2 ^ 0xff) & Player_CollisionBits;
-  return;
 }
 
 
@@ -9598,7 +9341,6 @@ void SetStun2(byte param_1) {
     Enemy_MovingDir[param_1] = bVar1;
   }
   SpriteVarData1[param_1] = EnemyBGCXSpdData[(byte)(bVar1 - 1)];
-  return;
 }
 
 
@@ -9686,7 +9428,6 @@ struct_ncr00 PlayerEnemyDiff(byte param_1) {
 void EnemyLanding(byte param_1) {
   InitVStf(param_1);
   Enemy_Y_Position[param_1] = (Enemy_Y_Position[param_1] & 0xf0) | 8;
-  return;
 }
 
 
@@ -9750,7 +9491,6 @@ byte HammerBroBGColl(byte param_1) {
 void KillEnemyAboveBlock(byte param_1) {
   ShellOrBlockDefeat(param_1);
   SpriteVarData2[param_1] = 0xfc;
-  return;
 }
 
 
@@ -9910,7 +9650,6 @@ void MoveBoundBoxOffscreen(byte param_1) {
   EnemyBoundingBoxCoord[bVar1 + 1] = 0xff;
   EnemyBoundingBoxCoord[bVar1 + 2] = 0xff;
   EnemyBoundingBoxCoord[bVar1 + 3] = 0xff;
-  return;
 }
 
 
@@ -10142,7 +9881,6 @@ void DrawVine(byte param_1) {
     }
     bVar4 += 4;
   } FOR_NE(cVar2, 6);
-  return;
 }
 
 
@@ -10231,9 +9969,7 @@ void FlagpoleGfxHandler(byte param_1) {
   }
   if ((Enemy_OffscreenBits & 0xe) != 0) {
     MoveSixSpritesOffscreen(Enemy_SprDataOffset[ObjectOffset]);
-    return;
   }
-  return;
 }
 
 
@@ -10242,7 +9978,6 @@ void FlagpoleGfxHandler(byte param_1) {
 // Signature: [Y] -> []
 void MoveSixSpritesOffscreen(byte param_1) {
   DumpSixSpr(0xf8, param_1);
-  return;
 }
 
 
@@ -10256,7 +9991,6 @@ void DumpSixSpr(byte param_1, byte param_2) {
   Sprite_Data[param_2 + 8] = param_1;
   Sprite_Data[param_2 + 4] = param_1;
   Sprite_Data[param_2] = param_1;
-  return;
 }
 
 
@@ -10268,7 +10002,6 @@ void DumpFourSpr(byte param_1, byte param_2) {
   Sprite_Data[param_2 + 8] = param_1;
   Sprite_Data[param_2 + 4] = param_1;
   Sprite_Data[param_2] = param_1;
-  return;
 }
 
 
@@ -10279,7 +10012,6 @@ void DumpThreeSpr(byte param_1, byte param_2) {
   Sprite_Data[param_2 + 8] = param_1;
   Sprite_Data[param_2 + 4] = param_1;
   Sprite_Data[param_2] = param_1;
-  return;
 }
 
 
@@ -10289,7 +10021,6 @@ void DumpThreeSpr(byte param_1, byte param_2) {
 void DumpTwoSpr(byte param_1, byte param_2) {
   Sprite_Data[param_2 + 4] = param_1;
   Sprite_Data[param_2] = param_1;
-  return;
 }
 
 
@@ -10770,7 +10501,6 @@ struct_xyr02 DrawOneSpriteRow(byte param_1, byte param_2, byte param_3, byte par
 // Signature: [A, X] -> []
 void MoveESprRowOffscreen(byte param_1, byte param_2) {
   DumpTwoSpr(0xf8, param_1 + Enemy_SprDataOffset[param_2]);
-  return;
 }
 
 
@@ -10784,7 +10514,6 @@ void MoveESprColOffscreen(byte param_1, byte param_2) {
   bVar2 = param_1 + Enemy_SprDataOffset[param_2];
   bVar1 = MoveColOffscreen(bVar2);
   Sprite_Data[bVar2 + 0x10] = bVar1;
-  return;
 }
 
 
@@ -10850,9 +10579,7 @@ byte DrawBlock(byte param_1) {
 void ChkLeftCo(byte param_1, byte param_2) {
   if ((param_1 & 8) != 0) {
     MoveColOffscreen(param_2);
-    return;
   }
-  return;
 }
 
 
@@ -10905,7 +10632,6 @@ void DrawBrickChunks(byte param_1) {
     Sprite_Data[bVar4 + 4] = 0xf8;
     Sprite_Data[bVar4 + 0xc] = 0xf8;
   }
-  return;
 }
 
 
@@ -10919,7 +10645,6 @@ void DrawFireball(byte param_1) {
   Sprite_Data[bVar1] = Fireball_Rel_YPos;
   Sprite_Data[bVar1 + 3] = Fireball_Rel_XPos;
   DrawFirebar(bVar1);
-  return;
 }
 
 
@@ -10937,7 +10662,6 @@ void DrawFirebar(byte param_1) {
     bVar2 = 0xc2;
   }
   Sprite_Data[param_1 + 2] = bVar2;
-  return;
 }
 
 
@@ -10952,10 +10676,9 @@ void DrawExplosion_Fireball(byte param_1) {
   bVar1 = bVar1 >> 1 & 7;
   if (bVar1 < 3) {
     DrawExplosion_Fireworks(bVar1, AltOrBlock_SprDataOffset[param_1]);
-    return;
+  } else {
+    Fireball_State[param_1] = 0;
   }
-  Fireball_State[param_1] = 0;
-  return;
 }
 
 
@@ -11055,7 +10778,6 @@ void DrawBubble(byte param_1) {
     Sprite_Data[bVar1 + 1] = 0x74;
     Sprite_Data[bVar1 + 2] = 2;
   }
-  return;
 }
 
 
@@ -11100,7 +10822,6 @@ void PlayerGfxHandler(void) {
       Sprite_Data[abVar2 + 0x19] = SwimKickTileNum[bVar1];
     }
   }
-  return;
 }
 
 
@@ -11112,7 +10833,6 @@ void FindPlayerAction(void) {
 
   bVar1 = ProcessPlayerAction();
   PlayerGfxProcessing(bVar1);
-  return;
 }
 
 
@@ -11153,7 +10873,6 @@ void PlayerGfxProcessing(byte param_1) {
     }
     bVar3 -= 8;
   } Nplus1_TIMES(bVar2);
-  return;
 }
 
 
@@ -11164,7 +10883,6 @@ void DrawPlayer_Intermediate(void) {
   DrawPlayerLoop(0xb8, 4, IntermediatePlayerData[0], IntermediatePlayerData[1], IntermediatePlayerData[2],
                  IntermediatePlayerData[3], IntermediatePlayerData[5]);
   Sprite_Data[34] = Sprite_Data[38] | 0x40;
-  return;
 }
 
 
@@ -11175,7 +10893,6 @@ void RenderPlayerSub(byte param_1) {
   Player_Pos_ForScroll = SprObject_Rel_XPos[0];
   DrawPlayerLoop(PlayerGfxOffset, PlayerOrSprDataOffset[0], SprObject_Rel_YPos[0], PlayerFacingDir,
                  Player_SprAttrib, SprObject_Rel_XPos[0], param_1);
-  return;
 }
 
 
@@ -11193,7 +10910,6 @@ void DrawPlayerLoop(byte param_1, byte param_2, byte param_3, byte param_4, byte
     param_1 = sVar1.x;
     param_7 -= 1;
   } while (param_7 != 0);
-  return;
 }
 
 
@@ -11357,7 +11073,6 @@ void ChkForPlayerAttrib(void) {
 C_S_IGAtt:
   Sprite_Data[abVar1 + 0x1a] = Sprite_Data[abVar1 + 0x1a] & 0x3f;
   Sprite_Data[abVar1 + 0x1e] = (Sprite_Data[abVar1 + 0x1e] & 0x3f) | 0x40;
-  return;
 }
 
 
@@ -11462,7 +11177,6 @@ byte GetObjRelativePosition(byte param_1, byte param_2) {
 // Signature: [] -> []
 void GetPlayerOffscreenBits(void) {
   GetOffScreenBitsSet(0, 0);
-  return;
 }
 
 

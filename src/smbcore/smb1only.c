@@ -389,7 +389,6 @@ void jumptable_BumpBlock(byte param_1, byte param_2) {
 // Signature: [] -> []
 void TitleScreenMode(void) {
   jumptable_TitleScreenMode(OperMode_Task);
-  return;
 }
 
 
@@ -513,7 +512,6 @@ void DrawMushroomIcon(void) {
     VRAM_Buffer1[3] = 0x24;
     VRAM_Buffer1[5] = 0xce;
   }
-  return;
 }
 
 
@@ -571,7 +569,6 @@ SetEndTimer:
     WorldEndTimer = 6;
     OperMode_Task += 1;
   }
-  return;
 }
 
 
@@ -644,7 +641,6 @@ void WriteGameText(byte param_1) {
       }
     }
   }
-  return;
 }
 
 
@@ -658,7 +654,6 @@ void InitializeGame(void) {
   DemoTimer = 0x18;
   LoadAreaPointer();
   InitializeArea();
-  return;
 }
 
 
@@ -708,9 +703,7 @@ void MushroomLedge(byte param_1) {
   if (bVar2 == bVar1) {
     MetatileBuffer[(byte)(bVar3 + 1)] = 0x4f;
     RenderUnderPart(0x50, bVar3 + 2, 0xf);
-    return;
   }
-  return;
 }
 
 
@@ -726,7 +719,6 @@ void ScrollScreen(byte param_1) {
   GetScreenPosition();
   ScrollIntervalTimer = 8;
   ChkPOffscr();
-  return;
 }
 
 
@@ -747,7 +739,6 @@ void GameTimerFireworks(byte param_1) {
     FireworksCounter = 0xff;
   }
   StarFlagTaskControl = StarFlagTaskControl + 1;
-  return;
 }
 
 
@@ -756,19 +747,14 @@ void GameTimerFireworks(byte param_1) {
 void ChkToStunEnemies(byte param_1, byte param_2) {
   if (param_1 < 9) {
     SetStun(param_2);
-    return;
-  }
-  if (param_1 > 0x10) {
+  } else if (param_1 > 0x10) {
     SetStun(param_2);
-    return;
-  }
-  if ((param_1 >= 10) && (param_1 < 0xd)) {
+  } else if ((param_1 >= 10) && (param_1 < 0xd)) {
     SetStun(param_2);
-    return;
+  } else {
+    Enemy_ID[param_2] = param_1 & 1;
+    SetStun(param_2);
   }
-  Enemy_ID[param_2] = param_1 & 1;
-  SetStun(param_2);
-  return;
 }
 
 

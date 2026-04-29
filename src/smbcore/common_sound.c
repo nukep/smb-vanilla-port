@@ -171,9 +171,9 @@ void ContinueBowserFlame(void) {
   byte vol = WaterEventMusEnvData[(Noise_SfxLenCounter >> 1) + 0x27];
   if (SMB1_ONLY && vol == 0) {
     ContinueMusic();
-    return;
+  } else {
+    PlayNoiseSfx(vol, 0xf);
   }
-  PlayNoiseSfx(vol, 0xf);
 }
 
 #ifdef SMB2J_MODE
@@ -235,7 +235,6 @@ void NoiseSfxHandler(void) {
     if (BIT(nsb, 0)) { return ContinueBrickShatter(); }
     if (BIT(nsb, 1)) { return ContinueBowserFlame(); }
   }
-  return;
 }
 
 #else
@@ -335,7 +334,6 @@ void SoundEngine(void) {
   }
   PauseSoundBuffer = 0;
   SkipSoundSubroutines();
-  return;
 }
 
 // SMB:f35d
@@ -364,7 +362,6 @@ void SkipSoundSubroutines(void) {
 void Dump_Squ1_Regs(byte param_1, byte param_2) {
   apu_sq1_sweep(param_2);
   apu_sq1_vol(param_1);
-  return;
 }
 
 // SMB:f388
@@ -399,7 +396,6 @@ struct_axyz SetFreq_Squ1(byte param_1) {
 void Dump_Sq2_Regs(byte param_1, byte param_2) {
   apu_sq2_vol(param_1);
   apu_sq2_sweep(param_2);
-  return;
 }
 
 // SMB:f3a6
@@ -408,7 +404,6 @@ void Dump_Sq2_Regs(byte param_1, byte param_2) {
 void PlaySqu2Sfx(byte param_1, byte param_2, byte param_3) {
   Dump_Sq2_Regs(param_2, param_3);
   SetFreq_Squ2(param_1);
-  return;
 }
 
 // SMB:f3a9
@@ -431,7 +426,6 @@ struct_axyz SetFreq_Squ2(byte param_1) {
 // Signature: [A] -> []
 void SetFreq_Tri(byte param_1) {
   Dump_Freq_Regs(param_1, 8);
-  return;
 }
 
 // SMB:f3bf
@@ -451,9 +445,7 @@ void PlayFlagpoleSlide(void) {
   Squ1_SfxLenCounter -= 1;
   if (Squ1_SfxLenCounter == 0) {
     StopSquare1Sfx();
-    return;
   }
-  return;
 }
 
 // SMB:f3cd
@@ -463,7 +455,6 @@ void PlaySmallJump(void) {
   PlaySqu1Sfx(0x26, 0x82, 0xa7);
   Squ1_SfxLenCounter = 0x28;
   ContinueSndJump();
-  return;
 }
 
 // SMB:f3d1
@@ -473,7 +464,6 @@ void PlayBigJump(void) {
   PlaySqu1Sfx(0x18, 0x82, 0xa7);
   Squ1_SfxLenCounter = 0x28;
   ContinueSndJump();
-  return;
 }
 
 // SMB:f3df
@@ -502,11 +492,9 @@ void ContinueSndJump(void) {
   }
 DecJpFPS:
   Squ1_SfxLenCounter -= 1;
-  if (Squ1_SfxLenCounter != 0) {
-    return;
+  if (Squ1_SfxLenCounter == 0) {
+    StopSquare1Sfx();
   }
-  StopSquare1Sfx();
-  return;
 }
 
 // SMB:f3f9
@@ -516,7 +504,6 @@ void PlayFireballThrow(void) {
   Squ1_SfxLenCounter = 5;
   PlaySqu1Sfx(0xc, 0x9e, 0x99);
   ContinueBumpThrow();
-  return;
 }
 
 // SMB:f3ff
@@ -526,7 +513,6 @@ void PlayBump(void) {
   Squ1_SfxLenCounter = 10;
   PlaySqu1Sfx(0xc, 0x9e, 0x93);
   ContinueBumpThrow();
-  return;
 }
 
 // SMB:f40d
@@ -539,9 +525,7 @@ void ContinueBumpThrow(void) {
   Squ1_SfxLenCounter -= 1;
   if (Squ1_SfxLenCounter == 0) {
     StopSquare1Sfx();
-    return;
   }
-  return;
 }
 
 // SMB:f41b
@@ -593,7 +577,6 @@ void PlaySwimStomp(void) {
   Squ1_SfxLenCounter = 0xe;
   PlaySqu1Sfx(0x26, 0x9e, 0x9c);
   ContinueSwimStomp();
-  return;
 }
 
 // SMB:f469
@@ -607,9 +590,7 @@ void ContinueSwimStomp(void) {
   Squ1_SfxLenCounter -= 1;
   if (Squ1_SfxLenCounter == 0) {
     StopSquare1Sfx();
-    return;
   }
-  return;
 }
 
 // SMB:f47d
@@ -627,9 +608,7 @@ void PlaySmackEnemy(void) {
   Squ1_SfxLenCounter -= 1;
   if (Squ1_SfxLenCounter == 0) {
     StopSquare1Sfx();
-    return;
   }
-  return;
 }
 
 // SMB:f48d
@@ -646,11 +625,9 @@ void ContinueSmackEnemy(void) {
   }
   apu_sq1_vol(bVar1);
   Squ1_SfxLenCounter -= 1;
-  if (Squ1_SfxLenCounter != 0) {
-    return;
+  if (Squ1_SfxLenCounter == 0) {
+    StopSquare1Sfx();
   }
-  StopSquare1Sfx();
-  return;
 }
 
 // SMB:f4a7
@@ -660,7 +637,6 @@ void StopSquare1Sfx(void) {
   Square1SoundBuffer = 0;
   apu_snd_chn(0xe);
   apu_snd_chn(0xf);
-  return;
 }
 
 // SMB:f4b6
@@ -669,7 +645,6 @@ void StopSquare1Sfx(void) {
 void PlayPipeDownInj(void) {
   Squ1_SfxLenCounter = 0x2f;
   ContinuePipeDownInj();
-  return;
 }
 
 // SMB:f4bb
@@ -683,9 +658,7 @@ void ContinuePipeDownInj(void) {
   Squ1_SfxLenCounter -= 1;
   if (Squ1_SfxLenCounter == 0) {
     StopSquare1Sfx();
-    return;
   }
-  return;
 }
 
 // SMB:f518
@@ -695,7 +668,6 @@ void PlayCoinGrab(void) {
   Squ2_SfxLenCounter = 0x35;
   PlaySqu2Sfx(0x42, 0x8d, 0x7f);
   ContinueCGrabTTick();
-  return;
 }
 
 // SMB:f51e
@@ -705,7 +677,6 @@ void PlayTimerTick(void) {
   Squ2_SfxLenCounter = 6;
   PlaySqu2Sfx(0x42, 0x98, 0x7f);
   ContinueCGrabTTick();
-  return;
 }
 
 // SMB:f52c
@@ -716,7 +687,6 @@ void ContinueCGrabTTick(void) {
     apu_sq2_lo(0x54);
   }
   DecrementSfx2Length();
-  return;
 }
 
 // SMB:f53a
@@ -726,7 +696,6 @@ void PlayBlast(void) {
   Squ2_SfxLenCounter = 0x20;
   PlaySqu2Sfx(0x5e, 0x9f, 0x94);
   DecrementSfx2Length();
-  return;
 }
 
 // SMB:f545
@@ -739,7 +708,6 @@ void ContinueBlast(void) {
   }
   PlaySqu2Sfx(0x18, 0x9f, 0x93);
   DecrementSfx2Length();
-  return;
 }
 
 // SMB:f552
@@ -748,7 +716,6 @@ void ContinueBlast(void) {
 void PlayPowerUpGrab(void) {
   Squ2_SfxLenCounter = 0x36;
   ContinuePowerUpGrab();
-  return;
 }
 
 // SMB:f557
@@ -761,7 +728,6 @@ void ContinuePowerUpGrab(void) {
   }
   PlaySqu2Sfx(ExtraLifeFreqData[(Squ2_SfxLenCounter >> 1) + 5], 0x5d, 0x7f);
   DecrementSfx2Length();
-  return;
 }
 
 // SMB:f568
@@ -772,9 +738,7 @@ void DecrementSfx2Length(void) {
   if (Squ2_SfxLenCounter == 0) {
     Square2SoundBuffer = 0;
     StopSquare2Sfx();
-    return;
   }
-  return;
 }
 
 // SMB:f571
@@ -783,7 +747,6 @@ void DecrementSfx2Length(void) {
 void StopSquare2Sfx(void) {
   apu_snd_chn(0xd);
   apu_snd_chn(0xf);
-  return;
 }
 
 // SMB:f57c
@@ -830,7 +793,6 @@ void PlayBowserFall(void) {
   Squ2_SfxLenCounter = 0x38;
   PlaySqu2Sfx(0x18, 0x9f, 0xc4);
   DecrementSfx2Length();
-  return;
 }
 
 // SMB:f5d3
@@ -843,7 +805,6 @@ void ContinueBowserFall(void) {
   }
   PlaySqu2Sfx(0x5a, 0x9f, 0xa4);
   DecrementSfx2Length();
-  return;
 }
 
 // SMB:f5e2
@@ -852,7 +813,6 @@ void ContinueBowserFall(void) {
 void PlayExtraLife(void) {
   Squ2_SfxLenCounter = 0x30;
   ContinueExtraLife();
-  return;
 }
 
 // SMB:f5e7
@@ -876,7 +836,6 @@ void ContinueExtraLife(void) {
   } while (cVar2 != 0);
   PlaySqu2Sfx(ExtraLifeFreqData[bVar1 - 1], 0x82, 0x7f);
   DecrementSfx2Length();
-  return;
 }
 
 // SMB:f5fc
@@ -887,7 +846,6 @@ void PlayGrowPowerUp(void) {
   apu_sq2_sweep(0x7f);
   Sfx_SecondaryCounter = 0;
   ContinueGrowItems();
-  return;
 }
 
 // SMB:f600
@@ -898,7 +856,6 @@ void PlayGrowVine(void) {
   apu_sq2_sweep(0x7f);
   Sfx_SecondaryCounter = 0;
   ContinueGrowItems();
-  return;
 }
 
 // SMB:f60f
@@ -913,7 +870,6 @@ void ContinueGrowItems(void) {
   }
   Square2SoundBuffer = 0;
   StopSquare2Sfx();
-  return;
 }
 
 // SMB:f691
@@ -921,7 +877,6 @@ void ContinueGrowItems(void) {
 // Signature: [] -> []
 void ContinueMusic(void) {
   HandleSquare2Music();
-  return;
 }
 
 // SMB:f694
@@ -938,9 +893,7 @@ void MusicHandler(void) {
   }
   if ((EventMusicBuffer | AreaMusicBuffer) != 0) {
     ContinueMusic();
-    return;
   }
-  return;
 }
 
 // SMB:f6a4
@@ -972,7 +925,6 @@ void LoadAreaMusic(byte param_1) {
   }
   GroundMusicHeaderOfs = 0x10;
   HandleAreaMusicLoopB(param_1);
-  return;
 }
 
 // SMB:f6d4
@@ -992,7 +944,6 @@ void HandleAreaMusicLoopB(byte param_1) {
   }
   GroundMusicHeaderOfs = 0x11;
   HandleAreaMusicLoopB(1);
-  return;
 }
 
 // SMB:f6ed
@@ -1001,7 +952,6 @@ void HandleAreaMusicLoopB(byte param_1) {
 void FindAreaMusicHeader(byte param_1) {
   MusicOffset_Square2 = 8;
   FindEventMusicHeader(param_1, 8);
-  return;
 }
 
 // SMB:f6f1
@@ -1047,7 +997,6 @@ void LoadHeader(byte param_1) {
   apu_snd_chn(0xf);
   NoiseDataLoopbackOfs = MusicOffset_Noise;
   HandleSquare2Music();
-  return;
 }
 
 // SMB:f73a
@@ -1114,7 +1063,6 @@ void HandleSquare2Music(void) {
     Squ2_EnvelopeDataCtrl -= 1;
   }
   HandleSquare1Music();
-  return;
 }
 
 // SMB:f7bc
@@ -1168,7 +1116,6 @@ void HandleSquare1Music(void) {
     apu_sq1_sweep(AltRegContentFlag);
   }
   HandleTriangleMusic();
-  return;
 }
 
 // SMB:f81a

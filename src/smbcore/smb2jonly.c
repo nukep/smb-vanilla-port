@@ -635,10 +635,9 @@ void DrawTitleScreen(void) {
   if (OperMode == 0) {
     VRAM_Buffer_AddrCtrl = 5;
     ScreenRoutineTask = ScreenRoutineTask + 1;
-    return;
+  } else {
+    OperMode_Task = OperMode_Task + 1;
   }
-  OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -669,7 +668,6 @@ SetEndTimer:
     WorldEndTimer = 8;
     OperMode_Task += 1;
   }
-  return;
 }
 
 
@@ -684,7 +682,6 @@ void EndCastleAward(void) {
       OperMode_Task += 1;
     }
   }
-  return;
 }
 
 
@@ -693,7 +690,6 @@ void EndCastleAward(void) {
 void InitScreenPalette(void) {
   VRAM_Buffer_AddrCtrl = 3;
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -758,7 +754,6 @@ void WriteWarpZoneMessage(byte param_1) {
   } while (WarpZone[bVar1] != 0);
   VRAM_Buffer1[27] = WarpZoneNumbers[(byte)(param_1 + 0x80)];
   VRAM_Buffer1_Offset = 0x24;
-  return;
 }
 
 
@@ -805,7 +800,6 @@ DumpWarpCtrl:
   WriteWarpZoneMessage(WarpZoneControl);
   KillEnemies(0xd);
   ScrollLockObject();
-  return;
 }
 
 
@@ -820,14 +814,11 @@ void CloudLedge(byte param_1) {
   if (sVar2.c != false) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
     NoUnder(0x8a, bVar1);
-    return;
-  }
-  if (AreaObjectLength[param_1] == 0) {
+  } else if (AreaObjectLength[param_1] == 0) {
     NoUnder(0x8c, bVar1);
-    return;
+  } else {
+    MetatileBuffer[bVar1] = 0x8b;
   }
-  MetatileBuffer[bVar1] = 0x8b;
-  return;
 }
 
 
@@ -836,7 +827,6 @@ void CloudLedge(byte param_1) {
 void PoisonMushBlock(byte param_1) {
   PowerUpType = 4;
   SetupPowerUp(param_1);
-  return;
 }
 
 
@@ -861,7 +851,6 @@ void GameTimerFireworks(byte param_1) {
     FireworksCounter = 0xff;
   }
   StarFlagTaskControl = StarFlagTaskControl + 1;
-  return;
 }
 
 
@@ -907,7 +896,6 @@ void ChkToStunEnemies(byte param_1) {
   }
   Enemy_ID[param_1] = bVar1 & 1;
   NoDemote(bVar1 & 1, param_1);
-  return;
 }
 
 
@@ -925,7 +913,6 @@ void NoDemote(byte param_1, byte param_2) {
 // Signature: [] -> []
 void AttractModeSubs(void) {
   jumptable_AttractModeSubs(OperMode_Task);
-  return;
 }
 
 
@@ -933,7 +920,6 @@ void AttractModeSubs(void) {
 // Signature: [] -> []
 void HardWorldsCheckpoint(void) {
   jumptable_HardWorldsCheckpoint(DiskIOTask);
-  return;
 }
 
 
@@ -970,7 +956,6 @@ NoLoadHW:
   DiskIOTask = 0;
   OperMode_Task = 0;
   DemoTimer = 0;
-  return;
 }
 
 
@@ -978,7 +963,6 @@ NoLoadHW:
 // Signature: [] -> []
 void AttractModeDiskRoutines(void) {
   jumptable_AttractModeDiskRoutines(DiskIOTask);
-  return;
 }
 
 
@@ -1009,7 +993,6 @@ InitWorldPos:
   WorldNumber = 0;
   HardWorldFlag = 0;
   ResetDiskIOTask();
-  return;
 }
 
 
@@ -1017,7 +1000,6 @@ InitWorldPos:
 // Signature: [] -> []
 void GameModeDiskRoutines(void) {
   jumptable_GameModeDiskRoutines(DiskIOTask);
-  return;
 }
 
 
@@ -1049,7 +1031,6 @@ void LoadWorlds5Thru8(void) {
   }
   DiskIOTask += 1;
   DiskErrorHandler(bVar1);
-  return;
 }
 
 
@@ -1058,7 +1039,6 @@ void LoadWorlds5Thru8(void) {
 void ResetDiskIOTask(void) {
   DiskIOTask = 0;
   VMDelay();
-  return;
 }
 
 
@@ -1066,7 +1046,6 @@ void ResetDiskIOTask(void) {
 // Signature: [] -> []
 void VMDelay(void) {
   OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -1075,7 +1054,6 @@ void VMDelay(void) {
 void StartVMDelay(void) {
   WorldEndTimer = 0x10;
   VMDelay();
-  return;
 }
 
 
@@ -1084,9 +1062,7 @@ void StartVMDelay(void) {
 void ContinueVMDelay(void) {
   if (WorldEndTimer == 0) {
     VMDelay();
-    return;
   }
-  return;
 }
 
 
@@ -1094,7 +1070,6 @@ void ContinueVMDelay(void) {
 // Signature: [] -> []
 void VictoryModeDiskRoutines(void) {
   jumptable_VictoryModeDiskRoutines(DiskIOTask);
-  return;
 }
 
 
@@ -1118,11 +1093,10 @@ void LoadEnding(void) {
     InitializeNameTables();
     ResetDiskIOTask();
     WriteNameToVictoryMsg();
-    return;
+  } else {
+    DiskIOTask += 1;
+    DiskErrorHandler(sVar2.a);
   }
-  DiskIOTask += 1;
-  DiskErrorHandler(sVar2.a);
-  return;
 }
 
 
@@ -1139,7 +1113,6 @@ void DiskScreen(void) {
   DisableScreenFlag = DisableScreenFlag + 1;
   VRAM_Buffer_AddrCtrl = 0x1a;
   DiskIOTask = DiskIOTask + 1;
-  return;
 }
 
 
@@ -1154,7 +1127,6 @@ void WaitForEject(void) {
   if ((bVar1 & 1) != 0) {
     DiskIOTask += 1;
   }
-  return;
 }
 
 
@@ -1168,9 +1140,7 @@ void WaitForReinsert(void) {
     DiskIOTask += 1;
   } else if (!(bool)(bVar1 & 1)) {
     ResetDiskVars();
-    return;
   }
-  return;
 }
 
 
@@ -1179,7 +1149,6 @@ void WaitForReinsert(void) {
 void ResetDiskVars(void) {
   DiskIOTask = 0;
   FileListNumber = 0;
-  return;
 }
 
 
@@ -1204,7 +1173,6 @@ void DiskErrorHandler(byte param_1) {
   VRAM_Buffer_AddrCtrl = 0x19;
   MoveAllSpritesOffscreen();
   InitializeNameTables();
-  return;
 }
 
 
@@ -1243,7 +1211,6 @@ void GameOverMenu(void) {
   }
   Hidden1UpFlag += 1;
   ContinueGame();
-  return;
 }
 
 static void LoadLuigiPhysics(void);
@@ -1353,7 +1320,6 @@ ResetTitle:
   OperMode_Task = 0;
   IRQUpdateFlag = 0;
   DisableScreenFlag = DisableScreenFlag + 1;
-  return;
 }
 
 
@@ -1362,7 +1328,6 @@ ResetTitle:
 void DrawMenuCursor(void) {
   VRAM_Buffer_AddrCtrl = 0x1c;
   SetupMenuCursor();
-  return;
 }
 
 
@@ -1371,7 +1336,6 @@ void DrawMenuCursor(void) {
 void SetupMenuCursor(void) {
   MenuCursorTemplate[3] = MenuCursorTiles[CurrentPlayer];
   MenuCursorTemplate[5] = MenuCursorTiles[CurrentPlayer + 1];
-  return;
 }
 
 
@@ -1398,7 +1362,6 @@ void InitializeGame(void) {
     SoundMemory[i] = 0;
   }
   DemoReset();
-  return;
 }
 
 
@@ -1408,7 +1371,6 @@ void DemoReset(void) {
   DemoTimer = 0x18;
   LoadAreaPointer();
   InitializeArea();
-  return;
 }
 
 
@@ -1461,7 +1423,6 @@ void UpsideDownPipe_High(byte param_1) {
   }
   bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar5, bVar3 - 1);
   MetatileBuffer[bVar5] = VerticalPipeData[bStack0000];
-  return;
 }
 
 
@@ -1497,7 +1458,6 @@ void UpsideDownPipe_Low(byte param_1) {
   }
   bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar5, bVar3 - 1);
   MetatileBuffer[bVar5] = VerticalPipeData[bStack0000];
-  return;
 }
 
 
@@ -1524,7 +1484,6 @@ void MoveUpsideDownPiranhaP(byte param_1) {
       EnemyFrameTimer[param_1] = 0x20;
     }
   }
-  return;
 }
 
 
@@ -1544,7 +1503,6 @@ void BlowPlayerAround(void) {
       SprObject_X_Position[0] = SprObject_X_Position[0] + 1;
     }
   }
-  return;
 }
 
 
@@ -1571,7 +1529,6 @@ void SimulateWind(void) {
       }
     } while (bVar1 != 0xc);
   }
-  return;
 }
 
 
@@ -1589,7 +1546,6 @@ void ModifyLeavesPos(void) {
 // Signature: [] -> []
 void WindOn(void) {
   WindFlag = 1;
-  return;
 }
 
 
@@ -1597,7 +1553,6 @@ void WindOn(void) {
 // Signature: [] -> []
 void WindOff(void) {
   WindFlag = 0;
-  return;
 }
 
 
@@ -1633,7 +1588,6 @@ void ScreenSubsForFinalRoom(void) {
     return;
   }
   jmpengine_overflow(ScreenRoutineTask);
-  return;
 }
 
 
@@ -1643,7 +1597,6 @@ void DrawFinalRoom(void) {
   VRAM_Buffer_AddrCtrl = 0x1b;
   IRQUpdateFlag = 0x1b;
   ScreenRoutineTask = ScreenRoutineTask + 1;
-  return;
 }
 
 
@@ -1658,7 +1611,6 @@ void RevealPrincess(void) {
   IRQUpdateFlag = 0;
   DisableScreenFlag = 0;
   OperMode_Task = OperMode_Task + 1;
-  return;
 }
 
 
@@ -1682,7 +1634,6 @@ void PrintVictoryMsgsForWorld8(void) {
   bVar1 = SecondaryMsgCounter >= 0xfc;
   SecondaryMsgCounter = SecondaryMsgCounter + 4;
   PrimaryMsgCounter = PrimaryMsgCounter + bVar1;
-  return;
 }
 
 
@@ -1692,7 +1643,6 @@ void EraseEndingCounters(void) {
   EndControlCntr = 0;
   BlueColorOfs = 0;
   BlueDelayFlag = 0;
-  return;
 }
 
 
@@ -1714,7 +1664,6 @@ void AwardExtraLives(void) {
       return;
     }
   }
-  return;
 }
 
 
@@ -1747,7 +1696,6 @@ void FadeToBlue(void) {
     OperMode_Task += 1;
   }
   BlueColorOfs = BlueColorOfs + 1;
-  return;
 }
 
 
@@ -1763,7 +1711,6 @@ void EraseLivesLines(void) {
   OperMode_Task += 1;
   EraseEndingCounters();
   MushroomRetDelay = 0x60;
-  return;
 }
 
 
@@ -1799,7 +1746,6 @@ void RunMushroomRetainers(void) {
     }
     OperMode_Task += 1;
   }
-  return;
 }
 
 
@@ -1827,7 +1773,6 @@ void EndingDiskRoutines(void) {
     return;
   }
   jmpengine_overflow(DiskIOTask);
-  return;
 }
 
 
@@ -1869,7 +1814,6 @@ void MushroomRetainersForW8(void) {
   WorldNumber = bStack0000;
   Enemy_SprDataOffset[0] = 0x30;
   Enemy_Y_Position[0] = 0xb8;
-  return;
 }
 
 
@@ -1925,7 +1869,6 @@ void AltHard_GetAreaDataAddrs(void) {
     CloudTypeOverride = 3;
   }
   AreaData = CONCAT11(AltHard_AreaDataAddrs[bVar2 + 1] + (bVar1 >= 0xfe), bVar1 + 2);
-  return;
 }
 
 
