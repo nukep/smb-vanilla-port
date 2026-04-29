@@ -169,10 +169,6 @@ void jumptable_ScreenRoutines(byte param_1) {
 }
 
 
-// Common: jumptable_GameOverMode
-// Common: jumptable_AreaParserTasks
-
-
 // SM2MAIN:n/a
 // Signature: [A, X, r00] -> []
 void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
@@ -429,10 +425,6 @@ void jumptable_GameMode(byte param_1) {
 }
 
 
-// Common: jumptable_GameRoutines
-// Common: jumptable_PlayerMovementSubs
-
-
 // SM2MAIN:n/a
 // Signature: [A, X] -> []
 void jumptable_BumpBlock(byte param_1, byte param_2) {
@@ -491,14 +483,6 @@ void jumptable_BumpBlock(byte param_1, byte param_2) {
   jmpengine_overflow(param_1);
   return;
 }
-
-
-// Common: jumptable_CheckpointEnemyID
-// Common: jumptable_InitEnemyFrenzy
-// Common: jumptable_RunEnemyObjectsCore
-// Common: jumptable_EnemyMovementSubs
-// Common: jumptable_LargePlatformSubroutines
-// Common: jumptable_RunStarFlagObj
 
 
 // SM2MAIN:n/a
@@ -645,16 +629,6 @@ void jumptable_VictoryModeDiskRoutines(byte param_1) {
 }
 
 
-// Common: PauseRoutine
-// Common: SpriteShuffler
-// Common: OperModeExecutionTree
-// Common: MoveAllSpritesOffscreen
-// Common: MoveSpritesOffscreen
-// Common: VictoryMode
-// Common: VictoryModeSubroutines
-// Common: SetupVictoryMode
-
-
 // SM2MAIN:632a
 // Signature: [] -> []
 void DrawTitleScreen(void) {
@@ -666,9 +640,6 @@ void DrawTitleScreen(void) {
   OperMode_Task = OperMode_Task + 1;
   return;
 }
-
-
-// Common: PlayerVictoryWalk
 
 
 // SM2MAIN:636d
@@ -717,12 +688,6 @@ void EndCastleAward(void) {
 }
 
 
-// Common: PlayerEndWorld
-// Common: FloateyNumbersRoutine
-// Common: ScreenRoutines
-// Common: InitScreen
-
-
 // SM2MAIN:64f6
 // Signature: [] -> []
 void InitScreenPalette(void) {
@@ -730,15 +695,6 @@ void InitScreenPalette(void) {
   ScreenRoutineTask = ScreenRoutineTask + 1;
   return;
 }
-
-
-// Common: SetupIntermediate
-// Common: GetAreaPalette
-// Common: GetBackgroundColor
-// Common: GetPlayerColors
-// Common: GetAlternatePalette1
-// Common: WriteTopStatusLine
-// Common: WriteBottomStatusLine
 
 
 // SM2MAIN:65e6
@@ -752,11 +708,6 @@ byte GetWorldNumForDisplay(void) {
   }
   return bVar1 + 1;
 }
-
-
-// Common: DisplayTimeUp
-// Common: DisplayIntermediate
-// Common: AreaParserTaskControl
 
 
 // SM2MAIN:671b
@@ -811,47 +762,6 @@ void WriteWarpZoneMessage(byte param_1) {
 }
 
 
-// Common: ResetSpritesAndScreenTimer
-// Common: ResetScreenTimer
-// Common: RenderAreaGraphics
-// Common: RenderAttributeTables
-// Common: ColorRotation
-// Common: RemoveCoin_Axe
-// Common: ReplaceBlockMetatile
-// Common: DestroyBlockMetatile
-// Common: WriteBlockMetatile
-// Common: MoveVOffset
-// Common: PutBlockMetatile
-// Common: RemBridge
-// Common: InitializeNameTables
-// Common: WritePPUReg1
-// Common: PrintStatusBarNumbers
-// Common: OutputNumbers
-// Common: DigitsMathRoutine
-// Common: UpdateTopScore
-// Common: TopScoreCheck
-// Common: InitializeArea
-// Common: SecondaryGameSetup
-// Common: GetAreaMusic
-// Common: Entrance_GameTimerSetup
-// Common: PlayerLoseLife
-// Common: GameOverMode
-// Common: SetupGameOver
-// Common: RunGameOver
-// Common: TerminateGame
-// Common: ContinueGame
-// Common: DoNothing
-// Common: AreaParserTaskHandler
-// Common: AreaParserTasks
-// Common: IncrementColumnPos
-// Common: AreaParserCore
-// Common: ProcessAreaData
-// Common: IncAreaObjOffset
-// Common: DecodeAreaData
-// Common: LoopCmdE
-// Common: AlterAreaAttributes
-
-
 // SM2MAIN:7513
 // Signature: [] -> []
 void ScrollLockObject_Warp(void) {
@@ -899,13 +809,6 @@ DumpWarpCtrl:
 }
 
 
-// Common: ScrollLockObject
-// Common: KillEnemies
-// Common: AreaFrenzy
-// Common: AreaStyleObject
-// Common: TreeLedge
-
-
 // SM2MAIN:75cf
 // Signature: [X] -> []
 void CloudLedge(byte param_1) {
@@ -928,124 +831,6 @@ void CloudLedge(byte param_1) {
 }
 
 
-// Common: NoUnder
-// Common: PulleyRopeObject
-// Common: CastleObject
-// Common: WaterPipe
-// Common: IntroPipe
-// Common: ExitPipe
-// Common: RenderSidewaysPipe
-// Common: VerticalPipe
-// Common: GetPipeHeight
-// Common: SetupPiranhaPlant
-// Common: FindEmptyEnemySlot
-// Common: Hole_Water
-// Common: QuestionBlockRow_High
-// Common: QuestionBlockRow_Low
-// Common: Bridge_High
-// Common: Bridge_Middle
-// Common: Bridge_Low
-// Common: FlagBalls_Residual
-// Common: FlagpoleObject
-// Common: EndlessRope
-// Common: BalancePlatRope
-// Common: RowOfCoins
-// Common: CastleBridgeObj
-// Common: AxeObj
-// Common: ChainObj
-// Common: EmptyBlock
-// Common: RowOfBricks
-// Common: RowOfSolidBlocks
-// Common: ColumnOfBricks
-// Common: ColumnOfSolidBlocks
-// Common: BulletBillCannon
-// Common: StaircaseObject
-// Common: Jumpspring
-// Common: Hidden1UpBlock
-// Common: QuestionBlock
-// Common: BrickWithCoins
-// Common: BrickWithItem
-// Common: GetAreaObjectID
-// Common: Hole_Empty
-// Common: RenderUnderPart
-// Common: ChkLrgObjLength
-// Common: ChkLrgObjFixedLength
-// Common: GetLrgObjAttrib
-// Common: GetAreaObjXPosition
-// Common: GetAreaObjYPosition
-// Common: GetBlockBufferAddr
-// Common: GameMode
-// Common: GameCoreRoutine
-// Common: UpdScrollVar
-// Common: ScrollHandler
-// Common: ChkPOffscr
-// Common: GetScreenPosition
-// Common: GameRoutines
-// Common: PlayerEntrance
-// Common: AutoControlPlayer
-// Common: PlayerCtrlRoutine
-// Common: Vine_AutoClimb
-// Common: SetEntr
-// Common: VerticalPipeEntry
-// Common: MovePlayerYAxis
-// Common: SideExitPipeEntry
-// Common: ChgAreaMode
-// Common: EnterSidePipe
-// Common: PlayerChangeSize
-// Common: PlayerInjuryBlink
-// Common: InitChangeSize
-// Common: PlayerDeath
-// Common: DonePlayerTask
-// Common: PlayerFireFlower
-// Common: CyclePlayerPalette
-// Common: ResetPalStar
-// Common: FlagpoleSlide
-// Common: PlayerEndLevel
-// Common: NextArea
-// Common: PlayerMovementSubs
-// Common: OnGroundStateSub
-// Common: FallingSub
-// Common: JumpSwimSub
-// Common: LRAir
-// Common: ClimbingSub
-// Common: PlayerPhysicsSub
-// Common: GetPlayerAnimSpeed
-// Common: ImposeFriction
-// Common: ProcFireball_Bubble
-// Common: FireballObjCore
-// Common: BubbleCheck
-// Common: SetupBubble
-// Common: MoveBubl
-// Common: RunGameTimer
-// Common: WarpZoneObject
-// Common: ProcessWhirlpools
-// Common: FlagpoleRoutine
-// Common: JumpspringHandler
-// Common: Setup_Vine
-// Common: VineObjectHandler
-// Common: ProcessCannons
-// Common: BulletBillHandler
-// Common: SpawnHammerObj
-// Common: ProcHammerObj
-// Common: CoinBlock
-// Common: SetupJumpCoin
-// Common: JCoinC
-// Common: FindEmptyMiscSlot
-// Common: MiscObjectsCore
-// Common: GiveOneCoin
-// Common: AddToScore
-// Common: WriteScoreAndCoinTally
-// Common: WriteDigits
-// Common: SetupPowerUp
-// Common: PwrUpJmp
-// Common: PowerUpObjHandler
-// Common: PlayerHeadCollision
-// Common: InitBlock_XY_Pos
-// Common: BumpBlock
-// Common: MushFlowerBlock
-// Common: StarBlock
-
-
 // SM2MAIN:89a1
 // Signature: [X] -> []
 void PoisonMushBlock(byte param_1) {
@@ -1053,129 +838,6 @@ void PoisonMushBlock(byte param_1) {
   SetupPowerUp(param_1);
   return;
 }
-
-
-// Common: ExtraLifeMushBlock
-// Common: VineBlock
-// Common: BlockBumpedChk
-// Common: BrickShatter
-// Common: CheckTopOfBlock
-// Common: SpawnBrickChunks
-// Common: BlockObjectsCore
-// Common: BlockObjMT_Updater
-// Common: MoveEnemyHorizontally
-// Common: MovePlayerHorizontally
-// Common: MoveObjectHorizontally
-// Common: MovePlayerVertically
-// Common: MoveD_EnemyVertically
-// Common: MoveFallingPlatform
-// Common: MoveRedPTroopaDown
-// Common: MoveRedPTroopaUp
-// Common: MoveDropPlatform
-// Common: MoveEnemySlowVert
-// Common: MoveJ_EnemyVertically
-// Common: SetXMoveAmt
-// Common: ImposeGravityBlock
-// Common: ImposeGravitySprObj
-// Common: MovePlatformDown
-// Common: MovePlatformUp
-// Common: RedPTroopaGrav
-// Common: ImposeGravity
-// Common: EnemiesAndLoopsCore
-// Common: ExecGameLoopback
-// Common: ProcLoopCommand
-// Common: InitEnemyObject
-// Common: CheckThreeBytes
-// Common: Inc2B
-// Common: CheckpointEnemyID
-// Common: NoInitCode
-// Common: InitGoomba
-// Common: InitPodoboo
-// Common: InitRetainerObj
-// Common: InitNormalEnemy
-// Common: InitRedKoopa
-// Common: InitHammerBro
-// Common: InitHorizFlySwimEnemy
-// Common: InitBloober
-// Common: SmallBBox
-// Common: InitRedPTroopa
-// Common: InitVStf
-// Common: InitBulletBill
-// Common: InitCheepCheep
-// Common: InitLakitu
-// Common: SetupLakitu
-// Common: LakituAndSpinyHandler
-// Common: InitLongFirebar
-// Common: InitShortFirebar
-// Common: InitFlyingCheepCheep
-// Common: InitBowser
-// Common: DuplicateEnemyObj
-// Common: InitBowserFlame
-// Common: PutAtRightExtent
-// Common: InitFireworks
-// Common: BulletBillCheepCheep
-// Common: HandleGroupEnemies
-// Common: InitPiranhaPlant
-// Common: InitEnemyFrenzy
-// Common: NoFrenzyCode
-// Common: EndFrenzy
-// Common: InitJumpGPTroopa
-// Common: InitBalPlatform
-// Common: InitDropPlatform
-// Common: InitHoriPlatform
-// Common: InitVertPlatform
-// Common: SPBBox
-// Common: LargeLiftUp
-// Common: LargeLiftDown
-// Common: PlatLiftUp
-// Common: PlatLiftDown
-// Common: PosPlatform
-// Common: EndOfEnemyInitCode
-// Common: RunEnemyObjectsCore
-// Common: NoRunCode
-// Common: RunRetainerObj
-// Common: RunNormalEnemies
-// Common: EnemyMovementSubs
-// Common: NoMoveCode
-// Common: RunBowserFlame
-// Common: RunFirebarObj
-// Common: RunSmallPlatform
-// Common: RunLargePlatform
-// Common: LargePlatformSubroutines
-// Common: EraseEnemyObject
-// Common: MovePodoboo
-// Common: ProcHammerBro
-// Common: SetHJ
-// Common: MoveHammerBroXDir
-// Common: MoveNormalEnemy
-// Common: MoveDefeatedEnemy
-// Common: MoveJumpingEnemy
-// Common: ProcMoveRedPTroopa
-// Common: MoveFlyGreenPTroopa
-// Common: XMoveCntr_GreenPTroopa
-// Common: XMoveCntr_Platform
-// Common: MoveWithXMCntrs
-// Common: MoveBloober
-// Common: ProcSwimmingB
-// Common: MoveBulletBill
-// Common: MoveSwimmingCheepCheep
-// Common: ProcFirebar
-// Common: DrawFirebar_Collision
-// Common: FirebarCollision
-// Common: GetFirebarPosition
-// Common: MoveFlyingCheepCheep
-// Common: MoveLakitu
-// Common: PlayerLakituDiff
-// Common: BridgeCollapse
-// Common: MoveD_Bowser
-// Common: RunBowser
-// Common: KillAllEnemies
-// Common: BowserGfxHandler
-// Common: ProcessBowserHalf
-// Common: SetFlameTimer
-// Common: ProcBowserFlame
-// Common: RunFireworks
-// Common: RunStarFlagObj
 
 
 // SM2MAIN:9f27
@@ -1203,43 +865,6 @@ void GameTimerFireworks(byte param_1) {
 }
 
 
-// Common: StarFlagExit
-// Common: AwardGameTimerPoints
-// Common: AwardTimerCastle
-// Common: EndAreaPoints
-// Common: RaiseFlagSetoffFWorks
-// Common: DrawStarFlag
-// Common: DelayToAreaEnd
-// Common: MovePiranhaPlant
-// Common: FirebarSpin
-// Common: BalancePlatform
-// Common: SetupPlatformRope
-// Common: InitPlatformFall
-// Common: StopPlatforms
-// Common: PlatformFall
-// Common: YMovingPlatform
-// Common: ChkYPCollision
-// Common: XMovingPlatform
-// Common: PositionPlayerOnHPlat
-// Common: DropPlatform
-// Common: RightPlatform
-// Common: MoveLargeLiftPlat
-// Common: MoveSmallPlatform
-// Common: MoveLiftPlatforms
-// Common: ChkSmallPlatCollision
-// Common: OffscreenBoundsCheck
-// Common: FireballEnemyCollision
-// Common: HandleEnemyFBallCol
-// Common: ShellOrBlockDefeat
-// Common: EnemySmackScore
-// Common: PlayerHammerCollision
-// Common: HandlePowerUpCollision
-// Common: PlayerEnemyCollision
-// Common: InjurePlayer
-// Common: ForceInjury
-// Common: SetPRout
-
-
 // SM2MAIN:a64e
 // Signature: [X] -> [A]
 byte SetBounce(byte param_1) {
@@ -1252,38 +877,6 @@ byte SetBounce(byte param_1) {
   }
   return bVar1;
 }
-
-
-// Common: ChkEnemyFaceRight
-// Common: LInj
-// Common: EnemyFacePlayer
-// Common: SetupFloateyNumber
-// Common: EnemiesCollision
-// Common: ProcEnemyCollisions
-// Common: EnemyTurnAround
-// Common: RXSpd
-// Common: LargePlatformCollision
-// Common: ChkForPlayerC_LargeP
-// Common: SmallPlatformCollision
-// Common: ProcLPlatCollisions
-// Common: PositionPlayerOnS_Plat
-// Common: PositionPlayerOnVPlat
-// Common: CheckPlayerVertical
-// Common: GetEnemyBoundBoxOfs
-// Common: GetEnemyBoundBoxOfsArg
-// Common: PlayerBGCollision
-// Common: ErACM
-// Common: HandleClimbing
-// Common: ChkInvisibleMTiles
-// Common: ChkForLandJumpSpring
-// Common: ChkJumpspringMetatiles
-// Common: HandlePipeEntry
-// Common: ImpedePlayerMove
-// Common: CheckForSolidMTiles
-// Common: CheckForClimbMTiles
-// Common: CheckForCoinMTiles
-// Common: GetMTileAttrib
-// Common: EnemyToBGCollisionDet
 
 
 // SM2MAIN:aca3
@@ -1326,104 +919,6 @@ void NoDemote(byte param_1, byte param_2) {
   }
   SetStun2(param_2);
 }
-
-
-// Common: SetStun2
-// Common: ChkForRedKoopa
-// Common: DoEnemySideCheck
-// Common: ChkForBump_HammerBroJ
-// Common: PlayerEnemyDiff
-// Common: EnemyLanding
-// Common: SubtEnemyYPos
-// Common: EnemyJump
-// Common: HammerBroBGColl
-// Common: KillEnemyAboveBlock
-// Common: ChkUnderEnemy
-// Common: ChkForNonSolids
-// Common: FireballBGCollision
-// Common: GetFireballBoundBox
-// Common: GetMiscBoundBox
-// Common: GetEnemyBoundBox
-// Common: SmallPlatformBoundBox
-// Common: GetMaskedOffScrBits
-// Common: LargePlatformBoundBox
-// Common: SetupEOffsetFBBox
-// Common: MoveBoundBoxOffscreen
-// Common: BoundingBoxCore
-// Common: CheckRightScreenBBox
-// Common: PlayerCollisionCore
-// Common: SprObjectCollisionCore
-// Common: BlockBufferChk_Enemy
-// Common: BlockBufferChk_FBall
-// Common: BlockBufferColli_Feet
-// Common: BlockBufferColli_Head
-// Common: BlockBufferColli_Side
-// Common: BlockBufferCollision
-// Common: DrawVine
-// Common: SixSpriteStacker
-// Common: DrawHammer
-// Common: FlagpoleGfxHandler
-// Common: MoveSixSpritesOffscreen
-// Common: DumpSixSpr
-// Common: DumpFourSpr
-// Common: DumpThreeSpr
-// Common: DumpTwoSpr
-// Common: DrawLargePlatform
-// Common: JCoinGfxHandler
-// Common: DrawPowerUp
-// Common: EnemyGfxHandler
-// Common: DrawEnemyObject
-// Common: SprObjectOffscrChk
-// Common: DrawEnemyObjRow
-// Common: DrawOneSpriteRow
-// Common: MoveESprRowOffscreen
-// Common: MoveESprColOffscreen
-// Common: DrawBlock
-// Common: ChkLeftCo
-// Common: MoveColOffscreen
-// Common: DrawBrickChunks
-// Common: DrawFireball
-// Common: DrawFirebar
-// Common: DrawExplosion_Fireball
-// Common: DrawExplosion_Fireworks
-// Common: DrawSmallPlatform
-// Common: DrawBubble
-// Common: PlayerGfxHandler
-// Common: FindPlayerAction
-// Common: PlayerGfxProcessing
-// Common: DrawPlayer_Intermediate
-// Common: RenderPlayerSub
-// Common: DrawPlayerLoop
-// Common: ProcessPlayerAction
-// Common: GetCurrentAnimOffset
-// Common: FourFrameExtent
-// Common: ThreeFrameExtent
-// Common: AnimationControl
-// Common: GetGfxOffsetAdder
-// Common: HandleChangeSize
-// Common: GetOffsetFromAnimCtrl
-// Common: ChkForPlayerAttrib
-// Common: RelativePlayerPosition
-// Common: RelativeBubblePosition
-// Common: RelativeFireballPosition
-// Common: RelativeMiscPosition
-// Common: RelativeEnemyPosition
-// Common: RelativeBlockPosition
-// Common: VariableObjOfsRelPos
-// Common: GetObjRelativePosition
-// Common: GetPlayerOffscreenBits
-// Common: GetFireballOffscreenBits
-// Common: GetBubbleOffscreenBits
-// Common: GetMiscOffscreenBits
-// Common: GetProperObjOffset
-// Common: GetEnemyOffscreenBits
-// Common: GetBlockOffscreenBits
-// Common: GetOffScreenBitsSet
-// Common: RunOffscrBitsSubs
-// Common: GetXOffscreenBits
-// Common: GetYOffscreenBits
-// Common: DividePDiff
-// Common: DrawSpriteObject
 
 
 // SM2MAIN:bfb0
@@ -1799,12 +1294,6 @@ static void LoadLuigiPhysics(void) {
 }
 
 
-// Common: LoadAreaPointer
-// Common: GetAreaType
-// Common: FindAreaPointer
-// Common: GetAreaDataAddrs
-
-
 // SM2MAIN:c46e
 // Signature: [] -> []
 void GameMenuRoutine(void) {
@@ -1889,11 +1378,6 @@ void SetupMenuCursor(void) {
 }
 
 
-// Common: DemoEngine
-// Common: ClearBuffersDrawIcon
-// Common: WriteTopScore
-
-
 // SM2MAIN:c592
 // Signature: [] -> []
 void InitializeGame(void) {
@@ -1929,9 +1413,6 @@ void DemoReset(void) {
   InitializeArea();
   return;
 }
-
-
-// Common: PrimaryGameSetup
 
 
 // SM2MAIN:c5ff
