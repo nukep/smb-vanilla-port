@@ -1155,16 +1155,22 @@ void ResetDiskVars(void) {
 // SM2MAIN:c182
 // Signature: [A] -> []
 void DiskErrorHandler(byte param_1) {
-  byte bVar1;
   byte bVar2;
 
   DiskErrorMainMsg[19] = param_1 & 0xf;
   DiskErrorMainMsg[18] = param_1 >> 4;
-  bVar1 = 3;
-  if (((param_1 != 7) && (bVar1 = 2, param_1 != 2)) && (bVar1 = 1, param_1 != 1)) {
-    bVar1 = 0;
+
+  byte bVar1;
+  if (param_1 == 7) {
+    bVar1 = DiskErrorMsgOffsets[3];
+  } else if (param_1 == 2) {
+    bVar1 = DiskErrorMsgOffsets[2];
+  } else if (param_1 == 1) {
+    bVar1 = DiskErrorMsgOffsets[1];
+  } else {
+    bVar1 = DiskErrorMsgOffsets[0];
   }
-  bVar1 = DiskErrorMsgOffsets[bVar1];
+
   bVar2 = 7;
   do {
     DiskErrorMainMsg[bVar2 + 3] = DiskErrorMsgs[bVar1];
