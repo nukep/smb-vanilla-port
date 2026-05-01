@@ -9300,10 +9300,20 @@ byte EnemyToBGCollisionDet(byte param_1) {
   bool bVarDD;
   struct_ncr00 sVar5;
 
-  if ((((Enemy_State[param_1] & 0x20) != 0) || (bVarDD = SubtEnemyYPos(param_1), !bVarDD))
-      || ((bVarAA = Enemy_ID[param_1], bVarAA == 0x12 && (Enemy_Y_Position[param_1] < 0x25)))) {
+  if ((Enemy_State[param_1] & 0x20) != 0) {
     return param_1;
   }
+
+  bVarDD = SubtEnemyYPos(param_1);
+  if (!bVarDD) {
+    return param_1;
+  }
+
+  bVarAA = Enemy_ID[param_1];
+  if ((bVarAA == 0x12) && (Enemy_Y_Position[param_1] < 0x25)) {
+    return param_1;
+  }
+
   if (bVarAA == 0xe) {
     return EnemyJump(param_1);
   }
