@@ -7029,9 +7029,12 @@ NoColFB:
     sVar5.r06 = bStack0000 + 4;
     return sVar5;
   }
-  if ((PlayerSize != 0) || (bVar2 = 0, abVar3 = SprObject_Y_Position[0], CrouchingFlag != 0)) {
+  if ((PlayerSize != 0) || (CrouchingFlag != 0)) {
     bVar2 = 2;
     abVar3 = SprObject_Y_Position[0] + 0x18;
+  } else {
+    bVar2 = 0;
+    abVar3 = SprObject_Y_Position[0];
   }
   do {
     bVar4 = abVar3 - param_4;
