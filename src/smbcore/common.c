@@ -1707,11 +1707,12 @@ void GetAreaMusic(void) {
   byte bVar1;
 
   if (OperMode != 0) {
-    if (((AltEntranceControl == 2) || ((bVar1 = 5, PlayerEntranceCtrl != 6 && (PlayerEntranceCtrl != 7))))) {
+    if ((AltEntranceControl != 2) && ((PlayerEntranceCtrl == 6) || (PlayerEntranceCtrl == 7))) {
+      bVar1 = 5;
+    } else if (CloudTypeOverride != 0) {
+      bVar1 = 4;
+    } else {
       bVar1 = AreaType;
-      if (CloudTypeOverride != 0) {
-        bVar1 = 4;
-      }
     }
     AreaMusicQueue = MusicSelectData[bVar1];
   }
@@ -3229,19 +3230,25 @@ void ScrollHandler(void) {
 // SM2MAIN:7b58
 // Signature: [] -> []
 void ChkPOffscr(void) {
-  byte bVar1;
-  byte bVar2;
+  byte bits = GetXOffscreenBits(0);
+  byte i;
 
-  bVar1 = GetXOffscreenBits(0);
-  bVar2 = 0;
-  if (((bool)(bVar1 >> 7)) || (bVar2 = 1, (bVar1 & 0x20) != 0)) {
-    SprObject_X_Position[0] = ScreenEdgeOrLeft_X_Pos[bVar2] - X_SubtracterData[bVar2];
-    SprObject_PageLoc[0]
-        = ScreenEdgeOrLeft_PageLoc[bVar2] - (ScreenEdgeOrLeft_X_Pos[bVar2] < X_SubtracterData[bVar2]);
-    if (Left_Right_Buttons != OffscrJoypadBitsData[bVar2]) {
-      PlayerSpriteVarData1[0] = 0;
-    }
+  if (bits & 0x80) {
+    i = 0;
+  } else if (bits & 0x20) {
+    i = 1;
+  } else {
+    Platform_X_Scroll = 0;
+    return;
   }
+
+  SprObject_X_Position[0] = ScreenEdgeOrLeft_X_Pos[i] - X_SubtracterData[i];
+  SprObject_PageLoc[0] = ScreenEdgeOrLeft_PageLoc[i] - (ScreenEdgeOrLeft_X_Pos[i] < X_SubtracterData[i]);
+
+  if (Left_Right_Buttons != OffscrJoypadBitsData[i]) {
+    PlayerSpriteVarData1[0] = 0;
+  }
+
   Platform_X_Scroll = 0;
 }
 
@@ -4233,7 +4240,7 @@ void FlagpoleRoutine(void) {
   ObjectOffset = 5;
   if (Enemy_ID[5] == 0x30) {
     if ((GameEngineSubroutine == 4) && (Player_State == 3)) {
-      if ((Enemy_Y_Position[5] >= 0xaa) || (bVar3 = SprObject_Y_Position[0] >= 0xa2, bVar3)) {
+      if ((Enemy_Y_Position[5] >= 0xaa) || (SprObject_Y_Position[0] >= 0xa2)) {
         if (SMB2J_ONLY && FlagpoleScore == 5) {
           NumberofLives += 1;
           Square2SoundQueue = 0x40;
@@ -4243,6 +4250,7 @@ void FlagpoleRoutine(void) {
         }
         GameEngineSubroutine = 5;
       } else {
+        bVar3 = SprObject_Y_Position[0] >= 0xa2;
         bVar1 = (BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[5] - 1) + bVar3;
         Enemy_Y_Position[5] = Enemy_Y_Position[5] + 1 + ((BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[5] != 0) || (bVar3 && bVar1 == 0));
         FlagpoleFNum_Y_Pos = (FlagpoleFNum_Y_Pos - 1) - (FlagpoleFNum_YMFDummy != 0xff);
