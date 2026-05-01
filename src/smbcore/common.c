@@ -4843,7 +4843,7 @@ void PlayerHeadCollision(byte param_1, byte param_2, byte param_3, byte param_4)
   }
   if (sVar5.c != false) {
     Block_State[bVar3] = 0x11;
-    if ((bVar4 == ssw(0x58, 0x56)) || (bVar2 = ssw(0xc4, 0xc5), bVar4 == ssw(0x5d, 0x5c))) {
+    if ((bVar4 == ssw(0x58, 0x56)) || (bVar4 == ssw(0x5d, 0x5c))) {
       if (BrickCoinTimerFlag == 0) {
         BrickCoinTimer = 0xb;
         BrickCoinTimerFlag = 1;
@@ -4852,6 +4852,8 @@ void PlayerHeadCollision(byte param_1, byte param_2, byte param_3, byte param_4)
       if (BrickCoinTimer == 0) {
         bVar2 = ssw(0xc4, 0xc5);
       }
+    } else {
+      bVar2 = ssw(0xc4, 0xc5);
     }
   }
   Block_Metatile[bVar3] = bVar2;
@@ -6791,13 +6793,15 @@ byte MoveBloober(byte param_1, bool param_2) {
   }
   if ((PseudoRandomBitReg[param_1 + 1] & BlooberBitmasks[SecondaryHardMode]) == 0) {
     param_2 = (bool)(param_1 & 1);
-    if ((param_2 == false) || (bVar2 = Player_MovingDir, !param_2)) {
+    if (!param_2) {
       bVar2 = 2;
       sVar3 = PlayerEnemyDiff(param_1);
       param_2 = sVar3.c;
       if (sVar3.n != false) {
         bVar2 -= 1;
       }
+    } else {
+      bVar2 = Player_MovingDir;
     }
     Enemy_MovingDir[param_1] = bVar2;
   }
@@ -8123,7 +8127,7 @@ void HandleEnemyFBallCol(byte param_1, byte param_2) {
   byte bVar3;
 
   RelativeEnemyPosition(param_1);
-  if ((Enemy_Flag[param_2] < 0x80) || (bVar2 = Enemy_Flag[param_2] & 0xf, Enemy_ID[bVar2] != 0x2d)) {
+  if ((Enemy_Flag[param_2] < 0x80) || (Enemy_ID[Enemy_Flag[param_2] & 0xf] != 0x2d)) {
     bVar1 = Enemy_ID[param_2];
     if (bVar1 == 2) {
       return;
@@ -8142,6 +8146,8 @@ void HandleEnemyFBallCol(byte param_1, byte param_2) {
       ShellOrBlockDefeat(param_2);
       return;
     }
+  } else {
+    bVar2 = Enemy_Flag[param_2] & 0xf;
   }
   BowserHitPoints -= 1;
   if (BowserHitPoints != 0) {
