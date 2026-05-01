@@ -1036,8 +1036,8 @@ byte GetPlayerColors(void) {
       bVar3 = 4;
     }
   }
-  bVar1 = 3;
   bVar2 = VRAM_Buffer1_Offset;
+  bVar1 = 3;
   do {
     VRAM_Buffer1[bVar2 + 3] = PlayerColors[bVar3];
     bVar3 += 1;
@@ -1497,9 +1497,9 @@ void OutputNumbers(byte param_1) {
     }
     VRAM_Buffer1[VRAM_Buffer1_Offset] = bVar2;
     VRAM_Buffer1[VRAM_Buffer1_Offset + 1] = StatusBarData[bVar3];
-    bVar2 = StatusBarData[bVar3 + 1];
-    VRAM_Buffer1[VRAM_Buffer1_Offset + 2] = bVar2;
+    VRAM_Buffer1[VRAM_Buffer1_Offset + 2] = StatusBarData[bVar3 + 1];
     bVar1 = StatusBarOffset[bVar1] - StatusBarData[bVar3 + 1];
+    bVar2 = StatusBarData[bVar3 + 1];
     do {
       bVar3 = VRAM_Buffer1_Offset;
       VRAM_Buffer1[bVar3 + 3] = DisplayDigits_Or_TopScoreDisplay[bVar1];
@@ -4349,22 +4349,27 @@ byte VineObjectHandler(byte param_1) {
   if (VineHeight >= 8) {
     sVar5 = RelativeEnemyPosition(5);
     GetEnemyOffscreenBits(sVar5.x);
+
     bVarAA = 0;
+    bVar3 = 0;
     do {
+      DrawVine(bVarAA);
       bVar3 = bVarAA;
-      DrawVine(bVar3);
-      bVarAA = bVar3 + 1;
-    } while ((byte)(bVar3 + 1) != VineFlagOffset);
-    bVarAA = VineFlagOffset;
-    bVarBB = VineHeight;
+      bVarAA += 1;
+    } while (bVar3 != (byte)(VineFlagOffset - 1));
+
     if ((Enemy_OffscreenBits & 0xc) != 0) {
+      bVarAA = VineFlagOffset;
+      bVarBB = VineHeight;
+      bVar3 = (byte)(VineFlagOffset - 1);
       do {
         bVarAA = EraseEnemyObject(VineObjOffset[bVar3]);
         bVarBB = bVarAA;
       } Nplus1_TIMES(bVar3);
+      VineHeight = bVarBB;
+      VineFlagOffset = bVarAA;
     }
-    VineHeight = bVarBB;
-    VineFlagOffset = bVarAA;
+
     if (VineHeight >= 0x20) {
       sVar6 = BlockBufferCollision(1, 6, 0x1b);
       bVarAA = sVar6.r02;
@@ -9088,8 +9093,8 @@ void HandleClimbing(byte param_1, byte param_2, byte param_3) {
         KillEnemies(0x33);
         EventMusicQueue = 0x80;
         FlagpoleSoundQueue = 0x40;
-        FlagpoleScore = 4;
         FlagpoleCollisionYPos = SprObject_Y_Position[0];
+        FlagpoleScore = 4;
         do {
           if (FlagpoleYPosData[FlagpoleScore] <= SprObject_Y_Position[0])
             break;
@@ -10262,10 +10267,10 @@ byte DrawPowerUp(void) {
   bVar5 = PowerUpAttributes[PowerUpType] | Enemy_SprAttrib[5];
   bStack0000 = PowerUpType;
   bVar7 = PowerUpType << 2;
-  bVar4 = 1;
   bVar2 = 1;
   bVar3 = Enemy_Rel_XPos;
   bVar8 = Enemy_SprDataOffset[5];
+  bVar4 = 1;
   do {
     sVar9 = DrawOneSpriteRow(PowerUpGfxTable[bVar7 + 1], bVar7, bVar8, PowerUpGfxTable[bVar7], bVar6, bVar2, bVar5,
                              bVar3);
@@ -10999,8 +11004,8 @@ void PlayerGfxProcessing(byte param_1) {
     }
   }
   bVar1 = SprObject_OffscrBits[0] >> 4;
-  bVar2 = 3;
   bVar3 = PlayerOrSprDataOffset[0] + 0x18;
+  bVar2 = 3;
   do {
     bVar5 = bVar1 & 1;
     bVar1 >>= 1;
