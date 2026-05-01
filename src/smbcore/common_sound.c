@@ -1013,22 +1013,27 @@ void HandleSquare2Music(void) {
     bVar1 = MusicData[MusicOffset_Square2++];
     if (bVar1 == 0) {
       bVar1 = EventMusicBuffer;
-      if ((EventMusicBuffer != 0x40) || (bVar1 = AreaMusicBuffer_Alt, AreaMusicBuffer_Alt == 0)) {
-        if ((bVar1 & 4) != 0) {
-          LoadEventMusic(bVar1 & 4);
-          return;
-        }
-        bVar1 = AreaMusicBuffer & 0x5f;
-        if (bVar1 == 0) {
-          AreaMusicBuffer = 0;
-          EventMusicBuffer = 0;
-          apu_tri_linear(0);
-          apu_sq1_vol(0x90);
-          apu_sq2_vol(0x90);
+      if (EventMusicBuffer == 0x40) {
+        bVar1 = AreaMusicBuffer_Alt;
+        if (AreaMusicBuffer_Alt != 0) {
+          HandleAreaMusicLoopB(bVar1);
           return;
         }
       }
-      HandleAreaMusicLoopB(bVar1);
+      if ((bVar1 & 4) != 0) {
+        LoadEventMusic(bVar1 & 4);
+        return;
+      }
+      bVar1 = AreaMusicBuffer & 0x5f;
+      if (bVar1 == 0) {
+        AreaMusicBuffer = 0;
+        EventMusicBuffer = 0;
+        apu_tri_linear(0);
+        apu_sq1_vol(0x90);
+        apu_sq2_vol(0x90);
+      } else {
+        HandleAreaMusicLoopB(bVar1);
+      }
       return;
     }
     if (bVar1 >= 0x80) {
@@ -1038,29 +1043,26 @@ void HandleSquare2Music(void) {
     }
     if (Square2SoundBuffer == 0) {
       sVar5 = SetFreq_Squ2(bVar1);
+      byte a = sVar5.a;
+      byte x = sVar5.x;
+      byte y = sVar5.y;
       if (!sVar5.z) {
         sVar6 = LoadControlRegs();
-        Squ2_EnvelopeDataCtrl = sVar6.a;
-        Dump_Sq2_Regs(sVar6.x, sVar6.y);
-      } else {
-        Squ2_EnvelopeDataCtrl = sVar5.a;
-        Dump_Sq2_Regs(sVar5.x, sVar5.y);
+        a = sVar6.a;
+        x = sVar6.x;
+        y = sVar6.y;
       }
+      Squ2_EnvelopeDataCtrl = a;
+      Dump_Sq2_Regs(x, y);
     }
     Squ2_NoteLenCounter = Squ2_NoteLenBuffer;
   }
-  if (Square2SoundBuffer != 0) {
-    HandleSquare1Music();
-    return;
-  }
-  if ((EventMusicBuffer & 0x91) != 0) {
-    HandleSquare1Music();
-    return;
-  }
-  apu_sq2_vol(LoadEnvelopeData(Squ2_EnvelopeDataCtrl));
-  apu_sq2_sweep(0x7f);
-  if (Squ2_EnvelopeDataCtrl != 0) {
-    Squ2_EnvelopeDataCtrl -= 1;
+  if ((Square2SoundBuffer == 0) && ((EventMusicBuffer & 0x91) == 0)) {
+    apu_sq2_vol(LoadEnvelopeData(Squ2_EnvelopeDataCtrl));
+    apu_sq2_sweep(0x7f);
+    if (Squ2_EnvelopeDataCtrl != 0) {
+      Squ2_EnvelopeDataCtrl -= 1;
+    }
   }
   HandleSquare1Music();
 }
@@ -1076,6 +1078,7 @@ void HandleSquare1Music(void) {
     HandleTriangleMusic();
     return;
   }
+
   Squ1_NoteLenCounter -= 1;
   if (Squ1_NoteLenCounter == 0) {
     while (MusicData[MusicOffset_Square1] == 0) {
@@ -1084,37 +1087,42 @@ void HandleSquare1Music(void) {
       AltRegContentFlag = 0x94;
       MusicOffset_Square1 += 1;
     }
+
     sVar6 = AlternateLengthHandler(MusicData[MusicOffset_Square1++]);
     Squ1_NoteLenCounter = sVar6.a;
+
     if (Square1SoundBuffer != 0) {
       HandleTriangleMusic();
       return;
     }
+
     sVar5 = SetFreq_Squ1(sVar6.x & 0x3e);
+    byte a = sVar5.a;
+    byte x = sVar5.x;
+    byte y = sVar5.y;
     if (!sVar5.z) {
       sVar6 = LoadControlRegs();
-      Squ1_EnvelopeDataCtrl = sVar6.a;
-      Dump_Squ1_Regs(sVar6.x, sVar6.y);
-    } else {
-      Squ1_EnvelopeDataCtrl = sVar5.a;
-      Dump_Squ1_Regs(sVar5.x, sVar5.y);
+      a = sVar6.a;
+      x = sVar6.x;
+      y = sVar6.y;
     }
+    Squ1_EnvelopeDataCtrl = a;
+    Dump_Squ1_Regs(x, y);
   }
+
   if (Square1SoundBuffer != 0) {
     HandleTriangleMusic();
     return;
   }
+
   if ((EventMusicBuffer & 0x91) == 0) {
     apu_sq1_vol(LoadEnvelopeData(Squ1_EnvelopeDataCtrl));
     if (Squ1_EnvelopeDataCtrl != 0) {
       Squ1_EnvelopeDataCtrl -= 1;
     }
   }
-  if (AltRegContentFlag == 0) {
-    apu_sq1_sweep(0x7f);
-  } else {
-    apu_sq1_sweep(AltRegContentFlag);
-  }
+
+  apu_sq1_sweep((AltRegContentFlag != 0) ? AltRegContentFlag : 0x7f);
   HandleTriangleMusic();
 }
 
@@ -1130,36 +1138,33 @@ void HandleTriangleMusic(void) {
     HandleNoiseMusic();
     return;
   }
+
   bVar2 = MusicData[MusicOffset_Triangle++];
-  if (bVar2 == 0) {
-    apu_tri_linear(0);
-    HandleNoiseMusic();
-    return;
-  }
   if (bVar2 >= 0x80) {
     sVar3 = ProcessLengthData(bVar2);
     Tri_NoteLenBuffer = sVar3.a;
     apu_tri_linear(0x1f);
     bVar2 = MusicData[MusicOffset_Triangle++];
-    if (bVar2 == 0) {
-      apu_tri_linear(0);
-      HandleNoiseMusic();
-      return;
-    }
   }
-  SetFreq_Tri(bVar2);
-  Tri_NoteLenCounter = Tri_NoteLenBuffer;
-  if (((EventMusicBuffer & 0x6e) == 0) && ((AreaMusicBuffer & 10) == 0)) {
+
+  if (bVar2 == 0) {
+    apu_tri_linear(0);
     HandleNoiseMusic();
     return;
   }
-  if (Tri_NoteLenBuffer >= 0x12){
-    apu_tri_linear(0xff);
-  } else if ((EventMusicBuffer & 8) == 0) {
-    apu_tri_linear(0x1f);
-  } else {
-    apu_tri_linear(0x0f);
+
+  SetFreq_Tri(bVar2);
+  Tri_NoteLenCounter = Tri_NoteLenBuffer;
+  if (((EventMusicBuffer & 0x6e) != 0) || ((AreaMusicBuffer & 10) != 0)) {
+    if (Tri_NoteLenBuffer >= 0x12){
+      apu_tri_linear(0xff);
+    } else if ((EventMusicBuffer & 8) == 0) {
+      apu_tri_linear(0x1f);
+    } else {
+      apu_tri_linear(0x0f);
+    }
   }
+
   HandleNoiseMusic();
 }
 
