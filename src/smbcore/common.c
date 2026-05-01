@@ -8749,10 +8749,14 @@ byte ProcLPlatCollisions(byte param_1, byte param_2, byte param_3) {
     return bVar1;
   }
   bVar1 = 1;
-  if (((byte)(BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[0] - BoundingBox_UL_Corner_Or_XPos[param_2]) < 8)
-      || (bVar1 = 2,
-          (byte)((BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] - BoundingBox_UL_Corner_Or_XPos[0]) - 1) < 9)) {
+  if (((byte)(BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[0] - BoundingBox_UL_Corner_Or_XPos[param_2]) < 8)) {
     ImpedePlayerMove(bVar1);
+  }
+  else {
+    bVar1 = 2;
+    if ((byte)((BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] - BoundingBox_UL_Corner_Or_XPos[0]) - 1) < 9) {
+      ImpedePlayerMove(bVar1);
+    }
   }
   return ObjectOffset;
 }
@@ -8840,8 +8844,14 @@ void PlayerBGCollision(void) {
   }
   bVar6 = 1;
   if (SwimmingFlag == 0) {
-    if ((Player_State == 0) || (bVar6 = Player_State, Player_State == 3)) {
+    if ((Player_State == 0)) {
       bVar6 = 2;
+    }
+    else {
+      bVar6 = Player_State;
+      if (Player_State == 3) {
+        bVar6 = 2;
+      }
     }
   }
   Player_State = bVar6;
@@ -8984,8 +8994,14 @@ BHalf:
   bVar3 = sVar9.r06;
   bVar2 = sVar9.r04;
   bVar5 = sVar9.a;
-  if ((((sVar9.z) || (bVar5 == ssw(0x1c, 0x19))) || (bVar5 == ssw(0x6b, 0x6d))) || (bVar8 = CheckForClimbMTiles(bVar5), bVar8)) {
+  if ((((sVar9.z) || (bVar5 == ssw(0x1c, 0x19))) || (bVar5 == ssw(0x6b, 0x6d)))) {
     goto BHalf;
+  }
+  else {
+    bVar8 = CheckForClimbMTiles(bVar5);
+    if (bVar8) {
+      goto BHalf;
+    }
   }
 CheckSideMTiles:
   bVar8 = ChkInvisibleMTiles(bVar5);
@@ -9121,8 +9137,14 @@ void ChkForLandJumpSpring(byte param_1) {
 bool ChkJumpspringMetatiles(byte param_1) {
   bool bVar1;
 
-  if ((param_1 == ssw(0x67, 0x68)) || (bVar1 = false, param_1 == ssw(0x68, 0x69))) {
+  if ((param_1 == ssw(0x67, 0x68))) {
     bVar1 = true;
+  }
+  else {
+    bVar1 = false;
+    if (param_1 == ssw(0x68, 0x69)) {
+      bVar1 = true;
+    }
   }
   return bVar1;
 }
@@ -9293,8 +9315,14 @@ byte EnemyToBGCollisionDet(byte param_1) {
 #endif
 
   bVarCC = sVar6.x;
-  if ((sVar6.z != false) || (bVarDD = ChkForNonSolids(sVar6.a), bVarDD)) {
+  if ((sVar6.z != false)) {
     return ChkForRedKoopa(sVar6.x);
+  }
+  else {
+    bVarDD = ChkForNonSolids(sVar6.a);
+    if (bVarDD) {
+      return ChkForRedKoopa(sVar6.x);
+    }
   }
 
 #ifdef SMB1_MODE
@@ -9332,8 +9360,14 @@ byte EnemyToBGCollisionDet(byte param_1) {
     return ChkForRedKoopa(bVarCC);
   }
   if ((Enemy_State[bVarCC] & 0x40) == 0) {
-    if (((char)Enemy_State[bVarCC] < 0) || (bVarAA = Enemy_State[bVarCC], bVarAA == 0)) {
+    if (((char)Enemy_State[bVarCC] < 0)) {
       return DoEnemySideCheck(bVarCC);
+    }
+    else {
+      bVarAA = Enemy_State[bVarCC];
+      if (bVarAA == 0) {
+        return DoEnemySideCheck(bVarCC);
+      }
     }
     if (bVarAA != 5) {
       if (bVarAA > 2) {
@@ -9388,8 +9422,14 @@ void SetStun2(byte param_1) {
 
   Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
   Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
-  if ((Enemy_ID[param_1] == 7) || (bVar1 = 0xfd, AreaType == 0)) {
+  if ((Enemy_ID[param_1] == 7)) {
     bVar1 = 0xff;
+  }
+  else {
+    bVar1 = 0xfd;
+    if (AreaType == 0) {
+      bVar1 = 0xff;
+    }
   }
   SpriteVarData2[param_1] = bVar1;
   bVar1 = 1;
