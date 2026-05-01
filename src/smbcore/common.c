@@ -8839,8 +8839,10 @@ void PlayerBGCollision(void) {
     return;
   }
   bVar6 = 1;
-  if ((SwimmingFlag == 0) && ((Player_State == 0 || (bVar6 = Player_State, Player_State == 3)))) {
-    bVar6 = 2;
+  if (SwimmingFlag == 0) {
+    if ((Player_State == 0) || (bVar6 = Player_State, Player_State == 3)) {
+      bVar6 = 2;
+    }
   }
   Player_State = bVar6;
   if (SprObject_Y_HighPos[0] != 1) {
