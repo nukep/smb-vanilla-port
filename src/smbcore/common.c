@@ -1707,9 +1707,11 @@ void GetAreaMusic(void) {
   byte bVar1;
 
   if (OperMode != 0) {
-    if (((AltEntranceControl == 2) || ((bVar1 = 5, PlayerEntranceCtrl != 6 && (PlayerEntranceCtrl != 7))))
-        && (bVar1 = AreaType, CloudTypeOverride != 0)) {
-      bVar1 = 4;
+    if (((AltEntranceControl == 2) || ((bVar1 = 5, PlayerEntranceCtrl != 6 && (PlayerEntranceCtrl != 7))))) {
+      bVar1 = AreaType;
+      if (CloudTypeOverride != 0) {
+        bVar1 = 4;
+      }
     }
     AreaMusicQueue = MusicSelectData[bVar1];
   }
@@ -2104,8 +2106,11 @@ void DecodeAreaData(byte param_1, byte param_2) {
     return;
   }
   bVar1 = AreaData[param_2] & 0xf;
-  if ((bVar1 != 0xf) && (cVar2 = 8, bVar1 != 0xc)) {
-    cVar2 = 0;
+  if ((bVar1 != 0xf)) {
+    cVar2 = 8;
+    if (bVar1 != 0xc) {
+      cVar2 = 0;
+    }
   }
   if (bVar1 == 0xe) {
     cVar2 = 0;
@@ -2275,10 +2280,12 @@ void TreeLedge(byte param_1) {
     NoUnder(0x18, bVar1);
     return;
   }
-  if ((AreaObjectLength[param_1] >= 0x80)
-      && (AreaObjectLength[param_1] = sVar2.y, (CurrentPageLoc | CurrentColumnPos) != 0)) {
-    NoUnder(0x16, bVar1);
-    return;
+  if ((AreaObjectLength[param_1] >= 0x80)) {
+    AreaObjectLength[param_1] = sVar2.y;
+    if ((CurrentPageLoc | CurrentColumnPos) != 0) {
+      NoUnder(0x16, bVar1);
+      return;
+    }
   }
   MetatileBuffer[bVar1] = 0x17;
   RenderUnderPart(0x4c, bVar1 + 1, 0xf);
@@ -2302,8 +2309,11 @@ void PulleyRopeObject(byte param_1) {
 
   sVar2 = ChkLrgObjLength(param_1);
   bVar1 = 0;
-  if ((!sVar2.c) && (bVar1 = 1, AreaObjectLength[param_1] == 0)) {
-    bVar1 = 2;
+  if ((!sVar2.c)) {
+    bVar1 = 1;
+    if (AreaObjectLength[param_1] == 0) {
+      bVar1 = 2;
+    }
   }
   MetatileBuffer[0] = PulleyRopeMetatiles[bVar1];
 }
@@ -3341,11 +3351,17 @@ void PlayerCtrlRoutine(void) {
   }
   PlayerMovementSubs();
   PlayerOrSprObj_BoundBoxCtrl[0] = 1;
-  if ((PlayerSize == 0) && (PlayerOrSprObj_BoundBoxCtrl[0] = 0, CrouchingFlag != 0)) {
-    PlayerOrSprObj_BoundBoxCtrl[0] = 2;
+  if ((PlayerSize == 0)) {
+    PlayerOrSprObj_BoundBoxCtrl[0] = 0;
+    if (CrouchingFlag != 0) {
+      PlayerOrSprObj_BoundBoxCtrl[0] = 2;
+    }
   }
-  if ((PlayerSpriteVarData1[0] != 0) && (Player_MovingDir = 1, PlayerSpriteVarData1[0] >= 0x80)) {
-    Player_MovingDir = 2;
+  if ((PlayerSpriteVarData1[0] != 0)) {
+    Player_MovingDir = 1;
+    if (PlayerSpriteVarData1[0] >= 0x80) {
+      Player_MovingDir = 2;
+    }
   }
   ScrollHandler();
   GetPlayerOffscreenBits();
@@ -3360,12 +3376,15 @@ void PlayerCtrlRoutine(void) {
     ScrollLock = 1;
     cVar1 = 4;
     cVar2 = 0;
-    if (((GameTimerExpiredFlag != 0) || (CloudTypeOverride == 0)) && (cVar2 = 1, GameEngineSubroutine != 0xb)) {
-      if (DeathMusicLoaded == 0) {
-        EventMusicQueue = 1;
-        DeathMusicLoaded = 1;
+    if (((GameTimerExpiredFlag != 0) || (CloudTypeOverride == 0))) {
+      cVar2 = 1;
+      if (GameEngineSubroutine != 0xb) {
+        if (DeathMusicLoaded == 0) {
+          EventMusicQueue = 1;
+          DeathMusicLoaded = 1;
+        }
+        cVar1 = 6;
       }
-      cVar1 = 6;
     }
     if ((byte)(SprObject_Y_HighPos[0] - cVar1) < 0x80) {
       if (0x7f < (byte)(cVar2 - 1U)) {
@@ -3414,8 +3433,11 @@ void VerticalPipeEntry(void) {
   MovePlayerYAxis(1);
   ScrollHandler();
   bVar1 = 0;
-  if ((WarpZoneControl == 0) && (bVar1 = 1, AreaType == 3)) {
-    bVar1 = 2;
+  if ((WarpZoneControl == 0)) {
+    bVar1 = 1;
+    if (AreaType == 3) {
+      bVar1 = 2;
+    }
   }
   ChangeAreaTimer -= 1;
   if (ChangeAreaTimer == 0) {
@@ -3597,9 +3619,12 @@ void PlayerEndLevel(void) {
   }
 #endif
 #ifdef SMB2J_MODE
-  if ((SprObject_Y_Position[0] >= 0xae) && (ScrollLock = 0, FlagpoleMusicFlag == 0)) {
-    EventMusicQueue = 0x20;
-    FlagpoleMusicFlag = 1;
+  if ((SprObject_Y_Position[0] >= 0xae)) {
+    ScrollLock = 0;
+    if (FlagpoleMusicFlag == 0) {
+      EventMusicQueue = 0x20;
+      FlagpoleMusicFlag = 1;
+    }
   }
 #endif
   if (!(bool)(Player_CollisionBits & 1)) {
@@ -3649,8 +3674,11 @@ void PlayerMovementSubs(void) {
   byte bVar1;
 
   bVar1 = 0;
-  if ((PlayerSize == 0) && (bVar1 = CrouchingFlag, Player_State == 0)) {
-    bVar1 = Up_Down_Buttons & 4;
+  if ((PlayerSize == 0)) {
+    bVar1 = CrouchingFlag;
+    if (Player_State == 0) {
+      bVar1 = Up_Down_Buttons & 4;
+    }
   }
   CrouchingFlag = bVar1;
   PlayerPhysicsSub();
@@ -3784,9 +3812,11 @@ void PlayerPhysicsSub(void) {
 
   if (Player_State == 3) {
     bVar1 = 0;
-    if (((Up_Down_Buttons & Player_CollisionBits) != 0)
-        && (bVar1 = 1, (Up_Down_Buttons & Player_CollisionBits & 8) == 0)) {
-      bVar1 = 2;
+    if (((Up_Down_Buttons & Player_CollisionBits) != 0)) {
+      bVar1 = 1;
+      if ((Up_Down_Buttons & Player_CollisionBits & 8) == 0) {
+        bVar1 = 2;
+      }
     }
     SprObject_Y_MoveForce[0] = Climb_Y_MForceData[bVar1];
     PlayerAnimTimerSet = 8;
@@ -3810,8 +3840,11 @@ void PlayerPhysicsSub(void) {
       bVar1 = 4;
     }
     DiffToHaltJump = 1;
-    if ((SwimmingFlag != 0) && (bVar1 = 5, Cannon_Timer_Or_Whirlpool_Flag[0] != 0)) {
-      bVar1 = 6;
+    if ((SwimmingFlag != 0)) {
+      bVar1 = 5;
+      if (Cannon_Timer_Or_Whirlpool_Flag[0] != 0) {
+        bVar1 = 6;
+      }
     }
     VerticalForce = JumpMForceData[bVar1];
     VerticalForceDown = FallMForceData[bVar1];
@@ -3834,13 +3867,16 @@ void PlayerPhysicsSub(void) {
   if (Player_State == 0) {
 ProcPRun:
     bVar2 = 1;
-    if ((AreaType != 0) && (bVar2 = 0, Left_Right_Buttons == Player_MovingDir)) {
-      if ((A_B_Buttons & 0x40) != 0) {
-        RunningTimer = 10;
-        goto GetXPhy;
-      }
-      if (RunningTimer != 0) {
-        goto GetXPhy;
+    if ((AreaType != 0)) {
+      bVar2 = 0;
+      if (Left_Right_Buttons == Player_MovingDir) {
+        if ((A_B_Buttons & 0x40) != 0) {
+          RunningTimer = 10;
+          goto GetXPhy;
+        }
+        if (RunningTimer != 0) {
+          goto GetXPhy;
+        }
       }
     }
   } else {
@@ -4714,8 +4750,11 @@ void PwrUpJmp(void) {
   Enemy_State[5] = 1;
   Enemy_Flag[5] = 1;
   Enemy_BoundBoxCtrl[5] = 3;
-  if ((PowerUpType < 2) && (PowerUpType = PlayerStatus, PlayerStatus > 1)) {
-    PowerUpType = PlayerStatus >> 1;
+  if ((PowerUpType < 2)) {
+    PowerUpType = PlayerStatus;
+    if (PlayerStatus > 1) {
+      PowerUpType = PlayerStatus >> 1;
+    }
   }
   Enemy_SprAttrib[5] = 0x20;
   Square2SoundQueue = 2;
@@ -4965,10 +5004,13 @@ struct_xr05 CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte param
 
   sVar2 = CONCAT11(param_4, param_3);
   bVar3 = SprDataOffset_Ctrl;
-  if ((param_1 != 0) && (bVar1 = param_1 - 0x10, RAM(sVar2 + (ushort)bVar1) == ssw(0xc2, 0xc3))) {
-    RAM(sVar2 + (ushort)bVar1) = 0;
-    param_2 = RemoveCoin_Axe(bVar1, param_3);
-    bVar3 = SetupJumpCoin(SprDataOffset_Ctrl, bVar1, (byte)sVar2);
+  if ((param_1 != 0)) {
+    bVar1 = param_1 - 0x10;
+    if (RAM(sVar2 + (ushort)bVar1) == ssw(0xc2, 0xc3)) {
+      RAM(sVar2 + (ushort)bVar1) = 0;
+      param_2 = RemoveCoin_Axe(bVar1, param_3);
+      bVar3 = SetupJumpCoin(SprDataOffset_Ctrl, bVar1, (byte)sVar2);
+    }
   }
   sVar4.r05 = param_2;
   sVar4.x = bVar3;
@@ -5796,8 +5838,11 @@ void InitFlyingCheepCheep(byte param_1) {
       bVar4 = PseudoRandomBitReg[param_1];
       SpriteVarData2[param_1] = 0xfb;
       cVar2 = 0;
-      if ((PlayerSpriteVarData1[0] != 0) && (cVar2 = 4, PlayerSpriteVarData1[0] > 0x18)) {
-        cVar2 = 8;
+      if ((PlayerSpriteVarData1[0] != 0)) {
+        cVar2 = 4;
+        if (PlayerSpriteVarData1[0] > 0x18) {
+          cVar2 = 8;
+        }
       }
       bVar3 = cVar2 + (bVar4 & 3);
       if ((PseudoRandomBitReg[param_1 + 1] & 3) != 0) {
@@ -5806,9 +5851,12 @@ void InitFlyingCheepCheep(byte param_1) {
       bVar4 = cVar2 + (bVar4 & 3);
       SpriteVarData1[param_1] = FlyCCXSpeedData[bVar4];
       Enemy_MovingDir[param_1] = 1;
-      if ((PlayerSpriteVarData1[0] == 0) && (bVar4 = bVar3, (bVar3 & 2) != 0)) {
-        SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
-        Enemy_MovingDir[param_1] = Enemy_MovingDir[param_1] + 1;
+      if ((PlayerSpriteVarData1[0] == 0)) {
+        bVar4 = bVar3;
+        if ((bVar3 & 2) != 0) {
+          SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
+          Enemy_MovingDir[param_1] = Enemy_MovingDir[param_1] + 1;
+        }
       }
       if ((bVar4 & 2) == 0) {
         bVar1 = SprObject_X_Position[0] < FlyCCXPositionData[bVar4];
@@ -6536,8 +6584,11 @@ byte MoveHammerBroXDir(byte param_1) {
   SpriteVarData1[param_1] = bVar1;
   bVar1 = 1;
   sVar2 = PlayerEnemyDiff(param_1);
-  if ((!sVar2.n) && (bVar1 += 1, EnemyIntervalTimer[param_1] == 0)) {
-    SpriteVarData1[param_1] = 0xf8;
+  if ((!sVar2.n)) {
+    bVar1 += 1;
+    if (EnemyIntervalTimer[param_1] == 0) {
+      SpriteVarData1[param_1] = 0xf8;
+    }
   }
   Enemy_MovingDir[param_1] = bVar1;
   return MoveNormalEnemy(param_1);
@@ -6637,14 +6688,14 @@ byte MoveJumpingEnemy(byte param_1) {
 // SM2MAIN:9734
 // Signature: [X] -> [X]
 byte ProcMoveRedPTroopa(byte param_1) {
-  if (((SpriteVarData2[param_1] | CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1])
-       == 0)
-      && (BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = 0,
-          Enemy_Y_Position[param_1] < Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1])) {
-    if ((FrameCounter & 7) == 0) {
-      Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 1;
+  if (((SpriteVarData2[param_1] | CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1]) == 0)) {
+    BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = 0;
+    if (Enemy_Y_Position[param_1] < Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1]) {
+      if ((FrameCounter & 7) == 0) {
+        Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 1;
+      }
+      return param_1;
     }
-    return param_1;
   }
   if (SpriteVarData1[param_1] <= Enemy_Y_Position[param_1]) {
     return MoveRedPTroopaUp(param_1);
@@ -7224,13 +7275,16 @@ byte RunBowser(byte param_1) {
     if ((FrameCounter & 0xf) == 0) {
       Enemy_MovingDir[param_1] = 2;
     }
-    if ((EnemyFrameTimer[param_1] != 0) && (sVar4 = PlayerEnemyDiff(param_1), sVar4.n != false)) {
-      Enemy_MovingDir[param_1] = 1;
-      BowserMovementSpeed = 2;
-      EnemyFrameTimer[param_1] = 0x20;
-      BowserFireBreathTimer = 0x20;
-      if (199 < Enemy_X_Position[param_1]) {
-        goto HammerChk;
+    if ((EnemyFrameTimer[param_1] != 0)) {
+      sVar4 = PlayerEnemyDiff(param_1);
+      if (sVar4.n != false) {
+        Enemy_MovingDir[param_1] = 1;
+        BowserMovementSpeed = 2;
+        EnemyFrameTimer[param_1] = 0x20;
+        BowserFireBreathTimer = 0x20;
+        if (199 < Enemy_X_Position[param_1]) {
+          goto HammerChk;
+        }
       }
     }
     if ((FrameCounter & 3) == 0) {
@@ -7597,11 +7651,12 @@ void MovePiranhaPlant(byte param_1) {
     if (SpriteVarData1[param_1] >= 0x80) {
       bVar3 = BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1];
     }
-    if ((((SMB2J_ONLY && EnemyAttributeData[13] == 0x22) || ((FrameCounter & 1) != 0)) && (TimerControl == 0))
-        && (bVar1 = Enemy_Y_Position[param_1], bVar2 = SpriteVarData1[param_1],
-            Enemy_Y_Position[param_1] = bVar1 + bVar2, (byte)(bVar1 + bVar2) == bVar3)) {
-      SpriteVarData2[param_1] = 0;
-      EnemyFrameTimer[param_1] = 0x40;
+    if ((((SMB2J_ONLY && EnemyAttributeData[13] == 0x22) || ((FrameCounter & 1) != 0)) && (TimerControl == 0))) {
+      bVar1 = Enemy_Y_Position[param_1], bVar2 = SpriteVarData1[param_1], Enemy_Y_Position[param_1] = bVar1 + bVar2;
+      if ((byte)(bVar1 + bVar2) == bVar3) {
+        SpriteVarData2[param_1] = 0;
+        EnemyFrameTimer[param_1] = 0x40;
+      }
     }
   }
 PutinPipe:
@@ -7821,15 +7876,15 @@ byte PlatformFall(byte param_1, byte param_2) {
 byte YMovingPlatform(byte param_1) {
   byte bVar1;
 
-  if (((SpriteVarData2[param_1] | CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1])
-       == 0)
-      && (BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = 0,
-          Enemy_Y_Position[param_1] < Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1])) {
-    if ((FrameCounter & 7) == 0) {
-      Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 1;
+  if (((SpriteVarData2[param_1] | CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1]) == 0)) {
+    BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = 0;
+    if (Enemy_Y_Position[param_1] < Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1]) {
+      if ((FrameCounter & 7) == 0) {
+        Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 1;
+      }
+      ChkYPCollision(param_1);
+      return param_1;
     }
-    ChkYPCollision(param_1);
-    return param_1;
   }
   if (SpriteVarData1[param_1] <= Enemy_Y_Position[param_1]) {
     bVar1 = MovePlatformUp(param_1);
@@ -8797,8 +8852,11 @@ void PlayerBGCollision(void) {
     return;
   }
   bVar6 = 2;
-  if (((CrouchingFlag == 0) && (PlayerSize == 0)) && (bVar6 = 1, SwimmingFlag == 0)) {
-    bVar6 = 0;
+  if (((CrouchingFlag == 0) && (PlayerSize == 0))) {
+    bVar6 = 1;
+    if (SwimmingFlag == 0) {
+      bVar6 = 0;
+    }
   }
   MysterySpriteThing1 = BlockBufferAdderData[bVar6];
   bVar6 = PlayerSize;
@@ -10213,8 +10271,11 @@ byte EnemyGfxHandler(byte param_1) {
   if ((MysterySpriteThing4 == 0xc) && (SpriteVarData2[ObjectOffset] < 0x80)) {
     VerticalFlipFlag = 1;
   }
-  if ((BowserGfxFlag != 0) && (MysterySpriteThing4 = 0x16, BowserGfxFlag != 1)) {
-    MysterySpriteThing4 = 0x17;
+  if ((BowserGfxFlag != 0)) {
+    MysterySpriteThing4 = 0x16;
+    if (BowserGfxFlag != 1) {
+      MysterySpriteThing4 = 0x17;
+    }
   }
   if (MysterySpriteThing4 == 6) {
     if (Enemy_State[ObjectOffset] > 1) {
@@ -10260,9 +10321,12 @@ DrawBowser:
       }
       goto CheckDefeatedState;
     }
-    if (((MysterySpriteThing4 < 4) && (MysterySpriteThing2 > 1)) && (bVar4 = 0x5a, MysterySpriteThing4 == 2)) {
-      bVar4 = 0x7e;
-      bVar5 += 1;
+    if (((MysterySpriteThing4 < 4) && (MysterySpriteThing2 > 1))) {
+      bVar4 = 0x5a;
+      if (MysterySpriteThing4 == 2) {
+        bVar4 = 0x7e;
+        bVar5 += 1;
+      }
     }
     if (MysterySpriteThing2 == 4) {
       bVar4 = 0x72;
@@ -10272,9 +10336,12 @@ DrawBowser:
         bVar1 = bVar5 + 2;
       }
       bVar5 = bVar1;
-      if ((MysterySpriteThing4 == 6) && (bVar4 = 0x54, (MysterySpriteThing3 & 0x20) == 0)) {
-        bVar4 = 0x8a;
-        bVar5 -= 1;
+      if ((MysterySpriteThing4 == 6)) {
+        bVar4 = 0x54;
+        if ((MysterySpriteThing3 & 0x20) == 0) {
+          bVar4 = 0x8a;
+          bVar5 -= 1;
+        }
       }
     }
   }
@@ -10947,15 +11014,18 @@ byte ProcessPlayerAction(void) {
       }
     } else {
       bVar1 = 6;
-      if ((CrouchingFlag == 0) && (bVar1 = 2, (PlayerSpriteVarData1[0] | Left_Right_Buttons) != 0)) {
-        if ((Player_XSpeedAbsolute < 9) || ((Player_MovingDir & PlayerFacingDir) != 0)) {
-          bVar1 = GetGfxOffsetAdder(4);
-          return FourFrameExtent(bVar1);
+      if ((CrouchingFlag == 0)) {
+        bVar1 = 2;
+        if ((PlayerSpriteVarData1[0] | Left_Right_Buttons) != 0) {
+          if ((Player_XSpeedAbsolute < 9) || ((Player_MovingDir & PlayerFacingDir) != 0)) {
+            bVar1 = GetGfxOffsetAdder(4);
+            return FourFrameExtent(bVar1);
+          }
+          if (SMB2J_ONLY && GameEngineSubroutine < 9) {
+            NoiseSoundQueue = 0x80;
+          }
+          bVar1 = 3;
         }
-        if (SMB2J_ONLY && GameEngineSubroutine < 9) {
-          NoiseSoundQueue = 0x80;
-        }
-        bVar1 = 3;
       }
     }
   }
@@ -11024,9 +11094,12 @@ byte GetGfxOffsetAdder(byte param_1) {
 byte HandleChangeSize(void) {
   byte bVar1;
 
-  if (((FrameCounter & 3) == 0) && (PlayerAnimCtrl += 1, PlayerAnimCtrl >= 10)) {
-    PlayerAnimCtrl = 0;
-    PlayerChangeSizeFlag = 0;
+  if (((FrameCounter & 3) == 0)) {
+    PlayerAnimCtrl += 1;
+    if (PlayerAnimCtrl >= 10) {
+      PlayerAnimCtrl = 0;
+      PlayerChangeSizeFlag = 0;
+    }
   }
   if (PlayerSize != 0) {
     bVar1 = 9;
@@ -11283,8 +11356,12 @@ static byte original_xoff_f(byte param_1, byte bVar3) {
   bVar1 = (ScreenEdgeOrLeft_PageLoc[bVar3] - SprObject_PageLoc[param_1])
           - (ScreenEdgeOrLeft_X_Pos[bVar3] < SprObject_X_Position[param_1]);
   bVar2 = DefaultXOnscreenOfs[bVar3];
-  if ((bVar1 < 0x80) && (bVar2 = DefaultXOnscreenOfs[bVar3 + 1], 0x7f < (byte)(bVar1 - 1))) {
-    bVar2 = DividePDiff(8, bVar2, bVar3, 0x38, ScreenEdgeOrLeft_X_Pos[bVar3] - SprObject_X_Position[param_1]);
+  if ((bVar1 < 0x80)) {
+    bVar2 = DefaultXOnscreenOfs[bVar3 + 1];
+    if (0x7f < (byte)(bVar1 - 1)) {
+      bVar2 = DividePDiff(8, bVar2, bVar3, 0x38,
+                          ScreenEdgeOrLeft_X_Pos[bVar3] - SprObject_X_Position[param_1]);
+    }
   }
   return bVar2;
 }
@@ -11337,8 +11414,12 @@ static byte original_yoff_f(byte param_1, byte bVar3) {
   bVar1
       = (1 - SprObject_Y_HighPos[param_1]) - (HighPosUnitData[bVar3] < SprObject_Y_Position[param_1]);
   bVar2 = DefaultYOnscreenOfs[bVar3];
-  if ((bVar1 < 0x80) && (bVar2 = DefaultYOnscreenOfs[bVar3 + 1], 0x7f < (byte)(bVar1 - 1))) {
-    bVar2 = DividePDiff(4, bVar2, bVar3, 0x20, HighPosUnitData[bVar3] - SprObject_Y_Position[param_1]);
+  if ((bVar1 < 0x80)) {
+    bVar2 = DefaultYOnscreenOfs[bVar3 + 1];
+    if (0x7f < (byte)(bVar1 - 1)) {
+      bVar2 = DividePDiff(4, bVar2, bVar3, 0x20,
+                          HighPosUnitData[bVar3] - SprObject_Y_Position[param_1]);
+    }
   }
   return bVar2;
 }
