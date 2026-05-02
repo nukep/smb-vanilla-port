@@ -4172,46 +4172,52 @@ void ProcessWhirlpools(void) {
   char cVar2;
   byte bVar3;
 
-  if ((AreaType == 0) && (Cannon_Timer_Or_Whirlpool_Flag[0] = AreaType, TimerControl == 0)) {
-    bVar3 = 4;
-    do {
-      if (((Cannon_Or_Whirlpool_PageLoc[bVar3] != 0)
-           && ((byte)((SprObject_PageLoc[0] - Cannon_Or_Whirlpool_PageLoc[bVar3])
-                      - (SprObject_X_Position[0] < Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3]))
-               < 0x80))
-          && ((byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3]
-                       + CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3],
-                                Cannon_Y_Position_Or_Whirlpool_Length[bVar3]))
-                      - SprObject_PageLoc[0])
-                     - ((byte)(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3]
-                               + Cannon_Y_Position_Or_Whirlpool_Length[bVar3])
-                        < SprObject_X_Position[0]))
-              < 0x80)) {
-        bVar1 = Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3] + (Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1);
-        if ((FrameCounter & 1) != 0) {
-          if ((byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3]
-                       + CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3],
-                                Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1))
-                      - SprObject_PageLoc[0])
-                     - (bVar1 < SprObject_X_Position[0]))
-              < 0x80) {
-            if ((Player_CollisionBits & 1) == 0) {
-              goto WhPull;
-            }
-            cVar2 = SprObject_X_Position[0] == 0xff;
-            SprObject_X_Position[0] = SprObject_X_Position[0] + 1;
-          } else {
-            cVar2 = -(SprObject_X_Position[0] == 0);
-            SprObject_X_Position[0] = SprObject_X_Position[0] - 1;
-          }
-          SprObject_PageLoc[0] += cVar2;
+  if (AreaType != 0) {
+    return;
+  }
+
+  Cannon_Timer_Or_Whirlpool_Flag[0] = AreaType;
+
+  if (TimerControl != 0) {
+    return;
+  }
+
+  for (int i = 4; i >= 0; i--) {
+    bVar3 = i;
+    bool cond2 = (Cannon_Or_Whirlpool_PageLoc[bVar3] != 0)
+          && ((byte)((SprObject_PageLoc[0] - Cannon_Or_Whirlpool_PageLoc[bVar3])
+                    - (SprObject_X_Position[0] < Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3]))
+              < 0x80)
+        && ((byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3]
+                      + CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3],
+                              Cannon_Y_Position_Or_Whirlpool_Length[bVar3]))
+                    - SprObject_PageLoc[0])
+                    - ((byte)(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3]
+                              + Cannon_Y_Position_Or_Whirlpool_Length[bVar3])
+                      < SprObject_X_Position[0]))
+            < 0x80);
+    if (cond2) {
+      bVar1 = Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3] + (Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1);
+      if ((FrameCounter & 1) != 0) {
+        bool cond = (byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3]
+                      + CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3],
+                              Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1))
+                    - SprObject_PageLoc[0])
+                    - (bVar1 < SprObject_X_Position[0]))
+            >= 0x80;
+        if (cond) {
+          SprObject_PageLoc[0] -= SprObject_X_Position[0] == 0;
+          SprObject_X_Position[0] -= 1;
+        } else if ((Player_CollisionBits & 1) != 0) {
+          SprObject_X_Position[0] += 1;
+          SprObject_PageLoc[0] += SprObject_X_Position[0] == 0;
         }
-WhPull:
-        Cannon_Timer_Or_Whirlpool_Flag[0] = 1;
-        ImposeGravity(0, 0, 0x10, bVar1, 1);
-        return;
       }
-    } while (bVar3 -= 1, bVar3 < 0x80);
+
+      Cannon_Timer_Or_Whirlpool_Flag[0] = 1;
+      ImposeGravity(0, 0, 0x10, bVar1, 1);
+      return;
+    }
   }
 }
 
