@@ -1171,11 +1171,11 @@ void DiskErrorHandler(byte param_1) {
     bVar1 = DiskErrorMsgOffsets[0];
   }
 
-  bVar2 = 7;
-  do {
+  for(int bVar2_counter = 0;bVar2_counter <= 7;bVar2_counter++) {
+    bVar2 = 7 - bVar2_counter;
     DiskErrorMainMsg[bVar2 + 3] = DiskErrorMsgs[bVar1];
     bVar1 -= 1;
-  } while (bVar2 -= 1, bVar2 < 0x80);
+  }
   VRAM_Buffer_AddrCtrl = 0x19;
   MoveAllSpritesOffscreen();
   InitializeNameTables();
@@ -1196,10 +1196,10 @@ void GameOverMenu(void) {
       }
       ContinueMenuSelect ^= 1;
     }
-    bVar1 = 2;
-    do {
+    for(int bVar1_counter = 0;bVar1_counter <= 2;bVar1_counter++) {
+      bVar1 = 2 - bVar1_counter;
       Sprite_Data[bVar1 + 1] = GameOverCursorData[bVar1];
-    } while (bVar1 -= 1, bVar1 < 0x80);
+    }
     Sprite_Data[0] = GameOverCursorY[ContinueMenuSelect];
     return;
   }
@@ -1691,11 +1691,11 @@ void FadeToBlue(void) {
   } else if ((EndControlCntr & 0xf) != 0) {
     return;
   }
-  bVar2 = 0x13;
-  do {
+  for(int bVar2_counter = 0;bVar2_counter <= 0x13;bVar2_counter++) {
+    bVar2 = 0x13 - bVar2_counter;
     VRAM_Buffer1[bVar2] = BlueTransPalette[bVar2];
     bVar1 = BlueColorOfs;
-  } while (bVar2 -= 1, bVar2 < 0x80);
+  }
   bVar2 = 0xc;
   do {
     VRAM_Buffer1[bVar2 + 3] = BlueTints[bVar1];
@@ -1713,10 +1713,10 @@ void FadeToBlue(void) {
 void EraseLivesLines(void) {
   byte bVar1;
 
-  bVar1 = 8;
-  do {
+  for(int bVar1_counter = 0;bVar1_counter <= 8;bVar1_counter++) {
+    bVar1 = 8 - bVar1_counter;
     VRAM_Buffer1[bVar1] = TwoBlankRows[bVar1];
-  } while (bVar1 -= 1, bVar1 < 0x80);
+  }
   OperMode_Task += 1;
   EraseEndingCounters();
   MushroomRetDelay = 0x60;
