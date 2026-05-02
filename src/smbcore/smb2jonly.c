@@ -1155,8 +1155,6 @@ void ResetDiskVars(void) {
 // SM2MAIN:c182
 // Signature: [A] -> []
 void DiskErrorHandler(byte param_1) {
-  byte bVar2;
-
   DiskErrorMainMsg[19] = param_1 & 0xf;
   DiskErrorMainMsg[18] = param_1 >> 4;
 
@@ -1171,11 +1169,10 @@ void DiskErrorHandler(byte param_1) {
     bVar1 = DiskErrorMsgOffsets[0];
   }
 
-  for(int bVar2_counter = 0;bVar2_counter <= 7;bVar2_counter++) {
-    bVar2 = 7 - bVar2_counter;
-    DiskErrorMainMsg[bVar2 + 3] = DiskErrorMsgs[bVar1];
-    bVar1 -= 1;
+  for (int i = 0; i < 8; i++) {
+    DiskErrorMainMsg[i+3] = DiskErrorMsgs[bVar1 + i - 7];
   }
+
   VRAM_Buffer_AddrCtrl = 0x19;
   MoveAllSpritesOffscreen();
   InitializeNameTables();
@@ -1185,8 +1182,6 @@ void DiskErrorHandler(byte param_1) {
 // SM2MAIN:c1c2
 // Signature: [] -> []
 void GameOverMenu(void) {
-  byte bVar1;
-
   if ((SavedJoypadBits[0] & BUTTON_START) == 0) {
     if (((SavedJoypadBits[0] & BUTTON_SELECT) != 0) && (SelectTimer == 0)) {
       if ((SavedJoypadBits[0] & BUTTON_SELECT) != 0) {
@@ -1196,10 +1191,11 @@ void GameOverMenu(void) {
       }
       ContinueMenuSelect ^= 1;
     }
-    for(int bVar1_counter = 0;bVar1_counter <= 2;bVar1_counter++) {
-      bVar1 = 2 - bVar1_counter;
-      Sprite_Data[bVar1 + 1] = GameOverCursorData[bVar1];
+
+    for (int i = 0; i < 3; i++) {
+      Sprite_Data[i+1] = GameOverCursorData[i];
     }
+
     Sprite_Data[0] = GameOverCursorY[ContinueMenuSelect];
     return;
   }
@@ -1691,11 +1687,12 @@ void FadeToBlue(void) {
   } else if ((EndControlCntr & 0xf) != 0) {
     return;
   }
-  for(int bVar2_counter = 0;bVar2_counter <= 0x13;bVar2_counter++) {
-    bVar2 = 0x13 - bVar2_counter;
-    VRAM_Buffer1[bVar2] = BlueTransPalette[bVar2];
-    bVar1 = BlueColorOfs;
+
+  for (int i = 0; i < 0x14; i++) {
+    VRAM_Buffer1[i] = BlueTransPalette[i];
   }
+
+  bVar1 = BlueColorOfs;
   bVar2 = 0xc;
   do {
     VRAM_Buffer1[bVar2 + 3] = BlueTints[bVar1];
@@ -1711,12 +1708,10 @@ void FadeToBlue(void) {
 // SM2DATA3:c710
 // Signature: [] -> []
 void EraseLivesLines(void) {
-  byte bVar1;
-
-  for(int bVar1_counter = 0;bVar1_counter <= 8;bVar1_counter++) {
-    bVar1 = 8 - bVar1_counter;
-    VRAM_Buffer1[bVar1] = TwoBlankRows[bVar1];
+  for (int i = 0; i < 9; i++) {
+    VRAM_Buffer1[i] = TwoBlankRows[i];
   }
+
   OperMode_Task += 1;
   EraseEndingCounters();
   MushroomRetDelay = 0x60;

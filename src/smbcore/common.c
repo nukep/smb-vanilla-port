@@ -1019,7 +1019,6 @@ void GetBackgroundColor(void) {
 // Signature: [] -> [X]
 byte GetPlayerColors(void) {
   byte bVar1;
-  byte bVar2;
   byte bVar3;
 
   bVar3 = 0;
@@ -1036,13 +1035,11 @@ byte GetPlayerColors(void) {
       bVar3 = 4;
     }
   }
-  bVar2 = VRAM_Buffer1_Offset;
-  for (int bVar1_counter = 0; bVar1_counter <= 3; bVar1_counter++) {
-    bVar1 = 3 - bVar1_counter;
-    VRAM_Buffer1[bVar2 + 3] = PlayerColors[bVar3];
-    bVar3 += 1;
-    bVar2 += 1;
+
+  for (int i = 0; i < 4; i++) {
+    VRAM_Buffer1[i + VRAM_Buffer1_Offset + 3] = PlayerColors[i + bVar3];
   }
+
   bVar1 = VRAM_Buffer1_Offset;
   bVar3 = BackgroundColorCtrl;
   if (BackgroundColorCtrl == 0) {
@@ -1516,29 +1513,28 @@ void OutputNumbers(byte param_1) {
 // SM2MAIN:6dd2
 // Signature: [Y] -> []
 void DigitsMathRoutine(byte param_1) {
-  byte bVar1;
-  byte bVar2;
+  // In SMB1 and SMB2J, DigitModifier is often accessed as DigitModifier-1.
 
   if (OperMode != 0) {
-    for(int bVar2_counter = 0;bVar2_counter <= 5;bVar2_counter++) {
-      bVar2 = 5 - bVar2_counter;
-      bVar1 = DigitModifier[bVar2] + DisplayDigits_Or_TopScoreDisplay[param_1];
+    for (int i = 6; i >= 1; i--) {
+      byte bVar1 = DigitModifier_Minus1[i] + DisplayDigits_Or_TopScoreDisplay[param_1 + i - 6];
       if (bVar1 < 0x80) {
         if (bVar1 >= 10) {
           bVar1 -= 10;
-          DigitModifier_Minus1[bVar2] = DigitModifier_Minus1[bVar2] + 1;
+          DigitModifier_Minus1[i-1] += 1;
         }
-      }else {
-        DigitModifier_Minus1[bVar2] = DigitModifier_Minus1[bVar2] - 1;
-        bVar1 = 9;
+        DisplayDigits_Or_TopScoreDisplay[param_1 + i - 6] = bVar1;
+      } else {
+        DigitModifier_Minus1[i-1] -= 1;
+        DisplayDigits_Or_TopScoreDisplay[param_1 + i - 6] = 9;
       }
-      DisplayDigits_Or_TopScoreDisplay[param_1] = bVar1;
-      param_1 -= 1;
     }
   }
-  for(int bVar2_counter = 0;bVar2_counter <= 6;bVar2_counter++) {
-    bVar2 = 6 - bVar2_counter;
-    DigitModifier_Minus1[bVar2] = 0;
+
+  // Zero out DigitModifier_Minus1
+
+  for (int i = 0; i <= 6; i++) {
+    DigitModifier_Minus1[i] = 0;
   }
 }
 
@@ -1679,15 +1675,16 @@ void SecondaryGameSetup(void) {
   SprShuffleAmt[2] = 0x38;
   SprShuffleAmt[1] = 0x48;
   SprShuffleAmt[0] = 0x58;
-  for(int bVar1_counter = 0;bVar1_counter <= 0xe;bVar1_counter++) {
-    bVar1 = 0xe - bVar1_counter;
-    PlayerOrSprDataOffset[bVar1] = DefaultSprOffsets[bVar1];
+
+  for (int i = 0; i < 0xf; i++) {
+    PlayerOrSprDataOffset[i] = DefaultSprOffsets[i];
   }
+
 #ifdef SMB1_MODE
-  for(int bVar1_counter = 0;bVar1_counter <= 3;bVar1_counter++) {
-    bVar1 = 3 - bVar1_counter;
-    Sprite_Data[bVar1] = Sprite0Data[bVar1];
+  for (int i = 0; i < 4; i++) {
+    Sprite_Data[i] = Sprite0Data[i];
   }
+
   DoNothing2();
   DoNothing();
   Sprite0HitDetectFlag = Sprite0HitDetectFlag + 1;
@@ -2203,12 +2200,9 @@ void ScrollLockObject(void) {
 // SM2MAIN:756d
 // Signature: [A] -> []
 void KillEnemies(byte param_1) {
-  byte bVar1;
-
-  for(int bVar1_counter = 0;bVar1_counter <= 4;bVar1_counter++) {
-    bVar1 = 4 - bVar1_counter;
-    if (Enemy_ID[bVar1] == param_1) {
-      Enemy_Flag[bVar1] = 0;
+  for (int i = 0; i < 5; i++) {
+    if (Enemy_ID[i] == param_1) {
+      Enemy_Flag[i] = 0;
     }
   }
 }
@@ -4002,8 +3996,6 @@ XSpdSign:
 // SM2MAIN:8190
 // Signature: [] -> []
 void ProcFireball_Bubble(void) {
-  byte bVar1;
-
   if (PlayerStatus > 1) {
     if (((((A_B_Buttons & 0x40) != 0) && ((A_B_Buttons & 0x40 & PreviousA_B_Buttons) == 0))
          && (Fireball_State[FireballCounter & 1] == 0))
@@ -4017,13 +4009,12 @@ void ProcFireball_Bubble(void) {
     FireballObjCore(0);
     FireballObjCore(1);
   }
+
   if (AreaType == 0) {
-    for(int bVar1_counter = 0;bVar1_counter <= 2;bVar1_counter++) {
-      bVar1 = 2 - bVar1_counter;
-      ObjectOffset = bVar1;
-      BubbleCheck(bVar1);
-      bVar1 = GetBubbleOffscreenBits(RelativeBubblePosition(bVar1));
-      DrawBubble(bVar1);
+    for (int i = 2; i >= 0; i--) {
+      ObjectOffset = i;
+      BubbleCheck(i);
+      DrawBubble(GetBubbleOffscreenBits(RelativeBubblePosition(i)));
     }
   }
 }
@@ -5750,21 +5741,20 @@ void LakituAndSpinyHandler(byte param_1) {
 
   if ((FrenzyEnemyTimer == 0) && (param_1 < 5)) {
     FrenzyEnemyTimer = 0x80;
-    for(int bVar2_counter = 0;bVar2_counter <= 4;bVar2_counter++) {
-      bVar2 = 4 - bVar2_counter;
-      if (Enemy_ID[bVar2] == 0x11) {
+    for (int i = 4; i >= 0; i--) {
+      if (Enemy_ID[i] == 0x11) {
         if (SprObject_Y_Position[0] < 0x2c) {
           FrenzyEnemyTimer = 0x80;
           return;
         }
-        if (Enemy_State[bVar2] != 0) {
+        if (Enemy_State[i] != 0) {
           FrenzyEnemyTimer = 0x80;
           return;
         }
-        Enemy_PageLoc[param_1] = Enemy_PageLoc[bVar2];
-        Enemy_X_Position[param_1] = Enemy_X_Position[bVar2];
+        Enemy_PageLoc[param_1] = Enemy_PageLoc[i];
+        Enemy_X_Position[param_1] = Enemy_X_Position[i];
         Enemy_Y_HighPos[param_1] = 1;
-        Enemy_Y_Position[param_1] = Enemy_Y_Position[bVar2] - 8;
+        Enemy_Y_Position[param_1] = Enemy_Y_Position[i] - 8;
         bVar1 = PseudoRandomBitReg[param_1] & 3;
         bVar2 = ObjectOffset;
         PlayerLakituDiff(ObjectOffset, PRDiffAdjustData[bVar1], PRDiffAdjustData[bVar1 + 4],
@@ -5784,22 +5774,18 @@ void LakituAndSpinyHandler(byte param_1) {
     }
     LakituReappearTimer += 1;
     if (LakituReappearTimer > ssw(6, 2)) {
-      bVar2 = 4;
-      do {
-        if (Enemy_Flag[bVar2] == 0) {
-          goto CreateL;
+      for (int i = 4; i >= 0; i--) {
+        if (Enemy_Flag[i] == 0) {
+          Enemy_State[i] = 0;
+          Enemy_ID[i] = 0x11;
+          SetupLakitu(i);
+          bVar1 = 0x20;
+          if (SMB2J_ONLY && (HardWorldFlag != 0 || WorldNumber >= 6)) {
+            bVar1 = 0x60;
+          }
+          PutAtRightExtent(bVar1, i);
+          return;
         }
-      } while (bVar2 -= 1, bVar2 < 0x80);
-      if (bVar2 < 0x80) {
-CreateL:
-        Enemy_State[bVar2] = 0;
-        Enemy_ID[bVar2] = 0x11;
-        SetupLakitu(bVar2);
-        bVar1 = 0x20;
-        if (SMB2J_ONLY && (HardWorldFlag != 0 || WorldNumber >= 6)) {
-          bVar1 = 0x60;
-        }
-        PutAtRightExtent(bVar1, bVar2);
       }
     }
   }
@@ -5895,16 +5881,17 @@ void InitFlyingCheepCheep(byte param_1) {
 // Signature: [X] -> []
 void InitBowser(byte param_1) {
   if (SMB2J_ONLY) {
-    byte bVar1;
-
-    for(int bVar1_counter = 0;bVar1_counter <= 4;bVar1_counter++) {
-      bVar1 = 4 - bVar1_counter;
-      if ((bVar1 != ObjectOffset) && (Enemy_ID[bVar1] == 0x2d)) {
-        Enemy_ID[bVar1] = 0;
-        Enemy_Flag[bVar1] = 0;
+    for (int i = 0; i < 5; i++) {
+      if (i == ObjectOffset) {
+        continue;
+      }
+      if (Enemy_ID[i] == 0x2d) {
+        Enemy_ID[i] = 0;
+        Enemy_Flag[i] = 0;
       }
     }
   }
+
   DuplicateEnemyObj(param_1);
   BowserBodyControls = 0;
   BridgeCollapseOffset = 0;
@@ -6178,14 +6165,12 @@ void NoFrenzyCode(void) { return; }
 // SM2MAIN:93ed
 // Signature: [X] -> []
 void EndFrenzy(byte param_1) {
-  byte bVar1;
-
-  for(int bVar1_counter = 0;bVar1_counter <= 5;bVar1_counter++) {
-    bVar1 = 5 - bVar1_counter;
-    if (Enemy_ID[bVar1] == 0x11) {
-      Enemy_State[bVar1] = 1;
+  for (int i = 0; i < 6; i++) {
+    if (Enemy_ID[i] == 0x11) {
+      Enemy_State[i] = 1;
     }
   }
+
   EnemyFrenzyBuffer = 0;
   Enemy_Flag[param_1] = 0;
 }
@@ -7609,20 +7594,19 @@ byte RaiseFlagSetoffFWorks(byte param_1) {
 // SM2MAIN:9f91
 // Signature: [X] -> [X]
 byte DrawStarFlag(byte param_1) {
-  byte bVar1;
   byte bVar2;
   struct_axr00 sVar3;
 
   sVar3 = RelativeEnemyPosition(param_1);
   bVar2 = Enemy_SprDataOffset[sVar3.x];
-  for(int bVar1_counter = 0;bVar1_counter <= 3;bVar1_counter++) {
-    bVar1 = 3 - bVar1_counter;
-    Sprite_Data[bVar2] = Enemy_Rel_YPos + StarFlagYPosAdder[bVar1];
-    Sprite_Data[bVar2 + 1] = StarFlagTileData[bVar1];
-    Sprite_Data[bVar2 + 2] = 0x22;
-    Sprite_Data[bVar2 + 3] = Enemy_Rel_XPos + StarFlagXPosAdder[bVar1];
-    bVar2 += 4;
+
+  for (int i = 0; i < 4; i++) {
+    Sprite_Data[(byte)(bVar2 + i*4) + 0] = Enemy_Rel_YPos + StarFlagYPosAdder[3 - i];
+    Sprite_Data[(byte)(bVar2 + i*4) + 1] = StarFlagTileData[3 - i];
+    Sprite_Data[(byte)(bVar2 + i*4) + 2] = 0x22;
+    Sprite_Data[(byte)(bVar2 + i*4) + 3] = Enemy_Rel_XPos + StarFlagXPosAdder[3 - i];
   }
+
   return ObjectOffset;
 }
 
@@ -8112,13 +8096,15 @@ byte FireballEnemyCollision(byte param_1) {
 
   if (((Fireball_State[param_1] != 0) && (!(bool)(Fireball_State[param_1] >> 7))) && (!(bool)(FrameCounter & 1))) {
     bStack0000 = param_1 * 4 + 0x1c;
-    for(int bVar2_counter = 0;bVar2_counter <= 4;bVar2_counter++) {
-      bVar2 = 4 - bVar2_counter;
-      if ((((((Enemy_State[bVar2] & 0x20) == 0) && (Enemy_Flag[bVar2] != 0)) && ((bVar1 = Enemy_ID[bVar2], bVar1 < 0x24 || (bVar1 > 0x2a)))) && ((bVar1 != 6 || (Enemy_State[bVar2] < 2)))) && (EnemyOffscrBitsMasked[bVar2] == 0)) {
-        bVar3 = SprObjectCollisionCore(bVar2 * 4 + 4, bStack0000);
-        if (bVar3) {
-          Fireball_State[ObjectOffset] = 0x80;
-          HandleEnemyFBallCol(bVar2, bVar2);
+    for (int i = 4; i >= 0; i--) {
+      bVar2 = i;
+      if (((((Enemy_State[bVar2] & 0x20) == 0) && (Enemy_Flag[bVar2] != 0)) && ((bVar1 = Enemy_ID[bVar2], bVar1 < 0x24 || (bVar1 > 0x2a)))) && (bVar1 != 6 || (Enemy_State[bVar2] < 2))) {
+        if (EnemyOffscrBitsMasked[bVar2] == 0) {
+          bVar3 = SprObjectCollisionCore(bVar2 * 4 + 4, bStack0000);
+          if (bVar3) {
+            Fireball_State[ObjectOffset] = 0x80;
+            HandleEnemyFBallCol(bVar2, bVar2);
+          }
         }
       }
     }
@@ -10266,8 +10252,9 @@ byte DrawPowerUp(void) {
   bVar2 = 1;
   bVar3 = Enemy_Rel_XPos;
   bVar8 = Enemy_SprDataOffset[5];
-  for(int bVar4_counter = 0;bVar4_counter <= 1;bVar4_counter++) {
-    bVar4 = 1 - bVar4_counter;
+
+  // Draw two rows
+  for (int i = 0; i < 2; i++) {
     sVar9 = DrawOneSpriteRow(PowerUpGfxTable[bVar7 + 1], bVar7, bVar8,
                              PowerUpGfxTable[bVar7], bVar6, bVar2, bVar5,
                              bVar3);
@@ -10276,6 +10263,7 @@ byte DrawPowerUp(void) {
     bVar8 = sVar9.y;
     bVar7 = sVar9.x;
   }
+
   if (((bStack0000 != 0) && (bStack0000 != 3)) && (ssw(true, bStack0000 != 4))) {
     bVar6 = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[5];
     Sprite_Data[Enemy_SprDataOffset[5] + 2] = bVar6;
@@ -10978,11 +10966,8 @@ void FindPlayerAction(void) {
 // SM2MAIN:bc20
 // Signature: [A] -> []
 void PlayerGfxProcessing(byte param_1) {
-  byte bVar1;
-  byte bVar2;
   byte bVar3;
   bool bVar4;
-  byte bVar5;
 
   PlayerGfxOffset = param_1;
   RenderPlayerSub(4);
@@ -11000,16 +10985,21 @@ void PlayerGfxProcessing(byte param_1) {
       RenderPlayerSub(bVar3);
     }
   }
-  bVar1 = SprObject_OffscrBits[0] >> 4;
-  bVar3 = PlayerOrSprDataOffset[0] + 0x18;
-  for(int bVar2_counter = 0;bVar2_counter <= 3;bVar2_counter++) {
-    bVar2 = 3 - bVar2_counter;
-    bVar5 = bVar1 & 1;
-    bVar1 >>= 1;
-    if (bVar5 != 0) {
-      DumpTwoSpr(0xf8, bVar3);
-    }
-    bVar3 -= 8;
+
+  if (SprObject_OffscrBits[0] & 0x10) {
+    DumpTwoSpr(0xf8, PlayerOrSprDataOffset[0] + 0x18);
+  }
+
+  if (SprObject_OffscrBits[0] & 0x20) {
+    DumpTwoSpr(0xf8, PlayerOrSprDataOffset[0] + 0x10);
+  }
+
+  if (SprObject_OffscrBits[0] & 0x40) {
+    DumpTwoSpr(0xf8, PlayerOrSprDataOffset[0] + 0x08);
+  }
+
+  if (SprObject_OffscrBits[0] & 0x80) {
+    DumpTwoSpr(0xf8, PlayerOrSprDataOffset[0]);
   }
 }
 
