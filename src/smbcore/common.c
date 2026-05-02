@@ -1042,7 +1042,7 @@ byte GetPlayerColors(void) {
     VRAM_Buffer1[bVar2 + 3] = PlayerColors[bVar3];
     bVar3 += 1;
     bVar2 += 1;
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
   bVar1 = VRAM_Buffer1_Offset;
   bVar3 = BackgroundColorCtrl;
   if (BackgroundColorCtrl == 0) {
@@ -1505,7 +1505,7 @@ void OutputNumbers(byte param_1) {
       VRAM_Buffer1[bVar3 + 3] = DisplayDigits_Or_TopScoreDisplay[bVar1];
       bVar1 += 1;
       VRAM_Buffer1_Offset = bVar3 + 1;
-    } N_TIMES(bVar2);
+    } while (bVar2 -= 1, bVar2 != 0);
     VRAM_Buffer1[(byte)(bVar3 + 1) + 3] = 0;
     VRAM_Buffer1_Offset = bVar3 + 4;
   }
@@ -1534,12 +1534,12 @@ void DigitsMathRoutine(byte param_1) {
       }
       DisplayDigits_Or_TopScoreDisplay[param_1] = bVar1;
       param_1 -= 1;
-    } Nplus1_TIMES(bVar2);
+    } while (bVar2 -= 1, bVar2 < 0x80);
   }
   bVar2 = 6;
   do {
     DigitModifier_Minus1[bVar2] = 0;
-  } Nplus1_TIMES(bVar2);
+  } while (bVar2 -= 1, bVar2 < 0x80);
 }
 
 
@@ -1682,12 +1682,12 @@ void SecondaryGameSetup(void) {
   bVar1 = 0xe;
   do {
     PlayerOrSprDataOffset[bVar1] = DefaultSprOffsets[bVar1];
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
 #ifdef SMB1_MODE
   bVar1 = 3;
   do {
     Sprite_Data[bVar1] = Sprite0Data[bVar1];
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
   DoNothing2();
   DoNothing();
   Sprite0HitDetectFlag = Sprite0HitDetectFlag + 1;
@@ -2072,7 +2072,7 @@ CheckRear:
       if (AreaObjectLength[ObjectOffset] < 0x80) {
         AreaObjectLength[ObjectOffset] = AreaObjectLength[ObjectOffset] - 1;
       }
-    } Nplus1_TIMES(bVar1);
+    } while (bVar1 -= 1, bVar1 < 0x80);
     if ((BehindAreaParserFlag == 0) && (BackloadingFlag == 0)) {
       return;
     }
@@ -2210,7 +2210,7 @@ void KillEnemies(byte param_1) {
     if (Enemy_ID[bVar1] == param_1) {
       Enemy_Flag[bVar1] = 0;
     }
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
 }
 
 
@@ -4025,7 +4025,7 @@ void ProcFireball_Bubble(void) {
       bVar1 = GetBubbleOffscreenBits(RelativeBubblePosition(bVar1));
       DrawBubble(bVar1);
       // note: counter gets modified!
-    } Nplus1_TIMES(bVar1);
+    } while (bVar1 -= 1, bVar1 < 0x80);
   }
 }
 
@@ -4221,7 +4221,7 @@ WhPull:
         ImposeGravity(0, 0, 0x10, bVar1, 1);
         return;
       }
-    } Nplus1_TIMES(bVar3);
+    } while (bVar3 -= 1, bVar3 < 0x80);
   }
 }
 
@@ -4365,7 +4365,7 @@ byte VineObjectHandler(byte param_1) {
       do {
         bVarAA = EraseEnemyObject(VineObjOffset[bVar3]);
         bVarBB = bVarAA;
-      } Nplus1_TIMES(bVar3);
+      } while (bVar3 -= 1, bVar3 < 0x80);
       VineHeight = bVarBB;
       VineFlagOffset = bVarAA;
     }
@@ -4442,7 +4442,7 @@ Chk_BB:
           }
         }
       }
-    } Nplus1_TIMES(bVar2);
+    } while (bVar2 -= 1, bVar2 < 0x80);
   }
 }
 
@@ -4981,7 +4981,7 @@ struct_yc BlockBumpedChk(byte param_1) {
     if (param_1 == BrickQBlockMetatiles[bVar1]) {
       goto MatchBump;
     }
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
   bVar2 = false;
 MatchBump:
   sVar3.c = bVar2;
@@ -5782,7 +5782,7 @@ void LakituAndSpinyHandler(byte param_1) {
         Enemy_State[bVar2] = 5;
         return;
       }
-    } Nplus1_TIMES(bVar2);
+    } while (bVar2 -= 1, bVar2 < 0x80);
     LakituReappearTimer += 1;
     if (LakituReappearTimer > ssw(6, 2)) {
       bVar2 = 4;
@@ -5790,7 +5790,7 @@ void LakituAndSpinyHandler(byte param_1) {
         if (Enemy_Flag[bVar2] == 0) {
           goto CreateL;
         }
-      } Nplus1_TIMES(bVar2);
+      } while (bVar2 -= 1, bVar2 < 0x80);
       if (bVar2 < 0x80) {
 CreateL:
         Enemy_State[bVar2] = 0;
@@ -5904,7 +5904,7 @@ void InitBowser(byte param_1) {
         Enemy_ID[bVar1] = 0;
         Enemy_Flag[bVar1] = 0;
       }
-    } Nplus1_TIMES(bVar1);
+    } while (bVar1 -= 1, bVar1 < 0x80);
   }
   DuplicateEnemyObj(param_1);
   BowserBodyControls = 0;
@@ -6133,7 +6133,7 @@ byte HandleGroupEnemies(byte param_1) {
       pageloc += 1;
     }
     xpos += 0x18;
-  } N_TIMES(NumberofGroupEnemies);
+  } while (NumberofGroupEnemies -= 1, NumberofGroupEnemies != 0);
 
   return Inc2B();
 }
@@ -6186,7 +6186,7 @@ void EndFrenzy(byte param_1) {
     if (Enemy_ID[bVar1] == 0x11) {
       Enemy_State[bVar1] = 1;
     }
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
   EnemyFrenzyBuffer = 0;
   Enemy_Flag[param_1] = 0;
 }
@@ -7209,7 +7209,7 @@ byte PlayerLakituDiff(byte param_1, byte param_2, byte param_3, byte param_4) {
   }
   do {
     param_2 -= 1;
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
   return param_2;
 }
 
@@ -7623,7 +7623,7 @@ byte DrawStarFlag(byte param_1) {
     Sprite_Data[bVar2 + 2] = 0x22;
     Sprite_Data[bVar2 + 3] = Enemy_Rel_XPos + StarFlagXPosAdder[bVar1];
     bVar2 += 4;
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
   return ObjectOffset;
 }
 
@@ -8125,7 +8125,7 @@ byte FireballEnemyCollision(byte param_1) {
           HandleEnemyFBallCol(bVar2, bVar2);
         }
       }
-    } Nplus1_TIMES(bVar2);
+    } while (bVar2 -= 1, bVar2 < 0x80);
   }
   return ObjectOffset;
 }
@@ -8745,7 +8745,7 @@ byte SmallPlatformCollision(byte param_1) {
         }
         BoundingBox_UL_YPos[bVar2] = BoundingBox_UL_YPos[bVar2] + 0x80;
         BoundingBox_DR_YPos[bVar2] = BoundingBox_DR_YPos[bVar2] + 0x80;
-      } N_TIMES(bVar1);
+      } while (bVar1 -= 1, bVar1 != 0);
     }
   }
   return ObjectOffset;
@@ -9098,7 +9098,7 @@ void HandleClimbing(byte param_1, byte param_2, byte param_3) {
         do {
           if (FlagpoleYPosData[FlagpoleScore] <= SprObject_Y_Position[0])
             break;
-        } N_TIMES(FlagpoleScore);
+        } while (FlagpoleScore -= 1, FlagpoleScore != 0);
         if (SMB2J_ONLY && (CoinDisplay[0] == CoinDisplay[1]) && (CoinDisplay[0] == GameTimerDisplay[2])) {
           FlagpoleScore = 5;
         }
@@ -10002,7 +10002,7 @@ void DrawVine(byte param_1) {
   do {
     Sprite_Data[bVar3 + 1] = 0xe1;
     bVar3 += 4;
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
   if (param_1 == 0) {
     Sprite_Data[bVar4 + 1] = 0xe0;
   }
@@ -10027,7 +10027,7 @@ byte SixSpriteStacker(byte param_1, byte param_2, byte param_3) {
     Sprite_Data[param_2] = param_1;
     param_1 += 8;
     param_2 += 4;
-  } N_TIMES(cVar1);
+  } while (cVar1 -= 1, cVar1 != 0);
   return param_3;
 }
 
@@ -10278,7 +10278,7 @@ byte DrawPowerUp(void) {
     bVar6 = sVar9.r02;
     bVar8 = sVar9.y;
     bVar7 = sVar9.x;
-  } Nplus1_TIMES(bVar4);
+  } while (bVar4 -= 1, bVar4 < 0x80);
   if (((bStack0000 != 0) && (bStack0000 != 3)) && (ssw(true, bStack0000 != 4))) {
     bVar6 = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[5];
     Sprite_Data[Enemy_SprDataOffset[5] + 2] = bVar6;
@@ -11013,7 +11013,7 @@ void PlayerGfxProcessing(byte param_1) {
       DumpTwoSpr(0xf8, bVar3);
     }
     bVar3 -= 8;
-  } Nplus1_TIMES(bVar2);
+  } while (bVar2 -= 1, bVar2 < 0x80);
 }
 
 

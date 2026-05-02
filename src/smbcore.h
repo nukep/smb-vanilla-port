@@ -144,8 +144,6 @@ static void joy2(struct SMB_buttons *buttons) {
 #define SMB1_2J_SWITCH(smb1, smb2j) (SMB1_ONLY ? (smb1) : (smb2j))
 #define ssw SMB1_2J_SWITCH
 
-#define N_TIMES(v) while (v -= 1, v != 0)
-#define Nplus1_TIMES(v) while (v -= 1, v < 0x80)
 #define FOR_LT(v, count) while (v += 1, v < count)
 #define FOR_NE(v, count) while (v += 1, v != count)
 

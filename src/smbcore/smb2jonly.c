@@ -1175,7 +1175,7 @@ void DiskErrorHandler(byte param_1) {
   do {
     DiskErrorMainMsg[bVar2 + 3] = DiskErrorMsgs[bVar1];
     bVar1 -= 1;
-  } Nplus1_TIMES(bVar2);
+  } while (bVar2 -= 1, bVar2 < 0x80);
   VRAM_Buffer_AddrCtrl = 0x19;
   MoveAllSpritesOffscreen();
   InitializeNameTables();
@@ -1199,7 +1199,7 @@ void GameOverMenu(void) {
     bVar1 = 2;
     do {
       Sprite_Data[bVar1 + 1] = GameOverCursorData[bVar1];
-    } Nplus1_TIMES(bVar1);
+    } while (bVar1 -= 1, bVar1 < 0x80);
     Sprite_Data[0] = GameOverCursorY[ContinueMenuSelect];
     return;
   }
@@ -1695,7 +1695,7 @@ void FadeToBlue(void) {
   do {
     VRAM_Buffer1[bVar2] = BlueTransPalette[bVar2];
     bVar1 = BlueColorOfs;
-  } Nplus1_TIMES(bVar2);
+  } while (bVar2 -= 1, bVar2 < 0x80);
   bVar2 = 0xc;
   do {
     VRAM_Buffer1[bVar2 + 3] = BlueTints[bVar1];
@@ -1716,7 +1716,7 @@ void EraseLivesLines(void) {
   bVar1 = 8;
   do {
     VRAM_Buffer1[bVar1] = TwoBlankRows[bVar1];
-  } Nplus1_TIMES(bVar1);
+  } while (bVar1 -= 1, bVar1 < 0x80);
   OperMode_Task += 1;
   EraseEndingCounters();
   MushroomRetDelay = 0x60;
@@ -1818,7 +1818,7 @@ void MushroomRetainersForW8(void) {
       ObjectOffset = 0;
       EnemyGfxHandler(0);
     }
-  } N_TIMES(BlueColorOfs);
+  } while (BlueColorOfs -= 1, BlueColorOfs != 0);
   BlueColorOfs = bVar1;
   WorldNumber = bStack0000;
   Enemy_SprDataOffset[0] = 0x30;
