@@ -2031,44 +2031,61 @@ static void RendBBuf() {
 // Signature: [] -> []
 void ProcessAreaData(void) {
   byte bVar1;
-  byte bVar2;
 
   do {
     bVar1 = 2;
     do {
       BehindAreaParserFlag = 0;
       ObjectOffset = bVar1;
-      if ((AreaData[AreaDataOffset] == 0xfd) || (AreaObjectLength[bVar1] < 0x80)) {
-RdyDecode:
+
+      bool decode = true;
+
+      if (AreaData[AreaDataOffset] == 0xfd) {
+        decode = true;
+      } else if (AreaObjectLength[bVar1] < 0x80) {
+        decode = true;
+      } else {
+        byte second_byte = AreaData[AreaDataOffset + 1];
+        byte first_nibble = AreaData[AreaDataOffset] & 0xf;
+        
+        if (second_byte & 0x80) {
+          if (AreaObjectPageSel == 0) {
+            AreaObjectPageSel = 1;
+            AreaObjectPageLoc += 1;
+          }
+        }
+
+        if ((first_nibble == 0xd) && ((second_byte & 0x40) == 0) && (AreaObjectPageSel == 0)) {
+          AreaObjectPageLoc = second_byte & 0x1f;
+          AreaObjectPageSel = 1;
+          decode = false;
+        } else if ((first_nibble == 0xe) && (BackloadingFlag != 0)) {
+          decode = true;
+        } else {
+          // CheckRear
+          if (CurrentPageLoc <= AreaObjectPageLoc) {
+            decode = true;
+          } else {
+            // SetBehind
+            BehindAreaParserFlag = 1;
+            decode = false;
+          }
+        }
+      }
+
+      if (decode) {
+        // RdyDecode
         DecodeAreaData(bVar1, AreaDataOffset);
       } else {
-        bVar2 = AreaDataOffset + 1;
-        if (((char)AreaData[bVar2] < 0) && (AreaObjectPageSel == 0)) {
-          AreaObjectPageSel = 1;
-          AreaObjectPageLoc += 1;
-        }
-        if ((AreaData[AreaDataOffset] & 0xf) != 0xd) {
-          if (((AreaData[AreaDataOffset] & 0xf) != 0xe) || (BackloadingFlag == 0)) {
-            goto CheckRear;
-          }
-          goto RdyDecode;
-        }
-        if (((AreaData[bVar2] & 0x40) == 0) && (AreaObjectPageSel == 0)) {
-          AreaObjectPageLoc = AreaData[bVar2] & 0x1f;
-          AreaObjectPageSel = 1;
-        } else {
-CheckRear:
-          if (CurrentPageLoc <= AreaObjectPageLoc) {
-            goto RdyDecode;
-          }
-          BehindAreaParserFlag = 1;
-        }
+        // NextAObj
         IncAreaObjOffset();
       }
-      bVar1 = ObjectOffset;
+
+      // ChkLength
       if (AreaObjectLength[ObjectOffset] < 0x80) {
         AreaObjectLength[ObjectOffset] = AreaObjectLength[ObjectOffset] - 1;
       }
+      bVar1 = ObjectOffset;
     } while (bVar1 -= 1, bVar1 < 0x80);
     if ((BehindAreaParserFlag == 0) && (BackloadingFlag == 0)) {
       return;
