@@ -1495,14 +1495,9 @@ void MoveUpsideDownPiranhaP(byte param_1) {
 // SM2DATA2+SM2DATA4:c4fe
 // Signature: [] -> []
 void BlowPlayerAround(void) {
-  byte bVar1;
-
   if ((WindFlag != 0) && (AreaType == 1)) {
-    bVar1 = 1;
-    if (!(bool)(FrameCounter >> 7)) {
-      bVar1 = 3;
-    }
-    if ((FrameCounter & bVar1) == 0) {
+    byte mask = (FrameCounter & 0x80) ? 1 : 3;
+    if ((FrameCounter & mask) == 0) {
       SprObject_PageLoc[0] += SprObject_X_Position[0] == 0xff;
       Player_X_Scroll += 1;
       SprObject_X_Position[0] = SprObject_X_Position[0] + 1;

@@ -3930,8 +3930,10 @@ void PlayerPhysicsSub(void) {
       return;
     }
 #endif
-    FrictionAdderHigh = FrictionAdderLow >> 7;
-    FrictionAdderLow <<= 1;
+
+    // FrictionAdder *= 2
+    FrictionAdderHigh = FrictionAdderLow >= 128 ? 1 : 0;
+    FrictionAdderLow *= 2;
   }
 }
 
@@ -4048,7 +4050,11 @@ void FireballObjCore(byte param_1) {
   byte bVar2;
   bool bVar3;
 
-  bVar3 = (bool)-((char)Fireball_State[param_1] >> 7);
+  // param_1 is always 0 or 1
+
+  bVar3 = (Fireball_State[param_1] & 0x80) != 0;
+
+
   ObjectOffset = param_1;
   if (bVar3) {
     bVar2 = RelativeFireballPosition(param_1);
@@ -4060,7 +4066,7 @@ void FireballObjCore(byte param_1) {
       bVar2 = SprObject_X_Position[0] + 4 + bVar3;
       bVar1 = SprObject_X_Position[0] >= 0xfc;
       Fireball_X_Position[param_1] = bVar2;
-      Fireball_PageLoc[param_1] = SprObject_PageLoc[0] + (bVar1 || (bVar3 && bVar2 == 0));
+      Fireball_PageLoc[param_1] = SprObject_PageLoc[0] + (bVar1 || (bVar3 && (bVar2 == 0)));
       Fireball_Y_Position[param_1] = SprObject_Y_Position[0];
       Fireball_Y_HighPos[param_1] = 1;
       Fireball_X_Speed[param_1] = FireballXSpdData[(byte)(PlayerFacingDir - 1)];
@@ -5379,15 +5385,12 @@ void ImposeGravity(byte param_1, byte param_2, byte param_3, byte param_4, byte 
 // SM2MAIN:8c23
 // Signature: [X] -> [X]
 byte EnemiesAndLoopsCore(byte param_1) {
-  byte bStack0000;
-
-  bStack0000 = Enemy_Flag[param_1];
-  if ((bool)(bStack0000 >> 7)) {
-    if (Enemy_Flag[bStack0000 & 0xf] == 0) {
+  if (Enemy_Flag[param_1] & 0x80) {
+    if (Enemy_Flag[Enemy_Flag[param_1] & 0xf] == 0) {
       Enemy_Flag[param_1] = 0;
     }
   } else {
-    if (bStack0000 != 0) {
+    if (Enemy_Flag[param_1] != 0) {
       return RunEnemyObjectsCore();
     }
     if ((AreaParserTaskNum & 7) != 7) {
@@ -6655,7 +6658,7 @@ byte MoveNormalEnemy(byte param_1) {
 
   bVar2 = 0;
   if ((Enemy_State[param_1] & 0x40) == 0) {
-    if ((bool)(Enemy_State[param_1] >> 7)) {
+    if (Enemy_State[param_1] & 0x80) {
       goto SteadM;
     }
     if ((Enemy_State[param_1] & 0x20) != 0) {
@@ -8147,7 +8150,7 @@ byte FireballEnemyCollision(byte param_1) {
   bool bVar3;
   byte bStack0000;
 
-  if (((Fireball_State[param_1] != 0) && (!(bool)(Fireball_State[param_1] >> 7))) && (!(bool)(FrameCounter & 1))) {
+  if (((Fireball_State[param_1] != 0) && ((Fireball_State[param_1] & 0x80) == 0)) && (!(bool)(FrameCounter & 1))) {
     bStack0000 = param_1 * 4 + 0x1c;
     for (int i = 4; i >= 0; i--) {
       bVar2 = i;
@@ -11120,7 +11123,7 @@ byte ProcessPlayerAction(void) {
         if ((JumpSwimTimer | PlayerAnimCtrl) != 0) {
           return FourFrameExtent(bVar1);
         }
-        if ((bool)(A_B_Buttons >> 7)) {
+        if (A_B_Buttons & 0x80) {
           return FourFrameExtent(bVar1);
         }
         return GetCurrentAnimOffset(bVar1);
