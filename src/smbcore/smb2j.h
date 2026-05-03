@@ -986,9 +986,6 @@ void smb2j_InitEnemyObject(byte param_1);
 byte smb2j_CheckThreeBytes(void);
 #define CheckThreeBytes smb2j_CheckThreeBytes
 
-byte smb2j_Inc2B(void);
-#define Inc2B smb2j_Inc2B
-
 void smb2j_CheckpointEnemyID(byte param_1);
 #define CheckpointEnemyID smb2j_CheckpointEnemyID
 

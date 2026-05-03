@@ -3887,37 +3887,35 @@ void PlayerPhysicsSub(void) {
       }
     }
   }
+
   bVar2 = 0;
-  bVar1 = 0;
+  bVar1 = 1;
   if (Player_State == 0) {
-ProcPRun:
-    bVar2 = 1;
+    // ProcPRun
     if ((AreaType != 0)) {
-      bVar2 = 0;
       if (Left_Right_Buttons == Player_MovingDir) {
         if ((A_B_Buttons & 0x40) != 0) {
           RunningTimer = 10;
-          goto GetXPhy;
         }
         if (RunningTimer != 0) {
-          goto GetXPhy;
+          bVar1 = 0;
         }
       }
+    } else {
+      bVar2 = 1;
     }
-  } else {
-    if (Player_XSpeedAbsolute > 0x18) {
-      goto GetXPhy;
-    }
-    if (Player_XSpeedAbsolute > 0x18) {
-      goto ProcPRun;
+  } else if (Player_XSpeedAbsolute > 0x18) {
+    bVar1 = 0;
+  }
+
+  if (bVar1) {
+    bVar2 += 1;
+    if ((RunningSpeed != 0) || (Player_XSpeedAbsolute > 0x20)) {
+      bVar1 = 2;
     }
   }
-  bVar2 += 1;
-  bVar1 = 1;
-  if ((RunningSpeed != 0) || (Player_XSpeedAbsolute > 0x20)) {
-    bVar1 = 2;
-  }
-GetXPhy:
+
+  // GetXPhy
   MaximumLeftSpeed = MaxLeftXSpdData[bVar2];
   if (GameEngineSubroutine == 7) {
     bVar2 = 3;
@@ -3972,46 +3970,43 @@ void GetPlayerAnimSpeed(void) {
 // SM2MAIN:8138
 // Signature: [A] -> []
 void ImposeFriction(byte param_1) {
-  byte bVar1;
+  param_1 &= Player_CollisionBits;
 
-  bVar1 = param_1 & Player_CollisionBits;
-  if ((param_1 & Player_CollisionBits) == 0) {
-    if (PlayerSpriteVarData1[0] == 0) {
-      Player_XSpeedAbsolute = PlayerSpriteVarData1[0];
+  bool go_left = true;
+
+  if (param_1 == 0) {
+    if (Player_X_Speed == 0) {
+      Player_XSpeedAbsolute = 0;
       return;
     }
-    if (PlayerSpriteVarData1[0] < 0x80) {
-      goto RghtFrict;
-    }
-    bVar1 = PlayerSpriteVarData1[0];
-    if (PlayerSpriteVarData1[0] < 0x80) {
-      goto JoypFrict;
+
+    go_left = Player_X_Speed >= 0x80;
+  } else {
+    go_left = (param_1 & 1) != 0;
+  }
+
+  if (go_left) {
+    // LeftFrict
+    Player_X_Speed = Player_X_Speed + FrictionAdderHigh + CARRY1(Player_X_MoveForce, FrictionAdderLow);
+    Player_X_MoveForce = Player_X_MoveForce + FrictionAdderLow;
+    if ((byte)(Player_X_Speed - MaximumRightSpeed) < 0x80) {
+      Player_X_Speed = MaximumRightSpeed;
+      Player_XSpeedAbsolute = MaximumRightSpeed;
+      return;
     }
   } else {
-JoypFrict:
-    if ((bVar1 & 1) == 0) {
-RghtFrict:
-      bVar1 = Player_X_MoveForce - FrictionAdderLow;
-      PlayerSpriteVarData1[0] = (PlayerSpriteVarData1[0] - FrictionAdderHigh) - (Player_X_MoveForce < FrictionAdderLow);
-      Player_X_MoveForce = bVar1;
-      if (0x7f < (byte)(PlayerSpriteVarData1[0] - MaximumLeftSpeed)) {
-        PlayerSpriteVarData1[0] = MaximumLeftSpeed;
-      }
-      goto XSpdSign;
+    // RghtFrict
+    Player_X_Speed = (Player_X_Speed - FrictionAdderHigh) - (Player_X_MoveForce < FrictionAdderLow);
+    Player_X_MoveForce = Player_X_MoveForce - FrictionAdderLow;
+    if ((byte)(Player_X_Speed - MaximumLeftSpeed) >= 0x80) {
+      Player_X_Speed = MaximumLeftSpeed;
     }
   }
-  bVar1 = Player_X_MoveForce + FrictionAdderLow;
-  PlayerSpriteVarData1[0] = PlayerSpriteVarData1[0] + FrictionAdderHigh + CARRY1(Player_X_MoveForce, FrictionAdderLow);
-  Player_X_MoveForce = bVar1;
-  if ((byte)(PlayerSpriteVarData1[0] - MaximumRightSpeed) < 0x80) {
-    PlayerSpriteVarData1[0] = MaximumRightSpeed;
-    Player_XSpeedAbsolute = MaximumRightSpeed;
-    return;
-  }
-XSpdSign:
-  Player_XSpeedAbsolute = PlayerSpriteVarData1[0];
-  if (PlayerSpriteVarData1[0] >= 0x80) {
-    Player_XSpeedAbsolute = NEGATE(PlayerSpriteVarData1[0]);
+
+  if (Player_X_Speed >= 0x80) {
+    Player_XSpeedAbsolute = -Player_X_Speed;
+  } else {
+    Player_XSpeedAbsolute = Player_X_Speed;
   }
 }
 
@@ -4429,26 +4424,29 @@ void ProcessCannons(void) {
   byte bVar2;
   struct_xy sVar3;
 
-  if (AreaType != 0) {
+  if (AreaType == 0) {
+    return;
+  }
+
     bVar2 = 2;
     do {
       ObjectOffset = bVar2;
       if (Enemy_Flag[bVar2] == 0) {
         bVar1 = PseudoRandomBitReg[bVar2 + 1] & CannonBitmasks[SecondaryHardMode];
-        if ((bVar1 > 5) || (Cannon_Or_Whirlpool_PageLoc[bVar1] == 0)) {
+        if ((bVar1 > 5) || (Cannon_PageLoc[bVar1] == 0)) {
           goto Chk_BB;
         }
-        if (Cannon_Timer_Or_Whirlpool_Flag[bVar1] != 0) {
-          Cannon_Timer_Or_Whirlpool_Flag[bVar1] = Cannon_Timer_Or_Whirlpool_Flag[bVar1] - (5 >= bVar1);
+        if (Cannon_Timer[bVar1] != 0) {
+          Cannon_Timer[bVar1] = Cannon_Timer[bVar1] - (5 >= bVar1);
           goto Chk_BB;
         }
         if (TimerControl != 0) {
           goto Chk_BB;
         }
-        Cannon_Timer_Or_Whirlpool_Flag[bVar1] = 0xe;
-        Enemy_PageLoc[bVar2] = Cannon_Or_Whirlpool_PageLoc[bVar1];
-        Enemy_X_Position[bVar2] = Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar1];
-        Enemy_Y_Position[bVar2] = Cannon_Y_Position_Or_Whirlpool_Length[bVar1] - 8;
+        Cannon_Timer[bVar1] = 0xe;
+        Enemy_PageLoc[bVar2] = Cannon_PageLoc[bVar1];
+        Enemy_X_Position[bVar2] = Cannon_X_Position[bVar1];
+        Enemy_Y_Position[bVar2] = Cannon_Y_Position[bVar1] - 8;
         Enemy_Y_HighPos[bVar2] = 1;
         Enemy_Flag[bVar2] = 1;
         Enemy_State[bVar2] = 0;
@@ -4465,7 +4463,6 @@ Chk_BB:
         }
       }
     } while (bVar2 -= 1, bVar2 < 0x80);
-  }
 }
 
 
@@ -4482,7 +4479,6 @@ byte BulletBillHandler(byte param_1) {
   if (TimerControl == 0) {
     if (Enemy_State[param_1] == 0) {
       if ((Enemy_OffscreenBits & 0xc) == 0xc) {
-KillBB:
         EraseEnemyObject(param_1);
         return param_1;
       }
@@ -4494,7 +4490,8 @@ KillBB:
       Enemy_MovingDir[param_1] = bVar1;
       SpriteVarData1[param_1] = BulletBillXSpdData[(byte)(bVar1 - 1)];
       if ((byte)(sVar2.r00 + 0x28 + sVar2.c) < 0x50) {
-        goto KillBB;
+        EraseEnemyObject(param_1);
+        return param_1;
       }
       Enemy_State[param_1] = 1;
       EnemyFrameTimer[param_1] = 10;
@@ -4552,26 +4549,31 @@ byte ProcHammerObj(byte param_1) {
 
   if (TimerControl == 0) {
     bVar2 = HammerEnemyOffset[param_1];
-    if ((Misc_State[param_1] & 0x7f) == 2) {
-      Misc_Y_Speed[param_1] = 0xfe;
-      Enemy_State[bVar2] = Enemy_State[bVar2] & 0xf7;
-      param_1 = ObjectOffset;
-      Misc_X_Speed[ObjectOffset] = HammerXSpdData[(byte)(Enemy_MovingDir[bVar2] - 1)];
-    } else if ((Misc_State[param_1] & 0x7f) < 2) {
+
+    if ((Misc_State[param_1] & 0x7f) < 2) {
       bVar2 = param_1 + 0xd;
       ImposeGravity(0, bVar2, 0x10, 0xf, 4);
       MoveObjectHorizontally(bVar2);
       param_1 = PlayerHammerCollision(ObjectOffset);
-      goto RunHSubs;
+    } else {
+      if ((Misc_State[param_1] & 0x7f) == 2) {
+        // SetHSpd
+        Misc_Y_Speed[param_1] = 0xfe;
+        Enemy_State[bVar2] = Enemy_State[bVar2] & 0xf7;
+        param_1 = ObjectOffset;
+        Misc_X_Speed[ObjectOffset] = HammerXSpdData[(byte)(Enemy_MovingDir[bVar2] - 1)];
+      }
+
+      // SetHPos
+      Misc_State[param_1] = Misc_State[param_1] - 1;
+      bVar1 = Enemy_X_Position[bVar2];
+      Misc_X_Position[param_1] = bVar1 + 2;
+      Misc_PageLoc[param_1] = Enemy_PageLoc[bVar2] + (bVar1 >= 0xfe);
+      Misc_Y_Position[param_1] = Enemy_Y_Position[bVar2] - 10;
+      Misc_Y_HighPos[param_1] = 1;
     }
-    Misc_State[param_1] = Misc_State[param_1] - 1;
-    bVar1 = Enemy_X_Position[bVar2];
-    Misc_X_Position[param_1] = bVar1 + 2;
-    Misc_PageLoc[param_1] = Enemy_PageLoc[bVar2] + (bVar1 >= 0xfe);
-    Misc_Y_Position[param_1] = Enemy_Y_Position[bVar2] - 10;
-    Misc_Y_HighPos[param_1] = 1;
   }
-RunHSubs:
+
   bVar2 = GetMiscOffscreenBits(param_1);
   bVar2 = RelativeMiscPosition(bVar2);
   bVar2 = GetMiscBoundBox(bVar2);
@@ -4583,6 +4585,8 @@ RunHSubs:
 // SM2MAIN:8703
 // Signature: [X, C] -> []
 void CoinBlock(byte param_1, bool param_2) {
+  // In practice, param_2 is always set to false.
+
   byte bVar1;
   struct_yc sVar2;
 
@@ -4603,6 +4607,7 @@ byte SetupJumpCoin(byte param_1, byte param_2, byte param_3) {
   bool in_C = false;
   struct_yc sVar2;
 
+  // in_C has no effect on the results we use
   sVar2 = FindEmptyMiscSlot(in_C);
   bVar1 = sVar2.y;
   Misc_PageLoc[bVar1] = Block_PageLoc2[param_1];
@@ -4633,21 +4638,25 @@ byte JCoinC(byte param_1, byte param_2) {
 // SM2MAIN:874f
 // Signature: [C] -> [Y, C]
 struct_yc FindEmptyMiscSlot(bool param_1) {
-
   struct_yc sVar1;
 
-  JumpCoinMiscOffset = 8;
-  do {
-    if (Misc_State[JumpCoinMiscOffset] == 0) {
-      goto UseMiscS;
+  int i = 8;
+
+  // There's a bug where the carry flag is unmodified on the first match.
+  // CoinBlock seems to expect the carry flag to be set by this call.
+
+  for (; i >= 6; i--) {
+    if (Misc_State[i] == 0) {
+      JumpCoinMiscOffset = i;
+      sVar1.c = i == 8 ? param_1 : true;
+      sVar1.y = i;
+      return sVar1;
     }
-    JumpCoinMiscOffset -= 1;
-    param_1 = JumpCoinMiscOffset >= 5;
-  } while (JumpCoinMiscOffset != 5);
+  }
+
   JumpCoinMiscOffset = 8;
-UseMiscS:
-  sVar1.c = param_1;
-  sVar1.y = JumpCoinMiscOffset;
+  sVar1.c = true;
+  sVar1.y = 8;
   return sVar1;
 }
 
@@ -5082,7 +5091,8 @@ byte BlockObjectsCore(byte param_1) {
 
   bStack0000 = Block_State[param_1];
   if (bStack0000 == 0) {
-    goto UpdSte;
+    Block_State[param_1] = 0;
+    return param_1;
   }
   bStack0000 &= 0xf;
   bVar1 = param_1 + 9;
@@ -5092,7 +5102,8 @@ byte BlockObjectsCore(byte param_1) {
     bVar1 = GetBlockOffscreenBits(bVar1);
     param_1 = DrawBlock(bVar1);
     if (4 < (Block_Y_Position[param_1] & 0xf)) {
-      goto UpdSte;
+      Block_State[param_1] = 1;
+      return param_1;
     }
     Block_RepFlag[param_1] = 1;
   } else {
@@ -5105,18 +5116,18 @@ byte BlockObjectsCore(byte param_1) {
     param_1 = GetBlockOffscreenBits(bVar1);
     DrawBrickChunks(param_1);
     if (Block_Y_HighPos[param_1] == 0) {
-      goto UpdSte;
+      Block_State[param_1] = bStack0000;
+      return param_1;
     }
     if (Block_Y_Position[param_1 + 2] > 0xf0) {
       Block_Y_Position[param_1 + 2] = 0xf0;
     }
     if (Block_Y_Position[param_1] < 0xf0) {
-      goto UpdSte;
+      Block_State[param_1] = bStack0000;
+      return param_1;
     }
   }
-  bStack0000 = 0;
-UpdSte:
-  Block_State[param_1] = bStack0000;
+  Block_State[param_1] = 0;
   return param_1;
 }
 
@@ -5475,13 +5486,26 @@ byte ProcLoopCommand(byte param_1) {
       InitEnemyObject(param_1);
       return param_1;
     }
+
     if (EnemyData[EnemyDataOffset] == 0xff) {
-      goto CheckFrenzyBuffer;
+      // CheckFrenzyBuffer
+      bVar4 = EnemyFrenzyBuffer;
+      if (EnemyFrenzyBuffer == 0) {
+        if (VineFlagOffset != 1) {
+          return param_1;
+        }
+        bVar4 = 0x2f;
+      }
+      Enemy_ID[param_1] = bVar4;
+      InitEnemyObject(param_1);
+      return param_1;
     }
+
     if ((((EnemyData[EnemyDataOffset] & 0xf) != 0xe) && (param_1 >= 5))
         && ((EnemyData[(byte)(EnemyDataOffset + 1)] & 0x3f) != 0x2e)) {
       return param_1;
     }
+
     bVar1 = ScreenRight_X_Pos + 0x30;
     bVar2 = ScreenRight_PageLoc + (ScreenRight_X_Pos >= 0xd0);
     bVar5 = EnemyDataOffset + 1;
@@ -5489,6 +5513,7 @@ byte ProcLoopCommand(byte param_1) {
       EnemyObjectPageSel = 1;
       EnemyObjectPageLoc += 1;
     }
+
     if (((EnemyData[EnemyDataOffset] & 0xf) != 0xf) || (EnemyObjectPageSel != 0)) {
       Enemy_PageLoc[param_1] = EnemyObjectPageLoc;
       bVar3 = EnemyData[bVar4] & 0xf0;
@@ -5497,7 +5522,7 @@ byte ProcLoopCommand(byte param_1) {
           || (ScreenRight_X_Pos > bVar3 && ScreenRight_PageLoc < Enemy_PageLoc[param_1])) {
         bVar6 = (bVar1 & 0xf0) < Enemy_X_Position[param_1];
         if ((bVar6 || bVar2 < Enemy_PageLoc[param_1]) && (!bVar6 || bVar2 <= Enemy_PageLoc[param_1])) {
-CheckFrenzyBuffer:
+          // CheckFrenzyBuffer
           bVar4 = EnemyFrenzyBuffer;
           if (EnemyFrenzyBuffer == 0) {
             if (VineFlagOffset != 1) {
@@ -5514,7 +5539,9 @@ CheckFrenzyBuffer:
         Enemy_Y_Position[param_1] = bVar1 * 0x10;
         if ((byte)(bVar1 * 0x10) != 0xe0) {
           if (((EnemyData[bVar5] & 0x40) != 0) && (SecondaryHardMode == 0)) {
-            return Inc2B();
+            EnemyDataOffset = EnemyDataOffset + 2;
+            EnemyObjectPageSel = 0;
+            return ObjectOffset;
           }
           bVar4 = EnemyData[bVar5] & 0x3f;
           if ((bVar4 > 0x36) && (bVar4 < 0x3f)) {
@@ -5529,7 +5556,9 @@ CheckFrenzyBuffer:
           if (Enemy_Flag[param_1] == 0) {
             return param_1;
           }
-          return Inc2B();
+          EnemyDataOffset = EnemyDataOffset + 2;
+          EnemyObjectPageSel = 0;
+          return ObjectOffset;
         }
       } else if ((EnemyData[bVar4] & 0xf) != 0xe) {
         return CheckThreeBytes();
@@ -5539,8 +5568,11 @@ CheckFrenzyBuffer:
         EntrancePage = EnemyData[(byte)(bVar4 + 2)] & 0x1f;
       }
       EnemyDataOffset += 1;
-      return Inc2B();
+      EnemyDataOffset = EnemyDataOffset + 2;
+      EnemyObjectPageSel = 0;
+      return ObjectOffset;
     }
+
     EnemyObjectPageLoc = EnemyData[bVar5] & 0x3f;
     EnemyDataOffset += 2;
     EnemyObjectPageSel = 1;
@@ -5561,18 +5593,9 @@ void InitEnemyObject(byte param_1) {
 // SM2MAIN:8e34
 // Signature: [] -> [X]
 byte CheckThreeBytes(void) {
-  if ((EnemyData[EnemyDataOffset] & 0xf) != 0xe) {
-    return Inc2B();
+  if ((EnemyData[EnemyDataOffset] & 0xf) == 0xe) {
+    EnemyDataOffset += 1;
   }
-  EnemyDataOffset += 1;
-  return Inc2B();
-}
-
-
-// SMB:c25e
-// SM2MAIN:8e42
-// Signature: [] -> [X]
-byte Inc2B(void) {
   EnemyDataOffset = EnemyDataOffset + 2;
   EnemyObjectPageSel = 0;
   return ObjectOffset;
@@ -6132,7 +6155,9 @@ byte HandleGroupEnemies(byte param_1) {
     for (k = 0; ; k++) {
       if (k == 5) {
         // exit
-        return Inc2B();
+        EnemyDataOffset = EnemyDataOffset + 2;
+        EnemyObjectPageSel = 0;
+        return ObjectOffset;
       }
       if (Enemy_Flag[k] == 0) {
         break;
@@ -6153,7 +6178,9 @@ byte HandleGroupEnemies(byte param_1) {
     xpos += 0x18;
   } while (NumberofGroupEnemies -= 1, NumberofGroupEnemies != 0);
 
-  return Inc2B();
+  EnemyDataOffset = EnemyDataOffset + 2;
+  EnemyObjectPageSel = 0;
+  return ObjectOffset;
 }
 
 

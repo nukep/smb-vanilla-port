@@ -1000,9 +1000,6 @@ void smb1_InitEnemyObject(byte param_1);
 byte smb1_CheckThreeBytes(void);
 #define CheckThreeBytes smb1_CheckThreeBytes
 
-byte smb1_Inc2B(void);
-#define Inc2B smb1_Inc2B
-
 void smb1_CheckpointEnemyID(byte param_1);
 #define CheckpointEnemyID smb1_CheckpointEnemyID
 
