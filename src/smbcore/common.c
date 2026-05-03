@@ -2078,7 +2078,9 @@ void ProcessAreaData(void) {
         DecodeAreaData(bVar1, AreaDataOffset);
       } else {
         // NextAObj
-        IncAreaObjOffset();
+        // inlined: IncAreaObjOffset
+        AreaDataOffset += 2;
+        AreaObjectPageSel = 0;
       }
 
       // ChkLength
@@ -2094,15 +2096,6 @@ void ProcessAreaData(void) {
 }
 
 
-// SMB:9589
-// SM2MAIN:739a
-// Signature: [] -> []
-void IncAreaObjOffset(void) {
-  AreaDataOffset = AreaDataOffset + 2;
-  AreaObjectPageSel = 0;
-}
-
-
 // SMB:9595
 // SM2MAIN:73a6
 // Signature: [X, Y] -> []
@@ -2112,68 +2105,88 @@ void DecodeAreaData(byte param_1, byte param_2) {
   byte bVar3;
   byte bVar4;
 
-  bVar3 = ObjectOffset;
   if (AreaObjectLength[param_1] < 0x80) {
     param_2 = AreaObjOffsetBuffer[param_1];
   }
-  cVar2 = 0x10;
+
   if (AreaData[param_2] == 0xfd) {
     return;
   }
-  bVar1 = AreaData[param_2] & 0xf;
-  if ((bVar1 != 0xf)) {
-    cVar2 = 8;
-    if (bVar1 != 0xc) {
-      cVar2 = 0;
-    }
-  }
-  if (bVar1 == 0xe) {
-    cVar2 = 0;
+
+  bVar3 = ObjectOffset;
+
+  byte data = AreaData[(byte)(param_2 + 1)];
+
+  cVar2 = 0;
+
+  switch (AreaData[param_2] & 0xf) {
+  case 0xe:
     bVar1 = ssw(0x2e, 0x36);
-  } else if (bVar1 == 0xd) {
+    break;
+
+  case 0xd:
     cVar2 = ssw(0x22, 0x28);
-    if ((AreaData[(byte)(param_2 + 1)] & 0x40) == 0) {
+    if ((data & 0x40) == 0) {
       return;
     }
-    if ((AreaData[(byte)(param_2 + 1)] & 0x7f) == 0x4b) {
+    if ((data & 0x7f) == 0x4b) {
       LoopCommand += 1;
     }
-    bVar1 = AreaData[(byte)(param_2 + 1)] & 0x3f;
-  } else {
-    if (bVar1 < 0xc) {
-      bVar4 = param_2 + 1;
-      bVar1 = AreaData[bVar4] & 0x70;
-      if (bVar1 == 0) {
-        cVar2 = ssw(0x16, 0x18);
-        bVar1 = AreaData[bVar4] & 0xf;
-        goto NormObj;
+    bVar1 = data & 0x3f;
+    break;
+
+  case 0xc:
+    cVar2 = 8;
+    bVar1 = (data & 0x70) >> 4;
+    break;
+
+  case 0xf:
+    cVar2 = 0x10;
+    bVar1 = (data & 0x70) >> 4;
+    break;
+
+  default:
+    if ((data & 0x70) == 0) {
+      cVar2 = ssw(0x16, 0x18);
+      bVar1 = data & 0xf;
+    } else if ((data & 0x78) == (0x70 | 0x08)) {
+      bVar1 = 0;
+    } else {
+      bVar1 = (data & 0x70) >> 4;
+    }
+    break;
+  }
+
+  if (AreaObjectLength[ObjectOffset] >= 0x80) {
+    if (AreaObjectPageLoc != CurrentPageLoc) {
+      if ((AreaData[AreaDataOffset] & 0xf) != 0xe) {
+        return;
       }
-      if ((bVar1 == 0x70) && ((AreaData[bVar4] & 8) != 0)) {
-        bVar1 = 0;
+      if (BackloadingFlag == 0) {
+        return;
       }
     } else {
-      bVar1 = AreaData[(byte)(param_2 + 1)] & 0x70;
-    }
-    bVar1 >>= 4;
-  }
-NormObj:
-  if (AreaObjectLength[ObjectOffset] >= 0x80) {
-    if (AreaObjectPageLoc == CurrentPageLoc) {
+      // InitRear
       if (BackloadingFlag != 0) {
         BackloadingFlag = 0;
         BehindAreaParserFlag = 0;
         ObjectOffset = 0;
         return;
       }
-      if (AreaData[AreaDataOffset] >> 4 != CurrentColumnPos) {
+
+      // BackColC
+      if ((AreaData[AreaDataOffset] >> 4) != CurrentColumnPos) {
         return;
       }
-    } else if (((AreaData[AreaDataOffset] & 0xf) != 0xe) || (BackloadingFlag == 0)) {
-      return;
     }
+    // StarAObj
     AreaObjOffsetBuffer[ObjectOffset] = AreaDataOffset;
-    IncAreaObjOffset();
+
+    // inlined: IncAreaObjOffset
+    AreaDataOffset += 2;
+    AreaObjectPageSel = 0;
   }
+
   jumptable_DecodeAreaData(bVar1 + cVar2, bVar3, bVar1);
 }
 

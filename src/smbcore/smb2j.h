@@ -515,9 +515,6 @@ void smb2j_AreaParserCore(void);
 void smb2j_ProcessAreaData(void);
 #define ProcessAreaData smb2j_ProcessAreaData
 
-void smb2j_IncAreaObjOffset(void);
-#define IncAreaObjOffset smb2j_IncAreaObjOffset
-
 void smb2j_DecodeAreaData(byte param_1,byte param_2);
 #define DecodeAreaData smb2j_DecodeAreaData
 

@@ -520,9 +520,6 @@ void smb1_AreaParserCore(void);
 void smb1_ProcessAreaData(void);
 #define ProcessAreaData smb1_ProcessAreaData
 
-void smb1_IncAreaObjOffset(void);
-#define IncAreaObjOffset smb1_IncAreaObjOffset
-
 void smb1_DecodeAreaData(byte param_1,byte param_2);
 #define DecodeAreaData smb1_DecodeAreaData
 
