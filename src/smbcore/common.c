@@ -2178,12 +2178,6 @@ NormObj:
 }
 
 
-// SMB:9645
-// SM2MAIN:7456
-// Signature: [] -> []
-void LoopCmdE(void) { return; }
-
-
 // SMB:96c5
 // SM2MAIN:74e6
 // Signature: [X] -> []

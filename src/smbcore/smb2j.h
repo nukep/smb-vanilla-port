@@ -521,9 +521,6 @@ void smb2j_IncAreaObjOffset(void);
 void smb2j_DecodeAreaData(byte param_1,byte param_2);
 #define DecodeAreaData smb2j_DecodeAreaData
 
-void smb2j_LoopCmdE(void);
-#define LoopCmdE smb2j_LoopCmdE
-
 void smb2j_AlterAreaAttributes(byte param_1);
 #define AlterAreaAttributes smb2j_AlterAreaAttributes
 

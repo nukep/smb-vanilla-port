@@ -377,7 +377,7 @@ void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
     return;
   }
   if (param_1 == 0x33) {
-    LoopCmdE();
+    // No-op
     return;
   }
   if (param_1 == 0x34) {

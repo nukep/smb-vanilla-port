@@ -526,9 +526,6 @@ void smb1_IncAreaObjOffset(void);
 void smb1_DecodeAreaData(byte param_1,byte param_2);
 #define DecodeAreaData smb1_DecodeAreaData
 
-void smb1_LoopCmdE(void);
-#define LoopCmdE smb1_LoopCmdE
-
 void smb1_AlterAreaAttributes(byte param_1);
 #define AlterAreaAttributes smb1_AlterAreaAttributes
 
