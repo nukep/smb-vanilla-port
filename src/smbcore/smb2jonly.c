@@ -1792,8 +1792,11 @@ void MushroomRetainersForW8(void) {
   }
   MoveSpritesOffscreen();
   if (BlueColorOfs == 7) {
-    if (((EndControlCntr & 0x1f) == 0) && (BlueDelayFlag += 1, BlueDelayFlag >= 0xb)) {
-      BlueDelayFlag = 4;
+    if (((EndControlCntr & 0x1f) == 0)) {
+      BlueDelayFlag += 1;
+      if (BlueDelayFlag >= 0xb) {
+        BlueDelayFlag = 4;
+      }
     }
   } else if ((EndControlCntr & 0x1f) == 0) {
     BlueColorOfs += 1;

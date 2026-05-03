@@ -4361,10 +4361,12 @@ byte VineObjectHandler(byte param_1) {
   if (param_1 != 5) {
     return ssw(ObjectOffset, param_1);
   }
-  if ((VineHeight != VineHeightData[(byte)(VineFlagOffset - 1)])
-      && (bVar4 = (bool)(FrameCounter >> 1 & 1), bVar4 != false)) {
-    Enemy_Y_Position[5] = (Enemy_Y_Position[5] - 1) - !bVar4;
-    VineHeight += 1;
+  if ((VineHeight != VineHeightData[(byte)(VineFlagOffset - 1)])) {
+    bVar4 = (bool)(FrameCounter >> 1 & 1);
+    if (bVar4 != false) {
+      Enemy_Y_Position[5] = (Enemy_Y_Position[5] - 1) - !bVar4;
+      VineHeight += 1;
+    }
   }
   if (VineHeight >= 8) {
     sVar5 = RelativeEnemyPosition(5);
@@ -7218,8 +7220,11 @@ byte PlayerLakituDiff(byte param_1, byte param_2, byte param_3, byte param_4) {
       cVar3 = 0;
     }
   }
-  if ((cVar3 != 0) && (param_2 = param_3, cVar3 != 1)) {
-    param_2 = param_4;
+  if ((cVar3 != 0)) {
+    param_2 = param_3;
+    if (cVar3 != 1) {
+      param_2 = param_4;
+    }
   }
   do {
     param_2 -= 1;
@@ -8752,8 +8757,11 @@ byte SmallPlatformCollision(byte param_1) {
         if ((CAST_TO_INT(sVar4) & 2) != 0) {
           return ObjectOffset;
         }
-        if ((BoundingBox_UL_YPos[bVar2] >= 0x20) && (bVar3 = PlayerCollisionCore(bVar2), bVar3)) {
-          return ProcLPlatCollisions(ObjectOffset, bVar2, bVar1);
+        if ((BoundingBox_UL_YPos[bVar2] >= 0x20)) {
+          bVar3 = PlayerCollisionCore(bVar2);
+          if (bVar3) {
+            return ProcLPlatCollisions(ObjectOffset, bVar2, bVar1);
+          }
         }
         BoundingBox_UL_YPos[bVar2] = BoundingBox_UL_YPos[bVar2] + 0x80;
         BoundingBox_DR_YPos[bVar2] = BoundingBox_DR_YPos[bVar2] + 0x80;
