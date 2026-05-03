@@ -839,7 +839,7 @@ struct_xc smb2j_SpawnHammerObj(void);
 byte smb2j_ProcHammerObj(byte param_1);
 #define ProcHammerObj smb2j_ProcHammerObj
 
-void smb2j_CoinBlock(byte param_1,bool param_2);
+void smb2j_CoinBlock(byte param_1);
 #define CoinBlock smb2j_CoinBlock
 
 byte smb2j_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
@@ -847,9 +847,6 @@ byte smb2j_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
 
 byte smb2j_JCoinC(byte param_1,byte param_2);
 #define JCoinC smb2j_JCoinC
-
-struct_yc smb2j_FindEmptyMiscSlot(bool param_1);
-#define FindEmptyMiscSlot smb2j_FindEmptyMiscSlot
 
 void smb2j_MiscObjectsCore(void);
 #define MiscObjectsCore smb2j_MiscObjectsCore

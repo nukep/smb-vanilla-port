@@ -856,7 +856,7 @@ struct_xc smb1_SpawnHammerObj(void);
 byte smb1_ProcHammerObj(byte param_1);
 #define ProcHammerObj smb1_ProcHammerObj
 
-void smb1_CoinBlock(byte param_1,bool param_2);
+void smb1_CoinBlock(byte param_1);
 #define CoinBlock smb1_CoinBlock
 
 byte smb1_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
@@ -864,9 +864,6 @@ byte smb1_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
 
 byte smb1_JCoinC(byte param_1,byte param_2);
 #define JCoinC smb1_JCoinC
-
-struct_yc smb1_FindEmptyMiscSlot(bool param_1);
-#define FindEmptyMiscSlot smb1_FindEmptyMiscSlot
 
 void smb1_MiscObjectsCore(void);
 #define MiscObjectsCore smb1_MiscObjectsCore

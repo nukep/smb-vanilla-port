@@ -437,11 +437,11 @@ void jumptable_BumpBlock(byte param_1, byte param_2) {
     return;
   }
   if (param_1 == 2) {
-    CoinBlock(param_2, false);
+    CoinBlock(param_2);
     return;
   }
   if (param_1 == 3) {
-    CoinBlock(param_2, false);
+    CoinBlock(param_2);
     return;
   }
   if (param_1 == 4) {
@@ -473,7 +473,7 @@ void jumptable_BumpBlock(byte param_1, byte param_2) {
     return;
   }
   if (param_1 == 0xb) {
-    CoinBlock(param_2, false);
+    CoinBlock(param_2);
     return;
   }
   if (param_1 == 0xc) {

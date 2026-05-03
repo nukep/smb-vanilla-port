@@ -4583,19 +4583,33 @@ byte ProcHammerObj(byte param_1) {
 
 // SMB:bb38
 // SM2MAIN:8703
-// Signature: [X, C] -> []
-void CoinBlock(byte param_1, bool param_2) {
-  // In practice, param_2 is always set to false.
+// Signature: [X] -> []
+void CoinBlock(byte param_1) {
+  // NES Note: The carry flag is technically an input to this function. However, it's a bug.
+  // This function is always called from a jumptable, which sets the carry flag (C) to false for jumptable indices < 0x80 (which CoinBlock always is)
 
-  byte bVar1;
-  struct_yc sVar2;
+  // Inlines FindEmptyMiscSlot
 
-  sVar2 = FindEmptyMiscSlot(param_2);
-  bVar1 = sVar2.y;
-  Misc_PageLoc[bVar1] = Block_PageLoc[param_1];
-  Misc_X_Position[bVar1] = Block_X_Position[param_1] | 5;
-  Misc_Y_Position[bVar1] = (Block_Y_Position[param_1] - 0x10) - !sVar2.c;
-  JCoinC(param_1, bVar1);
+  JumpCoinMiscOffset = 8;
+
+  for (int i = 8; i >= 6; i--) {
+    if (Misc_State[i] == 0) {
+      JumpCoinMiscOffset = i;
+      break;
+    }
+  }
+
+  Misc_PageLoc[JumpCoinMiscOffset] = Block_PageLoc[param_1];
+  Misc_X_Position[JumpCoinMiscOffset] = Block_X_Position[param_1] | 5;
+  Misc_Y_Position[JumpCoinMiscOffset] = Block_Y_Position[param_1] - 0x10;
+
+  // NES Note: There's a bug where the carry flag is unmodified by FindEmptyMiscSlot.
+  // It's usually set by this point, but in the below case, it's not.
+  if (Misc_State[8] == 0) {
+    Misc_Y_Position[JumpCoinMiscOffset] -= 1;
+  }
+
+  JCoinC(param_1, JumpCoinMiscOffset);
 }
 
 
@@ -4603,17 +4617,21 @@ void CoinBlock(byte param_1, bool param_2) {
 // SM2MAIN:871c
 // Signature: [X, r02, r06] -> [X]
 byte SetupJumpCoin(byte param_1, byte param_2, byte param_3) {
-  byte bVar1;
-  bool in_C = false;
-  struct_yc sVar2;
+  // Inlines FindEmptyMiscSlot
 
-  // in_C has no effect on the results we use
-  sVar2 = FindEmptyMiscSlot(in_C);
-  bVar1 = sVar2.y;
-  Misc_PageLoc[bVar1] = Block_PageLoc2[param_1];
-  Misc_X_Position[bVar1] = param_3 << 4 | 5;
-  Misc_Y_Position[bVar1] = (param_2 + 0x20) - ((char)(param_3 << 3) >> 7);
-  return JCoinC(param_1, bVar1);
+  JumpCoinMiscOffset = 8;
+
+  for (int i = 8; i >= 6; i--) {
+    if (Misc_State[i] == 0) {
+      JumpCoinMiscOffset = i;
+      break;
+    }
+  }
+
+  Misc_PageLoc[JumpCoinMiscOffset] = Block_PageLoc2[param_1];
+  Misc_X_Position[JumpCoinMiscOffset] = (param_3 << 4) | 5;
+  Misc_Y_Position[JumpCoinMiscOffset] = param_2 + 0x20 + (param_3 & 0x10 ? 1 : 0);
+  return JCoinC(param_1, JumpCoinMiscOffset);
 }
 
 
@@ -4631,33 +4649,6 @@ byte JCoinC(byte param_1, byte param_2) {
   bVar1 = GiveOneCoin();
   CoinTallyFor1Ups = CoinTallyFor1Ups + 1;
   return bVar1;
-}
-
-
-// SMB:bb84
-// SM2MAIN:874f
-// Signature: [C] -> [Y, C]
-struct_yc FindEmptyMiscSlot(bool param_1) {
-  struct_yc sVar1;
-
-  int i = 8;
-
-  // There's a bug where the carry flag is unmodified on the first match.
-  // CoinBlock seems to expect the carry flag to be set by this call.
-
-  for (; i >= 6; i--) {
-    if (Misc_State[i] == 0) {
-      JumpCoinMiscOffset = i;
-      sVar1.c = i == 8 ? param_1 : true;
-      sVar1.y = i;
-      return sVar1;
-    }
-  }
-
-  JumpCoinMiscOffset = 8;
-  sVar1.c = true;
-  sVar1.y = 8;
-  return sVar1;
 }
 
 
@@ -5055,7 +5046,7 @@ struct_xr05 CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte param
     if (RAM(sVar2 + (ushort)bVar1) == ssw(0xc2, 0xc3)) {
       RAM(sVar2 + (ushort)bVar1) = 0;
       param_2 = RemoveCoin_Axe(bVar1, param_3);
-      bVar3 = SetupJumpCoin(SprDataOffset_Ctrl, bVar1, (byte)sVar2);
+      bVar3 = SetupJumpCoin(SprDataOffset_Ctrl, bVar1, param_3);
     }
   }
   sVar4.r05 = param_2;
