@@ -223,14 +223,6 @@ struct struct_ar00 {
 };
 
 
-typedef struct struct_xy struct_xy;
-
-struct struct_xy {
-  byte x;
-  byte y;
-};
-
-
 typedef struct struct_ac struct_ac;
 
 struct struct_ac {
@@ -1735,13 +1727,13 @@ byte smb1_GetMiscOffscreenBits(byte param_1);
 byte smb1_GetProperObjOffset(byte param_1,byte param_2);
 #define GetProperObjOffset smb1_GetProperObjOffset
 
-struct_xy smb1_GetEnemyOffscreenBits(byte param_1);
+byte smb1_GetEnemyOffscreenBits(byte param_1);
 #define GetEnemyOffscreenBits smb1_GetEnemyOffscreenBits
 
 byte smb1_GetBlockOffscreenBits(byte param_1);
 #define GetBlockOffscreenBits smb1_GetBlockOffscreenBits
 
-struct_xy smb1_GetOffScreenBitsSet(byte param_1,byte param_2);
+byte smb1_GetOffScreenBitsSet(byte param_1,byte param_2);
 #define GetOffScreenBitsSet smb1_GetOffScreenBitsSet
 
 struct_ar00 smb1_RunOffscrBitsSubs(byte param_1);

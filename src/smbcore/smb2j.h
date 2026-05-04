@@ -99,14 +99,6 @@ struct struct_axzr04 {
 };
 
 
-typedef struct struct_xy struct_xy;
-
-struct struct_xy {
-  byte x;
-  byte y;
-};
-
-
 typedef struct struct_axyz struct_axyz;
 
 struct struct_axyz {
@@ -1718,13 +1710,13 @@ byte smb2j_GetMiscOffscreenBits(byte param_1);
 byte smb2j_GetProperObjOffset(byte param_1,byte param_2);
 #define GetProperObjOffset smb2j_GetProperObjOffset
 
-struct_xy smb2j_GetEnemyOffscreenBits(byte param_1);
+byte smb2j_GetEnemyOffscreenBits(byte param_1);
 #define GetEnemyOffscreenBits smb2j_GetEnemyOffscreenBits
 
 byte smb2j_GetBlockOffscreenBits(byte param_1);
 #define GetBlockOffscreenBits smb2j_GetBlockOffscreenBits
 
-struct_xy smb2j_GetOffScreenBitsSet(byte param_1,byte param_2);
+byte smb2j_GetOffScreenBitsSet(byte param_1,byte param_2);
 #define GetOffScreenBitsSet smb2j_GetOffScreenBitsSet
 
 struct_ar00 smb2j_RunOffscrBitsSubs(byte param_1);

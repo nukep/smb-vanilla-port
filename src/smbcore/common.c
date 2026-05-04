@@ -4250,7 +4250,7 @@ void FlagpoleRoutine(void) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
-  struct_xy sVar4;
+  byte sVar4;
   struct_axr00 sVar5;
 
   bVar2 = 5;
@@ -4276,7 +4276,7 @@ void FlagpoleRoutine(void) {
       }
     }
     sVar4 = GetEnemyOffscreenBits(bVar2);
-    sVar5 = RelativeEnemyPosition(sVar4.x);
+    sVar5 = RelativeEnemyPosition(sVar4);
     FlagpoleGfxHandler(sVar5.x);
   }
 }
@@ -4288,11 +4288,11 @@ void FlagpoleRoutine(void) {
 byte JumpspringHandler(byte param_1) {
   byte bVar1;
   byte bVar2;
-  struct_xy sVar3;
+  byte sVar3;
   struct_axr00 sVar4;
 
   sVar3 = GetEnemyOffscreenBits(param_1);
-  bVar1 = sVar3.x;
+  bVar1 = sVar3;
   if ((TimerControl == 0) && (JumpspringAnimCtrl != 0)) {
     bVar2 = JumpspringAnimCtrl - 1;
     if ((bVar2 & 2) == 0) {
@@ -4424,7 +4424,7 @@ byte VineObjectHandler(byte param_1) {
 void ProcessCannons(void) {
   byte bVar1;
   byte bVar2;
-  struct_xy sVar3;
+  byte sVar3;
 
   if (AreaType == 0) {
     return;
@@ -4460,7 +4460,7 @@ Chk_BB:
           OffscreenBoundsCheck(bVar2);
           if (Enemy_Flag[bVar2] != 0) {
             sVar3 = GetEnemyOffscreenBits(bVar2);
-            bVar2 = BulletBillHandler(sVar3.x);
+            bVar2 = BulletBillHandler(sVar3);
           }
         }
       }
@@ -4475,7 +4475,7 @@ byte BulletBillHandler(byte param_1) {
   byte bVar1;
   struct_ncr00 sVar2;
   struct_ax sVar3;
-  struct_xy sVar4;
+  byte sVar4;
   struct_axr00 sVar5;
 
   if (TimerControl == 0) {
@@ -4506,7 +4506,7 @@ byte BulletBillHandler(byte param_1) {
     param_1 = sVar3.x;
   }
   sVar4 = GetEnemyOffscreenBits(param_1);
-  sVar5 = RelativeEnemyPosition(sVar4.x);
+  sVar5 = RelativeEnemyPosition(sVar4);
   bVar1 = GetEnemyBoundBox(sVar5.x);
   bVar1 = PlayerEnemyCollision(bVar1);
   return EnemyGfxHandler(bVar1);
@@ -4805,7 +4805,7 @@ byte PowerUpObjHandler(void) {
   byte bVar1;
   bool bVar2;
   struct_axr00 sVar3;
-  struct_xy sVar4;
+  byte sVar4;
 
   bVar1 = 5;
   ObjectOffset = 5;
@@ -4840,7 +4840,7 @@ byte PowerUpObjHandler(void) {
     }
     sVar3 = RelativeEnemyPosition(bVar1);
     sVar4 = GetEnemyOffscreenBits(sVar3.x);
-    GetEnemyBoundBox(sVar4.x);
+    GetEnemyBoundBox(sVar4);
     bVar1 = DrawPowerUp();
     bVar1 = PlayerEnemyCollision(bVar1);
     OffscreenBoundsCheck(bVar1);
@@ -6398,11 +6398,11 @@ void NoRunCode(void) { return; }
 // SM2MAIN:950c
 // Signature: [X] -> [X]
 byte RunRetainerObj(byte param_1) {
-  struct_xy sVar2;
+  byte sVar2;
   struct_axr00 sVar3;
 
   sVar2 = GetEnemyOffscreenBits(param_1);
-  sVar3 = RelativeEnemyPosition(sVar2.x);
+  sVar3 = RelativeEnemyPosition(sVar2);
   return EnemyGfxHandler(sVar3.x);
 }
 
@@ -6412,12 +6412,12 @@ byte RunRetainerObj(byte param_1) {
 // Signature: [X] -> [X]
 byte RunNormalEnemies(byte param_1) {
   byte bVar1;
-  struct_xy sVar2;
+  byte sVar2;
   struct_axr00 sVar3;
 
   Enemy_SprAttrib[param_1] = 0;
   sVar2 = GetEnemyOffscreenBits(param_1);
-  sVar3 = RelativeEnemyPosition(sVar2.x);
+  sVar3 = RelativeEnemyPosition(sVar2);
   bVar1 = EnemyGfxHandler(sVar3.x);
   bVar1 = GetEnemyBoundBox(bVar1);
   bVar1 = EnemyToBGCollisionDet(bVar1);
@@ -6450,12 +6450,12 @@ void NoMoveCode(void) { return; }
 // Signature: [X] -> [X]
 byte RunBowserFlame(byte param_1) {
   byte bVar1;
-  struct_xy sVar2;
+  byte sVar2;
   struct_axr00 sVar3;
 
   bVar1 = ProcBowserFlame(param_1);
   sVar2 = GetEnemyOffscreenBits(bVar1);
-  sVar3 = RelativeEnemyPosition(sVar2.x);
+  sVar3 = RelativeEnemyPosition(sVar2);
   bVar1 = GetEnemyBoundBox(sVar3.x);
   bVar1 = PlayerEnemyCollision(bVar1);
   OffscreenBoundsCheck(bVar1);
@@ -6480,11 +6480,11 @@ byte RunFirebarObj(byte param_1) {
 // Signature: [X] -> [X]
 byte RunSmallPlatform(byte param_1) {
   byte bVar1;
-  struct_xy sVar2;
+  byte sVar2;
   struct_axr00 sVar3;
 
   sVar2 = GetEnemyOffscreenBits(param_1);
-  sVar3 = RelativeEnemyPosition(sVar2.x);
+  sVar3 = RelativeEnemyPosition(sVar2);
   bVar1 = SmallPlatformBoundBox(sVar3.x);
   bVar1 = SmallPlatformCollision(bVar1);
   sVar3 = RelativeEnemyPosition(bVar1);
@@ -6500,11 +6500,11 @@ byte RunSmallPlatform(byte param_1) {
 // Signature: [X] -> [X]
 byte RunLargePlatform(byte param_1) {
   byte bVar1;
-  struct_xy sVar2;
+  byte sVar2;
   struct_axr00 sVar3;
 
   sVar2 = GetEnemyOffscreenBits(param_1);
-  sVar3 = RelativeEnemyPosition(sVar2.x);
+  sVar3 = RelativeEnemyPosition(sVar2);
   bVar1 = LargePlatformBoundBox(sVar3.x);
   bVar1 = LargePlatformCollision(bVar1);
   if (TimerControl == 0) {
@@ -6979,13 +6979,13 @@ byte ProcFirebar(byte param_1) {
   byte bVar1;
   byte bVar2;
   byte bVar3;
-  struct_xy sVar4;
+  byte sVar4;
   struct_axr00 sVar5;
   struct_r01r02r03 sVar6;
   struct_xr00r06 sVar7;
 
   sVar4 = GetEnemyOffscreenBits(param_1);
-  bVar3 = sVar4.x;
+  bVar3 = sVar4;
   if ((Enemy_OffscreenBits & 8) == 0) {
     if (TimerControl == 0) {
       bVar2 = FirebarSpin(FirebarSpinSpeed[bVar3], bVar3);
@@ -7479,7 +7479,7 @@ byte ProcBowserFlame(byte param_1) {
   byte bVar2;
   byte bVar3;
   byte bVar5;
-  struct_xy sVar6;
+  byte sVar6;
   struct_axr00 sVar7;
 
   if (TimerControl == 0) {
@@ -7517,7 +7517,7 @@ byte ProcBowserFlame(byte param_1) {
     }
     sVar6 = GetEnemyOffscreenBits(ObjectOffset);
     bVar5 = Enemy_OffscreenBits;
-    bVar3 = Enemy_SprDataOffset[sVar6.x];
+    bVar3 = Enemy_SprDataOffset[sVar6];
     bVar2 = Enemy_OffscreenBits >> 1;
     if ((Enemy_OffscreenBits & 1) != 0) {
       Sprite_Data[bVar3 + 0xc] = 0xf8;
@@ -7531,7 +7531,7 @@ byte ProcBowserFlame(byte param_1) {
     if ((bVar5 >> 3 & 1) != 0) {
       Sprite_Data[bVar3] = 0xf8;
     }
-    return sVar6.x;
+    return sVar6;
   }
   return bVar3;
 }
@@ -7883,17 +7883,19 @@ struct_xr00r01 SetupPlatformRope(byte param_1, byte param_2) {
 // Signature: [Y] -> [X]
 byte InitPlatformFall(byte param_1) {
   byte bVar1;
-  byte bVar2;
-  struct_xy sVar3;
+  byte sVar3;
 
   sVar3 = GetEnemyOffscreenBits(param_1);
-  bVar2 = sVar3.y;
-  bVar1 = sVar3.x;
+
+  bVar1 = sVar3;
   SetupFloateyNumber(6, bVar1);
   FloateyNum_X_Pos[bVar1] = SprObject_Rel_XPos[0];
   FloateyNum_Y_Pos[bVar1] = SprObject_Y_Position[0];
   Enemy_MovingDir[bVar1] = 1;
-  StopPlatforms(bVar1, bVar2);
+
+  // NES note: GetEnemyOffscreenBits sets Y=1. This is later used by StopPlatforms.
+  // This is either a bug, or just a way to reuse the value. Either way, it's best extracted out to the caller (here).
+  StopPlatforms(bVar1, 1);
   return bVar1;
 }
 
@@ -11420,11 +11422,9 @@ void GetPlayerOffscreenBits(void) {
 // Signature: [X] -> [X]
 byte GetFireballOffscreenBits(byte param_1) {
   byte bVar1;
-  struct_xy sVar2;
 
   bVar1 = GetProperObjOffset(param_1, 0);
-  sVar2 = GetOffScreenBitsSet(bVar1, 2);
-  return sVar2.x;
+  return GetOffScreenBitsSet(bVar1, 2);
 }
 
 
@@ -11433,11 +11433,9 @@ byte GetFireballOffscreenBits(byte param_1) {
 // Signature: [X] -> [X]
 byte GetBubbleOffscreenBits(byte param_1) {
   byte bVar1;
-  struct_xy sVar2;
 
   bVar1 = GetProperObjOffset(param_1, 1);
-  sVar2 = GetOffScreenBitsSet(bVar1, 3);
-  return sVar2.x;
+  return GetOffScreenBitsSet(bVar1, 3);
 }
 
 
@@ -11446,11 +11444,9 @@ byte GetBubbleOffscreenBits(byte param_1) {
 // Signature: [X] -> [X]
 byte GetMiscOffscreenBits(byte param_1) {
   byte bVar1;
-  struct_xy sVar2;
 
   bVar1 = GetProperObjOffset(param_1, 2);
-  sVar2 = GetOffScreenBitsSet(bVar1, 6);
-  return sVar2.x;
+  return GetOffScreenBitsSet(bVar1, 6);
 }
 
 
@@ -11462,8 +11458,9 @@ byte GetProperObjOffset(byte param_1, byte param_2) { return param_1 + ObjOffset
 
 // SMB:f1af
 // SM2MAIN:be94
-// Signature: [X] -> [X, Y]
-struct_xy GetEnemyOffscreenBits(byte param_1) {
+// Signature: [X] -> [X]
+byte GetEnemyOffscreenBits(byte param_1) {
+  // NES note: GetEnemyOffscreenBits sets Y=1. Used by InitPlatformFall.
   return GetOffScreenBitsSet(param_1 + 1, 1);
 }
 
@@ -11472,27 +11469,19 @@ struct_xy GetEnemyOffscreenBits(byte param_1) {
 // SM2MAIN:be9b
 // Signature: [X] -> [X]
 byte GetBlockOffscreenBits(byte param_1) {
-  struct_xy sVar1;
-
-  sVar1 = GetOffScreenBitsSet(param_1 + 9, 4);
-  return sVar1.x;
+  return GetOffScreenBitsSet(param_1 + 9, 4);
 }
 
 
 // SMB:f1c0
 // SM2MAIN:bea5
-// Signature: [X, Y] -> [X, Y]
-struct_xy GetOffScreenBitsSet(byte param_1, byte param_2) {
-  struct_xy sVar1;
+// Signature: [X, Y] -> [X]
+byte GetOffScreenBitsSet(byte param_1, byte param_2) {
   struct_ar00 sVar2;
-  byte bStack0000;
 
-  bStack0000 = param_2;
   sVar2 = RunOffscrBitsSubs(param_1);
-  SprObject_OffscrBits[bStack0000] = sVar2.a << 4 | sVar2.r00;
-  sVar1.y = bStack0000;
-  sVar1.x = ObjectOffset;
-  return sVar1;
+  SprObject_OffscrBits[param_2] = sVar2.a << 4 | sVar2.r00;
+  return ObjectOffset;
 }
 
 
