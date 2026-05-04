@@ -8908,7 +8908,6 @@ void PlayerBGCollision(void) {
   byte bVar7;
   bool bVar8;
   struct_azr02r04r06r07 sVar9;
-  struct_ac sVar10;
   struct_azr02r04r06r07 sVar11;
 
   if (DisableCollisionDet != 0) {
@@ -8958,12 +8957,11 @@ void PlayerBGCollision(void) {
     bVar3 = sVar9.r06;
     bVar1 = sVar9.r04;
     if (!sVar9.z) {
-      sVar10 = CheckForCoinMTiles(sVar9.a);
-      bVar7 = sVar10.a;
-      if (sVar10.c) {
+      if (CheckForCoinMTiles(sVar9.a)) {
         HandleCoinMetatile(bVar6, bVar3, bVar4);
         return;
       }
+      bVar7 = sVar9.a;
       if ((PlayerSpriteVarData2[0] >= 0x80) && (bVar1 >= 4)) {
         bVar8 = CheckForSolidMTiles(bVar7);
 
@@ -8993,12 +8991,11 @@ void PlayerBGCollision(void) {
     bVar4 = sVar11.r07;
     bVar6 = sVar11.r02;
     bVar3 = sVar11.r06;
-    sVar10 = CheckForCoinMTiles(sVar11.a);
-    bVar1 = sVar10.a;
-    if (sVar10.c) {
+    if (CheckForCoinMTiles(sVar11.a)) {
       HandleCoinMetatile(bVar6, bVar3, bVar4);
       return;
     }
+    bVar1 = sVar11.a;
     sVar11 = BlockBufferColli_Feet(MysterySpriteThing1 + 1);
     bVar4 = sVar11.r07;
     bVar6 = sVar11.r02;
@@ -9008,12 +9005,11 @@ void PlayerBGCollision(void) {
     bVar7 = bVar1;
     if ((bVar1 != 0) || (bVar2 != 0)) {
       if (bVar1 == 0) {
-        sVar10 = CheckForCoinMTiles(bVar2);
-        bVar7 = sVar10.a;
-        if (sVar10.c != false) {
+        if (CheckForCoinMTiles(bVar2)) {
           HandleCoinMetatile(bVar6, bVar3, bVar4);
           return;
         }
+        bVar7 = bVar2;
       }
       bVar8 = CheckForClimbMTiles(bVar7);
       if ((!bVar8) && (PlayerSpriteVarData2[0] < 0x80)) {
@@ -9100,12 +9096,11 @@ void PlayerBGCollision(void) {
       return;
     }
 
-    sVar10 = CheckForCoinMTiles(bVar5);
-    bVar7 = sVar10.a;
-    if (sVar10.c) {
+    if (CheckForCoinMTiles(bVar5)) {
       HandleCoinMetatile(bVar6, bVar3, bVar4);
       return;
     }
+    bVar7 = bVar5;
 
     if (ChkJumpspringMetatiles(bVar7)) {
       if (JumpspringAnimCtrl != 0) {
@@ -9339,26 +9334,22 @@ bool CheckForClimbMTiles(byte param_1) {
 
 // SMB:dfa1
 // SM2MAIN:ac2a
-// Signature: [A] -> [A, C]
-struct_ac CheckForCoinMTiles(byte param_1) {
+// Signature: [A] -> [C]
+bool CheckForCoinMTiles(byte param_1) {
+  const byte regular_coin_mtile = ssw(0xc2, 0xc3);
+  const byte underwater_coin_mtile = ssw(0xc3, 0xc4);
 
-  bool bVar1;
-  struct_ac sVar2;
-  struct_ac sVar3;
-
-  bVar1 = param_1 >= ssw(0xc2, 0xc3);
-  if (param_1 != ssw(0xc2, 0xc3)) {
-    bVar1 = param_1 >= ssw(0xc3, 0xc4);
-    if (param_1 != ssw(0xc3, 0xc4)) {
-      sVar2.c = false;
-      sVar2.a = param_1;
-      return sVar2;
-    }
+  if (param_1 == regular_coin_mtile) {
+    Square2SoundQueue = 1;
+    return true;
   }
-  Square2SoundQueue = 1;
-  sVar3.c = bVar1;
-  sVar3.a = 1;
-  return sVar3;
+
+  if (param_1 == underwater_coin_mtile) {
+    Square2SoundQueue = 1;
+    return true;
+  }
+
+  return false;
 }
 
 

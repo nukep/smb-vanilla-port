@@ -227,14 +227,6 @@ struct struct_yr06r07 {
 };
 
 
-typedef struct struct_ac struct_ac;
-
-struct struct_ac {
-  byte a;
-  bool c;
-};
-
-
 typedef struct struct_xr00 struct_xr00;
 
 struct struct_xr00 {
@@ -1425,7 +1417,7 @@ bool smb2j_CheckForSolidMTiles(byte param_1);
 bool smb2j_CheckForClimbMTiles(byte param_1);
 #define CheckForClimbMTiles smb2j_CheckForClimbMTiles
 
-struct_ac smb2j_CheckForCoinMTiles(byte param_1);
+bool smb2j_CheckForCoinMTiles(byte param_1);
 #define CheckForCoinMTiles smb2j_CheckForCoinMTiles
 
 byte smb2j_GetMTileAttrib(byte param_1);
