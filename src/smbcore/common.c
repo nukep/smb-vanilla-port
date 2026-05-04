@@ -8887,6 +8887,35 @@ struct_ay GetEnemyBoundBoxOfsArg(byte param_1) {
 }
 
 
+// SMB:de05
+// SM2MAIN:aa73
+// Signature: [r02, r06, r07] -> []
+static void HandleCoinMetatile(byte bVar6, byte bVar3, byte bVar4) {
+  // Inlined: ErACM
+  RAM(CONCAT11(bVar4, bVar3) + (ushort)bVar6) = 0;
+  RemoveCoin_Axe(bVar6, bVar3);
+
+  CoinTallyFor1Ups += 1;
+  GiveOneCoin();
+}
+
+
+// SMB:de0e
+// SM2MAIN:aa7c
+// Signature: [r02, r06, r07] -> []
+static void HandleAxeMetatile(byte bVar6, byte bVar3, byte bVar4) {
+  OperMode_Task = 0;
+  OperMode = 2;
+#ifdef SMB2J_MODE
+  LoadMarioPhysics();
+#endif
+  PlayerSpriteVarData1[0] = 0x18;
+
+  // Inlined: ErACM
+  RAM(CONCAT11(bVar4, bVar3) + (ushort)bVar6) = 0;
+  RemoveCoin_Axe(bVar6, bVar3);
+}
+
 // SMB:dc64
 // SM2MAIN:a8d2
 // Signature: [] -> []
@@ -8949,23 +8978,33 @@ void PlayerBGCollision(void) {
       sVar10 = CheckForCoinMTiles(sVar9.a);
       bVar7 = sVar10.a;
       if (sVar10.c) {
-        goto HandleCoinMetatile;
+        HandleCoinMetatile(bVar6, bVar3, bVar4);
+        return;
       }
       if ((PlayerSpriteVarData2[0] >= 0x80) && (bVar1 >= 4)) {
         bVar8 = CheckForSolidMTiles(bVar7);
+
+        bool myspd = true;
+
         if (bVar8) {
           if (bVar7 != ssw(0x26, 0x23)) {
             Square1SoundQueue = 2;
           }
         } else if ((AreaType != 0) && (BlockBounceTimer == 0)) {
           PlayerHeadCollision(bVar7, bVar6, bVar3, bVar4);
-          goto DoFootCheck;
+          myspd = false;
         }
-        PlayerSpriteVarData2[0] = 1;
+
+        if (myspd) {
+          // MYSpd
+          PlayerSpriteVarData2[0] = 1;
+        }
       }
     }
   }
-DoFootCheck:
+
+  // DoFootCheck
+
   if (SprObject_Y_Position[0] < 0xcf) {
     sVar11 = BlockBufferColli_Feet(MysterySpriteThing1);
     bVar4 = sVar11.r07;
@@ -8974,7 +9013,8 @@ DoFootCheck:
     sVar10 = CheckForCoinMTiles(sVar11.a);
     bVar1 = sVar10.a;
     if (sVar10.c) {
-      goto HandleCoinMetatile;
+      HandleCoinMetatile(bVar6, bVar3, bVar4);
+      return;
     }
     sVar11 = BlockBufferColli_Feet(MysterySpriteThing1 + 1);
     bVar4 = sVar11.r07;
@@ -8983,50 +9023,68 @@ DoFootCheck:
     bVar5 = sVar11.r04;
     bVar2 = sVar11.a;
     bVar7 = bVar1;
-    if (bVar1 == 0) {
-      if (bVar2 == 0) {
-        goto DoPlayerSideCheck;
-      }
-      sVar10 = CheckForCoinMTiles(bVar2);
-      bVar7 = sVar10.a;
-      if (sVar10.c != false) {
-        goto HandleCoinMetatile;
-      }
-    }
-    bVar8 = CheckForClimbMTiles(bVar7);
-    if ((!bVar8) && (PlayerSpriteVarData2[0] < 0x80)) {
-      if (bVar7 == ssw(0xc5, 0xc6)) {
-        OperMode_Task = 0;
-        OperMode = 2;
-#ifdef SMB2J_MODE
-        LoadMarioPhysics();
-#endif
-        PlayerSpriteVarData1[0] = 0x18;
-        ErACM(bVar6, bVar3, bVar4);
-        return;
-      }
-      bVar8 = ChkInvisibleMTiles(bVar7);
-      if (!bVar8) {
-        if (JumpspringAnimCtrl == 0) {
-          if (bVar5 >= 5) {
-            ImpedePlayerMove(Player_MovingDir);
-            return;
-          }
-          ChkForLandJumpSpring(bVar7);
-          SprObject_Y_Position[0] &= 0xf0;
-          HandlePipeEntry(bVar2, bVar1);
-          PlayerSpriteVarData2[0] = 0;
-          SprObject_Y_MoveForce[0] = 0;
-          StompChainCounter = 0;
+    if ((bVar1 != 0) || (bVar2 != 0)) {
+      if (bVar1 == 0) {
+        sVar10 = CheckForCoinMTiles(bVar2);
+        bVar7 = sVar10.a;
+        if (sVar10.c != false) {
+          HandleCoinMetatile(bVar6, bVar3, bVar4);
+          return;
         }
-        Player_State = 0;
+      }
+      bVar8 = CheckForClimbMTiles(bVar7);
+      if ((!bVar8) && (PlayerSpriteVarData2[0] < 0x80)) {
+        if (bVar7 == ssw(0xc5, 0xc6)) {
+          HandleAxeMetatile(bVar6, bVar3, bVar4);
+          return;
+        }
+        bVar8 = ChkInvisibleMTiles(bVar7);
+        if (!bVar8) {
+          if (JumpspringAnimCtrl == 0) {
+            if (bVar5 >= 5) {
+              ImpedePlayerMove(Player_MovingDir);
+              return;
+            }
+            ChkForLandJumpSpring(bVar7);
+            SprObject_Y_Position[0] &= 0xf0;
+            HandlePipeEntry(bVar2, bVar1);
+            PlayerSpriteVarData2[0] = 0;
+            SprObject_Y_MoveForce[0] = 0;
+            StompChainCounter = 0;
+          }
+          Player_State = 0;
+        }
       }
     }
   }
-DoPlayerSideCheck:
+
+  // DoPlayerSideCheck
+
   bVar7 = MysterySpriteThing1 + 2;
   bVar1 = 2;
-  while (MysterySpriteThing1 = bVar7 + 1, SprObject_Y_Position[0] < 0x20) {
+  while (true) {
+    MysterySpriteThing1 = bVar7 + 1;
+    if (SprObject_Y_Position[0] >= 0x20) {
+      if (SprObject_Y_Position[0] >= 0xe4) {
+        return;
+      }
+      sVar9 = BlockBufferColli_Side(MysterySpriteThing1);
+      bVar4 = sVar9.r07;
+      bVar6 = sVar9.r02;
+      bVar3 = sVar9.r06;
+      bVar2 = sVar9.r04;
+      bVar5 = sVar9.a;
+      if ((((sVar9.z) || (bVar5 == ssw(0x1c, 0x19))) || (bVar5 == ssw(0x6b, 0x6d)))) {
+        goto BHalf;
+      }
+      else {
+        bVar8 = CheckForClimbMTiles(bVar5);
+        if (bVar8) {
+          goto BHalf;
+        }
+      }
+      break;
+    }
 BHalf:
     bVar7 = MysterySpriteThing1 + 1;
     if (SprObject_Y_Position[0] < 8) {
@@ -9042,32 +9100,16 @@ BHalf:
     bVar2 = sVar9.r04;
     bVar5 = sVar9.a;
     if (sVar9.z == false) {
-      goto CheckSideMTiles;
+      break;
     }
     bVar1 -= 1;
     if (bVar1 == 0) {
       return;
     }
   }
-  if (SprObject_Y_Position[0] >= 0xe4) {
-    return;
-  }
-  sVar9 = BlockBufferColli_Side(MysterySpriteThing1);
-  bVar4 = sVar9.r07;
-  bVar6 = sVar9.r02;
-  bVar3 = sVar9.r06;
-  bVar2 = sVar9.r04;
-  bVar5 = sVar9.a;
-  if ((((sVar9.z) || (bVar5 == ssw(0x1c, 0x19))) || (bVar5 == ssw(0x6b, 0x6d)))) {
-    goto BHalf;
-  }
-  else {
-    bVar8 = CheckForClimbMTiles(bVar5);
-    if (bVar8) {
-      goto BHalf;
-    }
-  }
-CheckSideMTiles:
+
+  // CheckSideMTiles
+
   bVar8 = ChkInvisibleMTiles(bVar5);
   if (!bVar8) {
     bVar8 = CheckForClimbMTiles(bVar5);
@@ -9078,10 +9120,7 @@ CheckSideMTiles:
     sVar10 = CheckForCoinMTiles(bVar5);
     bVar7 = sVar10.a;
     if (sVar10.c) {
-HandleCoinMetatile:
-      ErACM(bVar6, bVar3, bVar4);
-      CoinTallyFor1Ups += 1;
-      GiveOneCoin();
+      HandleCoinMetatile(bVar6, bVar3, bVar4);
       return;
     }
     bVar8 = ChkJumpspringMetatiles(bVar7);
@@ -9108,15 +9147,6 @@ HandleCoinMetatile:
     }
     ImpedePlayerMove(bVar1);
   }
-}
-
-
-// SMB:de1c
-// SM2MAIN:aa8d
-// Signature: [r02, r06, r07] -> []
-void ErACM(byte param_1, byte param_2, byte param_3) {
-  RAM(CONCAT11(param_3, param_2) + (ushort)param_1) = 0;
-  RemoveCoin_Axe(param_1, param_2);
 }
 
 

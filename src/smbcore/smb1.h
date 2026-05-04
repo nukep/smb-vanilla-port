@@ -1426,9 +1426,6 @@ struct_ay smb1_GetEnemyBoundBoxOfsArg(byte param_1);
 void smb1_PlayerBGCollision(void);
 #define PlayerBGCollision smb1_PlayerBGCollision
 
-void smb1_ErACM(byte param_1,byte param_2,byte param_3);
-#define ErACM smb1_ErACM
-
 void smb1_HandleClimbing(byte param_1,byte param_2,byte param_3);
 #define HandleClimbing smb1_HandleClimbing
 

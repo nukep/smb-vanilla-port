@@ -1415,9 +1415,6 @@ struct_ay smb2j_GetEnemyBoundBoxOfsArg(byte param_1);
 void smb2j_PlayerBGCollision(void);
 #define PlayerBGCollision smb2j_PlayerBGCollision
 
-void smb2j_ErACM(byte param_1,byte param_2,byte param_3);
-#define ErACM smb2j_ErACM
-
 void smb2j_HandleClimbing(byte param_1,byte param_2,byte param_3);
 #define HandleClimbing smb2j_HandleClimbing
 
