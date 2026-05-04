@@ -17,17 +17,17 @@ endif
 
 glew = dependency('glew', required: get_option('opengl'))
 
-if glew.found()
-endif
+opengl_sources = glew.found() ? ['src/render_opengl.c'] : []
 
 cdata = configuration_data()
-
-cdata.set('FOO', true)
-cdata.set('FOO', false)
-
 configure_file(output: 'smbport_config.h', configuration: cdata)
 
-smbcore = library('smbcore', 'src/smbcore.cpp', 'src/smbcommon.cpp', 'src/smb1.cpp', 'src/smb2j.cpp')
+smbcore = library('smbcore',
+        'src/smbcore.cpp',
+        'src/smbcommon.cpp',
+        'src/smb1.cpp',
+        'src/smb2j.cpp'
+)
 
 nessndemu = library('nessndemu',
         'Nes_Snd_Emu/emu2413/emu2413.c',
@@ -54,9 +54,8 @@ if use_sdl3
               'src/audio_sdl3.cpp',
               'src/time.c',
               'src/movie.c',
-              'src/render_opengl.c',
               'src/render_raster.c',
-              'src/thirdparty/ini.c'],
+              'src/thirdparty/ini.c'] + opengl_sources,
 
              include_directories: ['Nes_Snd_Emu'],
              link_with: [smbcore, nessndemu],
@@ -67,9 +66,8 @@ else
               'src/audio_sdl2.cpp',
               'src/time.c',
               'src/movie.c',
-              'src/render_opengl.c',
               'src/render_raster.c',
-              'src/thirdparty/ini.c'],
+              'src/thirdparty/ini.c'] + opengl_sources,
 
              include_directories: ['Nes_Snd_Emu'],
              link_with: [smbcore, nessndemu],
