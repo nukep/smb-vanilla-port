@@ -6997,8 +6997,10 @@ byte ProcFirebar(byte param_1) {
       SpriteVarData2[bVar3] = MysterySpriteThing4;
     }
     sVar5 = RelativeEnemyPosition(bVar3);
+    // NES note: RelativeEnemyPosition sets r00 (address $00) = X;
+    // This is relied on by GetFirebarPosition.
+    GetFirebarPosition(sVar5.a, bVar3);
     bVar3 = sVar5.x;
-    GetFirebarPosition(sVar5.a, sVar5.r00);
     bVar1 = Enemy_Rel_YPos;
     bVar3 = Enemy_SprDataOffset[bVar3];
     Sprite_Data[bVar3] = Enemy_Rel_YPos;
@@ -11365,7 +11367,12 @@ byte RelativeMiscPosition(byte param_1) {
 // SM2MAIN:be37
 // Signature: [X] -> [A, X, r00]
 struct_axr00 RelativeEnemyPosition(byte param_1) {
-  return VariableObjOfsRelPos(1, param_1, 1);
+  struct_axr00 sVar1;
+
+  sVar1.a = GetObjRelativePosition(1 + param_1, 1);
+  sVar1.x = ObjectOffset;
+  // NES Note: r00 is set to X (param_1). This is relied on by ProcFirebar.
+  return sVar1;
 }
 
 
@@ -11373,26 +11380,9 @@ struct_axr00 RelativeEnemyPosition(byte param_1) {
 // SM2MAIN:be3e
 // Signature: [X] -> [X]
 byte RelativeBlockPosition(byte param_1) {
-  char cVar1;
-  struct_axr00 sVar2;
-
-  cVar1 = 4;
-  sVar2 = VariableObjOfsRelPos(9, param_1, 4);
-  sVar2 = VariableObjOfsRelPos(9, sVar2.x + 2, cVar1 + 1);
-  return sVar2.x;
-}
-
-
-// SMB:f165
-// SM2MAIN:be4a
-// Signature: [A, X, Y] -> [A, X, r00]
-struct_axr00 VariableObjOfsRelPos(byte param_1, byte param_2, byte param_3) {
-  struct_axr00 sVar1;
-
-  sVar1.a = GetObjRelativePosition(param_1 + param_2, param_3);
-  sVar1.x = ObjectOffset;
-  sVar1.r00 = param_2;
-  return sVar1;
+  GetObjRelativePosition(9 + param_1, 4);
+  GetObjRelativePosition(9 + ObjectOffset + 2, 5);
+  return ObjectOffset;
 }
 
 

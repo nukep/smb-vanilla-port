@@ -114,7 +114,7 @@ typedef struct struct_axr00 struct_axr00;
 struct struct_axr00 {
   byte a;
   byte x;
-  byte r00;
+  // byte r00;
 };
 
 
@@ -1688,9 +1688,6 @@ struct_axr00 smb2j_RelativeEnemyPosition(byte param_1);
 
 byte smb2j_RelativeBlockPosition(byte param_1);
 #define RelativeBlockPosition smb2j_RelativeBlockPosition
-
-struct_axr00 smb2j_VariableObjOfsRelPos(byte param_1,byte param_2,byte param_3);
-#define VariableObjOfsRelPos smb2j_VariableObjOfsRelPos
 
 byte smb2j_GetObjRelativePosition(byte param_1,byte param_2);
 #define GetObjRelativePosition smb2j_GetObjRelativePosition

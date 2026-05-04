@@ -37,7 +37,7 @@ typedef struct struct_axr00 struct_axr00;
 struct struct_axr00 {
   byte a;
   byte x;
-  byte r00;
+  // byte r00;
 };
 
 
@@ -1705,9 +1705,6 @@ struct_axr00 smb1_RelativeEnemyPosition(byte param_1);
 
 byte smb1_RelativeBlockPosition(byte param_1);
 #define RelativeBlockPosition smb1_RelativeBlockPosition
-
-struct_axr00 smb1_VariableObjOfsRelPos(byte param_1,byte param_2,byte param_3);
-#define VariableObjOfsRelPos smb1_VariableObjOfsRelPos
 
 byte smb1_GetObjRelativePosition(byte param_1,byte param_2);
 #define GetObjRelativePosition smb1_GetObjRelativePosition
