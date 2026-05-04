@@ -1479,7 +1479,7 @@ void MoveUpsideDownPiranhaP(byte param_1) {
     if (SpriteVarData1[param_1] >= 0x80) {
       bVar3 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
     }
-    if ((TimerControl == 0)) {
+    if (TimerControl == 0) {
       bVar1 = Enemy_Y_Position[param_1];
       bVar2 = SpriteVarData1[param_1];
       Enemy_Y_Position[param_1] = bVar1 + bVar2;

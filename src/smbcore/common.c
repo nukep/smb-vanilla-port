@@ -1651,8 +1651,6 @@ void PrimaryGameSetup(void) {
 // SM2MAIN:6eb9
 // Signature: [] -> []
 void SecondaryGameSetup(void) {
-  byte bVar1;
-
   DisableScreenFlag = 0;
 #ifdef SMB2J_MODE
   WindFlag = 0;
@@ -2103,7 +2101,6 @@ void DecodeAreaData(byte param_1, byte param_2) {
   byte bVar1;
   char cVar2;
   byte bVar3;
-  byte bVar4;
 
   if (AreaObjectLength[param_1] < 0x80) {
     param_2 = AreaObjOffsetBuffer[param_1];
@@ -3376,7 +3373,7 @@ void PlayerCtrlRoutine(void) {
   }
   PlayerMovementSubs();
   PlayerOrSprObj_BoundBoxCtrl[0] = 1;
-  if ((PlayerSize == 0)) {
+  if (PlayerSize == 0) {
     PlayerOrSprObj_BoundBoxCtrl[0] = 0;
     if (CrouchingFlag != 0) {
       PlayerOrSprObj_BoundBoxCtrl[0] = 2;
@@ -3458,7 +3455,7 @@ void VerticalPipeEntry(void) {
   MovePlayerYAxis(1);
   ScrollHandler();
   bVar1 = 0;
-  if ((WarpZoneControl == 0)) {
+  if (WarpZoneControl == 0) {
     bVar1 = 1;
     if (AreaType == 3) {
       bVar1 = 2;
@@ -3699,7 +3696,7 @@ void PlayerMovementSubs(void) {
   byte bVar1;
 
   bVar1 = 0;
-  if ((PlayerSize == 0)) {
+  if (PlayerSize == 0) {
     bVar1 = CrouchingFlag;
     if (Player_State == 0) {
       bVar1 = Up_Down_Buttons & 4;
@@ -4194,7 +4191,6 @@ void WarpZoneObject(byte param_1) {
 // Signature: [] -> []
 void ProcessWhirlpools(void) {
   byte bVar1;
-  char cVar2;
   byte bVar3;
 
   if (AreaType != 0) {
@@ -5900,7 +5896,7 @@ void InitFlyingCheepCheep(byte param_1) {
       bVar4 = cVar2 + (bVar4 & 3);
       SpriteVarData1[param_1] = FlyCCXSpeedData[bVar4];
       Enemy_MovingDir[param_1] = 1;
-      if ((PlayerSpriteVarData1[0] == 0)) {
+      if (PlayerSpriteVarData1[0] == 0) {
         bVar4 = bVar3;
         if ((bVar3 & 2) != 0) {
           SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
@@ -9240,7 +9236,7 @@ void ChkForLandJumpSpring(byte param_1) {
 bool ChkJumpspringMetatiles(byte param_1) {
   bool bVar1;
 
-  if ((param_1 == ssw(0x67, 0x68))) {
+  if (param_1 == ssw(0x67, 0x68)) {
     bVar1 = true;
   }
   else {
@@ -9541,7 +9537,7 @@ void SetStun2(byte param_1) {
 
   Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
   Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
-  if ((Enemy_ID[param_1] == 7)) {
+  if (Enemy_ID[param_1] == 7) {
     bVar1 = 0xff;
   }
   else {
@@ -10344,7 +10340,6 @@ byte DrawPowerUp(void) {
   byte bVar1;
   byte bVar2;
   byte bVar3;
-  byte bVar4;
   byte bVar5;
   byte bVar6;
   byte bVar7;
@@ -10502,7 +10497,7 @@ byte EnemyGfxHandler(byte param_1) {
         bVar1 = bVar5 + 2;
       }
       bVar5 = bVar1;
-      if ((MysterySpriteThing4 == 6)) {
+      if (MysterySpriteThing4 == 6) {
         bVar4 = 0x54;
         if ((MysterySpriteThing3 & 0x20) == 0) {
           bVar4 = 0x8a;
@@ -11181,7 +11176,7 @@ byte ProcessPlayerAction(void) {
       }
     } else {
       bVar1 = 6;
-      if ((CrouchingFlag == 0)) {
+      if (CrouchingFlag == 0) {
         bVar1 = 2;
         if ((PlayerSpriteVarData1[0] | Left_Right_Buttons) != 0) {
           if ((Player_XSpeedAbsolute < 9) || ((Player_MovingDir & PlayerFacingDir) != 0)) {
@@ -11518,7 +11513,7 @@ struct_ar00 RunOffscrBitsSubs(byte param_1) {
 
 
 // keeping the original version for now, in case of regressions (though I made extra sure there aren't any)
-static byte original_xoff_f(byte param_1, byte bVar3) {
+static inline byte original_xoff_f(byte param_1, byte bVar3) {
   byte bVar1, bVar2;
   bVar1 = (ScreenEdgeOrLeft_PageLoc[bVar3] - SprObject_PageLoc[param_1])
           - (ScreenEdgeOrLeft_X_Pos[bVar3] < SprObject_X_Position[param_1]);

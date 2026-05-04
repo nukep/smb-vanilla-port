@@ -79,14 +79,14 @@ static inline bool read_rom_bytes(struct SMB_state *state, byte *buf, size_t siz
 static inline bool seek_rom(struct SMB_state *state, size_t offset) {
   return state->callbacks.seek_rom(state->callbacks.userdata, offset);
 }
-static byte smb2j_load_games_beaten() {
+static inline byte smb2j_load_games_beaten() {
   if (SMB_STATE->callbacks.smb2j_load_games_beaten) {
     return SMB_STATE->callbacks.smb2j_load_games_beaten(SMB_STATE->callbacks.userdata);
   } else {
     return 0;
   }
 }
-static bool smb2j_save_games_beaten(byte games_beaten) {
+static inline bool smb2j_save_games_beaten(byte games_beaten) {
   if (SMB_STATE->callbacks.smb2j_save_games_beaten) {
     return SMB_STATE->callbacks.smb2j_save_games_beaten(SMB_STATE->callbacks.userdata, games_beaten);
   } else {
@@ -94,17 +94,17 @@ static bool smb2j_save_games_beaten(byte games_beaten) {
   }
 }
 
-static void update_pattern_tables(struct SMB_state *state) {
+static inline void update_pattern_tables(struct SMB_state *state) {
   if (state->callbacks.update_pattern_tables) {
     state->callbacks.update_pattern_tables(state->callbacks.userdata, state->chrrom);
   }
 }
 
-static bool can_draw_tile() {
+static inline bool can_draw_tile() {
   return SMB_STATE->callbacks.draw_tile != 0;
 }
 
-static void draw_tile(const struct SMB_tile tile) {
+static inline void draw_tile(const struct SMB_tile tile) {
   if (SMB_STATE->callbacks.draw_tile) {
     SMB_STATE->callbacks.draw_tile(SMB_STATE->callbacks.userdata, tile);
   }
@@ -120,14 +120,14 @@ static inline void apu_end_frame() {
     SMB_STATE->callbacks.apu_end_frame(SMB_STATE->callbacks.userdata);
   }
 }
-static void joy1(struct SMB_buttons *buttons) {
+static inline void joy1(struct SMB_buttons *buttons) {
   if (SMB_STATE->callbacks.joy1) {
     return SMB_STATE->callbacks.joy1(SMB_STATE->callbacks.userdata, buttons);
   } else {
     *buttons = {0};
   }
 }
-static void joy2(struct SMB_buttons *buttons) {
+static inline void joy2(struct SMB_buttons *buttons) {
   if (SMB_STATE->callbacks.joy2) {
     return SMB_STATE->callbacks.joy2(SMB_STATE->callbacks.userdata, buttons);
   } else {
@@ -154,7 +154,7 @@ static void joy2(struct SMB_buttons *buttons) {
 
 
 // Write to $4016
-static void joystick_strobe(byte x) {
+static inline void joystick_strobe(byte x) {
 }
 
 #define APU_REG(name, addr) \
@@ -183,10 +183,10 @@ APU_REG(apu_framecounter_ctrl, 0x4017)
 
 #undef APU_REG
 
-static void announce_main_scroll(unsigned short scroll_x) {
+static inline void announce_main_scroll(unsigned short scroll_x) {
   SMB_STATE->scroll_x = scroll_x;
 }
-static void transfer_sprite_data(const byte *data) {
+static inline void transfer_sprite_data(const byte *data) {
   struct sprite *s = SMB_STATE->sprites;
   for (int i = 0; i < 64; i++) {
     s[i].tile.y = data[i * 4 + 0] + 1;
@@ -205,7 +205,7 @@ static void transfer_sprite_data(const byte *data) {
   }
 }
 
-static void jmpengine_overflow(byte index) {
+static inline void jmpengine_overflow(byte index) {
   warning("JMPENGINE overflow! %02X\n", index);
 }
 
@@ -290,7 +290,7 @@ public:
   }
 };
 
-static RamPtr &RAMPtr(ushort offset) {
+static inline RamPtr &RAMPtr(ushort offset) {
   RamPtr *ptr = (RamPtr *)(&RAM(offset));
   return *ptr;
 }
