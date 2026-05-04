@@ -1409,12 +1409,6 @@ void smb1_PositionPlayerOnVPlat(byte param_1);
 bool smb1_CheckPlayerVertical(void);
 #define CheckPlayerVertical smb1_CheckPlayerVertical
 
-struct_ay smb1_GetEnemyBoundBoxOfs(void);
-#define GetEnemyBoundBoxOfs smb1_GetEnemyBoundBoxOfs
-
-struct_ay smb1_GetEnemyBoundBoxOfsArg(byte param_1);
-#define GetEnemyBoundBoxOfsArg smb1_GetEnemyBoundBoxOfsArg
-
 void smb1_PlayerBGCollision(void);
 #define PlayerBGCollision smb1_PlayerBGCollision
 

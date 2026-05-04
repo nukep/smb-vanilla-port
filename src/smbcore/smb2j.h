@@ -1398,12 +1398,6 @@ void smb2j_PositionPlayerOnVPlat(byte param_1);
 bool smb2j_CheckPlayerVertical(void);
 #define CheckPlayerVertical smb2j_CheckPlayerVertical
 
-struct_ay smb2j_GetEnemyBoundBoxOfs(void);
-#define GetEnemyBoundBoxOfs smb2j_GetEnemyBoundBoxOfs
-
-struct_ay smb2j_GetEnemyBoundBoxOfsArg(byte param_1);
-#define GetEnemyBoundBoxOfsArg smb2j_GetEnemyBoundBoxOfsArg
-
 void smb2j_PlayerBGCollision(void);
 #define PlayerBGCollision smb2j_PlayerBGCollision
 

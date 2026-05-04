@@ -8331,7 +8331,6 @@ byte PlayerEnemyCollision(byte param_1) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
-  struct_ay sVar4;
   byte bStack0000;
 
   if (FrameCounter & 1) {
@@ -8350,8 +8349,8 @@ byte PlayerEnemyCollision(byte param_1) {
     return param_1;
   }
 
-  sVar4 = GetEnemyBoundBoxOfs();
-  bVar3 = PlayerCollisionCore(sVar4.y);
+  // Inlined: GetEnemyBoundBoxOfs
+  bVar3 = PlayerCollisionCore(ObjectOffset * 4 + 4);
   if (!bVar3) {
     Enemy_CollisionBits[ObjectOffset] = Enemy_CollisionBits[ObjectOffset] & 0xfe;
     return ObjectOffset;
@@ -8619,7 +8618,6 @@ void SetupFloateyNumber(byte param_1, byte param_2) {
 byte EnemiesCollision(byte param_1) {
   byte bVar1;
   bool bVar2;
-  struct_ay sVar3;
   byte bStack0000;
 
   if (((FrameCounter & 1) == 0) || (AreaType == 0)) {
@@ -8627,8 +8625,8 @@ byte EnemiesCollision(byte param_1) {
   }
   bVar1 = Enemy_ID[param_1];
   if ((bVar1 < 0x15) && (bVar1 != 0x11) && (bVar1 != 0xd) && ssw(true, (bVar1 != 4)) && (EnemyOffscrBitsMasked[param_1] == 0)) {
-    sVar3 = GetEnemyBoundBoxOfs();
-    bStack0000 = sVar3.y;
+    // Inlined: GetEnemyBoundBoxOfs
+    bStack0000 = ObjectOffset * 4 + 4;
 labelA:
     param_1 -= 1;
     if (param_1 < 0x80) {
@@ -8741,13 +8739,13 @@ byte ChkForPlayerC_LargeP(byte param_1) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
-  struct_ay sVar4;
   byte bStack0000;
 
   bVar3 = CheckPlayerVertical();
   if (!bVar3) {
-    sVar4 = GetEnemyBoundBoxOfsArg(param_1);
-    bVar2 = sVar4.y;
+    // Inlined: GetEnemyBoundBoxOfs
+    bVar2 = param_1 * 4 + 4;
+
     bVar1 = Enemy_Y_Position[param_1];
     bStack0000 = param_1;
     bVar3 = PlayerCollisionCore(bVar2);
@@ -8766,7 +8764,6 @@ byte SmallPlatformCollision(byte param_1) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
-  struct_ay sVar4;
 
   if (TimerControl == 0) {
     HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = 0;
@@ -8774,9 +8771,10 @@ byte SmallPlatformCollision(byte param_1) {
     if (!bVar3) {
       bVar1 = 2;
       do {
-        sVar4 = GetEnemyBoundBoxOfs();
-        bVar2 = sVar4.y;
-        if ((CAST_TO_INT(sVar4) & 2) != 0) {
+        // Inlined: GetEnemyBoundBoxOfs
+        bVar2 = ObjectOffset * 4 + 4;
+        // NES note: (Enemy_OffscreenBits & 0x2) came from GetEnemyBoundBoxOfs. We're inlining it here.
+        if ((Enemy_OffscreenBits & 0x2) != 0) {
           return ObjectOffset;
         }
         if ((BoundingBox_UL_YPos[bVar2] >= 0x20)) {
@@ -8865,25 +8863,6 @@ bool CheckPlayerVertical(void) {
 #ifdef SMB2J_MODE
   return (SprObject_OffscrBits[0] & 0xf0) != 0;
 #endif
-}
-
-
-// SMB:dc52
-// SM2MAIN:a8c0
-// Signature: [] -> [A, Y]
-struct_ay GetEnemyBoundBoxOfs(void) {
-  return GetEnemyBoundBoxOfsArg(ObjectOffset);
-}
-
-
-// SMB:dc54
-// SM2MAIN:a8c2
-// Signature: [A] -> [A, Y]
-struct_ay GetEnemyBoundBoxOfsArg(byte param_1) {
-  struct_ay res;
-  res.a = Enemy_OffscreenBits & 0xf;
-  res.y = param_1 * 4 + 4;
-  return res;
 }
 
 
