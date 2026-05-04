@@ -8932,43 +8932,46 @@ void PlayerBGCollision(void) {
   struct_ac sVar10;
   struct_azr02r04r06r07 sVar11;
 
-  if ((DisableCollisionDet != 0) || (GameEngineSubroutine == 0xb) || (GameEngineSubroutine < 4)) {
+  if (DisableCollisionDet != 0) {
+    return;
+  }
+  if (GameEngineSubroutine == 0xb) {
+    return;
+  }
+  if (GameEngineSubroutine < 4) {
     return;
   }
 
-  bVar6 = 1;
   if (SwimmingFlag == 0) {
-    if ((Player_State == 0)) {
-      bVar6 = 2;
+    if ((Player_State == 0) || (Player_State == 3)) {
+      Player_State = 2;
     }
-    else {
-      bVar6 = Player_State;
-      if (Player_State == 3) {
-        bVar6 = 2;
-      }
-    }
+  } else {
+    Player_State = 1;
   }
-  Player_State = bVar6;
+
   if (SprObject_Y_HighPos[0] != 1) {
     return;
   }
+
   Player_CollisionBits = 0xff;
+
   if (SprObject_Y_Position[0] > 0xce) {
-    Player_CollisionBits = 0xff;
     return;
   }
-  bVar6 = 2;
-  if (((CrouchingFlag == 0) && (PlayerSize == 0))) {
-    bVar6 = 1;
+
+  if ((CrouchingFlag == 0) && (PlayerSize == 0)) {
     if (SwimmingFlag == 0) {
-      bVar6 = 0;
+      MysterySpriteThing1 = BlockBufferAdderData[0];
+    } else {
+      MysterySpriteThing1 = BlockBufferAdderData[1];
     }
+  } else {
+    MysterySpriteThing1 = BlockBufferAdderData[2];
   }
-  MysterySpriteThing1 = BlockBufferAdderData[bVar6];
-  bVar6 = PlayerSize;
-  if (CrouchingFlag != 0) {
-    bVar6 = PlayerSize + 1;
-  }
+
+  bVar6 = PlayerSize + ((CrouchingFlag != 0) ? 1 : 0);
+
   if (PlayerBGUpperExtent[bVar6] <= SprObject_Y_Position[0]) {
     sVar9 = BlockBufferColli_Head(MysterySpriteThing1);
     bVar4 = sVar9.r07;
@@ -9061,10 +9064,12 @@ void PlayerBGCollision(void) {
 
   // DoPlayerSideCheck
 
-  bVar7 = MysterySpriteThing1 + 2;
-  bVar1 = 2;
-  while (true) {
-    MysterySpriteThing1 = bVar7 + 1;
+  int i;
+  for (i = 2; i >= 1; i--) {
+    MysterySpriteThing1 += i;
+    MysterySpriteThing1 += 1;
+    // +3, +2
+
     if (SprObject_Y_Position[0] >= 0x20) {
       if (SprObject_Y_Position[0] >= 0xe4) {
         return;
@@ -9098,15 +9103,13 @@ void PlayerBGCollision(void) {
     if (sVar9.z == false) {
       break;
     }
-
-    bVar1 -= 1;
-    if (bVar1 == 0) {
-      return;
-    }
-
-    // continue
-    bVar7 = MysterySpriteThing1 + 1;
   }
+
+  if (i == 0) {
+    return;
+  }
+
+  bVar1 = i;
 
   // bVar1 = 2 or bVar1 = 1
 
