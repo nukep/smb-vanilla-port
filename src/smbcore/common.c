@@ -5007,12 +5007,12 @@ struct_yc BlockBumpedChk(byte param_1) {
   do {
     bVar2 = BrickQBlockMetatiles[bVar1] <= param_1;
     if (param_1 == BrickQBlockMetatiles[bVar1]) {
-      goto MatchBump;
+      sVar3.c = bVar2;
+      sVar3.y = bVar1;
+      return sVar3;
     }
   } while (bVar1 -= 1, bVar1 < 0x80);
-  bVar2 = false;
-MatchBump:
-  sVar3.c = bVar2;
+  sVar3.c = false;
   sVar3.y = bVar1;
   return sVar3;
 }
@@ -6690,7 +6690,9 @@ byte MoveNormalEnemy(byte param_1) {
   if (Enemy_State[param_1] != 2) {
     if (((Enemy_State[param_1] & 0x40) != 0) && (Enemy_ID[param_1] != 0x2e)) {
       if (Enemy_ID[param_1] == 0x2e) {
-        goto MEHor;
+        // MEHor
+        sVar3 = MoveEnemyHorizontally(param_1);
+        return sVar3.x;
       }
       bVar2 = 1;
     }
@@ -6704,7 +6706,7 @@ SteadM:
     SpriteVarData1[sVar3.x] = bStack0000;
     return sVar3.x;
   }
-MEHor:
+  // MEHor
   sVar3 = MoveEnemyHorizontally(param_1);
   return sVar3.x;
 }
@@ -7767,7 +7769,6 @@ byte BalancePlatform(byte param_1) {
       StopPlatforms(param_1, bVar3);
       return param_1;
     }
-MakePlatformFall:
     return InitPlatformFall(bVar3);
   }
   if (Enemy_Y_Position[bVar3] < 0x2e) {
@@ -7776,7 +7777,7 @@ MakePlatformFall:
       StopPlatforms(param_1, bVar3);
       return param_1;
     }
-    goto MakePlatformFall;
+    return InitPlatformFall(bVar3);
   }
   bStack0000 = Enemy_Y_Position[param_1];
   bVar2 = HammerThrowingTimer_Or_PlatformCollisionFlag[param_1];
@@ -10405,27 +10406,27 @@ byte EnemyGfxHandler(byte param_1) {
   }
   bVar3 = EnemyAttributeData[MysterySpriteThing4] | bVar3;
   bVar4 = EnemyGfxTableOffsets[MysterySpriteThing4];
+
   if (BowserGfxFlag != 0) {
     if (BowserGfxFlag == 1) {
       if (BowserBodyControls >= 0x80) {
         bVar4 = 0xde;
       }
-      if ((MysterySpriteThing3 & 0x20) == 0) {
-        goto DrawBowser;
-      }
     } else {
       if ((BowserBodyControls & 1) != 0) {
         bVar4 = 0xe4;
       }
-      if ((MysterySpriteThing3 & 0x20) == 0) {
-        goto DrawBowser;
+      if ((MysterySpriteThing3 & 0x20) != 0) {
+        bVar5 -= 0x10;
       }
-      bVar5 -= 0x10;
     }
-    VerticalFlipFlag = bVar4;
-DrawBowser:
+    if ((MysterySpriteThing3 & 0x20) != 0) {
+      VerticalFlipFlag = bVar4;
+    }
+    // DrawBowser
     return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
   }
+
   if (bVar4 == 0x24) {
     if (MysterySpriteThing2 == 5) {
       bVar4 = 0x30;
@@ -10536,7 +10537,6 @@ byte DrawEnemyObject(byte param_1, byte param_2, byte param_3, byte param_4, byt
   DrawEnemyObjRow(sVar6.x, sVar6.y, sVar6.r02, param_3, param_4, param_5);
   bVar3 = Enemy_SprDataOffset[ObjectOffset];
   if (MysterySpriteThing4 == 8) {
-SkipToOffScrChk:
     return SprObjectOffscrChk();
   }
   if (VerticalFlipFlag != 0) {
@@ -10556,7 +10556,7 @@ SkipToOffScrChk:
   }
   bVar2 = MysterySpriteThing2;
   if (BowserGfxFlag != 0) {
-    goto SkipToOffScrChk;
+    return SprObjectOffscrChk();
   }
   if (MysterySpriteThing4 == 5) {
     return SprObjectOffscrChk();
