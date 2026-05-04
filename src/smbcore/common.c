@@ -8932,9 +8932,10 @@ void PlayerBGCollision(void) {
   struct_ac sVar10;
   struct_azr02r04r06r07 sVar11;
 
-  if (((DisableCollisionDet != 0) || (GameEngineSubroutine == 0xb)) || (GameEngineSubroutine < 4)) {
+  if ((DisableCollisionDet != 0) || (GameEngineSubroutine == 0xb) || (GameEngineSubroutine < 4)) {
     return;
   }
+
   bVar6 = 1;
   if (SwimmingFlag == 0) {
     if ((Player_State == 0)) {
@@ -9074,26 +9075,21 @@ void PlayerBGCollision(void) {
       bVar3 = sVar9.r06;
       bVar2 = sVar9.r04;
       bVar5 = sVar9.a;
-      if ((((sVar9.z) || (bVar5 == ssw(0x1c, 0x19))) || (bVar5 == ssw(0x6b, 0x6d)))) {
-        goto BHalf;
+      bool cond = (sVar9.z) || (bVar5 == ssw(0x1c, 0x19)) || (bVar5 == ssw(0x6b, 0x6d)) || CheckForClimbMTiles(bVar5);
+      if (!cond) {
+        break;
       }
-      else {
-        bVar8 = CheckForClimbMTiles(bVar5);
-        if (bVar8) {
-          goto BHalf;
-        }
-      }
-      break;
     }
-BHalf:
-    bVar7 = MysterySpriteThing1 + 1;
+
+    // BHalf
+
     if (SprObject_Y_Position[0] < 8) {
       return;
     }
     if (SprObject_Y_Position[0] >= 0xd0) {
       return;
     }
-    sVar9 = BlockBufferColli_Side(bVar7);
+    sVar9 = BlockBufferColli_Side(MysterySpriteThing1 + 1);
     bVar4 = sVar9.r07;
     bVar6 = sVar9.r02;
     bVar3 = sVar9.r06;
@@ -9102,29 +9098,34 @@ BHalf:
     if (sVar9.z == false) {
       break;
     }
+
     bVar1 -= 1;
     if (bVar1 == 0) {
       return;
     }
+
+    // continue
+    bVar7 = MysterySpriteThing1 + 1;
   }
+
+  // bVar1 = 2 or bVar1 = 1
 
   // CheckSideMTiles
 
-  bVar8 = ChkInvisibleMTiles(bVar5);
-  if (!bVar8) {
-    bVar8 = CheckForClimbMTiles(bVar5);
-    if (bVar8) {
+  if (!ChkInvisibleMTiles(bVar5)) {
+    if (CheckForClimbMTiles(bVar5)) {
       HandleClimbing(bVar5, bVar2, bVar3);
       return;
     }
+
     sVar10 = CheckForCoinMTiles(bVar5);
     bVar7 = sVar10.a;
     if (sVar10.c) {
       HandleCoinMetatile(bVar6, bVar3, bVar4);
       return;
     }
-    bVar8 = ChkJumpspringMetatiles(bVar7);
-    if (bVar8) {
+
+    if (ChkJumpspringMetatiles(bVar7)) {
       if (JumpspringAnimCtrl != 0) {
         return;
       }
@@ -9136,6 +9137,9 @@ BHalf:
       if ((SprObject_X_Position[0] & 0xf) != 0) {
         ChangeAreaTimer = AreaChangeTimerData[ScreenEdgeOrLeft_PageLoc[0] != 0];
       }
+
+      // 7 != 8, so this seems redundant. But it's in the assembly.
+      // We'll keep it in in case it's semantically meaningful in later refactor efforts.
       if (GameEngineSubroutine == 7) {
         return;
       }
@@ -9145,6 +9149,8 @@ BHalf:
       GameEngineSubroutine = 2;
       return;
     }
+
+    // bVar1 = 2 or bVar1 = 1
     ImpedePlayerMove(bVar1);
   }
 }
@@ -9298,13 +9304,17 @@ void ImpedePlayerMove(byte param_1) {
   if (param_1 == 1) {
     bVar2 = 1;
     if (PlayerSpriteVarData1[0] >= 0x80) {
-      goto ExIPM;
+      // ExIPM
+      Player_CollisionBits = (bVar2 ^ 0xff) & Player_CollisionBits;
+      return;
     }
     bVar1 = 0xff;
   } else {
     bVar2 = 2;
     if ((byte)(PlayerSpriteVarData1[0] - 1) < 0x80) {
-      goto ExIPM;
+      // ExIPM
+      Player_CollisionBits = (bVar2 ^ 0xff) & Player_CollisionBits;
+      return;
     }
     bVar1 = 1;
   }
@@ -9316,8 +9326,10 @@ void ImpedePlayerMove(byte param_1) {
   }
   SprObject_PageLoc[0] = SprObject_PageLoc[0] + cVar3 + CARRY1(bVar1, SprObject_X_Position[0]);
   SprObject_X_Position[0] = bVar1 + SprObject_X_Position[0];
-ExIPM:
+
+  // ExIPM
   Player_CollisionBits = (bVar2 ^ 0xff) & Player_CollisionBits;
+  return;
 }
 
 
@@ -10017,6 +10029,8 @@ struct_azr02r04r06r07 BlockBufferColli_Side(byte param_1) {
 // SM2MAIN:b08e
 // Signature: [A, X, Y] -> [A, Z, r02, r04, r06, r07]
 struct_azr02r04r06r07 BlockBufferCollision(byte param_1, byte param_2, byte param_3) {
+  // Note: Does not modify global variables (except temporary registers)
+
   char cVar1;
   byte bVar2;
   byte bVar3;
