@@ -17,7 +17,8 @@ endif
 
 glew = dependency('glew', required: get_option('opengl'))
 
-opengl_sources = glew.found() ? ['src/render_opengl.c'] : []
+opengl_sources = glew.found() ? ['src/render_opengl.c'] : ['src/render_opengl_noop.c']
+opengl_args = glew.found() ? ['-DOPENGL_ENABLED'] : []
 
 cdata = configuration_data()
 configure_file(output: 'smbport_config.h', configuration: cdata)
@@ -59,7 +60,9 @@ if use_sdl3
 
              include_directories: ['Nes_Snd_Emu'],
              link_with: [smbcore, nessndemu],
-             dependencies: [sdl, glew])
+             dependencies: [sdl, glew],
+             c_args:   opengl_args,
+             cpp_args: opengl_args)
 else
   executable('smbport',
              ['src/main_sdl2.c',
@@ -72,7 +75,7 @@ else
              include_directories: ['Nes_Snd_Emu'],
              link_with: [smbcore, nessndemu],
              dependencies: [sdl, glew],
-             c_args:   ['-DUSE_SDL2'],
-             cpp_args: ['-DUSE_SDL2'])
+             c_args:   ['-DUSE_SDL2'] + opengl_args,
+             cpp_args: ['-DUSE_SDL2'] + opengl_args)
 endif
 

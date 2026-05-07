@@ -393,6 +393,7 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
+#ifdef OPENGL_ENABLED
   if (cfg.graphics.opengl) {
     glcontext = SDL_GL_CreateContext(fe->window);
     if (glcontext) {
@@ -406,6 +407,7 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+#endif
 
   if (cfg.graphics.software && !fe->smb_gl) {
     // Fallback to raster
