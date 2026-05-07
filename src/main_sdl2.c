@@ -377,12 +377,16 @@ int main(int argc, char *argv[]) {
 
   fe->video_scale = 3;
 
+  if (cfg.graphics.video_scale != 0) {
+    fe->video_scale = cfg.graphics.video_scale;
+  }
+
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     log_error("Could not initialize SDL2 video: %s", SDL_GetError());
     goto exit;
   }
 
-  SDL_WindowFlags window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+  SDL_WindowFlags window_flags = SDL_WINDOW_SHOWN;
 
 #ifdef OPENGL_ENABLED
   if (cfg.graphics.opengl) {
