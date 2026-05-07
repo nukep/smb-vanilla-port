@@ -382,12 +382,19 @@ int main(int argc, char *argv[]) {
     goto exit;
   }
 
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE;
 
-  fe->window = SDL_CreateWindow("smb-port", 256 * fe->video_scale, 240 * fe->video_scale,
-                            SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+#ifdef OPENGL_ENABLED
+  if (cfg.graphics.opengl) {
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+    window_flags |= SDL_WINDOW_OPENGL;
+  }
+#endif
+
+  fe->window = SDL_CreateWindow("smb-port", 256 * fe->video_scale, 240 * fe->video_scale, window_flags);
   if (!fe->window) {
     log_error("Could not create SDL window: %s", SDL_GetError());
     goto exit;
