@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<title>smb-port</title>
+<style>
+  body { margin: 0; padding: 0; background: #111; color: #ddd; font-family: system-ui, sans-serif; }
+  #wrap { display: flex; flex-direction: column; align-items: center; padding: 12px; }
+  #canvas-wrap { width: 512px; height: 480px; }
+
+  #canvas-wrap #canvas {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    image-rendering: pixelated;
+  }
+
+  #log {
+    width: min(100%, 800px);
+    height: 160px;
+    background: #000;
+    color: #ccc;
+    font: 12px ui-monospace, monospace;
+    padding: 2em;
+    overflow: auto;
+    white-space: pre-wrap;
+  }
+
+  #log.error {
+    color: #f77;
+  }
+</style>
+</head>
+
+<body>
+<div id="wrap">
+  <div id="canvas-wrap">
+    <canvas id="canvas" width="512" height="480" tabindex="0"></canvas>
+  </div>
+  <pre id="log"></pre>
+</div>
+
+<script>
+  const logElem = document.getElementById('log')
+  const canvas = document.getElementById('canvas')
+
+  function message(line, cls=null) {
+    const span = document.createElement('span')
+    if (cls) {
+      span.className = cls
+    }
+    span.textContent = line + '\n'
+    logElem.appendChild(span)
+    logElem.scrollTop = logElem.scrollHeight
+  }
+
+  const PALETTE_DATA = new Uint8Array([102, 102, 102, 0, 42, 136, 20, 18, 167, 59, 0, 164, 92, 0, 126, 110, 0, 64, 108, 6, 0, 86, 29, 0, 51, 53, 0, 11, 72, 0, 0, 82, 0, 0, 79, 8, 0, 64, 77, 0, 0, 0, 0, 0, 0, 0, 0, 0, 173, 173, 173, 21, 95, 217, 66, 64, 255, 117, 39, 254, 160, 26, 204, 183, 30, 123, 181, 49, 32, 153, 78, 0, 107, 109, 0, 56, 135, 0, 12, 147, 0, 0, 143, 50, 0, 124, 141, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 254, 255, 100, 176, 255, 146, 144, 255, 198, 118, 255, 243, 106, 255, 254, 110, 204, 254, 129, 112, 234, 158, 34, 188, 190, 0, 136, 216, 0, 92, 228, 48, 69, 224, 130, 72, 205, 222, 79, 79, 79, 0, 0, 0, 0, 0, 0, 255, 254, 255, 192, 223, 255, 211, 210, 255, 232, 200, 255, 251, 194, 255, 254, 196, 234, 254, 204, 197, 247, 216, 165, 228, 229, 148, 207, 239, 150, 189, 244, 171, 179, 243, 204, 181, 235, 242, 184, 184, 184, 0, 0, 0, 0, 0, 0])
+
+  const INI_CONTENT = `
+[general]
+
+# The ROM file to load at startup. Can be a SMB1 or SMB2J (Lost Levels) ROM.
+rom_filename = smb.nes
+
+# The NES palette file. The file format is an RGB byte sequence. 64 colors * 3 bytes = 192 byte file
+palette_filename = palette.pal
+
+
+[debug]
+dump_ram_filename = ram.bin
+dump_ppu_filename = ppu.bin
+
+
+[smb1]
+
+
+[smb2j]
+# Set this to 8 or greater to play the "Hard" levels (hold A and Start on the title screen)
+override_games_beaten = 8
+
+
+[graphics]
+# OpenGL is not enabled in the Emscripten build (right now)
+opengl = false
+software = true
+# We scale in the browser later. It should be faster that way.
+video_scale = 1
+
+
+[audio]
+enabled = true
+samplerate = 44100
+maxlatency_ms = 100
+
+
+[bindings]
+# Order: Up Down Left Right Select Start B A
+
+# Key names are based on names passed to SDL_GetScancodeFromName()
+# A quick reference can be found in the SDL source code: https://github.com/libsdl-org/SDL/blob/d5acd7f123f593a256124f313a47816c97532652/src/events/SDL_keymap.c#L749
+
+# Mesen style
+#keys = W, S, A, D, U, I, J, K
+
+# FCEUX style
+#keys = Up, Down, Left, Right, S, Return, D, F
+
+# Custom
+keys = W, S, A, D, \\, Return, J, K
+
+`
+
+  var Module = {
+    canvas,
+    print: (t) => message(t),
+    printErr: (t) => message(t, 'error'),
+    setStatus: (t) => { if (t) message(`Emscripten: Status: ${t}`) },
+    preRun: [
+      () => {
+        function loadFile(filename) {
+          const onload = () => message(`Loaded ${filename}`)
+          const onloadfail = () => message(`Failed to load ${filename}`, 'error')
+
+          Module.FS_createPreloadedFile('/', filename, filename, true, false, onload, onloadfail)
+        }
+
+        FS.writeFile('/smbport.ini', INI_CONTENT)
+        FS.writeFile('/palette.pal', PALETTE_DATA)
+
+        loadFile('/smb.nes')
+      }
+    ],
+    onRuntimeInitialized: () => message(`Emscripten: Runtime initialized`),
+    onAbort: (e) => { message('Emscripten: onAbort: ' + e, 'error') },
+  }
+
+  window.addEventListener('error', (e) => message('Browser error: ' + e.message, 'error'))
+</script>
+<script src="smbport.js"></script>
+</body>
+</html>
+

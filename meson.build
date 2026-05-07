@@ -49,11 +49,19 @@ executable('smb_testrunner',
            ['src/main_testrunner.c', 'src/movie.c'],
            link_with: smbcore)
 
+time_c = 'src/time_sdl.c'
+
+# Detect which platform we're using. Swap out certain modules depending on the case.
+if host_machine.system() == 'emscripten'
+  time_c = 'src/time_emscripten.c'
+endif
+
+
 if use_sdl3
   executable('smbport',
              ['src/main_sdl3.c',
               'src/audio_sdl3.cpp',
-              'src/time.c',
+              time_c,
               'src/movie.c',
               'src/render_raster.c',
               'src/thirdparty/ini.c'] + opengl_sources,
@@ -67,7 +75,7 @@ else
   executable('smbport',
              ['src/main_sdl2.c',
               'src/audio_sdl2.cpp',
-              'src/time.c',
+              time_c,
               'src/movie.c',
               'src/render_raster.c',
               'src/thirdparty/ini.c'] + opengl_sources,
