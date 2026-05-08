@@ -1,6 +1,179 @@
 #include "types.h"
 #include "vars.h"
 
+static inline void GameMenuRoutine_ResetTitle() {
+  OperMode = 0;
+  OperMode_Task = 0;
+#ifdef SMB1_MODE
+  Sprite0HitDetectFlag = 0;
+#endif
+#ifdef SMB2J_MODE
+  IRQUpdateFlag = 0;
+#endif
+  DisableScreenFlag = DisableScreenFlag + 1;
+}
+
+#ifdef SMB1_MODE
+// SMB:830e
+// Signature: [A] -> [X]
+static inline byte GoContinue(byte param_1) {
+  WorldNumber = param_1;
+  OffScr_WorldNumber = param_1;
+  AreaNumber = 0;
+  OffScr_AreaNumber = 0;
+  return 0;
+}
+#endif
+
+// SMB:8245
+// SM2MAIN:c46e
+// Signature: [] -> []
+void GameMenuRoutine(void) {
+#ifdef SMB1_MODE
+  byte buttons = SavedJoypadBits[0] | SavedJoypadBits[1];
+#endif
+#ifdef SMB2J_MODE
+  byte buttons = SavedJoypadBits[0];
+#endif
+
+  bool button_a_pushed = (buttons & BUTTON_A) != 0;
+  bool button_select_pushed_only = buttons == BUTTON_SELECT;
+
+#ifdef SMB1_MODE
+  // Either just the Start button, or just the A + Start button.
+  bool button_activate = (buttons == BUTTON_START) || (buttons == (BUTTON_A | BUTTON_START));
+#endif
+#ifdef SMB2J_MODE
+  // The Start button, with other buttons possibly pushed.
+  bool button_activate = (buttons & BUTTON_START) != 0;;
+#endif
+
+  // NES note: This port inverts the comparison order of DemoTimer and the button pushes.
+  // (in the orignal NES versions, the button presses are checked first, then DemoTimer).
+  // IMO this is easier to understand.
+
+  // if the demo is running...
+  if (DemoTimer == 0) {
+    if (button_activate) {
+      // then reset to the title
+#ifdef SMB2J_MODE
+      CompletedWorlds = 0;
+      DiskIOTask = 0;
+      HardWorldFlag = 0;
+      if ((GamesBeatenCount >= 8) && button_a_pushed) {
+        HardWorldFlag = 1;
+      }
+#endif
+      GameMenuRoutine_ResetTitle();
+      return;
+    }
+
+    if (button_select_pushed_only) {
+      // then reset to the title
+      GameMenuRoutine_ResetTitle();
+      return;
+    }
+
+    // not really sure why this is done. seems pointless
+    SelectTimer = buttons;
+
+    if (DemoEngine()) {
+      // when the demo is finished, then reset to the title
+      GameMenuRoutine_ResetTitle();
+      return;
+    }
+
+    GameCoreRoutine();
+    if (GameEngineSubroutine == 6) {
+      GameMenuRoutine_ResetTitle();
+    }
+    return;
+  }
+
+  // demo is not running
+
+  if (button_activate) {
+    // Let'sa go!
+    // (start the game)
+
+#ifdef SMB1_MODE
+    if (button_a_pushed) {
+      GoContinue(ContinueWorld);
+    }
+    LoadAreaPointer();
+    Hidden1UpFlag += 1;
+    OffScr_Hidden1UpFlag += 1;
+    FetchNewGameTimerFlag += 1;
+    OperMode += 1;
+    PrimaryHardMode = WorldSelectEnableFlag;
+    OperMode_Task = 0;
+    DemoTimer = 0;
+    for (int i = 0; i < 12*2; i++) {
+      PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
+    }
+#endif
+#ifdef SMB2J_MODE
+    CompletedWorlds = 0;
+    DiskIOTask = 0;
+    HardWorldFlag = 0;
+    if ((GamesBeatenCount >= 8) && button_a_pushed) {
+      HardWorldFlag = 1;
+    }
+
+    OperMode_Task += 1;
+    PatchPlayerNamePal();
+    WorldNumber = 0;
+    LevelNumber = 0;
+    AreaNumber = 0;
+    for (int i = 0; i < 12; i++) {
+      PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
+    }
+#endif
+    return;
+  }
+
+  if (button_select_pushed_only) {
+    DemoTimer = 0x18;
+#ifdef SMB2J_MODE
+    FrameCounter &= 0xfe;
+#endif
+    if (SelectTimer == 0) {
+      SelectTimer = 0x10;
+#ifdef SMB1_MODE
+      NumberOfPlayers ^= 1;
+      DrawMushroomIcon();
+#endif
+#ifdef SMB2J_MODE
+      CurrentPlayer ^= 1;
+      DrawMenuCursor();
+#endif
+    }
+  }
+
+#ifdef SMB1_MODE
+  if ((buttons == BUTTON_B) && (WorldSelectEnableFlag != 0)) {
+    DemoTimer = 0x18;
+    if (SelectTimer == 0) {
+      SelectTimer = 0x10;
+      WorldSelectNumber = (WorldSelectNumber + 1) & 7;
+      GoContinue(WorldSelectNumber);
+      for (int i = 0; i < 6; i++) {
+        VRAM_Page[i] = WSelectBufferTemplate[i];
+      }
+      VRAM_Page[4] = WorldNumber + 1;
+    }
+  }
+#endif
+
+  SavedJoypadBits[0] = 0;
+
+  GameCoreRoutine();
+  if (GameEngineSubroutine == 6) {
+    GameMenuRoutine_ResetTitle();
+  }
+}
+
+
 enum GameOverMode_jumptable_item {
   GAMEOVERMODE_SETUPGAMEOVER,
   GAMEOVERMODE_SCREENROUTINES,

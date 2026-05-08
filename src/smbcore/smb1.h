@@ -297,9 +297,6 @@ void smb1_TitleScreenMode(void);
 void smb1_GameMenuRoutine(void);
 #define GameMenuRoutine smb1_GameMenuRoutine
 
-byte smb1_GoContinue(byte param_1);
-#define GoContinue smb1_GoContinue
-
 void smb1_DrawMushroomIcon(void);
 #define DrawMushroomIcon smb1_DrawMushroomIcon
 
