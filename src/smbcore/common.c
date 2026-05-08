@@ -1,6 +1,30 @@
 #include "types.h"
 #include "vars.h"
 
+// SMB:8325
+// SM2MAIN:c51b
+// Signature: [] -> []
+void DrawMushroomIcon(void) {
+  // This is called DrawMenuCursor in the SMB2J disassembly.
+
+#ifdef SMB1_MODE
+  for (int i = 0; i < 8; i++) {
+    VRAM_Page[i] = MushroomIconData[i];
+  }
+  if (NumberOfPlayers != 0) {
+    VRAM_Buffer1[3] = 0x24;
+    VRAM_Buffer1[5] = 0xce;
+  }
+#endif
+#ifdef SMB2J_MODE
+  VRAM_Buffer_AddrCtrl = 0x1c;
+  // Inlined: SetupMenuCursor
+  MenuCursorTemplate[3] = MenuCursorTiles[CurrentPlayer];
+  MenuCursorTemplate[5] = MenuCursorTiles[CurrentPlayer + 1];
+#endif
+}
+
+
 static inline void GameMenuRoutine_ResetTitle() {
   OperMode = 0;
   OperMode_Task = 0;
@@ -141,12 +165,11 @@ void GameMenuRoutine(void) {
       SelectTimer = 0x10;
 #ifdef SMB1_MODE
       NumberOfPlayers ^= 1;
-      DrawMushroomIcon();
 #endif
 #ifdef SMB2J_MODE
       CurrentPlayer ^= 1;
-      DrawMenuCursor();
 #endif
+      DrawMushroomIcon();
     }
   }
 
@@ -1614,12 +1637,7 @@ void ClearBuffersDrawIcon(void) {
       VRAM_Page[i] = 0;
       SprObject_X_MoveForce[i] = 0;
     }
-#ifdef SMB1_MODE
     DrawMushroomIcon();
-#endif
-#ifdef SMB2J_MODE
-    DrawMenuCursor();
-#endif
     ScreenRoutineTask = ScreenRoutineTask + 1;
   } else {
     OperMode_Task = OperMode_Task + 1;

@@ -1789,11 +1789,8 @@ void smb2j_GetAreaDataAddrs(void);
 void smb2j_GameMenuRoutine(void);
 #define GameMenuRoutine smb2j_GameMenuRoutine
 
-void smb2j_DrawMenuCursor(void);
-#define DrawMenuCursor smb2j_DrawMenuCursor
-
-void smb2j_SetupMenuCursor(void);
-#define SetupMenuCursor smb2j_SetupMenuCursor
+void smb2j_DrawMushroomIcon(void);
+#define DrawMushroomIcon smb2j_DrawMushroomIcon
 
 bool smb2j_DemoEngine(void);
 #define DemoEngine smb2j_DemoEngine

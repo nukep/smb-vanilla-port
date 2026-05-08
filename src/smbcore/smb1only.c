@@ -1,19 +1,6 @@
 #include "types.h"
 #include "vars.h"
 
-// SMB:8325
-// Signature: [] -> []
-void DrawMushroomIcon(void) {
-  for (int i = 0; i < 8; i++) {
-    VRAM_Page[i] = MushroomIconData[i];
-  }
-  if (NumberOfPlayers != 0) {
-    VRAM_Buffer1[3] = 0x24;
-    VRAM_Buffer1[5] = 0xce;
-  }
-}
-
-
 // SMB:83f6
 // Signature: [] -> []
 void PrintVictoryMessages(void) {

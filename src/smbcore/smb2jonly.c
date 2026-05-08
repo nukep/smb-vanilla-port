@@ -866,22 +866,6 @@ static void LoadLuigiPhysics(void) {
 }
 
 
-// SM2MAIN:c51b
-// Signature: [] -> []
-void DrawMenuCursor(void) {
-  VRAM_Buffer_AddrCtrl = 0x1c;
-  SetupMenuCursor();
-}
-
-
-// SM2MAIN:c520
-// Signature: [] -> []
-void SetupMenuCursor(void) {
-  MenuCursorTemplate[3] = MenuCursorTiles[CurrentPlayer];
-  MenuCursorTemplate[5] = MenuCursorTiles[CurrentPlayer + 1];
-}
-
-
 // SM2MAIN:c592
 // Signature: [] -> []
 void InitializeGame(void) {
@@ -889,7 +873,10 @@ void InitializeGame(void) {
   HardWorldFlag = 0;
   CurrentPlayer = 0;
   PatchPlayerNamePal();
-  SetupMenuCursor();
+
+  // Inlined: SetupMenuCursor
+  MenuCursorTemplate[3] = MenuCursorTiles[0];
+  MenuCursorTemplate[5] = MenuCursorTiles[1];
 
   // Draw a star for each beaten game on the title screen
 
