@@ -258,9 +258,6 @@ void smb1_jumptable_GameRoutines(byte param_1);
 void smb1_jumptable_PlayerMovementSubs(byte param_1);
 #define jumptable_PlayerMovementSubs smb1_jumptable_PlayerMovementSubs
 
-void smb1_jumptable_BumpBlock(byte param_1,byte param_2);
-#define jumptable_BumpBlock smb1_jumptable_BumpBlock
-
 void smb1_jumptable_CheckpointEnemyID(byte param_1,byte param_2);
 #define jumptable_CheckpointEnemyID smb1_jumptable_CheckpointEnemyID
 

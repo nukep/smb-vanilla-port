@@ -5499,6 +5499,75 @@ void InitBlock_XY_Pos(byte param_1) {
 }
 
 
+enum BumpBlock_jumptable_item {
+  BUMPBLOCK_MUSHFLOWERBLOCK_1,
+#ifdef SMB2J_MODE
+  BUMPBLOCK_POISONMUSHBLOCK_1,
+#endif
+  BUMPBLOCK_COINBLOCK_1,
+  BUMPBLOCK_COINBLOCK_2,
+  BUMPBLOCK_EXTRALIFEMUSHBLOCK_1,
+#ifdef SMB2J_MODE
+  BUMPBLOCK_POISONMUSHBLOCK_2,
+#endif
+  BUMPBLOCK_MUSHFLOWERBLOCK_2,
+#ifdef SMB2J_MODE
+  BUMPBLOCK_MUSHFLOWERBLOCK_3,
+  BUMPBLOCK_POISONMUSHBLOCK_3,
+#endif
+  BUMPBLOCK_VINEBLOCK,
+  BUMPBLOCK_STARBLOCK,
+  BUMPBLOCK_COINBLOCK_3,
+  BUMPBLOCK_EXTRALIFEMUSHBLOCK_2,
+};
+
+
+// SMB:n/a
+// SM2MAIN:n/a
+// Signature: [A, X] -> []
+static inline void jumptable_BumpBlock(byte param_1, byte param_2) {
+  switch (param_1) {
+  case BUMPBLOCK_MUSHFLOWERBLOCK_1:
+  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
+    MushFlowerBlock(param_2);
+    return;
+
+  case BUMPBLOCK_COINBLOCK_1:
+  case BUMPBLOCK_COINBLOCK_2:
+  case BUMPBLOCK_COINBLOCK_3:
+    CoinBlock(param_2);
+    return;
+
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
+    ExtraLifeMushBlock(param_2);
+    return;
+
+  case BUMPBLOCK_VINEBLOCK:
+    VineBlock();
+    return;
+
+  case BUMPBLOCK_STARBLOCK:
+    StarBlock(param_2);
+    return;
+
+#ifdef SMB2J_MODE
+  case BUMPBLOCK_MUSHFLOWERBLOCK_3:
+    MushFlowerBlock(param_2);
+    return;
+
+  case BUMPBLOCK_POISONMUSHBLOCK_1:
+  case BUMPBLOCK_POISONMUSHBLOCK_2:
+  case BUMPBLOCK_POISONMUSHBLOCK_3:
+    PoisonMushBlock(param_2);
+    return;
+#endif
+
+  default:
+    jmpengine_overflow(param_1);
+  }
+}
+
 // SMB:bd9b
 // SM2MAIN:895c
 // Signature: [r02, r05, r06, r07] -> []
@@ -5517,12 +5586,14 @@ void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
   Block_Y_Speed[bVar2] = 0xfe;
   sVar4 = BlockBumpedChk(sVar3.r05);
   bVar1 = sVar4.y;
-  if (sVar4.c != false) {
-    if (bVar1 >= ssw(9, 0xd)) {
-      bVar1 = bVar1 - ssw(5, 6);
-    }
-    jumptable_BumpBlock(bVar1, bVar2);
+  if (!sVar4.c) {
+    return;
   }
+
+  if (bVar1 >= ssw(9, 13)) {
+    bVar1 = bVar1 - ssw(5, 6);
+  }
+  jumptable_BumpBlock(bVar1, bVar2);
 }
 
 

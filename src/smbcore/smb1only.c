@@ -1,53 +1,6 @@
 #include "types.h"
 #include "vars.h"
 
-enum BumpBlock_jumptable_item {
-  BUMPBLOCK_MUSHFLOWERBLOCK_1,
-  BUMPBLOCK_COINBLOCK_1,
-  BUMPBLOCK_COINBLOCK_2,
-  BUMPBLOCK_EXTRALIFEMUSHBLOCK_1,
-  BUMPBLOCK_MUSHFLOWERBLOCK_2,
-  BUMPBLOCK_VINEBLOCK,
-  BUMPBLOCK_STARBLOCK,
-  BUMPBLOCK_COINBLOCK_3,
-  BUMPBLOCK_EXTRALIFEMUSHBLOCK_2,
-};
-
-
-// SMB:n/a
-// Signature: [A, X] -> []
-void jumptable_BumpBlock(byte param_1, byte param_2) {
-  switch (param_1) {
-  case BUMPBLOCK_MUSHFLOWERBLOCK_1:
-  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
-    MushFlowerBlock(param_2);
-    return;
-
-  case BUMPBLOCK_COINBLOCK_1:
-  case BUMPBLOCK_COINBLOCK_2:
-  case BUMPBLOCK_COINBLOCK_3:
-    CoinBlock(param_2);
-    return;
-
-  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
-  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
-    ExtraLifeMushBlock(param_2);
-    return;
-
-  case BUMPBLOCK_VINEBLOCK:
-    VineBlock();
-    return;
-
-  case BUMPBLOCK_STARBLOCK:
-    StarBlock(param_2);
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
 static void GameMenuRoutine_ResetTitle() {
   OperMode = 0;
   OperMode_Task = 0;
