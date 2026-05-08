@@ -247,9 +247,6 @@ void smb2j_jumptable_GameOverMode(byte param_1);
 void smb2j_jumptable_AreaParserTasks(byte param_1);
 #define jumptable_AreaParserTasks smb2j_jumptable_AreaParserTasks
 
-void smb2j_jumptable_DecodeAreaData(byte param_1,byte param_2,byte param_3);
-#define jumptable_DecodeAreaData smb2j_jumptable_DecodeAreaData
-
 void smb2j_jumptable_AreaStyleObject(byte param_1,byte param_2);
 #define jumptable_AreaStyleObject smb2j_jumptable_AreaStyleObject
 
