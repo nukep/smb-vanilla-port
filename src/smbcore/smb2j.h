@@ -289,8 +289,8 @@ byte smb2j_jumptable_LargePlatformSubroutines(byte param_1,byte param_2);
 byte smb2j_jumptable_RunStarFlagObj(byte param_1,byte param_2);
 #define jumptable_RunStarFlagObj smb2j_jumptable_RunStarFlagObj
 
-void smb2j_jumptable_AttractModeSubs(byte param_1);
-#define jumptable_AttractModeSubs smb2j_jumptable_AttractModeSubs
+void smb2j_jumptable_TitleScreenMode(byte param_1);
+#define jumptable_TitleScreenMode smb2j_jumptable_TitleScreenMode
 
 void smb2j_jumptable_HardWorldsCheckpoint(byte param_1);
 #define jumptable_HardWorldsCheckpoint smb2j_jumptable_HardWorldsCheckpoint
@@ -1717,8 +1717,8 @@ byte smb2j_DividePDiff(byte param_1,byte param_2,bool param_3,byte param_4,byte 
 struct_xyr02 smb2j_DrawSpriteObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
 #define DrawSpriteObject smb2j_DrawSpriteObject
 
-void smb2j_AttractModeSubs(void);
-#define AttractModeSubs smb2j_AttractModeSubs
+void smb2j_TitleScreenMode(void);
+#define TitleScreenMode smb2j_TitleScreenMode
 
 void smb2j_HardWorldsCheckpoint(void);
 #define HardWorldsCheckpoint smb2j_HardWorldsCheckpoint

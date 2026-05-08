@@ -346,6 +346,6 @@ void UpdateGamesBeaten() {
   } else {
     CompletedWorlds = 0;
     OperMode = 0;
-    AttractModeSubs();
+    TitleScreenMode();
   }
 }

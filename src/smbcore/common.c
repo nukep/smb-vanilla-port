@@ -954,12 +954,7 @@ void OperModeExecutionTree(void) {
 
   switch (OperMode) {
   case OPERMODEEXECUTIONTREE_TITLESCREENMODE:
-#ifdef SMB1_MODE
     TitleScreenMode();
-#endif
-#ifdef SMB2J_MODE
-    AttractModeSubs();
-#endif
     return;
 
   case OPERMODEEXECUTIONTREE_GAMEMODE:

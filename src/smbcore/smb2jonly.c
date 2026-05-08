@@ -1,6 +1,53 @@
 #include "types.h"
 #include "vars.h"
 
+enum TitleScreenMode_jumptable_item {
+  TITLESCREENMODE_ATTRACTMODEDISKROUTINES,
+  TITLESCREENMODE_INITIALIZEGAME,
+  TITLESCREENMODE_SCREENROUTINES,
+  TITLESCREENMODE_PRIMARYGAMESETUP,
+  TITLESCREENMODE_GAMEMENUROUTINE,
+  TITLESCREENMODE_HARDWORLDSCHECKPOINT,
+};
+
+
+// SM2MAIN:n/a
+// Signature: [A] -> []
+void jumptable_TitleScreenMode(byte param_1) {
+  // Note: In the SMB2J disassembly, this is called "AttractModeSubs".
+  // We consolidated it into SMB1's "TitleScreenMode" for clarity.
+
+  switch (param_1) {
+  case TITLESCREENMODE_ATTRACTMODEDISKROUTINES:
+    AttractModeDiskRoutines();
+    return;
+
+  case TITLESCREENMODE_INITIALIZEGAME:
+    InitializeGame();
+    return;
+
+  case TITLESCREENMODE_SCREENROUTINES:
+    ScreenRoutines();
+    return;
+
+  case TITLESCREENMODE_PRIMARYGAMESETUP:
+    PrimaryGameSetup();
+    return;
+
+  case TITLESCREENMODE_GAMEMENUROUTINE:
+    GameMenuRoutine();
+    return;
+
+  case TITLESCREENMODE_HARDWORLDSCHECKPOINT:
+    HardWorldsCheckpoint();
+    return;
+
+  default:
+    jmpengine_overflow(param_1);
+  }
+}
+
+
 enum VictoryModeSubroutines_jumptable_item {
   VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
   VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
@@ -630,49 +677,6 @@ void jumptable_BumpBlock(byte param_1, byte param_2) {
 }
 
 
-enum AttractModeSubs_jumptable_item {
-  ATTRACTMODESUBS_ATTRACTMODEDISKROUTINES,
-  ATTRACTMODESUBS_INITIALIZEGAME,
-  ATTRACTMODESUBS_SCREENROUTINES,
-  ATTRACTMODESUBS_PRIMARYGAMESETUP,
-  ATTRACTMODESUBS_GAMEMENUROUTINE,
-  ATTRACTMODESUBS_HARDWORLDSCHECKPOINT,
-};
-
-
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_AttractModeSubs(byte param_1) {
-  switch (param_1) {
-  case ATTRACTMODESUBS_ATTRACTMODEDISKROUTINES:
-    AttractModeDiskRoutines();
-    return;
-
-  case ATTRACTMODESUBS_INITIALIZEGAME:
-    InitializeGame();
-    return;
-
-  case ATTRACTMODESUBS_SCREENROUTINES:
-    ScreenRoutines();
-    return;
-
-  case ATTRACTMODESUBS_PRIMARYGAMESETUP:
-    PrimaryGameSetup();
-    return;
-
-  case ATTRACTMODESUBS_GAMEMENUROUTINE:
-    GameMenuRoutine();
-    return;
-
-  case ATTRACTMODESUBS_HARDWORLDSCHECKPOINT:
-    HardWorldsCheckpoint();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
 
 enum HardWorldsCheckpoint_jumptable_item {
   HARDWORLDSCHECKPOINT_DISKSCREEN,
@@ -1112,8 +1116,10 @@ void NoDemote(byte param_1, byte param_2) {
 
 // SM2MAIN:bfb0
 // Signature: [] -> []
-void AttractModeSubs(void) {
-  jumptable_AttractModeSubs(OperMode_Task);
+void TitleScreenMode(void) {
+  // Note: In the SMB2J disassembly, this is called "AttractModeSubs".
+  // We consolidated it into SMB1's "TitleScreenMode" for clarity.
+  jumptable_TitleScreenMode(OperMode_Task);
 }
 
 
@@ -1955,7 +1961,7 @@ void RunMushroomRetainers(void) {
       }
       CompletedWorlds = 0;
       OperMode = 0;
-      AttractModeSubs();
+      TitleScreenMode();
       return;
     }
     OperMode_Task += 1;
