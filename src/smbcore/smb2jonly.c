@@ -1,50 +1,6 @@
 #include "types.h"
 #include "vars.h"
 
-enum VictoryModeSubroutines_jumptable_item {
-  VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
-  VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
-  VICTORYMODESUBROUTINES_PLAYERVICTORYWALK,
-  VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES,
-  VICTORYMODESUBROUTINES_ENDCASTLEAWARD,
-  VICTORYMODESUBROUTINES_PLAYERENDWORLD,
-};
-
-
-// SM2MAIN:n/a
-// Signature: [A, r00] -> []
-void jumptable_VictoryModeSubroutines(byte param_1, byte param_2) {
-  switch (param_1) {
-  case VICTORYMODESUBROUTINES_BRIDGECOLLAPSE:
-    BridgeCollapse(param_2);
-    return;
-
-  case VICTORYMODESUBROUTINES_SETUPVICTORYMODE:
-    SetupVictoryMode();
-    return;
-
-  case VICTORYMODESUBROUTINES_PLAYERVICTORYWALK:
-    PlayerVictoryWalk();
-    return;
-
-  case VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES:
-    PrintVictoryMessages();
-    return;
-
-  case VICTORYMODESUBROUTINES_ENDCASTLEAWARD:
-    EndCastleAward();
-    return;
-
-  case VICTORYMODESUBROUTINES_PLAYERENDWORLD:
-    PlayerEndWorld();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
 enum VictoryModeSubroutines_forW8_jumptable_item {
   VICTORYMODESUBROUTINES_FORW8_BRIDGECOLLAPSE,
   VICTORYMODESUBROUTINES_FORW8_SETUPVICTORYMODE,

@@ -243,9 +243,6 @@ struct struct_xr00 {
 
 
 
-void smb1_jumptable_VictoryModeSubroutines(byte param_1,byte param_2);
-#define jumptable_VictoryModeSubroutines smb1_jumptable_VictoryModeSubroutines
-
 void smb1_jumptable_ScreenRoutines(byte param_1);
 #define jumptable_ScreenRoutines smb1_jumptable_ScreenRoutines
 

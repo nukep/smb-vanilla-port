@@ -238,9 +238,6 @@ struct struct_xr00 {
 
 
 
-void smb2j_jumptable_VictoryModeSubroutines(byte param_1,byte param_2);
-#define jumptable_VictoryModeSubroutines smb2j_jumptable_VictoryModeSubroutines
-
 void smb2j_jumptable_VictoryModeSubroutines_forW8(byte param_1,byte param_2);
 #define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
 

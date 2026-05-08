@@ -1,45 +1,6 @@
 #include "types.h"
 #include "vars.h"
 
-enum VictoryModeSubroutines_jumptable_item {
-  VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
-  VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
-  VICTORYMODESUBROUTINES_PLAYERVICTORYWALK,
-  VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES,
-  VICTORYMODESUBROUTINES_PLAYERENDWORLD,
-};
-
-
-// SMB:n/a
-// Signature: [A, r00] -> []
-void jumptable_VictoryModeSubroutines(byte param_1, byte param_2) {
-  switch (param_1) {
-  case VICTORYMODESUBROUTINES_BRIDGECOLLAPSE:
-    BridgeCollapse(param_2);
-    return;
-
-  case VICTORYMODESUBROUTINES_SETUPVICTORYMODE:
-    SetupVictoryMode();
-    return;
-
-  case VICTORYMODESUBROUTINES_PLAYERVICTORYWALK:
-    PlayerVictoryWalk();
-    return;
-
-  case VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES:
-    PrintVictoryMessages();
-    return;
-
-  case VICTORYMODESUBROUTINES_PLAYERENDWORLD:
-    PlayerEndWorld();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
 enum ScreenRoutines_jumptable_item {
   SCREENROUTINES_INITSCREEN,
   SCREENROUTINES_SETUPINTERMEDIATE,

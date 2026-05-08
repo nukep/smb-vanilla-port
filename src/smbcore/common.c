@@ -943,6 +943,18 @@ void VictoryMode(byte param_1) {
 }
 
 
+enum VictoryModeSubroutines_jumptable_item {
+  VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
+  VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
+  VICTORYMODESUBROUTINES_PLAYERVICTORYWALK,
+  VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES,
+#ifdef SMB2J_MODE
+  VICTORYMODESUBROUTINES_ENDCASTLEAWARD,
+#endif
+  VICTORYMODESUBROUTINES_PLAYERENDWORLD,
+};
+
+
 // SMB:83a0
 // SM2MAIN:62bc
 // Signature: [r00] -> []
@@ -953,7 +965,37 @@ void VictoryModeSubroutines(byte param_1) {
     return;
   }
 #endif
-  jumptable_VictoryModeSubroutines(OperMode_Task, param_1);
+
+  switch (OperMode_Task) {
+  case VICTORYMODESUBROUTINES_BRIDGECOLLAPSE:
+    BridgeCollapse(param_1);
+    return;
+
+  case VICTORYMODESUBROUTINES_SETUPVICTORYMODE:
+    SetupVictoryMode();
+    return;
+
+  case VICTORYMODESUBROUTINES_PLAYERVICTORYWALK:
+    PlayerVictoryWalk();
+    return;
+
+  case VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES:
+    PrintVictoryMessages();
+    return;
+
+  case VICTORYMODESUBROUTINES_PLAYERENDWORLD:
+    PlayerEndWorld();
+    return;
+
+#ifdef SMB2J_MODE
+  case VICTORYMODESUBROUTINES_ENDCASTLEAWARD:
+    EndCastleAward();
+    return;
+#endif
+
+  default:
+    jmpengine_overflow(OperMode_Task);
+  }
 }
 
 
