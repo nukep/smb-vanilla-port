@@ -1,28 +1,11 @@
 #include "types.h"
 #include "vars.h"
 
-static void GameMenuRoutine_ResetTitle() {
+static inline void GameMenuRoutine_ResetTitle() {
   OperMode = 0;
   OperMode_Task = 0;
   Sprite0HitDetectFlag = 0;
   DisableScreenFlag = DisableScreenFlag + 1;
-}
-
-static void GameMenuRoutine_StartGame(bool button_a_pushed) {
-  if (button_a_pushed) {
-    GoContinue(ContinueWorld);
-  }
-  LoadAreaPointer();
-  Hidden1UpFlag += 1;
-  OffScr_Hidden1UpFlag += 1;
-  FetchNewGameTimerFlag += 1;
-  OperMode += 1;
-  PrimaryHardMode = WorldSelectEnableFlag;
-  OperMode_Task = 0;
-  DemoTimer = 0;
-  for (int i = 0; i < 12*2; i++) {
-    PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
-  }
 }
 
 // SMB:8245
@@ -30,15 +13,26 @@ static void GameMenuRoutine_StartGame(bool button_a_pushed) {
 void GameMenuRoutine(void) {
   byte buttons = SavedJoypadBits[0] | SavedJoypadBits[1];
 
+  bool button_start_pushed = (buttons & BUTTON_START) != 0;
   bool button_start_and_maybe_a_pushed_only = (buttons == BUTTON_START) || (buttons == (BUTTON_A | BUTTON_START));
   bool button_a_pushed = (buttons & BUTTON_A) != 0;
   bool button_select_pushed_only = buttons == BUTTON_SELECT;
   bool button_b_pushed_only = buttons == BUTTON_B;
 
+  // NES note: This port inverts the comparison order of DemoTimer and the button pushes.
+  // (in the orignal NES versions, the button presses are checked first, then DemoTimer).
+  // IMO this is easier to understand.
+
   // if the demo is running...
   if (DemoTimer == 0) {
     // and Start or Select is pushed...
-    if (button_start_and_maybe_a_pushed_only || button_select_pushed_only) {
+    if (button_start_and_maybe_a_pushed_only) {
+      // then reset to the title
+      GameMenuRoutine_ResetTitle();
+      return;
+    }
+
+    if (button_select_pushed_only) {
       // then reset to the title
       GameMenuRoutine_ResetTitle();
       return;
@@ -65,7 +59,21 @@ void GameMenuRoutine(void) {
   if (button_start_and_maybe_a_pushed_only) {
     // Let'sa go!
     // (start the game)
-    GameMenuRoutine_StartGame(button_a_pushed);
+
+    if (button_a_pushed) {
+      GoContinue(ContinueWorld);
+    }
+    LoadAreaPointer();
+    Hidden1UpFlag += 1;
+    OffScr_Hidden1UpFlag += 1;
+    FetchNewGameTimerFlag += 1;
+    OperMode += 1;
+    PrimaryHardMode = WorldSelectEnableFlag;
+    OperMode_Task = 0;
+    DemoTimer = 0;
+    for (int i = 0; i < 12*2; i++) {
+      PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
+    }
     return;
   }
 
