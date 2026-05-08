@@ -378,7 +378,6 @@ int main(int argc, char *argv[]) {
   fe->video_scale = 3;
 
   if (cfg.graphics.video_scale != 0) {
-    printf("video scale = %d\n", cfg.graphics.video_scale);
     fe->video_scale = cfg.graphics.video_scale;
   }
 
