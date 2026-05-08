@@ -118,15 +118,12 @@ void jumptable_ScreenRoutines(byte param_1) {
     return;
 
   case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1:
+  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2:
     ResetSpritesAndScreenTimer();
     return;
 
   case SCREENROUTINES_DISPLAYINTERMEDIATE:
     DisplayIntermediate();
-    return;
-
-  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2:
-    ResetSpritesAndScreenTimer();
     return;
 
   case SCREENROUTINES_AREAPARSERTASKCONTROL:
@@ -219,6 +216,7 @@ enum DecodeAreaData_jumptable_item {
 void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
   switch (param_1) {
   case DECODEAREADATA_VERTICALPIPE_1:
+  case DECODEAREADATA_VERTICALPIPE_2:
     VerticalPipe(param_2, param_3);
     return;
 
@@ -244,10 +242,6 @@ void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
 
   case DECODEAREADATA_COLUMNOFSOLIDBLOCKS:
     ColumnOfSolidBlocks(param_2);
-    return;
-
-  case DECODEAREADATA_VERTICALPIPE_2:
-    VerticalPipe(param_2, param_3);
     return;
 
   case DECODEAREADATA_HOLE_EMPTY:
@@ -307,13 +301,7 @@ void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
     return;
 
   case DECODEAREADATA_QUESTIONBLOCK_1:
-    QuestionBlock(param_2, param_3);
-    return;
-
   case DECODEAREADATA_QUESTIONBLOCK_2:
-    QuestionBlock(param_2, param_3);
-    return;
-
   case DECODEAREADATA_QUESTIONBLOCK_3:
     QuestionBlock(param_2, param_3);
     return;
@@ -323,23 +311,14 @@ void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
     return;
 
   case DECODEAREADATA_BRICKWITHITEM_1:
-    BrickWithItem(param_2, param_3);
-    return;
-
   case DECODEAREADATA_BRICKWITHITEM_2:
-    BrickWithItem(param_2, param_3);
-    return;
-
   case DECODEAREADATA_BRICKWITHITEM_3:
+  case DECODEAREADATA_BRICKWITHITEM_4:
     BrickWithItem(param_2, param_3);
     return;
 
   case DECODEAREADATA_BRICKWITHCOINS:
     BrickWithCoins(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_BRICKWITHITEM_4:
-    BrickWithItem(param_2, param_3);
     return;
 
   case DECODEAREADATA_WATERPIPE:
@@ -379,21 +358,12 @@ void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
     return;
 
   case DECODEAREADATA_SCROLLLOCKOBJECT_1:
-    ScrollLockObject();
-    return;
-
   case DECODEAREADATA_SCROLLLOCKOBJECT_2:
     ScrollLockObject();
     return;
 
   case DECODEAREADATA_AREAFRENZY_1:
-    AreaFrenzy(param_3);
-    return;
-
   case DECODEAREADATA_AREAFRENZY_2:
-    AreaFrenzy(param_3);
-    return;
-
   case DECODEAREADATA_AREAFRENZY_3:
     AreaFrenzy(param_3);
     return;
@@ -464,23 +434,19 @@ enum BumpBlock_jumptable_item {
 void jumptable_BumpBlock(byte param_1, byte param_2) {
   switch (param_1) {
   case BUMPBLOCK_MUSHFLOWERBLOCK_1:
+  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
     MushFlowerBlock(param_2);
     return;
 
   case BUMPBLOCK_COINBLOCK_1:
-    CoinBlock(param_2);
-    return;
-
   case BUMPBLOCK_COINBLOCK_2:
+  case BUMPBLOCK_COINBLOCK_3:
     CoinBlock(param_2);
     return;
 
   case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
     ExtraLifeMushBlock(param_2);
-    return;
-
-  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
-    MushFlowerBlock(param_2);
     return;
 
   case BUMPBLOCK_VINEBLOCK:
@@ -489,14 +455,6 @@ void jumptable_BumpBlock(byte param_1, byte param_2) {
 
   case BUMPBLOCK_STARBLOCK:
     StarBlock(param_2);
-    return;
-
-  case BUMPBLOCK_COINBLOCK_3:
-    CoinBlock(param_2);
-    return;
-
-  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
-    ExtraLifeMushBlock(param_2);
     return;
 
   default:

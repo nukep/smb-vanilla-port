@@ -49,33 +49,18 @@ enum AreaParserTasks_jumptable_item {
 void jumptable_AreaParserTasks(byte param_1) {
   switch (param_1) {
   case AREAPARSERTASKS_INCREMENTCOLUMNPOS_1:
-    IncrementColumnPos();
-    return;
-
-  case AREAPARSERTASKS_RENDERAREAGRAPHICS_1:
-    RenderAreaGraphics();
-    return;
-
-  case AREAPARSERTASKS_RENDERAREAGRAPHICS_2:
-    RenderAreaGraphics();
-    return;
-
-  case AREAPARSERTASKS_AREAPARSERCORE_1:
-    AreaParserCore();
-    return;
-
   case AREAPARSERTASKS_INCREMENTCOLUMNPOS_2:
     IncrementColumnPos();
     return;
 
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_1:
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_2:
   case AREAPARSERTASKS_RENDERAREAGRAPHICS_3:
-    RenderAreaGraphics();
-    return;
-
   case AREAPARSERTASKS_RENDERAREAGRAPHICS_4:
     RenderAreaGraphics();
     return;
 
+  case AREAPARSERTASKS_AREAPARSERCORE_1:
   case AREAPARSERTASKS_AREAPARSERCORE_2:
     AreaParserCore();
     return;
@@ -266,13 +251,7 @@ enum CheckpointEnemyID_jumptable_item {
 void jumptable_CheckpointEnemyID(byte param_1, byte param_2) {
   switch (param_1) {
   case CHECKPOINTENEMYID_INITNORMALENEMY_1:
-    InitNormalEnemy(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITNORMALENEMY_2:
-    InitNormalEnemy(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITNORMALENEMY_3:
     InitNormalEnemy(param_2);
     return;
@@ -304,13 +283,22 @@ void jumptable_CheckpointEnemyID(byte param_1, byte param_2) {
     return;
 
   case CHECKPOINTENEMYID_NOINITCODE_1:
+  case CHECKPOINTENEMYID_NOINITCODE_2:
+  case CHECKPOINTENEMYID_NOINITCODE_3:
+  case CHECKPOINTENEMYID_NOINITCODE_4:
+  case CHECKPOINTENEMYID_NOINITCODE_5:
+  case CHECKPOINTENEMYID_NOINITCODE_6:
+  case CHECKPOINTENEMYID_NOINITCODE_7:
+  case CHECKPOINTENEMYID_NOINITCODE_8:
+  case CHECKPOINTENEMYID_NOINITCODE_9:
+  case CHECKPOINTENEMYID_NOINITCODE_10:
+  case CHECKPOINTENEMYID_NOINITCODE_11:
+  case CHECKPOINTENEMYID_NOINITCODE_12:
+  case CHECKPOINTENEMYID_NOINITCODE_13:
     NoInitCode();
     return;
 
   case CHECKPOINTENEMYID_INITCHEEPCHEEP_1:
-    InitCheepCheep(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITCHEEPCHEEP_2:
     InitCheepCheep(param_2);
     return;
@@ -340,25 +328,9 @@ void jumptable_CheckpointEnemyID(byte param_1, byte param_2) {
     return;
 
   case CHECKPOINTENEMYID_INITENEMYFRENZY_1:
-    InitEnemyFrenzy(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_2:
-    NoInitCode();
-    return;
-
   case CHECKPOINTENEMYID_INITENEMYFRENZY_2:
-    InitEnemyFrenzy(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITENEMYFRENZY_3:
-    InitEnemyFrenzy(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITENEMYFRENZY_4:
-    InitEnemyFrenzy(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITENEMYFRENZY_5:
     InitEnemyFrenzy(param_2);
     return;
@@ -367,48 +339,15 @@ void jumptable_CheckpointEnemyID(byte param_1, byte param_2) {
     EndFrenzy(param_2);
     return;
 
-  case CHECKPOINTENEMYID_NOINITCODE_3:
-    NoInitCode();
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_4:
-    NoInitCode();
-    return;
-
   case CHECKPOINTENEMYID_INITSHORTFIREBAR_1:
-    InitShortFirebar(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITSHORTFIREBAR_2:
-    InitShortFirebar(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITSHORTFIREBAR_3:
-    InitShortFirebar(param_2);
-    return;
-
   case CHECKPOINTENEMYID_INITSHORTFIREBAR_4:
     InitShortFirebar(param_2);
     return;
 
   case CHECKPOINTENEMYID_INITLONGFIREBAR:
     InitLongFirebar(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_5:
-    NoInitCode();
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_6:
-    NoInitCode();
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_7:
-    NoInitCode();
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_8:
-    NoInitCode();
     return;
 
   case CHECKPOINTENEMYID_INITBALPLATFORM:
@@ -428,15 +367,12 @@ void jumptable_CheckpointEnemyID(byte param_1, byte param_2) {
     return;
 
   case CHECKPOINTENEMYID_INITHORIPLATFORM_1:
+  case CHECKPOINTENEMYID_INITHORIPLATFORM_2:
     InitHoriPlatform(param_2);
     return;
 
   case CHECKPOINTENEMYID_INITDROPPLATFORM:
     InitDropPlatform(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITHORIPLATFORM_2:
-    InitHoriPlatform(param_2);
     return;
 
   case CHECKPOINTENEMYID_PLATLIFTUP:
@@ -457,26 +393,6 @@ void jumptable_CheckpointEnemyID(byte param_1, byte param_2) {
 
   case CHECKPOINTENEMYID_SETUP_VINE:
     Setup_Vine(param_2, 0x60);
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_9:
-    NoInitCode();
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_10:
-    NoInitCode();
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_11:
-    NoInitCode();
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_12:
-    NoInitCode();
-    return;
-
-  case CHECKPOINTENEMYID_NOINITCODE_13:
-    NoInitCode();
     return;
 
   case CHECKPOINTENEMYID_INITRETAINEROBJ:
@@ -591,73 +507,35 @@ byte jumptable_RunEnemyObjectsCore(byte param_1, byte param_2) {
     return RunFireworks(param_2);
 
   case RUNENEMYOBJECTSCORE_NORUNCODE_1:
-    NoRunCode();
-    return param_2;
-
   case RUNENEMYOBJECTSCORE_NORUNCODE_2:
-    NoRunCode();
-    return param_2;
-
   case RUNENEMYOBJECTSCORE_NORUNCODE_3:
-    NoRunCode();
-    return param_2;
-
   case RUNENEMYOBJECTSCORE_NORUNCODE_4:
+  case RUNENEMYOBJECTSCORE_NORUNCODE_5:
+  case RUNENEMYOBJECTSCORE_NORUNCODE_6:
+  case RUNENEMYOBJECTSCORE_NORUNCODE_7:
     NoRunCode();
     return param_2;
 
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_1:
-    return RunFirebarObj(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_2:
-    return RunFirebarObj(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_3:
-    return RunFirebarObj(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_4:
-    return RunFirebarObj(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_5:
-    return RunFirebarObj(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_6:
-    return RunFirebarObj(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_7:
-    return RunFirebarObj(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_8:
     return RunFirebarObj(param_2);
 
-  case RUNENEMYOBJECTSCORE_NORUNCODE_5:
-    NoRunCode();
-    return param_2;
-
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_1:
-    return RunLargePlatform(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_2:
-    return RunLargePlatform(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_3:
-    return RunLargePlatform(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_4:
-    return RunLargePlatform(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_5:
-    return RunLargePlatform(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_6:
-    return RunLargePlatform(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_7:
     return RunLargePlatform(param_2);
 
   case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_1:
-    return RunSmallPlatform(param_2);
-
   case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_2:
     return RunSmallPlatform(param_2);
 
@@ -670,19 +548,11 @@ byte jumptable_RunEnemyObjectsCore(byte param_1, byte param_2) {
   case RUNENEMYOBJECTSCORE_VINEOBJECTHANDLER:
     return VineObjectHandler(param_2);
 
-  case RUNENEMYOBJECTSCORE_NORUNCODE_6:
-    NoRunCode();
-    return param_2;
-
   case RUNENEMYOBJECTSCORE_RUNSTARFLAGOBJ:
     return RunStarFlagObj(param_2);
 
   case RUNENEMYOBJECTSCORE_JUMPSPRINGHANDLER:
     return JumpspringHandler(param_2);
-
-  case RUNENEMYOBJECTSCORE_NORUNCODE_7:
-    NoRunCode();
-    return param_2;
 
   case RUNENEMYOBJECTSCORE_WARPZONEOBJECT:
     WarpZoneObject(param_2);
@@ -729,15 +599,11 @@ enum EnemyMovementSubs_jumptable_item {
 byte jumptable_EnemyMovementSubs(byte param_1, byte param_2) {
   switch (param_1) {
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_1:
-    return MoveNormalEnemy(param_2);
-
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_2:
-    return MoveNormalEnemy(param_2);
-
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_3:
-    return MoveNormalEnemy(param_2);
-
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_4:
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5:
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6:
     return MoveNormalEnemy(param_2);
 
   case ENEMYMOVEMENTSUBS_MOVEUPSIDEDOWNPIRANHAP:
@@ -751,9 +617,6 @@ byte jumptable_EnemyMovementSubs(byte param_1, byte param_2) {
   case ENEMYMOVEMENTSUBS_PROCHAMMERBRO:
     return ProcHammerBro(param_2);
 
-  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5:
-    return MoveNormalEnemy(param_2);
-
   case ENEMYMOVEMENTSUBS_MOVEBLOOBER:
     return MoveBloober(param_2, false);
 
@@ -761,12 +624,11 @@ byte jumptable_EnemyMovementSubs(byte param_1, byte param_2) {
     return MoveBulletBill(param_2);
 
   case ENEMYMOVEMENTSUBS_NOMOVECODE_1:
+  case ENEMYMOVEMENTSUBS_NOMOVECODE_2:
     NoMoveCode();
     return param_2;
 
   case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_1:
-    return MoveSwimmingCheepCheep(param_2);
-
   case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_2:
     return MoveSwimmingCheepCheep(param_2);
 
@@ -788,13 +650,6 @@ byte jumptable_EnemyMovementSubs(byte param_1, byte param_2) {
 
   case ENEMYMOVEMENTSUBS_MOVELAKITU:
     return MoveLakitu(param_2);
-
-  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6:
-    return MoveNormalEnemy(param_2);
-
-  case ENEMYMOVEMENTSUBS_NOMOVECODE_2:
-    NoMoveCode();
-    return param_2;
 
   case ENEMYMOVEMENTSUBS_MOVEFLYINGCHEEPCHEEP:
     return MoveFlyingCheepCheep(param_2);
@@ -829,9 +684,6 @@ byte jumptable_LargePlatformSubroutines(byte param_1, byte param_2) {
     return YMovingPlatform(param_2);
 
   case LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_1:
-    MoveLargeLiftPlat(param_2);
-    return param_2;
-
   case LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_2:
     MoveLargeLiftPlat(param_2);
     return param_2;
