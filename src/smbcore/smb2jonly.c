@@ -253,36 +253,6 @@ void DrawTitleScreen(void) {
 }
 
 
-// SM2MAIN:636d
-// Signature: [] -> []
-void PrintVictoryMessages(void) {
-  bool bVar1;
-
-  if ((SecondaryMsgCounter == 0)
-      && ((PrimaryMsgCounter == 0 || ((PrimaryMsgCounter < 8 && (PrimaryMsgCounter != 0)))))) {
-    if (PrimaryMsgCounter != 0) {
-      bVar1 = PrimaryMsgCounter > 2;
-      if (bVar1) {
-        goto SetEndTimer;
-      }
-      if (PrimaryMsgCounter > 1) {
-        goto IncMsgCounter;
-      }
-    }
-    VRAM_Buffer_AddrCtrl = PrimaryMsgCounter + 0xc;
-  }
-IncMsgCounter:
-  PrimaryMsgCounter += SecondaryMsgCounter >= 0xfc;
-  bVar1 = PrimaryMsgCounter > 5;
-  SecondaryMsgCounter = SecondaryMsgCounter + 4;
-SetEndTimer:
-  if (bVar1) {
-    WorldEndTimer = 8;
-    OperMode_Task += 1;
-  }
-}
-
-
 // SM2MAIN:63af
 // Signature: [] -> []
 void EndCastleAward(void) {

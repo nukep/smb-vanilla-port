@@ -1,63 +1,6 @@
 #include "types.h"
 #include "vars.h"
 
-// SMB:83f6
-// Signature: [] -> []
-void PrintVictoryMessages(void) {
-  byte bVar1;
-  byte bVar2;
-  bool bVar3;
-
-  if (SecondaryMsgCounter == 0) {
-    bVar1 = PrimaryMsgCounter;
-    if (PrimaryMsgCounter == 0) {
-      goto ThankPlayer;
-    }
-    if (PrimaryMsgCounter < 9) {
-      if (WorldNumber == 7) {
-        if (PrimaryMsgCounter >= 3) {
-          bVar1 = (PrimaryMsgCounter - 1) - (PrimaryMsgCounter < 3);
-ThankPlayer:
-          if (bVar1 == 0) {
-            bVar2 = bVar1;
-            if (CurrentPlayer != 0) {
-              bVar2 = 1;
-            }
-          } else {
-            bVar2 = bVar1 + 1;
-            if (WorldNumber != 7) {
-              bVar3 = bVar1 >= 4;
-              if (bVar3) {
-                goto SetEndTimer;
-              }
-              bVar2 = bVar1;
-              if (bVar1 > 2) {
-                goto IncMsgCounter;
-              }
-            }
-          }
-          if (bVar2 == 3) {
-            EventMusicQueue = 4;
-          }
-          VRAM_Buffer_AddrCtrl = bVar2 + 0xc;
-        }
-      } else if (PrimaryMsgCounter > 1) {
-        goto ThankPlayer;
-      }
-    }
-  }
-IncMsgCounter:
-  PrimaryMsgCounter += SecondaryMsgCounter >= 0xfc;
-  bVar3 = PrimaryMsgCounter > 6;
-  SecondaryMsgCounter = SecondaryMsgCounter + 4;
-SetEndTimer:
-  if (bVar3) {
-    WorldEndTimer = 6;
-    OperMode_Task += 1;
-  }
-}
-
-
 // SMB:8808
 // Signature: [A] -> []
 void WriteGameText(byte param_1) {

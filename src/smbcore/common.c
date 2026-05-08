@@ -1239,6 +1239,71 @@ void PlayerVictoryWalk(void) {
 }
 
 
+// SMB:83f6
+// SM2MAIN:636d
+// Signature: [] -> []
+void PrintVictoryMessages(void) {
+  bool inc_msg_counter = true;
+
+  if (SecondaryMsgCounter == 0) {
+    bool print_msg = false;
+    byte bVar1;
+
+    if (PrimaryMsgCounter == 0) {
+      print_msg = true;
+      bVar1 = 0;
+#ifdef SMB1_MODE
+      bVar1 = (CurrentPlayer != 0) ? 1 : 0;
+#endif
+    } else if (PrimaryMsgCounter < ssw(9,8)) {
+#ifdef SMB1_MODE
+      if (WorldNumber == 7 && PrimaryMsgCounter >= 3) {
+          print_msg = true;
+          bVar1 = PrimaryMsgCounter;
+          // EvalForMusic
+          if (PrimaryMsgCounter == 3) {
+            EventMusicQueue = 4;
+          }
+      }
+      if (WorldNumber != 7 && PrimaryMsgCounter == 2) {
+          print_msg = true;
+          bVar1 = 2;
+      }
+
+      if (WorldNumber != 7 && PrimaryMsgCounter >= 4) {
+        inc_msg_counter = false;
+      }
+#endif
+#ifdef SMB2J_MODE
+      if (PrimaryMsgCounter < 2) {
+        print_msg = true;
+        bVar1 = PrimaryMsgCounter;
+      }
+
+      if (PrimaryMsgCounter >= 3) {
+        inc_msg_counter = false;
+      }
+#endif
+    }
+
+    if (print_msg) {
+      VRAM_Buffer_AddrCtrl = bVar1 + 0xc;
+    }
+  }
+
+  if (inc_msg_counter) {
+    PrimaryMsgCounter += SecondaryMsgCounter >= 0xfc;
+    SecondaryMsgCounter += 4;
+    if (PrimaryMsgCounter <= ssw(6,5)) {
+      return;
+    }
+  }
+
+  WorldEndTimer = ssw(6,8);
+  OperMode_Task += 1;
+}
+
+
 // SMB:8461
 // SM2MAIN:63d2
 // Signature: [] -> []
