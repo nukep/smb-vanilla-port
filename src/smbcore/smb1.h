@@ -465,12 +465,6 @@ void smb1_TerminateGame(void);
 void smb1_ContinueGame(void);
 #define ContinueGame smb1_ContinueGame
 
-void smb1_DoNothing(void);
-#define DoNothing smb1_DoNothing
-
-void smb1_DoNothing2(void);
-#define DoNothing2 smb1_DoNothing2
-
 void smb1_AreaParserTaskHandler(void);
 #define AreaParserTaskHandler smb1_AreaParserTaskHandler
 
@@ -966,9 +960,6 @@ byte smb1_CheckThreeBytes(void);
 void smb1_CheckpointEnemyID(byte param_1);
 #define CheckpointEnemyID smb1_CheckpointEnemyID
 
-void smb1_NoInitCode(void);
-#define NoInitCode smb1_NoInitCode
-
 void smb1_InitGoomba(byte param_1);
 #define InitGoomba smb1_InitGoomba
 
@@ -1053,9 +1044,6 @@ void smb1_InitPiranhaPlant(byte param_1);
 void smb1_InitEnemyFrenzy(byte param_1);
 #define InitEnemyFrenzy smb1_InitEnemyFrenzy
 
-void smb1_NoFrenzyCode(void);
-#define NoFrenzyCode smb1_NoFrenzyCode
-
 void smb1_EndFrenzy(byte param_1);
 #define EndFrenzy smb1_EndFrenzy
 
@@ -1092,14 +1080,8 @@ void smb1_PlatLiftDown(byte param_1);
 void smb1_PosPlatform(byte param_1,byte param_2);
 #define PosPlatform smb1_PosPlatform
 
-void smb1_EndOfEnemyInitCode(void);
-#define EndOfEnemyInitCode smb1_EndOfEnemyInitCode
-
 byte smb1_RunEnemyObjectsCore(void);
 #define RunEnemyObjectsCore smb1_RunEnemyObjectsCore
-
-void smb1_NoRunCode(void);
-#define NoRunCode smb1_NoRunCode
 
 byte smb1_RunRetainerObj(byte param_1);
 #define RunRetainerObj smb1_RunRetainerObj
@@ -1109,9 +1091,6 @@ byte smb1_RunNormalEnemies(byte param_1);
 
 byte smb1_EnemyMovementSubs(byte param_1);
 #define EnemyMovementSubs smb1_EnemyMovementSubs
-
-void smb1_NoMoveCode(void);
-#define NoMoveCode smb1_NoMoveCode
 
 byte smb1_RunBowserFlame(byte param_1);
 #define RunBowserFlame smb1_RunBowserFlame
@@ -1232,9 +1211,6 @@ byte smb1_RunStarFlagObj(byte param_1);
 
 void smb1_GameTimerFireworks(byte param_1);
 #define GameTimerFireworks smb1_GameTimerFireworks
-
-void smb1_StarFlagExit(void);
-#define StarFlagExit smb1_StarFlagExit
 
 byte smb1_AwardGameTimerPoints(byte param_1);
 #define AwardGameTimerPoints smb1_AwardGameTimerPoints

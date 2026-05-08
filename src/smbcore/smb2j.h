@@ -463,9 +463,6 @@ void smb2j_TerminateGame(void);
 void smb2j_ContinueGame(void);
 #define ContinueGame smb2j_ContinueGame
 
-void smb2j_DoNothing(void);
-#define DoNothing smb2j_DoNothing
-
 void smb2j_AreaParserTaskHandler(void);
 #define AreaParserTaskHandler smb2j_AreaParserTaskHandler
 
@@ -952,9 +949,6 @@ byte smb2j_CheckThreeBytes(void);
 void smb2j_CheckpointEnemyID(byte param_1);
 #define CheckpointEnemyID smb2j_CheckpointEnemyID
 
-void smb2j_NoInitCode(void);
-#define NoInitCode smb2j_NoInitCode
-
 void smb2j_InitGoomba(byte param_1);
 #define InitGoomba smb2j_InitGoomba
 
@@ -1039,9 +1033,6 @@ void smb2j_InitPiranhaPlant(byte param_1);
 void smb2j_InitEnemyFrenzy(byte param_1);
 #define InitEnemyFrenzy smb2j_InitEnemyFrenzy
 
-void smb2j_NoFrenzyCode(void);
-#define NoFrenzyCode smb2j_NoFrenzyCode
-
 void smb2j_EndFrenzy(byte param_1);
 #define EndFrenzy smb2j_EndFrenzy
 
@@ -1078,14 +1069,8 @@ void smb2j_PlatLiftDown(byte param_1);
 void smb2j_PosPlatform(byte param_1,byte param_2);
 #define PosPlatform smb2j_PosPlatform
 
-void smb2j_EndOfEnemyInitCode(void);
-#define EndOfEnemyInitCode smb2j_EndOfEnemyInitCode
-
 byte smb2j_RunEnemyObjectsCore(void);
 #define RunEnemyObjectsCore smb2j_RunEnemyObjectsCore
-
-void smb2j_NoRunCode(void);
-#define NoRunCode smb2j_NoRunCode
 
 byte smb2j_RunRetainerObj(byte param_1);
 #define RunRetainerObj smb2j_RunRetainerObj
@@ -1095,9 +1080,6 @@ byte smb2j_RunNormalEnemies(byte param_1);
 
 byte smb2j_EnemyMovementSubs(byte param_1);
 #define EnemyMovementSubs smb2j_EnemyMovementSubs
-
-void smb2j_NoMoveCode(void);
-#define NoMoveCode smb2j_NoMoveCode
 
 byte smb2j_RunBowserFlame(byte param_1);
 #define RunBowserFlame smb2j_RunBowserFlame
@@ -1218,9 +1200,6 @@ byte smb2j_RunStarFlagObj(byte param_1);
 
 void smb2j_GameTimerFireworks(byte param_1);
 #define GameTimerFireworks smb2j_GameTimerFireworks
-
-void smb2j_StarFlagExit(void);
-#define StarFlagExit smb2j_StarFlagExit
 
 byte smb2j_AwardGameTimerPoints(byte param_1);
 #define AwardGameTimerPoints smb2j_AwardGameTimerPoints

@@ -73,11 +73,6 @@ void WriteGameText(byte param_1) {
 }
 
 
-// SMB:92af
-// Signature: [] -> []
-void DoNothing2(void) { return; }
-
-
 // SMB:96f2
 // Signature: [] -> []
 void ScrollLockObject_Warp(void) {
