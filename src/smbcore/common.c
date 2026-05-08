@@ -5510,63 +5510,21 @@ enum BumpBlock_jumptable_item {
 #ifdef SMB2J_MODE
   BUMPBLOCK_POISONMUSHBLOCK_2,
 #endif
-  BUMPBLOCK_MUSHFLOWERBLOCK_2,
 #ifdef SMB2J_MODE
   BUMPBLOCK_MUSHFLOWERBLOCK_3,
+#endif
+  BUMPBLOCK_MUSHFLOWERBLOCK_2,
+#ifdef SMB2J_MODE
   BUMPBLOCK_POISONMUSHBLOCK_3,
 #endif
   BUMPBLOCK_VINEBLOCK,
   BUMPBLOCK_STARBLOCK,
   BUMPBLOCK_COINBLOCK_3,
   BUMPBLOCK_EXTRALIFEMUSHBLOCK_2,
+
+  BUMPBLOCK_COUNT
 };
 
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A, X] -> []
-static inline void jumptable_BumpBlock(byte param_1, byte param_2) {
-  switch (param_1) {
-  case BUMPBLOCK_MUSHFLOWERBLOCK_1:
-  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
-    MushFlowerBlock(param_2);
-    return;
-
-  case BUMPBLOCK_COINBLOCK_1:
-  case BUMPBLOCK_COINBLOCK_2:
-  case BUMPBLOCK_COINBLOCK_3:
-    CoinBlock(param_2);
-    return;
-
-  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
-  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
-    ExtraLifeMushBlock(param_2);
-    return;
-
-  case BUMPBLOCK_VINEBLOCK:
-    VineBlock();
-    return;
-
-  case BUMPBLOCK_STARBLOCK:
-    StarBlock(param_2);
-    return;
-
-#ifdef SMB2J_MODE
-  case BUMPBLOCK_MUSHFLOWERBLOCK_3:
-    MushFlowerBlock(param_2);
-    return;
-
-  case BUMPBLOCK_POISONMUSHBLOCK_1:
-  case BUMPBLOCK_POISONMUSHBLOCK_2:
-  case BUMPBLOCK_POISONMUSHBLOCK_3:
-    PoisonMushBlock(param_2);
-    return;
-#endif
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
 
 // SMB:bd9b
 // SM2MAIN:895c
@@ -5590,10 +5548,52 @@ void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
     return;
   }
 
-  if (bVar1 >= ssw(9, 13)) {
-    bVar1 = bVar1 - ssw(5, 6);
+  // If the block goes over the block count in the lookup, wrap around back to a previous item
+  if (bVar1 >= BUMPBLOCK_COUNT) {
+    bVar1 -= BUMPBLOCK_COUNT;
+    bVar1 += BUMPBLOCK_MUSHFLOWERBLOCK_2;
   }
-  jumptable_BumpBlock(bVar1, bVar2);
+
+  switch (bVar1) {
+  case BUMPBLOCK_MUSHFLOWERBLOCK_1:
+  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
+    MushFlowerBlock(bVar2);
+    return;
+
+  case BUMPBLOCK_COINBLOCK_1:
+  case BUMPBLOCK_COINBLOCK_2:
+  case BUMPBLOCK_COINBLOCK_3:
+    CoinBlock(bVar2);
+    return;
+
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
+    ExtraLifeMushBlock(bVar2);
+    return;
+
+  case BUMPBLOCK_VINEBLOCK:
+    VineBlock();
+    return;
+
+  case BUMPBLOCK_STARBLOCK:
+    StarBlock(bVar2);
+    return;
+
+#ifdef SMB2J_MODE
+  case BUMPBLOCK_MUSHFLOWERBLOCK_3:
+    MushFlowerBlock(bVar2);
+    return;
+
+  case BUMPBLOCK_POISONMUSHBLOCK_1:
+  case BUMPBLOCK_POISONMUSHBLOCK_2:
+  case BUMPBLOCK_POISONMUSHBLOCK_3:
+    PoisonMushBlock(bVar2);
+    return;
+#endif
+
+  default:
+    jmpengine_overflow(bVar1);
+  }
 }
 
 
@@ -5636,22 +5636,19 @@ void VineBlock(void) {
 // SM2MAIN:89c7
 // Signature: [A] -> [Y, C]
 struct_yc BlockBumpedChk(byte param_1) {
-  byte bVar1;
-
-  bool bVar2;
   struct_yc sVar3;
 
-  bVar1 = ssw(0xd, 0x12);
-  do {
-    bVar2 = BrickQBlockMetatiles[bVar1] <= param_1;
-    if (param_1 == BrickQBlockMetatiles[bVar1]) {
-      sVar3.c = bVar2;
-      sVar3.y = bVar1;
+  for (int i = ssw(13, 18); i >= 0; i--) {
+    if (param_1 == BrickQBlockMetatiles[i]) {
+      sVar3.c = true;
+      sVar3.y = i;
       return sVar3;
     }
-  } while (bVar1 -= 1, bVar1 < 0x80);
+  }
+
+  // NES Note: "y" value is unused if c = false
   sVar3.c = false;
-  sVar3.y = bVar1;
+  sVar3.y = -1;
   return sVar3;
 }
 
