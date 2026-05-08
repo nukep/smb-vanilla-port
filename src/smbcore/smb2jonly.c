@@ -1,631 +1,832 @@
 #include "types.h"
 #include "vars.h"
 
+enum VictoryModeSubroutines_jumptable_item {
+  VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
+  VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
+  VICTORYMODESUBROUTINES_PLAYERVICTORYWALK,
+  VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES,
+  VICTORYMODESUBROUTINES_ENDCASTLEAWARD,
+  VICTORYMODESUBROUTINES_PLAYERENDWORLD,
+};
+
+
 // SM2MAIN:n/a
 // Signature: [A, r00] -> []
 void jumptable_VictoryModeSubroutines(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case VICTORYMODESUBROUTINES_BRIDGECOLLAPSE:
     BridgeCollapse(param_2);
     return;
-  }
-  if (param_1 == 1) {
+
+  case VICTORYMODESUBROUTINES_SETUPVICTORYMODE:
     SetupVictoryMode();
     return;
-  }
-  if (param_1 == 2) {
+
+  case VICTORYMODESUBROUTINES_PLAYERVICTORYWALK:
     PlayerVictoryWalk();
     return;
-  }
-  if (param_1 == 3) {
+
+  case VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES:
     PrintVictoryMessages();
     return;
-  }
-  if (param_1 == 4) {
+
+  case VICTORYMODESUBROUTINES_ENDCASTLEAWARD:
     EndCastleAward();
     return;
-  }
-  if (param_1 == 5) {
+
+  case VICTORYMODESUBROUTINES_PLAYERENDWORLD:
     PlayerEndWorld();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum VictoryModeSubroutines_forW8_jumptable_item {
+  VICTORYMODESUBROUTINES_FORW8_BRIDGECOLLAPSE,
+  VICTORYMODESUBROUTINES_FORW8_SETUPVICTORYMODE,
+  VICTORYMODESUBROUTINES_FORW8_PLAYERVICTORYWALK,
+  VICTORYMODESUBROUTINES_FORW8_STARTVMDELAY,
+  VICTORYMODESUBROUTINES_FORW8_CONTINUEVMDELAY,
+  VICTORYMODESUBROUTINES_FORW8_VICTORYMODEDISKROUTINES,
+  VICTORYMODESUBROUTINES_FORW8_SCREENSUBSFORFINALROOM,
+  VICTORYMODESUBROUTINES_FORW8_PRINTVICTORYMSGSFORWORLD8,
+  VICTORYMODESUBROUTINES_FORW8_ENDCASTLEAWARD,
+  VICTORYMODESUBROUTINES_FORW8_AWARDEXTRALIVES,
+  VICTORYMODESUBROUTINES_FORW8_FADETOBLUE,
+  VICTORYMODESUBROUTINES_FORW8_ERASELIVESLINES,
+  VICTORYMODESUBROUTINES_FORW8_RUNMUSHROOMRETAINERS,
+  VICTORYMODESUBROUTINES_FORW8_ENDINGDISKROUTINES,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A, r00] -> []
 void jumptable_VictoryModeSubroutines_forW8(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case VICTORYMODESUBROUTINES_FORW8_BRIDGECOLLAPSE:
     BridgeCollapse(param_2);
     return;
-  }
-  if (param_1 == 1) {
+
+  case VICTORYMODESUBROUTINES_FORW8_SETUPVICTORYMODE:
     SetupVictoryMode();
     return;
-  }
-  if (param_1 == 2) {
+
+  case VICTORYMODESUBROUTINES_FORW8_PLAYERVICTORYWALK:
     PlayerVictoryWalk();
     return;
-  }
-  if (param_1 == 3) {
+
+  case VICTORYMODESUBROUTINES_FORW8_STARTVMDELAY:
     StartVMDelay();
     return;
-  }
-  if (param_1 == 4) {
+
+  case VICTORYMODESUBROUTINES_FORW8_CONTINUEVMDELAY:
     ContinueVMDelay();
     return;
-  }
-  if (param_1 == 5) {
+
+  case VICTORYMODESUBROUTINES_FORW8_VICTORYMODEDISKROUTINES:
     VictoryModeDiskRoutines();
     return;
-  }
-  if (param_1 == 6) {
+
+  case VICTORYMODESUBROUTINES_FORW8_SCREENSUBSFORFINALROOM:
     ScreenSubsForFinalRoom();
     return;
-  }
-  if (param_1 == 7) {
+
+  case VICTORYMODESUBROUTINES_FORW8_PRINTVICTORYMSGSFORWORLD8:
     PrintVictoryMsgsForWorld8();
     return;
-  }
-  if (param_1 == 8) {
+
+  case VICTORYMODESUBROUTINES_FORW8_ENDCASTLEAWARD:
     EndCastleAward();
     return;
-  }
-  if (param_1 == 9) {
+
+  case VICTORYMODESUBROUTINES_FORW8_AWARDEXTRALIVES:
     AwardExtraLives();
     return;
-  }
-  if (param_1 == 10) {
+
+  case VICTORYMODESUBROUTINES_FORW8_FADETOBLUE:
     FadeToBlue();
     return;
-  }
-  if (param_1 == 0xb) {
+
+  case VICTORYMODESUBROUTINES_FORW8_ERASELIVESLINES:
     EraseLivesLines();
     return;
-  }
-  if (param_1 == 0xc) {
+
+  case VICTORYMODESUBROUTINES_FORW8_RUNMUSHROOMRETAINERS:
     RunMushroomRetainers();
     return;
-  }
-  if (param_1 == 0xd) {
+
+  case VICTORYMODESUBROUTINES_FORW8_ENDINGDISKROUTINES:
     EndingDiskRoutines();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum ScreenRoutines_jumptable_item {
+  SCREENROUTINES_INITSCREEN,
+  SCREENROUTINES_SETUPINTERMEDIATE,
+  SCREENROUTINES_WRITETOPSTATUSLINE,
+  SCREENROUTINES_WRITEBOTTOMSTATUSLINE,
+  SCREENROUTINES_DISPLAYTIMEUP,
+  SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1,
+  SCREENROUTINES_DISPLAYINTERMEDIATE,
+  SCREENROUTINES_DEMORESET,
+  SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2,
+  SCREENROUTINES_AREAPARSERTASKCONTROL,
+  SCREENROUTINES_GETAREAPALETTE,
+  SCREENROUTINES_GETBACKGROUNDCOLOR,
+  SCREENROUTINES_GETALTERNATEPALETTE1,
+  SCREENROUTINES_DRAWTITLESCREEN,
+  SCREENROUTINES_CLEARBUFFERSDRAWICON,
+  SCREENROUTINES_WRITETOPSCORE,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_ScreenRoutines(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case SCREENROUTINES_INITSCREEN:
     InitScreen();
     return;
-  }
-  if (param_1 == 1) {
+
+  case SCREENROUTINES_SETUPINTERMEDIATE:
     SetupIntermediate();
     return;
-  }
-  if (param_1 == 2) {
+
+  case SCREENROUTINES_WRITETOPSTATUSLINE:
     WriteTopStatusLine();
     return;
-  }
-  if (param_1 == 3) {
+
+  case SCREENROUTINES_WRITEBOTTOMSTATUSLINE:
     WriteBottomStatusLine();
     return;
-  }
-  if (param_1 == 4) {
+
+  case SCREENROUTINES_DISPLAYTIMEUP:
     DisplayTimeUp();
     return;
-  }
-  if (param_1 == 5) {
+
+  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1:
     ResetSpritesAndScreenTimer();
     return;
-  }
-  if (param_1 == 6) {
+
+  case SCREENROUTINES_DISPLAYINTERMEDIATE:
     DisplayIntermediate();
     return;
-  }
-  if (param_1 == 7) {
+
+  case SCREENROUTINES_DEMORESET:
     DemoReset();
     return;
-  }
-  if (param_1 == 8) {
+
+  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2:
     ResetSpritesAndScreenTimer();
     return;
-  }
-  if (param_1 == 9) {
+
+  case SCREENROUTINES_AREAPARSERTASKCONTROL:
     AreaParserTaskControl();
     return;
-  }
-  if (param_1 == 10) {
+
+  case SCREENROUTINES_GETAREAPALETTE:
     GetAreaPalette();
     return;
-  }
-  if (param_1 == 0xb) {
+
+  case SCREENROUTINES_GETBACKGROUNDCOLOR:
     GetBackgroundColor();
     return;
-  }
-  if (param_1 == 0xc) {
+
+  case SCREENROUTINES_GETALTERNATEPALETTE1:
     GetAlternatePalette1();
     return;
-  }
-  if (param_1 == 0xd) {
+
+  case SCREENROUTINES_DRAWTITLESCREEN:
     DrawTitleScreen();
     return;
-  }
-  if (param_1 == 0xe) {
+
+  case SCREENROUTINES_CLEARBUFFERSDRAWICON:
     ClearBuffersDrawIcon();
     return;
-  }
-  if (param_1 == 0xf) {
+
+  case SCREENROUTINES_WRITETOPSCORE:
     WriteTopScore();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum DecodeAreaData_jumptable_item {
+  DECODEAREADATA_VERTICALPIPE_1,
+  DECODEAREADATA_AREASTYLEOBJECT,
+  DECODEAREADATA_ROWOFBRICKS,
+  DECODEAREADATA_ROWOFSOLIDBLOCKS,
+  DECODEAREADATA_ROWOFCOINS,
+  DECODEAREADATA_COLUMNOFBRICKS,
+  DECODEAREADATA_COLUMNOFSOLIDBLOCKS,
+  DECODEAREADATA_VERTICALPIPE_2,
+  DECODEAREADATA_HOLE_EMPTY,
+  DECODEAREADATA_PULLEYROPEOBJECT,
+  DECODEAREADATA_BRIDGE_HIGH,
+  DECODEAREADATA_BRIDGE_MIDDLE,
+  DECODEAREADATA_BRIDGE_LOW,
+  DECODEAREADATA_HOLE_WATER,
+  DECODEAREADATA_QUESTIONBLOCKROW_HIGH,
+  DECODEAREADATA_QUESTIONBLOCKROW_LOW,
+  DECODEAREADATA_ENDLESSROPE,
+  DECODEAREADATA_BALANCEPLATROPE,
+  DECODEAREADATA_CASTLEOBJECT,
+  DECODEAREADATA_STAIRCASEOBJECT,
+  DECODEAREADATA_EXITPIPE,
+  DECODEAREADATA_FLAGBALLS_RESIDUAL,
+  DECODEAREADATA_UPSIDEDOWNPIPE_HIGH,
+  DECODEAREADATA_UPSIDEDOWNPIPE_LOW,
+  DECODEAREADATA_QUESTIONBLOCK_1,
+  DECODEAREADATA_QUESTIONBLOCK_2,
+  DECODEAREADATA_QUESTIONBLOCK_3,
+  DECODEAREADATA_QUESTIONBLOCK_4,
+  DECODEAREADATA_HIDDEN1UPBLOCK,
+  DECODEAREADATA_QUESTIONBLOCK_5,
+  DECODEAREADATA_QUESTIONBLOCK_6,
+  DECODEAREADATA_BRICKWITHITEM_1,
+  DECODEAREADATA_BRICKWITHITEM_2,
+  DECODEAREADATA_BRICKWITHITEM_3,
+  DECODEAREADATA_BRICKWITHITEM_4,
+  DECODEAREADATA_BRICKWITHCOINS,
+  DECODEAREADATA_BRICKWITHITEM_5,
+  DECODEAREADATA_WATERPIPE,
+  DECODEAREADATA_EMPTYBLOCK,
+  DECODEAREADATA_JUMPSPRING,
+  DECODEAREADATA_INTROPIPE,
+  DECODEAREADATA_FLAGPOLEOBJECT,
+  DECODEAREADATA_AXEOBJ,
+  DECODEAREADATA_CHAINOBJ,
+  DECODEAREADATA_CASTLEBRIDGEOBJ,
+  DECODEAREADATA_SCROLLLOCKOBJECT_WARP,
+  DECODEAREADATA_SCROLLLOCKOBJECT_1,
+  DECODEAREADATA_SCROLLLOCKOBJECT_2,
+  DECODEAREADATA_AREAFRENZY_1,
+  DECODEAREADATA_AREAFRENZY_2,
+  DECODEAREADATA_AREAFRENZY_3,
+  DECODEAREADATA_NOOP,
+  DECODEAREADATA_WINDON,
+  DECODEAREADATA_WINDOFF,
+  DECODEAREADATA_ALTERAREAATTRIBUTES,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A, X, r00] -> []
 void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case DECODEAREADATA_VERTICALPIPE_1:
     VerticalPipe(param_2, param_3);
     return;
-  }
-  if (param_1 == 1) {
+
+  case DECODEAREADATA_AREASTYLEOBJECT:
     AreaStyleObject(param_2);
     return;
-  }
-  if (param_1 == 2) {
+
+  case DECODEAREADATA_ROWOFBRICKS:
     RowOfBricks(param_2);
     return;
-  }
-  if (param_1 == 3) {
+
+  case DECODEAREADATA_ROWOFSOLIDBLOCKS:
     RowOfSolidBlocks(param_2);
     return;
-  }
-  if (param_1 == 4) {
+
+  case DECODEAREADATA_ROWOFCOINS:
     RowOfCoins(param_2);
     return;
-  }
-  if (param_1 == 5) {
+
+  case DECODEAREADATA_COLUMNOFBRICKS:
     ColumnOfBricks(param_2);
     return;
-  }
-  if (param_1 == 6) {
+
+  case DECODEAREADATA_COLUMNOFSOLIDBLOCKS:
     ColumnOfSolidBlocks(param_2);
     return;
-  }
-  if (param_1 == 7) {
+
+  case DECODEAREADATA_VERTICALPIPE_2:
     VerticalPipe(param_2, param_3);
     return;
-  }
-  if (param_1 == 8) {
+
+  case DECODEAREADATA_HOLE_EMPTY:
     Hole_Empty(param_2);
     return;
-  }
-  if (param_1 == 9) {
+
+  case DECODEAREADATA_PULLEYROPEOBJECT:
     PulleyRopeObject(param_2);
     return;
-  }
-  if (param_1 == 10) {
+
+  case DECODEAREADATA_BRIDGE_HIGH:
     Bridge_High(param_2);
     return;
-  }
-  if (param_1 == 0xb) {
+
+  case DECODEAREADATA_BRIDGE_MIDDLE:
     Bridge_Middle(param_2);
     return;
-  }
-  if (param_1 == 0xc) {
+
+  case DECODEAREADATA_BRIDGE_LOW:
     Bridge_Low(param_2);
     return;
-  }
-  if (param_1 == 0xd) {
+
+  case DECODEAREADATA_HOLE_WATER:
     Hole_Water(param_2);
     return;
-  }
-  if (param_1 == 0xe) {
+
+  case DECODEAREADATA_QUESTIONBLOCKROW_HIGH:
     QuestionBlockRow_High(param_2);
     return;
-  }
-  if (param_1 == 0xf) {
+
+  case DECODEAREADATA_QUESTIONBLOCKROW_LOW:
     QuestionBlockRow_Low(param_2);
     return;
-  }
-  if (param_1 == 0x10) {
+
+  case DECODEAREADATA_ENDLESSROPE:
     EndlessRope();
     return;
-  }
-  if (param_1 == 0x11) {
+
+  case DECODEAREADATA_BALANCEPLATROPE:
     BalancePlatRope(param_2);
     return;
-  }
-  if (param_1 == 0x12) {
+
+  case DECODEAREADATA_CASTLEOBJECT:
     CastleObject(param_2);
     return;
-  }
-  if (param_1 == 0x13) {
+
+  case DECODEAREADATA_STAIRCASEOBJECT:
     StaircaseObject(param_2);
     return;
-  }
-  if (param_1 == 0x14) {
+
+  case DECODEAREADATA_EXITPIPE:
     ExitPipe(param_2);
     return;
-  }
-  if (param_1 == 0x15) {
+
+  case DECODEAREADATA_FLAGBALLS_RESIDUAL:
     FlagBalls_Residual(param_2);
     return;
-  }
-  if (param_1 == 0x16) {
+
+  case DECODEAREADATA_UPSIDEDOWNPIPE_HIGH:
     UpsideDownPipe_High(param_2);
     return;
-  }
-  if (param_1 == 0x17) {
+
+  case DECODEAREADATA_UPSIDEDOWNPIPE_LOW:
     UpsideDownPipe_Low(param_2);
     return;
-  }
-  if (param_1 == 0x18) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_1:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x19) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_2:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1a) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_3:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1b) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_4:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1c) {
+
+  case DECODEAREADATA_HIDDEN1UPBLOCK:
     Hidden1UpBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1d) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_5:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1e) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_6:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1f) {
+
+  case DECODEAREADATA_BRICKWITHITEM_1:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x20) {
+
+  case DECODEAREADATA_BRICKWITHITEM_2:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x21) {
+
+  case DECODEAREADATA_BRICKWITHITEM_3:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x22) {
+
+  case DECODEAREADATA_BRICKWITHITEM_4:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x23) {
+
+  case DECODEAREADATA_BRICKWITHCOINS:
     BrickWithCoins(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x24) {
+
+  case DECODEAREADATA_BRICKWITHITEM_5:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x25) {
+
+  case DECODEAREADATA_WATERPIPE:
     WaterPipe(param_2);
     return;
-  }
-  if (param_1 == 0x26) {
+
+  case DECODEAREADATA_EMPTYBLOCK:
     EmptyBlock(param_2);
     return;
-  }
-  if (param_1 == 0x27) {
+
+  case DECODEAREADATA_JUMPSPRING:
     Jumpspring(param_2);
     return;
-  }
-  if (param_1 == 0x28) {
+
+  case DECODEAREADATA_INTROPIPE:
     IntroPipe(param_2);
     return;
-  }
-  if (param_1 == 0x29) {
+
+  case DECODEAREADATA_FLAGPOLEOBJECT:
     FlagpoleObject();
     return;
-  }
-  if (param_1 == 0x2a) {
+
+  case DECODEAREADATA_AXEOBJ:
     AxeObj(param_3);
     return;
-  }
-  if (param_1 == 0x2b) {
+
+  case DECODEAREADATA_CHAINOBJ:
     ChainObj(param_3);
     return;
-  }
-  if (param_1 == 0x2c) {
+
+  case DECODEAREADATA_CASTLEBRIDGEOBJ:
     CastleBridgeObj(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x2d) {
+
+  case DECODEAREADATA_SCROLLLOCKOBJECT_WARP:
     ScrollLockObject_Warp();
     return;
-  }
-  if (param_1 == 0x2e) {
+
+  case DECODEAREADATA_SCROLLLOCKOBJECT_1:
     ScrollLockObject();
     return;
-  }
-  if (param_1 == 0x2f) {
+
+  case DECODEAREADATA_SCROLLLOCKOBJECT_2:
     ScrollLockObject();
     return;
-  }
-  if (param_1 == 0x30) {
+
+  case DECODEAREADATA_AREAFRENZY_1:
     AreaFrenzy(param_3);
     return;
-  }
-  if (param_1 == 0x31) {
+
+  case DECODEAREADATA_AREAFRENZY_2:
     AreaFrenzy(param_3);
     return;
-  }
-  if (param_1 == 0x32) {
+
+  case DECODEAREADATA_AREAFRENZY_3:
     AreaFrenzy(param_3);
     return;
-  }
-  if (param_1 == 0x33) {
+
+  case DECODEAREADATA_NOOP:
     // No-op
     return;
-  }
-  if (param_1 == 0x34) {
+
+  case DECODEAREADATA_WINDON:
     WindOn();
     return;
-  }
-  if (param_1 == 0x35) {
+
+  case DECODEAREADATA_WINDOFF:
     WindOff();
     return;
-  }
-  if (param_1 == 0x36) {
+
+  case DECODEAREADATA_ALTERAREAATTRIBUTES:
     AlterAreaAttributes(param_2);
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum GameMode_jumptable_item {
+  GAMEMODE_GAMEMODEDISKROUTINES,
+  GAMEMODE_INITIALIZEAREA,
+  GAMEMODE_SCREENROUTINES,
+  GAMEMODE_SECONDARYGAMESETUP,
+  GAMEMODE_GAMECOREROUTINE,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_GameMode(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case GAMEMODE_GAMEMODEDISKROUTINES:
     GameModeDiskRoutines();
     return;
-  }
-  if (param_1 == 1) {
+
+  case GAMEMODE_INITIALIZEAREA:
     InitializeArea();
     return;
-  }
-  if (param_1 == 2) {
+
+  case GAMEMODE_SCREENROUTINES:
     ScreenRoutines();
     return;
-  }
-  if (param_1 == 3) {
+
+  case GAMEMODE_SECONDARYGAMESETUP:
     SecondaryGameSetup();
     return;
-  }
-  if (param_1 == 4) {
+
+  case GAMEMODE_GAMECOREROUTINE:
     GameCoreRoutine();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum BumpBlock_jumptable_item {
+  BUMPBLOCK_MUSHFLOWERBLOCK_1,
+  BUMPBLOCK_POISONMUSHBLOCK_1,
+  BUMPBLOCK_COINBLOCK_1,
+  BUMPBLOCK_COINBLOCK_2,
+  BUMPBLOCK_EXTRALIFEMUSHBLOCK_1,
+  BUMPBLOCK_POISONMUSHBLOCK_2,
+  BUMPBLOCK_MUSHFLOWERBLOCK_2,
+  BUMPBLOCK_MUSHFLOWERBLOCK_3,
+  BUMPBLOCK_POISONMUSHBLOCK_3,
+  BUMPBLOCK_VINEBLOCK,
+  BUMPBLOCK_STARBLOCK,
+  BUMPBLOCK_COINBLOCK_3,
+  BUMPBLOCK_EXTRALIFEMUSHBLOCK_2,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A, X] -> []
 void jumptable_BumpBlock(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case BUMPBLOCK_MUSHFLOWERBLOCK_1:
     MushFlowerBlock(param_2);
     return;
-  }
-  if (param_1 == 1) {
+
+  case BUMPBLOCK_POISONMUSHBLOCK_1:
     PoisonMushBlock(param_2);
     return;
-  }
-  if (param_1 == 2) {
+
+  case BUMPBLOCK_COINBLOCK_1:
     CoinBlock(param_2);
     return;
-  }
-  if (param_1 == 3) {
+
+  case BUMPBLOCK_COINBLOCK_2:
     CoinBlock(param_2);
     return;
-  }
-  if (param_1 == 4) {
+
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
     ExtraLifeMushBlock(param_2);
     return;
-  }
-  if (param_1 == 5) {
+
+  case BUMPBLOCK_POISONMUSHBLOCK_2:
     PoisonMushBlock(param_2);
     return;
-  }
-  if (param_1 == 6) {
+
+  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
     MushFlowerBlock(param_2);
     return;
-  }
-  if (param_1 == 7) {
+
+  case BUMPBLOCK_MUSHFLOWERBLOCK_3:
     MushFlowerBlock(param_2);
     return;
-  }
-  if (param_1 == 8) {
+
+  case BUMPBLOCK_POISONMUSHBLOCK_3:
     PoisonMushBlock(param_2);
     return;
-  }
-  if (param_1 == 9) {
+
+  case BUMPBLOCK_VINEBLOCK:
     VineBlock();
     return;
-  }
-  if (param_1 == 10) {
+
+  case BUMPBLOCK_STARBLOCK:
     StarBlock(param_2);
     return;
-  }
-  if (param_1 == 0xb) {
+
+  case BUMPBLOCK_COINBLOCK_3:
     CoinBlock(param_2);
     return;
-  }
-  if (param_1 == 0xc) {
+
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
     ExtraLifeMushBlock(param_2);
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum AttractModeSubs_jumptable_item {
+  ATTRACTMODESUBS_ATTRACTMODEDISKROUTINES,
+  ATTRACTMODESUBS_INITIALIZEGAME,
+  ATTRACTMODESUBS_SCREENROUTINES,
+  ATTRACTMODESUBS_PRIMARYGAMESETUP,
+  ATTRACTMODESUBS_GAMEMENUROUTINE,
+  ATTRACTMODESUBS_HARDWORLDSCHECKPOINT,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_AttractModeSubs(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case ATTRACTMODESUBS_ATTRACTMODEDISKROUTINES:
     AttractModeDiskRoutines();
     return;
-  }
-  if (param_1 == 1) {
+
+  case ATTRACTMODESUBS_INITIALIZEGAME:
     InitializeGame();
     return;
-  }
-  if (param_1 == 2) {
+
+  case ATTRACTMODESUBS_SCREENROUTINES:
     ScreenRoutines();
     return;
-  }
-  if (param_1 == 3) {
+
+  case ATTRACTMODESUBS_PRIMARYGAMESETUP:
     PrimaryGameSetup();
     return;
-  }
-  if (param_1 == 4) {
+
+  case ATTRACTMODESUBS_GAMEMENUROUTINE:
     GameMenuRoutine();
     return;
-  }
-  if (param_1 == 5) {
+
+  case ATTRACTMODESUBS_HARDWORLDSCHECKPOINT:
     HardWorldsCheckpoint();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum HardWorldsCheckpoint_jumptable_item {
+  HARDWORLDSCHECKPOINT_DISKSCREEN,
+  HARDWORLDSCHECKPOINT_LOADHARDWORLDS,
+  HARDWORLDSCHECKPOINT_WAITFOREJECT,
+  HARDWORLDSCHECKPOINT_WAITFORREINSERT,
+  HARDWORLDSCHECKPOINT_RESETDISKVARS,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_HardWorldsCheckpoint(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case HARDWORLDSCHECKPOINT_DISKSCREEN:
     DiskScreen();
     return;
-  }
-  if (param_1 == 1) {
+
+  case HARDWORLDSCHECKPOINT_LOADHARDWORLDS:
     LoadHardWorlds();
     return;
-  }
-  if (param_1 == 2) {
+
+  case HARDWORLDSCHECKPOINT_WAITFOREJECT:
     WaitForEject();
     return;
-  }
-  if (param_1 == 3) {
+
+  case HARDWORLDSCHECKPOINT_WAITFORREINSERT:
     WaitForReinsert();
     return;
-  }
-  if (param_1 == 4) {
+
+  case HARDWORLDSCHECKPOINT_RESETDISKVARS:
     ResetDiskVars();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum AttractModeDiskRoutines_jumptable_item {
+  ATTRACTMODEDISKROUTINES_DISKSCREEN,
+  ATTRACTMODEDISKROUTINES_LOADWORLDS1THRU4,
+  ATTRACTMODEDISKROUTINES_WAITFOREJECT,
+  ATTRACTMODEDISKROUTINES_WAITFORREINSERT,
+  ATTRACTMODEDISKROUTINES_RESETDISKVARS,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_AttractModeDiskRoutines(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case ATTRACTMODEDISKROUTINES_DISKSCREEN:
     DiskScreen();
     return;
-  }
-  if (param_1 == 1) {
+
+  case ATTRACTMODEDISKROUTINES_LOADWORLDS1THRU4:
     LoadWorlds1Thru4();
     return;
-  }
-  if (param_1 == 2) {
+
+  case ATTRACTMODEDISKROUTINES_WAITFOREJECT:
     WaitForEject();
     return;
-  }
-  if (param_1 == 3) {
+
+  case ATTRACTMODEDISKROUTINES_WAITFORREINSERT:
     WaitForReinsert();
     return;
-  }
-  if (param_1 == 4) {
+
+  case ATTRACTMODEDISKROUTINES_RESETDISKVARS:
     ResetDiskVars();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum GameModeDiskRoutines_jumptable_item {
+  GAMEMODEDISKROUTINES_DISKSCREEN,
+  GAMEMODEDISKROUTINES_LOADWORLDS5THRU8,
+  GAMEMODEDISKROUTINES_WAITFOREJECT,
+  GAMEMODEDISKROUTINES_WAITFORREINSERT,
+  GAMEMODEDISKROUTINES_RESETDISKVARS,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_GameModeDiskRoutines(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case GAMEMODEDISKROUTINES_DISKSCREEN:
     DiskScreen();
     return;
-  }
-  if (param_1 == 1) {
+
+  case GAMEMODEDISKROUTINES_LOADWORLDS5THRU8:
     LoadWorlds5Thru8();
     return;
-  }
-  if (param_1 == 2) {
+
+  case GAMEMODEDISKROUTINES_WAITFOREJECT:
     WaitForEject();
     return;
-  }
-  if (param_1 == 3) {
+
+  case GAMEMODEDISKROUTINES_WAITFORREINSERT:
     WaitForReinsert();
     return;
-  }
-  if (param_1 == 4) {
+
+  case GAMEMODEDISKROUTINES_RESETDISKVARS:
     ResetDiskVars();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum VictoryModeDiskRoutines_jumptable_item {
+  VICTORYMODEDISKROUTINES_DISKSCREEN,
+  VICTORYMODEDISKROUTINES_LOADENDING,
+  VICTORYMODEDISKROUTINES_WAITFOREJECT,
+  VICTORYMODEDISKROUTINES_WAITFORREINSERT,
+  VICTORYMODEDISKROUTINES_RESETDISKVARS,
+};
 
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_VictoryModeDiskRoutines(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case VICTORYMODEDISKROUTINES_DISKSCREEN:
     DiskScreen();
     return;
-  }
-  if (param_1 == 1) {
+
+  case VICTORYMODEDISKROUTINES_LOADENDING:
     LoadEnding();
     return;
-  }
-  if (param_1 == 2) {
+
+  case VICTORYMODEDISKROUTINES_WAITFOREJECT:
     WaitForEject();
     return;
-  }
-  if (param_1 == 3) {
+
+  case VICTORYMODEDISKROUTINES_WAITFORREINSERT:
     WaitForReinsert();
     return;
-  }
-  if (param_1 == 4) {
+
+  case VICTORYMODEDISKROUTINES_RESETDISKVARS:
     ResetDiskVars();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
 
 
@@ -1556,38 +1757,52 @@ void WindOff(void) {
 }
 
 
+enum ScreenSubsForFinalRoom_jumptable_item {
+  SCREENSUBSFORFINALROOM_INITSCREENPALETTE,
+  SCREENSUBSFORFINALROOM_WRITETOPSTATUSLINE,
+  SCREENSUBSFORFINALROOM_WRITEBOTTOMSTATUSLINE,
+  SCREENSUBSFORFINALROOM_DRAWFINALROOM,
+  SCREENSUBSFORFINALROOM_GETAREAPALETTE,
+  SCREENSUBSFORFINALROOM_GETBACKGROUNDCOLOR,
+  SCREENSUBSFORFINALROOM_REVEALPRINCESS,
+};
+
+
 // SM2DATA3:c5fe
 // Signature: [] -> []
 void ScreenSubsForFinalRoom(void) {
-  if (ScreenRoutineTask == 0) {
+  switch (ScreenRoutineTask) {
+  case SCREENSUBSFORFINALROOM_INITSCREENPALETTE:
     InitScreenPalette();
     return;
-  }
-  if (ScreenRoutineTask == 1) {
+
+  case SCREENSUBSFORFINALROOM_WRITETOPSTATUSLINE:
     WriteTopStatusLine();
     return;
-  }
-  if (ScreenRoutineTask == 2) {
+
+  case SCREENSUBSFORFINALROOM_WRITEBOTTOMSTATUSLINE:
     WriteBottomStatusLine();
     return;
-  }
-  if (ScreenRoutineTask == 3) {
+
+  case SCREENSUBSFORFINALROOM_DRAWFINALROOM:
     DrawFinalRoom();
     return;
-  }
-  if (ScreenRoutineTask == 4) {
+
+  case SCREENSUBSFORFINALROOM_GETAREAPALETTE:
     GetAreaPalette();
     return;
-  }
-  if (ScreenRoutineTask == 5) {
+
+  case SCREENSUBSFORFINALROOM_GETBACKGROUNDCOLOR:
     GetBackgroundColor();
     return;
-  }
-  if (ScreenRoutineTask == 6) {
+
+  case SCREENSUBSFORFINALROOM_REVEALPRINCESS:
     RevealPrincess();
     return;
+
+  default:
+    jmpengine_overflow(ScreenRoutineTask);
   }
-  jmpengine_overflow(ScreenRoutineTask);
 }
 
 
@@ -1748,30 +1963,42 @@ void RunMushroomRetainers(void) {
 }
 
 
+enum EndingDiskRoutines_jumptable_item {
+  ENDINGDISKROUTINES_DISKSCREEN,
+  ENDINGDISKROUTINES_UPDATEGAMESBEATEN,
+  ENDINGDISKROUTINES_WAITFOREJECT,
+  ENDINGDISKROUTINES_WAITFORREINSERT,
+  ENDINGDISKROUTINES_RESETDISKVARS,
+};
+
+
 // SM2DATA3:c738
 // Signature: [] -> []
 void EndingDiskRoutines(void) {
-  if (DiskIOTask == 0) {
+  switch (DiskIOTask) {
+  case ENDINGDISKROUTINES_DISKSCREEN:
     DiskScreen();
     return;
-  }
-  if (DiskIOTask == 1) {
+
+  case ENDINGDISKROUTINES_UPDATEGAMESBEATEN:
     UpdateGamesBeaten();
     return;
-  }
-  if (DiskIOTask == 2) {
+
+  case ENDINGDISKROUTINES_WAITFOREJECT:
     WaitForEject();
     return;
-  }
-  if (DiskIOTask == 3) {
+
+  case ENDINGDISKROUTINES_WAITFORREINSERT:
     WaitForReinsert();
     return;
-  }
-  if (DiskIOTask == 4) {
+
+  case ENDINGDISKROUTINES_RESETDISKVARS:
     ResetDiskVars();
     return;
+
+  default:
+    jmpengine_overflow(DiskIOTask);
   }
-  jmpengine_overflow(DiskIOTask);
 }
 
 

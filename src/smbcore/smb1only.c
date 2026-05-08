@@ -1,387 +1,507 @@
 #include "types.h"
 #include "vars.h"
 
+enum TitleScreenMode_jumptable_item {
+  TITLESCREENMODE_INITIALIZEGAME,
+  TITLESCREENMODE_SCREENROUTINES,
+  TITLESCREENMODE_PRIMARYGAMESETUP,
+  TITLESCREENMODE_GAMEMENUROUTINE,
+};
+
+
 // SMB:n/a
 // Signature: [A] -> []
 void jumptable_TitleScreenMode(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case TITLESCREENMODE_INITIALIZEGAME:
     InitializeGame();
     return;
-  }
-  if (param_1 == 1) {
+
+  case TITLESCREENMODE_SCREENROUTINES:
     ScreenRoutines();
     return;
-  }
-  if (param_1 == 2) {
+
+  case TITLESCREENMODE_PRIMARYGAMESETUP:
     PrimaryGameSetup();
     return;
-  }
-  if (param_1 == 3) {
+
+  case TITLESCREENMODE_GAMEMENUROUTINE:
     GameMenuRoutine();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum VictoryModeSubroutines_jumptable_item {
+  VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
+  VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
+  VICTORYMODESUBROUTINES_PLAYERVICTORYWALK,
+  VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES,
+  VICTORYMODESUBROUTINES_PLAYERENDWORLD,
+};
 
 
 // SMB:n/a
 // Signature: [A, r00] -> []
 void jumptable_VictoryModeSubroutines(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case VICTORYMODESUBROUTINES_BRIDGECOLLAPSE:
     BridgeCollapse(param_2);
     return;
-  }
-  if (param_1 == 1) {
+
+  case VICTORYMODESUBROUTINES_SETUPVICTORYMODE:
     SetupVictoryMode();
     return;
-  }
-  if (param_1 == 2) {
+
+  case VICTORYMODESUBROUTINES_PLAYERVICTORYWALK:
     PlayerVictoryWalk();
     return;
-  }
-  if (param_1 == 3) {
+
+  case VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES:
     PrintVictoryMessages();
     return;
-  }
-  if (param_1 == 4) {
+
+  case VICTORYMODESUBROUTINES_PLAYERENDWORLD:
     PlayerEndWorld();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum ScreenRoutines_jumptable_item {
+  SCREENROUTINES_INITSCREEN,
+  SCREENROUTINES_SETUPINTERMEDIATE,
+  SCREENROUTINES_WRITETOPSTATUSLINE,
+  SCREENROUTINES_WRITEBOTTOMSTATUSLINE,
+  SCREENROUTINES_DISPLAYTIMEUP,
+  SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1,
+  SCREENROUTINES_DISPLAYINTERMEDIATE,
+  SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2,
+  SCREENROUTINES_AREAPARSERTASKCONTROL,
+  SCREENROUTINES_GETAREAPALETTE,
+  SCREENROUTINES_GETBACKGROUNDCOLOR,
+  SCREENROUTINES_GETALTERNATEPALETTE1,
+  SCREENROUTINES_DRAWTITLESCREEN,
+  SCREENROUTINES_CLEARBUFFERSDRAWICON,
+  SCREENROUTINES_WRITETOPSCORE,
+};
 
 
 // SMB:n/a
 // Signature: [A] -> []
 void jumptable_ScreenRoutines(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case SCREENROUTINES_INITSCREEN:
     InitScreen();
     return;
-  }
-  if (param_1 == 1) {
+
+  case SCREENROUTINES_SETUPINTERMEDIATE:
     SetupIntermediate();
     return;
-  }
-  if (param_1 == 2) {
+
+  case SCREENROUTINES_WRITETOPSTATUSLINE:
     WriteTopStatusLine();
     return;
-  }
-  if (param_1 == 3) {
+
+  case SCREENROUTINES_WRITEBOTTOMSTATUSLINE:
     WriteBottomStatusLine();
     return;
-  }
-  if (param_1 == 4) {
+
+  case SCREENROUTINES_DISPLAYTIMEUP:
     DisplayTimeUp();
     return;
-  }
-  if (param_1 == 5) {
+
+  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1:
     ResetSpritesAndScreenTimer();
     return;
-  }
-  if (param_1 == 6) {
+
+  case SCREENROUTINES_DISPLAYINTERMEDIATE:
     DisplayIntermediate();
     return;
-  }
-  if (param_1 == 7) {
+
+  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2:
     ResetSpritesAndScreenTimer();
     return;
-  }
-  if (param_1 == 8) {
+
+  case SCREENROUTINES_AREAPARSERTASKCONTROL:
     AreaParserTaskControl();
     return;
-  }
-  if (param_1 == 9) {
+
+  case SCREENROUTINES_GETAREAPALETTE:
     GetAreaPalette();
     return;
-  }
-  if (param_1 == 10) {
+
+  case SCREENROUTINES_GETBACKGROUNDCOLOR:
     GetBackgroundColor();
     return;
-  }
-  if (param_1 == 0xb) {
+
+  case SCREENROUTINES_GETALTERNATEPALETTE1:
     GetAlternatePalette1();
     return;
-  }
-  if (param_1 == 0xc) {
+
+  case SCREENROUTINES_DRAWTITLESCREEN:
     DrawTitleScreen();
     return;
-  }
-  if (param_1 == 0xd) {
+
+  case SCREENROUTINES_CLEARBUFFERSDRAWICON:
     ClearBuffersDrawIcon();
     return;
-  }
-  if (param_1 == 0xe) {
+
+  case SCREENROUTINES_WRITETOPSCORE:
     WriteTopScore();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum DecodeAreaData_jumptable_item {
+  DECODEAREADATA_VERTICALPIPE_1,
+  DECODEAREADATA_AREASTYLEOBJECT,
+  DECODEAREADATA_ROWOFBRICKS,
+  DECODEAREADATA_ROWOFSOLIDBLOCKS,
+  DECODEAREADATA_ROWOFCOINS,
+  DECODEAREADATA_COLUMNOFBRICKS,
+  DECODEAREADATA_COLUMNOFSOLIDBLOCKS,
+  DECODEAREADATA_VERTICALPIPE_2,
+  DECODEAREADATA_HOLE_EMPTY,
+  DECODEAREADATA_PULLEYROPEOBJECT,
+  DECODEAREADATA_BRIDGE_HIGH,
+  DECODEAREADATA_BRIDGE_MIDDLE,
+  DECODEAREADATA_BRIDGE_LOW,
+  DECODEAREADATA_HOLE_WATER,
+  DECODEAREADATA_QUESTIONBLOCKROW_HIGH,
+  DECODEAREADATA_QUESTIONBLOCKROW_LOW,
+  DECODEAREADATA_ENDLESSROPE,
+  DECODEAREADATA_BALANCEPLATROPE,
+  DECODEAREADATA_CASTLEOBJECT,
+  DECODEAREADATA_STAIRCASEOBJECT,
+  DECODEAREADATA_EXITPIPE,
+  DECODEAREADATA_FLAGBALLS_RESIDUAL,
+  DECODEAREADATA_QUESTIONBLOCK_1,
+  DECODEAREADATA_QUESTIONBLOCK_2,
+  DECODEAREADATA_QUESTIONBLOCK_3,
+  DECODEAREADATA_HIDDEN1UPBLOCK,
+  DECODEAREADATA_BRICKWITHITEM_1,
+  DECODEAREADATA_BRICKWITHITEM_2,
+  DECODEAREADATA_BRICKWITHITEM_3,
+  DECODEAREADATA_BRICKWITHCOINS,
+  DECODEAREADATA_BRICKWITHITEM_4,
+  DECODEAREADATA_WATERPIPE,
+  DECODEAREADATA_EMPTYBLOCK,
+  DECODEAREADATA_JUMPSPRING,
+  DECODEAREADATA_INTROPIPE,
+  DECODEAREADATA_FLAGPOLEOBJECT,
+  DECODEAREADATA_AXEOBJ,
+  DECODEAREADATA_CHAINOBJ,
+  DECODEAREADATA_CASTLEBRIDGEOBJ,
+  DECODEAREADATA_SCROLLLOCKOBJECT_WARP,
+  DECODEAREADATA_SCROLLLOCKOBJECT_1,
+  DECODEAREADATA_SCROLLLOCKOBJECT_2,
+  DECODEAREADATA_AREAFRENZY_1,
+  DECODEAREADATA_AREAFRENZY_2,
+  DECODEAREADATA_AREAFRENZY_3,
+  DECODEAREADATA_NOOP,
+  DECODEAREADATA_ALTERAREAATTRIBUTES,
+};
 
 
 // SMB:n/a
 // Signature: [A, X, r00] -> []
 void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case DECODEAREADATA_VERTICALPIPE_1:
     VerticalPipe(param_2, param_3);
     return;
-  }
-  if (param_1 == 1) {
+
+  case DECODEAREADATA_AREASTYLEOBJECT:
     AreaStyleObject(param_2);
     return;
-  }
-  if (param_1 == 2) {
+
+  case DECODEAREADATA_ROWOFBRICKS:
     RowOfBricks(param_2);
     return;
-  }
-  if (param_1 == 3) {
+
+  case DECODEAREADATA_ROWOFSOLIDBLOCKS:
     RowOfSolidBlocks(param_2);
     return;
-  }
-  if (param_1 == 4) {
+
+  case DECODEAREADATA_ROWOFCOINS:
     RowOfCoins(param_2);
     return;
-  }
-  if (param_1 == 5) {
+
+  case DECODEAREADATA_COLUMNOFBRICKS:
     ColumnOfBricks(param_2);
     return;
-  }
-  if (param_1 == 6) {
+
+  case DECODEAREADATA_COLUMNOFSOLIDBLOCKS:
     ColumnOfSolidBlocks(param_2);
     return;
-  }
-  if (param_1 == 7) {
+
+  case DECODEAREADATA_VERTICALPIPE_2:
     VerticalPipe(param_2, param_3);
     return;
-  }
-  if (param_1 == 8) {
+
+  case DECODEAREADATA_HOLE_EMPTY:
     Hole_Empty(param_2);
     return;
-  }
-  if (param_1 == 9) {
+
+  case DECODEAREADATA_PULLEYROPEOBJECT:
     PulleyRopeObject(param_2);
     return;
-  }
-  if (param_1 == 10) {
+
+  case DECODEAREADATA_BRIDGE_HIGH:
     Bridge_High(param_2);
     return;
-  }
-  if (param_1 == 0xb) {
+
+  case DECODEAREADATA_BRIDGE_MIDDLE:
     Bridge_Middle(param_2);
     return;
-  }
-  if (param_1 == 0xc) {
+
+  case DECODEAREADATA_BRIDGE_LOW:
     Bridge_Low(param_2);
     return;
-  }
-  if (param_1 == 0xd) {
+
+  case DECODEAREADATA_HOLE_WATER:
     Hole_Water(param_2);
     return;
-  }
-  if (param_1 == 0xe) {
+
+  case DECODEAREADATA_QUESTIONBLOCKROW_HIGH:
     QuestionBlockRow_High(param_2);
     return;
-  }
-  if (param_1 == 0xf) {
+
+  case DECODEAREADATA_QUESTIONBLOCKROW_LOW:
     QuestionBlockRow_Low(param_2);
     return;
-  }
-  if (param_1 == 0x10) {
+
+  case DECODEAREADATA_ENDLESSROPE:
     EndlessRope();
     return;
-  }
-  if (param_1 == 0x11) {
+
+  case DECODEAREADATA_BALANCEPLATROPE:
     BalancePlatRope(param_2);
     return;
-  }
-  if (param_1 == 0x12) {
+
+  case DECODEAREADATA_CASTLEOBJECT:
     CastleObject(param_2);
     return;
-  }
-  if (param_1 == 0x13) {
+
+  case DECODEAREADATA_STAIRCASEOBJECT:
     StaircaseObject(param_2);
     return;
-  }
-  if (param_1 == 0x14) {
+
+  case DECODEAREADATA_EXITPIPE:
     ExitPipe(param_2);
     return;
-  }
-  if (param_1 == 0x15) {
+
+  case DECODEAREADATA_FLAGBALLS_RESIDUAL:
     FlagBalls_Residual(param_2);
     return;
-  }
-  if (param_1 == 0x16) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_1:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x17) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_2:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x18) {
+
+  case DECODEAREADATA_QUESTIONBLOCK_3:
     QuestionBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x19) {
+
+  case DECODEAREADATA_HIDDEN1UPBLOCK:
     Hidden1UpBlock(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1a) {
+
+  case DECODEAREADATA_BRICKWITHITEM_1:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1b) {
+
+  case DECODEAREADATA_BRICKWITHITEM_2:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1c) {
+
+  case DECODEAREADATA_BRICKWITHITEM_3:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1d) {
+
+  case DECODEAREADATA_BRICKWITHCOINS:
     BrickWithCoins(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1e) {
+
+  case DECODEAREADATA_BRICKWITHITEM_4:
     BrickWithItem(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x1f) {
+
+  case DECODEAREADATA_WATERPIPE:
     WaterPipe(param_2);
     return;
-  }
-  if (param_1 == 0x20) {
+
+  case DECODEAREADATA_EMPTYBLOCK:
     EmptyBlock(param_2);
     return;
-  }
-  if (param_1 == 0x21) {
+
+  case DECODEAREADATA_JUMPSPRING:
     Jumpspring(param_2);
     return;
-  }
-  if (param_1 == 0x22) {
+
+  case DECODEAREADATA_INTROPIPE:
     IntroPipe(param_2);
     return;
-  }
-  if (param_1 == 0x23) {
+
+  case DECODEAREADATA_FLAGPOLEOBJECT:
     FlagpoleObject();
     return;
-  }
-  if (param_1 == 0x24) {
+
+  case DECODEAREADATA_AXEOBJ:
     AxeObj(param_3);
     return;
-  }
-  if (param_1 == 0x25) {
+
+  case DECODEAREADATA_CHAINOBJ:
     ChainObj(param_3);
     return;
-  }
-  if (param_1 == 0x26) {
+
+  case DECODEAREADATA_CASTLEBRIDGEOBJ:
     CastleBridgeObj(param_2, param_3);
     return;
-  }
-  if (param_1 == 0x27) {
+
+  case DECODEAREADATA_SCROLLLOCKOBJECT_WARP:
     ScrollLockObject_Warp();
     return;
-  }
-  if (param_1 == 0x28) {
+
+  case DECODEAREADATA_SCROLLLOCKOBJECT_1:
     ScrollLockObject();
     return;
-  }
-  if (param_1 == 0x29) {
+
+  case DECODEAREADATA_SCROLLLOCKOBJECT_2:
     ScrollLockObject();
     return;
-  }
-  if (param_1 == 0x2a) {
+
+  case DECODEAREADATA_AREAFRENZY_1:
     AreaFrenzy(param_3);
     return;
-  }
-  if (param_1 == 0x2b) {
+
+  case DECODEAREADATA_AREAFRENZY_2:
     AreaFrenzy(param_3);
     return;
-  }
-  if (param_1 == 0x2c) {
+
+  case DECODEAREADATA_AREAFRENZY_3:
     AreaFrenzy(param_3);
     return;
-  }
-  if (param_1 == 0x2d) {
+
+  case DECODEAREADATA_NOOP:
     // No-op
     return;
-  }
-  if (param_1 == 0x2e) {
+
+  case DECODEAREADATA_ALTERAREAATTRIBUTES:
     AlterAreaAttributes(param_2);
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum GameMode_jumptable_item {
+  GAMEMODE_INITIALIZEAREA,
+  GAMEMODE_SCREENROUTINES,
+  GAMEMODE_SECONDARYGAMESETUP,
+  GAMEMODE_GAMECOREROUTINE,
+};
 
 
 // SMB:n/a
 // Signature: [A] -> []
 void jumptable_GameMode(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case GAMEMODE_INITIALIZEAREA:
     InitializeArea();
     return;
-  }
-  if (param_1 == 1) {
+
+  case GAMEMODE_SCREENROUTINES:
     ScreenRoutines();
     return;
-  }
-  if (param_1 == 2) {
+
+  case GAMEMODE_SECONDARYGAMESETUP:
     SecondaryGameSetup();
     return;
-  }
-  if (param_1 == 3) {
+
+  case GAMEMODE_GAMECOREROUTINE:
     GameCoreRoutine();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum BumpBlock_jumptable_item {
+  BUMPBLOCK_MUSHFLOWERBLOCK_1,
+  BUMPBLOCK_COINBLOCK_1,
+  BUMPBLOCK_COINBLOCK_2,
+  BUMPBLOCK_EXTRALIFEMUSHBLOCK_1,
+  BUMPBLOCK_MUSHFLOWERBLOCK_2,
+  BUMPBLOCK_VINEBLOCK,
+  BUMPBLOCK_STARBLOCK,
+  BUMPBLOCK_COINBLOCK_3,
+  BUMPBLOCK_EXTRALIFEMUSHBLOCK_2,
+};
 
 
 // SMB:n/a
 // Signature: [A, X] -> []
 void jumptable_BumpBlock(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case BUMPBLOCK_MUSHFLOWERBLOCK_1:
     MushFlowerBlock(param_2);
     return;
-  }
-  if (param_1 == 1) {
+
+  case BUMPBLOCK_COINBLOCK_1:
     CoinBlock(param_2);
     return;
-  }
-  if (param_1 == 2) {
+
+  case BUMPBLOCK_COINBLOCK_2:
     CoinBlock(param_2);
     return;
-  }
-  if (param_1 == 3) {
+
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
     ExtraLifeMushBlock(param_2);
     return;
-  }
-  if (param_1 == 4) {
+
+  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
     MushFlowerBlock(param_2);
     return;
-  }
-  if (param_1 == 5) {
+
+  case BUMPBLOCK_VINEBLOCK:
     VineBlock();
     return;
-  }
-  if (param_1 == 6) {
+
+  case BUMPBLOCK_STARBLOCK:
     StarBlock(param_2);
     return;
-  }
-  if (param_1 == 7) {
+
+  case BUMPBLOCK_COINBLOCK_3:
     CoinBlock(param_2);
     return;
-  }
-  if (param_1 == 8) {
+
+  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
     ExtraLifeMushBlock(param_2);
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
 
 

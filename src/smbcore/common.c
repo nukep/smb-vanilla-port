@@ -1,672 +1,892 @@
 #include "types.h"
 #include "vars.h"
 
+enum GameOverMode_jumptable_item {
+  GAMEOVERMODE_SETUPGAMEOVER,
+  GAMEOVERMODE_SCREENROUTINES,
+  GAMEOVERMODE_RUNGAMEOVER,
+};
+
+
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_GameOverMode(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case GAMEOVERMODE_SETUPGAMEOVER:
     SetupGameOver();
     return;
-  }
-  if (param_1 == 1) {
+
+  case GAMEOVERMODE_SCREENROUTINES:
     ScreenRoutines();
     return;
-  }
-  if (param_1 == 2) {
+
+  case GAMEOVERMODE_RUNGAMEOVER:
     RunGameOver();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum AreaParserTasks_jumptable_item {
+  AREAPARSERTASKS_INCREMENTCOLUMNPOS_1,
+  AREAPARSERTASKS_RENDERAREAGRAPHICS_1,
+  AREAPARSERTASKS_RENDERAREAGRAPHICS_2,
+  AREAPARSERTASKS_AREAPARSERCORE_1,
+  AREAPARSERTASKS_INCREMENTCOLUMNPOS_2,
+  AREAPARSERTASKS_RENDERAREAGRAPHICS_3,
+  AREAPARSERTASKS_RENDERAREAGRAPHICS_4,
+  AREAPARSERTASKS_AREAPARSERCORE_2,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_AreaParserTasks(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case AREAPARSERTASKS_INCREMENTCOLUMNPOS_1:
     IncrementColumnPos();
     return;
-  }
-  if (param_1 == 1) {
+
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_1:
     RenderAreaGraphics();
     return;
-  }
-  if (param_1 == 2) {
+
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_2:
     RenderAreaGraphics();
     return;
-  }
-  if (param_1 == 3) {
+
+  case AREAPARSERTASKS_AREAPARSERCORE_1:
     AreaParserCore();
     return;
-  }
-  if (param_1 == 4) {
+
+  case AREAPARSERTASKS_INCREMENTCOLUMNPOS_2:
     IncrementColumnPos();
     return;
-  }
-  if (param_1 == 5) {
+
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_3:
     RenderAreaGraphics();
     return;
-  }
-  if (param_1 == 6) {
+
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_4:
     RenderAreaGraphics();
     return;
-  }
-  if (param_1 == 7) {
+
+  case AREAPARSERTASKS_AREAPARSERCORE_2:
     AreaParserCore();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum GameRoutines_jumptable_item {
+  GAMEROUTINES_ENTRANCE_GAMETIMERSETUP,
+  GAMEROUTINES_VINE_AUTOCLIMB,
+  GAMEROUTINES_SIDEEXITPIPEENTRY,
+  GAMEROUTINES_VERTICALPIPEENTRY,
+  GAMEROUTINES_FLAGPOLESLIDE,
+  GAMEROUTINES_PLAYERENDLEVEL,
+  GAMEROUTINES_PLAYERLOSELIFE,
+  GAMEROUTINES_PLAYERENTRANCE,
+  GAMEROUTINES_PLAYERCTRLROUTINE,
+  GAMEROUTINES_PLAYERCHANGESIZE,
+  GAMEROUTINES_PLAYERINJURYBLINK,
+  GAMEROUTINES_PLAYERDEATH,
+  GAMEROUTINES_PLAYERFIREFLOWER,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_GameRoutines(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case GAMEROUTINES_ENTRANCE_GAMETIMERSETUP:
     Entrance_GameTimerSetup(ssw(0x91, 0x6f));
     return;
-  }
-  if (param_1 == 1) {
+
+  case GAMEROUTINES_VINE_AUTOCLIMB:
     Vine_AutoClimb();
     return;
-  }
-  if (param_1 == 2) {
+
+  case GAMEROUTINES_SIDEEXITPIPEENTRY:
     SideExitPipeEntry();
     return;
-  }
-  if (param_1 == 3) {
+
+  case GAMEROUTINES_VERTICALPIPEENTRY:
     VerticalPipeEntry();
     return;
-  }
-  if (param_1 == 4) {
+
+  case GAMEROUTINES_FLAGPOLESLIDE:
     FlagpoleSlide();
     return;
-  }
-  if (param_1 == 5) {
+
+  case GAMEROUTINES_PLAYERENDLEVEL:
     PlayerEndLevel();
     return;
-  }
-  if (param_1 == 6) {
+
+  case GAMEROUTINES_PLAYERLOSELIFE:
     PlayerLoseLife();
     return;
-  }
-  if (param_1 == 7) {
+
+  case GAMEROUTINES_PLAYERENTRANCE:
     PlayerEntrance();
     return;
-  }
-  if (param_1 == 8) {
+
+  case GAMEROUTINES_PLAYERCTRLROUTINE:
     PlayerCtrlRoutine();
     return;
-  }
-  if (param_1 == 9) {
+
+  case GAMEROUTINES_PLAYERCHANGESIZE:
     PlayerChangeSize();
     return;
-  }
-  if (param_1 == 10) {
+
+  case GAMEROUTINES_PLAYERINJURYBLINK:
     PlayerInjuryBlink();
     return;
-  }
-  if (param_1 == 0xb) {
+
+  case GAMEROUTINES_PLAYERDEATH:
     PlayerDeath();
     return;
-  }
-  if (param_1 == 0xc) {
+
+  case GAMEROUTINES_PLAYERFIREFLOWER:
     PlayerFireFlower();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum PlayerMovementSubs_jumptable_item {
+  PLAYERMOVEMENTSUBS_ONGROUNDSTATESUB,
+  PLAYERMOVEMENTSUBS_JUMPSWIMSUB,
+  PLAYERMOVEMENTSUBS_FALLINGSUB,
+  PLAYERMOVEMENTSUBS_CLIMBINGSUB,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_PlayerMovementSubs(byte param_1) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case PLAYERMOVEMENTSUBS_ONGROUNDSTATESUB:
     OnGroundStateSub();
     return;
-  }
-  if (param_1 == 1) {
+
+  case PLAYERMOVEMENTSUBS_JUMPSWIMSUB:
     JumpSwimSub();
     return;
-  }
-  if (param_1 == 2) {
+
+  case PLAYERMOVEMENTSUBS_FALLINGSUB:
     FallingSub();
     return;
-  }
-  if (param_1 == 3) {
+
+  case PLAYERMOVEMENTSUBS_CLIMBINGSUB:
     ClimbingSub();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum CheckpointEnemyID_jumptable_item {
+  CHECKPOINTENEMYID_INITNORMALENEMY_1,
+  CHECKPOINTENEMYID_INITNORMALENEMY_2,
+  CHECKPOINTENEMYID_INITNORMALENEMY_3,
+  CHECKPOINTENEMYID_INITREDKOOPA,
+  CHECKPOINTENEMYID_INITPARANHAPLANT_SMB2J,
+  CHECKPOINTENEMYID_INITHAMMERBRO,
+  CHECKPOINTENEMYID_INITGOOMBA,
+  CHECKPOINTENEMYID_INITBLOOBER,
+  CHECKPOINTENEMYID_INITBULLETBILL,
+  CHECKPOINTENEMYID_NOINITCODE_1,
+  CHECKPOINTENEMYID_INITCHEEPCHEEP_1,
+  CHECKPOINTENEMYID_INITCHEEPCHEEP_2,
+  CHECKPOINTENEMYID_INITPODOBOO,
+  CHECKPOINTENEMYID_INITPIRANHAPLANT,
+  CHECKPOINTENEMYID_INITJUMPGPTROOPA,
+  CHECKPOINTENEMYID_INITREDPTROOPA,
+  CHECKPOINTENEMYID_INITHORIZFLYSWIMENEMY,
+  CHECKPOINTENEMYID_INITLAKITU,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_1,
+  CHECKPOINTENEMYID_NOINITCODE_2,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_2,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_3,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_4,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_5,
+  CHECKPOINTENEMYID_ENDFRENZY,
+  CHECKPOINTENEMYID_NOINITCODE_3,
+  CHECKPOINTENEMYID_NOINITCODE_4,
+  CHECKPOINTENEMYID_INITSHORTFIREBAR_1,
+  CHECKPOINTENEMYID_INITSHORTFIREBAR_2,
+  CHECKPOINTENEMYID_INITSHORTFIREBAR_3,
+  CHECKPOINTENEMYID_INITSHORTFIREBAR_4,
+  CHECKPOINTENEMYID_INITLONGFIREBAR,
+  CHECKPOINTENEMYID_NOINITCODE_5,
+  CHECKPOINTENEMYID_NOINITCODE_6,
+  CHECKPOINTENEMYID_NOINITCODE_7,
+  CHECKPOINTENEMYID_NOINITCODE_8,
+  CHECKPOINTENEMYID_INITBALPLATFORM,
+  CHECKPOINTENEMYID_INITVERTPLATFORM,
+  CHECKPOINTENEMYID_LARGELIFTUP,
+  CHECKPOINTENEMYID_LARGELIFTDOWN,
+  CHECKPOINTENEMYID_INITHORIPLATFORM_1,
+  CHECKPOINTENEMYID_INITDROPPLATFORM,
+  CHECKPOINTENEMYID_INITHORIPLATFORM_2,
+  CHECKPOINTENEMYID_PLATLIFTUP,
+  CHECKPOINTENEMYID_PLATLIFTDOWN,
+  CHECKPOINTENEMYID_INITBOWSER,
+  CHECKPOINTENEMYID_PWRUPJMP,
+  CHECKPOINTENEMYID_SETUP_VINE,
+  CHECKPOINTENEMYID_NOINITCODE_9,
+  CHECKPOINTENEMYID_NOINITCODE_10,
+  CHECKPOINTENEMYID_NOINITCODE_11,
+  CHECKPOINTENEMYID_NOINITCODE_12,
+  CHECKPOINTENEMYID_NOINITCODE_13,
+  CHECKPOINTENEMYID_INITRETAINEROBJ,
+  CHECKPOINTENEMYID_ENDOFENEMYINITCODE,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A, X] -> []
 void jumptable_CheckpointEnemyID(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case CHECKPOINTENEMYID_INITNORMALENEMY_1:
     InitNormalEnemy(param_2);
     return;
-  }
-  if (param_1 == 1) {
+
+  case CHECKPOINTENEMYID_INITNORMALENEMY_2:
     InitNormalEnemy(param_2);
     return;
-  }
-  if (param_1 == 2) {
+
+  case CHECKPOINTENEMYID_INITNORMALENEMY_3:
     InitNormalEnemy(param_2);
     return;
-  }
-  if (param_1 == 3) {
+
+  case CHECKPOINTENEMYID_INITREDKOOPA:
     InitRedKoopa(param_2);
     return;
-  }
-  if (param_1 == 4) {
+
+  case CHECKPOINTENEMYID_INITPARANHAPLANT_SMB2J:
     if (SMB2J_ONLY) {
       InitPiranhaPlant(param_2);
     }
     return;
-  }
-  if (param_1 == 5) {
+
+  case CHECKPOINTENEMYID_INITHAMMERBRO:
     InitHammerBro(param_2);
     return;
-  }
-  if (param_1 == 6) {
+
+  case CHECKPOINTENEMYID_INITGOOMBA:
     InitGoomba(param_2);
     return;
-  }
-  if (param_1 == 7) {
+
+  case CHECKPOINTENEMYID_INITBLOOBER:
     InitBloober(param_2);
     return;
-  }
-  if (param_1 == 8) {
+
+  case CHECKPOINTENEMYID_INITBULLETBILL:
     InitBulletBill(param_2);
     return;
-  }
-  if (param_1 == 9) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_1:
     NoInitCode();
     return;
-  }
-  if (param_1 == 10) {
+
+  case CHECKPOINTENEMYID_INITCHEEPCHEEP_1:
     InitCheepCheep(param_2);
     return;
-  }
-  if (param_1 == 0xb) {
+
+  case CHECKPOINTENEMYID_INITCHEEPCHEEP_2:
     InitCheepCheep(param_2);
     return;
-  }
-  if (param_1 == 0xc) {
+
+  case CHECKPOINTENEMYID_INITPODOBOO:
     InitPodoboo(param_2);
     return;
-  }
-  if (param_1 == 0xd) {
+
+  case CHECKPOINTENEMYID_INITPIRANHAPLANT:
     InitPiranhaPlant(param_2);
     return;
-  }
-  if (param_1 == 0xe) {
+
+  case CHECKPOINTENEMYID_INITJUMPGPTROOPA:
     InitJumpGPTroopa(param_2);
     return;
-  }
-  if (param_1 == 0xf) {
+
+  case CHECKPOINTENEMYID_INITREDPTROOPA:
     InitRedPTroopa(param_2, false);
     return;
-  }
-  if (param_1 == 0x10) {
+
+  case CHECKPOINTENEMYID_INITHORIZFLYSWIMENEMY:
     InitHorizFlySwimEnemy(param_2);
     return;
-  }
-  if (param_1 == 0x11) {
+
+  case CHECKPOINTENEMYID_INITLAKITU:
     InitLakitu(param_2);
     return;
-  }
-  if (param_1 == 0x12) {
+
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_1:
     InitEnemyFrenzy(param_2);
     return;
-  }
-  if (param_1 == 0x13) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_2:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x14) {
+
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_2:
     InitEnemyFrenzy(param_2);
     return;
-  }
-  if (param_1 == 0x15) {
+
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_3:
     InitEnemyFrenzy(param_2);
     return;
-  }
-  if (param_1 == 0x16) {
+
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_4:
     InitEnemyFrenzy(param_2);
     return;
-  }
-  if (param_1 == 0x17) {
+
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_5:
     InitEnemyFrenzy(param_2);
     return;
-  }
-  if (param_1 == 0x18) {
+
+  case CHECKPOINTENEMYID_ENDFRENZY:
     EndFrenzy(param_2);
     return;
-  }
-  if (param_1 == 0x19) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_3:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x1a) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_4:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x1b) {
+
+  case CHECKPOINTENEMYID_INITSHORTFIREBAR_1:
     InitShortFirebar(param_2);
     return;
-  }
-  if (param_1 == 0x1c) {
+
+  case CHECKPOINTENEMYID_INITSHORTFIREBAR_2:
     InitShortFirebar(param_2);
     return;
-  }
-  if (param_1 == 0x1d) {
+
+  case CHECKPOINTENEMYID_INITSHORTFIREBAR_3:
     InitShortFirebar(param_2);
     return;
-  }
-  if (param_1 == 0x1e) {
+
+  case CHECKPOINTENEMYID_INITSHORTFIREBAR_4:
     InitShortFirebar(param_2);
     return;
-  }
-  if (param_1 == 0x1f) {
+
+  case CHECKPOINTENEMYID_INITLONGFIREBAR:
     InitLongFirebar(param_2);
     return;
-  }
-  if (param_1 == 0x20) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_5:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x21) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_6:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x22) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_7:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x23) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_8:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x24) {
+
+  case CHECKPOINTENEMYID_INITBALPLATFORM:
     InitBalPlatform(param_2);
     return;
-  }
-  if (param_1 == 0x25) {
+
+  case CHECKPOINTENEMYID_INITVERTPLATFORM:
     InitVertPlatform(param_2);
     return;
-  }
-  if (param_1 == 0x26) {
+
+  case CHECKPOINTENEMYID_LARGELIFTUP:
     LargeLiftUp(param_2);
     return;
-  }
-  if (param_1 == 0x27) {
+
+  case CHECKPOINTENEMYID_LARGELIFTDOWN:
     LargeLiftDown(param_2);
     return;
-  }
-  if (param_1 == 0x28) {
+
+  case CHECKPOINTENEMYID_INITHORIPLATFORM_1:
     InitHoriPlatform(param_2);
     return;
-  }
-  if (param_1 == 0x29) {
+
+  case CHECKPOINTENEMYID_INITDROPPLATFORM:
     InitDropPlatform(param_2);
     return;
-  }
-  if (param_1 == 0x2a) {
+
+  case CHECKPOINTENEMYID_INITHORIPLATFORM_2:
     InitHoriPlatform(param_2);
     return;
-  }
-  if (param_1 == 0x2b) {
+
+  case CHECKPOINTENEMYID_PLATLIFTUP:
     PlatLiftUp(param_2);
     return;
-  }
-  if (param_1 == 0x2c) {
+
+  case CHECKPOINTENEMYID_PLATLIFTDOWN:
     PlatLiftDown(param_2);
     return;
-  }
-  if (param_1 == 0x2d) {
+
+  case CHECKPOINTENEMYID_INITBOWSER:
     InitBowser(param_2);
     return;
-  }
-  if (param_1 == 0x2e) {
+
+  case CHECKPOINTENEMYID_PWRUPJMP:
     PwrUpJmp();
     return;
-  }
-  if (param_1 == 0x2f) {
+
+  case CHECKPOINTENEMYID_SETUP_VINE:
     Setup_Vine(param_2, 0x60);
     return;
-  }
-  if (param_1 == 0x30) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_9:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x31) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_10:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x32) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_11:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x33) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_12:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x34) {
+
+  case CHECKPOINTENEMYID_NOINITCODE_13:
     NoInitCode();
     return;
-  }
-  if (param_1 == 0x35) {
+
+  case CHECKPOINTENEMYID_INITRETAINEROBJ:
     InitRetainerObj(param_2);
     return;
-  }
-  if (param_1 == 0x36) {
+
+  case CHECKPOINTENEMYID_ENDOFENEMYINITCODE:
     EndOfEnemyInitCode();
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum InitEnemyFrenzy_jumptable_item {
+  INITENEMYFRENZY_LAKITUANDSPINYHANDLER,
+  INITENEMYFRENZY_NOFRENZYCODE,
+  INITENEMYFRENZY_INITFLYINGCHEEPCHEEP,
+  INITENEMYFRENZY_INITBOWSERFLAME,
+  INITENEMYFRENZY_INITFIREWORKS,
+  INITENEMYFRENZY_BULLETBILLCHEEPCHEEP,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A, X] -> []
 void jumptable_InitEnemyFrenzy(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case INITENEMYFRENZY_LAKITUANDSPINYHANDLER:
     LakituAndSpinyHandler(param_2);
     return;
-  }
-  if (param_1 == 1) {
+
+  case INITENEMYFRENZY_NOFRENZYCODE:
     NoFrenzyCode();
     return;
-  }
-  if (param_1 == 2) {
+
+  case INITENEMYFRENZY_INITFLYINGCHEEPCHEEP:
     InitFlyingCheepCheep(param_2);
     return;
-  }
-  if (param_1 == 3) {
+
+  case INITENEMYFRENZY_INITBOWSERFLAME:
     InitBowserFlame(param_2);
     return;
-  }
-  if (param_1 == 4) {
+
+  case INITENEMYFRENZY_INITFIREWORKS:
     InitFireworks(param_2);
     return;
-  }
-  if (param_1 == 5) {
+
+  case INITENEMYFRENZY_BULLETBILLCHEEPCHEEP:
     BulletBillCheepCheep(param_2);
     return;
+
+  default:
+    jmpengine_overflow(param_1);
   }
-  jmpengine_overflow(param_1);
-  return;
 }
+
+
+enum RunEnemyObjectsCore_jumptable_item {
+  RUNENEMYOBJECTSCORE_RUNNORMALENEMIES,
+  RUNENEMYOBJECTSCORE_RUNBOWSERFLAME,
+  RUNENEMYOBJECTSCORE_RUNFIREWORKS,
+  RUNENEMYOBJECTSCORE_NORUNCODE_1,
+  RUNENEMYOBJECTSCORE_NORUNCODE_2,
+  RUNENEMYOBJECTSCORE_NORUNCODE_3,
+  RUNENEMYOBJECTSCORE_NORUNCODE_4,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_1,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_2,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_3,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_4,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_5,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_6,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_7,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_8,
+  RUNENEMYOBJECTSCORE_NORUNCODE_5,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_1,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_2,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_3,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_4,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_5,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_6,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_7,
+  RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_1,
+  RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_2,
+  RUNENEMYOBJECTSCORE_RUNBOWSER,
+  RUNENEMYOBJECTSCORE_POWERUPOBJHANDLER,
+  RUNENEMYOBJECTSCORE_VINEOBJECTHANDLER,
+  RUNENEMYOBJECTSCORE_NORUNCODE_6,
+  RUNENEMYOBJECTSCORE_RUNSTARFLAGOBJ,
+  RUNENEMYOBJECTSCORE_JUMPSPRINGHANDLER,
+  RUNENEMYOBJECTSCORE_NORUNCODE_7,
+  RUNENEMYOBJECTSCORE_WARPZONEOBJECT,
+  RUNENEMYOBJECTSCORE_RUNRETAINEROBJ,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A, X] -> [X]
 byte jumptable_RunEnemyObjectsCore(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case RUNENEMYOBJECTSCORE_RUNNORMALENEMIES:
     return RunNormalEnemies(param_2);
-  }
-  if (param_1 == 1) {
+
+  case RUNENEMYOBJECTSCORE_RUNBOWSERFLAME:
     return RunBowserFlame(param_2);
-  }
-  if (param_1 == 2) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREWORKS:
     return RunFireworks(param_2);
-  }
-  if (param_1 == 3) {
+
+  case RUNENEMYOBJECTSCORE_NORUNCODE_1:
     NoRunCode();
     return param_2;
-  }
-  if (param_1 == 4) {
+
+  case RUNENEMYOBJECTSCORE_NORUNCODE_2:
     NoRunCode();
     return param_2;
-  }
-  if (param_1 == 5) {
+
+  case RUNENEMYOBJECTSCORE_NORUNCODE_3:
     NoRunCode();
     return param_2;
-  }
-  if (param_1 == 6) {
+
+  case RUNENEMYOBJECTSCORE_NORUNCODE_4:
     NoRunCode();
     return param_2;
-  }
-  if (param_1 == 7) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_1:
     return RunFirebarObj(param_2);
-  }
-  if (param_1 == 8) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_2:
     return RunFirebarObj(param_2);
-  }
-  if (param_1 == 9) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_3:
     return RunFirebarObj(param_2);
-  }
-  if (param_1 == 10) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_4:
     return RunFirebarObj(param_2);
-  }
-  if (param_1 == 0xb) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_5:
     return RunFirebarObj(param_2);
-  }
-  if (param_1 == 0xc) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_6:
     return RunFirebarObj(param_2);
-  }
-  if (param_1 == 0xd) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_7:
     return RunFirebarObj(param_2);
-  }
-  if (param_1 == 0xe) {
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_8:
     return RunFirebarObj(param_2);
-  }
-  if (param_1 == 0xf) {
+
+  case RUNENEMYOBJECTSCORE_NORUNCODE_5:
     NoRunCode();
     return param_2;
-  }
-  if (param_1 == 0x10) {
+
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_1:
     return RunLargePlatform(param_2);
-  }
-  if (param_1 == 0x11) {
+
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_2:
     return RunLargePlatform(param_2);
-  }
-  if (param_1 == 0x12) {
+
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_3:
     return RunLargePlatform(param_2);
-  }
-  if (param_1 == 0x13) {
+
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_4:
     return RunLargePlatform(param_2);
-  }
-  if (param_1 == 0x14) {
+
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_5:
     return RunLargePlatform(param_2);
-  }
-  if (param_1 == 0x15) {
+
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_6:
     return RunLargePlatform(param_2);
-  }
-  if (param_1 == 0x16) {
+
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_7:
     return RunLargePlatform(param_2);
-  }
-  if (param_1 == 0x17) {
+
+  case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_1:
     return RunSmallPlatform(param_2);
-  }
-  if (param_1 == 0x18) {
+
+  case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_2:
     return RunSmallPlatform(param_2);
-  }
-  if (param_1 == 0x19) {
+
+  case RUNENEMYOBJECTSCORE_RUNBOWSER:
     return RunBowser(param_2);
-  }
-  if (param_1 == 0x1a) {
+
+  case RUNENEMYOBJECTSCORE_POWERUPOBJHANDLER:
     return PowerUpObjHandler();
-  }
-  if (param_1 == 0x1b) {
+
+  case RUNENEMYOBJECTSCORE_VINEOBJECTHANDLER:
     return VineObjectHandler(param_2);
-  }
-  if (param_1 == 0x1c) {
+
+  case RUNENEMYOBJECTSCORE_NORUNCODE_6:
     NoRunCode();
     return param_2;
-  }
-  if (param_1 == 0x1d) {
+
+  case RUNENEMYOBJECTSCORE_RUNSTARFLAGOBJ:
     return RunStarFlagObj(param_2);
-  }
-  if (param_1 == 0x1e) {
+
+  case RUNENEMYOBJECTSCORE_JUMPSPRINGHANDLER:
     return JumpspringHandler(param_2);
-  }
-  if (param_1 == 0x1f) {
+
+  case RUNENEMYOBJECTSCORE_NORUNCODE_7:
     NoRunCode();
     return param_2;
-  }
-  if (param_1 == 0x20) {
+
+  case RUNENEMYOBJECTSCORE_WARPZONEOBJECT:
     WarpZoneObject(param_2);
     return param_2;
-  }
-  if (param_1 == 0x21) {
+
+  case RUNENEMYOBJECTSCORE_RUNRETAINEROBJ:
     return RunRetainerObj(param_2);
+
+  default:
+    jmpengine_overflow(param_1);
+    return param_2;
   }
-  jmpengine_overflow(param_1);
-  return param_2;
 }
+
+
+enum EnemyMovementSubs_jumptable_item {
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_1,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_2,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_3,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_4,
+  ENEMYMOVEMENTSUBS_MOVEUPSIDEDOWNPIRANHAP,
+  ENEMYMOVEMENTSUBS_PROCHAMMERBRO,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5,
+  ENEMYMOVEMENTSUBS_MOVEBLOOBER,
+  ENEMYMOVEMENTSUBS_MOVEBULLETBILL,
+  ENEMYMOVEMENTSUBS_NOMOVECODE_1,
+  ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_1,
+  ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_2,
+  ENEMYMOVEMENTSUBS_MOVEPODOBOO,
+  ENEMYMOVEMENTSUBS_MOVEPIRANHAPLANT,
+  ENEMYMOVEMENTSUBS_MOVEJUMPINGENEMY,
+  ENEMYMOVEMENTSUBS_PROCMOVEREDPTROOPA,
+  ENEMYMOVEMENTSUBS_MOVEFLYGREENPTROOPA,
+  ENEMYMOVEMENTSUBS_MOVELAKITU,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6,
+  ENEMYMOVEMENTSUBS_NOMOVECODE_2,
+  ENEMYMOVEMENTSUBS_MOVEFLYINGCHEEPCHEEP,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A, X] -> [X]
 byte jumptable_EnemyMovementSubs(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_1:
     return MoveNormalEnemy(param_2);
-  }
-  if (param_1 == 1) {
+
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_2:
     return MoveNormalEnemy(param_2);
-  }
-  if (param_1 == 2) {
+
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_3:
     return MoveNormalEnemy(param_2);
-  }
-  if (param_1 == 3) {
+
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_4:
     return MoveNormalEnemy(param_2);
-  }
-  if (param_1 == 4) {
+
+  case ENEMYMOVEMENTSUBS_MOVEUPSIDEDOWNPIRANHAP:
     #ifdef SMB2J_MODE
     MoveUpsideDownPiranhaP(param_2);
     return param_2;
     #else
     return MoveNormalEnemy(param_2);
     #endif
-  }
-  if (param_1 == 5) {
+
+  case ENEMYMOVEMENTSUBS_PROCHAMMERBRO:
     return ProcHammerBro(param_2);
-  }
-  if (param_1 == 6) {
+
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5:
     return MoveNormalEnemy(param_2);
-  }
-  if (param_1 == 7) {
+
+  case ENEMYMOVEMENTSUBS_MOVEBLOOBER:
     return MoveBloober(param_2, false);
-  }
-  if (param_1 == 8) {
+
+  case ENEMYMOVEMENTSUBS_MOVEBULLETBILL:
     return MoveBulletBill(param_2);
-  }
-  if (param_1 == 9) {
+
+  case ENEMYMOVEMENTSUBS_NOMOVECODE_1:
     NoMoveCode();
     return param_2;
-  }
-  if (param_1 == 10) {
+
+  case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_1:
     return MoveSwimmingCheepCheep(param_2);
-  }
-  if (param_1 == 0xb) {
+
+  case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_2:
     return MoveSwimmingCheepCheep(param_2);
-  }
-  if (param_1 == 0xc) {
+
+  case ENEMYMOVEMENTSUBS_MOVEPODOBOO:
     return MovePodoboo(param_2);
-  }
-  if (param_1 == 0xd) {
+
+  case ENEMYMOVEMENTSUBS_MOVEPIRANHAPLANT:
     MovePiranhaPlant(param_2);
     return param_2;
-  }
-  if (param_1 == 0xe) {
+
+  case ENEMYMOVEMENTSUBS_MOVEJUMPINGENEMY:
     return MoveJumpingEnemy(param_2);
-  }
-  if (param_1 == 0xf) {
+
+  case ENEMYMOVEMENTSUBS_PROCMOVEREDPTROOPA:
     return ProcMoveRedPTroopa(param_2);
-  }
-  if (param_1 == 0x10) {
+
+  case ENEMYMOVEMENTSUBS_MOVEFLYGREENPTROOPA:
     return MoveFlyGreenPTroopa(param_2);
-  }
-  if (param_1 == 0x11) {
+
+  case ENEMYMOVEMENTSUBS_MOVELAKITU:
     return MoveLakitu(param_2);
-  }
-  if (param_1 == 0x12) {
+
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6:
     return MoveNormalEnemy(param_2);
-  }
-  if (param_1 == 0x13) {
+
+  case ENEMYMOVEMENTSUBS_NOMOVECODE_2:
     NoMoveCode();
     return param_2;
-  }
-  if (param_1 == 0x14) {
+
+  case ENEMYMOVEMENTSUBS_MOVEFLYINGCHEEPCHEEP:
     return MoveFlyingCheepCheep(param_2);
+
+  default:
+    jmpengine_overflow(param_1);
+    return param_2;
   }
-  jmpengine_overflow(param_1);
-  return param_2;
 }
+
+
+enum LargePlatformSubroutines_jumptable_item {
+  LARGEPLATFORMSUBROUTINES_BALANCEPLATFORM,
+  LARGEPLATFORMSUBROUTINES_YMOVINGPLATFORM,
+  LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_1,
+  LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_2,
+  LARGEPLATFORMSUBROUTINES_XMOVINGPLATFORM,
+  LARGEPLATFORMSUBROUTINES_DROPPLATFORM,
+  LARGEPLATFORMSUBROUTINES_RIGHTPLATFORM,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A, X] -> [X]
 byte jumptable_LargePlatformSubroutines(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case LARGEPLATFORMSUBROUTINES_BALANCEPLATFORM:
     return BalancePlatform(param_2);
-  }
-  if (param_1 == 1) {
+
+  case LARGEPLATFORMSUBROUTINES_YMOVINGPLATFORM:
     return YMovingPlatform(param_2);
-  }
-  if (param_1 == 2) {
+
+  case LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_1:
     MoveLargeLiftPlat(param_2);
     return param_2;
-  }
-  if (param_1 == 3) {
+
+  case LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_2:
     MoveLargeLiftPlat(param_2);
     return param_2;
-  }
-  if (param_1 == 4) {
+
+  case LARGEPLATFORMSUBROUTINES_XMOVINGPLATFORM:
     return XMovingPlatform(param_2);
-  }
-  if (param_1 == 5) {
+
+  case LARGEPLATFORMSUBROUTINES_DROPPLATFORM:
     return DropPlatform(param_2);
-  }
-  if (param_1 == 6) {
+
+  case LARGEPLATFORMSUBROUTINES_RIGHTPLATFORM:
     return RightPlatform(param_2);
+
+  default:
+    jmpengine_overflow(param_1);
+    return param_2;
   }
-  jmpengine_overflow(param_1);
-  return param_2;
 }
+
+
+enum RunStarFlagObj_jumptable_item {
+  RUNSTARFLAGOBJ_STARFLAGEXIT,
+  RUNSTARFLAGOBJ_GAMETIMERFIREWORKS,
+  RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS,
+  RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS,
+  RUNSTARFLAGOBJ_DELAYTOAREAEND,
+};
 
 
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A, X] -> [X]
 byte jumptable_RunStarFlagObj(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case RUNSTARFLAGOBJ_STARFLAGEXIT:
     StarFlagExit();
     return param_2;
-  }
-  if (param_1 == 1) {
+
+  case RUNSTARFLAGOBJ_GAMETIMERFIREWORKS:
     GameTimerFireworks(param_2);
     return param_2;
-  }
-  if (param_1 == 2) {
+
+  case RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS:
     return AwardGameTimerPoints(param_2);
-  }
-  if (param_1 == 3) {
+
+  case RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS:
     return RaiseFlagSetoffFWorks(param_2);
-  }
-  if (param_1 == 4) {
+
+  case RUNSTARFLAGOBJ_DELAYTOAREAEND:
     return DelayToAreaEnd(param_2);
+
+  default:
+    jmpengine_overflow(param_1);
+    return param_2;
   }
-  jmpengine_overflow(param_1);
-  return param_2;
 }
 
 
@@ -718,14 +938,22 @@ void SpriteShuffler(void) {
 }
 
 
+enum OperModeExecutionTree_jumptable_item {
+  OPERMODEEXECUTIONTREE_TITLESCREENMODE,
+  OPERMODEEXECUTIONTREE_GAMEMODE,
+  OPERMODEEXECUTIONTREE_VICTORYMODE,
+  OPERMODEEXECUTIONTREE_GAMEOVERMODE,
+};
+
+
 // SMB:8212
 // SM2MAIN:6279
 // Signature: [] -> []
 void OperModeExecutionTree(void) {
-  byte param_1 = OperMode;
   byte in_r00 = 0;
 
-  if (param_1 == 0) {
+  switch (OperMode) {
+  case OPERMODEEXECUTIONTREE_TITLESCREENMODE:
 #ifdef SMB1_MODE
     TitleScreenMode();
 #endif
@@ -733,20 +961,23 @@ void OperModeExecutionTree(void) {
     AttractModeSubs();
 #endif
     return;
-  }
-  if (param_1 == 1) {
+
+  case OPERMODEEXECUTIONTREE_GAMEMODE:
     GameMode();
     return;
-  }
-  if (param_1 == 2) {
+
+  case OPERMODEEXECUTIONTREE_VICTORYMODE:
     VictoryMode(in_r00);
     return;
-  }
-  if (param_1 == 3) {
+
+  case OPERMODEEXECUTIONTREE_GAMEOVERMODE:
     GameOverMode();
     return;
+
+  default:
+    jmpengine_overflow(OperMode);
+    return;
   }
-  jmpengine_overflow(param_1);
 }
 
 
@@ -2247,16 +2478,23 @@ void AreaFrenzy(byte param_1) {
 }
 
 
+enum AreaStyleObject_jumptable_item {
+  AREASTYLEOBJECT_TREELEDGE,
+  AREASTYLEOBJECT_MUSHROOMLEDGE,
+  AREASTYLEOBJECT_BULLETBILLCANNON,
+};
+
+
 // SMB:n/a
 // SM2MAIN:n/a
 // Signature: [A, X] -> []
 void jumptable_AreaStyleObject(byte param_1, byte param_2) {
-  if (param_1 == 0) {
+  switch (param_1) {
+  case AREASTYLEOBJECT_TREELEDGE:
     TreeLedge(param_2);
     return;
-  }
 
-  if (param_1 == 1) {
+  case AREASTYLEOBJECT_MUSHROOMLEDGE:
 #ifdef SMB1_MODE
     MushroomLedge(param_2);
 #endif
@@ -2264,14 +2502,15 @@ void jumptable_AreaStyleObject(byte param_1, byte param_2) {
     CloudLedge(param_2);
 #endif
     return;
-  }
 
-  if (param_1 == 2) {
+  case AREASTYLEOBJECT_BULLETBILLCANNON:
     BulletBillCannon(param_2);
     return;
-  }
 
-  jmpengine_overflow(param_1);
+  default:
+    jmpengine_overflow(param_1);
+    return;
+  }
 }
 
 
