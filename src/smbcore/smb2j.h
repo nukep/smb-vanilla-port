@@ -250,9 +250,6 @@ void smb2j_jumptable_AreaParserTasks(byte param_1);
 void smb2j_jumptable_AreaStyleObject(byte param_1,byte param_2);
 #define jumptable_AreaStyleObject smb2j_jumptable_AreaStyleObject
 
-void smb2j_jumptable_GameMode(byte param_1);
-#define jumptable_GameMode smb2j_jumptable_GameMode
-
 void smb2j_jumptable_GameRoutines(byte param_1);
 #define jumptable_GameRoutines smb2j_jumptable_GameRoutines
 

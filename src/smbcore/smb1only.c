@@ -1,40 +1,6 @@
 #include "types.h"
 #include "vars.h"
 
-enum GameMode_jumptable_item {
-  GAMEMODE_INITIALIZEAREA,
-  GAMEMODE_SCREENROUTINES,
-  GAMEMODE_SECONDARYGAMESETUP,
-  GAMEMODE_GAMECOREROUTINE,
-};
-
-
-// SMB:n/a
-// Signature: [A] -> []
-void jumptable_GameMode(byte param_1) {
-  switch (param_1) {
-  case GAMEMODE_INITIALIZEAREA:
-    InitializeArea();
-    return;
-
-  case GAMEMODE_SCREENROUTINES:
-    ScreenRoutines();
-    return;
-
-  case GAMEMODE_SECONDARYGAMESETUP:
-    SecondaryGameSetup();
-    return;
-
-  case GAMEMODE_GAMECOREROUTINE:
-    GameCoreRoutine();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
 enum BumpBlock_jumptable_item {
   BUMPBLOCK_MUSHFLOWERBLOCK_1,
   BUMPBLOCK_COINBLOCK_1,

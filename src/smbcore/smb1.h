@@ -252,9 +252,6 @@ void smb1_jumptable_AreaParserTasks(byte param_1);
 void smb1_jumptable_AreaStyleObject(byte param_1,byte param_2);
 #define jumptable_AreaStyleObject smb1_jumptable_AreaStyleObject
 
-void smb1_jumptable_GameMode(byte param_1);
-#define jumptable_GameMode smb1_jumptable_GameMode
-
 void smb1_jumptable_GameRoutines(byte param_1);
 #define jumptable_GameRoutines smb1_jumptable_GameRoutines
 

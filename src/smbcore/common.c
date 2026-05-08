@@ -3666,12 +3666,47 @@ void GetAreaDataAddrs(void) {
   AreaData = ((hi << 8) | lo) + 2;
 }
 
+enum GameMode_jumptable_item {
+#ifdef SMB2J_MODE
+  GAMEMODE_GAMEMODEDISKROUTINES,
+#endif
+  GAMEMODE_INITIALIZEAREA,
+  GAMEMODE_SCREENROUTINES,
+  GAMEMODE_SECONDARYGAMESETUP,
+  GAMEMODE_GAMECOREROUTINE,
+};
+
 
 // SMB:aedc
 // SM2MAIN:7a37
 // Signature: [] -> []
 void GameMode(void) {
-  jumptable_GameMode(OperMode_Task);
+  switch (OperMode_Task) {
+  case GAMEMODE_INITIALIZEAREA:
+    InitializeArea();
+    return;
+
+  case GAMEMODE_SCREENROUTINES:
+    ScreenRoutines();
+    return;
+
+  case GAMEMODE_SECONDARYGAMESETUP:
+    SecondaryGameSetup();
+    return;
+
+  case GAMEMODE_GAMECOREROUTINE:
+    GameCoreRoutine();
+    return;
+
+#ifdef SMB2J_MODE
+  case GAMEMODE_GAMEMODEDISKROUTINES:
+    GameModeDiskRoutines();
+    return;
+#endif
+
+  default:
+    jmpengine_overflow(OperMode_Task);
+  }
 }
 
 
