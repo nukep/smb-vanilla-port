@@ -1,40 +1,6 @@
 #include "types.h"
 #include "vars.h"
 
-enum TitleScreenMode_jumptable_item {
-  TITLESCREENMODE_INITIALIZEGAME,
-  TITLESCREENMODE_SCREENROUTINES,
-  TITLESCREENMODE_PRIMARYGAMESETUP,
-  TITLESCREENMODE_GAMEMENUROUTINE,
-};
-
-
-// SMB:n/a
-// Signature: [A] -> []
-void jumptable_TitleScreenMode(byte param_1) {
-  switch (param_1) {
-  case TITLESCREENMODE_INITIALIZEGAME:
-    InitializeGame();
-    return;
-
-  case TITLESCREENMODE_SCREENROUTINES:
-    ScreenRoutines();
-    return;
-
-  case TITLESCREENMODE_PRIMARYGAMESETUP:
-    PrimaryGameSetup();
-    return;
-
-  case TITLESCREENMODE_GAMEMENUROUTINE:
-    GameMenuRoutine();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
 enum VictoryModeSubroutines_jumptable_item {
   VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
   VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
@@ -460,13 +426,6 @@ void jumptable_BumpBlock(byte param_1, byte param_2) {
   default:
     jmpengine_overflow(param_1);
   }
-}
-
-
-// SMB:8231
-// Signature: [] -> []
-void TitleScreenMode(void) {
-  jumptable_TitleScreenMode(OperMode_Task);
 }
 
 

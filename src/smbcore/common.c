@@ -855,6 +855,61 @@ void MoveSpritesOffscreen(void) {
   } while (bVar1 != 0);
 }
 
+
+enum TitleScreenMode_jumptable_item {
+#ifdef SMB2J_MODE
+  TITLESCREENMODE_ATTRACTMODEDISKROUTINES,
+#endif
+  TITLESCREENMODE_INITIALIZEGAME,
+  TITLESCREENMODE_SCREENROUTINES,
+  TITLESCREENMODE_PRIMARYGAMESETUP,
+  TITLESCREENMODE_GAMEMENUROUTINE,
+#ifdef SMB2J_MODE
+  TITLESCREENMODE_HARDWORLDSCHECKPOINT,
+#endif
+};
+
+
+// SMB:8231
+// SM2MAIN:bfb0
+// Signature: [] -> []
+void TitleScreenMode(void) {
+  // Note: In the SMB2J disassembly, this is called "AttractModeSubs".
+  // We consolidated it into SMB1's "TitleScreenMode" for clarity.
+
+  switch (OperMode_Task) {
+  case TITLESCREENMODE_INITIALIZEGAME:
+    InitializeGame();
+    return;
+
+  case TITLESCREENMODE_SCREENROUTINES:
+    ScreenRoutines();
+    return;
+
+  case TITLESCREENMODE_PRIMARYGAMESETUP:
+    PrimaryGameSetup();
+    return;
+
+  case TITLESCREENMODE_GAMEMENUROUTINE:
+    GameMenuRoutine();
+    return;
+
+#ifdef SMB2J_MODE
+  case TITLESCREENMODE_ATTRACTMODEDISKROUTINES:
+    AttractModeDiskRoutines();
+    return;
+
+  case TITLESCREENMODE_HARDWORLDSCHECKPOINT:
+    HardWorldsCheckpoint();
+    return;
+#endif
+
+  default:
+    jmpengine_overflow(OperMode_Task);
+  }
+}
+
+
 // SMB:836b
 // SM2MAIN:c553
 // Signature: [] -> [C]

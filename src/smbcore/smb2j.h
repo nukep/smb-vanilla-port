@@ -289,9 +289,6 @@ byte smb2j_jumptable_LargePlatformSubroutines(byte param_1,byte param_2);
 byte smb2j_jumptable_RunStarFlagObj(byte param_1,byte param_2);
 #define jumptable_RunStarFlagObj smb2j_jumptable_RunStarFlagObj
 
-void smb2j_jumptable_TitleScreenMode(byte param_1);
-#define jumptable_TitleScreenMode smb2j_jumptable_TitleScreenMode
-
 void smb2j_jumptable_HardWorldsCheckpoint(byte param_1);
 #define jumptable_HardWorldsCheckpoint smb2j_jumptable_HardWorldsCheckpoint
 

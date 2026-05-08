@@ -1,53 +1,6 @@
 #include "types.h"
 #include "vars.h"
 
-enum TitleScreenMode_jumptable_item {
-  TITLESCREENMODE_ATTRACTMODEDISKROUTINES,
-  TITLESCREENMODE_INITIALIZEGAME,
-  TITLESCREENMODE_SCREENROUTINES,
-  TITLESCREENMODE_PRIMARYGAMESETUP,
-  TITLESCREENMODE_GAMEMENUROUTINE,
-  TITLESCREENMODE_HARDWORLDSCHECKPOINT,
-};
-
-
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_TitleScreenMode(byte param_1) {
-  // Note: In the SMB2J disassembly, this is called "AttractModeSubs".
-  // We consolidated it into SMB1's "TitleScreenMode" for clarity.
-
-  switch (param_1) {
-  case TITLESCREENMODE_ATTRACTMODEDISKROUTINES:
-    AttractModeDiskRoutines();
-    return;
-
-  case TITLESCREENMODE_INITIALIZEGAME:
-    InitializeGame();
-    return;
-
-  case TITLESCREENMODE_SCREENROUTINES:
-    ScreenRoutines();
-    return;
-
-  case TITLESCREENMODE_PRIMARYGAMESETUP:
-    PrimaryGameSetup();
-    return;
-
-  case TITLESCREENMODE_GAMEMENUROUTINE:
-    GameMenuRoutine();
-    return;
-
-  case TITLESCREENMODE_HARDWORLDSCHECKPOINT:
-    HardWorldsCheckpoint();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
 enum VictoryModeSubroutines_jumptable_item {
   VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
   VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
@@ -1048,15 +1001,6 @@ void NoDemote(byte param_1, byte param_2) {
     Enemy_State[param_2] = 2;
   }
   SetStun2(param_2);
-}
-
-
-// SM2MAIN:bfb0
-// Signature: [] -> []
-void TitleScreenMode(void) {
-  // Note: In the SMB2J disassembly, this is called "AttractModeSubs".
-  // We consolidated it into SMB1's "TitleScreenMode" for clarity.
-  jumptable_TitleScreenMode(OperMode_Task);
 }
 
 
