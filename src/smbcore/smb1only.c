@@ -133,26 +133,6 @@ void ScrollScreen(byte param_1) {
 }
 
 
-// SMB:d2f2
-// Signature: [X] -> []
-void GameTimerFireworks(byte param_1) {
-  if (GameTimerDisplay[2] == 1) {
-    Enemy_State[param_1] = 5;
-    FireworksCounter = 1;
-  } else if (GameTimerDisplay[2] == 3) {
-    Enemy_State[param_1] = 3;
-    FireworksCounter = 3;
-  } else if (GameTimerDisplay[2] == 6) {
-    Enemy_State[param_1] = 0;
-    FireworksCounter = 6;
-  } else {
-    Enemy_State[param_1] = 0;
-    FireworksCounter = 0xff;
-  }
-  StarFlagTaskControl = StarFlagTaskControl + 1;
-}
-
-
 // SMB:e01b
 // Signature: [A, X] -> []
 void ChkToStunEnemies(byte param_1, byte param_2) {

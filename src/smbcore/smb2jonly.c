@@ -412,30 +412,6 @@ void PoisonMushBlock(byte param_1) {
 }
 
 
-// SM2MAIN:9f27
-// Signature: [X] -> []
-void GameTimerFireworks(byte param_1) {
-  if (GameTimerDisplay[2] == CoinDisplay[1]) {
-    // only show fireworks if the last digit of the timer
-    // is the last digit of the coins
-
-    if ((GameTimerDisplay[2] & 1) == 0) {
-      // timer is even
-      Enemy_State[param_1] = 0;
-      FireworksCounter = 6;
-    } else {
-      // timer is odd
-      Enemy_State[param_1] = 3;
-      FireworksCounter = 3;
-    }
-  } else {
-    Enemy_State[param_1] = 0;
-    FireworksCounter = 0xff;
-  }
-  StarFlagTaskControl = StarFlagTaskControl + 1;
-}
-
-
 // SM2MAIN:a64e
 // Signature: [X] -> [A]
 byte SetBounce(byte param_1) {

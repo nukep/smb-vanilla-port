@@ -8482,6 +8482,48 @@ byte RunStarFlagObj(byte param_1) {
 }
 
 
+// SMB:d2f2
+// SM2MAIN:9f27
+// Signature: [X] -> []
+void GameTimerFireworks(byte param_1) {
+  byte last_digit = GameTimerDisplay[2];
+
+  Enemy_State[param_1] = 0;
+  FireworksCounter = 0xff;
+
+#ifdef SMB1_MODE
+  if (last_digit == 1) {
+    Enemy_State[param_1] = 5;
+    FireworksCounter = 1;
+  } else if (last_digit == 3) {
+    Enemy_State[param_1] = 3;
+    FireworksCounter = 3;
+  } else if (last_digit == 6) {
+    Enemy_State[param_1] = 0;
+    FireworksCounter = 6;
+  }
+#endif
+#ifdef SMB2J_MODE
+  if (last_digit == CoinDisplay[1]) {
+    // only show fireworks if the last digit of the timer
+    // is the last digit of the coins
+
+    if ((last_digit & 1) == 0) {
+      // timer is even
+      Enemy_State[param_1] = 0;
+      FireworksCounter = 6;
+    } else {
+      // timer is odd
+      Enemy_State[param_1] = 3;
+      FireworksCounter = 3;
+    }
+  }
+#endif
+
+  StarFlagTaskControl += 1;
+}
+
+
 // SMB:d312
 // SM2MAIN:9f4c
 // Signature: [X] -> [X]
