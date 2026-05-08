@@ -1390,9 +1390,6 @@ byte smb2j_EnemyToBGCollisionDet(byte param_1);
 void smb2j_ChkToStunEnemies(byte param_1);
 #define ChkToStunEnemies smb2j_ChkToStunEnemies
 
-void smb2j_NoDemote(byte param_1,byte param_2);
-#define NoDemote smb2j_NoDemote
-
 void smb2j_SetStun2(byte param_1);
 #define SetStun2 smb2j_SetStun2
 

@@ -1398,9 +1398,6 @@ byte smb1_EnemyToBGCollisionDet(byte param_1);
 void smb1_ChkToStunEnemies(byte param_1,byte param_2);
 #define ChkToStunEnemies smb1_ChkToStunEnemies
 
-void smb1_SetStun(byte param_1);
-#define SetStun smb1_SetStun
-
 void smb1_SetStun2(byte param_1);
 #define SetStun2 smb1_SetStun2
 

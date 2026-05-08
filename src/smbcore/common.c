@@ -9123,24 +9123,31 @@ void HandleEnemyFBallCol(byte param_1, byte param_2) {
 // SM2MAIN:a3d6
 // Signature: [X] -> []
 void ShellOrBlockDefeat(byte param_1) {
-#ifdef SMB1_MODE
-  if (Enemy_ID[param_1] == 0xd) {
-    // +1 is possible oversight in original game, didn't clc before adc
-    Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 0x18 + 1;
-    // first argument here is also probably a bug
-    ChkToStunEnemies(Enemy_Y_Position[param_1], param_1);
-  } else {
-    ChkToStunEnemies(Enemy_ID[param_1], param_1);
-  }
-#endif
+  byte enemy_id = Enemy_ID[param_1];
+
 #ifdef SMB2J_MODE
-  if (Enemy_ID[param_1] == 0xd) {
-    // +1 is possible oversight in original game, didn't clc before adc
-    Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 0x18 + 1;
-  } else if (Enemy_ID[param_1] == 4) {
+  if (enemy_id == 4) {
     // +1 is possible oversight in original game, didn't clc before adc
     Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 0x18 + 1 - 0x31;
   }
+#endif
+
+  if (enemy_id == 0xd) {
+    // +1 is possible oversight in original game, didn't clc before adc
+    Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 0x18 + 1;
+  }
+
+#ifdef SMB1_MODE
+  if (enemy_id == 0xd) {
+    // this reimplements a bug in SMB1
+    // NES note: The "A" register is overwritten by the Piranha plant case
+    enemy_id = Enemy_Y_Position[param_1];
+  }
+
+  ChkToStunEnemies(enemy_id, param_1);
+#endif
+
+#ifdef SMB2J_MODE
   ChkToStunEnemies(param_1);
 #endif
 
@@ -9397,11 +9404,16 @@ byte PlayerEnemyCollision(byte param_1) {
     SetupFloateyNumber(bVar2, param_1);
     bStack0000 = Enemy_MovingDir[param_1];
 #ifdef SMB1_MODE
-    SetStun(param_1);
+    // Inlined: SetStun
+    Enemy_State[param_1] = (Enemy_State[param_1] & 0xf0) | 2;
 #endif
 #ifdef SMB2J_MODE
-    NoDemote(bStack0000, param_1);
+    // Inlined: NoDemote
+    if ((bStack0000 != 0x2e) && (bStack0000 != 6)) {
+      Enemy_State[param_1] = 2;
+    }
 #endif
+    SetStun2(param_1);
     Enemy_MovingDir[param_1] = bStack0000;
     Enemy_State[param_1] = 0x20;
     SpriteVarData1[param_1] = InitVStf(param_1);
@@ -10313,36 +10325,35 @@ byte EnemyToBGCollisionDet(byte param_1) {
     }
   }
 
+  if (sVar6.a == ssw(0x23, 0x20)) {
 #ifdef SMB1_MODE
-  if (sVar6.a == 0x23) {
     RAM(CONCAT11(sVar6.r07, sVar6.r06) + sVar6.r02) = 0;
-    if (Enemy_ID[bVarCC] < 0x15) {
-      if (Enemy_ID[bVarCC] == 6) {
+#endif
+
+    byte enemy_id = Enemy_ID[bVarCC];
+    if (enemy_id < 0x15) {
+      if (enemy_id == 6) {
         KillEnemyAboveBlock(bVarCC);
       }
       SetupFloateyNumber(1, bVarCC);
-      bVarAA = Enemy_Rel_XPos; // possible glitch: the last value of the A register from SetupFloateyNum
-      ChkToStunEnemies(bVarAA, bVarCC);
-      return bVarCC;
+
+#ifdef SMB1_MODE
+      // this reimplements a bug in SMB1
+      // NES note: The "A" register is overwritten by the call to SetupFloateyNumber.
+      // The value happens to be Enemy_Rel_XPos
+      enemy_id = Enemy_Rel_XPos;
+#endif
     }
-    ChkToStunEnemies(Enemy_ID[bVarCC], bVarCC);
-    return bVarCC;
-  }
+
+#ifdef SMB1_MODE
+    ChkToStunEnemies(enemy_id, bVarCC);
 #endif
 #ifdef SMB2J_MODE
-  if (sVar6.a == 0x20) {
-    if (Enemy_ID[bVarCC] < 0x15) {
-      if (Enemy_ID[bVarCC] == 6) {
-        KillEnemyAboveBlock(bVarCC);
-      }
-      SetupFloateyNumber(1, bVarCC);
-      ChkToStunEnemies(bVarCC);
-      return bVarCC;
-    }
     ChkToStunEnemies(bVarCC);
+#endif
+
     return bVarCC;
   }
-#endif
 
   if ((byte)(sVar6.r04 - 8) > 4) {
     return ChkForRedKoopa(bVarCC);

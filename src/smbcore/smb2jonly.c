@@ -453,41 +453,23 @@ byte SetBounce(byte param_1) {
 // SM2MAIN:aca3
 // Signature: [X] -> []
 void ChkToStunEnemies(byte param_1) {
-  byte bVar1;
+  // The port inlines NoDemote, because it more clearly reveals what's actually going on here.
+  // The NES implementation did a bunch of compares to hoan in on the object types,
+  // but it's more obvious to just do the comparisons directly.
 
-  bVar1 = Enemy_ID[param_1];
-  if (bVar1 < 9) {
-    NoDemote(bVar1, param_1);
+  if (Enemy_ID[param_1] == 6 || Enemy_ID[param_1] == 0x2e) {
+    SetStun2(param_1);
     return;
   }
-  if (bVar1 > 0x10) {
-    NoDemote(bVar1, param_1);
-    return;
-  }
-  if (bVar1 == 0xd) {
-    NoDemote(0xd, param_1);
-    return;
-  }
-  if (bVar1 == 4) {
-    NoDemote(4, param_1);
-    return;
-  }
-  if ((bVar1 >= 10) && (bVar1 < 0xd)) {
-    NoDemote(bVar1, param_1);
-    return;
-  }
-  Enemy_ID[param_1] = bVar1 & 1;
-  NoDemote(bVar1 & 1, param_1);
-}
 
+  // Turn these enemies into koopas
+  if (Enemy_ID[param_1] == 9)  { Enemy_ID[param_1] = 1; }
+  if (Enemy_ID[param_1] == 14) { Enemy_ID[param_1] = 0; }
+  if (Enemy_ID[param_1] == 15) { Enemy_ID[param_1] = 1; }
+  if (Enemy_ID[param_1] == 16) { Enemy_ID[param_1] = 0; }
 
-// SM2MAIN:acc1
-// Signature: [A, X] -> []
-void NoDemote(byte param_1, byte param_2) {
-  if ((param_1 != 0x2e) && (param_1 != 6)) {
-    Enemy_State[param_2] = 2;
-  }
-  SetStun2(param_2);
+  Enemy_State[param_1] = 2;
+  SetStun2(param_1);
 }
 
 

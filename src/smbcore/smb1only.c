@@ -156,24 +156,17 @@ void GameTimerFireworks(byte param_1) {
 // SMB:e01b
 // Signature: [A, X] -> []
 void ChkToStunEnemies(byte param_1, byte param_2) {
-  if (param_1 < 9) {
-    SetStun(param_2);
-  } else if (param_1 > 0x10) {
-    SetStun(param_2);
-  } else if ((param_1 >= 10) && (param_1 < 0xd)) {
-    SetStun(param_2);
-  } else {
-    Enemy_ID[param_2] = param_1 & 1;
-    SetStun(param_2);
-  }
-}
+  // Turn these enemies into koopas
+  if (param_1 == 9)  { Enemy_ID[param_2] = 1; }
+  if (param_1 == 13) { Enemy_ID[param_2] = 1; }
+  if (param_1 == 14) { Enemy_ID[param_2] = 0; }
+  if (param_1 == 15) { Enemy_ID[param_2] = 1; }
+  if (param_1 == 16) { Enemy_ID[param_2] = 0; }
 
+  // Inlined: SetStun
 
-// SMB:e02f
-// Signature: [X] -> []
-void SetStun(byte param_1) {
-  Enemy_State[param_1] = (Enemy_State[param_1] & 0xf0) | 2;
-  SetStun2(param_1);
+  Enemy_State[param_2] = (Enemy_State[param_2] & 0xf0) | 2;
+  SetStun2(param_2);
 }
 
 
