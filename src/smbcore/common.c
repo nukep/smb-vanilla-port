@@ -1129,11 +1129,99 @@ byte FloateyNumbersRoutine(byte param_1) {
 }
 
 
+enum ScreenRoutines_jumptable_item {
+  SCREENROUTINES_INITSCREEN,
+  SCREENROUTINES_SETUPINTERMEDIATE,
+  SCREENROUTINES_WRITETOPSTATUSLINE,
+  SCREENROUTINES_WRITEBOTTOMSTATUSLINE,
+  SCREENROUTINES_DISPLAYTIMEUP,
+  SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1,
+  SCREENROUTINES_DISPLAYINTERMEDIATE,
+#ifdef SMB2J_MODE
+  SCREENROUTINES_DEMORESET,
+#endif
+  SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2,
+  SCREENROUTINES_AREAPARSERTASKCONTROL,
+  SCREENROUTINES_GETAREAPALETTE,
+  SCREENROUTINES_GETBACKGROUNDCOLOR,
+  SCREENROUTINES_GETALTERNATEPALETTE1,
+  SCREENROUTINES_DRAWTITLESCREEN,
+  SCREENROUTINES_CLEARBUFFERSDRAWICON,
+  SCREENROUTINES_WRITETOPSCORE,
+};
+
+
 // SMB:8567
 // SM2MAIN:64c5
 // Signature: [] -> []
 void ScreenRoutines(void) {
-  jumptable_ScreenRoutines(ScreenRoutineTask);
+  switch (ScreenRoutineTask) {
+  case SCREENROUTINES_INITSCREEN:
+    InitScreen();
+    return;
+
+  case SCREENROUTINES_SETUPINTERMEDIATE:
+    SetupIntermediate();
+    return;
+
+  case SCREENROUTINES_WRITETOPSTATUSLINE:
+    WriteTopStatusLine();
+    return;
+
+  case SCREENROUTINES_WRITEBOTTOMSTATUSLINE:
+    WriteBottomStatusLine();
+    return;
+
+  case SCREENROUTINES_DISPLAYTIMEUP:
+    DisplayTimeUp();
+    return;
+
+  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1:
+  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2:
+    ResetSpritesAndScreenTimer();
+    return;
+
+  case SCREENROUTINES_DISPLAYINTERMEDIATE:
+    DisplayIntermediate();
+    return;
+
+  case SCREENROUTINES_AREAPARSERTASKCONTROL:
+    AreaParserTaskControl();
+    return;
+
+  case SCREENROUTINES_GETAREAPALETTE:
+    GetAreaPalette();
+    return;
+
+  case SCREENROUTINES_GETBACKGROUNDCOLOR:
+    GetBackgroundColor();
+    return;
+
+  case SCREENROUTINES_GETALTERNATEPALETTE1:
+    GetAlternatePalette1();
+    return;
+
+  case SCREENROUTINES_DRAWTITLESCREEN:
+    DrawTitleScreen();
+    return;
+
+  case SCREENROUTINES_CLEARBUFFERSDRAWICON:
+    ClearBuffersDrawIcon();
+    return;
+
+  case SCREENROUTINES_WRITETOPSCORE:
+    WriteTopScore();
+    return;
+
+#ifdef SMB2J_MODE
+  case SCREENROUTINES_DEMORESET:
+    DemoReset();
+    return;
+#endif
+
+  default:
+    jmpengine_overflow(ScreenRoutineTask);
+  }
 }
 
 

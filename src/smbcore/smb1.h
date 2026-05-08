@@ -243,9 +243,6 @@ struct struct_xr00 {
 
 
 
-void smb1_jumptable_ScreenRoutines(byte param_1);
-#define jumptable_ScreenRoutines smb1_jumptable_ScreenRoutines
-
 void smb1_jumptable_GameOverMode(byte param_1);
 #define jumptable_GameOverMode smb1_jumptable_GameOverMode
 

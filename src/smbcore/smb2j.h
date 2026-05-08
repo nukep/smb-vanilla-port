@@ -241,9 +241,6 @@ struct struct_xr00 {
 void smb2j_jumptable_VictoryModeSubroutines_forW8(byte param_1,byte param_2);
 #define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
 
-void smb2j_jumptable_ScreenRoutines(byte param_1);
-#define jumptable_ScreenRoutines smb2j_jumptable_ScreenRoutines
-
 void smb2j_jumptable_GameOverMode(byte param_1);
 #define jumptable_GameOverMode smb2j_jumptable_GameOverMode
 
