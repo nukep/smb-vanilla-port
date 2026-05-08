@@ -111,8 +111,9 @@ struct struct_azr02r04r06r07 {
   bool z;
   byte r02;
   byte r04;
-  byte r06;
-  byte r07;
+
+  // as r06 and r07
+  ushort addr;
 };
 
 
@@ -1431,9 +1432,6 @@ void smb1_KillEnemyAboveBlock(byte param_1);
 struct_axzr04 smb1_ChkUnderEnemy(byte param_1);
 #define ChkUnderEnemy smb1_ChkUnderEnemy
 
-struct_axzr02r04r06r07 smb1_ChkUnderEnemy_Ext(byte param_1);
-#define ChkUnderEnemy_Ext smb1_ChkUnderEnemy_Ext
-
 bool smb1_ChkForNonSolids(byte param_1);
 #define ChkForNonSolids smb1_ChkForNonSolids
 
@@ -1478,9 +1476,6 @@ bool smb1_SprObjectCollisionCore(byte param_1,byte param_2);
 
 struct_axzr04 smb1_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
 #define BlockBufferChk_Enemy smb1_BlockBufferChk_Enemy
-
-struct_axzr02r04r06r07 smb1_BlockBufferChk_Enemy_Ext(byte param_1,byte param_2,byte param_3);
-#define BlockBufferChk_Enemy_Ext smb1_BlockBufferChk_Enemy_Ext
 
 struct_axz smb1_BlockBufferChk_FBall(byte param_1);
 #define BlockBufferChk_FBall smb1_BlockBufferChk_FBall

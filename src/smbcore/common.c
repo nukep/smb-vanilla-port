@@ -9905,9 +9905,9 @@ void PlayerBGCollision(void) {
 
   if (PlayerBGUpperExtent[bVar6] <= SprObject_Y_Position[0]) {
     sVar9 = BlockBufferColli_Head(MysterySpriteThing1);
-    bVar4 = sVar9.r07;
+    bVar3 = sVar9.addr & 0xff;
+    bVar4 = sVar9.addr >> 8;
     bVar6 = sVar9.r02;
-    bVar3 = sVar9.r06;
     bVar1 = sVar9.r04;
     if (!sVar9.z) {
       if (CheckForCoinMTiles(sVar9.a)) {
@@ -9941,18 +9941,18 @@ void PlayerBGCollision(void) {
 
   if (SprObject_Y_Position[0] < 0xcf) {
     sVar11 = BlockBufferColli_Feet(MysterySpriteThing1);
-    bVar4 = sVar11.r07;
+    bVar3 = sVar11.addr & 0xff;
+    bVar4 = sVar11.addr >> 8;
     bVar6 = sVar11.r02;
-    bVar3 = sVar11.r06;
     if (CheckForCoinMTiles(sVar11.a)) {
       HandleCoinMetatile(bVar6, bVar3, bVar4);
       return;
     }
     bVar1 = sVar11.a;
     sVar11 = BlockBufferColli_Feet(MysterySpriteThing1 + 1);
-    bVar4 = sVar11.r07;
+    bVar3 = sVar11.addr & 0xff;
+    bVar4 = sVar11.addr >> 8;
     bVar6 = sVar11.r02;
-    bVar3 = sVar11.r06;
     bVar5 = sVar11.r04;
     bVar2 = sVar11.a;
     bVar7 = bVar1;
@@ -10003,9 +10003,9 @@ void PlayerBGCollision(void) {
         return;
       }
       sVar9 = BlockBufferColli_Side(MysterySpriteThing1);
-      bVar4 = sVar9.r07;
+      bVar3 = sVar9.addr & 0xff;
+      bVar4 = sVar9.addr >> 8;
       bVar6 = sVar9.r02;
-      bVar3 = sVar9.r06;
       bVar2 = sVar9.r04;
       bVar5 = sVar9.a;
       bool cond = (sVar9.z) || (bVar5 == ssw(0x1c, 0x19)) || (bVar5 == ssw(0x6b, 0x6d)) || CheckForClimbMTiles(bVar5);
@@ -10023,9 +10023,9 @@ void PlayerBGCollision(void) {
       return;
     }
     sVar9 = BlockBufferColli_Side(MysterySpriteThing1 + 1);
-    bVar4 = sVar9.r07;
+    bVar3 = sVar9.addr & 0xff;
+    bVar4 = sVar9.addr >> 8;
     bVar6 = sVar9.r02;
-    bVar3 = sVar9.r06;
     bVar2 = sVar9.r04;
     bVar5 = sVar9.a;
     if (sVar9.z == false) {
@@ -10314,6 +10314,25 @@ byte GetMTileAttrib(byte x) {
 }
 
 
+// SMB:e1ae
+// Signature: [X] -> [A, X, Z, r02, r04, r06, r07]
+static inline struct_axzr04 ChkUnderEnemy_Ext(byte param_1, ushort *addr) {
+  // Inlined: BlockBufferChk_Enemy
+
+  struct_axzr04 sVar1;
+  struct_azr02r04r06r07 sVar2;
+
+  sVar2 = BlockBufferCollision(0, param_1 + 1, 0x15);
+  sVar1.a = sVar2.a;
+  sVar1.x = ObjectOffset;
+  sVar1.z = sVar2.a == 0;
+  sVar1.r04 = sVar2.r04;
+
+  *addr = sVar2.addr + sVar2.r02;
+
+  return sVar1;
+}
+
 // SMB:dfc1
 // SM2MAIN:ac4a
 // Signature: [X] -> [X]
@@ -10347,29 +10366,24 @@ byte EnemyToBGCollisionDet(byte param_1) {
     return param_1;
   }
 
+  struct_axzr04 sVar6;
 #ifdef SMB1_MODE
-  struct_axzr02r04r06r07 sVar6;
-  sVar6 = ChkUnderEnemy_Ext(param_1);
+  ushort chkunderenemy_addr = 0;
+  sVar6 = ChkUnderEnemy_Ext(param_1, &chkunderenemy_addr);
 #endif
 #ifdef SMB2J_MODE
-  struct_axzr04 sVar6;
   sVar6 = ChkUnderEnemy(param_1);
 #endif
 
-  bVarCC = sVar6.x;
-  if ((sVar6.z != false)) {
+  if (sVar6.z || ChkForNonSolids(sVar6.a)) {
     return ChkForRedKoopa(sVar6.x);
   }
-  else {
-    bVarDD = ChkForNonSolids(sVar6.a);
-    if (bVarDD) {
-      return ChkForRedKoopa(sVar6.x);
-    }
-  }
+
+  bVarCC = sVar6.x;
 
   if (sVar6.a == ssw(0x23, 0x20)) {
 #ifdef SMB1_MODE
-    RAM(CONCAT11(sVar6.r07, sVar6.r06) + sVar6.r02) = 0;
+    RAM(chkunderenemy_addr) = 0;
 #endif
 
     byte enemy_id = Enemy_ID[bVarCC];
@@ -10639,7 +10653,17 @@ void KillEnemyAboveBlock(byte param_1) {
 // SM2MAIN:ae44
 // Signature: [X] -> [A, X, Z, r04]
 struct_axzr04 ChkUnderEnemy(byte param_1) {
-  return BlockBufferChk_Enemy(0, param_1, 0x15);
+  // Inlined: BlockBufferChk_Enemy
+
+  struct_axzr04 sVar1;
+  struct_azr02r04r06r07 sVar2;
+
+  sVar2 = BlockBufferCollision(0, param_1 + 1, 0x15);
+  sVar1.a = sVar2.a;
+  sVar1.x = ObjectOffset;
+  sVar1.z = sVar2.a == 0;
+  sVar1.r04 = sVar2.r04;
+  return sVar1;
 }
 
 
@@ -10953,10 +10977,9 @@ struct_azr02r04r06r07 BlockBufferColli_Side(byte param_1) {
 // SMB:e3f0
 // SM2MAIN:b08e
 // Signature: [A, X, Y] -> [A, Z, r02, r04, r06, r07]
-struct_azr02r04r06r07 BlockBufferCollision(byte param_1, byte param_2, byte param_3) {
+struct_azr02r04r06r07 BlockBufferCollision(byte use_x, byte param_2, byte param_3) {
   // Note: Does not modify global variables (except temporary registers)
 
-  char cVar1;
   byte bVar2;
   byte bVar3;
 
@@ -10966,20 +10989,20 @@ struct_azr02r04r06r07 BlockBufferCollision(byte param_1, byte param_2, byte para
   ushort addr = GetBlockBufferAddr(((a + b + c*256) / 16) % 32);
 
   bVar2 = ((SprObject_Y_Position[param_2] + BlockBuffer_Y_Adder[param_3]) & 0xf0) - 0x20;
-  cVar1 = RAM(addr + (ushort)bVar2);
-  if (param_1 == 0) {
-    bVar3 = SprObject_Y_Position[param_2];
+
+  if (use_x) {
+    bVar3 = SprObject_X_Position[param_2] & 0xf;
   } else {
-    bVar3 = SprObject_X_Position[param_2];
+    bVar3 = SprObject_Y_Position[param_2] & 0xf;
   }
 
   struct_azr02r04r06r07 res;
-  res.a = cVar1;
-  res.z = cVar1 == 0;
+  res.a = RAM(addr + (ushort)bVar2);
+  res.z = RAM(addr + (ushort)bVar2) == 0;
+  res.r04 = bVar3;
+
   res.r02 = bVar2;
-  res.r04 = bVar3 & 0xf;
-  res.r06 = addr & 0xff;
-  res.r07 = addr >> 8;
+  res.addr = addr;
   return res;
 }
 

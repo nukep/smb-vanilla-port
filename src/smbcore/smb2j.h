@@ -75,8 +75,9 @@ struct struct_azr02r04r06r07 {
   bool z;
   byte r02;
   byte r04;
-  byte r06;
-  byte r07;
+
+  // as r06 and r07
+  ushort addr;
 };
 
 

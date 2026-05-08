@@ -148,28 +148,3 @@ void ChkToStunEnemies(byte param_1, byte param_2) {
   Enemy_State[param_2] = (Enemy_State[param_2] & 0xf0) | 2;
   SetStun2(param_2);
 }
-
-
-// SMB:e1ae
-// Signature: [X] -> [A, X, Z, r02, r04, r06, r07]
-struct_axzr02r04r06r07 ChkUnderEnemy_Ext(byte param_1) {
-  return BlockBufferChk_Enemy_Ext(0, param_1, 0x15);
-}
-
-
-// SMB:e388
-// Signature: [A, X, Y] -> [A, X, Z, r02, r04, r06, r07]
-struct_axzr02r04r06r07 BlockBufferChk_Enemy_Ext(byte param_1, byte param_2, byte param_3) {
-  struct_axzr02r04r06r07 sVar2;
-  struct_azr02r04r06r07 sVar3;
-
-  sVar3 = BlockBufferCollision(param_1, param_2 + 1, param_3);
-  sVar2.a = sVar3.a;
-  sVar2.x = ObjectOffset;
-  sVar2.z = sVar3.a == 0;
-  sVar2.r02 = sVar3.r02;
-  sVar2.r04 = sVar3.r04;
-  sVar2.r06 = sVar3.r06;
-  sVar2.r07 = sVar3.r07;
-  return sVar2;
-}
