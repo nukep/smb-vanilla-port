@@ -429,6 +429,9 @@ void smb1_TopScoreCheck(byte param_1);
 void smb1_InitializeGame(void);
 #define InitializeGame smb1_InitializeGame
 
+void smb1_DemoReset(void);
+#define DemoReset smb1_DemoReset
+
 void smb1_InitializeArea(void);
 #define InitializeArea smb1_InitializeArea
 

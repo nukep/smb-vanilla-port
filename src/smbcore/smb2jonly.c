@@ -836,44 +836,6 @@ static void LoadLuigiPhysics(void) {
 }
 
 
-// SM2MAIN:c592
-// Signature: [] -> []
-void InitializeGame(void) {
-  CompletedWorlds = 0;
-  HardWorldFlag = 0;
-  CurrentPlayer = 0;
-  PatchPlayerNamePal();
-
-  // Inlined: SetupMenuCursor
-  MenuCursorTemplate[3] = MenuCursorTiles[0];
-  MenuCursorTemplate[5] = MenuCursorTiles[1];
-
-  // Draw a star for each beaten game on the title screen
-
-  for (int i = 0; i < 12; i++) {
-    TitleScreenGfxData[0x33 + i] = i < GamesBeatenCount ? 0xf1 : 0x26;
-  }
-  for (int i = 12; i < 24; i++) {
-    TitleScreenGfxData[0x4d + i-12] = i < GamesBeatenCount ? 0xf1 : 0x26;
-  }
-
-  InitializeMemory(0x6f);
-  for (int i = 0; i < 0x20; i++) {
-    SoundMemory[i] = 0;
-  }
-  DemoReset();
-}
-
-
-// SM2MAIN:c5d0
-// Signature: [] -> []
-void DemoReset(void) {
-  DemoTimer = 0x18;
-  LoadAreaPointer();
-  InitializeArea();
-}
-
-
 // SM2MAIN:c5ff
 // Signature: [] -> []
 void PatchPlayerNamePal(void) {

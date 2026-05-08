@@ -73,19 +73,6 @@ void WriteGameText(byte param_1) {
 }
 
 
-// SMB:8fcf
-// Signature: [] -> []
-void InitializeGame(void) {
-  InitializeMemory(0x6f);
-  for (int i = 0; i < 0x20; i++) {
-    SoundMemory[i] = 0;
-  }
-  DemoTimer = 0x18;
-  LoadAreaPointer();
-  InitializeArea();
-}
-
-
 // SMB:92af
 // Signature: [] -> []
 void DoNothing2(void) { return; }

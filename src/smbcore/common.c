@@ -2097,6 +2097,49 @@ void TopScoreCheck(byte last_digit_offset) {
 }
 
 
+// SMB:8fdc
+// SM2MAIN:c5d0
+// Signature: [] -> []
+void DemoReset(void) {
+  // Note: The SMB disassembly doesn't label this
+  DemoTimer = 0x18;
+  LoadAreaPointer();
+  InitializeArea();
+}
+
+
+// SMB:8fcf
+// SM2MAIN:c592
+// Signature: [] -> []
+void InitializeGame(void) {
+#ifdef SMB2J_MODE
+  CompletedWorlds = 0;
+  HardWorldFlag = 0;
+  CurrentPlayer = 0;
+  PatchPlayerNamePal();
+
+  // Inlined: SetupMenuCursor
+  MenuCursorTemplate[3] = MenuCursorTiles[0];
+  MenuCursorTemplate[5] = MenuCursorTiles[1];
+
+  // Draw a star for each beaten game on the title screen
+
+  for (int i = 0; i < 12; i++) {
+    TitleScreenGfxData[0x33 + i] = i < GamesBeatenCount ? 0xf1 : 0x26;
+  }
+  for (int i = 12; i < 24; i++) {
+    TitleScreenGfxData[0x4d + i-12] = i < GamesBeatenCount ? 0xf1 : 0x26;
+  }
+#endif
+
+  InitializeMemory(0x6f);
+  for (int i = 0; i < 0x20; i++) {
+    SoundMemory[i] = 0;
+  }
+  DemoReset();
+}
+
+
 // SMB:8fe4
 // SM2MAIN:6e39
 // Signature: [] -> []
