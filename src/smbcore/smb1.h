@@ -850,7 +850,7 @@ void smb1_PwrUpJmp(void);
 byte smb1_PowerUpObjHandler(void);
 #define PowerUpObjHandler smb1_PowerUpObjHandler
 
-void smb1_PlayerHeadCollision(byte param_1,byte param_2,byte param_3,byte param_4);
+void smb1_PlayerHeadCollision(byte param_1,byte param_2,ushort addr);
 #define PlayerHeadCollision smb1_PlayerHeadCollision
 
 void smb1_InitBlock_XY_Pos(byte param_1);

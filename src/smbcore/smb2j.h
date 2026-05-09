@@ -836,7 +836,7 @@ void smb2j_PwrUpJmp(void);
 byte smb2j_PowerUpObjHandler(void);
 #define PowerUpObjHandler smb2j_PowerUpObjHandler
 
-void smb2j_PlayerHeadCollision(byte param_1,byte param_2,byte param_3,byte param_4);
+void smb2j_PlayerHeadCollision(byte param_1,byte param_2,ushort addr);
 #define PlayerHeadCollision smb2j_PlayerHeadCollision
 
 void smb2j_InitBlock_XY_Pos(byte param_1);

@@ -5719,7 +5719,9 @@ byte PowerUpObjHandler(void) {
 // SMB:bced
 // SM2MAIN:88ae
 // Signature: [A, r02, r06, r07] -> []
-void PlayerHeadCollision(byte param_1, byte param_2, byte param_3, byte param_4) {
+void PlayerHeadCollision(byte param_1, byte param_2, ushort addr) {
+  // addr: lo=r06, hi=r07
+
   short sVar1;
   byte bVar2;
   byte bVar3;
@@ -5728,14 +5730,14 @@ void PlayerHeadCollision(byte param_1, byte param_2, byte param_3, byte param_4)
   byte bStack0000;
 
   bVar4 = SprDataOffset_Ctrl;
-  sVar1 = CONCAT11(param_4, param_3);
+  sVar1 = addr;
   bVar2 = 0x11;
   if (PlayerSize == 0) {
     bVar2 = 0x12;
   }
   Block_State[SprDataOffset_Ctrl] = bVar2;
   bStack0000 = param_1;
-  DestroyBlockMetatile(bVar4, param_2, param_3);
+  DestroyBlockMetatile(bVar4, param_2, addr & 0xff);
   bVar3 = SprDataOffset_Ctrl;
   Block_Orig_YPos[SprDataOffset_Ctrl] = param_2;
   Block_BBuf_Low[bVar3] = (byte)sVar1;
@@ -9822,10 +9824,12 @@ bool CheckPlayerVertical(void) {
 // SMB:de05
 // SM2MAIN:aa73
 // Signature: [r02, r06, r07] -> []
-static void HandleCoinMetatile(byte bVar6, byte bVar3, byte bVar4) {
+static void HandleCoinMetatile(byte bVar6, ushort addr) {
+  // addr: lo=r06, hi=r07
+
   // Inlined: ErACM
-  RAM(CONCAT11(bVar4, bVar3) + (ushort)bVar6) = 0;
-  RemoveCoin_Axe(bVar6, bVar3);
+  RAM(addr + (ushort)bVar6) = 0;
+  RemoveCoin_Axe(bVar6, addr & 0xff);
 
   CoinTallyFor1Ups += 1;
   GiveOneCoin();
@@ -9835,7 +9839,9 @@ static void HandleCoinMetatile(byte bVar6, byte bVar3, byte bVar4) {
 // SMB:de0e
 // SM2MAIN:aa7c
 // Signature: [r02, r06, r07] -> []
-static void HandleAxeMetatile(byte bVar6, byte bVar3, byte bVar4) {
+static void HandleAxeMetatile(byte bVar6, ushort addr) {
+  // addr: lo=r06, hi=r07
+
   OperMode_Task = 0;
   OperMode = 2;
 #ifdef SMB2J_MODE
@@ -9844,8 +9850,8 @@ static void HandleAxeMetatile(byte bVar6, byte bVar3, byte bVar4) {
   PlayerSpriteVarData1[0] = 0x18;
 
   // Inlined: ErACM
-  RAM(CONCAT11(bVar4, bVar3) + (ushort)bVar6) = 0;
-  RemoveCoin_Axe(bVar6, bVar3);
+  RAM(addr + (ushort)bVar6) = 0;
+  RemoveCoin_Axe(bVar6, addr & 0xff);
 }
 
 // SMB:dc64
@@ -9854,8 +9860,6 @@ static void HandleAxeMetatile(byte bVar6, byte bVar3, byte bVar4) {
 void PlayerBGCollision(void) {
   byte bVar1;
   byte bVar2;
-  byte bVar3;
-  byte bVar4;
   byte bVar5;
   byte bVar6;
   byte bVar7;
@@ -9905,13 +9909,11 @@ void PlayerBGCollision(void) {
 
   if (PlayerBGUpperExtent[bVar6] <= SprObject_Y_Position[0]) {
     sVar9 = BlockBufferColli_Head(MysterySpriteThing1);
-    bVar3 = sVar9.addr & 0xff;
-    bVar4 = sVar9.addr >> 8;
     bVar6 = sVar9.r02;
     bVar1 = sVar9.r04;
     if (!sVar9.z) {
       if (CheckForCoinMTiles(sVar9.a)) {
-        HandleCoinMetatile(bVar6, bVar3, bVar4);
+        HandleCoinMetatile(bVar6, sVar9.addr);
         return;
       }
       bVar7 = sVar9.a;
@@ -9925,7 +9927,7 @@ void PlayerBGCollision(void) {
             Square1SoundQueue = 2;
           }
         } else if ((AreaType != 0) && (BlockBounceTimer == 0)) {
-          PlayerHeadCollision(bVar7, bVar6, bVar3, bVar4);
+          PlayerHeadCollision(bVar7, bVar6, sVar9.addr);
           myspd = false;
         }
 
@@ -9941,17 +9943,13 @@ void PlayerBGCollision(void) {
 
   if (SprObject_Y_Position[0] < 0xcf) {
     sVar11 = BlockBufferColli_Feet(MysterySpriteThing1);
-    bVar3 = sVar11.addr & 0xff;
-    bVar4 = sVar11.addr >> 8;
     bVar6 = sVar11.r02;
     if (CheckForCoinMTiles(sVar11.a)) {
-      HandleCoinMetatile(bVar6, bVar3, bVar4);
+      HandleCoinMetatile(bVar6, sVar11.addr);
       return;
     }
     bVar1 = sVar11.a;
     sVar11 = BlockBufferColli_Feet(MysterySpriteThing1 + 1);
-    bVar3 = sVar11.addr & 0xff;
-    bVar4 = sVar11.addr >> 8;
     bVar6 = sVar11.r02;
     bVar5 = sVar11.r04;
     bVar2 = sVar11.a;
@@ -9959,7 +9957,7 @@ void PlayerBGCollision(void) {
     if ((bVar1 != 0) || (bVar2 != 0)) {
       if (bVar1 == 0) {
         if (CheckForCoinMTiles(bVar2)) {
-          HandleCoinMetatile(bVar6, bVar3, bVar4);
+          HandleCoinMetatile(bVar6, sVar11.addr);
           return;
         }
         bVar7 = bVar2;
@@ -9967,7 +9965,7 @@ void PlayerBGCollision(void) {
       bVar8 = CheckForClimbMTiles(bVar7);
       if ((!bVar8) && (PlayerSpriteVarData2[0] < 0x80)) {
         if (bVar7 == ssw(0xc5, 0xc6)) {
-          HandleAxeMetatile(bVar6, bVar3, bVar4);
+          HandleAxeMetatile(bVar6, sVar11.addr);
           return;
         }
         bVar8 = ChkInvisibleMTiles(bVar7);
@@ -9992,6 +9990,8 @@ void PlayerBGCollision(void) {
 
   // DoPlayerSideCheck
 
+  ushort baddr = 0;
+
   int i;
   for (i = 2; i >= 1; i--) {
     MysterySpriteThing1 += i;
@@ -10003,8 +10003,7 @@ void PlayerBGCollision(void) {
         return;
       }
       sVar9 = BlockBufferColli_Side(MysterySpriteThing1);
-      bVar3 = sVar9.addr & 0xff;
-      bVar4 = sVar9.addr >> 8;
+      baddr = sVar9.addr;
       bVar6 = sVar9.r02;
       bVar2 = sVar9.r04;
       bVar5 = sVar9.a;
@@ -10023,12 +10022,12 @@ void PlayerBGCollision(void) {
       return;
     }
     sVar9 = BlockBufferColli_Side(MysterySpriteThing1 + 1);
-    bVar3 = sVar9.addr & 0xff;
-    bVar4 = sVar9.addr >> 8;
+    baddr = sVar9.addr;
     bVar6 = sVar9.r02;
     bVar2 = sVar9.r04;
     bVar5 = sVar9.a;
-    if (sVar9.z == false) {
+    bool cond = sVar9.z;
+    if (!cond) {
       break;
     }
   }
@@ -10045,12 +10044,12 @@ void PlayerBGCollision(void) {
 
   if (!ChkInvisibleMTiles(bVar5)) {
     if (CheckForClimbMTiles(bVar5)) {
-      HandleClimbing(bVar5, bVar2, bVar3);
+      HandleClimbing(bVar5, bVar2, baddr & 0xff);
       return;
     }
 
     if (CheckForCoinMTiles(bVar5)) {
-      HandleCoinMetatile(bVar6, bVar3, bVar4);
+      HandleCoinMetatile(bVar6, baddr);
       return;
     }
     bVar7 = bVar5;
