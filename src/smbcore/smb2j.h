@@ -239,7 +239,7 @@ struct struct_xr00 {
 
 
 
-void smb2j_jumptable_VictoryModeSubroutines_forW8(byte param_1,byte param_2);
+void smb2j_jumptable_VictoryModeSubroutines_forW8(byte param_1);
 #define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
 
 void smb2j_jumptable_GameOverMode(byte param_1);
@@ -302,10 +302,10 @@ void smb2j_MoveAllSpritesOffscreen(void);
 void smb2j_MoveSpritesOffscreen(void);
 #define MoveSpritesOffscreen smb2j_MoveSpritesOffscreen
 
-void smb2j_VictoryMode(byte param_1);
+void smb2j_VictoryMode(void);
 #define VictoryMode smb2j_VictoryMode
 
-void smb2j_VictoryModeSubroutines(byte param_1);
+void smb2j_VictoryModeSubroutines(void);
 #define VictoryModeSubroutines smb2j_VictoryModeSubroutines
 
 void smb2j_SetupVictoryMode(void);
@@ -398,19 +398,19 @@ byte smb2j_RemoveCoin_Axe(byte param_1,byte param_2);
 void smb2j_ReplaceBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4);
 #define ReplaceBlockMetatile smb2j_ReplaceBlockMetatile
 
-void smb2j_DestroyBlockMetatile(byte param_1,byte param_2,byte param_3);
+void smb2j_DestroyBlockMetatile(byte param_2,byte param_3);
 #define DestroyBlockMetatile smb2j_DestroyBlockMetatile
 
-void smb2j_WriteBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4);
+void smb2j_WriteBlockMetatile(byte param_1,byte param_3,byte param_4);
 #define WriteBlockMetatile smb2j_WriteBlockMetatile
 
 void smb2j_MoveVOffset(byte param_1);
 #define MoveVOffset smb2j_MoveVOffset
 
-byte smb2j_PutBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+byte smb2j_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
 #define PutBlockMetatile smb2j_PutBlockMetatile
 
-void smb2j_RemBridge(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+void smb2j_RemBridge(byte param_1,byte param_2,byte param_4,byte param_5);
 #define RemBridge smb2j_RemBridge
 
 void smb2j_InitializeNameTables(void);
@@ -1169,7 +1169,7 @@ byte smb2j_MoveLakitu(byte param_1);
 byte smb2j_PlayerLakituDiff(byte param_1,byte param_2,byte param_3,byte param_4);
 #define PlayerLakituDiff smb2j_PlayerLakituDiff
 
-void smb2j_BridgeCollapse(byte param_1);
+void smb2j_BridgeCollapse(void);
 #define BridgeCollapse smb2j_BridgeCollapse
 
 byte smb2j_MoveD_Bowser(byte param_1);

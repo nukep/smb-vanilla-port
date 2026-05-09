@@ -304,10 +304,10 @@ void smb1_DrawMushroomIcon(void);
 bool smb1_DemoEngine(void);
 #define DemoEngine smb1_DemoEngine
 
-void smb1_VictoryMode(byte param_1);
+void smb1_VictoryMode(void);
 #define VictoryMode smb1_VictoryMode
 
-void smb1_VictoryModeSubroutines(byte param_1);
+void smb1_VictoryModeSubroutines(void);
 #define VictoryModeSubroutines smb1_VictoryModeSubroutines
 
 void smb1_SetupVictoryMode(void);
@@ -391,19 +391,19 @@ byte smb1_RemoveCoin_Axe(byte param_1,byte param_2);
 void smb1_ReplaceBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4);
 #define ReplaceBlockMetatile smb1_ReplaceBlockMetatile
 
-void smb1_DestroyBlockMetatile(byte param_1,byte param_2,byte param_3);
+void smb1_DestroyBlockMetatile(byte param_2,byte param_3);
 #define DestroyBlockMetatile smb1_DestroyBlockMetatile
 
-void smb1_WriteBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4);
+void smb1_WriteBlockMetatile(byte param_1,byte param_3,byte param_4);
 #define WriteBlockMetatile smb1_WriteBlockMetatile
 
 void smb1_MoveVOffset(byte param_1);
 #define MoveVOffset smb1_MoveVOffset
 
-byte smb1_PutBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+byte smb1_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
 #define PutBlockMetatile smb1_PutBlockMetatile
 
-void smb1_RemBridge(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+void smb1_RemBridge(byte param_1,byte param_2,byte param_4,byte param_5);
 #define RemBridge smb1_RemBridge
 
 void smb1_InitializeNameTables(void);
@@ -1180,7 +1180,7 @@ byte smb1_MoveLakitu(byte param_1);
 byte smb1_PlayerLakituDiff(byte param_1,byte param_2,byte param_3,byte param_4);
 #define PlayerLakituDiff smb1_PlayerLakituDiff
 
-void smb1_BridgeCollapse(byte param_1);
+void smb1_BridgeCollapse(void);
 #define BridgeCollapse smb1_BridgeCollapse
 
 byte smb1_MoveD_Bowser(byte param_1);

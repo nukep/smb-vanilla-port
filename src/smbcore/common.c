@@ -257,8 +257,6 @@ enum OperModeExecutionTree_jumptable_item {
 // SM2MAIN:6279
 // Signature: [] -> []
 void OperModeExecutionTree(void) {
-  byte in_r00 = 0;
-
   switch (OperMode) {
   case OPERMODEEXECUTIONTREE_TITLESCREENMODE:
     TitleScreenMode();
@@ -269,7 +267,7 @@ void OperModeExecutionTree(void) {
     return;
 
   case OPERMODEEXECUTIONTREE_VICTORYMODE:
-    VictoryMode(in_r00);
+    VictoryMode();
     return;
 
   case OPERMODEEXECUTIONTREE_GAMEOVERMODE:
@@ -383,9 +381,9 @@ bool DemoEngine(void) {
 
 // SMB:838b
 // SM2MAIN:6298
-// Signature: [r00] -> []
-void VictoryMode(byte param_1) {
-  VictoryModeSubroutines(param_1);
+// Signature: [] -> []
+void VictoryMode(void) {
+  VictoryModeSubroutines();
   if (OperMode_Task != 0) {
     if (SMB2J_ONLY && (WorldNumber == 7) && (OperMode_Task == 5 || OperMode_Task == 0xd)) {
       return;
@@ -412,18 +410,18 @@ enum VictoryModeSubroutines_jumptable_item {
 
 // SMB:83a0
 // SM2MAIN:62bc
-// Signature: [r00] -> []
-void VictoryModeSubroutines(byte param_1) {
+// Signature: [] -> []
+void VictoryModeSubroutines(void) {
 #ifdef SMB2J_MODE
   if (WorldNumber == 7) {
-    jumptable_VictoryModeSubroutines_forW8(OperMode_Task, param_1);
+    jumptable_VictoryModeSubroutines_forW8(OperMode_Task);
     return;
   }
 #endif
 
   switch (OperMode_Task) {
   case VICTORYMODESUBROUTINES_BRIDGECOLLAPSE:
-    BridgeCollapse(param_1);
+    BridgeCollapse();
     return;
 
   case VICTORYMODESUBROUTINES_SETUPVICTORYMODE:
@@ -1128,7 +1126,7 @@ byte RemoveCoin_Axe(byte param_1, byte param_2) {
   if (AreaType == 0) {
     bVar1 = 4;
   }
-  bVar1 = PutBlockMetatile(bVar1, AreaType, 0x41, param_1, param_2);
+  bVar1 = PutBlockMetatile(bVar1, 0x41, param_1, param_2);
   VRAM_Buffer_AddrCtrl = 6;
   return bVar1;
 }
@@ -1138,7 +1136,7 @@ byte RemoveCoin_Axe(byte param_1, byte param_2) {
 // SM2MAIN:693e
 // Signature: [A, X, r02, r06] -> []
 void ReplaceBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4) {
-  WriteBlockMetatile(param_1, param_2, param_3, param_4);
+  WriteBlockMetatile(param_1, param_3, param_4);
   Block_ResidualCounter += 1;
   Block_RepFlag[param_2] = Block_RepFlag[param_2] - 1;
 }
@@ -1146,16 +1144,16 @@ void ReplaceBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4
 
 // SMB:8a6b
 // SM2MAIN:6948
-// Signature: [X, r02, r06] -> []
-void DestroyBlockMetatile(byte param_1, byte param_2, byte param_3) {
-  WriteBlockMetatile(0, param_1, param_2, param_3);
+// Signature: [r02, r06] -> []
+void DestroyBlockMetatile(byte param_2, byte param_3) {
+  WriteBlockMetatile(0, param_2, param_3);
 }
 
 
 // SMB:8a6d
 // SM2MAIN:694a
-// Signature: [A, X, r02, r06] -> []
-void WriteBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4) {
+// Signature: [A, r02, r06] -> []
+void WriteBlockMetatile(byte param_1, byte param_3, byte param_4) {
   byte bVar2;
 
   byte bVar1;
@@ -1173,7 +1171,7 @@ void WriteBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4) 
     bVar1 = 2;
   }
   bVar2 = VRAM_Buffer1_Offset + 1;
-  PutBlockMetatile(bVar1, param_2, bVar2, param_3, param_4);
+  PutBlockMetatile(bVar1, bVar2, param_3, param_4);
   MoveVOffset(bVar2);
 }
 
@@ -1188,8 +1186,8 @@ void MoveVOffset(byte param_1) {
 
 // SMB:8a97
 // SM2MAIN:6974
-// Signature: [A, X, Y, r02, r06] -> [r05]
-byte PutBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4, byte param_5) {
+// Signature: [A, Y, r02, r06] -> [r05]
+byte PutBlockMetatile(byte param_1, byte param_3, byte param_4, byte param_5) {
   byte bVar1;
   byte bVar2;
   byte bVar3;
@@ -1203,15 +1201,15 @@ byte PutBlockMetatile(byte param_1, byte param_2, byte param_3, byte param_4, by
   bVar2 = (param_5 & 0xf) << 1;
   bVar1 = param_4 + 0x20;
   bVar3 = (bVar1 >> 6) + CARRY1(bVar1 << 2, bVar2) + cVar4;
-  RemBridge(param_1 << 2, param_3, param_2, bVar1 * 4 + bVar2, bVar3);
+  RemBridge(param_1 << 2, param_3, bVar1 * 4 + bVar2, bVar3);
   return bVar3;
 }
 
 
 // SMB:8acd
 // SM2MAIN:69aa
-// Signature: [X, Y, r00, r04, r05] -> []
-void RemBridge(byte param_1, byte param_2, byte param_3, byte param_4, byte param_5) {
+// Signature: [X, Y, r04, r05] -> []
+void RemBridge(byte param_1, byte param_2, byte param_4, byte param_5) {
   VRAM_Buffer1[param_2 + 2] = BlockGfxData[param_1];
   VRAM_Buffer1[param_2 + 3] = BlockGfxData[param_1 + 1];
   VRAM_Buffer1[param_2 + 7] = BlockGfxData[param_1 + 2];
@@ -5125,7 +5123,6 @@ void PlayerHeadCollision(byte param_1, byte param_2, ushort addr) {
   struct_yc sVar5;
   byte bStack0000;
 
-  bVar4 = SprDataOffset_Ctrl;
   sVar1 = addr;
   bVar2 = 0x11;
   if (PlayerSize == 0) {
@@ -5133,7 +5130,7 @@ void PlayerHeadCollision(byte param_1, byte param_2, ushort addr) {
   }
   Block_State[SprDataOffset_Ctrl] = bVar2;
   bStack0000 = param_1;
-  DestroyBlockMetatile(bVar4, param_2, addr & 0xff);
+  DestroyBlockMetatile(param_2, addr & 0xff);
   bVar3 = SprDataOffset_Ctrl;
   Block_Orig_YPos[SprDataOffset_Ctrl] = param_2;
   Block_BBuf_Low[bVar3] = (byte)sVar1;
@@ -8041,8 +8038,8 @@ byte PlayerLakituDiff(byte param_1, byte param_2, byte param_3, byte param_4) {
 
 // SMB:cfec
 // SM2MAIN:9c21
-// Signature: [r00] -> []
-void BridgeCollapse(byte param_1) {
+// Signature: [] -> []
+void BridgeCollapse(void) {
   byte bVar1;
   byte bVar2;
 
@@ -8055,7 +8052,7 @@ void BridgeCollapse(byte param_1) {
         BowserFeetCounter = 4;
         BowserBodyControls ^= 1;
         bVar2 = VRAM_Buffer1_Offset + 1;
-        RemBridge(0xc, bVar2, param_1, BridgeCollapseData[BridgeCollapseOffset], 0x22);
+        RemBridge(0xc, bVar2, BridgeCollapseData[BridgeCollapseOffset], 0x22);
         bVar1 = ObjectOffset;
         MoveVOffset(bVar2);
         Square2SoundQueue = 8;

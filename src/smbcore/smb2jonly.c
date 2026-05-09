@@ -20,11 +20,11 @@ enum VictoryModeSubroutines_forW8_jumptable_item {
 
 
 // SM2MAIN:n/a
-// Signature: [A, r00] -> []
-void jumptable_VictoryModeSubroutines_forW8(byte param_1, byte param_2) {
+// Signature: [A] -> []
+void jumptable_VictoryModeSubroutines_forW8(byte param_1) {
   switch (param_1) {
   case VICTORYMODESUBROUTINES_FORW8_BRIDGECOLLAPSE:
-    BridgeCollapse(param_2);
+    BridgeCollapse();
     return;
 
   case VICTORYMODESUBROUTINES_FORW8_SETUPVICTORYMODE:
