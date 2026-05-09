@@ -937,9 +937,6 @@ byte smb1_MovePlatformDown(byte param_1);
 byte smb1_MovePlatformUp(byte param_1);
 #define MovePlatformUp smb1_MovePlatformUp
 
-byte smb1_RedPTroopaGrav(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
-#define RedPTroopaGrav smb1_RedPTroopaGrav
-
 void smb1_ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 #define ImposeGravity smb1_ImposeGravity
 

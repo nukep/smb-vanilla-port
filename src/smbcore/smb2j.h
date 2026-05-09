@@ -926,9 +926,6 @@ byte smb2j_MovePlatformDown(byte param_1);
 byte smb2j_MovePlatformUp(byte param_1);
 #define MovePlatformUp smb2j_MovePlatformUp
 
-byte smb2j_RedPTroopaGrav(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
-#define RedPTroopaGrav smb2j_RedPTroopaGrav
-
 void smb2j_ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 #define ImposeGravity smb2j_ImposeGravity
 

@@ -4304,7 +4304,6 @@ void ProcFireball_Bubble(void) {
 // Signature: [X] -> []
 void FireballObjCore(byte param_1) {
   bool bVar1;
-  byte in_r01 = 0;
   byte bVar2;
   bool bVar3;
 
@@ -4333,7 +4332,10 @@ void FireballObjCore(byte param_1) {
       Fireball_State[param_1] = Fireball_State[param_1] - 1;
     }
     bVar2 = param_1 + 7;
+
+    byte in_r01 = 0;
     ImposeGravity(0, bVar2, 0x50, in_r01, 3);
+
     MoveObjectHorizontally(bVar2);
     bVar2 = RelativeFireballPosition(ObjectOffset);
     bVar2 = GetFireballOffscreenBits(bVar2);
@@ -4497,7 +4499,10 @@ void ProcessWhirlpools(void) {
       }
 
       Cannon_Timer_Or_Whirlpool_Flag[0] = 1;
-      ImposeGravity(0, 0, 0x10, bVar1, 1);
+
+      byte in_r01 = 0;
+      ImposeGravity(0, 0, 0x10, in_r01, 1);
+
       return;
     }
   }
@@ -4815,7 +4820,10 @@ byte ProcHammerObj(byte param_1) {
 
     if ((Misc_State[param_1] & 0x7f) < 2) {
       bVar2 = param_1 + 0xd;
-      ImposeGravity(0, bVar2, 0x10, 0xf, 4);
+
+      byte in_r01 = 0xf;
+      ImposeGravity(0, bVar2, 0x10, in_r01, 4);
+
       MoveObjectHorizontally(bVar2);
       param_1 = PlayerHammerCollision(ObjectOffset);
     } else {
@@ -4930,7 +4938,10 @@ void MiscObjectsCore(void) {
         bVar2 = ProcHammerObj(bVar2);
       } else {
         if (Misc_State[bVar2] == 1) {
-          ImposeGravity(0, bVar2 + 0xd, 0x50, 3, 6);
+
+          byte in_r01 = 3;
+          ImposeGravity(0, bVar2 + 0xd, 0x50, in_r01, 6);
+
           bVar2 = ObjectOffset;
           if (Misc_Y_Speed[ObjectOffset] == 5) {
             Misc_State[ObjectOffset] = Misc_State[ObjectOffset] + 1;
@@ -5562,7 +5573,8 @@ byte MoveFallingPlatform(byte param_1) {
 // SM2MAIN:8b41
 // Signature: [X] -> [X]
 byte MoveRedPTroopaDown(byte param_1) {
-  return RedPTroopaGrav(0, param_1 + 1, 3, 6, 2);
+  ImposeGravity(0, param_1 + 1, 3, 6, 2);
+  return ObjectOffset;
 }
 
 
@@ -5570,7 +5582,8 @@ byte MoveRedPTroopaDown(byte param_1) {
 // SM2MAIN:8b46
 // Signature: [X] -> [X]
 byte MoveRedPTroopaUp(byte param_1) {
-  return RedPTroopaGrav(1, param_1 + 1, 3, 6, 2);
+  ImposeGravity(1, param_1 + 1, 3, 6, 2);
+  return ObjectOffset;
 }
 
 
@@ -5637,7 +5650,8 @@ byte MovePlatformDown(byte param_1) {
   if (Enemy_ID[param_1] == 0x29) {
     bVar1 = 9;
   }
-  return RedPTroopaGrav(0, param_1 + 1, bVar1, 10, 3);
+  ImposeGravity(0, param_1 + 1, bVar1, 10, 3);
+  return ObjectOffset;
 }
 
 
@@ -5651,15 +5665,7 @@ byte MovePlatformUp(byte param_1) {
   if (Enemy_ID[param_1] == 0x29) {
     bVar1 = 9;
   }
-  return RedPTroopaGrav(1, param_1 + 1, bVar1, 10, 3);
-}
-
-
-// SMB:bfd1
-// SM2MAIN:8ba2
-// Signature: [A, X, r00, r01, r02] -> [X]
-byte RedPTroopaGrav(byte param_1, byte param_2, byte param_3, byte param_4, byte param_5) {
-  ImposeGravity(param_1, param_2, param_3, param_4, param_5);
+  ImposeGravity(1, param_1 + 1, bVar1, 10, 3);
   return ObjectOffset;
 }
 
