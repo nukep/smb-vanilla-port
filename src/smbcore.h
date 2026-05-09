@@ -237,7 +237,7 @@ static inline uint64_t CAST_TO_INT_helper(void *var, size_t sz) {
     printf("Nope\n");
     return 0;
   }
-  memcpy(&v, var, sz);
+  memcpy(&v, var, sz <= sizeof(v) ? sz : sizeof(v));
   return v;
 }
 
