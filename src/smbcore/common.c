@@ -197,747 +197,6 @@ void GameMenuRoutine(void) {
 }
 
 
-enum GameOverMode_jumptable_item {
-  GAMEOVERMODE_SETUPGAMEOVER,
-  GAMEOVERMODE_SCREENROUTINES,
-  GAMEOVERMODE_RUNGAMEOVER,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_GameOverMode(byte param_1) {
-  switch (param_1) {
-  case GAMEOVERMODE_SETUPGAMEOVER:
-    SetupGameOver();
-    return;
-
-  case GAMEOVERMODE_SCREENROUTINES:
-    ScreenRoutines();
-    return;
-
-  case GAMEOVERMODE_RUNGAMEOVER:
-    RunGameOver();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum AreaParserTasks_jumptable_item {
-  AREAPARSERTASKS_INCREMENTCOLUMNPOS_1,
-  AREAPARSERTASKS_RENDERAREAGRAPHICS_1,
-  AREAPARSERTASKS_RENDERAREAGRAPHICS_2,
-  AREAPARSERTASKS_AREAPARSERCORE_1,
-  AREAPARSERTASKS_INCREMENTCOLUMNPOS_2,
-  AREAPARSERTASKS_RENDERAREAGRAPHICS_3,
-  AREAPARSERTASKS_RENDERAREAGRAPHICS_4,
-  AREAPARSERTASKS_AREAPARSERCORE_2,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_AreaParserTasks(byte param_1) {
-  switch (param_1) {
-  case AREAPARSERTASKS_INCREMENTCOLUMNPOS_1:
-  case AREAPARSERTASKS_INCREMENTCOLUMNPOS_2:
-    IncrementColumnPos();
-    return;
-
-  case AREAPARSERTASKS_RENDERAREAGRAPHICS_1:
-  case AREAPARSERTASKS_RENDERAREAGRAPHICS_2:
-  case AREAPARSERTASKS_RENDERAREAGRAPHICS_3:
-  case AREAPARSERTASKS_RENDERAREAGRAPHICS_4:
-    RenderAreaGraphics();
-    return;
-
-  case AREAPARSERTASKS_AREAPARSERCORE_1:
-  case AREAPARSERTASKS_AREAPARSERCORE_2:
-    AreaParserCore();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum GameRoutines_jumptable_item {
-  GAMEROUTINES_ENTRANCE_GAMETIMERSETUP,
-  GAMEROUTINES_VINE_AUTOCLIMB,
-  GAMEROUTINES_SIDEEXITPIPEENTRY,
-  GAMEROUTINES_VERTICALPIPEENTRY,
-  GAMEROUTINES_FLAGPOLESLIDE,
-  GAMEROUTINES_PLAYERENDLEVEL,
-  GAMEROUTINES_PLAYERLOSELIFE,
-  GAMEROUTINES_PLAYERENTRANCE,
-  GAMEROUTINES_PLAYERCTRLROUTINE,
-  GAMEROUTINES_PLAYERCHANGESIZE,
-  GAMEROUTINES_PLAYERINJURYBLINK,
-  GAMEROUTINES_PLAYERDEATH,
-  GAMEROUTINES_PLAYERFIREFLOWER,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_GameRoutines(byte param_1) {
-  switch (param_1) {
-  case GAMEROUTINES_ENTRANCE_GAMETIMERSETUP:
-    Entrance_GameTimerSetup(ssw(0x91, 0x6f));
-    return;
-
-  case GAMEROUTINES_VINE_AUTOCLIMB:
-    Vine_AutoClimb();
-    return;
-
-  case GAMEROUTINES_SIDEEXITPIPEENTRY:
-    SideExitPipeEntry();
-    return;
-
-  case GAMEROUTINES_VERTICALPIPEENTRY:
-    VerticalPipeEntry();
-    return;
-
-  case GAMEROUTINES_FLAGPOLESLIDE:
-    FlagpoleSlide();
-    return;
-
-  case GAMEROUTINES_PLAYERENDLEVEL:
-    PlayerEndLevel();
-    return;
-
-  case GAMEROUTINES_PLAYERLOSELIFE:
-    PlayerLoseLife();
-    return;
-
-  case GAMEROUTINES_PLAYERENTRANCE:
-    PlayerEntrance();
-    return;
-
-  case GAMEROUTINES_PLAYERCTRLROUTINE:
-    PlayerCtrlRoutine();
-    return;
-
-  case GAMEROUTINES_PLAYERCHANGESIZE:
-    PlayerChangeSize();
-    return;
-
-  case GAMEROUTINES_PLAYERINJURYBLINK:
-    PlayerInjuryBlink();
-    return;
-
-  case GAMEROUTINES_PLAYERDEATH:
-    PlayerDeath();
-    return;
-
-  case GAMEROUTINES_PLAYERFIREFLOWER:
-    PlayerFireFlower();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum PlayerMovementSubs_jumptable_item {
-  PLAYERMOVEMENTSUBS_ONGROUNDSTATESUB,
-  PLAYERMOVEMENTSUBS_JUMPSWIMSUB,
-  PLAYERMOVEMENTSUBS_FALLINGSUB,
-  PLAYERMOVEMENTSUBS_CLIMBINGSUB,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_PlayerMovementSubs(byte param_1) {
-  switch (param_1) {
-  case PLAYERMOVEMENTSUBS_ONGROUNDSTATESUB:
-    OnGroundStateSub();
-    return;
-
-  case PLAYERMOVEMENTSUBS_JUMPSWIMSUB:
-    JumpSwimSub();
-    return;
-
-  case PLAYERMOVEMENTSUBS_FALLINGSUB:
-    FallingSub();
-    return;
-
-  case PLAYERMOVEMENTSUBS_CLIMBINGSUB:
-    ClimbingSub();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum CheckpointEnemyID_jumptable_item {
-  CHECKPOINTENEMYID_INITNORMALENEMY_1,
-  CHECKPOINTENEMYID_INITNORMALENEMY_2,
-  CHECKPOINTENEMYID_INITNORMALENEMY_3,
-  CHECKPOINTENEMYID_INITREDKOOPA,
-  CHECKPOINTENEMYID_INITPARANHAPLANT_SMB2J,
-  CHECKPOINTENEMYID_INITHAMMERBRO,
-  CHECKPOINTENEMYID_INITGOOMBA,
-  CHECKPOINTENEMYID_INITBLOOBER,
-  CHECKPOINTENEMYID_INITBULLETBILL,
-  CHECKPOINTENEMYID_NOOP_1,
-  CHECKPOINTENEMYID_INITCHEEPCHEEP_1,
-  CHECKPOINTENEMYID_INITCHEEPCHEEP_2,
-  CHECKPOINTENEMYID_INITPODOBOO,
-  CHECKPOINTENEMYID_INITPIRANHAPLANT,
-  CHECKPOINTENEMYID_INITJUMPGPTROOPA,
-  CHECKPOINTENEMYID_INITREDPTROOPA,
-  CHECKPOINTENEMYID_INITHORIZFLYSWIMENEMY,
-  CHECKPOINTENEMYID_INITLAKITU,
-  CHECKPOINTENEMYID_INITENEMYFRENZY_1,
-  CHECKPOINTENEMYID_NOOP_2,
-  CHECKPOINTENEMYID_INITENEMYFRENZY_2,
-  CHECKPOINTENEMYID_INITENEMYFRENZY_3,
-  CHECKPOINTENEMYID_INITENEMYFRENZY_4,
-  CHECKPOINTENEMYID_INITENEMYFRENZY_5,
-  CHECKPOINTENEMYID_ENDFRENZY,
-  CHECKPOINTENEMYID_NOOP_3,
-  CHECKPOINTENEMYID_NOOP_4,
-  CHECKPOINTENEMYID_INITSHORTFIREBAR_1,
-  CHECKPOINTENEMYID_INITSHORTFIREBAR_2,
-  CHECKPOINTENEMYID_INITSHORTFIREBAR_3,
-  CHECKPOINTENEMYID_INITSHORTFIREBAR_4,
-  CHECKPOINTENEMYID_INITLONGFIREBAR,
-  CHECKPOINTENEMYID_NOOP_5,
-  CHECKPOINTENEMYID_NOOP_6,
-  CHECKPOINTENEMYID_NOOP_7,
-  CHECKPOINTENEMYID_NOOP_8,
-  CHECKPOINTENEMYID_INITBALPLATFORM,
-  CHECKPOINTENEMYID_INITVERTPLATFORM,
-  CHECKPOINTENEMYID_LARGELIFTUP,
-  CHECKPOINTENEMYID_LARGELIFTDOWN,
-  CHECKPOINTENEMYID_INITHORIPLATFORM_1,
-  CHECKPOINTENEMYID_INITDROPPLATFORM,
-  CHECKPOINTENEMYID_INITHORIPLATFORM_2,
-  CHECKPOINTENEMYID_PLATLIFTUP,
-  CHECKPOINTENEMYID_PLATLIFTDOWN,
-  CHECKPOINTENEMYID_INITBOWSER,
-  CHECKPOINTENEMYID_PWRUPJMP,
-  CHECKPOINTENEMYID_SETUP_VINE,
-  CHECKPOINTENEMYID_NOOP_9,
-  CHECKPOINTENEMYID_NOOP_10,
-  CHECKPOINTENEMYID_NOOP_11,
-  CHECKPOINTENEMYID_NOOP_12,
-  CHECKPOINTENEMYID_NOOP_13,
-  CHECKPOINTENEMYID_INITRETAINEROBJ,
-  CHECKPOINTENEMYID_NOOP_14,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A, X] -> []
-void jumptable_CheckpointEnemyID(byte param_1, byte param_2) {
-  switch (param_1) {
-  case CHECKPOINTENEMYID_INITNORMALENEMY_1:
-  case CHECKPOINTENEMYID_INITNORMALENEMY_2:
-  case CHECKPOINTENEMYID_INITNORMALENEMY_3:
-    InitNormalEnemy(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITREDKOOPA:
-    InitRedKoopa(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITPARANHAPLANT_SMB2J:
-    if (SMB2J_ONLY) {
-      InitPiranhaPlant(param_2);
-    }
-    return;
-
-  case CHECKPOINTENEMYID_INITHAMMERBRO:
-    InitHammerBro(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITGOOMBA:
-    InitGoomba(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITBLOOBER:
-    InitBloober(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITBULLETBILL:
-    InitBulletBill(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_NOOP_1:
-  case CHECKPOINTENEMYID_NOOP_2:
-  case CHECKPOINTENEMYID_NOOP_3:
-  case CHECKPOINTENEMYID_NOOP_4:
-  case CHECKPOINTENEMYID_NOOP_5:
-  case CHECKPOINTENEMYID_NOOP_6:
-  case CHECKPOINTENEMYID_NOOP_7:
-  case CHECKPOINTENEMYID_NOOP_8:
-  case CHECKPOINTENEMYID_NOOP_9:
-  case CHECKPOINTENEMYID_NOOP_10:
-  case CHECKPOINTENEMYID_NOOP_11:
-  case CHECKPOINTENEMYID_NOOP_12:
-  case CHECKPOINTENEMYID_NOOP_13:
-    // NES note: goes to "NoInitCode" (a no-op)
-    return;
-
-  case CHECKPOINTENEMYID_NOOP_14:
-    // NES note: goes to "EndOfEnemyInitCode" (a no-op)
-    return;
-
-  case CHECKPOINTENEMYID_INITCHEEPCHEEP_1:
-  case CHECKPOINTENEMYID_INITCHEEPCHEEP_2:
-    InitCheepCheep(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITPODOBOO:
-    InitPodoboo(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITPIRANHAPLANT:
-    InitPiranhaPlant(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITJUMPGPTROOPA:
-    InitJumpGPTroopa(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITREDPTROOPA:
-    InitRedPTroopa(param_2, false);
-    return;
-
-  case CHECKPOINTENEMYID_INITHORIZFLYSWIMENEMY:
-    InitHorizFlySwimEnemy(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITLAKITU:
-    InitLakitu(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITENEMYFRENZY_1:
-  case CHECKPOINTENEMYID_INITENEMYFRENZY_2:
-  case CHECKPOINTENEMYID_INITENEMYFRENZY_3:
-  case CHECKPOINTENEMYID_INITENEMYFRENZY_4:
-  case CHECKPOINTENEMYID_INITENEMYFRENZY_5:
-    InitEnemyFrenzy(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_ENDFRENZY:
-    EndFrenzy(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITSHORTFIREBAR_1:
-  case CHECKPOINTENEMYID_INITSHORTFIREBAR_2:
-  case CHECKPOINTENEMYID_INITSHORTFIREBAR_3:
-  case CHECKPOINTENEMYID_INITSHORTFIREBAR_4:
-    InitShortFirebar(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITLONGFIREBAR:
-    InitLongFirebar(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITBALPLATFORM:
-    InitBalPlatform(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITVERTPLATFORM:
-    InitVertPlatform(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_LARGELIFTUP:
-    LargeLiftUp(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_LARGELIFTDOWN:
-    LargeLiftDown(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITHORIPLATFORM_1:
-  case CHECKPOINTENEMYID_INITHORIPLATFORM_2:
-    InitHoriPlatform(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITDROPPLATFORM:
-    InitDropPlatform(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_PLATLIFTUP:
-    PlatLiftUp(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_PLATLIFTDOWN:
-    PlatLiftDown(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_INITBOWSER:
-    InitBowser(param_2);
-    return;
-
-  case CHECKPOINTENEMYID_PWRUPJMP:
-    PwrUpJmp();
-    return;
-
-  case CHECKPOINTENEMYID_SETUP_VINE:
-    Setup_Vine(param_2, 0x60);
-    return;
-
-  case CHECKPOINTENEMYID_INITRETAINEROBJ:
-    InitRetainerObj(param_2);
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum InitEnemyFrenzy_jumptable_item {
-  INITENEMYFRENZY_LAKITUANDSPINYHANDLER,
-  INITENEMYFRENZY_NOOP,
-  INITENEMYFRENZY_INITFLYINGCHEEPCHEEP,
-  INITENEMYFRENZY_INITBOWSERFLAME,
-  INITENEMYFRENZY_INITFIREWORKS,
-  INITENEMYFRENZY_BULLETBILLCHEEPCHEEP,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A, X] -> []
-void jumptable_InitEnemyFrenzy(byte param_1, byte param_2) {
-  switch (param_1) {
-  case INITENEMYFRENZY_LAKITUANDSPINYHANDLER:
-    LakituAndSpinyHandler(param_2);
-    return;
-
-  case INITENEMYFRENZY_NOOP:
-    // NES note: goes to "NoFrenzyCode" (a no-op)
-    return;
-
-  case INITENEMYFRENZY_INITFLYINGCHEEPCHEEP:
-    InitFlyingCheepCheep(param_2);
-    return;
-
-  case INITENEMYFRENZY_INITBOWSERFLAME:
-    InitBowserFlame(param_2);
-    return;
-
-  case INITENEMYFRENZY_INITFIREWORKS:
-    InitFireworks(param_2);
-    return;
-
-  case INITENEMYFRENZY_BULLETBILLCHEEPCHEEP:
-    BulletBillCheepCheep(param_2);
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum RunEnemyObjectsCore_jumptable_item {
-  RUNENEMYOBJECTSCORE_RUNNORMALENEMIES,
-  RUNENEMYOBJECTSCORE_RUNBOWSERFLAME,
-  RUNENEMYOBJECTSCORE_RUNFIREWORKS,
-  RUNENEMYOBJECTSCORE_NOOP_1,
-  RUNENEMYOBJECTSCORE_NOOP_2,
-  RUNENEMYOBJECTSCORE_NOOP_3,
-  RUNENEMYOBJECTSCORE_NOOP_4,
-  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_1,
-  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_2,
-  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_3,
-  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_4,
-  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_5,
-  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_6,
-  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_7,
-  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_8,
-  RUNENEMYOBJECTSCORE_NOOP_5,
-  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_1,
-  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_2,
-  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_3,
-  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_4,
-  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_5,
-  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_6,
-  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_7,
-  RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_1,
-  RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_2,
-  RUNENEMYOBJECTSCORE_RUNBOWSER,
-  RUNENEMYOBJECTSCORE_POWERUPOBJHANDLER,
-  RUNENEMYOBJECTSCORE_VINEOBJECTHANDLER,
-  RUNENEMYOBJECTSCORE_NOOP_6,
-  RUNENEMYOBJECTSCORE_RUNSTARFLAGOBJ,
-  RUNENEMYOBJECTSCORE_JUMPSPRINGHANDLER,
-  RUNENEMYOBJECTSCORE_NOOP_7,
-  RUNENEMYOBJECTSCORE_WARPZONEOBJECT,
-  RUNENEMYOBJECTSCORE_RUNRETAINEROBJ,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A, X] -> [X]
-byte jumptable_RunEnemyObjectsCore(byte param_1, byte param_2) {
-  switch (param_1) {
-  case RUNENEMYOBJECTSCORE_RUNNORMALENEMIES:
-    return RunNormalEnemies(param_2);
-
-  case RUNENEMYOBJECTSCORE_RUNBOWSERFLAME:
-    return RunBowserFlame(param_2);
-
-  case RUNENEMYOBJECTSCORE_RUNFIREWORKS:
-    return RunFireworks(param_2);
-
-  case RUNENEMYOBJECTSCORE_NOOP_1:
-  case RUNENEMYOBJECTSCORE_NOOP_2:
-  case RUNENEMYOBJECTSCORE_NOOP_3:
-  case RUNENEMYOBJECTSCORE_NOOP_4:
-  case RUNENEMYOBJECTSCORE_NOOP_5:
-  case RUNENEMYOBJECTSCORE_NOOP_6:
-  case RUNENEMYOBJECTSCORE_NOOP_7:
-    // NES note: goes to "NoRunCode" (a no-op)
-    return param_2;
-
-  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_1:
-  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_2:
-  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_3:
-  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_4:
-  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_5:
-  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_6:
-  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_7:
-  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_8:
-    return RunFirebarObj(param_2);
-
-  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_1:
-  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_2:
-  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_3:
-  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_4:
-  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_5:
-  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_6:
-  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_7:
-    return RunLargePlatform(param_2);
-
-  case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_1:
-  case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_2:
-    return RunSmallPlatform(param_2);
-
-  case RUNENEMYOBJECTSCORE_RUNBOWSER:
-    return RunBowser(param_2);
-
-  case RUNENEMYOBJECTSCORE_POWERUPOBJHANDLER:
-    return PowerUpObjHandler();
-
-  case RUNENEMYOBJECTSCORE_VINEOBJECTHANDLER:
-    return VineObjectHandler(param_2);
-
-  case RUNENEMYOBJECTSCORE_RUNSTARFLAGOBJ:
-    return RunStarFlagObj(param_2);
-
-  case RUNENEMYOBJECTSCORE_JUMPSPRINGHANDLER:
-    return JumpspringHandler(param_2);
-
-  case RUNENEMYOBJECTSCORE_WARPZONEOBJECT:
-    WarpZoneObject(param_2);
-    return param_2;
-
-  case RUNENEMYOBJECTSCORE_RUNRETAINEROBJ:
-    return RunRetainerObj(param_2);
-
-  default:
-    jmpengine_overflow(param_1);
-    return param_2;
-  }
-}
-
-
-enum EnemyMovementSubs_jumptable_item {
-  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_1,
-  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_2,
-  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_3,
-  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_4,
-  ENEMYMOVEMENTSUBS_MOVEUPSIDEDOWNPIRANHAP,
-  ENEMYMOVEMENTSUBS_PROCHAMMERBRO,
-  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5,
-  ENEMYMOVEMENTSUBS_MOVEBLOOBER,
-  ENEMYMOVEMENTSUBS_MOVEBULLETBILL,
-  ENEMYMOVEMENTSUBS_NOOP_1,
-  ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_1,
-  ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_2,
-  ENEMYMOVEMENTSUBS_MOVEPODOBOO,
-  ENEMYMOVEMENTSUBS_MOVEPIRANHAPLANT,
-  ENEMYMOVEMENTSUBS_MOVEJUMPINGENEMY,
-  ENEMYMOVEMENTSUBS_PROCMOVEREDPTROOPA,
-  ENEMYMOVEMENTSUBS_MOVEFLYGREENPTROOPA,
-  ENEMYMOVEMENTSUBS_MOVELAKITU,
-  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6,
-  ENEMYMOVEMENTSUBS_NOOP_2,
-  ENEMYMOVEMENTSUBS_MOVEFLYINGCHEEPCHEEP,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A, X] -> [X]
-byte jumptable_EnemyMovementSubs(byte param_1, byte param_2) {
-  switch (param_1) {
-  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_1:
-  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_2:
-  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_3:
-  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_4:
-  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5:
-  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6:
-    return MoveNormalEnemy(param_2);
-
-  case ENEMYMOVEMENTSUBS_MOVEUPSIDEDOWNPIRANHAP:
-    #ifdef SMB2J_MODE
-    MoveUpsideDownPiranhaP(param_2);
-    return param_2;
-    #else
-    return MoveNormalEnemy(param_2);
-    #endif
-
-  case ENEMYMOVEMENTSUBS_PROCHAMMERBRO:
-    return ProcHammerBro(param_2);
-
-  case ENEMYMOVEMENTSUBS_MOVEBLOOBER:
-    return MoveBloober(param_2, false);
-
-  case ENEMYMOVEMENTSUBS_MOVEBULLETBILL:
-    return MoveBulletBill(param_2);
-
-  case ENEMYMOVEMENTSUBS_NOOP_1:
-  case ENEMYMOVEMENTSUBS_NOOP_2:
-    // NES note: goes to "NoMoveCode" (a no-op)
-    return param_2;
-
-  case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_1:
-  case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_2:
-    return MoveSwimmingCheepCheep(param_2);
-
-  case ENEMYMOVEMENTSUBS_MOVEPODOBOO:
-    return MovePodoboo(param_2);
-
-  case ENEMYMOVEMENTSUBS_MOVEPIRANHAPLANT:
-    MovePiranhaPlant(param_2);
-    return param_2;
-
-  case ENEMYMOVEMENTSUBS_MOVEJUMPINGENEMY:
-    return MoveJumpingEnemy(param_2);
-
-  case ENEMYMOVEMENTSUBS_PROCMOVEREDPTROOPA:
-    return ProcMoveRedPTroopa(param_2);
-
-  case ENEMYMOVEMENTSUBS_MOVEFLYGREENPTROOPA:
-    return MoveFlyGreenPTroopa(param_2);
-
-  case ENEMYMOVEMENTSUBS_MOVELAKITU:
-    return MoveLakitu(param_2);
-
-  case ENEMYMOVEMENTSUBS_MOVEFLYINGCHEEPCHEEP:
-    return MoveFlyingCheepCheep(param_2);
-
-  default:
-    jmpengine_overflow(param_1);
-    return param_2;
-  }
-}
-
-
-enum LargePlatformSubroutines_jumptable_item {
-  LARGEPLATFORMSUBROUTINES_BALANCEPLATFORM,
-  LARGEPLATFORMSUBROUTINES_YMOVINGPLATFORM,
-  LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_1,
-  LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_2,
-  LARGEPLATFORMSUBROUTINES_XMOVINGPLATFORM,
-  LARGEPLATFORMSUBROUTINES_DROPPLATFORM,
-  LARGEPLATFORMSUBROUTINES_RIGHTPLATFORM,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A, X] -> [X]
-byte jumptable_LargePlatformSubroutines(byte param_1, byte param_2) {
-  switch (param_1) {
-  case LARGEPLATFORMSUBROUTINES_BALANCEPLATFORM:
-    return BalancePlatform(param_2);
-
-  case LARGEPLATFORMSUBROUTINES_YMOVINGPLATFORM:
-    return YMovingPlatform(param_2);
-
-  case LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_1:
-  case LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_2:
-    MoveLargeLiftPlat(param_2);
-    return param_2;
-
-  case LARGEPLATFORMSUBROUTINES_XMOVINGPLATFORM:
-    return XMovingPlatform(param_2);
-
-  case LARGEPLATFORMSUBROUTINES_DROPPLATFORM:
-    return DropPlatform(param_2);
-
-  case LARGEPLATFORMSUBROUTINES_RIGHTPLATFORM:
-    return RightPlatform(param_2);
-
-  default:
-    jmpengine_overflow(param_1);
-    return param_2;
-  }
-}
-
-
-enum RunStarFlagObj_jumptable_item {
-  RUNSTARFLAGOBJ_NOOP,
-  RUNSTARFLAGOBJ_GAMETIMERFIREWORKS,
-  RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS,
-  RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS,
-  RUNSTARFLAGOBJ_DELAYTOAREAEND,
-};
-
-
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A, X] -> [X]
-byte jumptable_RunStarFlagObj(byte param_1, byte param_2) {
-  switch (param_1) {
-  case RUNSTARFLAGOBJ_NOOP:
-    // NES note: goes to "StarFlagExit" (a no-op)
-    return param_2;
-
-  case RUNSTARFLAGOBJ_GAMETIMERFIREWORKS:
-    GameTimerFireworks(param_2);
-    return param_2;
-
-  case RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS:
-    return AwardGameTimerPoints(param_2);
-
-  case RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS:
-    return RaiseFlagSetoffFWorks(param_2);
-
-  case RUNSTARFLAGOBJ_DELAYTOAREAEND:
-    return DelayToAreaEnd(param_2);
-
-  default:
-    jmpengine_overflow(param_1);
-    return param_2;
-  }
-}
-
-
 // SMB:8182
 // SM2MAIN:61e9
 // Signature: [] -> []
@@ -2363,11 +1622,33 @@ void PlayerLoseLife(void) {
 }
 
 
+enum GameOverMode_jumptable_item {
+  GAMEOVERMODE_SETUPGAMEOVER,
+  GAMEOVERMODE_SCREENROUTINES,
+  GAMEOVERMODE_RUNGAMEOVER,
+};
+
+
 // SMB:9218
 // SM2MAIN:7057
 // Signature: [] -> []
 void GameOverMode(void) {
-  jumptable_GameOverMode(OperMode_Task);
+  switch (OperMode_Task) {
+  case GAMEOVERMODE_SETUPGAMEOVER:
+    SetupGameOver();
+    return;
+
+  case GAMEOVERMODE_SCREENROUTINES:
+    ScreenRoutines();
+    return;
+
+  case GAMEOVERMODE_RUNGAMEOVER:
+    RunGameOver();
+    return;
+
+  default:
+    jmpengine_overflow(OperMode_Task);
+  }
 }
 
 
@@ -2445,6 +1726,18 @@ void ContinueGame(void) {
 }
 
 
+enum AreaParserTasks_jumptable_item {
+  AREAPARSERTASKS_INCREMENTCOLUMNPOS_1,
+  AREAPARSERTASKS_RENDERAREAGRAPHICS_1,
+  AREAPARSERTASKS_RENDERAREAGRAPHICS_2,
+  AREAPARSERTASKS_AREAPARSERCORE_1,
+  AREAPARSERTASKS_INCREMENTCOLUMNPOS_2,
+  AREAPARSERTASKS_RENDERAREAGRAPHICS_3,
+  AREAPARSERTASKS_RENDERAREAGRAPHICS_4,
+  AREAPARSERTASKS_AREAPARSERCORE_2,
+};
+
+
 // SMB:92b0
 // SM2MAIN:70c1
 // Signature: [] -> []
@@ -2452,19 +1745,33 @@ void AreaParserTaskHandler(void) {
   if (AreaParserTaskNum == 0) {
     AreaParserTaskNum = 8;
   }
-  AreaParserTasks(AreaParserTaskNum - 1);
+
+  switch (AreaParserTaskNum - 1) {
+  case AREAPARSERTASKS_INCREMENTCOLUMNPOS_1:
+  case AREAPARSERTASKS_INCREMENTCOLUMNPOS_2:
+    IncrementColumnPos();
+    break;
+
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_1:
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_2:
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_3:
+  case AREAPARSERTASKS_RENDERAREAGRAPHICS_4:
+    RenderAreaGraphics();
+    break;
+
+  case AREAPARSERTASKS_AREAPARSERCORE_1:
+  case AREAPARSERTASKS_AREAPARSERCORE_2:
+    AreaParserCore();
+    break;
+
+  default:
+    jmpengine_overflow(AreaParserTaskNum - 1);
+  }
+
   AreaParserTaskNum -= 1;
   if (AreaParserTaskNum == 0) {
     RenderAttributeTables();
   }
-}
-
-
-// SMB:92c8
-// SM2MAIN:70d9
-// Signature: [A] -> []
-void AreaParserTasks(byte param_1) {
-  jumptable_AreaParserTasks(param_1);
 }
 
 
@@ -2721,203 +2028,6 @@ enum DecodeAreaData_jumptable_item {
   DECODEAREADATA_ALTERAREAATTRIBUTES,
 };
 
-static inline void jumptable_DecodeAreaData(byte param_1, byte param_2, byte param_3) {
-  switch (param_1) {
-  case DECODEAREADATA_VERTICALPIPE_1:
-  case DECODEAREADATA_VERTICALPIPE_2:
-    VerticalPipe(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_AREASTYLEOBJECT:
-    AreaStyleObject(param_2);
-    return;
-
-  case DECODEAREADATA_ROWOFBRICKS:
-    RowOfBricks(param_2);
-    return;
-
-  case DECODEAREADATA_ROWOFSOLIDBLOCKS:
-    RowOfSolidBlocks(param_2);
-    return;
-
-  case DECODEAREADATA_ROWOFCOINS:
-    RowOfCoins(param_2);
-    return;
-
-  case DECODEAREADATA_COLUMNOFBRICKS:
-    ColumnOfBricks(param_2);
-    return;
-
-  case DECODEAREADATA_COLUMNOFSOLIDBLOCKS:
-    ColumnOfSolidBlocks(param_2);
-    return;
-
-  case DECODEAREADATA_HOLE_EMPTY:
-    Hole_Empty(param_2);
-    return;
-
-  case DECODEAREADATA_PULLEYROPEOBJECT:
-    PulleyRopeObject(param_2);
-    return;
-
-  case DECODEAREADATA_BRIDGE_HIGH:
-    Bridge_High(param_2);
-    return;
-
-  case DECODEAREADATA_BRIDGE_MIDDLE:
-    Bridge_Middle(param_2);
-    return;
-
-  case DECODEAREADATA_BRIDGE_LOW:
-    Bridge_Low(param_2);
-    return;
-
-  case DECODEAREADATA_HOLE_WATER:
-    Hole_Water(param_2);
-    return;
-
-  case DECODEAREADATA_QUESTIONBLOCKROW_HIGH:
-    QuestionBlockRow_High(param_2);
-    return;
-
-  case DECODEAREADATA_QUESTIONBLOCKROW_LOW:
-    QuestionBlockRow_Low(param_2);
-    return;
-
-  case DECODEAREADATA_ENDLESSROPE:
-    EndlessRope();
-    return;
-
-  case DECODEAREADATA_BALANCEPLATROPE:
-    BalancePlatRope(param_2);
-    return;
-
-  case DECODEAREADATA_CASTLEOBJECT:
-    CastleObject(param_2);
-    return;
-
-  case DECODEAREADATA_STAIRCASEOBJECT:
-    StaircaseObject(param_2);
-    return;
-
-  case DECODEAREADATA_EXITPIPE:
-    ExitPipe(param_2);
-    return;
-
-  case DECODEAREADATA_FLAGBALLS_RESIDUAL:
-    FlagBalls_Residual(param_2);
-    return;
-
-  case DECODEAREADATA_QUESTIONBLOCK_1:
-  case DECODEAREADATA_QUESTIONBLOCK_2:
-  case DECODEAREADATA_QUESTIONBLOCK_3:
-    QuestionBlock(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_HIDDEN1UPBLOCK:
-    Hidden1UpBlock(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_BRICKWITHITEM_1:
-  case DECODEAREADATA_BRICKWITHITEM_2:
-  case DECODEAREADATA_BRICKWITHITEM_3:
-  case DECODEAREADATA_BRICKWITHITEM_4:
-    BrickWithItem(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_BRICKWITHCOINS:
-    BrickWithCoins(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_WATERPIPE:
-    WaterPipe(param_2);
-    return;
-
-  case DECODEAREADATA_EMPTYBLOCK:
-    EmptyBlock(param_2);
-    return;
-
-  case DECODEAREADATA_JUMPSPRING:
-    Jumpspring(param_2);
-    return;
-
-  case DECODEAREADATA_INTROPIPE:
-    IntroPipe(param_2);
-    return;
-
-  case DECODEAREADATA_FLAGPOLEOBJECT:
-    FlagpoleObject();
-    return;
-
-  case DECODEAREADATA_AXEOBJ:
-    AxeObj(param_3);
-    return;
-
-  case DECODEAREADATA_CHAINOBJ:
-    ChainObj(param_3);
-    return;
-
-  case DECODEAREADATA_CASTLEBRIDGEOBJ:
-    CastleBridgeObj(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_SCROLLLOCKOBJECT_WARP:
-    ScrollLockObject_Warp();
-    return;
-
-  case DECODEAREADATA_SCROLLLOCKOBJECT_1:
-  case DECODEAREADATA_SCROLLLOCKOBJECT_2:
-    ScrollLockObject();
-    return;
-
-  case DECODEAREADATA_AREAFRENZY_1:
-  case DECODEAREADATA_AREAFRENZY_2:
-  case DECODEAREADATA_AREAFRENZY_3:
-    AreaFrenzy(param_3);
-    return;
-
-  case DECODEAREADATA_NOOP:
-    // NES note: goes to "LoopCmdE" (a no-op)
-    return;
-
-  case DECODEAREADATA_ALTERAREAATTRIBUTES:
-    AlterAreaAttributes(param_2);
-    return;
-
-#ifdef SMB2J_MODE
-  case DECODEAREADATA_QUESTIONBLOCK_4:
-  case DECODEAREADATA_QUESTIONBLOCK_5:
-  case DECODEAREADATA_QUESTIONBLOCK_6:
-    QuestionBlock(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_BRICKWITHITEM_5:
-    BrickWithItem(param_2, param_3);
-    return;
-
-  case DECODEAREADATA_UPSIDEDOWNPIPE_HIGH:
-    UpsideDownPipe_High(param_2);
-    return;
-
-  case DECODEAREADATA_UPSIDEDOWNPIPE_LOW:
-    UpsideDownPipe_Low(param_2);
-    return;
-
-  case DECODEAREADATA_WINDON:
-    WindOn();
-    return;
-
-  case DECODEAREADATA_WINDOFF:
-    WindOff();
-    return;
-#endif
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
 // SMB:9595
 // SM2MAIN:73a6
 // Signature: [X, Y] -> []
@@ -3008,7 +2118,201 @@ void DecodeAreaData(byte param_1, byte param_2) {
     AreaObjectPageSel = 0;
   }
 
-  jumptable_DecodeAreaData(bVar1 + cVar2, bVar3, bVar1);
+  byte jmptable_idx = bVar1 + cVar2;
+
+  switch (jmptable_idx) {
+  case DECODEAREADATA_VERTICALPIPE_1:
+  case DECODEAREADATA_VERTICALPIPE_2:
+    VerticalPipe(bVar3, bVar1);
+    return;
+
+  case DECODEAREADATA_AREASTYLEOBJECT:
+    AreaStyleObject(bVar3);
+    return;
+
+  case DECODEAREADATA_ROWOFBRICKS:
+    RowOfBricks(bVar3);
+    return;
+
+  case DECODEAREADATA_ROWOFSOLIDBLOCKS:
+    RowOfSolidBlocks(bVar3);
+    return;
+
+  case DECODEAREADATA_ROWOFCOINS:
+    RowOfCoins(bVar3);
+    return;
+
+  case DECODEAREADATA_COLUMNOFBRICKS:
+    ColumnOfBricks(bVar3);
+    return;
+
+  case DECODEAREADATA_COLUMNOFSOLIDBLOCKS:
+    ColumnOfSolidBlocks(bVar3);
+    return;
+
+  case DECODEAREADATA_HOLE_EMPTY:
+    Hole_Empty(bVar3);
+    return;
+
+  case DECODEAREADATA_PULLEYROPEOBJECT:
+    PulleyRopeObject(bVar3);
+    return;
+
+  case DECODEAREADATA_BRIDGE_HIGH:
+    Bridge_High(bVar3);
+    return;
+
+  case DECODEAREADATA_BRIDGE_MIDDLE:
+    Bridge_Middle(bVar3);
+    return;
+
+  case DECODEAREADATA_BRIDGE_LOW:
+    Bridge_Low(bVar3);
+    return;
+
+  case DECODEAREADATA_HOLE_WATER:
+    Hole_Water(bVar3);
+    return;
+
+  case DECODEAREADATA_QUESTIONBLOCKROW_HIGH:
+    QuestionBlockRow_High(bVar3);
+    return;
+
+  case DECODEAREADATA_QUESTIONBLOCKROW_LOW:
+    QuestionBlockRow_Low(bVar3);
+    return;
+
+  case DECODEAREADATA_ENDLESSROPE:
+    EndlessRope();
+    return;
+
+  case DECODEAREADATA_BALANCEPLATROPE:
+    BalancePlatRope(bVar3);
+    return;
+
+  case DECODEAREADATA_CASTLEOBJECT:
+    CastleObject(bVar3);
+    return;
+
+  case DECODEAREADATA_STAIRCASEOBJECT:
+    StaircaseObject(bVar3);
+    return;
+
+  case DECODEAREADATA_EXITPIPE:
+    ExitPipe(bVar3);
+    return;
+
+  case DECODEAREADATA_FLAGBALLS_RESIDUAL:
+    FlagBalls_Residual(bVar3);
+    return;
+
+  case DECODEAREADATA_QUESTIONBLOCK_1:
+  case DECODEAREADATA_QUESTIONBLOCK_2:
+  case DECODEAREADATA_QUESTIONBLOCK_3:
+    QuestionBlock(bVar3, bVar1);
+    return;
+
+  case DECODEAREADATA_HIDDEN1UPBLOCK:
+    Hidden1UpBlock(bVar3, bVar1);
+    return;
+
+  case DECODEAREADATA_BRICKWITHITEM_1:
+  case DECODEAREADATA_BRICKWITHITEM_2:
+  case DECODEAREADATA_BRICKWITHITEM_3:
+  case DECODEAREADATA_BRICKWITHITEM_4:
+    BrickWithItem(bVar3, bVar1);
+    return;
+
+  case DECODEAREADATA_BRICKWITHCOINS:
+    BrickWithCoins(bVar3, bVar1);
+    return;
+
+  case DECODEAREADATA_WATERPIPE:
+    WaterPipe(bVar3);
+    return;
+
+  case DECODEAREADATA_EMPTYBLOCK:
+    EmptyBlock(bVar3);
+    return;
+
+  case DECODEAREADATA_JUMPSPRING:
+    Jumpspring(bVar3);
+    return;
+
+  case DECODEAREADATA_INTROPIPE:
+    IntroPipe(bVar3);
+    return;
+
+  case DECODEAREADATA_FLAGPOLEOBJECT:
+    FlagpoleObject();
+    return;
+
+  case DECODEAREADATA_AXEOBJ:
+    AxeObj(bVar1);
+    return;
+
+  case DECODEAREADATA_CHAINOBJ:
+    ChainObj(bVar1);
+    return;
+
+  case DECODEAREADATA_CASTLEBRIDGEOBJ:
+    CastleBridgeObj(bVar3, bVar1);
+    return;
+
+  case DECODEAREADATA_SCROLLLOCKOBJECT_WARP:
+    ScrollLockObject_Warp();
+    return;
+
+  case DECODEAREADATA_SCROLLLOCKOBJECT_1:
+  case DECODEAREADATA_SCROLLLOCKOBJECT_2:
+    ScrollLockObject();
+    return;
+
+  case DECODEAREADATA_AREAFRENZY_1:
+  case DECODEAREADATA_AREAFRENZY_2:
+  case DECODEAREADATA_AREAFRENZY_3:
+    AreaFrenzy(bVar1);
+    return;
+
+  case DECODEAREADATA_NOOP:
+    // NES note: goes to "LoopCmdE" (a no-op)
+    return;
+
+  case DECODEAREADATA_ALTERAREAATTRIBUTES:
+    AlterAreaAttributes(bVar3);
+    return;
+
+#ifdef SMB2J_MODE
+  case DECODEAREADATA_QUESTIONBLOCK_4:
+  case DECODEAREADATA_QUESTIONBLOCK_5:
+  case DECODEAREADATA_QUESTIONBLOCK_6:
+    QuestionBlock(bVar3, bVar1);
+    return;
+
+  case DECODEAREADATA_BRICKWITHITEM_5:
+    BrickWithItem(bVar3, bVar1);
+    return;
+
+  case DECODEAREADATA_UPSIDEDOWNPIPE_HIGH:
+    UpsideDownPipe_High(bVar3);
+    return;
+
+  case DECODEAREADATA_UPSIDEDOWNPIPE_LOW:
+    UpsideDownPipe_Low(bVar3);
+    return;
+
+  case DECODEAREADATA_WINDON:
+    WindOn();
+    return;
+
+  case DECODEAREADATA_WINDOFF:
+    WindOff();
+    return;
+#endif
+
+  default:
+    jmpengine_overflow(jmptable_idx);
+  }
 }
 
 
@@ -3078,40 +2382,32 @@ enum AreaStyleObject_jumptable_item {
 };
 
 
-// SMB:n/a
-// SM2MAIN:n/a
-// Signature: [A, X] -> []
-void jumptable_AreaStyleObject(byte param_1, byte param_2) {
-  switch (param_1) {
-  case AREASTYLEOBJECT_TREELEDGE:
-    TreeLedge(param_2);
-    return;
-
-  case AREASTYLEOBJECT_MUSHROOMLEDGE:
-#ifdef SMB1_MODE
-    MushroomLedge(param_2);
-#endif
-#ifdef SMB2J_MODE
-    CloudLedge(param_2);
-#endif
-    return;
-
-  case AREASTYLEOBJECT_BULLETBILLCANNON:
-    BulletBillCannon(param_2);
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-    return;
-  }
-}
-
-
 // SMB:9740
 // SM2MAIN:7597
 // Signature: [X] -> []
 void AreaStyleObject(byte param_1) {
-  jumptable_AreaStyleObject(AreaStyle, param_1);
+  switch (AreaStyle) {
+  case AREASTYLEOBJECT_TREELEDGE:
+    TreeLedge(param_1);
+    return;
+
+  case AREASTYLEOBJECT_MUSHROOMLEDGE:
+#ifdef SMB1_MODE
+    MushroomLedge(param_1);
+#endif
+#ifdef SMB2J_MODE
+    CloudLedge(param_1);
+#endif
+    return;
+
+  case AREASTYLEOBJECT_BULLETBILLCANNON:
+    BulletBillCannon(param_1);
+    return;
+
+  default:
+    jmpengine_overflow(AreaStyle);
+    return;
+  }
 }
 
 
@@ -4145,11 +3441,83 @@ byte GetScreenPosition(void) {
 }
 
 
+enum GameRoutines_jumptable_item {
+  GAMEROUTINES_ENTRANCE_GAMETIMERSETUP,
+  GAMEROUTINES_VINE_AUTOCLIMB,
+  GAMEROUTINES_SIDEEXITPIPEENTRY,
+  GAMEROUTINES_VERTICALPIPEENTRY,
+  GAMEROUTINES_FLAGPOLESLIDE,
+  GAMEROUTINES_PLAYERENDLEVEL,
+  GAMEROUTINES_PLAYERLOSELIFE,
+  GAMEROUTINES_PLAYERENTRANCE,
+  GAMEROUTINES_PLAYERCTRLROUTINE,
+  GAMEROUTINES_PLAYERCHANGESIZE,
+  GAMEROUTINES_PLAYERINJURYBLINK,
+  GAMEROUTINES_PLAYERDEATH,
+  GAMEROUTINES_PLAYERFIREFLOWER,
+};
+
+
 // SMB:b04a
 // SM2MAIN:7ba2
 // Signature: [] -> []
 void GameRoutines(void) {
-  jumptable_GameRoutines(GameEngineSubroutine);
+  switch (GameEngineSubroutine) {
+  case GAMEROUTINES_ENTRANCE_GAMETIMERSETUP:
+    Entrance_GameTimerSetup(ssw(0x91, 0x6f));
+    return;
+
+  case GAMEROUTINES_VINE_AUTOCLIMB:
+    Vine_AutoClimb();
+    return;
+
+  case GAMEROUTINES_SIDEEXITPIPEENTRY:
+    SideExitPipeEntry();
+    return;
+
+  case GAMEROUTINES_VERTICALPIPEENTRY:
+    VerticalPipeEntry();
+    return;
+
+  case GAMEROUTINES_FLAGPOLESLIDE:
+    FlagpoleSlide();
+    return;
+
+  case GAMEROUTINES_PLAYERENDLEVEL:
+    PlayerEndLevel();
+    return;
+
+  case GAMEROUTINES_PLAYERLOSELIFE:
+    PlayerLoseLife();
+    return;
+
+  case GAMEROUTINES_PLAYERENTRANCE:
+    PlayerEntrance();
+    return;
+
+  case GAMEROUTINES_PLAYERCTRLROUTINE:
+    PlayerCtrlRoutine();
+    return;
+
+  case GAMEROUTINES_PLAYERCHANGESIZE:
+    PlayerChangeSize();
+    return;
+
+  case GAMEROUTINES_PLAYERINJURYBLINK:
+    PlayerInjuryBlink();
+    return;
+
+  case GAMEROUTINES_PLAYERDEATH:
+    PlayerDeath();
+    return;
+
+  case GAMEROUTINES_PLAYERFIREFLOWER:
+    PlayerFireFlower();
+    return;
+
+  default:
+    jmpengine_overflow(GameEngineSubroutine);
+  }
 }
 
 
@@ -4556,6 +3924,14 @@ void NextArea(void) {
 }
 
 
+enum PlayerMovementSubs_jumptable_item {
+  PLAYERMOVEMENTSUBS_ONGROUNDSTATESUB,
+  PLAYERMOVEMENTSUBS_JUMPSWIMSUB,
+  PLAYERMOVEMENTSUBS_FALLINGSUB,
+  PLAYERMOVEMENTSUBS_CLIMBINGSUB,
+};
+
+
 // SMB:b329
 // SM2MAIN:7e90
 // Signature: [] -> []
@@ -4577,7 +3953,27 @@ void PlayerMovementSubs(void) {
   if (Player_State != 3) {
     ClimbSideTimer = 0x18;
   }
-  jumptable_PlayerMovementSubs(Player_State);
+
+  switch (Player_State) {
+  case PLAYERMOVEMENTSUBS_ONGROUNDSTATESUB:
+    OnGroundStateSub();
+    return;
+
+  case PLAYERMOVEMENTSUBS_JUMPSWIMSUB:
+    JumpSwimSub();
+    return;
+
+  case PLAYERMOVEMENTSUBS_FALLINGSUB:
+    FallingSub();
+    return;
+
+  case PLAYERMOVEMENTSUBS_CLIMBINGSUB:
+    ClimbingSub();
+    return;
+
+  default:
+    jmpengine_overflow(Player_State);
+  }
 }
 
 
@@ -6529,6 +5925,65 @@ byte CheckThreeBytes(void) {
 }
 
 
+enum CheckpointEnemyID_jumptable_item {
+  CHECKPOINTENEMYID_INITNORMALENEMY_1,
+  CHECKPOINTENEMYID_INITNORMALENEMY_2,
+  CHECKPOINTENEMYID_INITNORMALENEMY_3,
+  CHECKPOINTENEMYID_INITREDKOOPA,
+  CHECKPOINTENEMYID_INITPARANHAPLANT_SMB2J,
+  CHECKPOINTENEMYID_INITHAMMERBRO,
+  CHECKPOINTENEMYID_INITGOOMBA,
+  CHECKPOINTENEMYID_INITBLOOBER,
+  CHECKPOINTENEMYID_INITBULLETBILL,
+  CHECKPOINTENEMYID_NOOP_1,
+  CHECKPOINTENEMYID_INITCHEEPCHEEP_1,
+  CHECKPOINTENEMYID_INITCHEEPCHEEP_2,
+  CHECKPOINTENEMYID_INITPODOBOO,
+  CHECKPOINTENEMYID_INITPIRANHAPLANT,
+  CHECKPOINTENEMYID_INITJUMPGPTROOPA,
+  CHECKPOINTENEMYID_INITREDPTROOPA,
+  CHECKPOINTENEMYID_INITHORIZFLYSWIMENEMY,
+  CHECKPOINTENEMYID_INITLAKITU,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_1,
+  CHECKPOINTENEMYID_NOOP_2,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_2,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_3,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_4,
+  CHECKPOINTENEMYID_INITENEMYFRENZY_5,
+  CHECKPOINTENEMYID_ENDFRENZY,
+  CHECKPOINTENEMYID_NOOP_3,
+  CHECKPOINTENEMYID_NOOP_4,
+  CHECKPOINTENEMYID_INITSHORTFIREBAR_1,
+  CHECKPOINTENEMYID_INITSHORTFIREBAR_2,
+  CHECKPOINTENEMYID_INITSHORTFIREBAR_3,
+  CHECKPOINTENEMYID_INITSHORTFIREBAR_4,
+  CHECKPOINTENEMYID_INITLONGFIREBAR,
+  CHECKPOINTENEMYID_NOOP_5,
+  CHECKPOINTENEMYID_NOOP_6,
+  CHECKPOINTENEMYID_NOOP_7,
+  CHECKPOINTENEMYID_NOOP_8,
+  CHECKPOINTENEMYID_INITBALPLATFORM,
+  CHECKPOINTENEMYID_INITVERTPLATFORM,
+  CHECKPOINTENEMYID_LARGELIFTUP,
+  CHECKPOINTENEMYID_LARGELIFTDOWN,
+  CHECKPOINTENEMYID_INITHORIPLATFORM_1,
+  CHECKPOINTENEMYID_INITDROPPLATFORM,
+  CHECKPOINTENEMYID_INITHORIPLATFORM_2,
+  CHECKPOINTENEMYID_PLATLIFTUP,
+  CHECKPOINTENEMYID_PLATLIFTDOWN,
+  CHECKPOINTENEMYID_INITBOWSER,
+  CHECKPOINTENEMYID_PWRUPJMP,
+  CHECKPOINTENEMYID_SETUP_VINE,
+  CHECKPOINTENEMYID_NOOP_9,
+  CHECKPOINTENEMYID_NOOP_10,
+  CHECKPOINTENEMYID_NOOP_11,
+  CHECKPOINTENEMYID_NOOP_12,
+  CHECKPOINTENEMYID_NOOP_13,
+  CHECKPOINTENEMYID_INITRETAINEROBJ,
+  CHECKPOINTENEMYID_NOOP_14,
+};
+
+
 // SMB:c26c
 // SM2MAIN:8e50
 // Signature: [X] -> []
@@ -6536,11 +5991,168 @@ void CheckpointEnemyID(byte param_1) {
   byte bVar1;
 
   bVar1 = Enemy_ID[param_1];
-  if (0x14 >= bVar1) {
-    Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 8 + (bVar1 > 0x14);
+  if (bVar1 <= 0x14) {
+    Enemy_Y_Position[param_1] += 8;
     EnemyOffscrBitsMasked[param_1] = 1;
   }
-  jumptable_CheckpointEnemyID(bVar1, param_1);
+
+  switch (bVar1) {
+  case CHECKPOINTENEMYID_INITNORMALENEMY_1:
+  case CHECKPOINTENEMYID_INITNORMALENEMY_2:
+  case CHECKPOINTENEMYID_INITNORMALENEMY_3:
+    InitNormalEnemy(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITREDKOOPA:
+    InitRedKoopa(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITPARANHAPLANT_SMB2J:
+    if (SMB2J_ONLY) {
+      InitPiranhaPlant(param_1);
+    }
+    return;
+
+  case CHECKPOINTENEMYID_INITHAMMERBRO:
+    InitHammerBro(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITGOOMBA:
+    InitGoomba(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITBLOOBER:
+    InitBloober(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITBULLETBILL:
+    InitBulletBill(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_NOOP_1:
+  case CHECKPOINTENEMYID_NOOP_2:
+  case CHECKPOINTENEMYID_NOOP_3:
+  case CHECKPOINTENEMYID_NOOP_4:
+  case CHECKPOINTENEMYID_NOOP_5:
+  case CHECKPOINTENEMYID_NOOP_6:
+  case CHECKPOINTENEMYID_NOOP_7:
+  case CHECKPOINTENEMYID_NOOP_8:
+  case CHECKPOINTENEMYID_NOOP_9:
+  case CHECKPOINTENEMYID_NOOP_10:
+  case CHECKPOINTENEMYID_NOOP_11:
+  case CHECKPOINTENEMYID_NOOP_12:
+  case CHECKPOINTENEMYID_NOOP_13:
+    // NES note: goes to "NoInitCode" (a no-op)
+    return;
+
+  case CHECKPOINTENEMYID_NOOP_14:
+    // NES note: goes to "EndOfEnemyInitCode" (a no-op)
+    return;
+
+  case CHECKPOINTENEMYID_INITCHEEPCHEEP_1:
+  case CHECKPOINTENEMYID_INITCHEEPCHEEP_2:
+    InitCheepCheep(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITPODOBOO:
+    InitPodoboo(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITPIRANHAPLANT:
+    InitPiranhaPlant(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITJUMPGPTROOPA:
+    InitJumpGPTroopa(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITREDPTROOPA:
+    InitRedPTroopa(param_1, false);
+    return;
+
+  case CHECKPOINTENEMYID_INITHORIZFLYSWIMENEMY:
+    InitHorizFlySwimEnemy(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITLAKITU:
+    InitLakitu(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_1:
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_2:
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_3:
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_4:
+  case CHECKPOINTENEMYID_INITENEMYFRENZY_5:
+    InitEnemyFrenzy(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_ENDFRENZY:
+    EndFrenzy(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITSHORTFIREBAR_1:
+  case CHECKPOINTENEMYID_INITSHORTFIREBAR_2:
+  case CHECKPOINTENEMYID_INITSHORTFIREBAR_3:
+  case CHECKPOINTENEMYID_INITSHORTFIREBAR_4:
+    InitShortFirebar(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITLONGFIREBAR:
+    InitLongFirebar(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITBALPLATFORM:
+    InitBalPlatform(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITVERTPLATFORM:
+    InitVertPlatform(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_LARGELIFTUP:
+    LargeLiftUp(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_LARGELIFTDOWN:
+    LargeLiftDown(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITHORIPLATFORM_1:
+  case CHECKPOINTENEMYID_INITHORIPLATFORM_2:
+    InitHoriPlatform(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITDROPPLATFORM:
+    InitDropPlatform(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_PLATLIFTUP:
+    PlatLiftUp(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_PLATLIFTDOWN:
+    PlatLiftDown(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_INITBOWSER:
+    InitBowser(param_1);
+    return;
+
+  case CHECKPOINTENEMYID_PWRUPJMP:
+    PwrUpJmp();
+    return;
+
+  case CHECKPOINTENEMYID_SETUP_VINE:
+    Setup_Vine(param_1, 0x60);
+    return;
+
+  case CHECKPOINTENEMYID_INITRETAINEROBJ:
+    InitRetainerObj(param_1);
+    return;
+
+  default:
+    jmpengine_overflow(bVar1);
+  }
 }
 
 
@@ -7126,12 +6738,50 @@ void InitPiranhaPlant(byte param_1) {
 }
 
 
+enum InitEnemyFrenzy_jumptable_item {
+  INITENEMYFRENZY_LAKITUANDSPINYHANDLER,
+  INITENEMYFRENZY_NOOP,
+  INITENEMYFRENZY_INITFLYINGCHEEPCHEEP,
+  INITENEMYFRENZY_INITBOWSERFLAME,
+  INITENEMYFRENZY_INITFIREWORKS,
+  INITENEMYFRENZY_BULLETBILLCHEEPCHEEP,
+};
+
+
 // SMB:c7a0
 // SM2MAIN:93d5
 // Signature: [X] -> []
 void InitEnemyFrenzy(byte param_1) {
   EnemyFrenzyBuffer = Enemy_ID[param_1];
-  jumptable_InitEnemyFrenzy(EnemyFrenzyBuffer - 0x12, param_1);
+
+  switch (Enemy_ID[param_1] - 0x12) {
+  case INITENEMYFRENZY_LAKITUANDSPINYHANDLER:
+    LakituAndSpinyHandler(param_1);
+    return;
+
+  case INITENEMYFRENZY_NOOP:
+    // NES note: goes to "NoFrenzyCode" (a no-op)
+    return;
+
+  case INITENEMYFRENZY_INITFLYINGCHEEPCHEEP:
+    InitFlyingCheepCheep(param_1);
+    return;
+
+  case INITENEMYFRENZY_INITBOWSERFLAME:
+    InitBowserFlame(param_1);
+    return;
+
+  case INITENEMYFRENZY_INITFIREWORKS:
+    InitFireworks(param_1);
+    return;
+
+  case INITENEMYFRENZY_BULLETBILLCHEEPCHEEP:
+    BulletBillCheepCheep(param_1);
+    return;
+
+  default:
+    jmpengine_overflow(Enemy_ID[param_1] - 0x12);
+  }
 }
 
 
@@ -7291,19 +6941,127 @@ void PosPlatform(byte param_1, byte param_2) {
 }
 
 
+enum RunEnemyObjectsCore_jumptable_item {
+  RUNENEMYOBJECTSCORE_RUNNORMALENEMIES,
+  RUNENEMYOBJECTSCORE_RUNBOWSERFLAME,
+  RUNENEMYOBJECTSCORE_RUNFIREWORKS,
+  RUNENEMYOBJECTSCORE_NOOP_1,
+  RUNENEMYOBJECTSCORE_NOOP_2,
+  RUNENEMYOBJECTSCORE_NOOP_3,
+  RUNENEMYOBJECTSCORE_NOOP_4,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_1,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_2,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_3,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_4,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_5,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_6,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_7,
+  RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_8,
+  RUNENEMYOBJECTSCORE_NOOP_5,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_1,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_2,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_3,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_4,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_5,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_6,
+  RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_7,
+  RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_1,
+  RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_2,
+  RUNENEMYOBJECTSCORE_RUNBOWSER,
+  RUNENEMYOBJECTSCORE_POWERUPOBJHANDLER,
+  RUNENEMYOBJECTSCORE_VINEOBJECTHANDLER,
+  RUNENEMYOBJECTSCORE_NOOP_6,
+  RUNENEMYOBJECTSCORE_RUNSTARFLAGOBJ,
+  RUNENEMYOBJECTSCORE_JUMPSPRINGHANDLER,
+  RUNENEMYOBJECTSCORE_NOOP_7,
+  RUNENEMYOBJECTSCORE_WARPZONEOBJECT,
+  RUNENEMYOBJECTSCORE_RUNRETAINEROBJ,
+};
+
+
 // SMB:c882
 // SM2MAIN:94b7
 // Signature: [] -> [X]
 byte RunEnemyObjectsCore(void) {
   byte bVar1;
-  byte bVar2;
 
   bVar1 = 0;
-  bVar2 = Enemy_ID[ObjectOffset];
-  if (bVar2 >= 0x15) {
-    bVar1 = (bVar2 - 0x14) - (bVar2 < 0x15);
+  if (Enemy_ID[ObjectOffset] >= 0x15) {
+    bVar1 = Enemy_ID[ObjectOffset] - 0x14;
   }
-  return jumptable_RunEnemyObjectsCore(bVar1, ObjectOffset);
+
+  switch (bVar1) {
+  case RUNENEMYOBJECTSCORE_RUNNORMALENEMIES:
+    return RunNormalEnemies(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_RUNBOWSERFLAME:
+    return RunBowserFlame(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_RUNFIREWORKS:
+    return RunFireworks(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_NOOP_1:
+  case RUNENEMYOBJECTSCORE_NOOP_2:
+  case RUNENEMYOBJECTSCORE_NOOP_3:
+  case RUNENEMYOBJECTSCORE_NOOP_4:
+  case RUNENEMYOBJECTSCORE_NOOP_5:
+  case RUNENEMYOBJECTSCORE_NOOP_6:
+  case RUNENEMYOBJECTSCORE_NOOP_7:
+    // NES note: goes to "NoRunCode" (a no-op)
+    return ObjectOffset;
+
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_1:
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_2:
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_3:
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_4:
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_5:
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_6:
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_7:
+  case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_8:
+    return RunFirebarObj(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_1:
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_2:
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_3:
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_4:
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_5:
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_6:
+  case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_7:
+    return RunLargePlatform(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_1:
+  case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_2:
+    return RunSmallPlatform(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_RUNBOWSER:
+    return RunBowser(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_POWERUPOBJHANDLER:
+    return PowerUpObjHandler();
+
+  case RUNENEMYOBJECTSCORE_VINEOBJECTHANDLER:
+    return VineObjectHandler(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_RUNSTARFLAGOBJ:
+    return RunStarFlagObj(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_JUMPSPRINGHANDLER:
+    return JumpspringHandler(ObjectOffset);
+
+  case RUNENEMYOBJECTSCORE_WARPZONEOBJECT:
+    {
+      byte old_object_offset = ObjectOffset;
+      WarpZoneObject(ObjectOffset);
+      return old_object_offset;
+    }
+
+  case RUNENEMYOBJECTSCORE_RUNRETAINEROBJ:
+    return RunRetainerObj(ObjectOffset);
+
+  default:
+    jmpengine_overflow(bVar1);
+    return ObjectOffset;
+  }
 }
 
 
@@ -7344,11 +7102,96 @@ byte RunNormalEnemies(byte param_1) {
 }
 
 
+enum EnemyMovementSubs_jumptable_item {
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_1,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_2,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_3,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_4,
+  ENEMYMOVEMENTSUBS_MOVEUPSIDEDOWNPIRANHAP,
+  ENEMYMOVEMENTSUBS_PROCHAMMERBRO,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5,
+  ENEMYMOVEMENTSUBS_MOVEBLOOBER,
+  ENEMYMOVEMENTSUBS_MOVEBULLETBILL,
+  ENEMYMOVEMENTSUBS_NOOP_1,
+  ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_1,
+  ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_2,
+  ENEMYMOVEMENTSUBS_MOVEPODOBOO,
+  ENEMYMOVEMENTSUBS_MOVEPIRANHAPLANT,
+  ENEMYMOVEMENTSUBS_MOVEJUMPINGENEMY,
+  ENEMYMOVEMENTSUBS_PROCMOVEREDPTROOPA,
+  ENEMYMOVEMENTSUBS_MOVEFLYGREENPTROOPA,
+  ENEMYMOVEMENTSUBS_MOVELAKITU,
+  ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6,
+  ENEMYMOVEMENTSUBS_NOOP_2,
+  ENEMYMOVEMENTSUBS_MOVEFLYINGCHEEPCHEEP,
+};
+
+
 // SMB:c905
 // SM2MAIN:953a
 // Signature: [X] -> [X]
 byte EnemyMovementSubs(byte param_1) {
-  return jumptable_EnemyMovementSubs(Enemy_ID[param_1], param_1);
+  switch (Enemy_ID[param_1]) {
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_1:
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_2:
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_3:
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_4:
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5:
+  case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6:
+    return MoveNormalEnemy(param_1);
+
+  case ENEMYMOVEMENTSUBS_MOVEUPSIDEDOWNPIRANHAP:
+    #ifdef SMB2J_MODE
+    MoveUpsideDownPiranhaP(param_1);
+    return param_1;
+    #else
+    return MoveNormalEnemy(param_1);
+    #endif
+
+  case ENEMYMOVEMENTSUBS_PROCHAMMERBRO:
+    return ProcHammerBro(param_1);
+
+  case ENEMYMOVEMENTSUBS_MOVEBLOOBER:
+    return MoveBloober(param_1, false);
+
+  case ENEMYMOVEMENTSUBS_MOVEBULLETBILL:
+    return MoveBulletBill(param_1);
+
+  case ENEMYMOVEMENTSUBS_NOOP_1:
+  case ENEMYMOVEMENTSUBS_NOOP_2:
+    // NES note: goes to "NoMoveCode" (a no-op)
+    return param_1;
+
+  case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_1:
+  case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_2:
+    return MoveSwimmingCheepCheep(param_1);
+
+  case ENEMYMOVEMENTSUBS_MOVEPODOBOO:
+    return MovePodoboo(param_1);
+
+  case ENEMYMOVEMENTSUBS_MOVEPIRANHAPLANT:
+    MovePiranhaPlant(param_1);
+    return param_1;
+
+  case ENEMYMOVEMENTSUBS_MOVEJUMPINGENEMY:
+    return MoveJumpingEnemy(param_1);
+
+  case ENEMYMOVEMENTSUBS_PROCMOVEREDPTROOPA:
+    return ProcMoveRedPTroopa(param_1);
+
+  case ENEMYMOVEMENTSUBS_MOVEFLYGREENPTROOPA:
+    return MoveFlyGreenPTroopa(param_1);
+
+  case ENEMYMOVEMENTSUBS_MOVELAKITU:
+    return MoveLakitu(param_1);
+
+  case ENEMYMOVEMENTSUBS_MOVEFLYINGCHEEPCHEEP:
+    return MoveFlyingCheepCheep(param_1);
+
+  default:
+    jmpengine_overflow(Enemy_ID[param_1]);
+    return param_1;
+  }
 }
 
 
@@ -7424,11 +7267,46 @@ byte RunLargePlatform(byte param_1) {
 }
 
 
+enum LargePlatformSubroutines_jumptable_item {
+  LARGEPLATFORMSUBROUTINES_BALANCEPLATFORM,
+  LARGEPLATFORMSUBROUTINES_YMOVINGPLATFORM,
+  LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_1,
+  LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_2,
+  LARGEPLATFORMSUBROUTINES_XMOVINGPLATFORM,
+  LARGEPLATFORMSUBROUTINES_DROPPLATFORM,
+  LARGEPLATFORMSUBROUTINES_RIGHTPLATFORM,
+};
+
+
 // SMB:c982
 // SM2MAIN:95b7
 // Signature: [X] -> [X]
 byte LargePlatformSubroutines(byte param_1) {
-  return jumptable_LargePlatformSubroutines(Enemy_ID[param_1] - 0x24, param_1);
+  switch (Enemy_ID[param_1] - 0x24) {
+  case LARGEPLATFORMSUBROUTINES_BALANCEPLATFORM:
+    return BalancePlatform(param_1);
+
+  case LARGEPLATFORMSUBROUTINES_YMOVINGPLATFORM:
+    return YMovingPlatform(param_1);
+
+  case LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_1:
+  case LARGEPLATFORMSUBROUTINES_MOVELARGELIFTPLAT_2:
+    MoveLargeLiftPlat(param_1);
+    return param_1;
+
+  case LARGEPLATFORMSUBROUTINES_XMOVINGPLATFORM:
+    return XMovingPlatform(param_1);
+
+  case LARGEPLATFORMSUBROUTINES_DROPPLATFORM:
+    return DropPlatform(param_1);
+
+  case LARGEPLATFORMSUBROUTINES_RIGHTPLATFORM:
+    return RightPlatform(param_1);
+
+  default:
+    jmpengine_overflow(Enemy_ID[param_1] - 0x24);
+    return param_1;
+  }
 }
 
 
@@ -8472,15 +8350,43 @@ byte RunFireworks(byte param_1) {
 }
 
 
+enum RunStarFlagObj_jumptable_item {
+  RUNSTARFLAGOBJ_NOOP,
+  RUNSTARFLAGOBJ_GAMETIMERFIREWORKS,
+  RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS,
+  RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS,
+  RUNSTARFLAGOBJ_DELAYTOAREAEND,
+};
+
+
 // SMB:d2d9
 // SM2MAIN:9f0e
 // Signature: [X] -> [X]
 byte RunStarFlagObj(byte param_1) {
   EnemyFrenzyBuffer = 0;
-  if (StarFlagTaskControl < 5) {
-    return jumptable_RunStarFlagObj(StarFlagTaskControl, param_1);
+
+  switch (StarFlagTaskControl) {
+  case RUNSTARFLAGOBJ_NOOP:
+    // NES note: goes to "StarFlagExit" (a no-op)
+    return param_1;
+
+  case RUNSTARFLAGOBJ_GAMETIMERFIREWORKS:
+    GameTimerFireworks(param_1);
+    return param_1;
+
+  case RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS:
+    return AwardGameTimerPoints(param_1);
+
+  case RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS:
+    return RaiseFlagSetoffFWorks(param_1);
+
+  case RUNSTARFLAGOBJ_DELAYTOAREAEND:
+    return DelayToAreaEnd(param_1);
+
+  default:
+    // No jmpengine_overflow() warning here, because the original NES version takes care of it!
+    return param_1;
   }
-  return param_1;
 }
 
 
