@@ -85,162 +85,6 @@ void jumptable_VictoryModeSubroutines_forW8(byte param_1, byte param_2) {
 }
 
 
-enum HardWorldsCheckpoint_jumptable_item {
-  HARDWORLDSCHECKPOINT_DISKSCREEN,
-  HARDWORLDSCHECKPOINT_LOADHARDWORLDS,
-  HARDWORLDSCHECKPOINT_WAITFOREJECT,
-  HARDWORLDSCHECKPOINT_WAITFORREINSERT,
-  HARDWORLDSCHECKPOINT_RESETDISKVARS,
-};
-
-
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_HardWorldsCheckpoint(byte param_1) {
-  switch (param_1) {
-  case HARDWORLDSCHECKPOINT_DISKSCREEN:
-    DiskScreen();
-    return;
-
-  case HARDWORLDSCHECKPOINT_LOADHARDWORLDS:
-    LoadHardWorlds();
-    return;
-
-  case HARDWORLDSCHECKPOINT_WAITFOREJECT:
-    WaitForEject();
-    return;
-
-  case HARDWORLDSCHECKPOINT_WAITFORREINSERT:
-    WaitForReinsert();
-    return;
-
-  case HARDWORLDSCHECKPOINT_RESETDISKVARS:
-    ResetDiskVars();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum AttractModeDiskRoutines_jumptable_item {
-  ATTRACTMODEDISKROUTINES_DISKSCREEN,
-  ATTRACTMODEDISKROUTINES_LOADWORLDS1THRU4,
-  ATTRACTMODEDISKROUTINES_WAITFOREJECT,
-  ATTRACTMODEDISKROUTINES_WAITFORREINSERT,
-  ATTRACTMODEDISKROUTINES_RESETDISKVARS,
-};
-
-
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_AttractModeDiskRoutines(byte param_1) {
-  switch (param_1) {
-  case ATTRACTMODEDISKROUTINES_DISKSCREEN:
-    DiskScreen();
-    return;
-
-  case ATTRACTMODEDISKROUTINES_LOADWORLDS1THRU4:
-    LoadWorlds1Thru4();
-    return;
-
-  case ATTRACTMODEDISKROUTINES_WAITFOREJECT:
-    WaitForEject();
-    return;
-
-  case ATTRACTMODEDISKROUTINES_WAITFORREINSERT:
-    WaitForReinsert();
-    return;
-
-  case ATTRACTMODEDISKROUTINES_RESETDISKVARS:
-    ResetDiskVars();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum GameModeDiskRoutines_jumptable_item {
-  GAMEMODEDISKROUTINES_DISKSCREEN,
-  GAMEMODEDISKROUTINES_LOADWORLDS5THRU8,
-  GAMEMODEDISKROUTINES_WAITFOREJECT,
-  GAMEMODEDISKROUTINES_WAITFORREINSERT,
-  GAMEMODEDISKROUTINES_RESETDISKVARS,
-};
-
-
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_GameModeDiskRoutines(byte param_1) {
-  switch (param_1) {
-  case GAMEMODEDISKROUTINES_DISKSCREEN:
-    DiskScreen();
-    return;
-
-  case GAMEMODEDISKROUTINES_LOADWORLDS5THRU8:
-    LoadWorlds5Thru8();
-    return;
-
-  case GAMEMODEDISKROUTINES_WAITFOREJECT:
-    WaitForEject();
-    return;
-
-  case GAMEMODEDISKROUTINES_WAITFORREINSERT:
-    WaitForReinsert();
-    return;
-
-  case GAMEMODEDISKROUTINES_RESETDISKVARS:
-    ResetDiskVars();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
-enum VictoryModeDiskRoutines_jumptable_item {
-  VICTORYMODEDISKROUTINES_DISKSCREEN,
-  VICTORYMODEDISKROUTINES_LOADENDING,
-  VICTORYMODEDISKROUTINES_WAITFOREJECT,
-  VICTORYMODEDISKROUTINES_WAITFORREINSERT,
-  VICTORYMODEDISKROUTINES_RESETDISKVARS,
-};
-
-
-// SM2MAIN:n/a
-// Signature: [A] -> []
-void jumptable_VictoryModeDiskRoutines(byte param_1) {
-  switch (param_1) {
-  case VICTORYMODEDISKROUTINES_DISKSCREEN:
-    DiskScreen();
-    return;
-
-  case VICTORYMODEDISKROUTINES_LOADENDING:
-    LoadEnding();
-    return;
-
-  case VICTORYMODEDISKROUTINES_WAITFOREJECT:
-    WaitForEject();
-    return;
-
-  case VICTORYMODEDISKROUTINES_WAITFORREINSERT:
-    WaitForReinsert();
-    return;
-
-  case VICTORYMODEDISKROUTINES_RESETDISKVARS:
-    ResetDiskVars();
-    return;
-
-  default:
-    jmpengine_overflow(param_1);
-  }
-}
-
-
 // SM2MAIN:632a
 // Signature: [] -> []
 void DrawTitleScreen(void) {
@@ -449,10 +293,42 @@ void ChkToStunEnemies(byte param_1) {
 }
 
 
+enum HardWorldsCheckpoint_jumptable_item {
+  HARDWORLDSCHECKPOINT_DISKSCREEN,
+  HARDWORLDSCHECKPOINT_LOADHARDWORLDS,
+  HARDWORLDSCHECKPOINT_WAITFOREJECT,
+  HARDWORLDSCHECKPOINT_WAITFORREINSERT,
+  HARDWORLDSCHECKPOINT_RESETDISKVARS,
+};
+
+
 // SM2MAIN:bfc2
 // Signature: [] -> []
 void HardWorldsCheckpoint(void) {
-  jumptable_HardWorldsCheckpoint(DiskIOTask);
+  switch (DiskIOTask) {
+  case HARDWORLDSCHECKPOINT_DISKSCREEN:
+    DiskScreen();
+    return;
+
+  case HARDWORLDSCHECKPOINT_LOADHARDWORLDS:
+    LoadHardWorlds();
+    return;
+
+  case HARDWORLDSCHECKPOINT_WAITFOREJECT:
+    WaitForEject();
+    return;
+
+  case HARDWORLDSCHECKPOINT_WAITFORREINSERT:
+    WaitForReinsert();
+    return;
+
+  case HARDWORLDSCHECKPOINT_RESETDISKVARS:
+    ResetDiskVars();
+    return;
+
+  default:
+    jmpengine_overflow(DiskIOTask);
+  }
 }
 
 
@@ -492,10 +368,42 @@ NoLoadHW:
 }
 
 
+enum AttractModeDiskRoutines_jumptable_item {
+  ATTRACTMODEDISKROUTINES_DISKSCREEN,
+  ATTRACTMODEDISKROUTINES_LOADWORLDS1THRU4,
+  ATTRACTMODEDISKROUTINES_WAITFOREJECT,
+  ATTRACTMODEDISKROUTINES_WAITFORREINSERT,
+  ATTRACTMODEDISKROUTINES_RESETDISKVARS,
+};
+
+
 // SM2MAIN:c006
 // Signature: [] -> []
 void AttractModeDiskRoutines(void) {
-  jumptable_AttractModeDiskRoutines(DiskIOTask);
+  switch (DiskIOTask) {
+  case ATTRACTMODEDISKROUTINES_DISKSCREEN:
+    DiskScreen();
+    return;
+
+  case ATTRACTMODEDISKROUTINES_LOADWORLDS1THRU4:
+    LoadWorlds1Thru4();
+    return;
+
+  case ATTRACTMODEDISKROUTINES_WAITFOREJECT:
+    WaitForEject();
+    return;
+
+  case ATTRACTMODEDISKROUTINES_WAITFORREINSERT:
+    WaitForReinsert();
+    return;
+
+  case ATTRACTMODEDISKROUTINES_RESETDISKVARS:
+    ResetDiskVars();
+    return;
+
+  default:
+    jmpengine_overflow(DiskIOTask);
+  }
 }
 
 
@@ -529,10 +437,42 @@ InitWorldPos:
 }
 
 
+enum GameModeDiskRoutines_jumptable_item {
+  GAMEMODEDISKROUTINES_DISKSCREEN,
+  GAMEMODEDISKROUTINES_LOADWORLDS5THRU8,
+  GAMEMODEDISKROUTINES_WAITFOREJECT,
+  GAMEMODEDISKROUTINES_WAITFORREINSERT,
+  GAMEMODEDISKROUTINES_RESETDISKVARS,
+};
+
+
 // SM2MAIN:c04d
 // Signature: [] -> []
 void GameModeDiskRoutines(void) {
-  jumptable_GameModeDiskRoutines(DiskIOTask);
+  switch (DiskIOTask) {
+  case GAMEMODEDISKROUTINES_DISKSCREEN:
+    DiskScreen();
+    return;
+
+  case GAMEMODEDISKROUTINES_LOADWORLDS5THRU8:
+    LoadWorlds5Thru8();
+    return;
+
+  case GAMEMODEDISKROUTINES_WAITFOREJECT:
+    WaitForEject();
+    return;
+
+  case GAMEMODEDISKROUTINES_WAITFORREINSERT:
+    WaitForReinsert();
+    return;
+
+  case GAMEMODEDISKROUTINES_RESETDISKVARS:
+    ResetDiskVars();
+    return;
+
+  default:
+    jmpengine_overflow(DiskIOTask);
+  }
 }
 
 
@@ -599,10 +539,42 @@ void ContinueVMDelay(void) {
 }
 
 
+enum VictoryModeDiskRoutines_jumptable_item {
+  VICTORYMODEDISKROUTINES_DISKSCREEN,
+  VICTORYMODEDISKROUTINES_LOADENDING,
+  VICTORYMODEDISKROUTINES_WAITFOREJECT,
+  VICTORYMODEDISKROUTINES_WAITFORREINSERT,
+  VICTORYMODEDISKROUTINES_RESETDISKVARS,
+};
+
+
 // SM2MAIN:c08e
 // Signature: [] -> []
 void VictoryModeDiskRoutines(void) {
-  jumptable_VictoryModeDiskRoutines(DiskIOTask);
+  switch (DiskIOTask) {
+  case VICTORYMODEDISKROUTINES_DISKSCREEN:
+    DiskScreen();
+    return;
+
+  case VICTORYMODEDISKROUTINES_LOADENDING:
+    LoadEnding();
+    return;
+
+  case VICTORYMODEDISKROUTINES_WAITFOREJECT:
+    WaitForEject();
+    return;
+
+  case VICTORYMODEDISKROUTINES_WAITFORREINSERT:
+    WaitForReinsert();
+    return;
+
+  case VICTORYMODEDISKROUTINES_RESETDISKVARS:
+    ResetDiskVars();
+    return;
+
+  default:
+    jmpengine_overflow(DiskIOTask);
+  }
 }
 
 
