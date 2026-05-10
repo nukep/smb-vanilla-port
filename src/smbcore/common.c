@@ -1200,7 +1200,8 @@ byte PutBlockMetatile(byte param_1, byte param_3, byte param_4, byte param_5) {
   }
   bVar2 = (param_5 & 0xf) << 1;
   bVar1 = param_4 + 0x20;
-  bVar3 = (bVar1 >> 6) + CARRY1(bVar1 << 2, bVar2) + cVar4;
+  bVar3 = (bVar1 >> 6) + cVar4;
+  bVar3 += CARRY1(bVar1 << 2, bVar2);
   RemBridge(param_1 << 2, param_3, bVar1 * 4 + bVar2, bVar3);
   return bVar3;
 }
@@ -4247,7 +4248,8 @@ void ImposeFriction(byte param_1) {
 
   if (go_left) {
     // LeftFrict
-    Player_X_Speed = Player_X_Speed + FrictionAdderHigh + CARRY1(Player_X_MoveForce, FrictionAdderLow);
+    Player_X_Speed = Player_X_Speed + FrictionAdderHigh;
+    Player_X_Speed += CARRY1(Player_X_MoveForce, FrictionAdderLow);
     Player_X_MoveForce = Player_X_MoveForce + FrictionAdderLow;
     if ((byte)(Player_X_Speed - MaximumRightSpeed) < 0x80) {
       Player_X_Speed = MaximumRightSpeed;
@@ -5691,9 +5693,12 @@ void ImposeGravity(byte param_1, byte param_2, byte param_3, byte param_4, byte 
   bVar2 = bVar3 + bVar5 + bVar1;
   SprObject_Y_Position[param_2] = bVar2;
   SprObject_Y_HighPos[param_2] = SprObject_Y_HighPos[param_2] + cVar4 + (CARRY1(bVar3, bVar5) || (bVar1 && bVar2 == 0));
-  bVar3 = SprObject_Y_MoveForce[param_2];
-  SprObject_Y_MoveForce[param_2] = bVar3 + param_3;
-  bVar3 = PlayerSpriteVarData2[param_2] + CARRY1(bVar3, param_3);
+
+  const byte tmp1 = SprObject_Y_MoveForce[param_2];
+
+  SprObject_Y_MoveForce[param_2] = tmp1 + param_3;
+  bVar3 = PlayerSpriteVarData2[param_2];
+  bVar3 += CARRY1(tmp1, param_3);
   PlayerSpriteVarData2[param_2] = bVar3;
   if (((byte)(bVar3 - param_5) < 0x80) && (SprObject_Y_MoveForce[param_2] >= 0x80)) {
     PlayerSpriteVarData2[param_2] = param_5;
@@ -6596,7 +6601,8 @@ void InitFireworks(byte param_1) {
     bVar3 = FireworksCounter + Enemy_State[bVar5];
     bVar5 = FireworksXPosData[bVar3];
     Enemy_X_Position[param_1] = bVar4 + bVar5;
-    Enemy_PageLoc[param_1] = (bVar2 - (bVar1 < 0x30)) + CARRY1(bVar4, bVar5);
+    Enemy_PageLoc[param_1] = bVar2 - (bVar1 < 0x30);
+    Enemy_PageLoc[param_1] += CARRY1(bVar4, bVar5);
     Enemy_Y_Position[param_1] = FireworksYPosData[bVar3];
     Enemy_Y_HighPos[param_1] = 1;
     Enemy_Flag[param_1] = 1;
@@ -6940,7 +6946,8 @@ void PosPlatform(byte param_1, byte param_2) {
   bVar1 = Enemy_X_Position[param_1];
   bVar2 = PlatPosDataLow[param_2];
   Enemy_X_Position[param_1] = bVar1 + bVar2;
-  Enemy_PageLoc[param_1] = Enemy_PageLoc[param_1] + PlatPosDataHigh[param_2] + CARRY1(bVar1, bVar2);
+  Enemy_PageLoc[param_1] = Enemy_PageLoc[param_1] + PlatPosDataHigh[param_2];
+  Enemy_PageLoc[param_1] += CARRY1(bVar1, bVar2);
 }
 
 
@@ -7651,7 +7658,7 @@ byte MoveBloober(byte param_1, bool param_2) {
     bVar2 = Enemy_X_Position[param_1];
     bVar1 = SpriteVarData1[param_1];
     Enemy_X_Position[param_1] = bVar2 + bVar1;
-    Enemy_PageLoc[param_1] = Enemy_PageLoc[param_1] + CARRY1(bVar2, bVar1);
+    Enemy_PageLoc[param_1] += CARRY1(bVar2, bVar1);
     return param_1;
   }
   bVar2 = Enemy_X_Position[param_1];
@@ -10162,7 +10169,8 @@ void ImpedePlayerMove(byte param_1) {
   if (bVar1 >= 0x80) {
     cVar3 = -1;
   }
-  SprObject_PageLoc[0] = SprObject_PageLoc[0] + cVar3 + CARRY1(bVar1, SprObject_X_Position[0]);
+  SprObject_PageLoc[0] = SprObject_PageLoc[0] + cVar3;
+  SprObject_PageLoc[0] += CARRY1(bVar1, SprObject_X_Position[0]);
   SprObject_X_Position[0] = bVar1 + SprObject_X_Position[0];
 
   // ExIPM
