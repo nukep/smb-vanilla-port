@@ -4083,15 +4083,22 @@ void PlayerPhysicsSub(void) {
   if ((((JumpspringAnimCtrl == 0) && ((A_B_Buttons & 0x80) != 0)) && ((A_B_Buttons & 0x80 & PreviousA_B_Buttons) == 0))
       && ((Player_State == 0 || ((SwimmingFlag != 0 && ((JumpSwimTimer != 0 || (PlayerSpriteVarData2[0] < 0x80)))))))) {
     JumpSwimTimer = 0x20;
-    bVar1 = 0;
     SprObject_YMF_Dummy[0] = 0;
     JumpOrigin_Y_HighPos = SprObject_Y_HighPos[0];
     JumpOrigin_Y_Position = SprObject_Y_Position[0];
     Player_State = 1;
-    if ((Player_XSpeedAbsolute > 8)
-        && (((bVar1 = 1, Player_XSpeedAbsolute >= 0x10 && (bVar1 = 2, Player_XSpeedAbsolute > 0x18))
-             && (bVar1 = 3, Player_XSpeedAbsolute >= 0x1c)))) {
-      bVar1 = 4;
+
+    const byte xs = Player_XSpeedAbsolute;
+    if (xs <= 8) {
+        bVar1 = 0;
+    } else if (xs < 16) {
+        bVar1 = 1;
+    } else if (xs <= 24) {
+        bVar1 = 2;
+    } else if (xs < 28) {
+        bVar1 = 3;
+    } else {
+        bVar1 = 4;
     }
     DiffToHaltJump = 1;
     if ((SwimmingFlag != 0)) {
@@ -8023,14 +8030,19 @@ byte PlayerLakituDiff(byte param_1, byte param_2, byte param_3, byte param_4) {
     bVar2 += 1;
     bVar1 = NEGATE(bVar1);
   }
-  if (((bVar1 >= 0x3c) && (bVar1 = 0x3c, Enemy_ID[param_1] == 0x11)) && (bVar2 != SpriteVarData2[param_1])) {
-    if (SpriteVarData2[param_1] != 0) {
-      SpriteVarData1[param_1] = SpriteVarData1[param_1] - 1;
-      if (SpriteVarData1[param_1] != 0) {
-        return SpriteVarData1[param_1];
+  if (bVar1 >= 0x3c) {
+    bVar1 = 0x3c;
+    if (Enemy_ID[param_1] == 0x11) {
+      if (bVar2 != SpriteVarData2[param_1]) {
+        if (SpriteVarData2[param_1] != 0) {
+          SpriteVarData1[param_1] = SpriteVarData1[param_1] - 1;
+          if (SpriteVarData1[param_1] != 0) {
+            return SpriteVarData1[param_1];
+          }
+        }
+        SpriteVarData2[param_1] = bVar2;
       }
     }
-    SpriteVarData2[param_1] = bVar2;
   }
   bVar1 = (bVar1 & 0x3c) >> 2;
   cVar3 = 0;
@@ -9016,12 +9028,17 @@ byte FireballEnemyCollision(byte param_1) {
     bStack0000 = param_1 * 4 + 0x1c;
     for (int i = 4; i >= 0; i--) {
       bVar2 = i;
-      if (((((Enemy_State[bVar2] & 0x20) == 0) && (Enemy_Flag[bVar2] != 0)) && ((bVar1 = Enemy_ID[bVar2], bVar1 < 0x24 || (bVar1 > 0x2a)))) && (bVar1 != 6 || (Enemy_State[bVar2] < 2))) {
-        if (EnemyOffscrBitsMasked[bVar2] == 0) {
-          bVar3 = SprObjectCollisionCore(bVar2 * 4 + 4, bStack0000);
-          if (bVar3) {
-            Fireball_State[ObjectOffset] = 0x80;
-            HandleEnemyFBallCol(bVar2, bVar2);
+      if (((Enemy_State[bVar2] & 0x20) == 0) && (Enemy_Flag[bVar2] != 0)) {
+        bVar1 = Enemy_ID[bVar2];
+        if ((bVar1 < 0x24) || (bVar1 > 0x2a)) {
+          if ((bVar1 != 6 || (Enemy_State[bVar2] < 2))) {
+            if (EnemyOffscrBitsMasked[bVar2] == 0) {
+              bVar3 = SprObjectCollisionCore(bVar2 * 4 + 4, bStack0000);
+              if (bVar3) {
+                Fireball_State[ObjectOffset] = 0x80;
+                HandleEnemyFBallCol(bVar2, bVar2);
+              }
+            }
           }
         }
       }
@@ -9503,21 +9520,25 @@ byte EnemiesCollision(byte param_1) {
 labelA:
     param_1 -= 1;
     if (param_1 < 0x80) {
-      if (((Enemy_Flag[param_1] != 0) && (bVar1 = Enemy_ID[param_1], bVar1 < 0x15))
-          && ((bVar1 != 0x11 && (((bVar1 != 0xd && ssw(true, (bVar1 != 4))) && (EnemyOffscrBitsMasked[param_1] == 0)))))) {
-        bVar2 = SprObjectCollisionCore(param_1 * 4 + 4, bStack0000);
-        bVar1 = ObjectOffset;
-        if (bVar2) {
-          if (((Enemy_State[ObjectOffset] | Enemy_State[param_1]) & 0x80) == 0) {
-            if ((Enemy_CollisionBits[param_1] & SetBitsMask[ObjectOffset]) != 0) {
+      if (Enemy_Flag[param_1] != 0) {
+        bVar1 = Enemy_ID[param_1];
+        if (bVar1 < 0x15) {
+          if ((bVar1 != 0x11 && (((bVar1 != 0xd && ssw(true, (bVar1 != 4))) && (EnemyOffscrBitsMasked[param_1] == 0))))) {
+            bVar2 = SprObjectCollisionCore(param_1 * 4 + 4, bStack0000);
+            bVar1 = ObjectOffset;
+            if (bVar2) {
+              if (((Enemy_State[ObjectOffset] | Enemy_State[param_1]) & 0x80) == 0) {
+                if ((Enemy_CollisionBits[param_1] & SetBitsMask[ObjectOffset]) != 0) {
+                  goto labelA;
+                }
+                Enemy_CollisionBits[param_1] = Enemy_CollisionBits[param_1] | SetBitsMask[ObjectOffset];
+              }
+              ProcEnemyCollisions(bVar1, param_1, param_1);
               goto labelA;
             }
-            Enemy_CollisionBits[param_1] = Enemy_CollisionBits[param_1] | SetBitsMask[ObjectOffset];
+            Enemy_CollisionBits[param_1] = Enemy_CollisionBits[param_1] & ClearBitsMask[ObjectOffset];
           }
-          ProcEnemyCollisions(bVar1, param_1, param_1);
-          goto labelA;
         }
-        Enemy_CollisionBits[param_1] = Enemy_CollisionBits[param_1] & ClearBitsMask[ObjectOffset];
       }
       goto labelA;
     }
@@ -10809,11 +10830,13 @@ bool SprObjectCollisionCore(byte param_1, byte param_2) {
             && (BoundingBox_UL_Corner_Or_XPos[param_1] > BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2])) {
           return BoundingBox_UL_Corner_Or_XPos[param_1] <= BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2];
         }
-      } else if (((bVar1 != BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_1])
-                  && (bVar1 = BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2],
-                      BoundingBox_UL_Corner_Or_XPos[param_2] <= bVar1))
-                 && (BoundingBox_UL_Corner_Or_XPos[param_1] > bVar1)) {
-        return BoundingBox_UL_Corner_Or_XPos[param_1] <= bVar1;
+      } else if (bVar1 != BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_1]) {
+        bVar1 = BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2];
+        if (BoundingBox_UL_Corner_Or_XPos[param_2] <= bVar1) {
+          if (BoundingBox_UL_Corner_Or_XPos[param_1] > bVar1) {
+            return BoundingBox_UL_Corner_Or_XPos[param_1] <= bVar1;
+          }
+        }
       }
     } else if ((((bVar1 != BoundingBox_UL_Corner_Or_XPos[param_1])
                  && (BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_1] <= bVar1))
