@@ -2481,7 +2481,6 @@ void CastleObject(byte param_1) {
     if ((bVar4 == 1) || ((bVar3 == 0 && (bVar4 == 3)))) {
       MetatileBuffer[10] = ssw(0x52, 0x50);
     } else if (bVar4 == 2) {
-      bStack0000 = param_1;
       bStack0000 = GetAreaObjXPosition();
       sVar6 = FindEmptyEnemySlot();
       bVar4 = sVar6.x;
@@ -4607,7 +4606,6 @@ byte VineObjectHandler(byte param_1) {
     GetEnemyOffscreenBits(sVar5.x);
 
     bVarAA = 0;
-    bVar3 = 0;
     do {
       DrawVine(bVarAA);
       bVar3 = bVarAA;
@@ -4615,8 +4613,6 @@ byte VineObjectHandler(byte param_1) {
     } while (bVar3 != (byte)(VineFlagOffset - 1));
 
     if ((Enemy_OffscreenBits & 0xc) != 0) {
-      bVarAA = VineFlagOffset;
-      bVarBB = VineHeight;
       bVar3 = (byte)(VineFlagOffset - 1);
       do {
         bVarAA = EraseEnemyObject(VineObjOffset[bVar3]);
