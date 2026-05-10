@@ -403,7 +403,7 @@ void smb1_MoveVOffset(byte param_1);
 byte smb1_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
 #define PutBlockMetatile smb1_PutBlockMetatile
 
-void smb1_RemBridge(byte param_1,byte param_2,byte param_4,byte param_5);
+void smb1_RemBridge(byte param_1,byte param_2,ushort addr);
 #define RemBridge smb1_RemBridge
 
 void smb1_InitializeNameTables(void);

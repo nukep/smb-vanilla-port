@@ -1188,37 +1188,29 @@ void MoveVOffset(byte param_1) {
 // SM2MAIN:6974
 // Signature: [A, Y, r02, r06] -> [r05]
 byte PutBlockMetatile(byte param_1, byte param_3, byte param_4, byte param_5) {
-  byte bVar1;
-  byte bVar2;
-  byte bVar3;
-  char cVar4;
+  const ushort nametable = param_5 < 0xd0 ? 0x2000 : 0x2400;
+  const ushort addr = (param_4*4 + 32*4) + ((param_5*2) % 32) + nametable;
 
-  if (param_5 >= 0xd0) {
-    cVar4 = 0x24;
-  } else {
-    cVar4 = 0x20;
-  }
-  bVar2 = (param_5 & 0xf) << 1;
-  bVar1 = param_4 + 0x20;
-  bVar3 = (bVar1 >> 6) + cVar4;
-  bVar3 += CARRY1(bVar1 << 2, bVar2);
-  RemBridge(param_1 << 2, param_3, bVar1 * 4 + bVar2, bVar3);
-  return bVar3;
+  RemBridge(param_1*4, param_3, addr);
+
+  return addr >> 8;
 }
 
 
 // SMB:8acd
 // SM2MAIN:69aa
 // Signature: [X, Y, r04, r05] -> []
-void RemBridge(byte param_1, byte param_2, byte param_4, byte param_5) {
+void RemBridge(byte param_1, byte param_2, ushort addr) {
+  // Note: addr is made up of r04 and r05 for lo and hi respectively.
+
   VRAM_Buffer1[param_2 + 2] = BlockGfxData[param_1];
   VRAM_Buffer1[param_2 + 3] = BlockGfxData[param_1 + 1];
   VRAM_Buffer1[param_2 + 7] = BlockGfxData[param_1 + 2];
   VRAM_Buffer1[param_2 + 8] = BlockGfxData[param_1 + 3];
-  VRAM_Buffer1[param_2] = param_4;
-  VRAM_Buffer1[param_2 + 5] = param_4 + 0x20;
-  VRAM_Page[param_2] = param_5;
-  VRAM_Buffer1[param_2 + 4] = param_5;
+  VRAM_Buffer1[param_2] = addr & 0xff;
+  VRAM_Buffer1[param_2 + 5] = (addr & 0xff) + 0x20;
+  VRAM_Page[param_2] = addr >> 8;
+  VRAM_Buffer1[param_2 + 4] = addr >> 8;
   VRAM_Buffer1[param_2 + 1] = 2;
   VRAM_Buffer1[param_2 + 6] = 2;
   VRAM_Buffer1[param_2 + 9] = 0;
@@ -8068,7 +8060,7 @@ void BridgeCollapse(void) {
         BowserFeetCounter = 4;
         BowserBodyControls ^= 1;
         bVar2 = VRAM_Buffer1_Offset + 1;
-        RemBridge(0xc, bVar2, BridgeCollapseData[BridgeCollapseOffset], 0x22);
+        RemBridge(0xc, bVar2, 0x2200 | BridgeCollapseData[BridgeCollapseOffset]);
         bVar1 = ObjectOffset;
         MoveVOffset(bVar2);
         Square2SoundQueue = 8;
