@@ -1782,10 +1782,7 @@ static void RendBBuf();
 // SM2MAIN:720d
 // Signature: [] -> []
 void AreaParserCore(void) {
-  char cVar1;
   byte bVar2;
-  byte bVar4;
-  bool bVar7;
 
   if (BackloadingFlag != 0) {
     ProcessAreaData();
@@ -1793,18 +1790,18 @@ void AreaParserCore(void) {
   for (int i = 0; i < 13; i++) {
     MetatileBuffer[i] = 0;
   }
-  bVar4 = CurrentPageLoc;
   if (BackgroundScenery != 0) {
     // TODO: check if CurrentPageLoc could ever be greater than 0x82
-    if (bVar4 <= 0x82) {
-      bVar4 = bVar4 % 3;
-    }
-    
-    bVar7 = (bVar4 & 0x10) != 0;
-    cVar1 = bVar4 * 0x10 + BSceneDataOffsets[BackgroundScenery - 1] + bVar7;
-    const bool tmp1 = CARRY1(bVar4 * 0x10, BSceneDataOffsets[BackgroundScenery - 1]);
-    const byte tmp2 = cVar1 + CurrentColumnPos + (tmp1 || (bVar7 && cVar1 == 0));
-    bVar4 = BackSceneryData[tmp2];
+    const byte bVar44 = CurrentPageLoc <= 0x82 ? CurrentPageLoc % 3 : CurrentPageLoc;
+
+    const byte v1 = bVar44 * 0x10;
+    const byte v2 = BSceneDataOffsets[BackgroundScenery - 1];
+    const bool bVar7 = (bVar44 & 0x10) != 0;
+
+    // TODO: check if the carry addition here is necessary. it doesn't seem to happen in practice.
+    const byte tmp2 = (v1 + v2 + bVar7) + ((u16)v1 + (u16)v2 + (u16)bVar7 >= 0x100);
+
+    byte bVar4 = BackSceneryData[tmp2 + CurrentColumnPos];
     if (bVar4 != 0) {
       bVar2 = ((bVar4 & 0xf) - 1) * 3;
       if ((bVar4 & 0xf) == 0) {
@@ -1824,12 +1821,12 @@ void AreaParserCore(void) {
     }
   }
   if (ForegroundScenery != 0) {
-    bVar4 = BackSceneryMetatiles[ForegroundScenery + 0x23];
+    byte bVar44 = BackSceneryMetatiles[ForegroundScenery + 0x23];
     for (int i = 0; i < 0xd; i++) {
-      if (ForeSceneryData[bVar4] != 0) {
-        MetatileBuffer[i] = ForeSceneryData[bVar4];
+      if (ForeSceneryData[bVar44] != 0) {
+        MetatileBuffer[i] = ForeSceneryData[bVar44];
       }
-      bVar4 += 1;
+      bVar44 += 1;
     }
   }
   AreaParserCore_step2();
@@ -4040,40 +4037,23 @@ void LRAir(void) {
 // SM2MAIN:7f3b
 // Signature: [] -> []
 void ClimbingSub(void) {
-  bool bVar1;
-  bool bVar2;
-  byte bVar3;
-  byte bVar4;
-  char cVar5;
+  ADD_SIGNED_24_16(SprObject_Y_HighPos[0], SprObject_Y_Position[0], SprObject_YMF_Dummy[0],
+                   PlayerSpriteVarData2[0], SprObject_Y_MoveForce[0]);
 
-  bVar1 = CARRY1(SprObject_YMF_Dummy[0], SprObject_Y_MoveForce[0]);
-  SprObject_YMF_Dummy[0] = SprObject_YMF_Dummy[0] + SprObject_Y_MoveForce[0];
-  cVar5 = 0;
-  if (PlayerSpriteVarData2[0] >= 0x80) {
-    cVar5 = -1;
-  }
-  bVar3 = PlayerSpriteVarData2[0] + SprObject_Y_Position[0] + bVar1;
-  bVar2 = CARRY1(PlayerSpriteVarData2[0], SprObject_Y_Position[0]);
-  SprObject_Y_Position[0] = bVar3;
-  SprObject_Y_HighPos[0] = SprObject_Y_HighPos[0] + cVar5 + (bVar2 || (bVar1 && bVar3 == 0));
-  bVar3 = Left_Right_Buttons & Player_CollisionBits;
+  const byte bVar3 = Left_Right_Buttons & Player_CollisionBits;
   if (bVar3 != 0) {
     if (ClimbSideTimer == 0) {
       ClimbSideTimer = 0x18;
-      bVar4 = 0;
-      if (!(bool)(bVar3 & 1)) {
-        bVar4 = 2;
-      }
+      byte bVar4 = (bVar3 & 1) == 0 ? 2 : 0;
       if (PlayerFacingDir != 1) {
         bVar4 += 1;
       }
-      SprObject_PageLoc[0] = SprObject_PageLoc[0] + ClimbAdderHigh[bVar4];
-      SprObject_PageLoc[0] += CARRY1(SprObject_X_Position[0], ClimbAdderLow[bVar4]);
+      ADD_16_16(SprObject_PageLoc[0], SprObject_X_Position[0],
+                ClimbAdderHigh[bVar4], ClimbAdderLow[bVar4]);
       PlayerFacingDir = Left_Right_Buttons ^ 3;
-      SprObject_X_Position[0] = SprObject_X_Position[0] + ClimbAdderLow[bVar4];
     }
   } else {
-    ClimbSideTimer = bVar3;
+    ClimbSideTimer = 0;
   }
 }
 

@@ -10,8 +10,10 @@ typedef uint8_t byte;
 typedef uint16_t ushort;
 typedef uint8_t u8;
 typedef uint16_t u16;
+typedef uint32_t u32;
 typedef int8_t i8;
 typedef int16_t i16;
+typedef int32_t i32;
 
 // #define warning printf
 #define warning(...)
@@ -235,16 +237,42 @@ static inline byte NEGATE(byte x) {
 
 // Higher-bit math helpers
 
-// Performs `dst = dst + addend`.
-// dst_hi and dst_lo are 8-bit integers.
-// addend is an 8-bit integer, interpreted as signed by two's complement.
-#define ADD_SIGNED_16_8(dst_hi, dst_lo, addend) { \
-  i16 dst = ((i16)(dst_hi) << 8) | ((i16)(dst_lo)); \
-  dst += (i8)(addend); \
+// Performs `dst = dst + src`.
+// dst_* and src_* are 8-bit integers.
+#define ADD_16_16(dst_hi, dst_lo, src_hi, src_lo) { \
+  u16 dst = ((u16)(dst_hi) << 8) | ((u16)(dst_lo)); \
+  u16 src = ((u16)(src_hi) << 8) | ((u16)(src_lo)); \
+  dst += src; \
   dst_hi = (dst >> 8) & 0xff; \
   dst_lo = dst & 0xff; \
 }
 
+// Performs `dst = dst + src`.
+// dst_* and src_* are 8-bit integers.
+#define ADD_24_24(dst_hi, dst_me, dst_lo, src_hi, src_me, src_lo) { \
+  u32 dst = ((u32)(dst_hi) << 16) | ((u32)(dst_me) << 8) | ((u32)(dst_lo)); \
+  u32 src = ((u32)(src_hi) << 16) | ((u32)(src_me) << 8) | ((u32)(src_lo)); \
+  dst += src; \
+  dst_hi = (dst >> 16) & 0xff; \
+  dst_me = (dst >> 8) & 0xff; \
+  dst_lo = dst & 0xff; \
+}
+
+// Performs `dst = dst + src`.
+// dst_* are 8-bit integers.
+// src is an 8-bit integer, sign-extended to a 16-bit addend.
+#define ADD_SIGNED_16_8(dst_hi, dst_lo, src) { \
+  u8 h = src; \
+  ADD_16_16(dst_hi, dst_lo, h >= 0x80 ? -1 : 0, h); \
+}
+
+// Performs `dst = dst + src`.
+// dst_* and src_* are 8-bit integers.
+// src is a 16-bit integer, sign-extended to a 24-bit addend.
+#define ADD_SIGNED_24_16(dst_hi, dst_me, dst_lo, src_me, src_lo) { \
+  u8 h = src_me; \
+  ADD_24_24(dst_hi, dst_me, dst_lo, h >= 0x80 ? -1 : 0, h, src_lo); \
+}
 
 // Represents a pointer type. Size is 2 bytes.
 class RamPtr {
