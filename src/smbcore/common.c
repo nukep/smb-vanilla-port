@@ -54,22 +54,22 @@ static inline byte GoContinue(byte param_1) {
 // Signature: [] -> []
 void GameMenuRoutine(void) {
 #ifdef SMB1_MODE
-  byte buttons = SavedJoypadBits[0] | SavedJoypadBits[1];
+  byte const buttons = SavedJoypadBits[0] | SavedJoypadBits[1];
 #endif
 #ifdef SMB2J_MODE
-  byte buttons = SavedJoypadBits[0];
+  byte const buttons = SavedJoypadBits[0];
 #endif
 
-  bool button_a_pushed = (buttons & BUTTON_A) != 0;
-  bool button_select_pushed_only = buttons == BUTTON_SELECT;
+  bool const button_a_pushed = (buttons & BUTTON_A) != 0;
+  bool const button_select_pushed_only = buttons == BUTTON_SELECT;
 
 #ifdef SMB1_MODE
   // Either just the Start button, or just the A + Start button.
-  bool button_activate = (buttons == BUTTON_START) || (buttons == (BUTTON_A | BUTTON_START));
+  bool const button_activate = (buttons == BUTTON_START) || (buttons == (BUTTON_A | BUTTON_START));
 #endif
 #ifdef SMB2J_MODE
   // The Start button, with other buttons possibly pushed.
-  bool button_activate = (buttons & BUTTON_START) != 0;;
+  bool const button_activate = (buttons & BUTTON_START) != 0;;
 #endif
 
   // NES note: This port inverts the comparison order of DemoTimer and the button pushes.
@@ -222,7 +222,7 @@ void PauseRoutine(void) {
 // Signature: [] -> []
 void SpriteShuffler(void) {
   for (int j = 0; j < 15; j++) {
-    int i = 14 - j;
+    int const i = 14 - j;
 
     if (PlayerOrSprDataOffset[i] >= 0x28) {
       int amount = (int)PlayerOrSprDataOffset[i] + (int)SprShuffleAmt[SprShuffleAmtOffset];
@@ -1322,11 +1322,11 @@ void UpdateTopScore(void) {
 void TopScoreCheck(byte last_digit_offset) {
   // last_digit_offset is 5 or 11
 
-  byte off = last_digit_offset - 5;
+  byte const off = last_digit_offset - 5;
   // scan the digits from left to right
   for (int i = 0; i < 6; i++) {
-      byte player_digit = PlayerScoreDisplay_Or_ScoreAndCoinDisplay[off + i];
-      byte top_digit = DisplayDigits_Or_TopScoreDisplay[i];
+      byte const player_digit = PlayerScoreDisplay_Or_ScoreAndCoinDisplay[off + i];
+      byte const top_digit = DisplayDigits_Or_TopScoreDisplay[i];
       if (player_digit < top_digit) {
           // definitely below than top score
           return;
@@ -1866,7 +1866,7 @@ static void AreaParserCore_step2() {
 
 static void RendBBuf() {
   ProcessAreaData();
-  ushort addr = GetBlockBufferAddr(BlockBufferColumnPos);
+  ushort const addr = GetBlockBufferAddr(BlockBufferColumnPos);
   for (int i = 0; i < 0xd; i++) {
     byte bVar5 = MetatileBuffer[i];
     if (bVar5 < BlockBuffLowBounds[MetatileBuffer[i] >> 6]) {
@@ -1896,8 +1896,8 @@ void ProcessAreaData(void) {
       } else if (AreaObjectLength[bVar1] < 0x80) {
         decode = true;
       } else {
-        byte second_byte = AreaData[AreaDataOffset + 1];
-        byte first_nibble = AreaData[AreaDataOffset] & 0xf;
+        byte const second_byte = AreaData[AreaDataOffset + 1];
+        byte const first_nibble = AreaData[AreaDataOffset] & 0xf;
         
         if (second_byte & 0x80) {
           if (AreaObjectPageSel == 0) {
@@ -2033,7 +2033,7 @@ void DecodeAreaData(byte param_1, byte param_2) {
 
   bVar3 = ObjectOffset;
 
-  byte data = AreaData[(byte)(param_2 + 1)];
+  byte const data = AreaData[(byte)(param_2 + 1)];
 
   cVar2 = 0;
 
@@ -2105,7 +2105,7 @@ void DecodeAreaData(byte param_1, byte param_2) {
     AreaObjectPageSel = 0;
   }
 
-  byte jmptable_idx = bVar1 + cVar2;
+  byte const jmptable_idx = bVar1 + cVar2;
 
   switch (jmptable_idx) {
   case DECODEAREADATA_VERTICALPIPE_1:
@@ -3192,7 +3192,7 @@ void GetAreaDataAddrs(void) {
 
   bVar2 = GetAreaType(AreaPointer);
   AreaAddrsLOffset = AreaPointer & 0x1f;
-  byte off = (byte)(EnemyAddrHOffsets[bVar2] + AreaAddrsLOffset);
+  byte const off = (byte)(EnemyAddrHOffsets[bVar2] + AreaAddrsLOffset);
 
 #ifdef SMB1_MODE
   EnemyData.lo = EnemyDataAddrLow[off];
@@ -3204,13 +3204,13 @@ void GetAreaDataAddrs(void) {
 #endif
 
 #ifdef SMB1_MODE
-  byte bVar2_off = (byte)(AreaDataHOffsets[AreaType] + AreaAddrsLOffset);
-  byte lo = AreaDataAddrLow[bVar2_off];
+  byte const bVar2_off = (byte)(AreaDataHOffsets[AreaType] + AreaAddrsLOffset);
+  byte const lo = AreaDataAddrLow[bVar2_off];
   byte hi = AreaDataAddrHigh[bVar2_off];
 #endif
 #ifdef SMB2J_MODE
-  byte bVar2_off = (AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
-  byte lo = AreaDataAddrs[bVar2_off];
+  byte const bVar2_off = (AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
+  byte const lo = AreaDataAddrs[bVar2_off];
   byte hi = AreaDataAddrs[bVar2_off + 1];
 #endif
 
@@ -3394,7 +3394,7 @@ void ScrollHandler(void) {
 // SM2MAIN:7b58
 // Signature: [] -> []
 void ChkPOffscr(void) {
-  byte bits = GetXOffscreenBits(0);
+  byte const bits = GetXOffscreenBits(0);
   byte i;
 
   if (bits & 0x80) {
@@ -4305,7 +4305,7 @@ void FireballObjCore(byte param_1) {
     }
     bVar2 = param_1 + 7;
 
-    byte in_r01 = 0;
+    byte const in_r01 = 0;
     ImposeGravity(0, bVar2, 0x50, in_r01, 3);
 
     MoveObjectHorizontally(bVar2);
@@ -4441,7 +4441,7 @@ void ProcessWhirlpools(void) {
   for (int i = 4; i >= 0; i--) {
     bVar3 = i;
     const bool tmp1 = CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3], Cannon_Y_Position_Or_Whirlpool_Length[bVar3]);
-    bool cond2 = (Cannon_Or_Whirlpool_PageLoc[bVar3] != 0)
+    bool const cond2 = (Cannon_Or_Whirlpool_PageLoc[bVar3] != 0)
           && ((byte)((SprObject_PageLoc[0] - Cannon_Or_Whirlpool_PageLoc[bVar3])
                     - (SprObject_X_Position[0] < Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3]))
               < 0x80)
@@ -4455,7 +4455,7 @@ void ProcessWhirlpools(void) {
       bVar1 = Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3] + (Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1);
       if ((FrameCounter & 1) != 0) {
         const bool tmp2 = CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3], Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1);
-        bool cond = (byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3] + tmp2)
+        bool const cond = (byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3] + tmp2)
                     - SprObject_PageLoc[0])
                     - (bVar1 < SprObject_X_Position[0]))
             >= 0x80;
@@ -4470,7 +4470,7 @@ void ProcessWhirlpools(void) {
 
       Cannon_Timer_Or_Whirlpool_Flag[0] = 1;
 
-      byte in_r01 = 0;
+      byte const in_r01 = 0;
       ImposeGravity(0, 0, 0x10, in_r01, 1);
 
       return;
@@ -4632,8 +4632,8 @@ byte VineObjectHandler(byte param_1) {
   }
 
 #ifdef SMB2J_MODE
-  byte cmpA = (byte)((Enemy_PageLoc[5] - ScreenEdgeOrLeft_PageLoc[0]) - (Enemy_X_Position[5] < ScreenEdgeOrLeft_X_Pos[0]));
-  byte cmpB = (byte)(Enemy_X_Position[5] - ScreenEdgeOrLeft_X_Pos[0]);
+  byte const cmpA = (byte)((Enemy_PageLoc[5] - ScreenEdgeOrLeft_PageLoc[0]) - (Enemy_X_Position[5] < ScreenEdgeOrLeft_X_Pos[0]));
+  byte const cmpB = (byte)(Enemy_X_Position[5] - ScreenEdgeOrLeft_X_Pos[0]);
   if ((cmpA >= 0x80) || (cmpB < 9)) {
     Enemy_Flag[5] = 0;
     bVarAA = BlockBufferAddr[Enemy_PageLoc[5] & 1];
@@ -4788,7 +4788,7 @@ byte ProcHammerObj(byte param_1) {
     if ((Misc_State[param_1] & 0x7f) < 2) {
       bVar2 = param_1 + 0xd;
 
-      byte in_r01 = 0xf;
+      byte const in_r01 = 0xf;
       ImposeGravity(0, bVar2, 0x10, in_r01, 4);
 
       MoveObjectHorizontally(bVar2);
@@ -4906,7 +4906,7 @@ void MiscObjectsCore(void) {
       } else {
         if (Misc_State[bVar2] == 1) {
 
-          byte in_r01 = 3;
+          byte const in_r01 = 3;
           ImposeGravity(0, bVar2 + 0xd, 0x50, in_r01, 6);
 
           bVar2 = ObjectOffset;
@@ -5051,7 +5051,7 @@ byte PowerUpObjHandler(void) {
   if (Enemy_State[5] != 0) {
     if ((char)Enemy_State[5] < 0) {
       if (TimerControl == 0) {
-        bool smb2j_powerups = SMB2J_ONLY && (PowerUpType == 4 || PowerUpType == 5);
+        bool const smb2j_powerups = SMB2J_ONLY && (PowerUpType == 4 || PowerUpType == 5);
         if (PowerUpType == 0 || PowerUpType == 3 || smb2j_powerups) {
           bVar1 = MoveNormalEnemy(5);
           bVar1 = EnemyToBGCollisionDet(bVar1);
@@ -5369,7 +5369,7 @@ struct_yc BlockBumpedChk(byte param_1) {
 // SM2MAIN:89d3
 // Signature: [r02, r06, r07] -> []
 void BrickShatter(byte param_1, byte param_2, byte param_3) {
-  byte in_r05 = 0;
+  byte const in_r05 = 0;
   byte sVar1;
 
   sVar1 = CheckTopOfBlock(param_1, in_r05, param_2, param_3);
@@ -5480,12 +5480,12 @@ void BlockObjMT_Updater(void) {
   byte bVar2;
 
   for (int j = 0; j < 2; j++) {
-    int i = 1-j;
+    int const i = 1-j;
     ObjectOffset = i;
     if ((VRAM_Buffer1[0] == 0) && (Block_RepFlag[i] != 0)) {
       bVar1 = Block_BBuf_Low[i];
       bVar2 = Block_Orig_YPos[i];
-      byte metatile = Block_Metatile[i];
+      byte const metatile = Block_Metatile[i];
       Block_Buffers[(int)bVar1 + (int)bVar2] = metatile;
       ReplaceBlockMetatile(metatile, i, bVar2, bVar1);
       Block_RepFlag[i] = 0;
@@ -5631,7 +5631,7 @@ byte SetXMoveAmt(byte param_1, byte param_2, byte param_3) {
 // SM2MAIN:8b75
 // Signature: [X] -> []
 void ImposeGravityBlock(byte param_1) {
-  byte in_r01 = 0;
+  byte const in_r01 = 0;
 
   ImposeGravity(0, param_1, 0x50, in_r01, MaxSpdBlockData[1]);
 }
@@ -5641,7 +5641,7 @@ void ImposeGravityBlock(byte param_1) {
 // SM2MAIN:8b7e
 // Signature: [A, X, r00] -> []
 void ImposeGravitySprObj(byte param_1, byte param_2, byte param_3) {
-  byte in_r01 = 0;
+  byte const in_r01 = 0;
 
   ImposeGravity(0, param_2, param_3, in_r01, param_1);
 }
@@ -5797,10 +5797,10 @@ byte ProcLoopCommand(byte param_1) {
 
         MultiLoopPassCntr += 1;
     #ifdef SMB1_MODE
-        byte cmp_val = 3;
+        byte const cmp_val = 3;
     #endif
     #ifdef SMB2J_MODE
-        byte cmp_val = MultiLoopCount[idx];
+        byte const cmp_val = MultiLoopCount[idx];
     #endif
         if (MultiLoopPassCntr == cmp_val) {
           if (MultiLoopCorrectCntr != cmp_val) {
@@ -7067,7 +7067,7 @@ byte RunEnemyObjectsCore(void) {
 
   case RUNENEMYOBJECTSCORE_WARPZONEOBJECT:
     {
-      byte old_object_offset = ObjectOffset;
+      byte const old_object_offset = ObjectOffset;
       WarpZoneObject(ObjectOffset);
       return old_object_offset;
     }
@@ -8411,7 +8411,7 @@ byte RunStarFlagObj(byte param_1) {
 // SM2MAIN:9f27
 // Signature: [X] -> []
 void GameTimerFireworks(byte param_1) {
-  byte last_digit = GameTimerDisplay[2];
+  byte const last_digit = GameTimerDisplay[2];
 
   Enemy_State[param_1] = 0;
   FireworksCounter = 0xff;
@@ -8963,20 +8963,20 @@ void OffscreenBoundsCheck(byte param_1) {
   bVar2 = abVar5 >= 0x48;
   bVar3 = !bVar7;
   bVar4 = abVar5 > 0x48;
-  bool nk = (bVar7 && bVar2) || (bVar3 && bVar4);
-  bool k = !nk;
+  bool const nk = (bVar7 && bVar2) || (bVar3 && bVar4);
+  bool const k = !nk;
   bVar8 = nk || (!nk && ScreenEdgeOrLeft_PageLoc[0] != 0);
   bVar6 = ScreenRight_X_Pos + 0x48 + bVar8;
 
-  byte e_ploc = Enemy_PageLoc[param_1];
-  byte e_xp = Enemy_X_Position[param_1];
-  bool p = (ScreenRight_X_Pos >= 0xb8) || (bVar8 && bVar6 == 0);
-  byte q = (byte)(abVar5 + 0xb8 - !bVar7);
-  byte sl_ploc = ScreenEdgeOrLeft_PageLoc[0];
-  byte sr_ploc = ScreenRight_PageLoc;
+  byte const e_ploc = Enemy_PageLoc[param_1];
+  byte const e_xp = Enemy_X_Position[param_1];
+  bool const p = (ScreenRight_X_Pos >= 0xb8) || (bVar8 && bVar6 == 0);
+  byte const q = (byte)(abVar5 + 0xb8 - !bVar7);
+  byte const sl_ploc = ScreenEdgeOrLeft_PageLoc[0];
+  byte const sr_ploc = ScreenRight_PageLoc;
 
-  bool A = (byte)(e_ploc - sl_ploc + k - (e_xp < q)) >= 0x80;
-  bool B = (byte)(e_ploc - sr_ploc - p - (e_xp < bVar6)) >= 0x80;
+  bool const A = (byte)(e_ploc - sl_ploc + k - (e_xp < q)) >= 0x80;
+  bool const B = (byte)(e_ploc - sr_ploc - p - (e_xp < bVar6)) >= 0x80;
 
   if (A) {
     // object is to the left of the screen
@@ -9139,7 +9139,7 @@ void EnemySmackScore(byte param_1, byte param_2) {
 byte PlayerHammerCollision(byte param_1) {
   bool bVar2;
 
-  byte smb2j_sprobj = SMB2J_ONLY ? SprObject_OffscrBits[0] : 0;
+  byte const smb2j_sprobj = SMB2J_ONLY ? SprObject_OffscrBits[0] : 0;
 
   if (((FrameCounter & 1) != 0) && ((smb2j_sprobj | TimerControl | Misc_OffscreenBits) == 0)) {
     bVar2 = PlayerCollisionCore(param_1 * 4 + 0x24);
@@ -9229,7 +9229,7 @@ byte PlayerEnemyCollision(byte param_1) {
   }
 
   if (StarInvincibleTimer != 0) {
-    byte ret = ObjectOffset;
+    byte const ret = ObjectOffset;
     ShellOrBlockDefeat(ObjectOffset);
     return ret;
   }
@@ -9280,10 +9280,10 @@ byte PlayerEnemyCollision(byte param_1) {
     if ((Enemy_ID[ObjectOffset] < 7) || (Enemy_Y_Position[ObjectOffset] <= (byte)(SprObject_Y_Position[0] + 0xC))) {
 
 #ifdef SMB1_MODE
-      bool cond2 = (PlayerSpriteVarData2[0] == 0) || (PlayerSpriteVarData2[0] >= 0x80);
+      bool const cond2 = (PlayerSpriteVarData2[0] == 0) || (PlayerSpriteVarData2[0] >= 0x80);
 #endif
 #ifdef SMB2J_MODE
-      bool cond2 = (PlayerSpriteVarData2[0] == 0) || (PlayerSpriteVarData2[0] > 0x80);
+      bool const cond2 = (PlayerSpriteVarData2[0] == 0) || (PlayerSpriteVarData2[0] > 0x80);
 #endif
 
       if (cond2) {
@@ -9925,7 +9925,7 @@ void PlayerBGCollision(void) {
       bVar6 = sVar9.r02;
       bVar2 = sVar9.r04;
       bVar5 = sVar9.a;
-      bool cond = (sVar9.z) || (bVar5 == ssw(0x1c, 0x19)) || (bVar5 == ssw(0x6b, 0x6d)) || CheckForClimbMTiles(bVar5);
+      bool const cond = (sVar9.z) || (bVar5 == ssw(0x1c, 0x19)) || (bVar5 == ssw(0x6b, 0x6d)) || CheckForClimbMTiles(bVar5);
       if (!cond) {
         break;
       }
@@ -9944,7 +9944,7 @@ void PlayerBGCollision(void) {
     bVar6 = sVar9.r02;
     bVar2 = sVar9.r04;
     bVar5 = sVar9.a;
-    bool cond = sVar9.z;
+    bool const cond = sVar9.z;
     if (!cond) {
       break;
     }
@@ -10901,10 +10901,10 @@ struct_azr02r04r06r07 BlockBufferCollision(byte use_x, byte param_2, byte param_
   byte bVar2;
   byte bVar3;
 
-  int a = BlockBuffer_X_Adder[param_3];
-  int b = SprObject_X_Position[param_2];
-  int c = SprObject_PageLoc[param_2];
-  ushort addr = GetBlockBufferAddr(((a + b + c*256) / 16) % 32);
+  int const a = BlockBuffer_X_Adder[param_3];
+  int const b = SprObject_X_Position[param_2];
+  int const c = SprObject_PageLoc[param_2];
+  ushort const addr = GetBlockBufferAddr(((a + b + c*256) / 16) % 32);
 
   bVar2 = ((SprObject_Y_Position[param_2] + BlockBuffer_Y_Adder[param_3]) & 0xf0) - 0x20;
 
@@ -11525,7 +11525,7 @@ CheckToMirrorLakitu:
   if (MysterySpriteThing4 < 0x18) {
     return SprObjectOffscrChk();
   }
-  byte ead = ssw(0x02, EnemyAttributeData[24]);
+  byte const ead = ssw(0x02, EnemyAttributeData[24]);
   Sprite_Data[bVar3 + 10] = ead | 0x80;
   Sprite_Data[bVar3 + 0x12] = ead | 0x80;
   Sprite_Data[bVar3 + 0xe] = ead | 0xc0;
@@ -12380,8 +12380,8 @@ static byte xoff_f(byte param_1, byte a) {
   // a seriously inlined/simplified version of the original.
   // part of GetXOffscreenBits
 
-  int j = ScreenEdgeOrLeft_PageLoc[a] - SprObject_PageLoc[param_1];
-  int ik = ScreenEdgeOrLeft_X_Pos[a] - SprObject_X_Position[param_1];
+  int const j = ScreenEdgeOrLeft_PageLoc[a] - SprObject_PageLoc[param_1];
+  int const ik = ScreenEdgeOrLeft_X_Pos[a] - SprObject_X_Position[param_1];
 
   int z = ik + j*256;
 
@@ -12443,8 +12443,8 @@ static byte yoff_f(byte param_1, bool a) {
   is_smb2j = true;
   #endif
 
-  int i = SprObject_Y_HighPos[param_1];
-  int j = SprObject_Y_Position[param_1];
+  int const i = SprObject_Y_HighPos[param_1];
+  int const j = SprObject_Y_Position[param_1];
 
   int z = 256 - i*256 - j;
 

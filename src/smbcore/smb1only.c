@@ -6,8 +6,8 @@
 void WriteGameText(byte param_1) {
   // param_1 is 0,1,2,3, 4,5,6
 
-  static byte p1_l[7] = {0,2,5,7,9,9,9};
-  static byte p2_l[7] = {0,2,4,6,8,8,8};
+  static byte const p1_l[7] = {0,2,5,7,9,9,9};
+  static byte const p2_l[7] = {0,2,4,6,8,8,8};
 
   byte offset;
   if (NumberOfPlayers == 0) {

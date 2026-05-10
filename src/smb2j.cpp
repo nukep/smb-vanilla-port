@@ -137,7 +137,7 @@ void SMB2J_Reset() {
   // assuming a hard reset:
   WorldNumber = 0xFF;
 
-  byte last_worldnumber = WorldNumber;
+  byte const last_worldnumber = WorldNumber;
 
   byte initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
 
@@ -268,7 +268,7 @@ void SMB2J_NMI() {
 // Signature: [] -> []
 void IRQHandler() {
   disable_interrupt();
-  byte status = FDS_AcknowledgeIrq();
+  byte const status = FDS_AcknowledgeIrq();
 
   if ((status & 0x02) == 0) {
     if ((status & 0x01) != 0) {
@@ -295,7 +295,7 @@ void ScrollScreen(byte scroll_amount) {
   // The FDS version loops here until IRQAckFlag is 0.
   trigger_scroll_irq_if_havent_yet();
 
-  int x_pos = ScreenLeft_X_Pos + scroll_amount;
+  int const x_pos = ScreenLeft_X_Pos + scroll_amount;
 
   ScrollThirtyTwo = ScrollThirtyTwo + scroll_amount;
   HorizontalScroll = x_pos % 256;
@@ -314,8 +314,8 @@ void ScrollScreen(byte scroll_amount) {
 // Signature: [] -> []
 void UpdateGamesBeaten() {
   // The FDS version would use an FDS BIOS subroutine
-  bool success = smb2j_save_games_beaten(GamesBeatenCount);
-  byte error_code = 0;
+  bool const success = smb2j_save_games_beaten(GamesBeatenCount);
+  byte const error_code = 0;
 
   if (!success) {
     DiskIOTask += 1;

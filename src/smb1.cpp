@@ -118,7 +118,7 @@ void SMB1_NMI() {
   ppuscroll(HorizontalScroll);
   ppuscroll(VerticalScroll);
 
-  byte prev_mirror_ppu_ctrl = Mirror_PPU_CTRL_REG1;
+  byte const prev_mirror_ppu_ctrl = Mirror_PPU_CTRL_REG1;
   ppuctrl(Mirror_PPU_CTRL_REG1);
   if ((GamePauseStatus & 1) == 0) {
     OperModeExecutionTree();

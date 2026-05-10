@@ -769,15 +769,15 @@ static void LoadLuigiPhysics(void) {
 // SM2MAIN:c5ff
 // Signature: [] -> []
 void PatchPlayerNamePal(void) {
-  byte off = PlayerNameOffsets[CurrentPlayer];
+  byte const off = PlayerNameOffsets[CurrentPlayer];
   for (int i = 0; i < 5; i++) {
-    byte j = (byte)(off-4 + i);
+    byte const j = (byte)(off-4 + i);
     TopStatusBarLine[i + 3] = PlayerNameData[j];
     ThankYouMessage[i + 13] = PlayerNameData[j];
   }
 
   for (int i = 0; i < 4; i++) {
-    byte j = (byte)(off-4-CurrentPlayer + i);
+    byte const j = (byte)(off-4-CurrentPlayer + i);
     PlayerColors[i] = PlayerPaletteData[j];
   }
 }
@@ -886,7 +886,7 @@ void MoveUpsideDownPiranhaP(byte param_1) {
 // Signature: [] -> []
 void BlowPlayerAround(void) {
   if ((WindFlag != 0) && (AreaType == 1)) {
-    byte mask = (FrameCounter & 0x80) ? 1 : 3;
+    byte const mask = (FrameCounter & 0x80) ? 1 : 3;
     if ((FrameCounter & mask) == 0) {
       SprObject_PageLoc[0] += SprObject_X_Position[0] == 0xff;
       Player_X_Scroll += 1;
