@@ -1122,11 +1122,7 @@ void ColorRotation(void) {
 byte RemoveCoin_Axe(byte param_1, byte param_2) {
   byte bVar1;
 
-  bVar1 = 3;
-  if (AreaType == 0) {
-    bVar1 = 4;
-  }
-  bVar1 = PutBlockMetatile(bVar1, 0x41, param_1, param_2);
+  bVar1 = PutBlockMetatile(AreaType == 0 ? 4 : 3, 0x41, param_1, param_2);
   VRAM_Buffer_AddrCtrl = 6;
   return bVar1;
 }
@@ -1192,6 +1188,10 @@ byte PutBlockMetatile(byte param_1, byte param_3, byte param_4, byte param_5) {
   const ushort addr = (param_4*4 + 32*4) + ((param_5*2) % 32) + nametable;
 
   RemBridge(param_1*4, param_3, addr);
+
+  // NES note: The value of `addr >> 8` is set to $05 and eventually used as an input by `BlockBumpedChk`.
+  // but it's guaranteed to always be between 0x20 and 0x28 inclusive (usually 0x20 to 0x27).
+  // The theorerical range for addr is 0x2080 to 0x289a inclusive.
 
   return addr >> 8;
 }
@@ -5226,10 +5226,38 @@ enum BumpBlock_jumptable_item {
 // SM2MAIN:895c
 // Signature: [r02, r05, r06, r07] -> []
 void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
-  byte bVar1;
   byte bVar2;
   struct_xr05 sVar3;
   struct_yc sVar4;
+
+  bool bug = false;
+  byte bug_addr_hi = 0;
+
+  // NES note: We're reimplementing a bug here. See `PutBlockMetatile` for details.
+#if 1
+  // Start bug reimplementation here
+
+  // -> CheckTopOfBlock
+  if (param_1 != 0) {
+    short sVar2;
+    byte bVar1;
+
+    sVar2 = CONCAT11(param_4, param_3);
+    bVar1 = param_1 - 0x10;
+    if (RAM(sVar2 + (ushort)bVar1) == ssw(0xc2, 0xc3)) {
+      // -> RemoveCoin_Axe(bVar1, param_3);
+      //   -> PutBlockMetatile(_, _, bVar1, param_3);
+
+      const ushort nametable = param_3 < 0xd0 ? 0x2000 : 0x2400;
+      const ushort addr = (bVar1*4 + 32*4) + ((param_3*2) % 32) + nametable;
+
+      bug = true;
+      bug_addr_hi = addr >> 8;
+    }
+  }
+
+  // End bug reimplementation here
+#endif
 
   sVar3 = CheckTopOfBlock(param_1, param_2, param_3, param_4);
   bVar2 = sVar3.x;
@@ -5238,7 +5266,18 @@ void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
   Block_Y_MoveForce[bVar2] = 0;
   PlayerSpriteVarData2[0] = 0;
   Block_Y_Speed[bVar2] = 0xfe;
-  sVar4 = BlockBumpedChk(sVar3.r05);
+
+  if (bug) {
+    // TODO: remove sVar3.r05 eventually
+
+    assert_eq_regressiontest(bug_addr_hi, sVar3.r05);
+    sVar4 = BlockBumpedChk(bug_addr_hi);
+  } else {
+    sVar4 = BlockBumpedChk(param_2);
+  }
+
+  byte bVar1;
+
   bVar1 = sVar4.y;
   if (!sVar4.c) {
     return;
@@ -5378,7 +5417,7 @@ struct_xr05 CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte param
 
   sVar2 = CONCAT11(param_4, param_3);
   bVar3 = SprDataOffset_Ctrl;
-  if ((param_1 != 0)) {
+  if (param_1 != 0) {
     bVar1 = param_1 - 0x10;
     if (RAM(sVar2 + (ushort)bVar1) == ssw(0xc2, 0xc3)) {
       RAM(sVar2 + (ushort)bVar1) = 0;
