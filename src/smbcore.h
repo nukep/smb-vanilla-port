@@ -274,6 +274,13 @@ static inline byte NEGATE(byte x) {
   ADD_24_24(dst_hi, dst_me, dst_lo, h >= 0x80 ? -1 : 0, h, src_lo); \
 }
 
+// Performs `dst = dst + src`.
+// dst_* are 8-bit integers.
+// src is an 8-bit integer.
+#define ADD_UNSIGNED_16_8(dst_hi, dst_lo, src) { \
+  ADD_16_16(dst_hi, dst_lo, 0, src); \
+}
+
 // Represents a pointer type. Size is 2 bytes.
 class RamPtr {
 public:

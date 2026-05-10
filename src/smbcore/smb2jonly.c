@@ -926,10 +926,12 @@ void SimulateWind(void) {
 // Signature: [] -> []
 void ModifyLeavesPos(void) {
   for (int i = 0; i < 12; i++) {
-    const byte tmp1 = LeavesXPos[i];
-    LeavesXPos[i] = tmp1 + LeavesPosAdder[i] + LeavesPosAdder[i];
-    LeavesXPos[i] += CARRY1(tmp1, LeavesPosAdder[i]);
-    LeavesYPos[i] = LeavesYPos[i] + LeavesPosAdder[i];
+    // The carry seems like an oversight in the original game,
+    // because the intent is to double the adder for the X axis
+    // (The disassembly has two ADC instructions in a row)
+    const byte adder = LeavesPosAdder[i];
+    LeavesXPos[i] += adder + adder + CARRY1(LeavesXPos[i], adder);
+    LeavesYPos[i] += adder;
   }
 }
 

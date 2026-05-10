@@ -121,12 +121,13 @@ void MushroomLedge(byte param_1) {
 // SMB:afc4
 // Signature: [Y] -> []
 void ScrollScreen(byte param_1) {
-  ScrollThirtyTwo = param_1 + ScrollThirtyTwo;
-  HorizontalScroll = param_1 + ScreenEdgeOrLeft_X_Pos[0];
-  ScreenEdgeOrLeft_PageLoc[0] += CARRY1(param_1, ScreenEdgeOrLeft_X_Pos[0]);
-  Mirror_PPU_CTRL_REG1 = (Mirror_PPU_CTRL_REG1 & 0xfe) | (ScreenEdgeOrLeft_PageLoc[0] & 1);
-  ScreenEdgeOrLeft_X_Pos[0] = HorizontalScroll;
   ScrollAmount = param_1;
+  ScrollThirtyTwo += param_1;
+  ADD_UNSIGNED_16_8(ScreenEdgeOrLeft_PageLoc[0], ScreenEdgeOrLeft_X_Pos[0],
+                    param_1);
+  HorizontalScroll = ScreenEdgeOrLeft_X_Pos[0];
+  Mirror_PPU_CTRL_REG1 &= 0xfe;
+  Mirror_PPU_CTRL_REG1 |= ScreenEdgeOrLeft_PageLoc[0] & 1;
   GetScreenPosition();
   ScrollIntervalTimer = 8;
   ChkPOffscr();
