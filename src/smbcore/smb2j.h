@@ -178,14 +178,6 @@ struct struct_ax {
 };
 
 
-typedef struct struct_xr05 struct_xr05;
-
-struct struct_xr05 {
-  byte x;
-  byte r05;
-};
-
-
 typedef struct struct_xc struct_xc;
 
 struct struct_xc {
@@ -392,7 +384,7 @@ void smb2j_RenderAttributeTables(void);
 void smb2j_ColorRotation(void);
 #define ColorRotation smb2j_ColorRotation
 
-byte smb2j_RemoveCoin_Axe(byte param_1,byte param_2);
+void smb2j_RemoveCoin_Axe(byte param_1,byte param_2);
 #define RemoveCoin_Axe smb2j_RemoveCoin_Axe
 
 void smb2j_ReplaceBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4);
@@ -407,7 +399,7 @@ void smb2j_WriteBlockMetatile(byte param_1,byte param_3,byte param_4);
 void smb2j_MoveVOffset(byte param_1);
 #define MoveVOffset smb2j_MoveVOffset
 
-byte smb2j_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
+void smb2j_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
 #define PutBlockMetatile smb2j_PutBlockMetatile
 
 void smb2j_RemBridge(byte param_1,byte param_2,ushort addr);
@@ -866,7 +858,7 @@ struct_yc smb2j_BlockBumpedChk(byte param_1);
 void smb2j_BrickShatter(byte param_1,byte param_2,byte param_3);
 #define BrickShatter smb2j_BrickShatter
 
-struct_xr05 smb2j_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
+byte smb2j_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
 #define CheckTopOfBlock smb2j_CheckTopOfBlock
 
 void smb2j_SpawnBrickChunks(byte param_1);

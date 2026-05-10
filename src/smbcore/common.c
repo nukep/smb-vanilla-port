@@ -1118,13 +1118,10 @@ void ColorRotation(void) {
 
 // SMB:8a4d
 // SM2MAIN:692a
-// Signature: [r02, r06] -> [r05]
-byte RemoveCoin_Axe(byte param_1, byte param_2) {
-  byte bVar1;
-
-  bVar1 = PutBlockMetatile(AreaType == 0 ? 4 : 3, 0x41, param_1, param_2);
+// Signature: [r02, r06] -> []
+void RemoveCoin_Axe(byte param_1, byte param_2) {
+  PutBlockMetatile(AreaType == 0 ? 4 : 3, 0x41, param_1, param_2);
   VRAM_Buffer_AddrCtrl = 6;
-  return bVar1;
 }
 
 
@@ -1182,18 +1179,18 @@ void MoveVOffset(byte param_1) {
 
 // SMB:8a97
 // SM2MAIN:6974
-// Signature: [A, Y, r02, r06] -> [r05]
-byte PutBlockMetatile(byte param_1, byte param_3, byte param_4, byte param_5) {
+// Signature: [A, Y, r02, r06] -> []
+void PutBlockMetatile(byte param_1, byte param_3, byte param_4, byte param_5) {
   const ushort nametable = param_5 < 0xd0 ? 0x2000 : 0x2400;
   const ushort addr = (param_4*4 + 32*4) + ((param_5*2) % 32) + nametable;
 
   RemBridge(param_1*4, param_3, addr);
 
   // NES note: The value of `addr >> 8` is set to $05 and eventually used as an input by `BlockBumpedChk`.
-  // but it's guaranteed to always be between 0x20 and 0x28 inclusive (usually 0x20 to 0x27).
-  // The theorerical range for addr is 0x2080 to 0x289a inclusive.
-
-  return addr >> 8;
+  // It's guaranteed to always be between 0x20 and 0x28 inclusive (usually 0x20 to 0x27).
+  //
+  // The port removes the return value here to keep the implementation simple.
+  // (see BumpBlock for details)
 }
 
 
@@ -5227,13 +5224,20 @@ enum BumpBlock_jumptable_item {
 // Signature: [r02, r05, r06, r07] -> []
 void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
   byte bVar2;
-  struct_xr05 sVar3;
   struct_yc sVar4;
 
   bool bug = false;
   byte bug_addr_hi = 0;
 
-  // NES note: We're reimplementing a bug here. See `PutBlockMetatile` for details.
+  // NES note: We're reimplementing a bug here.
+  // The call to `CheckTopOfBlock` might set $05 to a value between 0x20 and 0x28 inclusive.
+  // The value in $05 is later used as an argument to `BlockBumpedChk`:
+  //   LDA $05
+  //   JSR BlockBumpedChk
+  //
+  // Unmodded ROMs for SMB1 and SMB2J will never match anything in `BlockBumpedChk` in this case,
+  // because all values in the BrickQBlockMetatiles table are >= 0x52.
+  // However, because I'm unsure whether to hardcode that table or not (is it sufficiently code-like?), I'm moving the bug here.
 #if 1
   // Start bug reimplementation here
 
@@ -5250,6 +5254,7 @@ void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
 
       const ushort nametable = param_3 < 0xd0 ? 0x2000 : 0x2400;
       const ushort addr = (bVar1*4 + 32*4) + ((param_3*2) % 32) + nametable;
+      // The theorerical range for addr is 0x2080 to 0x289a inclusive.
 
       bug = true;
       bug_addr_hi = addr >> 8;
@@ -5259,8 +5264,7 @@ void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
   // End bug reimplementation here
 #endif
 
-  sVar3 = CheckTopOfBlock(param_1, param_2, param_3, param_4);
-  bVar2 = sVar3.x;
+  bVar2 = CheckTopOfBlock(param_1, param_2, param_3, param_4);
   Square1SoundQueue = 2;
   Block_X_Speed[bVar2] = 0;
   Block_Y_MoveForce[bVar2] = 0;
@@ -5268,9 +5272,6 @@ void BumpBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
   Block_Y_Speed[bVar2] = 0xfe;
 
   if (bug) {
-    // TODO: remove sVar3.r05 eventually
-
-    assert_eq_regressiontest(bug_addr_hi, sVar3.r05);
     sVar4 = BlockBumpedChk(bug_addr_hi);
   } else {
     sVar4 = BlockBumpedChk(param_2);
@@ -5393,12 +5394,12 @@ struct_yc BlockBumpedChk(byte param_1) {
 // Signature: [r02, r06, r07] -> []
 void BrickShatter(byte param_1, byte param_2, byte param_3) {
   byte in_r05 = 0;
-  struct_xr05 sVar1;
+  byte sVar1;
 
   sVar1 = CheckTopOfBlock(param_1, in_r05, param_2, param_3);
-  Block_RepFlag[sVar1.x] = 1;
+  Block_RepFlag[sVar1] = 1;
   NoiseSoundQueue = 1;
-  SpawnBrickChunks(sVar1.x);
+  SpawnBrickChunks(sVar1);
   PlayerSpriteVarData2[0] = 0xfe;
   DigitModifier[5] = 5;
   AddToScore();
@@ -5407,13 +5408,11 @@ void BrickShatter(byte param_1, byte param_2, byte param_3) {
 
 // SMB:be1f
 // SM2MAIN:89f0
-// Signature: [r02, r05, r06, r07] -> [X, r05]
-struct_xr05 CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
+// Signature: [r02, r05, r06, r07] -> [X]
+byte CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte param_4) {
   byte bVar1;
   short sVar2;
   byte bVar3;
-
-  struct_xr05 sVar4;
 
   sVar2 = CONCAT11(param_4, param_3);
   bVar3 = SprDataOffset_Ctrl;
@@ -5421,13 +5420,11 @@ struct_xr05 CheckTopOfBlock(byte param_1, byte param_2, byte param_3, byte param
     bVar1 = param_1 - 0x10;
     if (RAM(sVar2 + (ushort)bVar1) == ssw(0xc2, 0xc3)) {
       RAM(sVar2 + (ushort)bVar1) = 0;
-      param_2 = RemoveCoin_Axe(bVar1, param_3);
+      RemoveCoin_Axe(bVar1, param_3);
       bVar3 = SetupJumpCoin(SprDataOffset_Ctrl, bVar1, param_3);
     }
   }
-  sVar4.r05 = param_2;
-  sVar4.x = bVar3;
-  return sVar4;
+  return bVar3;
 }
 
 

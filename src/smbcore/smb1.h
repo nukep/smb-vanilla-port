@@ -164,14 +164,6 @@ struct struct_ax {
 };
 
 
-typedef struct struct_xr05 struct_xr05;
-
-struct struct_xr05 {
-  byte x;
-  byte r05;
-};
-
-
 typedef struct struct_r01r02r03 struct_r01r02r03;
 
 struct struct_r01r02r03 {
@@ -385,7 +377,7 @@ void smb1_RenderAttributeTables(void);
 void smb1_ColorRotation(void);
 #define ColorRotation smb1_ColorRotation
 
-byte smb1_RemoveCoin_Axe(byte param_1,byte param_2);
+void smb1_RemoveCoin_Axe(byte param_1,byte param_2);
 #define RemoveCoin_Axe smb1_RemoveCoin_Axe
 
 void smb1_ReplaceBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4);
@@ -400,7 +392,7 @@ void smb1_WriteBlockMetatile(byte param_1,byte param_3,byte param_4);
 void smb1_MoveVOffset(byte param_1);
 #define MoveVOffset smb1_MoveVOffset
 
-byte smb1_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
+void smb1_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
 #define PutBlockMetatile smb1_PutBlockMetatile
 
 void smb1_RemBridge(byte param_1,byte param_2,ushort addr);
@@ -877,7 +869,7 @@ struct_yc smb1_BlockBumpedChk(byte param_1);
 void smb1_BrickShatter(byte param_1,byte param_2,byte param_3);
 #define BrickShatter smb1_BrickShatter
 
-struct_xr05 smb1_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
+byte smb1_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
 #define CheckTopOfBlock smb1_CheckTopOfBlock
 
 void smb1_SpawnBrickChunks(byte param_1);
