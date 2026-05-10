@@ -1813,7 +1813,9 @@ void AreaParserCore(void) {
     
     bVar7 = (bVar4 & 0x10) != 0;
     cVar1 = bVar4 * 0x10 + BSceneDataOffsets[BackgroundScenery - 1] + bVar7;
-    bVar4 = BackSceneryData[(byte)(cVar1 + CurrentColumnPos + (CARRY1(bVar4 * 0x10, BSceneDataOffsets[BackgroundScenery - 1]) || (bVar7 && cVar1 == 0)))];
+    const bool tmp1 = CARRY1(bVar4 * 0x10, BSceneDataOffsets[BackgroundScenery - 1]);
+    const byte tmp2 = cVar1 + CurrentColumnPos + (tmp1 || (bVar7 && cVar1 == 0));
+    bVar4 = BackSceneryData[tmp2];
     if (bVar4 != 0) {
       bVar2 = ((bVar4 & 0xf) - 1) * 3;
       if ((bVar4 & 0xf) == 0) {
@@ -4076,8 +4078,8 @@ void ClimbingSub(void) {
       if (PlayerFacingDir != 1) {
         bVar4 += 1;
       }
-      SprObject_PageLoc[0] = SprObject_PageLoc[0] + ClimbAdderHigh[bVar4]
-                                     + CARRY1(SprObject_X_Position[0], ClimbAdderLow[bVar4]);
+      SprObject_PageLoc[0] = SprObject_PageLoc[0] + ClimbAdderHigh[bVar4];
+      SprObject_PageLoc[0] += CARRY1(SprObject_X_Position[0], ClimbAdderLow[bVar4]);
       PlayerFacingDir = Left_Right_Buttons ^ 3;
       SprObject_X_Position[0] = SprObject_X_Position[0] + ClimbAdderLow[bVar4];
     }
@@ -4470,13 +4472,12 @@ void ProcessWhirlpools(void) {
 
   for (int i = 4; i >= 0; i--) {
     bVar3 = i;
+    const bool tmp1 = CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3], Cannon_Y_Position_Or_Whirlpool_Length[bVar3]);
     bool cond2 = (Cannon_Or_Whirlpool_PageLoc[bVar3] != 0)
           && ((byte)((SprObject_PageLoc[0] - Cannon_Or_Whirlpool_PageLoc[bVar3])
                     - (SprObject_X_Position[0] < Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3]))
               < 0x80)
-        && ((byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3]
-                      + CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3],
-                              Cannon_Y_Position_Or_Whirlpool_Length[bVar3]))
+        && ((byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3] + tmp1)
                     - SprObject_PageLoc[0])
                     - ((byte)(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3]
                               + Cannon_Y_Position_Or_Whirlpool_Length[bVar3])
@@ -4485,9 +4486,8 @@ void ProcessWhirlpools(void) {
     if (cond2) {
       bVar1 = Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3] + (Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1);
       if ((FrameCounter & 1) != 0) {
-        bool cond = (byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3]
-                      + CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3],
-                              Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1))
+        const bool tmp2 = CARRY1(Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar3], Cannon_Y_Position_Or_Whirlpool_Length[bVar3] >> 1);
+        bool cond = (byte)(((Cannon_Or_Whirlpool_PageLoc[bVar3] + tmp2)
                     - SprObject_PageLoc[0])
                     - (bVar1 < SprObject_X_Position[0]))
             >= 0x80;
@@ -5537,7 +5537,8 @@ byte MoveObjectHorizontally(byte param_1) {
   bVar1 = SprObject_X_Position[param_1];
   bVar4 = bVar1 + bVar3 + bVar2;
   SprObject_X_Position[param_1] = bVar4;
-  SprObject_PageLoc[param_1] = SprObject_PageLoc[param_1] + cVar5 + (CARRY1(bVar1, bVar3) || (bVar2 && bVar4 == 0));
+  const bool tmp1 = CARRY1(bVar1, bVar3);
+  SprObject_PageLoc[param_1] = SprObject_PageLoc[param_1] + cVar5 + (tmp1 || (bVar2 && bVar4 == 0));
   return bVar2 + bVar3;
 }
 
@@ -5692,7 +5693,9 @@ void ImposeGravity(byte param_1, byte param_2, byte param_3, byte param_4, byte 
   bVar5 = SprObject_Y_Position[param_2];
   bVar2 = bVar3 + bVar5 + bVar1;
   SprObject_Y_Position[param_2] = bVar2;
-  SprObject_Y_HighPos[param_2] = SprObject_Y_HighPos[param_2] + cVar4 + (CARRY1(bVar3, bVar5) || (bVar1 && bVar2 == 0));
+
+  const bool tmp2 = CARRY1(bVar3, bVar5);
+  SprObject_Y_HighPos[param_2] = SprObject_Y_HighPos[param_2] + cVar4 + (tmp2 || (bVar1 && bVar2 == 0));
 
   const byte tmp1 = SprObject_Y_MoveForce[param_2];
 
@@ -8918,9 +8921,10 @@ void MoveLiftPlatforms(byte param_1) {
     bVar1 = BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1];
     BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1]
         = bVar1 + CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
-    Enemy_Y_Position[param_1]
-        = Enemy_Y_Position[param_1] + SpriteVarData2[param_1]
-          + CARRY1(bVar1, CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1]);
+
+    const bool tmp1 = CARRY1(bVar1, CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1]);
+
+    Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + SpriteVarData2[param_1] + tmp1;
   }
 }
 
@@ -11709,13 +11713,19 @@ void DrawBrickChunks(byte param_1) {
   Sprite_Data[bVar4 + 3] = Block_Rel_XPos;
   bVar1 = Block_Orig_XPos[param_1] - ScreenEdgeOrLeft_X_Pos[0];
   cVar3 = (bVar1 - Block_Rel_XPos) + bVar1 + (Block_Rel_XPos <= bVar1);
-  Sprite_Data[bVar4 + 7] = cVar3 + 6 + (CARRY1(bVar1 - Block_Rel_XPos, bVar1) || (Block_Rel_XPos <= bVar1 && cVar3 == 0));
+
+  const bool tmp1 = CARRY1(bVar1 - Block_Rel_XPos, bVar1);
+  Sprite_Data[bVar4 + 7] = cVar3 + 6 + (tmp1 || (Block_Rel_XPos <= bVar1 && cVar3 == 0));
+
   bVar2 = Block_Rel_YPos_2;
   Sprite_Data[bVar4 + 8] = Block_Rel_YPos_2;
   Sprite_Data[bVar4 + 0xc] = bVar2;
   Sprite_Data[bVar4 + 0xb] = Block_Rel_XPos_2;
   cVar3 = (bVar1 - Block_Rel_XPos_2) + bVar1 + (Block_Rel_XPos_2 <= bVar1);
-  Sprite_Data[bVar4 + 0xf] = cVar3 + 6 + (CARRY1(bVar1 - Block_Rel_XPos_2, bVar1) || (Block_Rel_XPos_2 <= bVar1 && cVar3 == 0));
+
+  const bool tmp2 = CARRY1(bVar1 - Block_Rel_XPos_2, bVar1);
+  Sprite_Data[bVar4 + 0xf] = cVar3 + 6 + (tmp2 || (Block_Rel_XPos_2 <= bVar1 && cVar3 == 0));
+
   ChkLeftCo(Block_OffscreenBits, bVar4);
   if ((char)Block_OffscreenBits < 0) {
     DumpTwoSpr(0xf8, bVar4);
