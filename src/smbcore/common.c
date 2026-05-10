@@ -2936,7 +2936,7 @@ void StaircaseObject(byte param_1) {
   struct_ycr07 sVar1;
 
   sVar1 = ChkLrgObjLength(param_1);
-  if (sVar1.c != false) {
+  if (sVar1.c) {
     StaircaseControl = 9;
   }
   StaircaseControl -= 1;
@@ -3046,7 +3046,7 @@ void Hole_Empty(byte param_1) {
 
   sVar3 = ChkLrgObjLength(param_1);
   bVar2 = sVar3.y;
-  if ((sVar3.c != false) && (AreaType == 0)) {
+  if ((sVar3.c) && (AreaType == 0)) {
     bVar1 = GetAreaObjXPosition();
     Cannon_X_Position_Or_Whirlpool_LeftExtent[Cannon_Or_Whirlpool_Offset] = bVar1 - 0x10;
     Cannon_Or_Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc - (bVar1 < 0x10);
@@ -4346,7 +4346,7 @@ void SetupBubble(byte param_1, byte param_2) {
 
   bVar3 = 0;
   bVar4 = (bool)(PlayerFacingDir & 1);
-  if (bVar4 != false) {
+  if (bVar4) {
     bVar3 = 8;
   }
   bVar2 = bVar3 + SprObject_X_Position[0] + bVar4;
@@ -4596,7 +4596,7 @@ byte VineObjectHandler(byte param_1) {
   }
   if ((VineHeight != VineHeightData[(byte)(VineFlagOffset - 1)])) {
     bVar4 = (bool)(FrameCounter >> 1 & 1);
-    if (bVar4 != false) {
+    if (bVar4) {
       Enemy_Y_Position[5] = (Enemy_Y_Position[5] - 1) - !bVar4;
       VineHeight += 1;
     }
@@ -5118,7 +5118,7 @@ void PlayerHeadCollision(byte param_1, byte param_2, ushort addr) {
   if (PlayerSize == 0) {
     bVar2 = 0;
   }
-  if (sVar5.c != false) {
+  if (sVar5.c) {
     Block_State[bVar3] = 0x11;
     if ((bVar4 == ssw(0x58, 0x56)) || (bVar4 == ssw(0x5d, 0x5c))) {
       if (BrickCoinTimerFlag == 0) {
@@ -5776,7 +5776,7 @@ byte ProcLoopCommand(byte param_1) {
   do {
     if (LoopCommand != 0 && CurrentColumnPos == 0) {
       for (int idx = ssw(0xb,0xc)-1; idx >= 0; idx--) {
-        if (!(WorldNumber == LoopCmdWorldNumber[idx] && CurrentPageLoc == LoopCmdPageNumber[idx])) {
+        if (WorldNumber != LoopCmdWorldNumber[idx] || CurrentPageLoc != LoopCmdPageNumber[idx]) {
           continue;
         }
 
@@ -5785,7 +5785,7 @@ byte ProcLoopCommand(byte param_1) {
         }
 
         if (SMB1_ONLY && WorldNumber != 6) {
-          if (!(SprObject_Y_Position[0] == LoopCmdYPosition[idx] && Player_State == 0)) {
+          if (SprObject_Y_Position[0] != LoopCmdYPosition[idx] || Player_State != 0) {
             ExecGameLoopback(idx);
             param_1 = KillAllEnemies();
           }
@@ -7378,7 +7378,7 @@ byte ProcHammerBro(byte param_1) {
       HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = HammerThrowTmrData[SecondaryHardMode];
       sVar2 = SpawnHammerObj();
       param_1 = sVar2.x;
-      if (sVar2.c != false) {
+      if (sVar2.c) {
         Enemy_State[param_1] = Enemy_State[param_1] | 8;
         return MoveHammerBroXDir(param_1);
       }
@@ -7647,7 +7647,7 @@ byte MoveBloober(byte param_1, bool param_2) {
       bVar2 = 2;
       sVar3 = PlayerEnemyDiff(param_1);
       param_2 = sVar3.c;
-      if (sVar3.n != false) {
+      if (sVar3.n) {
         bVar2 -= 1;
       }
     } else {
@@ -8019,7 +8019,7 @@ byte PlayerLakituDiff(byte param_1, byte param_2, byte param_3, byte param_4) {
   bVar2 = 0;
   sVar4 = PlayerEnemyDiff(param_1);
   bVar1 = sVar4.r00;
-  if (sVar4.n != false) {
+  if (sVar4.n) {
     bVar2 += 1;
     bVar1 = NEGATE(bVar1);
   }
@@ -8139,7 +8139,7 @@ byte RunBowser(byte param_1) {
     }
     if ((EnemyFrameTimer[param_1] != 0)) {
       sVar4 = PlayerEnemyDiff(param_1);
-      if (sVar4.n != false) {
+      if (sVar4.n) {
         Enemy_MovingDir[param_1] = 1;
         BowserMovementSpeed = 2;
         EnemyFrameTimer[param_1] = 0x20;
@@ -8562,7 +8562,7 @@ void MovePiranhaPlant(byte param_1) {
       if (SpriteVarData1[param_1] < 0x80) {
         sVar4 = PlayerEnemyDiff(param_1);
         bVar3 = sVar4.r00;
-        if (sVar4.n != false) {
+        if (sVar4.n) {
           bVar3 = NEGATE(bVar3);
         }
         if (bVar3 < ssw(0x21, RAM(0x9ffe))) {
@@ -9466,7 +9466,7 @@ byte EnemyFacePlayer(byte param_1) {
 
   bVar1 = 1;
   sVar2 = PlayerEnemyDiff(param_1);
-  if (sVar2.n != false) {
+  if (sVar2.n) {
     bVar1 += 1;
   }
   Enemy_MovingDir[param_1] = bVar1;
@@ -10367,7 +10367,7 @@ byte EnemyToBGCollisionDet(byte param_1) {
       }
       bVarAA = 1;
       sVar5 = PlayerEnemyDiff(bVarCC);
-      if (sVar5.n != false) {
+      if (sVar5.n) {
         bVarAA += 1;
       }
       if (bVarAA == Enemy_MovingDir[bVarCC]) {
@@ -10407,7 +10407,7 @@ void SetStun2(byte param_1) {
   SpriteVarData2[param_1] = bVar1;
   bVar1 = 1;
   sVar2 = PlayerEnemyDiff(param_1);
-  if (sVar2.n != false) {
+  if (sVar2.n) {
     bVar1 += 1;
   }
   if ((Enemy_ID[param_1] != 0x33) && (Enemy_ID[param_1] != 8)) {

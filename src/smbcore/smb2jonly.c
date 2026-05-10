@@ -237,7 +237,7 @@ void CloudLedge(byte param_1) {
 
   sVar2 = ChkLrgObjLength(param_1);
   bVar1 = sVar2.r07;
-  if (sVar2.c != false) {
+  if (sVar2.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
     NoUnder(0x8a, bVar1);
   } else if (AreaObjectLength[param_1] == 0) {
@@ -343,7 +343,7 @@ void LoadHardWorlds(void) {
     FileListNumber = 3;
     sVar3 = LoadFiles();
     bVar1 = sVar3.a;
-    if (sVar3.z != false) {
+    if (sVar3.z) {
       bVar2 = CheckFileCount(sVar3.y);
       if (bVar2) {
         goto NoLoadHW;
@@ -418,7 +418,7 @@ void LoadWorlds1Thru4(void) {
     FileListNumber = 0;
     sVar3 = LoadFiles();
     bVar1 = sVar3.a;
-    if (sVar3.z != false) {
+    if (sVar3.z) {
       bVar2 = CheckFileCount(sVar3.y);
       if (bVar2) {
         goto InitWorldPos;
@@ -494,7 +494,7 @@ void LoadWorlds5Thru8(void) {
   FileListNumber = 1;
   sVar3 = LoadFiles();
   bVar1 = sVar3.a;
-  if (sVar3.z != false) {
+  if (sVar3.z) {
     bVar2 = CheckFileCount(sVar3.y);
     if (bVar2) {
       ResetDiskIOTask();
@@ -586,7 +586,7 @@ void LoadEnding(void) {
 
   FileListNumber = 2;
   sVar2 = LoadFiles();
-  if (sVar2.z != false) {
+  if (sVar2.z) {
     bVar1 = CheckFileCount(sVar2.y);
     if (!bVar1) {
       GamesBeatenCount = 0;
@@ -641,7 +641,7 @@ void WaitForReinsert(void) {
   byte bVar1;
 
   bVar1 = FDS_drive_status();
-  if ((bool)(bVar1 & 1) == false) {
+  if ((bVar1 & 1) == 0) {
     DiskIOTask += 1;
   } else if (!(bool)(bVar1 & 1)) {
     ResetDiskVars();

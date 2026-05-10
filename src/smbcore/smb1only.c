@@ -99,7 +99,7 @@ void MushroomLedge(byte param_1) {
 
   sVar4 = ChkLrgObjLength(param_1);
   bVar3 = sVar4.r07;
-  if (sVar4.c != false) {
+  if (sVar4.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
     NoUnder(0x19, bVar3);
     return;
