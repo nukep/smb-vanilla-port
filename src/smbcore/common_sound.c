@@ -385,8 +385,8 @@ struct_axyz SetFreq_Squ1(byte param_1) {
   sVar3 = Dump_Freq_Regs(param_1, 0);
   sVar2.a = sVar3.a;
   sVar2.x = 0;
-  sVar2.y = (char)SUBPIECE(sVar3, 1, 2);
-  sVar2.z = (bool)(char)((ushort)SUBPIECE(sVar3, 1, 2) >> 8);
+  sVar2.y = sVar2.y;
+  sVar2.z = sVar3.z;
   return sVar2;
 }
 

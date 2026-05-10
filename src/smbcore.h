@@ -213,47 +213,9 @@ void draw_graphics(struct SMB_state *state);
 
 // Implementation of Ghidra decompiler functions.
 
-#define BITMASK_HELPER(bytes) ((1ULL << (8 * (bytes))) - 1)
-// "Concatenate"
-// CONCAT42(a,b) means: input is 4 bytes + 2 bytes, output is 6 bytes total.
-// Their order is the same as written order (we write numbers in big endian).
-// e.g. CONCAT42(0xaabbccdd,0x0123) = 0xaabbccdd0123
-#define CONCATimpl(x, y)                                                   \
-  static inline uint64_t CONCAT##x##y(uint64_t a, uint64_t b) {            \
-    return (a & BITMASK_HELPER(x)) << (8 * (y)) | (b & BITMASK_HELPER(y)); \
-  }
-// "Subpiece"
-// SUB42(a,b) means: input is 4 bytes, output is 2 bytes.
-// a is the input, b is the number of lower bytes being truncated.
-// e.g. SUB42(0xaabbccdd,1) = 0xbbcc
-#define SUBimpl(x, y)                                                \
-  static inline uint64_t SUB##x##y(uint64_t a, uint64_t b) {         \
-    return ((a & BITMASK_HELPER(x)) >> (8 * b)) & BITMASK_HELPER(y); \
-  }
-
-static inline uint64_t CAST_TO_INT_helper(void *var, size_t sz) {
-  uint64_t v = 0;
-  if (sz > sizeof(v)) {
-    printf("Nope\n");
-    return 0;
-  }
-  memcpy(&v, var, sz);
-  return v;
+static inline ushort CONCAT11(byte a, byte b) {
+  return (((ushort)a) << 8) | ((ushort)b);
 }
-
-#define CAST_TO_INT(var) CAST_TO_INT_helper(&(var), sizeof(var))
-
-#define SUBPIECE(var, a, b) ((CAST_TO_INT(var) >> (a * 8)) & BITMASK_HELPER(b))
-
-CONCATimpl(1, 1);
-CONCATimpl(1, 2);
-CONCATimpl(2, 2);
-CONCATimpl(2, 3);
-CONCATimpl(3, 3);
-CONCATimpl(3, 4);
-SUBimpl(4, 2);
-SUBimpl(3, 2);
-SUBimpl(6, 2);
 
 static inline bool CARRY1(byte a, byte b) {
   ushort r = (ushort)a + (ushort)b;

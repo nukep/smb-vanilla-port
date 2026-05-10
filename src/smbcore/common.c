@@ -4658,8 +4658,8 @@ byte VineObjectHandler(byte param_1) {
     if (VineHeight >= 0x20) {
       sVar6 = BlockBufferCollision(1, 6, 0x1b);
       bVarAA = sVar6.r02;
-      if ((bVarAA < 0xd0) && (RAM(SUBPIECE(sVar6, 4, 2) + (ushort)bVarAA) == 0)) {
-        RAM(SUBPIECE(sVar6, 4, 2) + (ushort)bVarAA) = ssw(0x26, 0x23);
+      if ((bVarAA < 0xd0) && (RAM(sVar6.addr + (ushort)bVarAA) == 0)) {
+        RAM(sVar6.addr + (ushort)bVarAA) = ssw(0x26, 0x23);
       }
     }
   }
