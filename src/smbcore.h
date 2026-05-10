@@ -6,10 +6,13 @@
 
 #include "mario.h"
 
-typedef unsigned char byte;
-typedef unsigned short ushort;
-typedef unsigned char u8;
-typedef unsigned short u16;
+typedef uint8_t byte;
+typedef uint16_t ushort;
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef int8_t i8;
+typedef int16_t i16;
+
 // #define warning printf
 #define warning(...)
 
@@ -228,6 +231,20 @@ static inline bool CARRY1(byte a, byte b) {
 static inline byte NEGATE(byte x) {
   return (x ^ 0xFF) + 1;
 }
+
+
+// Higher-bit math helpers
+
+// Performs `dst = dst + addend`.
+// dst_hi and dst_lo are 8-bit integers.
+// addend is an 8-bit integer, interpreted as signed by two's complement.
+#define ADD_SIGNED_16_8(dst_hi, dst_lo, addend) { \
+  i16 dst = ((i16)(dst_hi) << 8) | ((i16)(dst_lo)); \
+  dst += (i8)(addend); \
+  dst_hi = (dst >> 8) & 0xff; \
+  dst_lo = dst & 0xff; \
+}
+
 
 // Represents a pointer type. Size is 2 bytes.
 class RamPtr {

@@ -8879,14 +8879,8 @@ byte XMovingPlatform(byte param_1) {
 // SM2MAIN:a24e
 // Signature: [X, r00] -> []
 void PositionPlayerOnHPlat(byte param_1, byte param_2) {
-  char cVar1;
+  ADD_SIGNED_16_8(SprObject_PageLoc[0], SprObject_X_Position[0], param_2);
 
-  cVar1 = CARRY1(SprObject_X_Position[0], param_2);
-  if (param_2 >= 0x80) {
-    cVar1 = -!(bool)cVar1;
-  }
-  SprObject_PageLoc[0] += cVar1;
-  SprObject_X_Position[0] = SprObject_X_Position[0] + param_2;
   Platform_X_Scroll = param_2;
   PositionPlayerOnVPlat(param_1);
 }
