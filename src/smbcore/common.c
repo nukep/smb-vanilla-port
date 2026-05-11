@@ -7453,7 +7453,7 @@ byte ProcFirebar(const byte param_1) {
   byte bVar2;
   struct_axr00 sVar5;
   struct_r01r02r03 sVar6;
-  struct_xr00r06 sVar7;
+  struct_xr06 sVar7;
 
   const byte sVar4 = GetEnemyOffscreenBits(param_1);
   byte bVar3 = sVar4;
@@ -7477,19 +7477,19 @@ byte ProcFirebar(const byte param_1) {
     Sprite_Data[bVar3] = Enemy_Rel_YPos;
     bVar2 = Enemy_Rel_XPos;
     Sprite_Data[bVar3 + 3] = Enemy_Rel_XPos;
-    sVar7 = FirebarCollision(bVar3, 1, bVar2, bVar1);
+    sVar7 = FirebarCollision(bVar3, bVar2, bVar1);
     bVar2 = sVar7.r06;
     MysterySpriteThing3 = (Enemy_ID[sVar7.x] > 0x1e) ? 0xb : 5;
     bVar1 = 0;
     do {
       sVar6 = GetFirebarPosition(MysterySpriteThing4, bVar1);
-      sVar7 = DrawFirebar_Collision(bVar1, sVar6.r01, sVar6.r02, sVar6.r03, bVar2);
+      sVar7 = DrawFirebar_Collision(sVar6.r01, sVar6.r02, sVar6.r03, bVar2);
       bVar2 = sVar7.r06;
       bVar3 = sVar7.x;
-      if (sVar7.r00 == 4) {
+      if (bVar1 == 4) {
         bVar2 = Enemy_SprDataOffset[DuplicateObj_Offset];
       }
-      bVar1 = sVar7.r00 + 1;
+      bVar1 += 1;
     } while (bVar1 < MysterySpriteThing3);
   }
   return bVar3;
@@ -7498,8 +7498,8 @@ byte ProcFirebar(const byte param_1) {
 
 // SMB:cdbb
 // SM2MAIN:99f0
-// Signature: [r00, r01, r02, r03, r06] -> [X, r00, r06]
-struct_xr00r06 DrawFirebar_Collision(const byte param_1, const byte param_2, const byte param_3, const byte param_4, const byte param_5) {
+// Signature: [r01, r02, r03, r06] -> [X, r06]
+struct_xr06 DrawFirebar_Collision(const byte param_2, const byte param_3, const byte param_4, const byte param_5) {
   bool bVar3;
 
   byte bVar1;
@@ -7529,21 +7529,20 @@ struct_xr00r06 DrawFirebar_Collision(const byte param_1, const byte param_2, con
     bVar2 = 0xf8;
   }
   Sprite_Data[param_5] = bVar2;
-  return FirebarCollision(param_5, param_1, bVar1, bVar2);
+  return FirebarCollision(param_5, bVar1, bVar2);
 }
 
 
 // SMB:ce08
 // SM2MAIN:9a3d
-// Signature: [Y, r00, r06, r07] -> [X, r00, r06]
-struct_xr00r06 FirebarCollision(const byte param_1, const byte param_2, const byte param_3, const byte param_4) {
-  struct_xr00r06 sVar5;
+// Signature: [Y, r06, r07] -> [X, r06]
+struct_xr06 FirebarCollision(const byte param_1, const byte param_3, const byte param_4) {
+  struct_xr06 sVar5;
 
   DrawFirebar(param_1);
   const byte bStack0000 = param_1;
   if (((StarInvincibleTimer | TimerControl) != 0) || (SprObject_Y_HighPos[0] != 1)) {
 NoColFB:
-    sVar5.r00 = param_2;
     sVar5.x = ObjectOffset;
     sVar5.r06 = bStack0000 + 4;
     return sVar5;

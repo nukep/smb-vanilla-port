@@ -58,11 +58,10 @@ struct struct_ncr00 {
 };
 
 
-typedef struct struct_xr00r06 struct_xr00r06;
+typedef struct struct_xr06 struct_xr06;
 
-struct struct_xr00r06 {
+struct struct_xr06 {
   byte x;
-  byte r00;
   byte r06;
 };
 
@@ -1151,10 +1150,10 @@ byte smb1_MoveSwimmingCheepCheep(byte param_1);
 byte smb1_ProcFirebar(byte param_1);
 #define ProcFirebar smb1_ProcFirebar
 
-struct_xr00r06 smb1_DrawFirebar_Collision(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+struct_xr06 smb1_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
 #define DrawFirebar_Collision smb1_DrawFirebar_Collision
 
-struct_xr00r06 smb1_FirebarCollision(byte param_1,byte param_2,byte param_3,byte param_4);
+struct_xr06 smb1_FirebarCollision(byte param_1,byte param_3,byte param_4);
 #define FirebarCollision smb1_FirebarCollision
 
 struct_r01r02r03 smb1_GetFirebarPosition(byte param_1,byte param_2);
