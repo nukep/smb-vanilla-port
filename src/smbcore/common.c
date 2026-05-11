@@ -468,18 +468,18 @@ void SetupVictoryMode(void) {
 // SM2MAIN:6334
 // Signature: [] -> []
 void PlayerVictoryWalk(void) {
-  bool bVar1;
-
-  byte bVar2 = 0;
-  VictoryWalkControl = 0;
-  if ((SprObject_PageLoc[0] != VictoryDestPageLoc)
-      || (SprObject_X_Position[0] < 0x60)) {
+  if ((SprObject_PageLoc[0] == VictoryDestPageLoc) && (SprObject_X_Position[0] >= 0x60)) {
+    // Stop walking
+    VictoryWalkControl = 0;
+    AutoControlPlayer(0);
+  } else {
+    // Keep going right
     VictoryWalkControl = 1;
-    bVar2 = 1;
+    AutoControlPlayer(1);
   }
-  AutoControlPlayer(bVar2);
+
   if (ScreenEdgeOrLeft_PageLoc[0] != VictoryDestPageLoc) {
-    bVar1 = ScrollFractional >= 0x80;
+    const bool bVar1 = ScrollFractional >= 0x80;
     ScrollFractional = ScrollFractional + 0x80;
     ScrollScreen(bVar1 + 1);
     UpdScrollVar();
@@ -588,26 +588,26 @@ void PlayerEndWorld(void) {
 // SM2MAIN:6421
 // Signature: [X] -> [X]
 byte FloateyNumbersRoutine(const byte param_1) {
-  bool bVar1;
-
-  byte bVar2 = FloateyNum_Control[param_1];
-  if (bVar2 == 0) {
+  if (FloateyNum_Control[param_1] == 0) {
     return param_1;
   }
+
+  byte bVar2 = FloateyNum_Control[param_1];
   if (bVar2 >= 0xb) {
     bVar2 = 0xb;
-    FloateyNum_Control[param_1] = 0xb;
   }
-  byte bVar3 = FloateyNum_Timer[param_1];
-  if (bVar3 == 0) {
+  FloateyNum_Control[param_1] = bVar2;
+
+  const byte timer = FloateyNum_Timer[param_1];
+  if (timer == 0) {
     FloateyNum_Control[param_1] = 0;
     return param_1;
   }
-  FloateyNum_Timer[param_1] = FloateyNum_Timer[param_1] - 1;
+  FloateyNum_Timer[param_1] -= 1;
 
   byte tmp1 = param_1;
 
-  if (bVar3 == 0x2b) {
+  if (timer == 0x2b) {
     if (bVar2 == 0xb) {
       NumberofLives += 1;
       Square2SoundQueue = 0x40;
@@ -615,29 +615,42 @@ byte FloateyNumbersRoutine(const byte param_1) {
     DigitModifier[ScoreUpdateData[bVar2] >> 4] = ScoreUpdateData[bVar2] & 0xf;
     tmp1 = AddToScore();
   }
-  bVar3 = Enemy_SprDataOffset[tmp1];
-  bVar2 = Enemy_ID[tmp1];
-  if (((bVar2 != 0x12) && (bVar2 != 0xd))
-      && ((bVar2 == 5 || (((bVar2 != 10 && (bVar2 != 0xb)) && ((bVar2 > 8 || (Enemy_State[tmp1] < 2)))))))) {
-    bVar3 = AltOrBlock_SprDataOffset[SprDataOffset_Ctrl];
-    tmp1 = ObjectOffset;
+
+  const byte enemy_id = Enemy_ID[tmp1];
+
+  bool cond = false;
+
+  if ((enemy_id != 0x12) && (enemy_id != 0xd)) {
+    if (enemy_id == 5) {
+      cond = true;
+    } else if ((enemy_id != 10) && (enemy_id != 0xb)) {
+      if (enemy_id > 8) {
+        cond = true;
+      } else if (Enemy_State[tmp1] < 2) {
+        cond = true;
+      }
+    }
   }
-  bVar2 = FloateyNum_Y_Pos[tmp1];
-  bool bVar4 = bVar2 >= 0x18;
-  if (bVar4) {
-    bVar1 = !bVar4;
-    bVar4 = (bVar2 >= 0x18) || (!bVar4 && bVar2 > 1);
-    FloateyNum_Y_Pos[tmp1] = (bVar2 - 1) - bVar1;
+
+  const byte offset = cond ? AltOrBlock_SprDataOffset[SprDataOffset_Ctrl] : Enemy_SprDataOffset[tmp1];
+  const byte tmp2 = cond ? ObjectOffset : tmp1;
+
+  const byte ypos = FloateyNum_Y_Pos[tmp2];
+  if (ypos >= 0x18) {
+    FloateyNum_Y_Pos[tmp2] -= 1;
   }
-  DumpTwoSpr((FloateyNum_Y_Pos[tmp1] - 8) - !bVar4, bVar3);
-  bVar2 = FloateyNum_X_Pos[tmp1];
-  Sprite_Data[bVar3 + 3] = bVar2;
-  Sprite_Data[bVar3 + 7] = bVar2 + 8;
-  Sprite_Data[bVar3 + 2] = 2;
-  Sprite_Data[bVar3 + 6] = 2;
-  bVar2 = FloateyNum_Control[tmp1];
-  Sprite_Data[bVar3 + 1] = FloateyNumTileData[(byte)(bVar2 << 1)];
-  Sprite_Data[bVar3 + 5] = FloateyNumTileData[(byte)(bVar2 << 1) + 1];
+  DumpTwoSpr(ypos - 9, offset);
+
+  const byte xpos = FloateyNum_X_Pos[tmp2];
+  Sprite_Data[offset + 3] = xpos;
+  Sprite_Data[offset + 7] = xpos + 8;
+  Sprite_Data[offset + 2] = 2;
+  Sprite_Data[offset + 6] = 2;
+
+  const byte ctrl = FloateyNum_Control[tmp2];
+  Sprite_Data[offset + 1] = FloateyNumTileData[(byte)(ctrl << 1)];
+  Sprite_Data[offset + 5] = FloateyNumTileData[(byte)(ctrl << 1) + 1];
+
   return ObjectOffset;
 }
 
