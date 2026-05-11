@@ -4941,11 +4941,7 @@ byte PowerUpObjHandler(void) {
 // Signature: [A, r02, r06, r07] -> []
 void PlayerHeadCollision(const byte param_1, const byte param_2, ushort addr) {
   const short sVar1 = addr;
-  byte bVar2 = 0x11;
-  if (PlayerSize == 0) {
-    bVar2 = 0x12;
-  }
-  Block_State[SprDataOffset_Ctrl] = bVar2;
+  Block_State[SprDataOffset_Ctrl] = (PlayerSize == 0) ? 0x12 : 0x11;
   const byte bStack0000 = param_1;
   DestroyBlockMetatile(param_2, addr & 0xff);
   const byte bVar3 = SprDataOffset_Ctrl;
@@ -4953,10 +4949,7 @@ void PlayerHeadCollision(const byte param_1, const byte param_2, ushort addr) {
   Block_BBuf_Low[bVar3] = (byte)sVar1;
   byte bVar4 = RAM(sVar1 + (ushort)param_2);
   const struct_yc sVar5 = BlockBumpedChk(bVar4);
-  bVar2 = bVar4;
-  if (PlayerSize == 0) {
-    bVar2 = 0;
-  }
+  byte bVar2 = (PlayerSize == 0) ? 0 : bVar4;
   if (sVar5.c) {
     Block_State[bVar3] = 0x11;
     if ((bVar4 == ssw(0x58, 0x56)) || (bVar4 == ssw(0x5d, 0x5c))) {
@@ -4964,10 +4957,7 @@ void PlayerHeadCollision(const byte param_1, const byte param_2, ushort addr) {
         BrickCoinTimer = 0xb;
         BrickCoinTimerFlag = 1;
       }
-      bVar2 = bVar4;
-      if (BrickCoinTimer == 0) {
-        bVar2 = ssw(0xc4, 0xc5);
-      }
+      bVar2 = (BrickCoinTimer == 0) ? ssw(0xc4, 0xc5) : bVar4;
     } else {
       bVar2 = ssw(0xc4, 0xc5);
     }
@@ -5347,10 +5337,7 @@ byte MoveObjectHorizontally(const byte param_1) {
   if (bVar3 >= 8) {
     bVar3 |= 0xf0;
   }
-  char cVar5 = 0;
-  if (bVar3 >= 0x80) {
-    cVar5 = -1;
-  }
+  const char cVar5 = (bVar3 >= 0x80) ? -1 : 0;
   const bool bVar2 = CARRY1(SprObject_X_MoveForce[param_1],
                       PlayerSpriteVarData1[param_1] * 0x10);
   SprObject_X_MoveForce[param_1] = SprObject_X_MoveForce[param_1] + PlayerSpriteVarData1[param_1] * 0x10;
@@ -5467,10 +5454,7 @@ void ImposeGravitySprObj(const byte param_1, const byte param_2, const byte para
 // SM2MAIN:8b85
 // Signature: [X] -> [X]
 byte MovePlatformDown(const byte param_1) {
-  byte bVar1 = 5;
-  if (Enemy_ID[param_1] == 0x29) {
-    bVar1 = 9;
-  }
+  const byte bVar1 = (Enemy_ID[param_1] == 0x29) ? 9 : 5;
   ImposeGravity(0, param_1 + 1, bVar1, 10, 3);
   return ObjectOffset;
 }
@@ -5480,10 +5464,7 @@ byte MovePlatformDown(const byte param_1) {
 // SM2MAIN:8b88
 // Signature: [X] -> [X]
 byte MovePlatformUp(const byte param_1) {
-  byte bVar1 = 5;
-  if (Enemy_ID[param_1] == 0x29) {
-    bVar1 = 9;
-  }
+  const byte bVar1 = (Enemy_ID[param_1] == 0x29) ? 9 : 5;
   ImposeGravity(1, param_1 + 1, bVar1, 10, 3);
   return ObjectOffset;
 }
@@ -6679,11 +6660,7 @@ void InitVertPlatform(const byte param_1) {
 // SM2MAIN:9460
 // Signature: [X] -> []
 void SPBBox(const byte param_1) {
-  byte bVar1 = 5;
-  if ((AreaType != 3) && (SecondaryHardMode == 0)) {
-    bVar1 = 6;
-  }
-  Enemy_BoundBoxCtrl[param_1] = bVar1;
+  Enemy_BoundBoxCtrl[param_1] = ((AreaType != 3) && (SecondaryHardMode == 0)) ? 6 : 5;
 }
 
 
@@ -7179,20 +7156,14 @@ byte SetHJ(const byte param_1, const byte param_2, const byte param_3) {
 // SM2MAIN:968d
 // Signature: [X] -> [X]
 byte MoveHammerBroXDir(const byte param_1) {
-  byte bVar1 = 0xfc;
-  if ((FrameCounter & 0x40) == 0) {
-    bVar1 = 4;
-  }
-  SpriteVarData1[param_1] = bVar1;
-  bVar1 = 1;
+  SpriteVarData1[param_1] = ((FrameCounter & 0x40) == 0) ? 4 : 0xfc;;
   const struct_ncr00 sVar2 = PlayerEnemyDiff(param_1);
-  if ((!sVar2.n)) {
-    bVar1 += 1;
+  if (!sVar2.n) {
     if (EnemyIntervalTimer[param_1] == 0) {
       SpriteVarData1[param_1] = 0xf8;
     }
   }
-  Enemy_MovingDir[param_1] = bVar1;
+  Enemy_MovingDir[param_1] = (sVar2.n) ? 1 : 2;
   return MoveNormalEnemy(param_1);
 }
 
@@ -7945,20 +7916,16 @@ byte KillAllEnemies(void) {
 // Signature: [X] -> [X]
 byte BowserGfxHandler(const byte param_1) {
   const byte bVar2 = ProcessBowserHalf(param_1);
-  byte bVar1 = DuplicateObj_Offset;
-  char cVar3 = 0x10;
-  if ((Enemy_MovingDir[bVar2] & 1) != 0) {
-    cVar3 = -0x10;
-  }
+  const char cVar3 = ((Enemy_MovingDir[bVar2] & 1) != 0) ? -0x10 : 0x10;
   Enemy_X_Position[DuplicateObj_Offset] = cVar3 + Enemy_X_Position[bVar2];
-  Enemy_Y_Position[bVar1] = Enemy_Y_Position[bVar2] + 8;
-  Enemy_State[bVar1] = Enemy_State[bVar2];
-  Enemy_MovingDir[bVar1] = Enemy_MovingDir[bVar2];
-  bVar1 = DuplicateObj_Offset;
+  Enemy_Y_Position[DuplicateObj_Offset] = Enemy_Y_Position[bVar2] + 8;
+  Enemy_State[DuplicateObj_Offset] = Enemy_State[bVar2];
+  Enemy_MovingDir[DuplicateObj_Offset] = Enemy_MovingDir[bVar2];
+
   const byte bStack0000 = ObjectOffset;
   ObjectOffset = DuplicateObj_Offset;
   Enemy_ID[DuplicateObj_Offset] = 0x2d;
-  ProcessBowserHalf(bVar1);
+  ProcessBowserHalf(DuplicateObj_Offset);
   ObjectOffset = bStack0000;
   BowserGfxFlag = 0;
   return bStack0000;
@@ -7994,20 +7961,17 @@ byte SetFlameTimer(void) {
 // SM2MAIN:9e20
 // Signature: [X] -> [X]
 byte ProcBowserFlame(const byte param_1) {
-  bool bVar1;
   byte bVar2;
   byte bVar5;
   byte sVar6;
 
   if (TimerControl == 0) {
-    byte bVar3 = 0x40;
-    if (SecondaryHardMode != 0) {
-      bVar3 = 0x60;
-    }
-    bVar1 = Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] < bVar3;
+    const byte bVar33 = (SecondaryHardMode != 0) ? 0x60 : 0x40;
+    const bool bVar1 = Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] < bVar33;
     Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1]
-        = Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] - bVar3;
-    bVar3 = Enemy_X_Position[param_1];
+        = Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] - bVar33;
+
+    const byte bVar3 = Enemy_X_Position[param_1];
     Enemy_X_Position[param_1] = (bVar3 - 1) - bVar1;
     Enemy_PageLoc[param_1] = Enemy_PageLoc[param_1] - ((bVar1 || bVar3 == 0) && (!bVar1 || bVar3 < 2));
     if (Enemy_Y_Position[param_1]
@@ -8749,13 +8713,8 @@ void HandleEnemyFBallCol(const byte param_1, const byte param_2) {
   EnemyFrenzyBuffer = InitVStf(bVar2);
   SpriteVarData1[bVar2] = EnemyFrenzyBuffer;
   SpriteVarData2[bVar2] = 0xfe;
-  const byte bVar1 = WorldNumber;
   Enemy_ID[bVar2] = BowserIdentities[WorldNumber];
-  byte bVar3 = 0x20;
-  if (bVar1 < 3) {
-    bVar3 = 0x23;
-  }
-  Enemy_State[bVar2] = bVar3;
+  Enemy_State[bVar2] = (WorldNumber < 3) ? 0x23 : 0x20;
   Square2SoundQueue = 0x80;
   EnemySmackScore(9, param_2);
 }
@@ -11341,13 +11300,8 @@ void DrawFireball(const byte param_1) {
 // SM2MAIN:b9c8
 // Signature: [Y] -> []
 void DrawFirebar(const byte param_1) {
-  const byte bVar1 = FrameCounter;
   Sprite_Data[param_1 + 1] = ((FrameCounter >> 2) & 1) ^ 100;
-  byte bVar2 = 2;
-  if ((bVar1 >> 3 & 1) != 0) {
-    bVar2 = 0xc2;
-  }
-  Sprite_Data[param_1 + 2] = bVar2;
+  Sprite_Data[param_1 + 2] = ((FrameCounter >> 3 & 1) != 0) ? 0xc2 : 2;
 }
 
 
