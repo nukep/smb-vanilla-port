@@ -32,15 +32,6 @@ struct struct_axyz {
 };
 
 
-typedef struct struct_axr00 struct_axr00;
-
-struct struct_axr00 {
-  byte a;
-  byte x;
-  // byte r00;
-};
-
-
 typedef struct struct_nr00 struct_nr00;
 
 struct struct_nr00 {
@@ -1624,7 +1615,7 @@ byte smb1_RelativeFireballPosition(byte param_1);
 byte smb1_RelativeMiscPosition(byte param_1);
 #define RelativeMiscPosition smb1_RelativeMiscPosition
 
-struct_axr00 smb1_RelativeEnemyPosition(byte param_1);
+byte smb1_RelativeEnemyPosition(byte param_1);
 #define RelativeEnemyPosition smb1_RelativeEnemyPosition
 
 byte smb1_RelativeBlockPosition(byte param_1);

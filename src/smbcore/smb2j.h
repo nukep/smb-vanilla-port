@@ -108,16 +108,6 @@ struct struct_axyz {
   bool z;
 };
 
-
-typedef struct struct_axr00 struct_axr00;
-
-struct struct_axr00 {
-  byte a;
-  byte x;
-  // byte r00;
-};
-
-
 typedef struct struct_az struct_az;
 
 struct struct_az {
@@ -1616,7 +1606,7 @@ byte smb2j_RelativeFireballPosition(byte param_1);
 byte smb2j_RelativeMiscPosition(byte param_1);
 #define RelativeMiscPosition smb2j_RelativeMiscPosition
 
-struct_axr00 smb2j_RelativeEnemyPosition(byte param_1);
+byte smb2j_RelativeEnemyPosition(byte param_1);
 #define RelativeEnemyPosition smb2j_RelativeEnemyPosition
 
 byte smb2j_RelativeBlockPosition(byte param_1);
