@@ -281,6 +281,38 @@ static inline byte NEGATE(byte x) {
   ADD_16_16(dst_hi, dst_lo, 0, src); \
 }
 
+// Get the first set bit position, where the LSB is position 1.
+// Providing bits=0 returns 0.
+//
+// e.g. 142 => 2, because:
+// 142 = 10001110
+//             ^ position 2
+// 
+// e.g. 64 => 7, because:
+//  64 = 01000000
+//        ^ position 7
+static inline byte find_first_bit_position(byte bits) {
+  if (bits == 0) {
+    return 0;
+  }
+
+#if defined(__has_builtin) && __has_builtin(__builtin_ctz)
+  // Count trailing zeros, plus 1
+  return __builtin_ctz(bits) + 1;
+#else
+  // C impl
+  byte i = 0;
+  while (1) {
+    i += 1;
+    if (bits & 1) {
+      break;
+    }
+    bits >>= 1;
+  }
+  return i;
+#endif
+}
+
 // Represents a pointer type. Size is 2 bytes.
 class RamPtr {
 public:

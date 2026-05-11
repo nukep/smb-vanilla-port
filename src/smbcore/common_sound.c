@@ -819,22 +819,11 @@ void PlayExtraLife(void) {
 // SM2MAIN:d5b7
 // Signature: [] -> []
 void ContinueExtraLife(void) {
-  byte bVar1;
-  char cVar2;
-  bool bVar3;
+  if ((Squ2_SfxLenCounter & 7) == 0) {
+    const byte bVar1 = Squ2_SfxLenCounter >> 3;
+    PlaySqu2Sfx(ExtraLifeFreqData[bVar1 - 1], 0x82, 0x7f);
+  }
 
-  cVar2 = 3;
-  bVar1 = Squ2_SfxLenCounter;
-  do {
-    bVar3 = (bool)(bVar1 & 1);
-    bVar1 >>= 1;
-    if (bVar3) {
-      DecrementSfx2Length();
-      return;
-    }
-    cVar2 += -1;
-  } while (cVar2 != 0);
-  PlaySqu2Sfx(ExtraLifeFreqData[bVar1 - 1], 0x82, 0x7f);
   DecrementSfx2Length();
 }
 
@@ -962,18 +951,9 @@ void FindEventMusicHeader(const byte param_1, const byte param_2) {
 
   assert_smb_crashbug(param_1 != 0, "An infinite loop would've occurred in the original game");
 
-  byte i = 0;
-  byte bits = param_1;
-  while (1) {
-    i += 1;
-    if (bits & 1) {
-      break;
-    }
-    bits >>= 1;
-  }
 
   // 1 to 16 (inclusive) in practice
-  LoadHeader(param_2 + i);
+  LoadHeader(param_2 + find_first_bit_position(param_1));
 }
 
 // SMB:f6f5
