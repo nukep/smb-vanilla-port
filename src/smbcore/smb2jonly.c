@@ -122,9 +122,7 @@ void InitScreenPalette(void) {
 // SM2MAIN:65e6
 // Signature: [] -> [A]
 byte GetWorldNumForDisplay(void) {
-  byte bVar1;
-
-  bVar1 = WorldNumber;
+  byte bVar1 = WorldNumber;
   if (HardWorldFlag != 0) {
     bVar1 = (WorldNumber & 3) + 9;
   }
@@ -171,9 +169,7 @@ void WriteGameText(byte param_1) {
 // SM2MAIN:675e
 // Signature: [A] -> []
 void WriteWarpZoneMessage(byte param_1) {
-  byte bVar1;
-
-  bVar1 = 0xff;
+  byte bVar1 = 0xff;
   do {
     bVar1 += 1;
     VRAM_Buffer1[bVar1] = WarpZone[bVar1];
@@ -232,11 +228,8 @@ DumpWarpCtrl:
 // SM2MAIN:75cf
 // Signature: [X] -> []
 void CloudLedge(byte param_1) {
-  byte bVar1;
-  struct_ycr07 sVar2;
-
-  sVar2 = ChkLrgObjLength(param_1);
-  bVar1 = sVar2.r07;
+  struct_ycr07 sVar2 = ChkLrgObjLength(param_1);
+  byte bVar1 = sVar2.r07;
   if (sVar2.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
     NoUnder(0x8a, bVar1);
@@ -259,10 +252,8 @@ void PoisonMushBlock(byte param_1) {
 // SM2MAIN:a64e
 // Signature: [X] -> [A]
 byte SetBounce(byte param_1) {
-  byte bVar1;
-
   PlayerSpriteVarData2[0] = 0xfa;
-  bVar1 = Enemy_ID[param_1];
+  byte bVar1 = Enemy_ID[param_1];
   if ((bVar1 == 0xf) || (bVar1 == 0x10)) {
     PlayerSpriteVarData2[0] = 0xf8;
   }
@@ -479,9 +470,7 @@ void GameModeDiskRoutines(void) {
 // SM2MAIN:c05d
 // Signature: [] -> []
 void LoadWorlds5Thru8(void) {
-  byte bVar1;
   bool bVar2;
-  struct_ayz sVar3;
 
   if (WorldNumber < 4) {
     ResetDiskIOTask();
@@ -492,8 +481,8 @@ void LoadWorlds5Thru8(void) {
     return;
   }
   FileListNumber = 1;
-  sVar3 = LoadFiles();
-  bVar1 = sVar3.a;
+  struct_ayz sVar3 = LoadFiles();
+  byte bVar1 = sVar3.a;
   if (sVar3.z) {
     bVar2 = CheckFileCount(sVar3.y);
     if (bVar2) {
@@ -582,10 +571,9 @@ void VictoryModeDiskRoutines(void) {
 // Signature: [] -> []
 void LoadEnding(void) {
   bool bVar1;
-  struct_ayz sVar2;
 
   FileListNumber = 2;
-  sVar2 = LoadFiles();
+  struct_ayz sVar2 = LoadFiles();
   if (sVar2.z) {
     bVar1 = CheckFileCount(sVar2.y);
     if (!bVar1) {
@@ -624,11 +612,9 @@ void DiskScreen(void) {
 // SM2MAIN:c126
 // Signature: [] -> []
 void WaitForEject(void) {
-  byte bVar1;
-
   NameTableSelect = 0;
   DisableScreenFlag = 0;
-  bVar1 = FDS_drive_status();
+  byte bVar1 = FDS_drive_status();
   if ((bVar1 & 1) != 0) {
     DiskIOTask += 1;
   }
@@ -638,9 +624,7 @@ void WaitForEject(void) {
 // SM2MAIN:c138
 // Signature: [] -> []
 void WaitForReinsert(void) {
-  byte bVar1;
-
-  bVar1 = FDS_drive_status();
+  byte bVar1 = FDS_drive_status();
   if ((bVar1 & 1) == 0) {
     DiskIOTask += 1;
   } else if (!(bool)(bVar1 & 1)) {
@@ -788,17 +772,13 @@ void PatchPlayerNamePal(void) {
 void UpsideDownPipe_High(byte param_1) {
   char cVar1;
   byte bVar2;
-  byte bVar3;
   byte bVar4;
-  byte bVar5;
   struct_xc sVar6;
-  struct_yr06r07 sVar7;
-  byte bStack0000;
 
-  bStack0000 = 1;
-  sVar7 = GetPipeHeight(param_1);
-  bVar3 = sVar7.r06;
-  bVar5 = bStack0000;
+  byte bStack0000 = 1;
+  struct_yr06r07 sVar7 = GetPipeHeight(param_1);
+  byte bVar3 = sVar7.r06;
+  byte bVar5 = bStack0000;
   bStack0000 = sVar7.y;
   if (AreaObjectLength[param_1] != 0) {
     sVar6 = FindEmptyEnemySlot();
@@ -823,17 +803,13 @@ void UpsideDownPipe_High(byte param_1) {
 void UpsideDownPipe_Low(byte param_1) {
   char cVar1;
   byte bVar2;
-  byte bVar3;
   byte bVar4;
-  byte bVar5;
-  struct_yr06r07 sVar6;
   struct_xc sVar7;
-  byte bStack0000;
 
-  bStack0000 = 4;
-  sVar6 = GetPipeHeight(param_1);
-  bVar3 = sVar6.r06;
-  bVar5 = bStack0000;
+  byte bStack0000 = 4;
+  struct_yr06r07 sVar6 = GetPipeHeight(param_1);
+  byte bVar3 = sVar6.r06;
+  byte bVar5 = bStack0000;
   bStack0000 = sVar6.y;
   if (AreaObjectLength[param_1] != 0) {
     sVar7 = FindEmptyEnemySlot();
@@ -1025,8 +1001,6 @@ void RevealPrincess(void) {
 // SM2DATA3:c642
 // Signature: [] -> []
 void PrintVictoryMsgsForWorld8(void) {
-  bool bVar1;
-
   if (SecondaryMsgCounter == 0) {
     if (PrimaryMsgCounter >= 10) {
       WorldEndTimer = 0xc;
@@ -1039,7 +1013,7 @@ void PrintVictoryMsgsForWorld8(void) {
     }
     VRAM_Buffer_AddrCtrl = PrimaryMsgCounter + 0xf;
   }
-  bVar1 = SecondaryMsgCounter >= 0xfc;
+  bool bVar1 = SecondaryMsgCounter >= 0xfc;
   SecondaryMsgCounter = SecondaryMsgCounter + 4;
   PrimaryMsgCounter = PrimaryMsgCounter + bVar1;
 }
@@ -1078,9 +1052,6 @@ void AwardExtraLives(void) {
 // SM2DATA3:c6ca
 // Signature: [] -> []
 void FadeToBlue(void) {
-  byte bVar1;
-  byte bVar2;
-
   EndControlCntr += 1;
   if (BlueDelayFlag == 0) {
     if (EndControlCntr != 0) {
@@ -1095,8 +1066,8 @@ void FadeToBlue(void) {
     VRAM_Buffer1[i] = BlueTransPalette[i];
   }
 
-  bVar1 = BlueColorOfs;
-  bVar2 = 0xc;
+  byte bVar1 = BlueColorOfs;
+  byte bVar2 = 0xc;
   do {
     VRAM_Buffer1[bVar2 + 3] = BlueTints[bVar1];
     bVar2 -= 4;
@@ -1198,9 +1169,6 @@ void EndingDiskRoutines(void) {
 // SM2DATA3:c7bd
 // Signature: [] -> []
 void MushroomRetainersForW8(void) {
-  byte bVar1;
-  byte bStack0000;
-
   if (MushroomRetDelay != 0) {
     MushroomRetDelay = MushroomRetDelay - 1;
     return;
@@ -1217,9 +1185,9 @@ void MushroomRetainersForW8(void) {
     BlueColorOfs += 1;
     Square2SoundQueue = 1;
   }
-  bVar1 = BlueColorOfs;
+  byte bVar1 = BlueColorOfs;
   EndControlCntr += 1;
-  bStack0000 = WorldNumber;
+  byte bStack0000 = WorldNumber;
   do {
     if ((BlueDelayFlag < 4)
         || (FlashMRSpriteDataOfs[(byte)((BlueDelayFlag - 4) - (BlueDelayFlag < 4))] != MRSpriteDataOfs[BlueColorOfs])) {
@@ -1260,21 +1228,16 @@ void WriteNameToVictoryMsg(void) {
 // SM2DATA4:c2c3
 // Signature: [] -> []
 void AltHard_GetAreaDataAddrs(void) {
-  byte bVar1;
-  byte bVar2;
-  byte bVar3;
-  byte bVar4;
-
-  bVar3 = GetAreaType(AreaPointer);
+  byte bVar3 = GetAreaType(AreaPointer);
   AreaAddrsLOffset = AreaPointer & 0x1f;
   bVar3 = (AltHard_EnemyAddrHOffsets[bVar3] + AreaAddrsLOffset) * 2;
   EnemyData.hi = AltHard_EnemyDataAddrs[bVar3 + 1];
   EnemyData.lo = AltHard_EnemyDataAddrs[bVar3];
-  bVar2 = (AltHard_AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
-  bVar1 = AltHard_AreaDataAddrs[bVar2];
+  byte bVar2 = (AltHard_AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
+  byte bVar1 = AltHard_AreaDataAddrs[bVar2];
   AreaData = CONCAT11(AltHard_AreaDataAddrs[bVar2 + 1], bVar1);
   bVar3 = *AreaData;
-  bVar4 = bVar3 & 7;
+  byte bVar4 = bVar3 & 7;
   ForegroundScenery = bVar4;
   if (bVar4 >= 4) {
     ForegroundScenery = 0;
