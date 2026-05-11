@@ -21,7 +21,7 @@ enum VictoryModeSubroutines_forW8_jumptable_item {
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
-void jumptable_VictoryModeSubroutines_forW8(byte param_1) {
+void jumptable_VictoryModeSubroutines_forW8(const byte param_1) {
   switch (param_1) {
   case VICTORYMODESUBROUTINES_FORW8_BRIDGECOLLAPSE:
     BridgeCollapse();
@@ -132,7 +132,7 @@ byte GetWorldNumForDisplay(void) {
 
 // SM2MAIN:671b
 // Signature: [A] -> []
-void WriteGameText(byte param_1) {
+void WriteGameText(const byte param_1) {
   byte offset = GameTextOffsets[param_1];
 
   bool terminated = false;
@@ -168,7 +168,7 @@ void WriteGameText(byte param_1) {
 
 // SM2MAIN:675e
 // Signature: [A] -> []
-void WriteWarpZoneMessage(byte param_1) {
+void WriteWarpZoneMessage(const byte param_1) {
   byte bVar1 = 0xff;
   do {
     bVar1 += 1;
@@ -227,7 +227,7 @@ DumpWarpCtrl:
 
 // SM2MAIN:75cf
 // Signature: [X] -> []
-void CloudLedge(byte param_1) {
+void CloudLedge(const byte param_1) {
   const struct_ycr07 sVar2 = ChkLrgObjLength(param_1);
   const byte bVar1 = sVar2.r07;
   if (sVar2.c) {
@@ -243,7 +243,7 @@ void CloudLedge(byte param_1) {
 
 // SM2MAIN:89a1
 // Signature: [X] -> []
-void PoisonMushBlock(byte param_1) {
+void PoisonMushBlock(const byte param_1) {
   PowerUpType = 4;
   SetupPowerUp(param_1);
 }
@@ -251,7 +251,7 @@ void PoisonMushBlock(byte param_1) {
 
 // SM2MAIN:a64e
 // Signature: [X] -> [A]
-byte SetBounce(byte param_1) {
+byte SetBounce(const byte param_1) {
   PlayerSpriteVarData2[0] = 0xfa;
   const byte bVar1 = Enemy_ID[param_1];
   if ((bVar1 == 0xf) || (bVar1 == 0x10)) {
@@ -263,7 +263,7 @@ byte SetBounce(byte param_1) {
 
 // SM2MAIN:aca3
 // Signature: [X] -> []
-void ChkToStunEnemies(byte param_1) {
+void ChkToStunEnemies(const byte param_1) {
   // The port inlines NoDemote, because it more clearly reveals what's actually going on here.
   // The NES implementation did a bunch of compares to hoan in on the object types,
   // but it's more obvious to just do the comparisons directly.
@@ -595,7 +595,7 @@ void LoadEnding(void) {
 
 // SM2MAIN:c0ca
 // Signature: [Y] -> [Z]
-bool CheckFileCount(byte param_1) { return param_1 == FileCount[FileListNumber]; }
+bool CheckFileCount(const byte param_1) { return param_1 == FileCount[FileListNumber]; }
 
 
 // SM2MAIN:c113
@@ -643,7 +643,7 @@ void ResetDiskVars(void) {
 
 // SM2MAIN:c182
 // Signature: [A] -> []
-void DiskErrorHandler(byte param_1) {
+void DiskErrorHandler(const byte param_1) {
   DiskErrorMainMsg[19] = param_1 & 0xf;
   DiskErrorMainMsg[18] = param_1 >> 4;
 
@@ -769,7 +769,7 @@ void PatchPlayerNamePal(void) {
 
 // SM2DATA2+SM2DATA4:c470
 // Signature: [X] -> []
-void UpsideDownPipe_High(byte param_1) {
+void UpsideDownPipe_High(const byte param_1) {
   char cVar1;
   byte bVar2;
   byte bVar4;
@@ -800,7 +800,7 @@ void UpsideDownPipe_High(byte param_1) {
 
 // SM2DATA2+SM2DATA4:c475
 // Signature: [X] -> []
-void UpsideDownPipe_Low(byte param_1) {
+void UpsideDownPipe_Low(const byte param_1) {
   char cVar1;
   byte bVar2;
   byte bVar4;
@@ -831,7 +831,7 @@ void UpsideDownPipe_Low(byte param_1) {
 
 // SM2DATA2+SM2DATA4:c4c0
 // Signature: [X] -> []
-void MoveUpsideDownPiranhaP(byte param_1) {
+void MoveUpsideDownPiranhaP(const byte param_1) {
   byte bVar1;
   byte bVar2;
   byte bVar3;

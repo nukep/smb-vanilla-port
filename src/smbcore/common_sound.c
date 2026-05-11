@@ -83,7 +83,7 @@ static byte LoadEnvelopeData(byte param_1);
 // SMB:f38d, SM2MAIN:d35d
 // Signature: [A, X] -> [A, Y, Z]
 
-struct_ayz Dump_Freq_Regs(byte param_1, byte channel) {
+struct_ayz Dump_Freq_Regs(const byte param_1, byte channel) {
   // channel is always 0, 4, or 8
 
   struct_ayz ret;
@@ -359,7 +359,7 @@ void SkipSoundSubroutines(void) {
 // SMB:f381
 // SM2MAIN:d351
 // Signature: [X, Y] -> []
-void Dump_Squ1_Regs(byte param_1, byte param_2) {
+void Dump_Squ1_Regs(const byte param_1, const byte param_2) {
   apu_sq1_sweep(param_2);
   apu_sq1_vol(param_1);
 }
@@ -367,7 +367,7 @@ void Dump_Squ1_Regs(byte param_1, byte param_2) {
 // SMB:f388
 // SM2MAIN:d358
 // Signature: [A, X, Y] -> [Z]
-bool PlaySqu1Sfx(byte param_1, byte param_2, byte param_3) {
+bool PlaySqu1Sfx(const byte param_1, const byte param_2, const byte param_3) {
   struct_axyz sVar1;
 
   Dump_Squ1_Regs(param_2, param_3);
@@ -378,7 +378,7 @@ bool PlaySqu1Sfx(byte param_1, byte param_2, byte param_3) {
 // SMB:f38b
 // SM2MAIN:d35b
 // Signature: [A] -> [A, X, Y, Z]
-struct_axyz SetFreq_Squ1(byte param_1) {
+struct_axyz SetFreq_Squ1(const byte param_1) {
   struct_axyz sVar2;
   struct_ayz sVar3;
 
@@ -393,7 +393,7 @@ struct_axyz SetFreq_Squ1(byte param_1) {
 // SMB:f39f
 // SM2MAIN:d36f
 // Signature: [X, Y] -> []
-void Dump_Sq2_Regs(byte param_1, byte param_2) {
+void Dump_Sq2_Regs(const byte param_1, const byte param_2) {
   apu_sq2_vol(param_1);
   apu_sq2_sweep(param_2);
 }
@@ -401,7 +401,7 @@ void Dump_Sq2_Regs(byte param_1, byte param_2) {
 // SMB:f3a6
 // SM2MAIN:d376
 // Signature: [A, X, Y] -> []
-void PlaySqu2Sfx(byte param_1, byte param_2, byte param_3) {
+void PlaySqu2Sfx(const byte param_1, const byte param_2, const byte param_3) {
   Dump_Sq2_Regs(param_2, param_3);
   SetFreq_Squ2(param_1);
 }
@@ -409,7 +409,7 @@ void PlaySqu2Sfx(byte param_1, byte param_2, byte param_3) {
 // SMB:f3a9
 // SM2MAIN:d379
 // Signature: [A] -> [A, X, Y, Z]
-struct_axyz SetFreq_Squ2(byte param_1) {
+struct_axyz SetFreq_Squ2(const byte param_1) {
   struct_axyz sVar2;
   struct_ayz sVar3;
 
@@ -424,7 +424,7 @@ struct_axyz SetFreq_Squ2(byte param_1) {
 // SMB:f3ad
 // SM2MAIN:d37d
 // Signature: [A] -> []
-void SetFreq_Tri(byte param_1) {
+void SetFreq_Tri(const byte param_1) {
   Dump_Freq_Regs(param_1, 8);
 }
 
@@ -899,7 +899,7 @@ void MusicHandler(void) {
 // SMB:f6a4
 // SM2MAIN:d6e0
 // Signature: [A] -> []
-void LoadEventMusic(byte param_1) {
+void LoadEventMusic(const byte param_1) {
   EventMusicBuffer = param_1;
   if (param_1 == 1) {
     StopSquare1Sfx();
@@ -919,7 +919,7 @@ void LoadEventMusic(byte param_1) {
 // SMB:f6c8
 // SM2MAIN:d704
 // Signature: [A] -> []
-void LoadAreaMusic(byte param_1) {
+void LoadAreaMusic(const byte param_1) {
   if (param_1 == 4) {
     StopSquare1Sfx();
   }
@@ -930,7 +930,7 @@ void LoadAreaMusic(byte param_1) {
 // SMB:f6d4
 // SM2MAIN:d710
 // Signature: [A] -> []
-void HandleAreaMusicLoopB(byte param_1) {
+void HandleAreaMusicLoopB(const byte param_1) {
   EventMusicBuffer = 0;
   AreaMusicBuffer = param_1;
   if (param_1 != 1) {
@@ -949,7 +949,7 @@ void HandleAreaMusicLoopB(byte param_1) {
 // SMB:f6ed
 // SM2MAIN:d729
 // Signature: [A] -> []
-void FindAreaMusicHeader(byte param_1) {
+void FindAreaMusicHeader(const byte param_1) {
   MusicOffset_Square2 = 8;
   FindEventMusicHeader(param_1, 8);
 }
@@ -957,27 +957,29 @@ void FindAreaMusicHeader(byte param_1) {
 // SMB:f6f1
 // SM2MAIN:d72d
 // Signature: [A, Y] -> []
-void FindEventMusicHeader(byte param_1, byte param_2) {
+void FindEventMusicHeader(const byte param_1, const byte param_2) {
   // The second argument is either 0 or 8 in practice.
 
   assert_smb_crashbug(param_1 != 0, "An infinite loop would've occurred in the original game");
 
+  byte i = 0;
+  byte bits = param_1;
   while (1) {
-    param_2 += 1;
-    if (param_1 & 1) {
+    i += 1;
+    if (bits & 1) {
       break;
     }
-    param_1 >>= 1;
+    bits >>= 1;
   }
 
   // 1 to 16 (inclusive) in practice
-  LoadHeader(param_2);
+  LoadHeader(param_2 + i);
 }
 
 // SMB:f6f5
 // SM2MAIN:d731
 // Signature: [Y] -> []
-void LoadHeader(byte param_1) {
+void LoadHeader(const byte param_1) {
   byte bVar1;
 
   bVar1 = MusicHeaderData[param_1 - 1];
@@ -1210,7 +1212,7 @@ void HandleNoiseMusic(void) {
 // SMB:f8bb
 // SM2MAIN:d8f7
 // Signature: [A, X, Y] -> []
-void PlayBeat(byte param_1, byte param_2, byte param_3) {
+void PlayBeat(const byte param_1, const byte param_2, const byte param_3) {
   apu_noise_vol(param_1);
   apu_noise_lo(param_2);
   apu_noise_hi(param_3);
@@ -1219,7 +1221,7 @@ void PlayBeat(byte param_1, byte param_2, byte param_3) {
 // SMB:f8c5
 // SM2MAIN:d901
 // Signature: [A] -> [A, X, Y]
-struct_axy AlternateLengthHandler(byte param_1) {
+struct_axy AlternateLengthHandler(const byte param_1) {
   struct_ay sVar1;
   struct_axy sVar2;
 
@@ -1236,7 +1238,7 @@ struct_axy AlternateLengthHandler(byte param_1) {
 // SMB:f8cb
 // SM2MAIN:d907
 // Signature: [A] -> [A, Y]
-struct_ay ProcessLengthData(byte param_1) {
+struct_ay ProcessLengthData(const byte param_1) {
   byte offset;
 
   struct_ay sVar2;
@@ -1277,7 +1279,7 @@ struct_axy LoadControlRegs(void) {
 // SMB:f8f4
 // SM2MAIN:d930
 // Signature: [Y] -> [A]
-byte LoadEnvelopeData(byte param_1) {
+byte LoadEnvelopeData(const byte param_1) {
   if ((EventMusicBuffer & 8) != 0) {
     return EndOfCastleMusicEnvData[param_1];
   } else if ((AreaMusicBuffer & 0x7d) != 0) {

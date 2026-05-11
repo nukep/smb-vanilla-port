@@ -3,7 +3,7 @@
 
 // SMB:8808
 // Signature: [A] -> []
-void WriteGameText(byte param_1) {
+void WriteGameText(const byte param_1) {
   // param_1 is 0,1,2,3, 4,5,6
 
   static byte const p1_l[7] = {0,2,5,7,9,9,9};
@@ -91,7 +91,7 @@ void ScrollLockObject_Warp(void) {
 
 // SMB:9778
 // Signature: [X] -> []
-void MushroomLedge(byte param_1) {
+void MushroomLedge(const byte param_1) {
   const struct_ycr07 sVar4 = ChkLrgObjLength(param_1);
   const byte bVar3 = sVar4.r07;
   if (sVar4.c) {
@@ -115,7 +115,7 @@ void MushroomLedge(byte param_1) {
 
 // SMB:afc4
 // Signature: [Y] -> []
-void ScrollScreen(byte param_1) {
+void ScrollScreen(const byte param_1) {
   ScrollAmount = param_1;
   ScrollThirtyTwo += param_1;
   ADD_UNSIGNED_16_8(ScreenEdgeOrLeft_PageLoc[0], ScreenEdgeOrLeft_X_Pos[0],
@@ -131,7 +131,7 @@ void ScrollScreen(byte param_1) {
 
 // SMB:e01b
 // Signature: [A, X] -> []
-void ChkToStunEnemies(byte param_1, byte param_2) {
+void ChkToStunEnemies(const byte param_1, const byte param_2) {
   // Turn these enemies into koopas
   if (param_1 == 9)  { Enemy_ID[param_2] = 1; }
   if (param_1 == 13) { Enemy_ID[param_2] = 1; }
