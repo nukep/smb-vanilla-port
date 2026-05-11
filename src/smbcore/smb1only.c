@@ -92,19 +92,19 @@ void ScrollLockObject_Warp(void) {
 // SMB:9778
 // Signature: [X] -> []
 void MushroomLedge(byte param_1) {
-  struct_ycr07 sVar4 = ChkLrgObjLength(param_1);
-  byte bVar3 = sVar4.r07;
+  const struct_ycr07 sVar4 = ChkLrgObjLength(param_1);
+  const byte bVar3 = sVar4.r07;
   if (sVar4.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
     NoUnder(0x19, bVar3);
     return;
   }
-  byte bVar2 = AreaObjectLength[param_1];
+  const byte bVar2 = AreaObjectLength[param_1];
   if (bVar2 == 0) {
     NoUnder(0x1b, bVar3);
     return;
   }
-  byte bVar1 = MushroomLedgeHalfLen[param_1];
+  const byte bVar1 = MushroomLedgeHalfLen[param_1];
   MetatileBuffer[bVar3] = 0x1a;
   if (bVar2 == bVar1) {
     MetatileBuffer[(byte)(bVar3 + 1)] = 0x4f;

@@ -228,8 +228,8 @@ DumpWarpCtrl:
 // SM2MAIN:75cf
 // Signature: [X] -> []
 void CloudLedge(byte param_1) {
-  struct_ycr07 sVar2 = ChkLrgObjLength(param_1);
-  byte bVar1 = sVar2.r07;
+  const struct_ycr07 sVar2 = ChkLrgObjLength(param_1);
+  const byte bVar1 = sVar2.r07;
   if (sVar2.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
     NoUnder(0x8a, bVar1);
@@ -253,7 +253,7 @@ void PoisonMushBlock(byte param_1) {
 // Signature: [X] -> [A]
 byte SetBounce(byte param_1) {
   PlayerSpriteVarData2[0] = 0xfa;
-  byte bVar1 = Enemy_ID[param_1];
+  const byte bVar1 = Enemy_ID[param_1];
   if ((bVar1 == 0xf) || (bVar1 == 0x10)) {
     PlayerSpriteVarData2[0] = 0xf8;
   }
@@ -481,7 +481,7 @@ void LoadWorlds5Thru8(void) {
     return;
   }
   FileListNumber = 1;
-  struct_ayz sVar3 = LoadFiles();
+  const struct_ayz sVar3 = LoadFiles();
   byte bVar1 = sVar3.a;
   if (sVar3.z) {
     bVar2 = CheckFileCount(sVar3.y);
@@ -573,7 +573,7 @@ void LoadEnding(void) {
   bool bVar1;
 
   FileListNumber = 2;
-  struct_ayz sVar2 = LoadFiles();
+  const struct_ayz sVar2 = LoadFiles();
   if (sVar2.z) {
     bVar1 = CheckFileCount(sVar2.y);
     if (!bVar1) {
@@ -614,7 +614,7 @@ void DiskScreen(void) {
 void WaitForEject(void) {
   NameTableSelect = 0;
   DisableScreenFlag = 0;
-  byte bVar1 = FDS_drive_status();
+  const byte bVar1 = FDS_drive_status();
   if ((bVar1 & 1) != 0) {
     DiskIOTask += 1;
   }
@@ -624,7 +624,7 @@ void WaitForEject(void) {
 // SM2MAIN:c138
 // Signature: [] -> []
 void WaitForReinsert(void) {
-  byte bVar1 = FDS_drive_status();
+  const byte bVar1 = FDS_drive_status();
   if ((bVar1 & 1) == 0) {
     DiskIOTask += 1;
   } else if (!(bool)(bVar1 & 1)) {
@@ -753,15 +753,15 @@ static void LoadLuigiPhysics(void) {
 // SM2MAIN:c5ff
 // Signature: [] -> []
 void PatchPlayerNamePal(void) {
-  byte const off = PlayerNameOffsets[CurrentPlayer];
+  const byte off = PlayerNameOffsets[CurrentPlayer];
   for (int i = 0; i < 5; i++) {
-    byte const j = (byte)(off-4 + i);
+    const byte j = (byte)(off-4 + i);
     TopStatusBarLine[i + 3] = PlayerNameData[j];
     ThankYouMessage[i + 13] = PlayerNameData[j];
   }
 
   for (int i = 0; i < 4; i++) {
-    byte const j = (byte)(off-4-CurrentPlayer + i);
+    const byte j = (byte)(off-4-CurrentPlayer + i);
     PlayerColors[i] = PlayerPaletteData[j];
   }
 }
@@ -776,8 +776,8 @@ void UpsideDownPipe_High(byte param_1) {
   struct_xc sVar6;
 
   byte bStack0000 = 1;
-  struct_yr06r07 sVar7 = GetPipeHeight(param_1);
-  byte bVar3 = sVar7.r06;
+  const struct_yr06r07 sVar7 = GetPipeHeight(param_1);
+  const byte bVar3 = sVar7.r06;
   byte bVar5 = bStack0000;
   bStack0000 = sVar7.y;
   if (AreaObjectLength[param_1] != 0) {
@@ -807,8 +807,8 @@ void UpsideDownPipe_Low(byte param_1) {
   struct_xc sVar7;
 
   byte bStack0000 = 4;
-  struct_yr06r07 sVar6 = GetPipeHeight(param_1);
-  byte bVar3 = sVar6.r06;
+  const struct_yr06r07 sVar6 = GetPipeHeight(param_1);
+  const byte bVar3 = sVar6.r06;
   byte bVar5 = bStack0000;
   bStack0000 = sVar6.y;
   if (AreaObjectLength[param_1] != 0) {
@@ -862,7 +862,7 @@ void MoveUpsideDownPiranhaP(byte param_1) {
 // Signature: [] -> []
 void BlowPlayerAround(void) {
   if ((WindFlag != 0) && (AreaType == 1)) {
-    byte const mask = (FrameCounter & 0x80) ? 1 : 3;
+    const byte mask = (FrameCounter & 0x80) ? 1 : 3;
     if ((FrameCounter & mask) == 0) {
       SprObject_PageLoc[0] += SprObject_X_Position[0] == 0xff;
       Player_X_Scroll += 1;
@@ -1013,7 +1013,7 @@ void PrintVictoryMsgsForWorld8(void) {
     }
     VRAM_Buffer_AddrCtrl = PrimaryMsgCounter + 0xf;
   }
-  bool bVar1 = SecondaryMsgCounter >= 0xfc;
+  const bool bVar1 = SecondaryMsgCounter >= 0xfc;
   SecondaryMsgCounter = SecondaryMsgCounter + 4;
   PrimaryMsgCounter = PrimaryMsgCounter + bVar1;
 }
@@ -1066,7 +1066,7 @@ void FadeToBlue(void) {
     VRAM_Buffer1[i] = BlueTransPalette[i];
   }
 
-  byte bVar1 = BlueColorOfs;
+  const byte bVar1 = BlueColorOfs;
   byte bVar2 = 0xc;
   do {
     VRAM_Buffer1[bVar2 + 3] = BlueTints[bVar1];
@@ -1185,9 +1185,9 @@ void MushroomRetainersForW8(void) {
     BlueColorOfs += 1;
     Square2SoundQueue = 1;
   }
-  byte bVar1 = BlueColorOfs;
+  const byte bVar1 = BlueColorOfs;
   EndControlCntr += 1;
-  byte bStack0000 = WorldNumber;
+  const byte bStack0000 = WorldNumber;
   do {
     if ((BlueDelayFlag < 4)
         || (FlashMRSpriteDataOfs[(byte)((BlueDelayFlag - 4) - (BlueDelayFlag < 4))] != MRSpriteDataOfs[BlueColorOfs])) {
@@ -1233,11 +1233,11 @@ void AltHard_GetAreaDataAddrs(void) {
   bVar3 = (AltHard_EnemyAddrHOffsets[bVar3] + AreaAddrsLOffset) * 2;
   EnemyData.hi = AltHard_EnemyDataAddrs[bVar3 + 1];
   EnemyData.lo = AltHard_EnemyDataAddrs[bVar3];
-  byte bVar2 = (AltHard_AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
-  byte bVar1 = AltHard_AreaDataAddrs[bVar2];
+  const byte bVar2 = (AltHard_AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
+  const byte bVar1 = AltHard_AreaDataAddrs[bVar2];
   AreaData = CONCAT11(AltHard_AreaDataAddrs[bVar2 + 1], bVar1);
   bVar3 = *AreaData;
-  byte bVar4 = bVar3 & 7;
+  const byte bVar4 = bVar3 & 7;
   ForegroundScenery = bVar4;
   if (bVar4 >= 4) {
     ForegroundScenery = 0;

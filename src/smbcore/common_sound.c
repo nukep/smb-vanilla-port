@@ -93,8 +93,8 @@ struct_ayz Dump_Freq_Regs(byte param_1, byte channel) {
   // apu_tri_lo, apu_tri_hi
 
   if (FreqRegLookupTbl[param_1 + 1] != 0) {
-    byte const a = FreqRegLookupTbl[param_1 + 1];
-    byte const b = FreqRegLookupTbl[param_1] | 8;
+    const byte a = FreqRegLookupTbl[param_1 + 1];
+    const byte b = FreqRegLookupTbl[param_1] | 8;
 
     switch (channel) {
     case 0: apu_sq1_lo(a); apu_sq1_hi(b); break;
@@ -168,7 +168,7 @@ void PlayBowserFlame(void) {
 // SMB:f685, SM2MAIN:d69c
 // Signature: [] -> []
 void ContinueBowserFlame(void) {
-  byte const vol = WaterEventMusEnvData[(Noise_SfxLenCounter >> 1) + 0x27];
+  const byte vol = WaterEventMusEnvData[(Noise_SfxLenCounter >> 1) + 0x27];
   if (SMB1_ONLY && vol == 0) {
     ContinueMusic();
   } else {
@@ -221,7 +221,7 @@ void ContinueWindSfx(void) {
 // SMB:f667
 // Signature: [] -> []
 void NoiseSfxHandler(void) {
-  byte const nsq = NoiseSoundQueue;
+  const byte nsq = NoiseSoundQueue;
 
   // The original game modified (bit-shifted) NoiseSoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
 
@@ -230,7 +230,7 @@ void NoiseSfxHandler(void) {
     if (BIT(nsq, 0)) { return PlayBrickShatter(); }
     if (BIT(nsq, 1)) { return PlayBowserFlame(); }
   }
-  byte const nsb = NoiseSoundBuffer;
+  const byte nsb = NoiseSoundBuffer;
   if (nsb != 0) {
     if (BIT(nsb, 0)) { return ContinueBrickShatter(); }
     if (BIT(nsb, 1)) { return ContinueBowserFlame(); }
@@ -242,8 +242,8 @@ void NoiseSfxHandler(void) {
 // SM2MAIN:d677
 // Signature: [] -> []
 void NoiseSfxHandler(void) {
-  byte const nsb = NoiseSoundBuffer;
-  byte const nsq = NoiseSoundQueue;
+  const byte nsb = NoiseSoundBuffer;
+  const byte nsq = NoiseSoundQueue;
 
   if (BIT(nsb, 7)) { return ContinueSkidSfx(); }
   if (BIT(nsq, 7)) {
@@ -345,7 +345,7 @@ void SkipSoundSubroutines(void) {
   NoiseSoundQueue = 0;
   PauseSoundQueue = 0;
 
-  byte const prev_counter = DAC_Counter;
+  const byte prev_counter = DAC_Counter;
 
   if ((AreaMusicBuffer & 3) != 0 && DAC_Counter < 0x30) {
     DAC_Counter += 1;
@@ -532,7 +532,7 @@ void ContinueBumpThrow(void) {
 // SM2MAIN:d3eb
 // Signature: [] -> []
 void Square1SfxHandler(void) {
-  byte const ssq = Square1SoundQueue;
+  const byte ssq = Square1SoundQueue;
 
   // The original game modified (bit-shifted) Square1SoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
 
@@ -552,7 +552,7 @@ void Square1SfxHandler(void) {
   // Square1SoundQueue is 0
   // Continuing to play previous sfx
 
-  byte const ssb = Square1SoundBuffer;
+  const byte ssb = Square1SoundBuffer;
   if (ssb != 0) {
     if (BIT(ssb, 7)) { return ContinueSndJump(); }
     if (BIT(ssb, 0)) { return ContinueSndJump(); }
@@ -757,7 +757,7 @@ void Square2SfxHandler(void) {
 
   // The original game modified (bit-shifted) Square2SoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
 
-  byte const ssq = Square2SoundQueue;
+  const byte ssq = Square2SoundQueue;
 
   if (ssq != 0) {
     Square2SoundBuffer = ssq;
@@ -771,7 +771,7 @@ void Square2SfxHandler(void) {
     if (BIT(ssq, 6)) { return PlayExtraLife(); }
   }
 
-  byte const ssb = Square2SoundBuffer;
+  const byte ssb = Square2SoundBuffer;
 
   if (ssb == 0) {
     return;
