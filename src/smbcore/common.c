@@ -279,11 +279,9 @@ void OperModeExecutionTree(void) {
 // SM2MAIN:6287
 // Signature: [] -> []
 void MoveAllSpritesOffscreen(void) {
-  byte bVar1 = 0;
-  do {
-    Sprite_Data[bVar1] = 0xf8;
-    bVar1 += 4;
-  } while (bVar1 != 0);
+  for (int i = 0; i < 256; i += 4) {
+    Sprite_Data[i] = 0xf8;
+  }
 }
 
 
@@ -291,11 +289,9 @@ void MoveAllSpritesOffscreen(void) {
 // SM2MAIN:628a
 // Signature: [] -> []
 void MoveSpritesOffscreen(void) {
-  byte bVar1 = 4;
-  do {
-    Sprite_Data[bVar1] = 0xf8;
-    bVar1 += 4;
-  } while (bVar1 != 0);
+  for (int i = 4; i < 256; i += 4) {
+    Sprite_Data[i] = 0xf8;
+  }
 }
 
 
@@ -996,53 +992,45 @@ void ResetScreenTimer(void) {
 // SM2MAIN:678b
 // Signature: [] -> []
 void RenderAreaGraphics(void) {
-  const byte bVar7 = CurrentColumnPos & 1;
+  const bool even_column = (CurrentColumnPos & 1) == 0;
   VRAM_Buffer2[VRAM_Buffer2_Offset + 1] = CurrentNTAddr_Low;
   VRAM_Buffer2[VRAM_Buffer2_Offset] = CurrentNTAddr_High;
   VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = 0x9a;
-  byte bVar9 = 0;
-  byte bVar5 = 0;
-  do {
-    const byte bVar4 = VRAM_Buffer2_Offset;
-    const byte bVar1 = MetatileBuffer[bVar9];
-    byte bVar8 = bVar1 & 0xc0;
-    byte bVar3 = bVar1 >> 6;
-    byte bVar6 = MetatileGraphics_Low[bVar3];
-    bVar3 = MetatileGraphics_High[bVar3];
-    const byte bVar2 = ((AreaParserTaskNum & 1) ^ 1) * 2 + MetatileBuffer[bVar9] * 4;
-    VRAM_Buffer2[bVar4 + 3] = RAM(CONCAT11(bVar3, bVar6) + (ushort)bVar2);
-    VRAM_Buffer2[bVar4 + 4] = RAM(CONCAT11(bVar3, bVar6) + (ushort)(byte)(bVar2 + 1));
-    bVar6 = bVar5;
-    if (bVar7 == 0) {
-      if (bVar9 & 1) {
-        bVar8 >>= 2;
-        bVar6 = bVar5 + 1;
-      } else {
-        bVar8 = bVar1 >> 6;
-      }
-    } else {
-      if (bVar9 & 1) {
-        bVar6 = bVar5 + 1;
-      } else {
-        bVar8 >>= 4;
-      }
+
+  for (int i = 0; i < 13; i++) {
+    const byte mt = MetatileBuffer[i];
+    const byte lo = MetatileGraphics_Low[mt >> 6];
+    const byte hi = MetatileGraphics_High[mt >> 6];
+    const u16 addr = CONCAT11(hi, lo);
+    const byte bVar2 = (mt << 2) | ((AreaParserTaskNum & 1) ? 0 : 2);
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 3] = RAM(addr + bVar2);
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 4] = RAM(addr + bVar2 + 1);
+
+    byte bVar8 = mt & 0xc0;
+    const byte tmp1 = i/2;
+
+    if ((i & 1) == 0) {
+      bVar8 >>= 4;
     }
-    AttributeBuffer[bVar5] = AttributeBuffer[bVar5] | bVar8;
-    bVar9 += 1;
-    VRAM_Buffer2_Offset = bVar4 + 2;
-    bVar5 = bVar6;
-    if (bVar9 >= 0xd) {
-      VRAM_Buffer2[(byte)(bVar4 + 5)] = 0;
-      VRAM_Buffer2_Offset = bVar4 + 5;
-      CurrentNTAddr_Low += 1;
-      if ((CurrentNTAddr_Low & 0x1f) == 0) {
-        CurrentNTAddr_Low = 0x80;
-        CurrentNTAddr_High ^= 4;
-      }
-      VRAM_Buffer_AddrCtrl = 6;
-      return;
+
+    if (even_column) {
+      bVar8 >>= 2;
     }
-  } while (true);
+
+    AttributeBuffer[tmp1] |= bVar8;
+    VRAM_Buffer2_Offset += 2;
+  }
+
+  const byte bVar4 = VRAM_Buffer2_Offset - 2;
+
+  VRAM_Buffer2[(byte)(bVar4 + 5)] = 0;
+  VRAM_Buffer2_Offset = bVar4 + 5;
+  CurrentNTAddr_Low += 1;
+  if ((CurrentNTAddr_Low & 0x1f) == 0) {
+    CurrentNTAddr_Low = 0x80;
+    CurrentNTAddr_High ^= 4;
+  }
+  VRAM_Buffer_AddrCtrl = 6;
 }
 
 
@@ -1050,18 +1038,14 @@ void RenderAreaGraphics(void) {
 // SM2MAIN:6847
 // Signature: [] -> []
 void RenderAttributeTables(void) {
-  byte bVar2;
-  if ((CurrentNTAddr_Low & 0x1f) < 4) {
-    bVar2 = CurrentNTAddr_High ^ 4;
-  } else {
-    bVar2 = CurrentNTAddr_High;
-  }
+  const byte bVar2 = (CurrentNTAddr_Low & 0x1f) < 4 ? CurrentNTAddr_High ^ 4 : CurrentNTAddr_High;
+  const byte tmp = (bVar2 & 4) | 0x23;
+
   byte bVar1 = (CurrentNTAddr_Low - 4) & 0x1f;
   bVar1 = 0xc0 + bVar1/4 + (bVar1/2)%2;
   for (int i = 0; i < 7; i++) {
-    VRAM_Buffer2[VRAM_Buffer2_Offset] = (bVar2 & 4) | 0x23;
-    bVar1 += 8;
-    VRAM_Buffer2[VRAM_Buffer2_Offset + 1] = bVar1;
+    VRAM_Buffer2[VRAM_Buffer2_Offset] = tmp;
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 1] = bVar1 + (i*8) + 8;
     VRAM_Buffer2[VRAM_Buffer2_Offset + 3] = AttributeBuffer[i];
     VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = 1;
     AttributeBuffer[i] = 0;
