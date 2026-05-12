@@ -9202,22 +9202,19 @@ byte LargePlatformCollision(const byte param_1) {
 // SM2MAIN:a7d4
 // Signature: [X] -> [X]
 byte ChkForPlayerC_LargeP(const byte param_1) {
-  byte bVar1;
-  byte bVar2;
-  byte bStack0000;
-
-  bool bVar3 = CheckPlayerVertical();
-  if (!bVar3) {
-    // Inlined: GetEnemyBoundBoxOfs
-    bVar2 = param_1 * 4 + 4;
-
-    bVar1 = Enemy_Y_Position[param_1];
-    bStack0000 = param_1;
-    bVar3 = PlayerCollisionCore(bVar2);
-    if (bVar3) {
-      ProcLPlatCollisions(bStack0000, bVar2, bVar1);
-    }
+  if (CheckPlayerVertical()) {
+    return ObjectOffset;
   }
+
+  // Inlined: GetEnemyBoundBoxOfs
+  const byte bVar2 = (param_1 + 1) * 4;
+
+  const byte bVar1 = Enemy_Y_Position[param_1];
+  const bool bVar3 = PlayerCollisionCore(bVar2);
+  if (bVar3) {
+    ProcLPlatCollisions(param_1, bVar2, bVar1);
+  }
+
   return ObjectOffset;
 }
 
@@ -9226,33 +9223,33 @@ byte ChkForPlayerC_LargeP(const byte param_1) {
 // SM2MAIN:a7f0
 // Signature: [X] -> [X]
 byte SmallPlatformCollision(const byte param_1) {
-  byte bVar1;
-  byte bVar2;
-  bool bVar3;
-
-  if (TimerControl == 0) {
-    HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = 0;
-    bVar3 = CheckPlayerVertical();
-    if (!bVar3) {
-      bVar1 = 2;
-      do {
-        // Inlined: GetEnemyBoundBoxOfs
-        bVar2 = ObjectOffset * 4 + 4;
-        // NES note: (Enemy_OffscreenBits & 0x2) came from GetEnemyBoundBoxOfs. We're inlining it here.
-        if ((Enemy_OffscreenBits & 0x2) != 0) {
-          return ObjectOffset;
-        }
-        if ((BoundingBox_UL_YPos[bVar2] >= 0x20)) {
-          bVar3 = PlayerCollisionCore(bVar2);
-          if (bVar3) {
-            return ProcLPlatCollisions(ObjectOffset, bVar2, bVar1);
-          }
-        }
-        BoundingBox_UL_YPos[bVar2] = BoundingBox_UL_YPos[bVar2] + 0x80;
-        BoundingBox_DR_YPos[bVar2] = BoundingBox_DR_YPos[bVar2] + 0x80;
-      } while (bVar1 -= 1, bVar1 != 0);
-    }
+  if (TimerControl != 0) {
+    return ObjectOffset;
   }
+
+  HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = 0;
+
+  if (CheckPlayerVertical()) {
+    return ObjectOffset;
+  }
+
+  for (int i = 2; i > 0; i--) {
+    // Inlined: GetEnemyBoundBoxOfs
+    const byte bVar2 = (ObjectOffset + 1) * 4;
+    // NES note: (Enemy_OffscreenBits & 0x2) came from GetEnemyBoundBoxOfs. We're inlining it here.
+    if ((Enemy_OffscreenBits & 0x2) != 0) {
+      return ObjectOffset;
+    }
+    if ((BoundingBox_UL_YPos[bVar2] >= 0x20)) {
+      const bool bVar3 = PlayerCollisionCore(bVar2);
+      if (bVar3) {
+        return ProcLPlatCollisions(ObjectOffset, bVar2, i);
+      }
+    }
+    BoundingBox_UL_YPos[bVar2] = BoundingBox_UL_YPos[bVar2] + 0x80;
+    BoundingBox_DR_YPos[bVar2] = BoundingBox_DR_YPos[bVar2] + 0x80;
+  }
+
   return ObjectOffset;
 }
 
@@ -9261,6 +9258,10 @@ byte SmallPlatformCollision(const byte param_1) {
 // SM2MAIN:a831
 // Signature: [X, Y, r00] -> [X]
 byte ProcLPlatCollisions(const byte param_1, const byte param_2, const byte param_3) {
+  // This is always the case in the original
+  // TODO: check if any other values would make sense and if param_2 should be eliminated
+  assert_eq_assumption(param_2, (param_1+1)*4);
+
   if (((byte)(BoundingBox_DR_YPos[param_2] - BoundingBox_UL_YPos[0]) < 4) && (PlayerSpriteVarData2[0] >= 0x80)) {
     PlayerSpriteVarData2[0] = 1;
   }
@@ -10199,8 +10200,8 @@ byte FireballBGCollision(const byte param_1) {
 // Signature: [X] -> [X]
 byte GetFireballBoundBox(const byte param_1) {
   const byte bVar1 = param_1 + 7;
-  const byte bVar2 = BoundingBoxCore(bVar1, 2);
-  return CheckRightScreenBBox(bVar1, bVar2);
+  BoundingBoxCore(bVar1, 2);
+  return CheckRightScreenBBox(bVar1);
 }
 
 
@@ -10209,8 +10210,8 @@ byte GetFireballBoundBox(const byte param_1) {
 // Signature: [X] -> [X]
 byte GetMiscBoundBox(const byte param_1) {
   const byte bVar1 = param_1 + 9;
-  const byte bVar2 = BoundingBoxCore(bVar1, 6);
-  return CheckRightScreenBBox(bVar1, bVar2);
+  BoundingBoxCore(bVar1, 6);
+  return CheckRightScreenBBox(bVar1);
 }
 
 
@@ -10269,8 +10270,8 @@ byte LargePlatformBoundBox(const byte param_1) {
 // Signature: [X] -> [X]
 byte SetupEOffsetFBBox(const byte param_1) {
   const byte bVar1 = param_1 + 1;
-  const byte bVar2 = BoundingBoxCore(bVar1, 1);
-  return CheckRightScreenBBox(bVar1, bVar2);
+  BoundingBoxCore(bVar1, 1);
+  return CheckRightScreenBBox(bVar1);
 }
 
 
@@ -10288,8 +10289,8 @@ void MoveBoundBoxOffscreen(const byte param_1) {
 
 // SMB:e29c
 // SM2MAIN:af3a
-// Signature: [X, Y] -> [Y]
-byte BoundingBoxCore(const byte param_1, const byte param_2) {
+// Signature: [X, Y] -> []
+void BoundingBoxCore(const byte param_1, const byte param_2) {
   const byte bVar1 = SprObject_Rel_YPos[param_2];
   const byte bVar2 = SprObject_Rel_XPos[param_2];
   const byte bVar3 = param_1 * 4;
@@ -10303,34 +10304,41 @@ byte BoundingBoxCore(const byte param_1, const byte param_2) {
   BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bVar3] = b;
   BoundingBox_UL_Corner_Or_XPos[(byte)(bVar3 + 1)] = c;
   BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[(byte)(bVar3 + 1)] = d;
-  return bVar3;
+
+  // NES note: The "Y" register is param_1*4, and may eventually be used in CheckRightScreenBBox.
+  // The ports omits it for clarity.
 }
 
 
 // SMB:e2de
 // SM2MAIN:af7c
-// Signature: [X, Y] -> [X]
-byte CheckRightScreenBBox(const byte param_1, const byte param_2) {
+// Signature: [X] -> [X]
+byte CheckRightScreenBBox(const byte param_1) {
+  // NES note: The "Y" register is technically an input, but's always X*4 (param_1*4) in practice.
+  // This value comes from BoundingBoxCore.
+
   const u16 screen_left_pos = (ScreenEdgeOrLeft_PageLoc[0] << 8) | ScreenEdgeOrLeft_X_Pos[0];
   const u16 object_x_pos = (SprObject_PageLoc[param_1] << 8) | SprObject_X_Position[param_1];
 
-  const u8 a = BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2];
-  const u8 b = BoundingBox_UL_Corner_Or_XPos[param_2];
+  const byte bboxoff = param_1 * 4;
+
+  const u8 a = BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bboxoff];
+  const u8 b = BoundingBox_UL_Corner_Or_XPos[bboxoff];
 
   if (object_x_pos >= (screen_left_pos + 0x80)) {
     if (a < 0x80) {
       if (b < 0x80) {
-        BoundingBox_UL_Corner_Or_XPos[param_2] = 0xff;
+        BoundingBox_UL_Corner_Or_XPos[bboxoff] = 0xff;
       }
-      BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] = 0xff;
+      BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bboxoff] = 0xff;
     }
   } else {
     // CheckLeftScreenBBox
     if (b >= 0xa0) {
       if (a >= 0x80) {
-        BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] = 0;
+        BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bboxoff] = 0;
       }
-      BoundingBox_UL_Corner_Or_XPos[param_2] = 0;
+      BoundingBox_UL_Corner_Or_XPos[bboxoff] = 0;
     }
   }
 
@@ -10350,41 +10358,28 @@ bool PlayerCollisionCore(const byte param_1) {
 // SM2MAIN:afc5
 // Signature: [X, Y] -> [C]
 bool SprObjectCollisionCore(const byte param_1, const byte param_2) {
-  byte bVar2 = 1;
-  byte tmp1 = param_1;
-  byte tmp2 = param_2;
-  do {
-    byte bVar1 = BoundingBox_UL_Corner_Or_XPos[tmp2];
-    if (bVar1 < BoundingBox_UL_Corner_Or_XPos[tmp1]) {
-      if (bVar1 < BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp1]) {
-        if ((BoundingBox_UL_Corner_Or_XPos[tmp1] <= BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp1])
-            && (BoundingBox_UL_Corner_Or_XPos[tmp1] > BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp2])) {
-          return BoundingBox_UL_Corner_Or_XPos[tmp1] <= BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp2];
-        }
-      } else if (bVar1 != BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp1]) {
-        bVar1 = BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp2];
-        if (BoundingBox_UL_Corner_Or_XPos[tmp2] <= bVar1) {
-          if (BoundingBox_UL_Corner_Or_XPos[tmp1] > bVar1) {
-            return BoundingBox_UL_Corner_Or_XPos[tmp1] <= bVar1;
-          }
-        }
-      }
-    } else if ((((bVar1 != BoundingBox_UL_Corner_Or_XPos[tmp1])
-                 && (BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp1] <= bVar1))
-                && (bVar1 != BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp1]))
-               && (((bVar1 < BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp2]
-                     || (bVar1 == BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp2]))
-                    || (BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[tmp2]
-                        < BoundingBox_UL_Corner_Or_XPos[tmp1])))) {
+  assert_eq_assumption(param_1 % 4, 0);
+  assert_eq_assumption(param_2 % 4, 0);
+
+  // Iterate on both the X and Y axes
+  for (int i = 0; i < 2; i++) {
+    const byte tl1 = BoundingBoxCoords[param_1+i];
+    const byte tl2 = BoundingBoxCoords[param_2+i];
+    const byte br1 = BoundingBoxCoords[param_1+i + 2];
+    const byte br2 = BoundingBoxCoords[param_2+i + 2];
+
+    // This is _almost_ symmetrical, but not quite!
+
+    if (tl2 < tl1 && br2 < tl1 && (tl1 <= br1 || (tl2 > br1 && tl2 <= br2))) {
       return false;
     }
-    tmp1 += 1;
-    tmp2 += 1;
-    bVar2 -= 1;
-    if (bVar2 >= 0x80) {
-      return true;
+
+    if (tl2 > tl1 && br1 < tl2 && (tl2 <= br2 || (tl1 > br2))) {
+      return false;
     }
-  } while (true);
+  }
+
+  return true;
 }
 
 

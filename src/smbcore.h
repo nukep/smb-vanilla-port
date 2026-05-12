@@ -19,6 +19,7 @@ typedef int32_t i32;
 #define warning(...)
 
 #define assert_smb_crashbug(condition, message) assert(condition)
+#define assert_eq_assumption(expected, actual) assert((expected) == (actual))
 #define assert_eq_regressiontest(expected, actual) assert((expected) == (actual))
 
 #ifdef _MSC_VER

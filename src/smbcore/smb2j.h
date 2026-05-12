@@ -1432,10 +1432,10 @@ byte smb2j_SetupEOffsetFBBox(byte param_1);
 void smb2j_MoveBoundBoxOffscreen(byte param_1);
 #define MoveBoundBoxOffscreen smb2j_MoveBoundBoxOffscreen
 
-byte smb2j_BoundingBoxCore(byte param_1,byte param_2);
+void smb2j_BoundingBoxCore(byte param_1,byte param_2);
 #define BoundingBoxCore smb2j_BoundingBoxCore
 
-byte smb2j_CheckRightScreenBBox(byte param_1,byte param_2);
+byte smb2j_CheckRightScreenBBox(byte param_1);
 #define CheckRightScreenBBox smb2j_CheckRightScreenBBox
 
 bool smb2j_PlayerCollisionCore(byte param_1);

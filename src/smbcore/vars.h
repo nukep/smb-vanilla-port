@@ -246,6 +246,7 @@
 #define Enemy_BoundBoxCtrl               RAMARRAY(0x049A, 0)
 #define Fireball_BoundBoxCtrl            RAMARRAY(0x04A0, 0)
 #define Misc_BoundBoxCtrl                RAMARRAY(0x04A2, 0)
+#define BoundingBoxCoords                RAMARRAY(0x04AC, 0)
 #define BoundingBox_UL_Corner            RAMARRAY(0x04AC, 0)
 #define BoundingBox_UL_Corner_Or_XPos    RAMARRAY(0x04AC, 0)
 #define BoundingBox_UL_XPos              RAMARRAY(0x04AC, 0)

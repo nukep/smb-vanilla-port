@@ -1441,10 +1441,10 @@ byte smb1_SetupEOffsetFBBox(byte param_1);
 void smb1_MoveBoundBoxOffscreen(byte param_1);
 #define MoveBoundBoxOffscreen smb1_MoveBoundBoxOffscreen
 
-byte smb1_BoundingBoxCore(byte param_1,byte param_2);
+void smb1_BoundingBoxCore(byte param_1,byte param_2);
 #define BoundingBoxCore smb1_BoundingBoxCore
 
-byte smb1_CheckRightScreenBBox(byte param_1,byte param_2);
+byte smb1_CheckRightScreenBBox(byte param_1);
 #define CheckRightScreenBBox smb1_CheckRightScreenBBox
 
 bool smb1_PlayerCollisionCore(byte param_1);
