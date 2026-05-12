@@ -10047,13 +10047,15 @@ byte ChkForBump_HammerBroJ(const byte param_1) {
 // SM2MAIN:add9
 // Signature: [X] -> [N, C, r00]
 struct_ncr00 PlayerEnemyDiff(const byte param_1) {
-  struct_ncr00 sVar3;
+  const u16 player_pos = (SprObject_PageLoc[0] << 8) | (SprObject_X_Position[0]);
+  const u16 enemy_pos = (Enemy_PageLoc[param_1] << 8) | (Enemy_X_Position[param_1]);
 
-  const bool bVar2 = SprObject_X_Position[0] <= Enemy_X_Position[param_1];
-  const byte bVar1 = Enemy_PageLoc[param_1];
-  sVar3.n = 0x7f < (byte)((bVar1 - SprObject_PageLoc[0]) - !bVar2);
-  sVar3.c = (bVar2 && SprObject_PageLoc[0] <= bVar1) || (!bVar2 && SprObject_PageLoc[0] < bVar1);
-  sVar3.r00 = Enemy_X_Position[param_1] - SprObject_X_Position[0];
+  const i16 diff = enemy_pos - player_pos;
+
+  struct_ncr00 sVar3;
+  sVar3.n = diff < 0;
+  sVar3.c = player_pos <= enemy_pos;
+  sVar3.r00 = diff & 0xff;
   return sVar3;
 }
 
@@ -10309,23 +10311,29 @@ byte BoundingBoxCore(const byte param_1, const byte param_2) {
 // SM2MAIN:af7c
 // Signature: [X, Y] -> [X]
 byte CheckRightScreenBBox(const byte param_1, const byte param_2) {
-  const byte bVar1 = ScreenEdgeOrLeft_PageLoc[0] + (ScreenEdgeOrLeft_X_Pos[0] >= 0x80);
-  const bool bVar2 = (byte)(ScreenEdgeOrLeft_X_Pos[0] + 0x80) <= SprObject_X_Position[param_1];
-  if ((bVar2 && bVar1 <= SprObject_PageLoc[param_1]) || (!bVar2 && bVar1 < SprObject_PageLoc[param_1])) {
-    if (BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] < 0x80) {
-      if (BoundingBox_UL_Corner_Or_XPos[param_2] < 0x80) {
+  const u16 screen_left_pos = (ScreenEdgeOrLeft_PageLoc[0] << 8) | ScreenEdgeOrLeft_X_Pos[0];
+  const u16 object_x_pos = (SprObject_PageLoc[param_1] << 8) | SprObject_X_Position[param_1];
+
+  const u8 a = BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2];
+  const u8 b = BoundingBox_UL_Corner_Or_XPos[param_2];
+
+  if (object_x_pos >= (screen_left_pos + 0x80)) {
+    if (a < 0x80) {
+      if (b < 0x80) {
         BoundingBox_UL_Corner_Or_XPos[param_2] = 0xff;
       }
       BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] = 0xff;
     }
-    return ObjectOffset;
-  }
-  if ((BoundingBox_UL_Corner_Or_XPos[param_2] >= 0x80) && (BoundingBox_UL_Corner_Or_XPos[param_2] >= 0xa0)) {
-    if (BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] >= 0x80) {
-      BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] = 0;
+  } else {
+    // CheckLeftScreenBBox
+    if (b >= 0xa0) {
+      if (a >= 0x80) {
+        BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] = 0;
+      }
+      BoundingBox_UL_Corner_Or_XPos[param_2] = 0;
     }
-    BoundingBox_UL_Corner_Or_XPos[param_2] = 0;
   }
+
   return ObjectOffset;
 }
 
