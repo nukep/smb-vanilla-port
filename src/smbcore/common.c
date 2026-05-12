@@ -10292,10 +10292,15 @@ byte BoundingBoxCore(const byte param_1, const byte param_2) {
   const byte bVar2 = SprObject_Rel_XPos[param_2];
   const byte bVar3 = param_1 * 4;
   const byte bVar4 = PlayerOrSprObj_BoundBoxCtrl[param_1] * 4;
-  BoundingBox_UL_Corner_Or_XPos[bVar3] = bVar2 + BoundBoxCtrlData[bVar4];
-  BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bVar3] = bVar2 + BoundBoxCtrlData[bVar4 + 2];
-  BoundingBox_UL_Corner_Or_XPos[(byte)(bVar3 + 1)] = bVar1 + BoundBoxCtrlData[(byte)(bVar4 + 1)];
-  BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[(byte)(bVar3 + 1)] = bVar1 + BoundBoxCtrlData[(byte)(bVar4 + 1) + 2];
+  const byte a = bVar2 + BoundBoxCtrlData[bVar4];
+  const byte b = bVar2 + BoundBoxCtrlData[bVar4 + 2];
+  const byte c = bVar1 + BoundBoxCtrlData[(byte)(bVar4 + 1)];
+  const byte d = bVar1 + BoundBoxCtrlData[(byte)(bVar4 + 1) + 2];
+
+  BoundingBox_UL_Corner_Or_XPos[bVar3] = a;
+  BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bVar3] = b;
+  BoundingBox_UL_Corner_Or_XPos[(byte)(bVar3 + 1)] = c;
+  BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[(byte)(bVar3 + 1)] = d;
   return bVar3;
 }
 
@@ -11632,9 +11637,8 @@ C_S_IGAtt:
 // SM2MAIN:be0f
 // Signature: [] -> [Y]
 byte RelativePlayerPosition(void) {
-  const byte bVar1 = 0;
   GetObjRelativePosition(0, 0);
-  return bVar1;
+  return 0;
 }
 
 
@@ -11689,12 +11693,10 @@ byte RelativeBlockPosition(const byte param_1) {
 
 // SMB:f171
 // SM2MAIN:be56
-// Signature: [X, Y] -> [A]
-byte GetObjRelativePosition(const byte param_1, const byte param_2) {
+// Signature: [X, Y] -> []
+void GetObjRelativePosition(const byte param_1, const byte param_2) {
   SprObject_Rel_YPos[param_2] = SprObject_Y_Position[param_1];
-  const byte bVar1 = SprObject_X_Position[param_1] - ScreenEdgeOrLeft_X_Pos[0];
-  SprObject_Rel_XPos[param_2] = bVar1;
-  return bVar1;
+  SprObject_Rel_XPos[param_2] = SprObject_X_Position[param_1] - ScreenEdgeOrLeft_X_Pos[0];
 }
 
 
@@ -11760,23 +11762,13 @@ byte GetBlockOffscreenBits(const byte param_1) {
 // SM2MAIN:bea5
 // Signature: [X, Y] -> [X]
 byte GetOffScreenBitsSet(const byte param_1, const byte param_2) {
-  const struct_ar00 sVar2 = RunOffscrBitsSubs(param_1);
-  SprObject_OffscrBits[param_2] = sVar2.a << 4 | sVar2.r00;
+  // Inlined: RunOffscrBitsSubs (only used once in the original games)
+  const byte xbits = GetXOffscreenBits(param_1);
+  const byte ybits = GetYOffscreenBits(param_1);
+
+  SprObject_OffscrBits[param_2] = (ybits << 4) | (xbits >> 4);
+
   return ObjectOffset;
-}
-
-
-// SMB:f1d7
-// SM2MAIN:bebc
-// Signature: [X] -> [A, r00]
-struct_ar00 RunOffscrBitsSubs(const byte param_1) {
-  struct_ar00 sVar2;
-
-  byte bVar1 = GetXOffscreenBits(param_1);
-  bVar1 >>= 4;
-  sVar2.a = GetYOffscreenBits(param_1);
-  sVar2.r00 = bVar1;
-  return sVar2;
 }
 
 

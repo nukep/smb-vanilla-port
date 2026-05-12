@@ -1612,7 +1612,7 @@ byte smb2j_RelativeEnemyPosition(byte param_1);
 byte smb2j_RelativeBlockPosition(byte param_1);
 #define RelativeBlockPosition smb2j_RelativeBlockPosition
 
-byte smb2j_GetObjRelativePosition(byte param_1,byte param_2);
+void smb2j_GetObjRelativePosition(byte param_1,byte param_2);
 #define GetObjRelativePosition smb2j_GetObjRelativePosition
 
 void smb2j_GetPlayerOffscreenBits(void);
@@ -1638,9 +1638,6 @@ byte smb2j_GetBlockOffscreenBits(byte param_1);
 
 byte smb2j_GetOffScreenBitsSet(byte param_1,byte param_2);
 #define GetOffScreenBitsSet smb2j_GetOffScreenBitsSet
-
-struct_ar00 smb2j_RunOffscrBitsSubs(byte param_1);
-#define RunOffscrBitsSubs smb2j_RunOffscrBitsSubs
 
 byte smb2j_GetXOffscreenBits(byte param_1);
 #define GetXOffscreenBits smb2j_GetXOffscreenBits

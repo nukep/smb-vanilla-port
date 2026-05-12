@@ -1621,7 +1621,7 @@ byte smb1_RelativeEnemyPosition(byte param_1);
 byte smb1_RelativeBlockPosition(byte param_1);
 #define RelativeBlockPosition smb1_RelativeBlockPosition
 
-byte smb1_GetObjRelativePosition(byte param_1,byte param_2);
+void smb1_GetObjRelativePosition(byte param_1,byte param_2);
 #define GetObjRelativePosition smb1_GetObjRelativePosition
 
 void smb1_GetPlayerOffscreenBits(void);
@@ -1647,9 +1647,6 @@ byte smb1_GetBlockOffscreenBits(byte param_1);
 
 byte smb1_GetOffScreenBitsSet(byte param_1,byte param_2);
 #define GetOffScreenBitsSet smb1_GetOffScreenBitsSet
-
-struct_ar00 smb1_RunOffscrBitsSubs(byte param_1);
-#define RunOffscrBitsSubs smb1_RunOffscrBitsSubs
 
 byte smb1_GetXOffscreenBits(byte param_1);
 #define GetXOffscreenBits smb1_GetXOffscreenBits
