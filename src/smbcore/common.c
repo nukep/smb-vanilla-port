@@ -9271,19 +9271,16 @@ byte ProcLPlatCollisions(const byte param_1, const byte param_2, const byte para
     if ((Enemy_ID[param_1] != 0x2b) && (Enemy_ID[param_1] != 0x2c)) {
       tmp3 = param_1;
     }
-    const byte bVar1 = ObjectOffset;
     HammerThrowingTimer_Or_PlatformCollisionFlag[ObjectOffset] = tmp3;
     Player_State = 0;
-    return bVar1;
+    return ObjectOffset;
   }
-  byte bVar1 = 1;
-  if (((byte)(BBOX_BOTRIGHT_X(0) - BBOX_TOPLEFT_X(param_2_div4)) < 8)) {
-    ImpedePlayerMove(bVar1);
-  }
-  else {
-    bVar1 = 2;
-    if ((byte)((BBOX_BOTRIGHT_X(param_2_div4) - BBOX_TOPLEFT_X(0)) - 1) < 9) {
-      ImpedePlayerMove(bVar1);
+
+  if ((byte)(BBOX_BOTRIGHT_X(0) - BBOX_TOPLEFT_X(param_2_div4)) <= 7) {
+    ImpedePlayerMove(1);
+  } else {
+    if ((byte)(BBOX_BOTRIGHT_X(param_2_div4) - BBOX_TOPLEFT_X(0) - 1) <= 8) {
+      ImpedePlayerMove(2);
     }
   }
   return ObjectOffset;
