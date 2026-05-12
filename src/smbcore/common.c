@@ -9235,19 +9235,19 @@ byte SmallPlatformCollision(const byte param_1) {
 
   for (int i = 2; i > 0; i--) {
     // Inlined: GetEnemyBoundBoxOfs
-    const byte bVar2 = (ObjectOffset + 1) * 4;
     // NES note: (Enemy_OffscreenBits & 0x2) came from GetEnemyBoundBoxOfs. We're inlining it here.
     if ((Enemy_OffscreenBits & 0x2) != 0) {
       return ObjectOffset;
     }
-    if ((BoundingBox_UL_YPos[bVar2] >= 0x20)) {
-      const bool bVar3 = PlayerCollisionCore(bVar2);
+    const byte bVar1 = ObjectOffset + 1;
+    if ((BBOX_TOPLEFT_Y(bVar1) >= 0x20)) {
+      const bool bVar3 = PlayerCollisionCore(bVar1 * 4);
       if (bVar3) {
-        return ProcLPlatCollisions(ObjectOffset, bVar2, i);
+        return ProcLPlatCollisions(ObjectOffset, bVar1 * 4, i);
       }
     }
-    BoundingBox_UL_YPos[bVar2] = BoundingBox_UL_YPos[bVar2] + 0x80;
-    BoundingBox_DR_YPos[bVar2] = BoundingBox_DR_YPos[bVar2] + 0x80;
+    BBOX_TOPLEFT_Y(bVar1) += 0x80;
+    BBOX_BOTRIGHT_Y(bVar1) += 0x80;
   }
 
   return ObjectOffset;
@@ -9261,11 +9261,12 @@ byte ProcLPlatCollisions(const byte param_1, const byte param_2, const byte para
   // This is always the case in the original
   // TODO: check if any other values would make sense and if param_2 should be eliminated
   assert_eq_assumption(param_2, (param_1+1)*4);
+  const byte param_2_div4 = param_2 / 4;
 
-  if (((byte)(BoundingBox_DR_YPos[param_2] - BoundingBox_UL_YPos[0]) < 4) && (PlayerSpriteVarData2[0] >= 0x80)) {
+  if (((byte)(BBOX_BOTRIGHT_Y(param_2_div4) - BBOX_TOPLEFT_Y(0)) < 4) && (PlayerSpriteVarData2[0] >= 0x80)) {
     PlayerSpriteVarData2[0] = 1;
   }
-  if (((byte)(BoundingBox_DR_YPos[0] - BoundingBox_UL_YPos[param_2]) < 6) && (PlayerSpriteVarData2[0] < 0x80)) {
+  if (((byte)(BBOX_BOTRIGHT_Y(0) - BBOX_TOPLEFT_Y(param_2_div4)) < 6) && (PlayerSpriteVarData2[0] < 0x80)) {
     byte tmp3 = param_3;
     if ((Enemy_ID[param_1] != 0x2b) && (Enemy_ID[param_1] != 0x2c)) {
       tmp3 = param_1;
@@ -9276,12 +9277,12 @@ byte ProcLPlatCollisions(const byte param_1, const byte param_2, const byte para
     return bVar1;
   }
   byte bVar1 = 1;
-  if (((byte)(BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[0] - BoundingBox_UL_Corner_Or_XPos[param_2]) < 8)) {
+  if (((byte)(BBOX_BOTRIGHT_X(0) - BBOX_TOPLEFT_X(param_2_div4)) < 8)) {
     ImpedePlayerMove(bVar1);
   }
   else {
     bVar1 = 2;
-    if ((byte)((BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[param_2] - BoundingBox_UL_Corner_Or_XPos[0]) - 1) < 9) {
+    if ((byte)((BBOX_BOTRIGHT_X(param_2_div4) - BBOX_TOPLEFT_X(0)) - 1) < 9) {
       ImpedePlayerMove(bVar1);
     }
   }
@@ -10254,14 +10255,12 @@ byte GetMaskedOffScrBits(const byte param_1, const byte param_2, const byte para
 // SM2MAIN:af11
 // Signature: [X] -> [X]
 byte LargePlatformBoundBox(const byte param_1) {
-  byte bVar2 = param_1 + 1;
-  const byte bVar1 = GetXOffscreenBits(bVar2);
-  bVar2 -= 1;
+  const byte bVar1 = GetXOffscreenBits(param_1 + 1);
   if (bVar1 >= 0xfe) {
-    MoveBoundBoxOffscreen(bVar2);
-    return bVar2;
+    MoveBoundBoxOffscreen(param_1);
+    return param_1;
   }
-  return SetupEOffsetFBBox(bVar2);
+  return SetupEOffsetFBBox(param_1);
 }
 
 
@@ -10279,11 +10278,25 @@ byte SetupEOffsetFBBox(const byte param_1) {
 // SM2MAIN:af27
 // Signature: [X] -> []
 void MoveBoundBoxOffscreen(const byte param_1) {
-  const byte bVar1 = param_1 << 2;
-  EnemyBoundingBoxCoord[bVar1] = 0xff;
-  EnemyBoundingBoxCoord[bVar1 + 1] = 0xff;
-  EnemyBoundingBoxCoord[bVar1 + 2] = 0xff;
-  EnemyBoundingBoxCoord[bVar1 + 3] = 0xff;
+  if (param_1 % 64 == 63) {
+    // TODO: should we keep this in? Would this actually happen?
+
+    // NES note: The stores in this subroutine are based on $04B0, plus the y register.
+    // The address $04B0 is $04AC + 4, or BoundingBoxCoords + 4.
+    //
+    // To make things cleaner in the port, we just add 1 to the index to
+    // base it on the usual bounding box array.
+    // This would however wraparound the array early,
+    // so here is the workaround for that:
+
+    RAM(0x05AC) = RAM(0x05AD) = RAM(0x05AE) = RAM(0x05AF) = 0xff;
+    return;
+  }
+
+  BBOX_TOPLEFT_X(param_1 + 1)  = 0xff;
+  BBOX_TOPLEFT_Y(param_1 + 1)  = 0xff;
+  BBOX_BOTRIGHT_X(param_1 + 1) = 0xff;
+  BBOX_BOTRIGHT_Y(param_1 + 1) = 0xff;
 }
 
 
@@ -10293,17 +10306,12 @@ void MoveBoundBoxOffscreen(const byte param_1) {
 void BoundingBoxCore(const byte param_1, const byte param_2) {
   const byte bVar1 = SprObject_Rel_YPos[param_2];
   const byte bVar2 = SprObject_Rel_XPos[param_2];
-  const byte bVar3 = param_1 * 4;
   const byte bVar4 = PlayerOrSprObj_BoundBoxCtrl[param_1] * 4;
-  const byte a = bVar2 + BoundBoxCtrlData[bVar4];
-  const byte b = bVar2 + BoundBoxCtrlData[bVar4 + 2];
-  const byte c = bVar1 + BoundBoxCtrlData[(byte)(bVar4 + 1)];
-  const byte d = bVar1 + BoundBoxCtrlData[(byte)(bVar4 + 1) + 2];
 
-  BoundingBox_UL_Corner_Or_XPos[bVar3] = a;
-  BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bVar3] = b;
-  BoundingBox_UL_Corner_Or_XPos[(byte)(bVar3 + 1)] = c;
-  BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[(byte)(bVar3 + 1)] = d;
+  BBOX_TOPLEFT_X(param_1) = bVar2 + BoundBoxCtrlData[bVar4];
+  BBOX_BOTRIGHT_X(param_1)= bVar2 + BoundBoxCtrlData[bVar4 + 2];
+  BBOX_TOPLEFT_Y(param_1) = bVar1 + BoundBoxCtrlData[(byte)(bVar4 + 1)];
+  BBOX_BOTRIGHT_Y(param_1)= bVar1 + BoundBoxCtrlData[(byte)(bVar4 + 1) + 2];
 
   // NES note: The "Y" register is param_1*4, and may eventually be used in CheckRightScreenBBox.
   // The ports omits it for clarity.
@@ -10320,25 +10328,23 @@ byte CheckRightScreenBBox(const byte param_1) {
   const u16 screen_left_pos = (ScreenEdgeOrLeft_PageLoc[0] << 8) | ScreenEdgeOrLeft_X_Pos[0];
   const u16 object_x_pos = (SprObject_PageLoc[param_1] << 8) | SprObject_X_Position[param_1];
 
-  const byte bboxoff = param_1 * 4;
-
-  const u8 a = BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bboxoff];
-  const u8 b = BoundingBox_UL_Corner_Or_XPos[bboxoff];
+  const u8 a = BBOX_BOTRIGHT_X(param_1);
+  const u8 b = BBOX_TOPLEFT_X(param_1);
 
   if (object_x_pos >= (screen_left_pos + 0x80)) {
     if (a < 0x80) {
       if (b < 0x80) {
-        BoundingBox_UL_Corner_Or_XPos[bboxoff] = 0xff;
+        BBOX_TOPLEFT_X(param_1) = 0xff;
       }
-      BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bboxoff] = 0xff;
+      BBOX_BOTRIGHT_X(param_1) = 0xff;
     }
   } else {
     // CheckLeftScreenBBox
     if (b >= 0xa0) {
       if (a >= 0x80) {
-        BoundingBox_DR_XPos_Or_BoundingBox_LR_Corner[bboxoff] = 0;
+        BBOX_BOTRIGHT_X(param_1) = 0;
       }
-      BoundingBox_UL_Corner_Or_XPos[bboxoff] = 0;
+      BBOX_TOPLEFT_X(param_1) = 0;
     }
   }
 

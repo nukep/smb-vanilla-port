@@ -10,4 +10,16 @@
 #define BUTTON_L 0x02
 #define BUTTON_R 0x01
 
+// Note that `i` is modulo 64 for bounding boxes, hence the `(byte)` cast.
+
+#define BBOX_TOPLEFT_X(i)  BoundingBoxCoords[(byte)((i)*4) + 0]
+#define BBOX_TOPLEFT_Y(i)  BoundingBoxCoords[(byte)((i)*4) + 1]
+#define BBOX_BOTRIGHT_X(i) BoundingBoxCoords[(byte)((i)*4) + 2]
+#define BBOX_BOTRIGHT_Y(i) BoundingBoxCoords[(byte)((i)*4) + 3]
+
+#define NOWRAP_BBOX_TOPLEFT_X(i)  BoundingBoxCoords[(i)*4 + 0]
+#define NOWRAP_BBOX_TOPLEFT_Y(i)  BoundingBoxCoords[(i)*4 + 1]
+#define NOWRAP_BBOX_BOTRIGHT_X(i) BoundingBoxCoords[(i)*4 + 2]
+#define NOWRAP_BBOX_BOTRIGHT_Y(i) BoundingBoxCoords[(i)*4 + 3]
+
 #endif
