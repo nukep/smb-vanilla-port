@@ -1720,12 +1720,6 @@ void smb2j_LoadMarioPhysics(void);
 void smb2j_LoadAreaPointer(void);
 #define LoadAreaPointer smb2j_LoadAreaPointer
 
-byte smb2j_GetAreaType(byte param_1);
-#define GetAreaType smb2j_GetAreaType
-
-byte smb2j_FindAreaPointer(void);
-#define FindAreaPointer smb2j_FindAreaPointer
-
 void smb2j_FUN_e149(void);
 #define FUN_e149 smb2j_FUN_e149
 

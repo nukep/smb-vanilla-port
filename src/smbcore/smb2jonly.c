@@ -1228,32 +1228,57 @@ void WriteNameToVictoryMsg(void) {
 // SM2DATA4:c2c3
 // Signature: [] -> []
 void AltHard_GetAreaDataAddrs(void) {
-  byte bVar3 = GetAreaType(AreaPointer);
-  AreaAddrsLOffset = AreaPointer & 0x1f;
-  bVar3 = (AltHard_EnemyAddrHOffsets[bVar3] + AreaAddrsLOffset) * 2;
-  EnemyData.hi = AltHard_EnemyDataAddrs[bVar3 + 1];
-  EnemyData.lo = AltHard_EnemyDataAddrs[bVar3];
-  const byte bVar2 = (AltHard_AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
-  const byte bVar1 = AltHard_AreaDataAddrs[bVar2];
-  AreaData = CONCAT11(AltHard_AreaDataAddrs[bVar2 + 1], bVar1);
-  bVar3 = *AreaData;
-  const byte bVar4 = bVar3 & 7;
-  ForegroundScenery = bVar4;
-  if (bVar4 >= 4) {
+  // Inlined: GetAreaType
+  const byte area_type = (AreaPointer & 0x60) >> 5;
+  const byte loffset = AreaPointer & 0x1f;
+  AreaType = area_type;
+  AreaAddrsLOffset = loffset;
+
+  const byte off = AltHard_EnemyAddrHOffsets[area_type] + loffset;
+
+  EnemyData.lo = AltHard_EnemyDataAddrs[(byte)(off * 2)];
+  EnemyData.hi = AltHard_EnemyDataAddrs[(byte)(off * 2) + 1];
+
+  const byte bVar2 = (AltHard_AreaDataHOffsets[area_type] + loffset) * 2;
+  const byte lo = AltHard_AreaDataAddrs[bVar2];
+  const byte hi = AltHard_AreaDataAddrs[bVar2 + 1];
+
+  AreaData = (hi << 8) | lo;
+
+  const byte area_data_0 = AreaData[0];
+  // gg ppp fff
+
+  const byte gg = area_data_0 >> 6;
+  const byte ppp = (area_data_0 & 0x38) >> 3;
+  const byte fff = area_data_0 & 7;
+
+  if (fff >= 4) {
     ForegroundScenery = 0;
-    BackgroundColorCtrl = bVar4;
+    BackgroundColorCtrl = fff;
+  } else {
+    ForegroundScenery = fff;
   }
-  PlayerEntranceCtrl = (bVar3 & 0x38) >> 3;
-  GameTimerSetting = bVar3 >> 6;
-  bVar3 = AreaData[1];
-  TerrainControl = bVar3 & 0xf;
-  BackgroundScenery = (bVar3 & 0x30) >> 4;
-  AreaStyle = bVar3 >> 6;
-  if (AreaStyle == 3) {
+  PlayerEntranceCtrl = ppp;
+  GameTimerSetting = gg;
+
+  const byte area_data_1 = AreaData[1];
+  // aa bb tttt
+
+  const byte aa = area_data_1 >> 6;
+  const byte bb = (area_data_1 & 0x30) >> 4;
+  const byte tttt = area_data_1 & 0xf;
+
+  TerrainControl = tttt;
+  BackgroundScenery = bb;
+  AreaStyle = aa;
+  if (aa == 3) {
     AreaStyle = 0;
     CloudTypeOverride = 3;
+  } else {
+    AreaStyle = aa;
   }
-  AreaData = CONCAT11(AltHard_AreaDataAddrs[bVar2 + 1] + (bVar1 >= 0xfe), bVar1 + 2);
+
+  AreaData += 2;
 }
 
 

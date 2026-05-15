@@ -3011,33 +3011,26 @@ ushort GetBlockBufferAddr(byte column) {
 // SM2MAIN:c2a4
 // Signature: [] -> []
 void LoadAreaPointer(void) {
-  AreaPointer = FindAreaPointer();
-  GetAreaType(AreaPointer);
+  // Inlined: FindAreaPointer
+  const byte area_pointer = AreaAddrOffsets[(byte)(WorldAddrOffsets[WorldNumber] + AreaNumber)];
+  const byte area_type = (area_pointer & 0x60) >> 5;
+
+  AreaPointer = area_pointer;
+  AreaType = area_type;
 }
-
-
-// SMB:9c09
-// SM2MAIN:c2aa
-// Signature: [A] -> [A]
-byte GetAreaType(const byte param_1) {
-  AreaType = (param_1 >> 5) & 0x03;
-  return AreaType;
-}
-
-
-// SMB:9c13
-// SM2MAIN:c2b4
-// Signature: [] -> [A]
-byte FindAreaPointer(void) { return AreaAddrOffsets[(byte)(WorldAddrOffsets[WorldNumber] + AreaNumber)]; }
 
 
 // SMB:9c22
 // SM2MAIN:c2c3
 // Signature: [] -> []
 void GetAreaDataAddrs(void) {
-  byte bVar2 = GetAreaType(AreaPointer);
-  AreaAddrsLOffset = AreaPointer & 0x1f;
-  const byte off = (byte)(EnemyAddrHOffsets[bVar2] + AreaAddrsLOffset);
+  // Inlined: GetAreaType
+  const byte area_type = (AreaPointer & 0x60) >> 5;
+  const byte loffset = AreaPointer & 0x1f;
+  AreaType = area_type;
+  AreaAddrsLOffset = loffset;
+
+  const byte off = EnemyAddrHOffsets[area_type] + loffset;
 
 #ifdef SMB1_MODE
   EnemyData.lo = EnemyDataAddrLow[off];
@@ -3049,44 +3042,51 @@ void GetAreaDataAddrs(void) {
 #endif
 
 #ifdef SMB1_MODE
-  const byte bVar2_off = (byte)(AreaDataHOffsets[AreaType] + AreaAddrsLOffset);
+  const byte bVar2_off = (byte)(AreaDataHOffsets[area_type] + loffset);
   const byte lo = AreaDataAddrLow[bVar2_off];
-  byte hi = AreaDataAddrHigh[bVar2_off];
+  const byte hi = AreaDataAddrHigh[bVar2_off];
 #endif
 #ifdef SMB2J_MODE
-  const byte bVar2_off = (AreaDataHOffsets[AreaType] + AreaAddrsLOffset) * 2;
+  const byte bVar2_off = (AreaDataHOffsets[area_type] + loffset) * 2;
   const byte lo = AreaDataAddrs[bVar2_off];
-  byte hi = AreaDataAddrs[bVar2_off + 1];
+  const byte hi = AreaDataAddrs[bVar2_off + 1];
 #endif
 
   AreaData = (hi << 8) | lo;
 
-  bVar2 = AreaData[0];
-  const byte bVar3 = bVar2 & 7;
-  ForegroundScenery = bVar3;
-  if (bVar3 >= 4) {
+  const byte area_data_0 = AreaData[0];
+  // gg ppp fff
+
+  const byte gg = area_data_0 >> 6;
+  const byte ppp = (area_data_0 & 0x38) >> 3;
+  const byte fff = area_data_0 & 7;
+
+  if (fff >= 4) {
     ForegroundScenery = 0;
-    BackgroundColorCtrl = bVar3;
+    BackgroundColorCtrl = fff;
+  } else {
+    ForegroundScenery = fff;
   }
-  PlayerEntranceCtrl = (bVar2 & 0x38) >> 3;
-  GameTimerSetting = bVar2 >> 6;
-  bVar2 = AreaData[1];
-  TerrainControl = bVar2 & 0xf;
-  BackgroundScenery = (bVar2 & 0x30) >> 4;
-  AreaStyle = bVar2 >> 6;
-  if (AreaStyle == 3) {
+  PlayerEntranceCtrl = ppp;
+  GameTimerSetting = gg;
+
+  const byte area_data_1 = AreaData[1];
+  // aa bb tttt
+
+  const byte aa = area_data_1 >> 6;
+  const byte bb = (area_data_1 & 0x30) >> 4;
+  const byte tttt = area_data_1 & 0xf;
+
+  TerrainControl = tttt;
+  BackgroundScenery = bb;
+  if (aa == 3) {
     AreaStyle = 0;
     CloudTypeOverride = 3;
+  } else {
+    AreaStyle = aa;
   }
 
-#ifdef SMB1_MODE
-  hi = AreaDataAddrHigh[(byte)(AreaDataHOffsets[AreaType] + AreaAddrsLOffset)];
-#endif
-#ifdef SMB2J_MODE
-  hi = AreaDataAddrs[bVar2_off + 1];
-#endif
-
-  AreaData = ((hi << 8) | lo) + 2;
+  AreaData += 2;
 }
 
 enum GameMode_jumptable_item {
@@ -3760,7 +3760,7 @@ void PlayerMovementSubs(void) {
   if (PlayerSize == 0) {
     bVar1 = CrouchingFlag;
     if (Player_State == 0) {
-      bVar1 = Up_Down_Buttons & 4;
+      bVar1 = Up_Down_Buttons & BUTTON_D;
     }
   }
   CrouchingFlag = bVar1;
@@ -3827,7 +3827,7 @@ void FallingSub(void) {
 // Signature: [] -> []
 void JumpSwimSub(void) {
   if ((PlayerSpriteVarData2[0] < 0x80)
-      || (((A_B_Buttons & 0x80 & PreviousA_B_Buttons) == 0
+      || (((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0
            && (DiffToHaltJump <= (byte)(JumpOrigin_Y_Position - SprObject_Y_Position[0]))))) {
     VerticalForce = VerticalForceDown;
   }
@@ -3897,7 +3897,7 @@ void PlayerPhysicsSub(void) {
     byte bVar1 = 0;
     if (((Up_Down_Buttons & Player_CollisionBits) != 0)) {
       bVar1 = 1;
-      if ((Up_Down_Buttons & Player_CollisionBits & 8) == 0) {
+      if ((Up_Down_Buttons & Player_CollisionBits & BUTTON_U) == 0) {
         bVar1 = 2;
       }
     }
@@ -3909,64 +3909,76 @@ void PlayerPhysicsSub(void) {
     }
     return;
   }
-  if ((((JumpspringAnimCtrl == 0) && ((A_B_Buttons & 0x80) != 0)) && ((A_B_Buttons & 0x80 & PreviousA_B_Buttons) == 0))
-      && ((Player_State == 0 || ((SwimmingFlag != 0 && ((JumpSwimTimer != 0 || (PlayerSpriteVarData2[0] < 0x80)))))))) {
-    JumpSwimTimer = 0x20;
-    SprObject_YMF_Dummy[0] = 0;
-    JumpOrigin_Y_HighPos = SprObject_Y_HighPos[0];
-    JumpOrigin_Y_Position = SprObject_Y_Position[0];
-    Player_State = 1;
 
-    const byte xs = Player_XSpeedAbsolute;
-    byte bVar1;
-    if (xs <= 8) {
-        bVar1 = 0;
-    } else if (xs < 16) {
-        bVar1 = 1;
-    } else if (xs <= 24) {
-        bVar1 = 2;
-    } else if (xs < 28) {
-        bVar1 = 3;
-    } else {
-        bVar1 = 4;
-    }
-    DiffToHaltJump = 1;
-    if (SwimmingFlag != 0) {
-      bVar1 = (Cannon_Timer_Or_Whirlpool_Flag[0] == 0) ? 5 : 6;
-    }
-    VerticalForce = JumpMForceData[bVar1];
-    VerticalForceDown = FallMForceData[bVar1];
-    SprObject_Y_MoveForce[0] = InitMForceData[bVar1];
-    PlayerSpriteVarData2[0] = PlayerYSpdData[bVar1];
-    if (SwimmingFlag == 0) {
-      Square1SoundQueue = (PlayerSize != 0) ? 0x80 : 1;
-    } else {
-      Square1SoundQueue = 4;
-      if (SprObject_Y_Position[0] < 0x14) {
-        PlayerSpriteVarData2[0] = 0;
+  const bool button_a_newly_pressed = ((A_B_Buttons & BUTTON_A) != 0) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0);
+  if ((JumpspringAnimCtrl == 0) && button_a_newly_pressed) {
+    if (Player_State == 0 || (SwimmingFlag != 0 && (JumpSwimTimer != 0 || (PlayerSpriteVarData2[0] < 0x80)))) {
+      JumpSwimTimer = 0x20;
+      SprObject_YMF_Dummy[0] = 0;
+      JumpOrigin_Y_HighPos = SprObject_Y_HighPos[0];
+      JumpOrigin_Y_Position = SprObject_Y_Position[0];
+      Player_State = 1;
+
+      byte bVar1;
+      if (SwimmingFlag == 0) {
+        const byte xs = Player_XSpeedAbsolute;
+        if (xs <= 8) {
+          bVar1 = 0;
+        } else if (xs < 16) {
+          bVar1 = 1;
+        } else if (xs <= 24) {
+          bVar1 = 2;
+        } else if (xs < 28) {
+          bVar1 = 3;
+        } else {
+          bVar1 = 4;
+        }
+      } else {
+        bVar1 = (Cannon_Timer_Or_Whirlpool_Flag[0] == 0) ? 5 : 6;
+      }
+
+      DiffToHaltJump = 1;
+
+      VerticalForce = JumpMForceData[bVar1];
+      VerticalForceDown = FallMForceData[bVar1];
+      SprObject_Y_MoveForce[0] = InitMForceData[bVar1];
+      PlayerSpriteVarData2[0] = PlayerYSpdData[bVar1];
+
+      if (SwimmingFlag == 0) {
+        Square1SoundQueue = (PlayerSize != 0) ? 0x80 : 1;
+      } else {
+        Square1SoundQueue = 4;
+        if (SprObject_Y_Position[0] < 0x14) {
+          PlayerSpriteVarData2[0] = 0;
+        }
       }
     }
   }
 
   byte bVar2 = 0;
   byte bVar1 = 1;
+
+  const bool same_direction = Left_Right_Buttons == Player_MovingDir;
+  const bool holding_b = (A_B_Buttons & BUTTON_B) != 0;
+  const bool running = same_direction && holding_b;
+
   if (Player_State == 0) {
     // ProcPRun
     if ((AreaType != 0)) {
-      if (Left_Right_Buttons == Player_MovingDir) {
-        if ((A_B_Buttons & 0x40) != 0) {
-          RunningTimer = 10;
-        }
+      if (running) {
+        RunningTimer = 10;
+      }
+      if (same_direction) {
         if (RunningTimer != 0) {
           bVar1 = 0;
         }
       }
-    } else {
-      bVar2 = 1;
     }
   } else if (Player_XSpeedAbsolute > 0x18) {
     bVar1 = 0;
   }
+
+  bVar2 = (Player_State == 0 && AreaType == 0) ? 1 : 0;
 
   if (bVar1) {
     bVar2 += 1;
@@ -3977,10 +3989,7 @@ void PlayerPhysicsSub(void) {
 
   // GetXPhy
   MaximumLeftSpeed = MaxLeftXSpdData[bVar2];
-  if (GameEngineSubroutine == 7) {
-    bVar2 = 3;
-  }
-  MaximumRightSpeed = MaxRightXSpdData[bVar2];
+  MaximumRightSpeed = MaxRightXSpdData[GameEngineSubroutine == 7 ? 3 : bVar2];
   FrictionAdderLow = FrictionData[bVar1];
   FrictionAdderHigh = 0;
   if (PlayerFacingDir != Player_MovingDir) {
@@ -4076,14 +4085,22 @@ void ImposeFriction(const byte param_1) {
 // Signature: [] -> []
 void ProcFireball_Bubble(void) {
   if (PlayerStatus > 1) {
-    if (((((A_B_Buttons & 0x40) != 0) && ((A_B_Buttons & 0x40 & PreviousA_B_Buttons) == 0))
-         && (Fireball_State[FireballCounter & 1] == 0))
-        && (((SprObject_Y_HighPos[0] == 1 && (CrouchingFlag == 0)) && (Player_State != 3)))) {
-      Square1SoundQueue = 0x20;
-      Fireball_State[FireballCounter & 1] = 2;
-      FireballThrowingTimer = PlayerAnimTimerSet;
-      PlayerAnimTimer = PlayerAnimTimerSet - 1;
-      FireballCounter += 1;
+    if ((A_B_Buttons & BUTTON_B) != 0) {
+      if ((A_B_Buttons & BUTTON_B & PreviousA_B_Buttons) == 0) {
+        if (Fireball_State[FireballCounter & 1] == 0) {
+          if (SprObject_Y_HighPos[0] == 1) {
+            if (CrouchingFlag == 0) {
+              if (Player_State != 3) {
+                Square1SoundQueue = 0x20;
+                Fireball_State[FireballCounter & 1] = 2;
+                FireballThrowingTimer = PlayerAnimTimerSet;
+                PlayerAnimTimer = PlayerAnimTimerSet - 1;
+                FireballCounter += 1;
+              }
+            }
+          }
+        }
+      }
     }
     FireballObjCore(0);
     FireballObjCore(1);
@@ -4350,7 +4367,7 @@ byte JumpspringHandler(const byte param_1) {
       SprObject_Y_Position[0] -= 2;
     }
     Enemy_Y_Position[bVar1] = SpriteVarData1[bVar1] + Jumpspring_Y_PosData[bVar2];
-    if ((((bVar2 != 0) && ((A_B_Buttons & 0x80) != 0)) && ((A_B_Buttons & 0x80 & PreviousA_B_Buttons) == 0))) {
+    if ((((bVar2 != 0) && ((A_B_Buttons & BUTTON_A) != 0)) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0))) {
       JumpspringForce = 0xf4;
       if (SMB2J_ONLY && (WorldNumber == 1 || WorldNumber == 2 || WorldNumber == 6)) {
         JumpspringForce = 0xe0;
@@ -9671,7 +9688,7 @@ bool ChkJumpspringMetatiles(const byte param_1) {
 void HandlePipeEntry(const byte param_1, const byte param_2) {
   byte bVar1;
 
-  if ((((Up_Down_Buttons & 4) != 0) && (param_1 == 0x11)) && (param_2 == 0x10)) {
+  if ((((Up_Down_Buttons & BUTTON_D) != 0) && (param_1 == 0x11)) && (param_2 == 0x10)) {
     ChangeAreaTimer = 0x30;
     GameEngineSubroutine = 3;
     Square1SoundQueue = 0x10;
@@ -11488,7 +11505,7 @@ byte ProcessPlayerAction(void) {
         if ((JumpSwimTimer | PlayerAnimCtrl) != 0) {
           return FourFrameExtent(gfxoffsetadder);
         }
-        if (A_B_Buttons & 0x80) {
+        if (A_B_Buttons & BUTTON_A) {
           return FourFrameExtent(gfxoffsetadder);
         }
         return GetCurrentAnimOffset(gfxoffsetadder);

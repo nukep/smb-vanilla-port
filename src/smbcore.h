@@ -318,14 +318,8 @@ static inline byte find_first_bit_position(byte bits) {
 class RamPtr {
 public:
   // fields, as laid out in 6502 memory
-  union {
-    byte lo;
-    byte _0_1_; // ghidra labels it this
-  };
-  union {
-    byte hi;
-    byte _1_1_; // ghidra labels it this
-  };
+  byte lo;
+  byte hi;
 
   RamPtr(ushort addr) : lo(addr & 0xFF), hi(addr >> 8) {}
   byte &operator*() {
@@ -334,6 +328,14 @@ public:
   byte &operator[](int i) {
     // equivalent to LDA (ptr),Y
     return RAM(((hi << 8) | lo) + i);
+  }
+  operator ushort() const {
+    return (hi << 8) | lo;
+  }
+  RamPtr& operator+=(int i) {
+    ushort addr = *this;
+    *this = RamPtr(addr + i);
+    return *this;
   }
 };
 

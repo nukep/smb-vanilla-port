@@ -628,12 +628,6 @@ ushort smb1_GetBlockBufferAddr(byte param_1);
 void smb1_LoadAreaPointer(void);
 #define LoadAreaPointer smb1_LoadAreaPointer
 
-byte smb1_GetAreaType(byte param_1);
-#define GetAreaType smb1_GetAreaType
-
-byte smb1_FindAreaPointer(void);
-#define FindAreaPointer smb1_FindAreaPointer
-
 void smb1_GetAreaDataAddrs(void);
 #define GetAreaDataAddrs smb1_GetAreaDataAddrs
 
