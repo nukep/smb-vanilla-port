@@ -1,6 +1,9 @@
 #ifndef SMBCORE_SMB1ROMARRAYS_H
 #define SMBCORE_SMB1ROMARRAYS_H
 
+// This is a constant in SMB1, but changes in SMB2J. This definition is here for symmetry with smb2j.
+#define PiranhaPlantCompareOperand       0x21
+
 #define VRAM_AddrTable_Low               RAMARRAY_CONST(0x805A, 19)
 #define VRAM_AddrTable_High              RAMARRAY_CONST(0x806D, 19)
 #define VRAM_Buffer_Offset               RAMARRAY_CONST(0x8080, 2)

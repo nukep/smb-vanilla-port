@@ -282,6 +282,23 @@ static inline byte NEGATE(byte x) {
   ADD_16_16(dst_hi, dst_lo, 0, src); \
 }
 
+// Performs `dst = src + addend`.
+#define ADD_UNSIGNED_16_16_8(dst_hi, dst_lo, src_hi, src_lo, addend) { \
+  u16 src = ((src_hi) << 8) | (src_lo); \
+  src += (byte)(addend); \
+  dst_lo = src & 0xff; \
+  dst_hi = src >> 8; \
+}
+
+// Calculates the absolute difference between two bytes.
+static inline byte ABS_DIFF(byte a, byte b) {
+  if (a < b) {
+    return b - a;
+  } else {
+    return a - b;
+  }
+}
+
 // Get the first set bit position, where the LSB is position 1.
 // Providing bits=0 returns 0.
 //

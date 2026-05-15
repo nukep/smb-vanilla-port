@@ -1,8 +1,11 @@
 #ifndef SMBCORE_SMB2JROMARRAYS_H
 #define SMBCORE_SMB2JROMARRAYS_H
 
-// The original game modifies an instruction
+// The original game modifies an instruction opcode
 #define PhysicsInstructionOpcode         RAM(0x80f1)
+
+// The original game modifies an instruction operand
+#define PiranhaPlantCompareOperand       RAM(0x9ffe)
 
 #define GamesBeatenCount                 RAM(0xD29F)
 

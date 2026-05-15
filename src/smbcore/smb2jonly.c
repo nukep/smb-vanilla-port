@@ -1013,9 +1013,9 @@ void PrintVictoryMsgsForWorld8(void) {
     }
     VRAM_Buffer_AddrCtrl = PrimaryMsgCounter + 0xf;
   }
-  const bool bVar1 = SecondaryMsgCounter >= 0xfc;
-  SecondaryMsgCounter = SecondaryMsgCounter + 4;
-  PrimaryMsgCounter = PrimaryMsgCounter + bVar1;
+
+  ADD_UNSIGNED_16_8(PrimaryMsgCounter, SecondaryMsgCounter,
+                    4);
 }
 
 
