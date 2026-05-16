@@ -790,9 +790,6 @@ byte smb1_BulletBillHandler(byte param_1);
 struct_xc smb1_SpawnHammerObj(void);
 #define SpawnHammerObj smb1_SpawnHammerObj
 
-byte smb1_ProcHammerObj(byte param_1);
-#define ProcHammerObj smb1_ProcHammerObj
-
 void smb1_CoinBlock(byte param_1);
 #define CoinBlock smb1_CoinBlock
 

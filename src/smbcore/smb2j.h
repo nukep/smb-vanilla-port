@@ -781,9 +781,6 @@ byte smb2j_BulletBillHandler(byte param_1);
 struct_xc smb2j_SpawnHammerObj(void);
 #define SpawnHammerObj smb2j_SpawnHammerObj
 
-byte smb2j_ProcHammerObj(byte param_1);
-#define ProcHammerObj smb2j_ProcHammerObj
-
 void smb2j_CoinBlock(byte param_1);
 #define CoinBlock smb2j_CoinBlock
 

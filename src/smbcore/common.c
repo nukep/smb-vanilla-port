@@ -4597,50 +4597,6 @@ struct_xc SpawnHammerObj(void) {
 }
 
 
-// SMB:bac3
-// SM2MAIN:868e
-// Signature: [X] -> [X]
-byte ProcHammerObj(const byte param_1) {
-  byte tmp1 = param_1;
-
-  if (TimerControl == 0) {
-    if ((Misc_State[param_1] & 0x7f) < 2) {
-      const byte bVar2 = param_1 + 0xd;
-
-      const byte in_r01 = 0xf;
-      ImposeGravity(0, bVar2, 0x10, in_r01, 4);
-
-      MoveObjectHorizontally(bVar2);
-      tmp1 = PlayerHammerCollision(ObjectOffset);
-    } else {
-      const byte bVar2 = HammerEnemyOffset[param_1];
-      if ((Misc_State[param_1] & 0x7f) == 2) {
-        // SetHSpd
-        Misc_Y_Speed[param_1] = 0xfe;
-        Enemy_State[bVar2] = Enemy_State[bVar2] & 0xf7;
-        tmp1 = ObjectOffset;
-        Misc_X_Speed[ObjectOffset] = HammerXSpdData[(byte)(Enemy_MovingDir[bVar2] - 1)];
-      }
-
-      // SetHPos
-      Misc_State[tmp1] -= 1;
-
-      ADD_UNSIGNED_16_16_8(Misc_PageLoc[tmp1], Misc_X_Position[tmp1],
-                           Enemy_PageLoc[bVar2], Enemy_X_Position[bVar2],
-                           2);
-
-      Misc_Y_Position[tmp1] = Enemy_Y_Position[bVar2] - 10;
-      Misc_Y_HighPos[tmp1] = 1;
-    }
-  }
-
-  byte bVar2 = GetMiscOffscreenBits(tmp1);
-  bVar2 = RelativeMiscPosition(bVar2);
-  bVar2 = GetMiscBoundBox(bVar2);
-  return DrawHammer(bVar2);
-}
-
-
 // SMB:bb38
 // SM2MAIN:8703
 // Signature: [X] -> []
@@ -4710,49 +4666,123 @@ byte JCoinC(const byte param_1, const byte param_2) {
 }
 
 
+// SMB:bac3
+// SM2MAIN:868e
+// Signature: [X] -> []
+static inline void ProcHammerObj(const int i) {
+  assert_eq_assumption(i, ObjectOffset);
+
+  if (TimerControl == 0) {
+    if ((Misc_State[i] & 0x7f) < 2) {
+      const byte bVar2 = i + 0xd;
+
+      const byte in_r01 = 0xf;
+      ImposeGravity(0, bVar2, 0x10, in_r01, 4);
+
+      MoveObjectHorizontally(bVar2);
+      const byte x = PlayerHammerCollision(ObjectOffset);
+      assert_eq_assumption(x, i);
+    } else {
+      const byte bVar2 = HammerEnemyOffset[i];
+      if ((Misc_State[i] & 0x7f) == 2) {
+        // SetHSpd
+        Misc_Y_Speed[i] = 0xfe;
+        Enemy_State[bVar2] = Enemy_State[bVar2] & 0xf7;
+
+        assert_eq_assumption(i, ObjectOffset);
+
+        Misc_X_Speed[i] = HammerXSpdData[(byte)(Enemy_MovingDir[bVar2] - 1)];
+      }
+
+      // SetHPos
+      Misc_State[i] -= 1;
+
+      ADD_UNSIGNED_16_16_8(Misc_PageLoc[i], Misc_X_Position[i],
+                           Enemy_PageLoc[bVar2], Enemy_X_Position[bVar2],
+                           2);
+
+      Misc_Y_Position[i] = Enemy_Y_Position[bVar2] - 10;
+      Misc_Y_HighPos[i] = 1;
+    }
+  }
+
+  byte x = i;
+  x = GetMiscOffscreenBits(x);
+  x = RelativeMiscPosition(x);
+  x = GetMiscBoundBox(x);
+  x = DrawHammer(x);
+
+  assert_eq_assumption(x, i);
+}
+
+// SMB:bba7
+// SM2MAIN:8772
+// Signature: [X] -> []
+static inline void ProcJumpCoin(const int i) {
+  assert_eq_assumption(i, ObjectOffset);
+
+  if (Misc_State[i] == 1) {
+    // JCoinRun
+    const byte in_r01 = 3;
+    ImposeGravity(0, i + 0xd, 0x50, in_r01, 6);
+
+    assert_eq_assumption(i, ObjectOffset);
+
+    if (Misc_Y_Speed[i] == 5) {
+      Misc_State[i] += 1;
+    }
+  } else {
+    Misc_State[i] += 1;
+
+    ADD_UNSIGNED_16_8(Misc_PageLoc[i], Misc_X_Position[i],
+                      ScrollAmount);
+
+    if (Misc_State[i] == 0x30) {
+      Misc_State[i] = 0;
+      return;
+    }
+  }
+
+  assert_eq_assumption(i, ObjectOffset);
+
+  byte x = i;
+  x = RelativeMiscPosition(x);
+  x = GetMiscOffscreenBits(x);
+  x = GetMiscBoundBox(x);
+  x = JCoinGfxHandler(x);
+
+  assert_eq_assumption(x, i);
+}
+
 // SMB:bb96
 // SM2MAIN:8761
 // Signature: [] -> []
 void MiscObjectsCore(void) {
-  byte bVar2 = 8;
-  do {
-    ObjectOffset = bVar2;
-    if (Misc_State[bVar2] != 0) {
-      if ((i8)Misc_State[bVar2] < 0) {
-        bVar2 = ProcHammerObj(bVar2);
-      } else {
-        if (Misc_State[bVar2] == 1) {
+  // Note: Some of the array accesses of [i] are really [ObjectOffset] in the NES version,
+  // but it's way simpler to convey as the former.
+  // ObjectOffset shares the loop index, and shouldn't change during functions.
+  // We use asserts to make sure functions behave and return the expected values.
+  //
+  // There are _possible_ edge cases (unsure) where buffer overflows to arrays
+  // could wraparound the zero page and set ObjectOffset, but that's such an
+  // annoying possibility that we're just not handling it.
+  // (and it would possibly mangle the temporary registers $00-$07 anyway, so whatever)
 
-          const byte in_r01 = 3;
-          ImposeGravity(0, bVar2 + 0xd, 0x50, in_r01, 6);
-
-          bVar2 = ObjectOffset;
-          if (Misc_Y_Speed[ObjectOffset] == 5) {
-            Misc_State[ObjectOffset] = Misc_State[ObjectOffset] + 1;
-          }
-        } else {
-          Misc_State[bVar2] += 1;
-
-          ADD_UNSIGNED_16_8(Misc_PageLoc[bVar2], Misc_X_Position[bVar2],
-                            ScrollAmount);
-
-          if (Misc_State[bVar2] == 0x30) {
-            Misc_State[bVar2] = 0;
-            goto MiscLoopBack;
-          }
-        }
-        bVar2 = RelativeMiscPosition(bVar2);
-        bVar2 = GetMiscOffscreenBits(bVar2);
-        bVar2 = GetMiscBoundBox(bVar2);
-        bVar2 = JCoinGfxHandler(bVar2);
-      }
+  for (int i = 8; i >= 0; i--) {
+    if (Misc_State[i] == 0) {
+      continue;
     }
-MiscLoopBack:
-    bVar2 -= 1;
-    if (bVar2 >= 0x80) {
-      return;
+
+    ObjectOffset = i;
+
+    if ((i8)Misc_State[i] < 0) {
+      ProcHammerObj(i);
+    } else {
+      ProcJumpCoin(i);
     }
-  } while (true);
+  }
+
+  ObjectOffset = 0;
 }
 
 
