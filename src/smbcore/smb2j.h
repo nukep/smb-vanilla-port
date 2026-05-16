@@ -1201,9 +1201,6 @@ byte smb2j_DelayToAreaEnd(byte param_1);
 void smb2j_MovePiranhaPlant(byte param_1);
 #define MovePiranhaPlant smb2j_MovePiranhaPlant
 
-byte smb2j_FirebarSpin(byte param_1,byte param_2);
-#define FirebarSpin smb2j_FirebarSpin
-
 byte smb2j_BalancePlatform(byte param_1);
 #define BalancePlatform smb2j_BalancePlatform
 

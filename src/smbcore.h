@@ -238,6 +238,25 @@ static inline byte NEGATE(byte x) {
 
 // Higher-bit math helpers
 
+// Loads a 16-bit value from two 8-bit values.
+// Used as an RHS expression.
+#define LOAD_16(src_hi, src_lo) ((u16)(((src_hi) << 8) | ((u8)(src_lo))))
+
+// Store a 16-bit value into two 8-bit values from a 16-bit value.
+#define STORE_16(dst_hi, dst_lo, val) { \
+  u16 val_to_store = val; \
+  dst_hi = (val_to_store) >> 8; \
+  dst_lo = (val_to_store) & 0xff; \
+}
+
+// Performs `dst = src`.
+// Mostly here for symmetry with the other arithmetic operators
+#define SET_16_16(dst_hi, dst_lo, src_hi, src_lo) { \
+  u8 src_lo_expand = src_lo; \
+  dst_hi = src_hi; \
+  dst_lo = src_lo_expand; \
+}
+
 // Performs `dst = dst + src`.
 // dst_* and src_* are 8-bit integers.
 #define ADD_16_16(dst_hi, dst_lo, src_hi, src_lo) { \
@@ -317,7 +336,7 @@ static inline byte ABS_DIFF(byte a, byte b) {
 // e.g. 142 => 2, because:
 // 142 = 10001110
 //             ^ position 2
-// 
+//
 // e.g. 64 => 7, because:
 //  64 = 01000000
 //        ^ position 7

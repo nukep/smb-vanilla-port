@@ -1207,9 +1207,6 @@ byte smb1_DelayToAreaEnd(byte param_1);
 void smb1_MovePiranhaPlant(byte param_1);
 #define MovePiranhaPlant smb1_MovePiranhaPlant
 
-byte smb1_FirebarSpin(byte param_1,byte param_2);
-#define FirebarSpin smb1_FirebarSpin
-
 byte smb1_BalancePlatform(byte param_1);
 #define BalancePlatform smb1_BalancePlatform
 
