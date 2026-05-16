@@ -627,8 +627,6 @@ void WaitForReinsert(void) {
   const byte bVar1 = FDS_drive_status();
   if ((bVar1 & 1) == 0) {
     DiskIOTask += 1;
-  } else if (!(bool)(bVar1 & 1)) {
-    ResetDiskVars();
   }
 }
 

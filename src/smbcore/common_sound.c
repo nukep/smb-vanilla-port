@@ -651,7 +651,7 @@ void PlayPipeDownInj(void) {
 // SM2MAIN:d48b
 // Signature: [] -> []
 void ContinuePipeDownInj(void) {
-  if (((!(bool)(Squ1_SfxLenCounter & 1)) && (!(bool)((Squ1_SfxLenCounter >> 1) & 1)))
+  if ((((Squ1_SfxLenCounter & 1) == 0) && (((Squ1_SfxLenCounter >> 1) & 1) == 0))
       && ((Squ1_SfxLenCounter >> 2 & 2) != 0)) {
     PlaySqu1Sfx(0x44, 0x9a, 0x91);
   }
@@ -722,7 +722,7 @@ void PlayPowerUpGrab(void) {
 // SM2MAIN:d527
 // Signature: [] -> []
 void ContinuePowerUpGrab(void) {
-  if ((bool)(Squ2_SfxLenCounter & 1)) {
+  if ((Squ2_SfxLenCounter & 1) != 0) {
     DecrementSfx2Length();
     return;
   }

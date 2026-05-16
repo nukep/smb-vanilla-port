@@ -1548,7 +1548,7 @@ void PlayerLoseLife(void) {
     bVar1 += 1;
   }
   bVar1 = HalfwayPageNybbles[bVar1];
-  if (!(bool)(LevelNumber & 1)) {
+  if ((LevelNumber & 1) == 0) {
     bVar1 >>= 4;
   }
   HalfwayPage = bVar1 & 0xf;
@@ -3362,7 +3362,7 @@ void PlayerEntrance(void) {
       }
       DisableCollisionDet = SprObject_Y_Position[0] > 0x98;
       bVar1 = 1;
-      if ((bool)DisableCollisionDet) {
+      if (DisableCollisionDet != 0) {
         Player_State = 3;
         bVar1 = 8;
         Block_Buffer_1[180] = 8;
@@ -3698,7 +3698,7 @@ void PlayerEndLevel(void) {
     }
   }
 #endif
-  if (!(bool)(Player_CollisionBits & 1)) {
+  if ((Player_CollisionBits & 1) == 0) {
     if (StarFlagTaskControl == 0) {
       StarFlagTaskControl = 1;
     }
@@ -4178,7 +4178,7 @@ void BubbleCheck(const byte param_1) {
 // Signature: [X, r07] -> []
 void SetupBubble(const byte param_1, const byte param_2) {
   byte bVar3 = 0;
-  const bool bVar4 = (bool)(PlayerFacingDir & 1);
+  const bool bVar4 = (PlayerFacingDir & 1) != 0;
   if (bVar4) {
     bVar3 = 8;
   }
@@ -7261,7 +7261,7 @@ void XMoveCntr_Platform(const byte param_1, const byte param_2) {
   if ((FrameCounter & 3) != 0) {
     return;
   }
-  if ((bool)(SpriteVarData2[param_2] & 1)) {
+  if ((SpriteVarData2[param_2] & 1) != 0) {
     if (SpriteVarData1[param_2] != 0) {
       SpriteVarData1[param_2] = SpriteVarData1[param_2] - 1;
       return;
@@ -7305,7 +7305,7 @@ byte MoveBloober(const byte param_1, bool param_2) {
     return MoveEnemySlowVert(param_1);
   }
   if ((PseudoRandomBitReg[param_1 + 1] & BlooberBitmasks[SecondaryHardMode]) == 0) {
-    param_2 = (bool)(param_1 & 1);
+    param_2 = (param_1 & 1) != 0;
     byte bVar2;
     if (!param_2) {
       bVar2 = 2;
@@ -7347,7 +7347,7 @@ void ProcSwimmingB(const byte param_1, bool param_2) {
   byte bVar1;
 
   if ((SpriteVarData2[param_1] & 2) == 0) {
-    if (!(bool)(SpriteVarData2[param_1] & 1)) {
+    if ((SpriteVarData2[param_1] & 1) == 0) {
       if ((FrameCounter & 7) == 0) {
         bVar1 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] + 1;
         CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = bVar1;
@@ -7368,7 +7368,7 @@ void ProcSwimmingB(const byte param_1, bool param_2) {
   } else if ((EnemyIntervalTimer[param_1] == 0)
       && (SprObject_Y_Position[0] <= (byte)(Enemy_Y_Position[param_1] + 0x10 + param_2))) {
     SpriteVarData2[param_1] = 0;
-  } else if (!(bool)(FrameCounter & 1)) {
+  } else if ((FrameCounter & 1) == 0) {
     Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 1;
   }
 }
@@ -8593,7 +8593,7 @@ byte FireballEnemyCollision(const byte param_1) {
   bool bVar3;
   byte bStack0000;
 
-  if (((Fireball_State[param_1] != 0) && ((Fireball_State[param_1] & 0x80) == 0)) && (!(bool)(FrameCounter & 1))) {
+  if (((Fireball_State[param_1] != 0) && ((Fireball_State[param_1] & 0x80) == 0)) && ((FrameCounter & 1) == 0)) {
     bStack0000 = param_1 * 4 + 0x1c;
     for (int i = 4; i >= 0; i--) {
       bVar2 = i;
@@ -10713,7 +10713,7 @@ byte JCoinGfxHandler(const byte param_1) {
     Sprite_Data[(byte)(bVar2 - 1) + 6] = 0x82;
     return ObjectOffset;
   } else {
-    if (!(bool)(FrameCounter & 1)) {
+    if ((FrameCounter & 1) == 0) {
       Misc_Y_Position[param_1] = Misc_Y_Position[param_1] - 1;
     }
     DumpTwoSpr(Misc_Y_Position[param_1], bVar2);
@@ -11358,7 +11358,7 @@ void PlayerGfxHandler(void) {
   byte bVar1;
   byte abVar2;
 
-  if ((InjuryTimer == 0) || (!(bool)(FrameCounter & 1))) {
+  if ((InjuryTimer == 0) || ((FrameCounter & 1) == 0)) {
     if (GameEngineSubroutine == 0xb) {
       PlayerGfxProcessing(PlayerGfxTblOffsets[14]);
       return;
@@ -11379,7 +11379,7 @@ void PlayerGfxHandler(void) {
     FindPlayerAction();
     if ((FrameCounter & 4) == 0) {
       abVar2 = PlayerOrSprDataOffset[0];
-      if (!(bool)(PlayerFacingDir & 1)) {
+      if ((PlayerFacingDir & 1) == 0) {
         abVar2 = PlayerOrSprDataOffset[0] + 4;
       }
       bVar1 = 0;
