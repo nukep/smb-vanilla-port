@@ -83,7 +83,7 @@ static byte LoadEnvelopeData(byte param_1);
 // SMB:f38d, SM2MAIN:d35d
 // Signature: [A, X] -> [A, Y, Z]
 
-struct_ayz Dump_Freq_Regs(const byte param_1, byte channel) {
+struct_ayz Dump_Freq_Regs(const byte param_1, const byte channel) {
   // channel is always 0, 4, or 8
 
   struct_ayz ret;
@@ -137,7 +137,7 @@ void ContinueBrickShatter(void) {
 
 // SMB:f64d, SM2MAIN:d658
 // Signature: [A, X] -> []
-void PlayNoiseSfx(byte vol, byte noise_period) {
+void PlayNoiseSfx(const byte vol, const byte noise_period) {
   apu_noise_vol(vol);
   apu_noise_lo(noise_period);
   apu_noise_hi(0x18);

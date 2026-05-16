@@ -248,6 +248,14 @@ static inline byte NEGATE(byte x) {
   dst_lo = dst & 0xff; \
 }
 
+#define SUB_16_16(dst_hi, dst_lo, src_hi, src_lo) { \
+  u16 dst = ((u16)(dst_hi) << 8) | ((u16)(dst_lo)); \
+  u16 src = ((u16)(src_hi) << 8) | ((u16)(src_lo)); \
+  dst -= src; \
+  dst_hi = (dst >> 8) & 0xff; \
+  dst_lo = dst & 0xff; \
+}
+
 // Performs `dst = dst + src`.
 // dst_* and src_* are 8-bit integers.
 #define ADD_24_24(dst_hi, dst_me, dst_lo, src_hi, src_me, src_lo) { \
@@ -280,6 +288,10 @@ static inline byte NEGATE(byte x) {
 // src is an 8-bit integer.
 #define ADD_UNSIGNED_16_8(dst_hi, dst_lo, src) { \
   ADD_16_16(dst_hi, dst_lo, 0, src); \
+}
+
+#define SUB_UNSIGNED_16_8(dst_hi, dst_lo, src) { \
+  SUB_16_16(dst_hi, dst_lo, 0, src); \
 }
 
 // Performs `dst = src + addend`.

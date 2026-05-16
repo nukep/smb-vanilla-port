@@ -1164,7 +1164,7 @@ void PutBlockMetatile(const byte param_1, const byte param_3, const byte param_4
 // SMB:8acd
 // SM2MAIN:69aa
 // Signature: [X, Y, r04, r05] -> []
-void RemBridge(const byte param_1, const byte param_2, ushort addr) {
+void RemBridge(const byte param_1, const byte param_2, const ushort addr) {
   // Note: addr is made up of r04 and r05 for lo and hi respectively.
 
   VRAM_Buffer1[param_2 + 2] = BlockGfxData[param_1];
@@ -1280,7 +1280,7 @@ void UpdateTopScore(void) {
 // SMB:8f9e
 // SM2MAIN:6e0a
 // Signature: [X] -> []
-void TopScoreCheck(byte last_digit_offset) {
+void TopScoreCheck(const byte last_digit_offset) {
   // last_digit_offset is 5 or 11
 
   const byte off = last_digit_offset - 5;
@@ -4901,7 +4901,7 @@ byte PowerUpObjHandler(void) {
 // SMB:bced
 // SM2MAIN:88ae
 // Signature: [A, r02, r06, r07] -> []
-void PlayerHeadCollision(const byte param_1, const byte param_2, ushort addr) {
+void PlayerHeadCollision(const byte param_1, const byte param_2, const ushort addr) {
   const short sVar1 = addr;
   Block_State[SprDataOffset_Ctrl] = (PlayerSize == 0) ? 0x12 : 0x11;
   const byte bStack0000 = param_1;
@@ -6013,7 +6013,7 @@ byte SmallBBox(const byte param_1) {
 // SMB:c34a
 // SM2MAIN:8f35
 // Signature: [X, C] -> []
-void InitRedPTroopa(const byte param_1, bool param_2) {
+void InitRedPTroopa(const byte param_1, const bool param_2) {
   char cVar1 = 0x30;
   Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] = Enemy_Y_Position[param_1];
   if (Enemy_Y_Position[param_1] >= 0x80) {
@@ -7298,44 +7298,42 @@ struct_xr00 MoveWithXMCntrs(const byte param_1) {
 // SMB:cb89
 // SM2MAIN:97be
 // Signature: [X, C] -> [X]
-byte MoveBloober(const byte param_1, bool param_2) {
-  struct_ncr00 sVar3;
-
+byte MoveBloober(const byte param_1, const bool param_2) {
   if ((Enemy_State[param_1] & 0x20) != 0) {
     return MoveEnemySlowVert(param_1);
   }
+
   if ((PseudoRandomBitReg[param_1 + 1] & BlooberBitmasks[SecondaryHardMode]) == 0) {
-    param_2 = (param_1 & 1) != 0;
     byte bVar2;
-    if (!param_2) {
-      bVar2 = 2;
-      sVar3 = PlayerEnemyDiff(param_1);
-      param_2 = sVar3.c;
-      if (sVar3.n) {
-        bVar2 -= 1;
-      }
-    } else {
+    bool tmp2;
+
+    if ((param_1 & 1) != 0) {
       bVar2 = Player_MovingDir;
+      tmp2 = true;
+    } else {
+      const struct_ncr00 sVar3 = PlayerEnemyDiff(param_1);
+      bVar2 = sVar3.n ? 1 : 2;
+      tmp2 = sVar3.c;
     }
     Enemy_MovingDir[param_1] = bVar2;
+    ProcSwimmingB(param_1, tmp2);
+  } else {
+    ProcSwimmingB(param_1, param_2);
   }
-  ProcSwimmingB(param_1, param_2);
-  if (0x1f
-      < (byte)(Enemy_Y_Position[param_1] - CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1])) {
-    Enemy_Y_Position[param_1]
-        = Enemy_Y_Position[param_1] - CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
+
+  const byte ydiff = Enemy_Y_Position[param_1] - CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
+
+  if (ydiff >= 0x20) {
+    Enemy_Y_Position[param_1] = ydiff;
   }
+
   if (Enemy_MovingDir[param_1] == 1) {
-    const byte bVar2 = Enemy_X_Position[param_1];
-    const byte bVar1 = SpriteVarData1[param_1];
-    Enemy_X_Position[param_1] = bVar2 + bVar1;
-    Enemy_PageLoc[param_1] += CARRY1(bVar2, bVar1);
-    return param_1;
+    ADD_UNSIGNED_16_8(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
+                      SpriteVarData1[param_1]);
+  } else {
+    SUB_UNSIGNED_16_8(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
+                      SpriteVarData1[param_1]);
   }
-  const byte bVar2 = Enemy_X_Position[param_1];
-  const byte bVar1 = SpriteVarData1[param_1];
-  Enemy_X_Position[param_1] = bVar2 - bVar1;
-  Enemy_PageLoc[param_1] = Enemy_PageLoc[param_1] - (bVar2 < bVar1);
   return param_1;
 }
 
@@ -7343,13 +7341,11 @@ byte MoveBloober(const byte param_1, bool param_2) {
 // SMB:cbdf
 // SM2MAIN:9814
 // Signature: [X, C] -> []
-void ProcSwimmingB(const byte param_1, bool param_2) {
-  byte bVar1;
-
+void ProcSwimmingB(const byte param_1, const bool param_2) {
   if ((SpriteVarData2[param_1] & 2) == 0) {
     if ((SpriteVarData2[param_1] & 1) == 0) {
       if ((FrameCounter & 7) == 0) {
-        bVar1 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] + 1;
+        const byte bVar1 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] + 1;
         CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = bVar1;
         SpriteVarData1[param_1] = bVar1;
         if (bVar1 == 2) {
@@ -7357,7 +7353,7 @@ void ProcSwimmingB(const byte param_1, bool param_2) {
         }
       }
     } else if ((FrameCounter & 7) == 0) {
-      bVar1 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] - 1;
+      const byte bVar1 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] - 1;
       CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = bVar1;
       SpriteVarData1[param_1] = bVar1;
       if (bVar1 == 0) {
@@ -9317,7 +9313,7 @@ bool CheckPlayerVertical(void) {
 // SMB:de05
 // SM2MAIN:aa73
 // Signature: [r02, r06, r07] -> []
-static void HandleCoinMetatile(byte bVar6, ushort addr) {
+static void HandleCoinMetatile(const byte bVar6, const ushort addr) {
   // addr: lo=r06, hi=r07
 
   // Inlined: ErACM
@@ -9332,7 +9328,7 @@ static void HandleCoinMetatile(byte bVar6, ushort addr) {
 // SMB:de0e
 // SM2MAIN:aa7c
 // Signature: [r02, r06, r07] -> []
-static void HandleAxeMetatile(byte bVar6, ushort addr) {
+static void HandleAxeMetatile(const byte bVar6, const ushort addr) {
   // addr: lo=r06, hi=r07
 
   OperMode_Task = 0;
@@ -9622,7 +9618,7 @@ void HandleClimbing(const byte param_1, const byte param_2, const byte param_3) 
 // SMB:debd
 // SM2MAIN:ab40
 // Signature: [A] -> [Z]
-bool ChkInvisibleMTiles(byte mtile) {
+bool ChkInvisibleMTiles(const byte mtile) {
 #ifdef SMB1_MODE
   return mtile == 0x5f || mtile == 0x60;
 #endif
@@ -9792,7 +9788,7 @@ bool CheckForCoinMTiles(const byte param_1) {
 // SMB:dfb0
 // SM2MAIN:ac39
 // Signature: [A] -> [X]
-byte GetMTileAttrib(byte x) {
+byte GetMTileAttrib(const byte x) {
   return x >> 6;
 }
 
@@ -10137,7 +10133,7 @@ struct_axzr04 ChkUnderEnemy(const byte param_1) {
 // SMB:e1b5
 // SM2MAIN:ae4b
 // Signature: [A] -> [Z]
-bool ChkForNonSolids(byte v) {
+bool ChkForNonSolids(const byte v) {
   if (SMB1_ONLY) {
     return v == 0x26 || v == 0x5f || v == 0x60 || v == 0xc2 || v == 0xc3;
   } else if (SMB2J_ONLY) {
@@ -10433,7 +10429,7 @@ struct_azr02r04r06r07 BlockBufferColli_Side(const byte param_1) {
 // SMB:e3f0
 // SM2MAIN:b08e
 // Signature: [A, X, Y] -> [A, Z, r02, r04, r06, r07]
-struct_azr02r04r06r07 BlockBufferCollision(byte use_x, const byte param_2, const byte param_3) {
+struct_azr02r04r06r07 BlockBufferCollision(const byte use_x, const byte param_2, const byte param_3) {
   const int a = BlockBuffer_X_Adder[param_3];
   const int b = SprObject_X_Position[param_2];
   const int c = SprObject_PageLoc[param_2];
@@ -11902,7 +11898,7 @@ byte GetYOffscreenBits(const byte param_1) {
 // SMB:f26d
 // SM2MAIN:bf52
 // Signature: [A, X, Y, r06, r07] -> [X]
-byte DividePDiff(const byte param_1, const byte param_2, bool param_3, const byte param_4, const byte param_5) {
+byte DividePDiff(const byte param_1, const byte param_2, const bool param_3, const byte param_4, const byte param_5) {
   // note: to be removed once other old code is removed
   if (param_5 >= param_4) {
     return param_2;
