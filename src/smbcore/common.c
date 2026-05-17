@@ -279,8 +279,8 @@ void OperModeExecutionTree(void) {
 // SM2MAIN:6287
 // Signature: [] -> []
 void MoveAllSpritesOffscreen(void) {
-  for (int i = 0; i < 256; i += 4) {
-    Sprite_Data[i] = 0xf8;
+  for (int i = 0; i < 64; i++) {
+    SPRITE_Y(0, i) = SPRITE_Y_OFFSCREEN;
   }
 }
 
@@ -289,8 +289,8 @@ void MoveAllSpritesOffscreen(void) {
 // SM2MAIN:628a
 // Signature: [] -> []
 void MoveSpritesOffscreen(void) {
-  for (int i = 4; i < 256; i += 4) {
-    Sprite_Data[i] = 0xf8;
+  for (int i = 1; i < 64; i++) {
+    SPRITE_Y(0, i) = SPRITE_Y_OFFSCREEN;
   }
 }
 
@@ -630,17 +630,20 @@ byte FloateyNumbersRoutine(const byte param_1) {
   if (ypos >= 0x18) {
     FloateyNum_Y_Pos[tmp2] -= 1;
   }
-  DumpTwoSpr(ypos - 9, offset);
+
+  // Inlined: DumpTwoSpr
+  SPRITE_Y(offset, 0) = ypos - 9;
+  SPRITE_Y(offset, 1) = ypos - 9;
 
   const byte xpos = FloateyNum_X_Pos[tmp2];
-  Sprite_Data[offset + 3] = xpos;
-  Sprite_Data[offset + 7] = xpos + 8;
-  Sprite_Data[offset + 2] = 2;
-  Sprite_Data[offset + 6] = 2;
+  SPRITE_X(offset, 0) = xpos;
+  SPRITE_X(offset, 1) = xpos + 8;
+  SPRITE_ATTR(offset, 0) = 2;
+  SPRITE_ATTR(offset, 1) = 2;
 
   const byte ctrl = FloateyNum_Control[tmp2];
-  Sprite_Data[offset + 1] = FloateyNumTileData[(byte)(ctrl << 1)];
-  Sprite_Data[offset + 5] = FloateyNumTileData[(byte)(ctrl << 1) + 1];
+  SPRITE_TILE(offset, 0) = FloateyNumTileData[(byte)(ctrl << 1)];
+  SPRITE_TILE(offset, 1) = FloateyNumTileData[(byte)(ctrl << 1) + 1];
 
   return ObjectOffset;
 }
@@ -1444,9 +1447,10 @@ void SecondaryGameSetup(void) {
   }
 
 #ifdef SMB1_MODE
-  for (int i = 0; i < 4; i++) {
-    Sprite_Data[i] = Sprite0Data[i];
-  }
+  SPRITE_Y(0, 0)    = Sprite0Data[0];
+  SPRITE_TILE(0, 0) = Sprite0Data[1];
+  SPRITE_ATTR(0, 0) = Sprite0Data[2];
+  SPRITE_X(0, 0)    = Sprite0Data[3];
 
   // NES note: there was a call here to "DoNothing2", which, well, does nothing
 
@@ -4166,7 +4170,7 @@ void FireballObjCore(const byte param_1) {
 // SM2MAIN:8265
 // Signature: [X] -> []
 void BubbleCheck(const byte param_1) {
-  if (Bubble_Y_Position[param_1] != 0xf8) {
+  if (Bubble_Y_Position[param_1] != SPRITE_Y_OFFSCREEN) {
     MoveBubl(param_1, PseudoRandomBitReg[param_1 + 1] & 1);
   } else if (AirBubbleTimer == 0) {
     SetupBubble(param_1, PseudoRandomBitReg[param_1 + 1] & 1);
@@ -4204,7 +4208,7 @@ void MoveBubl(const byte param_1, const byte param_2) {
   Bubble_YMF_Dummy[param_1] = bVar2 - bVar1;
   bVar2 = Bubble_Y_Position[param_1] - (bVar2 < bVar1);
   if (bVar2 < 0x20) {
-    bVar2 = 0xf8;
+    bVar2 = SPRITE_Y_OFFSCREEN;
   }
   Bubble_Y_Position[param_1] = bVar2;
 }
@@ -6256,7 +6260,7 @@ void InitFlyingCheepCheep(const byte param_1) {
 
   Enemy_Flag[param_1] = 1;
   Enemy_Y_HighPos[param_1] = 1;
-  Enemy_Y_Position[param_1] = 0xf8;
+  Enemy_Y_Position[param_1] = SPRITE_Y_OFFSCREEN;
 }
 
 
@@ -7520,8 +7524,8 @@ byte ProcFirebar(const byte param_1) {
 
   const byte bVar4 = Enemy_Rel_YPos;
   byte bVar3 = Enemy_SprDataOffset[sVar5];
-  Sprite_Data[bVar3] = Enemy_Rel_YPos;
-  Sprite_Data[bVar3 + 3] = Enemy_Rel_XPos;
+  SPRITE_Y(bVar3, 0) = Enemy_Rel_YPos;
+  SPRITE_X(bVar3, 0) = Enemy_Rel_XPos;
 
   struct_xr06 sVar8 = FirebarCollision(bVar3, Enemy_Rel_XPos, bVar4);
   byte bVar2 = sVar8.r06;
@@ -7549,18 +7553,18 @@ byte ProcFirebar(const byte param_1) {
 struct_xr06 DrawFirebar_Collision(const byte param_2, const byte param_3, const byte param_4, const byte param_5) {
   const byte bVar1 = Enemy_Rel_XPos + ((param_4 & 1) != 0 ? param_2 : -param_2);
 
-  Sprite_Data[param_5 + 3] = bVar1;
+  SPRITE_X(param_5, 0) = bVar1;
 
   byte bVar3;
   if (ABS_DIFF(bVar1, Enemy_Rel_XPos) <= 0x58) {
     bVar3 = Enemy_Rel_YPos;
-    if (Enemy_Rel_YPos != 0xf8) {
+    if (Enemy_Rel_YPos != SPRITE_Y_OFFSCREEN) {
       bVar3 = Enemy_Rel_YPos + ((param_4 & 2) != 0 ? param_3 : -param_3);
     }
   } else {
-    bVar3 = 0xf8;
+    bVar3 = SPRITE_Y_OFFSCREEN;
   }
-  Sprite_Data[param_5] = bVar3;
+  SPRITE_Y(param_5, 0) = bVar3;
   return FirebarCollision(param_5, bVar1, bVar3);
 }
 
@@ -7594,13 +7598,13 @@ NoColFB:
       bVar4 = NEGATE(bVar4);
     }
     if ((bVar4 < 8) && (param_3 < 0xf0)) {
-      bVar4 = (Sprite_Data[7] + 4) - param_3;
+      bVar4 = (SPRITE_X(0, 1) + 4) - param_3;
       if (bVar4 >= 0x80) {
         bVar4 = NEGATE(bVar4);
       }
       if (bVar4 < 8) {
         Enemy_MovingDir[0] = 1;
-        if ((byte)(Sprite_Data[7] + 4) < param_3) {
+        if ((byte)(SPRITE_X(0, 1) + 4) < param_3) {
           Enemy_MovingDir[0] = 2;
         }
         InjurePlayer();
@@ -7981,10 +7985,10 @@ byte ProcBowserFlame(const byte param_1) {
   const byte bVar55 = ((FrameCounter & 2) != 0) ? 0x82 : 2;
   const byte offset = Enemy_SprDataOffset[sVar7];
   for (int i = 0; i < 3; i++) {
-    Sprite_Data[(byte)(offset + i*4) + 0] = Enemy_Rel_YPos;
-    Sprite_Data[(byte)(offset + i*4) + 1] = 0x51 + i;
-    Sprite_Data[(byte)(offset + i*4) + 2] = bVar55;
-    Sprite_Data[(byte)(offset + i*4) + 3] = Enemy_Rel_XPos;
+    SPRITE_Y_strict(offset, i) = Enemy_Rel_YPos;
+    SPRITE_TILE_semistrict(offset, i) = 0x51 + i;
+    SPRITE_ATTR_semistrict(offset, i) = bVar55;
+    SPRITE_X_semistrict(offset, i) = Enemy_Rel_XPos;
     Enemy_Rel_XPos += 8;
   }
 
@@ -7994,16 +7998,16 @@ byte ProcBowserFlame(const byte param_1) {
   const byte bits = Enemy_OffscreenBits;
 
   if ((bits & 1) != 0) {
-    Sprite_Data[bVar3 + 0xc] = 0xf8;
+    SPRITE_Y(bVar3, 3) = SPRITE_Y_OFFSCREEN;
   }
   if ((bits & 2) != 0) {
-    Sprite_Data[bVar3 + 8] = 0xf8;
+    SPRITE_Y(bVar3, 2) = SPRITE_Y_OFFSCREEN;
   }
   if ((bits & 4) != 0) {
-    Sprite_Data[bVar3 + 4] = 0xf8;
+    SPRITE_Y(bVar3, 1) = SPRITE_Y_OFFSCREEN;
   }
   if ((bits & 8) != 0) {
-    Sprite_Data[bVar3] = 0xf8;
+    SPRITE_Y(bVar3, 0) = SPRITE_Y_OFFSCREEN;
   }
   return sVar6;
 }
@@ -8183,10 +8187,10 @@ byte DrawStarFlag(const byte param_1) {
   const byte bVar2 = Enemy_SprDataOffset[sVar3];
 
   for (int i = 0; i < 4; i++) {
-    Sprite_Data[(byte)(bVar2 + i*4) + 0] = Enemy_Rel_YPos + StarFlagYPosAdder[3 - i];
-    Sprite_Data[(byte)(bVar2 + i*4) + 1] = StarFlagTileData[3 - i];
-    Sprite_Data[(byte)(bVar2 + i*4) + 2] = 0x22;
-    Sprite_Data[(byte)(bVar2 + i*4) + 3] = Enemy_Rel_XPos + StarFlagXPosAdder[3 - i];
+    SPRITE_Y_strict(bVar2, i) = Enemy_Rel_YPos + StarFlagYPosAdder[3 - i];
+    SPRITE_TILE_semistrict(bVar2, i) = StarFlagTileData[3 - i];
+    SPRITE_ATTR_semistrict(bVar2, i) = 0x22;
+    SPRITE_X_semistrict(bVar2, i) = Enemy_Rel_XPos + StarFlagXPosAdder[3 - i];
   }
 
   return ObjectOffset;
@@ -9767,7 +9771,7 @@ void ImpedePlayerMove(const byte param_1) {
     bVar2 = 2;
     bVar1 = 1;
   }
-  
+
   if (nxspd) {
     // NXSpd
 
@@ -10496,58 +10500,31 @@ struct_azr02r04r06r07 BlockBufferCollision(const byte use_x, const byte param_2,
 // SM2MAIN:b0d9
 // Signature: [Y] -> []
 void DrawVine(const byte param_1) {
-  byte bVar1;
-  char cVar2;
-  byte bVar3;
-  byte bVar4;
+  const byte sproff = Enemy_SprDataOffset[VineObjOffset[param_1]];
 
-  bVar4 = Enemy_SprDataOffset[VineObjOffset[param_1]];
-  bVar3 = SixSpriteStacker(Enemy_Rel_YPos + VineYPosAdder[param_1], bVar4, bVar4);
-  bVar1 = Enemy_Rel_XPos;
-  Sprite_Data[bVar3 + 3] = Enemy_Rel_XPos;
-  Sprite_Data[bVar3 + 0xb] = bVar1;
-  Sprite_Data[bVar3 + 0x13] = bVar1;
-  bVar1 += 6;
-  Sprite_Data[bVar3 + 7] = bVar1;
-  Sprite_Data[bVar3 + 0xf] = bVar1;
-  Sprite_Data[bVar3 + 0x17] = bVar1;
-  Sprite_Data[bVar3 + 2] = 0x21;
-  Sprite_Data[bVar3 + 10] = 0x21;
-  Sprite_Data[bVar3 + 0x12] = 0x21;
-  Sprite_Data[bVar3 + 6] = 0x61;
-  Sprite_Data[bVar3 + 0xe] = 0x61;
-  Sprite_Data[bVar3 + 0x16] = 0x61;
-  bVar1 = 5;
-  do {
-    Sprite_Data[bVar3 + 1] = 0xe1;
-    bVar3 += 4;
-  } while (bVar1 -= 1, bVar1 < 0x80);
-  if (param_1 == 0) {
-    Sprite_Data[bVar4 + 1] = 0xe0;
+  const byte xpos = Enemy_Rel_XPos;
+  const byte ypos = Enemy_Rel_YPos + VineYPosAdder[param_1];
+
+  for (int i = 0; i < 6; i++) {
+    const bool even = i % 2 == 0;
+
+    // Inlined: SixSpriteStacker (for the sprite's Y component)
+    SPRITE_Y_strict(sproff, i)        = ypos + i*8;
+    SPRITE_X(sproff, i)               = xpos + (even ? 0 : 6);
+    SPRITE_ATTR(sproff, i)            = 0x21 | (even ? 0 : 0x40);
+    SPRITE_TILE_semistrict(sproff, i) = 0xe1;
   }
-  cVar2 = 0;
-  do {
-    if (99 < (byte)(VineStart_Y_Position - Sprite_Data[bVar4])) {
-      Sprite_Data[bVar4] = 0xf8;
+
+  if (param_1 == 0) {
+    SPRITE_TILE(sproff, 0) = 0xe0;
+  }
+
+  for (int i = 0; i < 6; i++) {
+    const byte diff = VineStart_Y_Position - SPRITE_Y(sproff, i);
+    if (diff >= 100) {
+      SPRITE_Y_strict(sproff, i) = SPRITE_Y_OFFSCREEN;
     }
-    bVar4 += 4;
-  } FOR_NE(cVar2, 6);
-}
-
-
-// SMB:e4ae
-// SM2MAIN:b152
-// Signature: [A, Y, r02] -> [Y]
-byte SixSpriteStacker(const byte param_1, const byte param_2, const byte param_3) {
-  char cVar1 = 6;
-  byte tmp1 = param_1;
-  byte tmp2 = param_2;
-  do {
-    Sprite_Data[tmp2] = tmp1;
-    tmp1 += 8;
-    tmp2 += 4;
-  } while (cVar1 -= 1, cVar1 != 0);
-  return param_3;
+  }
 }
 
 
@@ -10563,20 +10540,23 @@ byte DrawHammer(const byte param_1) {
     bVar3 = 0;
   }
   byte bVar2 = Misc_Rel_YPos + FirstSprYPos[bVar3];
-  Sprite_Data[bVar1] = bVar2;
-  Sprite_Data[bVar1 + 4] = bVar2 + SecondSprYPos[bVar3];
+  SPRITE_Y(bVar1, 0) = bVar2;
+  SPRITE_Y(bVar1, 1) = bVar2 + SecondSprYPos[bVar3];
   bVar2 = Misc_Rel_XPos + FirstSprXPos[bVar3];
-  Sprite_Data[bVar1 + 3] = bVar2;
-  Sprite_Data[bVar1 + 7] = bVar2 + SecondSprXPos[bVar3];
-  Sprite_Data[bVar1 + 1] = FirstSprTilenum[bVar3];
-  Sprite_Data[bVar1 + 5] = SecondSprTilenum[bVar3];
+  SPRITE_X(bVar1, 0) = bVar2;
+  SPRITE_X(bVar1, 1) = bVar2 + SecondSprXPos[bVar3];
+  SPRITE_TILE(bVar1, 0) = FirstSprTilenum[bVar3];
+  SPRITE_TILE(bVar1, 1) = SecondSprTilenum[bVar3];
   bVar3 = HammerSprAttrib[bVar3];
-  Sprite_Data[bVar1 + 2] = bVar3;
-  Sprite_Data[bVar1 + 6] = bVar3;
+  SPRITE_ATTR(bVar1, 0) = bVar3;
+  SPRITE_ATTR(bVar1, 1) = bVar3;
   bVar3 = ObjectOffset;
   if ((Misc_OffscreenBits & 0xfc) != 0) {
     Misc_State[ObjectOffset] = 0;
-    DumpTwoSpr(0xf8, bVar1);
+
+    // Inlined: DumpTwoSpr
+    SPRITE_Y(bVar1, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(bVar1, 1) = SPRITE_Y_OFFSCREEN;
   }
   return bVar3;
 }
@@ -10594,22 +10574,22 @@ void FlagpoleGfxHandler(const byte param_1) {
   // NES note: There's a carry bug after adding 8 and 12 to Enemy_Rel_XPos
   const bool carry_bug = xpos >= 236 && xpos < 248;
 
-  Sprite_Data[off + 3] = xpos;
-  Sprite_Data[off + 7] = xpos + 8;
-  Sprite_Data[off + 11] = xpos + 8;
+  SPRITE_X(off, 0) = xpos;
+  SPRITE_X(off, 1) = xpos + 8;
+  SPRITE_X(off, 2) = xpos + 8;
 
   // Inlined: DumpTwoSpr
-  Sprite_Data[off + 0] = ypos;
-  Sprite_Data[off + 4] = ypos;
-  Sprite_Data[off + 8] = ypos + 8 + carry_bug;
+  SPRITE_Y(off, 0) = ypos;
+  SPRITE_Y(off, 1) = ypos;
+  SPRITE_Y(off, 2) = ypos + 8 + carry_bug;
 
-  Sprite_Data[off + 2] = 1;
-  Sprite_Data[off + 6] = 1;
-  Sprite_Data[off + 10] = 1;
+  SPRITE_ATTR(off, 0) = 1;
+  SPRITE_ATTR(off, 1) = 1;
+  SPRITE_ATTR(off, 2) = 1;
 
-  Sprite_Data[off + 1] = 0x7e;
-  Sprite_Data[off + 5] = 0x7f;
-  Sprite_Data[off + 9] = 0x7e;
+  SPRITE_TILE(off, 0) = 0x7e;
+  SPRITE_TILE(off, 1) = 0x7f;
+  SPRITE_TILE(off, 2) = 0x7e;
 
   if (FlagpoleCollisionYPos != 0) {
     const byte bVar1 = FlagpoleScore << 1;
@@ -10623,59 +10603,12 @@ void FlagpoleGfxHandler(const byte param_1) {
                      xpos + 20);
   }
   if ((Enemy_OffscreenBits & 0xe) != 0) {
-    MoveSixSpritesOffscreen(Enemy_SprDataOffset[ObjectOffset]);
+    // Inlined: MoveSixSpritesOffscreen
+    const byte sprite_offset = Enemy_SprDataOffset[ObjectOffset];
+    for (int i = 0; i < 6; i++) {
+      SPRITE_Y(sprite_offset, i) = SPRITE_Y_OFFSCREEN;
+    }
   }
-}
-
-
-// SMB:e5b3
-// SM2MAIN:b259
-// Signature: [Y] -> []
-void MoveSixSpritesOffscreen(const byte param_1) {
-  DumpSixSpr(0xf8, param_1);
-}
-
-
-// SMB:e5b5
-// SM2MAIN:b25b
-// Signature: [A, Y] -> []
-void DumpSixSpr(const byte param_1, const byte param_2) {
-  Sprite_Data[param_2 + 0x14] = param_1;
-  Sprite_Data[param_2 + 0x10] = param_1;
-  Sprite_Data[param_2 + 0xc] = param_1;
-  Sprite_Data[param_2 + 8] = param_1;
-  Sprite_Data[param_2 + 4] = param_1;
-  Sprite_Data[param_2] = param_1;
-}
-
-
-// SMB:e5bb
-// SM2MAIN:b261
-// Signature: [A, Y] -> []
-void DumpFourSpr(const byte param_1, const byte param_2) {
-  Sprite_Data[param_2 + 0xc] = param_1;
-  Sprite_Data[param_2 + 8] = param_1;
-  Sprite_Data[param_2 + 4] = param_1;
-  Sprite_Data[param_2] = param_1;
-}
-
-
-// SMB:e5be
-// SM2MAIN:b264
-// Signature: [A, Y] -> []
-void DumpThreeSpr(const byte param_1, const byte param_2) {
-  Sprite_Data[param_2 + 8] = param_1;
-  Sprite_Data[param_2 + 4] = param_1;
-  Sprite_Data[param_2] = param_1;
-}
-
-
-// SMB:e5c1
-// SM2MAIN:b267
-// Signature: [A, Y] -> []
-void DumpTwoSpr(const byte param_1, const byte param_2) {
-  Sprite_Data[param_2 + 4] = param_1;
-  Sprite_Data[param_2] = param_1;
 }
 
 
@@ -10683,47 +10616,63 @@ void DumpTwoSpr(const byte param_1, const byte param_2) {
 // SM2MAIN:b26e
 // Signature: [X] -> [X]
 byte DrawLargePlatform(const byte param_1) {
-  DumpFourSpr(
-    Enemy_Y_Position[ObjectOffset],
-    SixSpriteStacker(Enemy_Rel_XPos,
-                     Enemy_SprDataOffset[param_1] + 3,
-                     Enemy_SprDataOffset[param_1])
-  );
+  const byte sproff1 = Enemy_SprDataOffset[param_1];
 
-  byte bVar11 = Enemy_Y_Position[ObjectOffset];
-  if ((AreaType == 3) || (SecondaryHardMode != 0)) {
-    bVar11 = 0xf8;
+  // Inlined: SixSpriteStacker
+  for (int i = 0; i < 6; i++) {
+    SPRITE_X_strict(sproff1, i) = Enemy_Rel_XPos + i*8;
   }
-  const byte bVar3 = Enemy_SprDataOffset[ObjectOffset];
-  Sprite_Data[bVar3 + 0x10] = bVar11;
-  Sprite_Data[bVar3 + 0x14] = bVar11;
 
-  DumpSixSpr((CloudTypeOverride != 0) ? 0x75 : 0x5b, bVar3+1);
-  DumpSixSpr(2, bVar3 + 2);
+  const byte ypos = Enemy_Y_Position[ObjectOffset];
+
+  // Inlined: DumpFourSpr
+  SPRITE_Y(sproff1, 0) = ypos;
+  SPRITE_Y(sproff1, 1) = ypos;
+  SPRITE_Y(sproff1, 2) = ypos;
+  SPRITE_Y(sproff1, 3) = ypos;
+
+  byte bVar11 = ypos;
+  if ((AreaType == 3) || (SecondaryHardMode != 0)) {
+    bVar11 = SPRITE_Y_OFFSCREEN;
+  }
+
+  const byte bVar3 = Enemy_SprDataOffset[ObjectOffset];
+
+  // NES note: If the offset is 254 or 255, this wraparounds the sprite page
+  // because it's incremented before passing to DumpSixSpr.
+  // This port assumes it can't happen.
+  assert_eq_assumption(bVar3 <= 253, true);
+
+  SPRITE_Y(bVar3, 4) = bVar11;
+  SPRITE_Y(bVar3, 5) = bVar11;
+
+  const byte tile = (CloudTypeOverride != 0) ? 0x75 : 0x5b;
+
+  // Inlined: DumpSixSpr
+  for (int i = 0; i < 6; i++) {
+    SPRITE_TILE(bVar3, i) = tile;
+    SPRITE_ATTR(bVar3, i) = 2;
+  }
 
   const byte xoffscrbits = GetXOffscreenBits(ObjectOffset+1);
   const byte bVar1 = Enemy_SprDataOffset[ObjectOffset];
-  if (xoffscrbits & 0x80) {
-    Sprite_Data[bVar1] = 0xf8;
+
+  // NES version is unrolled. We rolled up the loop in this port
+  for (int i = 0; i < 6; i++) {
+    // 0x80, 0x40, 0x20, 0x10, 0x08, 0x04
+    const byte mask = 1 << (7-i);
+    if (xoffscrbits & mask) {
+      SPRITE_Y(bVar1, i) = SPRITE_Y_OFFSCREEN;
+    }
   }
-  if (xoffscrbits & 0x40) {
-    Sprite_Data[bVar1 + 4] = 0xf8;
-  }
-  if (xoffscrbits & 0x20) {
-    Sprite_Data[bVar1 + 8] = 0xf8;
-  }
-  if (xoffscrbits & 0x10) {
-    Sprite_Data[bVar1 + 0xc] = 0xf8;
-  }
-  if (xoffscrbits & 0x08) {
-    Sprite_Data[bVar1 + 0x10] = 0xf8;
-  }
-  if (xoffscrbits & 0x04) {
-    Sprite_Data[bVar1 + 0x14] = 0xf8;
-  }
+
   if (Enemy_OffscreenBits & 0x80) {
-    MoveSixSpritesOffscreen(bVar1);
+    // Inlined: MoveSixSpritesOffscreen
+    for (int i = 0; i < 6; i++) {
+      SPRITE_Y(bVar1, i) = SPRITE_Y_OFFSCREEN;
+    }
   }
+
   return ObjectOffset;
 }
 
@@ -10735,28 +10684,40 @@ byte JCoinGfxHandler(const byte param_1) {
   byte bVar2 = Misc_SprDataOffset[param_1];
   if (Misc_State[param_1] < 2) {
     byte bVar1 = Misc_Y_Position[param_1];
-    Sprite_Data[bVar2] = bVar1;
-    Sprite_Data[bVar2 + 4] = bVar1 + 8;
+    SPRITE_Y(bVar2, 0) = bVar1;
+    SPRITE_Y(bVar2, 1) = bVar1 + 8;
     bVar1 = Misc_Rel_XPos;
-    Sprite_Data[bVar2 + 3] = Misc_Rel_XPos;
-    Sprite_Data[bVar2 + 7] = bVar1;
-    bVar2 += 1;
-    DumpTwoSpr(JumpingCoinTiles[FrameCounter >> 1 & 3], bVar2);
-    Sprite_Data[(byte)(bVar2 - 1) + 2] = 2;
-    Sprite_Data[(byte)(bVar2 - 1) + 6] = 0x82;
+    SPRITE_X(bVar2, 0) = Misc_Rel_XPos;
+    SPRITE_X(bVar2, 1) = bVar1;
+
+    // Inlined: DumpTwoSpr
+    // NES note: If the offset is 255, this wraparounds the sprite page
+    // because it's incremented before passing to DumpTwoSpr.
+    // This port assumes it can't happen.
+    assert_eq_assumption(bVar2 != 255, true);
+    const byte tile = JumpingCoinTiles[FrameCounter >> 1 & 3];
+    SPRITE_TILE(bVar2, 0) = tile;
+    SPRITE_TILE(bVar2, 1) = tile;
+
+    SPRITE_ATTR(bVar2, 0) = 2;
+    SPRITE_ATTR(bVar2, 1) = 0x82;
     return ObjectOffset;
   } else {
     if ((FrameCounter & 1) == 0) {
       Misc_Y_Position[param_1] = Misc_Y_Position[param_1] - 1;
     }
-    DumpTwoSpr(Misc_Y_Position[param_1], bVar2);
+
+    // Inlined: DumpTwoSpr
+    SPRITE_Y(bVar2, 0) = Misc_Y_Position[param_1];
+    SPRITE_Y(bVar2, 1) = Misc_Y_Position[param_1];
+
     const byte bVar1 = Misc_Rel_XPos;
-    Sprite_Data[bVar2 + 3] = Misc_Rel_XPos;
-    Sprite_Data[bVar2 + 7] = bVar1 + 8;
-    Sprite_Data[bVar2 + 2] = 2;
-    Sprite_Data[bVar2 + 6] = 2;
-    Sprite_Data[bVar2 + 1] = 0xf7;
-    Sprite_Data[bVar2 + 5] = 0xfb;
+    SPRITE_X(bVar2, 0) = Misc_Rel_XPos;
+    SPRITE_X(bVar2, 1) = bVar1 + 8;
+    SPRITE_ATTR(bVar2, 0) = 2;
+    SPRITE_ATTR(bVar2, 1) = 2;
+    SPRITE_TILE(bVar2, 0) = 0xf7;
+    SPRITE_TILE(bVar2, 1) = 0xfb;
     return param_1;
   }
 }
@@ -10790,14 +10751,14 @@ byte DrawPowerUp(void) {
 
   if (((bStack0000 != 0) && (bStack0000 != 3)) && (ssw(true, bStack0000 != 4))) {
     bVar6 = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[5];
-    Sprite_Data[Enemy_SprDataOffset[5] + 2] = bVar6;
-    Sprite_Data[bVar1 + 6] = bVar6;
+    SPRITE_ATTR(Enemy_SprDataOffset[5], 0) = bVar6;
+    SPRITE_ATTR(bVar1, 1) = bVar6;
     if (bStack0000 != 1) {
-      Sprite_Data[bVar1 + 10] = bVar6;
-      Sprite_Data[bVar1 + 0xe] = bVar6;
+      SPRITE_ATTR(bVar1, 2) = bVar6;
+      SPRITE_ATTR(bVar1, 3) = bVar6;
     }
-    Sprite_Data[bVar1 + 6] = Sprite_Data[bVar1 + 6] | 0x40;
-    Sprite_Data[bVar1 + 0xe] = Sprite_Data[bVar1 + 0xe] | 0x40;
+    SPRITE_ATTR(bVar1, 1) = SPRITE_ATTR(bVar1, 1) | 0x40;
+    SPRITE_ATTR(bVar1, 3) = SPRITE_ATTR(bVar1, 3) | 0x40;
   }
   return SprObjectOffscrChk();
 }
@@ -10981,30 +10942,39 @@ CheckDefeatedState:
 byte DrawEnemyObject(const byte param_1, const byte param_2, const byte param_3, const byte param_4, const byte param_5) {
   byte bVar1;
   byte bVar4;
-  bool bVar5;
 
   struct_xyr02 sVar6 = DrawEnemyObjRow(param_1, MysterySpriteThing1, param_2,
                                        param_3, param_4, param_5);
   sVar6 = DrawEnemyObjRow(sVar6.x, sVar6.y, sVar6.r02, param_3, param_4, param_5);
   DrawEnemyObjRow(sVar6.x, sVar6.y, sVar6.r02, param_3, param_4, param_5);
-  byte bVar3 = Enemy_SprDataOffset[ObjectOffset];
+  const byte bVar3 = Enemy_SprDataOffset[ObjectOffset];
+
   if (MysterySpriteThing4 == 8) {
     return SprObjectOffscrChk();
   }
   if (VerticalFlipFlag != 0) {
-    bVar4 = bVar3 + 2;
-    DumpSixSpr(Sprite_Data[bVar3 + 2] | 0x80, bVar4);
-    bVar3 = bVar4 - 2;
+    const byte attr = SPRITE_ATTR(bVar3, 0) | 0x80;
+
+    // NES note: If the offset is 254 or 255, this wraparounds the sprite page
+    // because it's incremented before passing to DumpSixSpr.
+    // This port assumes it can't happen.
+    assert_eq_assumption(bVar3 <= 253, true);
+
+    // Inlined: DumpSixSpr
+    for (int i =  0; i < 6; i++) {
+      SPRITE_ATTR(bVar3, i) = attr;
+    }
+
     byte bVar2 = bVar3;
     if ((MysterySpriteThing4 != 5) && ssw(true, (MysterySpriteThing4 != 4)) && (MysterySpriteThing4 != 0x11) && (MysterySpriteThing4 < 0x15)) {
-      bVar2 = bVar4 + 6;
+      bVar2 = bVar3 + 8;
     }
-    bVar4 = Sprite_Data[bVar2 + 1];
-    bVar1 = Sprite_Data[bVar2 + 5];
-    Sprite_Data[bVar2 + 1] = Sprite_Data[bVar3 + 0x11];
-    Sprite_Data[bVar2 + 5] = Sprite_Data[bVar3 + 0x15];
-    Sprite_Data[bVar3 + 0x15] = bVar1;
-    Sprite_Data[bVar3 + 0x11] = bVar4;
+    bVar4 = SPRITE_TILE(bVar2, 0);
+    bVar1 = SPRITE_TILE(bVar2, 1);
+    SPRITE_TILE(bVar2, 0) = SPRITE_TILE(bVar3, 4);
+    SPRITE_TILE(bVar2, 1) = SPRITE_TILE(bVar3, 5);
+    SPRITE_TILE(bVar3, 5) = bVar1;
+    SPRITE_TILE(bVar3, 4) = bVar4;
   }
   byte bVar2 = MysterySpriteThing2;
   if (BowserGfxFlag != 0) {
@@ -11018,61 +10988,57 @@ byte DrawEnemyObject(const byte param_1, const byte param_2, const byte param_3,
       goto CheckToMirrorLakitu;
     }
     if (MysterySpriteThing4 == 0x15) {
-      Sprite_Data[bVar3 + 0x16] = 0x42;
+      SPRITE_ATTR(bVar3, 5) = 0x42;
     }
     if (bVar2 < 2) {
       goto CheckToMirrorLakitu;
     }
   }
   if (BowserGfxFlag == 0) {
-    bVar4 = Sprite_Data[bVar3 + 2] & 0xa3;
-    Sprite_Data[bVar3 + 2] = bVar4;
-    Sprite_Data[bVar3 + 10] = bVar4;
-    Sprite_Data[bVar3 + 0x12] = bVar4;
+    bVar4 = SPRITE_ATTR(bVar3, 0) & 0xa3;
+    SPRITE_ATTR(bVar3, 0) = bVar4;
+    SPRITE_ATTR(bVar3, 2) = bVar4;
+    SPRITE_ATTR(bVar3, 4) = bVar4;
     bVar1 = bVar4 | 0x40;
     if (bVar2 == 5) {
       bVar1 = bVar4 | 0xc0;
     }
-    Sprite_Data[bVar3 + 6] = bVar1;
-    Sprite_Data[bVar3 + 0xe] = bVar1;
-    Sprite_Data[bVar3 + 0x16] = bVar1;
+    SPRITE_ATTR(bVar3, 1) = bVar1;
+    SPRITE_ATTR(bVar3, 3) = bVar1;
+    SPRITE_ATTR(bVar3, 5) = bVar1;
     if (bVar2 == 4) {
-      bVar2 = Sprite_Data[bVar3 + 10];
+      bVar2 = SPRITE_ATTR(bVar3, 2);
       bVar4 = bVar2 | 0x80;
-      Sprite_Data[bVar3 + 10] = bVar4;
-      Sprite_Data[bVar3 + 0x12] = bVar4;
+      SPRITE_ATTR(bVar3, 2) = bVar4;
+      SPRITE_ATTR(bVar3, 4) = bVar4;
       bVar2 |= 0xc0;
-      Sprite_Data[bVar3 + 0xe] = bVar2;
-      Sprite_Data[bVar3 + 0x16] = bVar2;
+      SPRITE_ATTR(bVar3, 3) = bVar2;
+      SPRITE_ATTR(bVar3, 5) = bVar2;
     }
   }
 CheckToMirrorLakitu:
   if (MysterySpriteThing4 == 0x11) {
     if (VerticalFlipFlag == 0) {
-      Sprite_Data[bVar3 + 0x12] = Sprite_Data[bVar3 + 0x12] & 0x81;
-      bVar2 = Sprite_Data[bVar3 + 0x16] | 0x41;
-      Sprite_Data[bVar3 + 0x16] = bVar2;
-      bVar5 = FrenzyEnemyTimer >= 0x10;
-      if (bVar5) {
-        return SprObjectOffscrChk();
+      SPRITE_ATTR(bVar3, 4) &= 0x81;
+      SPRITE_ATTR(bVar3, 5) |= 0x41;
+      const byte bVar2 = SPRITE_ATTR(bVar3, 5);
+      if (FrenzyEnemyTimer < 0x10) {
+        SPRITE_ATTR(bVar3, 3) = bVar2;
+        SPRITE_ATTR(bVar3, 2) = bVar2 & 0x81;
       }
-      Sprite_Data[bVar3 + 0xe] = bVar2;
-      Sprite_Data[bVar3 + 10] = bVar2 & 0x81;
-      if (!bVar5) {
-        return SprObjectOffscrChk();
-      }
+      return SprObjectOffscrChk();
     }
-    Sprite_Data[bVar3 + 2] = Sprite_Data[bVar3 + 2] & 0x81;
-    Sprite_Data[bVar3 + 6] = Sprite_Data[bVar3 + 6] | 0x41;
+    SPRITE_ATTR(bVar3, 0) = SPRITE_ATTR(bVar3, 0) & 0x81;
+    SPRITE_ATTR(bVar3, 1) = SPRITE_ATTR(bVar3, 1) | 0x41;
   }
   if (MysterySpriteThing4 < 0x18) {
     return SprObjectOffscrChk();
   }
   const byte ead = ssw(0x02, EnemyAttributeData[24]);
-  Sprite_Data[bVar3 + 10] = ead | 0x80;
-  Sprite_Data[bVar3 + 0x12] = ead | 0x80;
-  Sprite_Data[bVar3 + 0xe] = ead | 0xc0;
-  Sprite_Data[bVar3 + 0x16] = ead | 0xc0;
+  SPRITE_ATTR(bVar3, 2) = ead | 0x80;
+  SPRITE_ATTR(bVar3, 4) = ead | 0x80;
+  SPRITE_ATTR(bVar3, 3) = ead | 0xc0;
+  SPRITE_ATTR(bVar3, 5) = ead | 0xc0;
   return SprObjectOffscrChk();
 }
 
@@ -11081,33 +11047,51 @@ CheckToMirrorLakitu:
 // SM2MAIN:b83f
 // Signature: [] -> [X]
 byte SprObjectOffscrChk(void) {
-  byte bStack0000 = Enemy_OffscreenBits >> 3;
-  const byte bVar1 = ObjectOffset;
-  if ((Enemy_OffscreenBits >> 2 & 1) != 0) {
-    MoveESprColOffscreen(4, ObjectOffset);
+  const byte original_bits = Enemy_OffscreenBits;
+  const byte objoff = ObjectOffset;
+
+  if ((original_bits & 4) != 0) {
+    // Inlined: MoveESprColOffscreen
+    const byte offset = SPRITE_calculate_wrap(Enemy_SprDataOffset[objoff], 1);
+    SPRITE_Y(offset, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(offset, 2) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(offset, 4) = SPRITE_Y_OFFSCREEN;
   }
-  byte bVar2 = bStack0000 & 1;
-  bStack0000 >>= 1;
-  if (bVar2 != 0) {
-    MoveESprColOffscreen(0, bVar1);
+
+  if ((original_bits & 8) != 0) {
+    // Inlined: MoveESprColOffscreen
+    const byte offset = Enemy_SprDataOffset[objoff];
+    SPRITE_Y(offset, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(offset, 2) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(offset, 4) = SPRITE_Y_OFFSCREEN;
   }
-  bVar2 = bStack0000 >> 1;
-  bStack0000 >>= 2;
-  if ((bVar2 & 1) != 0) {
-    MoveESprRowOffscreen(0x10, bVar1);
+
+  if ((original_bits & 0x20) != 0) {
+    // Inlined: MoveESprRowOffscreen
+    const byte offset = SPRITE_calculate_wrap(Enemy_SprDataOffset[objoff], 4);
+    SPRITE_Y(offset, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(offset, 1) = SPRITE_Y_OFFSCREEN;
   }
-  bVar2 = bStack0000 & 1;
-  bStack0000 >>= 1;
-  if (bVar2 != 0) {
-    MoveESprRowOffscreen(8, bVar1);
+
+  if ((original_bits & 0x40) != 0) {
+    // Inlined: MoveESprRowOffscreen
+    const byte offset = SPRITE_calculate_wrap(Enemy_SprDataOffset[objoff], 2);
+    SPRITE_Y(offset, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(offset, 1) = SPRITE_Y_OFFSCREEN;
   }
-  if ((bStack0000 & 1) != 0) {
-    MoveESprRowOffscreen(bStack0000 >> 1, bVar1);
-    if ((Enemy_ID[bVar1] != 0xc) && (Enemy_Y_HighPos[bVar1] == 2)) {
-      EraseEnemyObject(bVar1);
+
+  if ((original_bits & 0x80) != 0) {
+    // Inlined: MoveESprRowOffscreen
+    const byte offset = Enemy_SprDataOffset[objoff];
+    SPRITE_Y(offset, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(offset, 1) = SPRITE_Y_OFFSCREEN;
+
+    if ((Enemy_ID[objoff] != 0xc) && (Enemy_Y_HighPos[objoff] == 2)) {
+      EraseEnemyObject(objoff);
     }
   }
-  return bVar1;
+
+  return objoff;
 }
 
 
@@ -11126,24 +11110,6 @@ struct_xyr02 DrawEnemyObjRow(const byte param_1, const byte param_2, const byte 
 struct_xyr02 DrawOneSpriteRow(const byte param_1, const byte param_2, const byte param_3, const byte param_4, const byte param_5, const byte param_6,
                               const byte param_7, const byte param_8) {
   return DrawSpriteObject(param_2, param_3, param_4, param_1, param_5, param_6, param_7, param_8);
-}
-
-
-// SMB:ebb7
-// SM2MAIN:b892
-// Signature: [A, X] -> []
-void MoveESprRowOffscreen(const byte param_1, const byte param_2) {
-  DumpTwoSpr(0xf8, param_1 + Enemy_SprDataOffset[param_2]);
-}
-
-
-// SMB:ebc1
-// SM2MAIN:b89c
-// Signature: [A, X] -> []
-void MoveESprColOffscreen(const byte param_1, const byte param_2) {
-  const byte bVar2 = param_1 + Enemy_SprDataOffset[param_2];
-  const byte bVar1 = MoveColOffscreen(bVar2);
-  Sprite_Data[bVar2 + 0x10] = bVar1;
 }
 
 
@@ -11174,45 +11140,40 @@ byte DrawBlock(const byte param_1) {
   } while (bVar6 != 4);
   bVar7 = AltOrBlock_SprDataOffset[ObjectOffset];
   if (AreaType != 1) {
-    Sprite_Data[bVar7 + 1] = 0x86;
-    Sprite_Data[bVar7 + 5] = 0x86;
+    SPRITE_TILE(bVar7, 0) = 0x86;
+    SPRITE_TILE(bVar7, 1) = 0x86;
   }
   if (Block_Metatile[bVar5] == ssw(0xc4, 0xc5)) {
-    DumpFourSpr(0x87, bVar7+1);
+    // Inlined: DumpFourSpr
+    // NES note: If the offset is 255, this wraparounds the sprite page
+    // because it's incremented before passing to DumpFourSpr.
+    // This port assumes it can't happen.
+    assert_eq_assumption(bVar7 != 255, true);
+    SPRITE_TILE(bVar7, 0) = 0x87;
+    SPRITE_TILE(bVar7, 1) = 0x87;
+    SPRITE_TILE(bVar7, 2) = 0x87;
+    SPRITE_TILE(bVar7, 3) = 0x87;
+
     bVar5 = ObjectOffset;
 
     const byte bVar4 = (AreaType != 1) ? 1 : 3;
-    Sprite_Data[bVar7 + 2] = bVar4;
-    Sprite_Data[bVar7 + 6] = bVar4 | 0x40;
-    Sprite_Data[bVar7 + 0xe] = bVar4 | 0xc0;
-    Sprite_Data[bVar7 + 10] = bVar4 | 0x80;
+    SPRITE_ATTR(bVar7, 0) = bVar4;
+    SPRITE_ATTR(bVar7, 1) = bVar4 | 0x40;
+    SPRITE_ATTR(bVar7, 2) = bVar4 | 0x80;
+    SPRITE_ATTR(bVar7, 3) = bVar4 | 0xc0;
   }
   if ((Block_OffscreenBits & 4) != 0) {
-    Sprite_Data[bVar7 + 4] = 0xf8;
-    Sprite_Data[bVar7 + 0xc] = 0xf8;
+    SPRITE_Y(bVar7, 1) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(bVar7, 3) = SPRITE_Y_OFFSCREEN;
   }
-  ChkLeftCo(Block_OffscreenBits, bVar7);
+
+  // Inlined: ChkLeftCo
+  if ((Block_OffscreenBits & 8) != 0) {
+    SPRITE_Y(bVar7, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(bVar7, 2) = SPRITE_Y_OFFSCREEN;
+  }
+
   return bVar5;
-}
-
-
-// SMB:ec46
-// SM2MAIN:b921
-// Signature: [A, Y] -> []
-void ChkLeftCo(const byte param_1, const byte param_2) {
-  if ((param_1 & 8) != 0) {
-    MoveColOffscreen(param_2);
-  }
-}
-
-
-// SMB:ec4a
-// SM2MAIN:b925
-// Signature: [Y] -> [A]
-byte MoveColOffscreen(const byte param_1) {
-  Sprite_Data[param_1] = 0xf8;
-  Sprite_Data[param_1 + 8] = 0xf8;
-  return 0xf8;
 }
 
 
@@ -11225,17 +11186,34 @@ void DrawBrickChunks(const byte param_1) {
 
   const byte off = AltOrBlock_SprDataOffset[param_1];
 
+  // NES note: If the sprite offset is 254 or 255, this wraparounds the sprite page
+  // because it's incremented before passing to DumpFourSpr.
+  // This port assumes it can't happen.
+  assert_eq_assumption(off <= 253, true);
+
   // Set tile indices for all 4 sprites
-  DumpFourSpr(tileidx, off + 1);
+  // Inlined: DumpFourSpr
+  SPRITE_TILE(off, 0) = tileidx;
+  SPRITE_TILE(off, 1) = tileidx;
+  SPRITE_TILE(off, 2) = tileidx;
+  SPRITE_TILE(off, 3) = tileidx;
 
   // Set attributes for all 4 sprites
   // Cycle through flipping them vertically and horizontally based on the frame counter
   // None -> Horz -> Vert -> Vert+Horz -> None -> ...
   const byte tileflipattr = (FrameCounter & 0xc) << 4;
-  DumpFourSpr(tileflipattr | tilepalette, off + 2);
+  const byte attr = tileflipattr | tilepalette;
+  // Inlined: DumpFourSpr
+  SPRITE_ATTR(off, 0) = attr;
+  SPRITE_ATTR(off, 1) = attr;
+  SPRITE_ATTR(off, 2) = attr;
+  SPRITE_ATTR(off, 3) = attr;
 
   // Set Y for sprites +0, +1
-  DumpTwoSpr(Block_Rel_YPos, off);
+
+  // Inlined: DumpTwoSpr
+  SPRITE_Y(off, 0) = Block_Rel_YPos;
+  SPRITE_Y(off, 1) = Block_Rel_YPos;
 
   const byte x1 = Block_Rel_XPos;
   const byte x2 = Block_Rel_XPos_2;
@@ -11243,34 +11221,36 @@ void DrawBrickChunks(const byte param_1) {
   const byte b = Block_Orig_XPos[param_1] - ScreenEdgeOrLeft_X_Pos[0];
 
   // Set X for all 4 sprites
-  Sprite_Data[off + 3]  = x1;
-  Sprite_Data[off + 7]  = 6 + 2*b - x1;
-  Sprite_Data[off + 11] = x2;
-  Sprite_Data[off + 15] = 6 + 2*b - x2;
+  SPRITE_X(off, 0) = x1;
+  SPRITE_X(off, 1) = 6 + 2*b - x1;
+  SPRITE_X(off, 2) = x2;
+  SPRITE_X(off, 3) = 6 + 2*b - x2;
 
   // NES note: The carry additions here are probably an oversight in the original
   // It's separated out here in case a feature-enhacing port wants to remove it
-  Sprite_Data[off + 7]  += (b >= x1) + (2*b - x1 + (b >= x1) >= 0x100);
-  Sprite_Data[off + 15] += (b >= x2) + (2*b - x2 + (b >= x2) >= 0x100);
+  SPRITE_X(off, 1) += (b >= x1) + (2*b - x1 + (b >= x1) >= 0x100);
+  SPRITE_X(off, 3) += (b >= x2) + (2*b - x2 + (b >= x2) >= 0x100);
 
   // Set Y for sprites +2, +3
-  Sprite_Data[off + 8] = Block_Rel_YPos_2;
-  Sprite_Data[off + 12] = Block_Rel_YPos_2;
+  SPRITE_Y(off, 2) = Block_Rel_YPos_2;
+  SPRITE_Y(off, 3) = Block_Rel_YPos_2;
 
   // Inlined: ChkLeftCo
-  // Only modifies Sprite_Data[off] and Sprite_Data[off + 8]
   if ((Block_OffscreenBits & 8) != 0) {
-    MoveColOffscreen(off);
+    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 2) = SPRITE_Y_OFFSCREEN;
   }
 
   if ((Block_OffscreenBits & 0x80) != 0) {
-    DumpTwoSpr(0xf8, off);
+    // Inlined: DumpTwoSpr
+    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
   }
 
-  if (((i8)b < 0) && (Sprite_Data[off + 7] <= Sprite_Data[off + 3])) {
+  if (((i8)b < 0) && (SPRITE_X(off, 1) <= SPRITE_X(off, 0))) {
     // Sprites +1 and +3 are offscreen
-    Sprite_Data[off + 4] = 0xf8;
-    Sprite_Data[off + 12] = 0xf8;
+    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 3) = SPRITE_Y_OFFSCREEN;
   }
 }
 
@@ -11280,8 +11260,8 @@ void DrawBrickChunks(const byte param_1) {
 // Signature: [X] -> []
 void DrawFireball(const byte param_1) {
   const byte bVar1 = FBall_SprDataOffset[param_1];
-  Sprite_Data[bVar1] = Fireball_Rel_YPos;
-  Sprite_Data[bVar1 + 3] = Fireball_Rel_XPos;
+  SPRITE_Y(bVar1, 0) = Fireball_Rel_YPos;
+  SPRITE_X(bVar1, 0) = Fireball_Rel_XPos;
   DrawFirebar(bVar1);
 }
 
@@ -11290,8 +11270,8 @@ void DrawFireball(const byte param_1) {
 // SM2MAIN:b9c8
 // Signature: [Y] -> []
 void DrawFirebar(const byte param_1) {
-  Sprite_Data[param_1 + 1] = ((FrameCounter >> 2) & 1) ^ 100;
-  Sprite_Data[param_1 + 2] = ((FrameCounter >> 3 & 1) != 0) ? 0xc2 : 2;
+  SPRITE_TILE(param_1, 0) = ((FrameCounter >> 2) & 1) ^ 100;
+  SPRITE_ATTR(param_1, 0) = ((FrameCounter >> 3 & 1) != 0) ? 0xc2 : 2;
 }
 
 
@@ -11314,27 +11294,33 @@ void DrawExplosion_Fireball(const byte param_1) {
 // SM2MAIN:b9f2
 // Signature: [A, Y] -> [X]
 byte DrawExplosion_Fireworks(const byte param_1, const byte param_2) {
-  byte bVar4 = param_2 + 1;
-  DumpFourSpr(ExplosionTiles[param_1], bVar4);
-  byte bVar2 = Fireball_Rel_YPos;
-  bVar4 -= 1;
-  const byte bVar3 = ObjectOffset;
-  byte bVar1 = Fireball_Rel_YPos - 4;
-  Sprite_Data[bVar4] = bVar1;
-  Sprite_Data[bVar4 + 8] = bVar1;
-  Sprite_Data[bVar4 + 4] = bVar2 + 4;
-  Sprite_Data[bVar4 + 0xc] = bVar2 + 4;
-  bVar2 = Fireball_Rel_XPos;
-  bVar1 = Fireball_Rel_XPos - 4;
-  Sprite_Data[bVar4 + 3] = bVar1;
-  Sprite_Data[bVar4 + 7] = bVar1;
-  Sprite_Data[bVar4 + 0xb] = bVar2 + 4;
-  Sprite_Data[bVar4 + 0xf] = bVar2 + 4;
-  Sprite_Data[bVar4 + 2] = 2;
-  Sprite_Data[bVar4 + 6] = 0x82;
-  Sprite_Data[bVar4 + 10] = 0x42;
-  Sprite_Data[bVar4 + 0xe] = 0xc2;
-  return bVar3;
+  // NES note: If the offset is 255, this wraparounds the sprite page
+  // because it's incremented before passing to DumpFourSpr.
+  // This port assumes it can't happen.
+  assert_eq_assumption(param_2 != 255, true);
+
+  // Inlined: DumpFourSpr
+  SPRITE_TILE(param_2, 0) = ExplosionTiles[param_1];
+  SPRITE_TILE(param_2, 1) = ExplosionTiles[param_1];
+  SPRITE_TILE(param_2, 2) = ExplosionTiles[param_1];
+  SPRITE_TILE(param_2, 3) = ExplosionTiles[param_1];
+
+  SPRITE_Y(param_2, 0) = Fireball_Rel_YPos - 4;
+  SPRITE_Y(param_2, 2) = Fireball_Rel_YPos - 4;
+  SPRITE_Y(param_2, 1) = Fireball_Rel_YPos + 4;
+  SPRITE_Y(param_2, 3) = Fireball_Rel_YPos + 4;
+
+  SPRITE_X(param_2, 0) = Fireball_Rel_XPos - 4;
+  SPRITE_X(param_2, 1) = Fireball_Rel_XPos - 4;
+  SPRITE_X(param_2, 2) = Fireball_Rel_XPos + 4;
+  SPRITE_X(param_2, 3) = Fireball_Rel_XPos + 4;
+
+  SPRITE_ATTR(param_2, 0) = 2;
+  SPRITE_ATTR(param_2, 1) = 0x82;
+  SPRITE_ATTR(param_2, 2) = 0x42;
+  SPRITE_ATTR(param_2, 3) = 0xc2;
+
+  return ObjectOffset;
 }
 
 
@@ -11342,43 +11328,56 @@ byte DrawExplosion_Fireworks(const byte param_1, const byte param_2) {
 // SM2MAIN:ba41
 // Signature: [X] -> [X]
 byte DrawSmallPlatform(const byte param_1) {
-  byte bVar2 = Enemy_SprDataOffset[param_1] + 1;
-  DumpSixSpr(0x5b, bVar2);
-  bVar2 += 1;
-  DumpSixSpr(2, bVar2);
+  const byte bVar2 = Enemy_SprDataOffset[param_1];
+
+  // NES note: If the offset is 254 or 255, this wraparounds the sprite page
+  // because it's incremented before passing to DumpSixSpr.
+  // This port assumes it can't happen.
+  assert_eq_assumption(bVar2 <= 253, true);
+
+  // Inlined: DumpSixSpr
+  for (int i = 0; i < 6; i++) {
+    SPRITE_TILE(bVar2, i) = 0x5b;
+    SPRITE_ATTR(bVar2, i) = 2;
+  }
+
   byte bVar1 = Enemy_Rel_XPos;
-  bVar2 -= 2;
-  Sprite_Data[bVar2 + 3] = Enemy_Rel_XPos;
-  Sprite_Data[bVar2 + 0xf] = bVar1;
-  Sprite_Data[bVar2 + 7] = bVar1 + 8;
-  Sprite_Data[bVar2 + 0x13] = bVar1 + 8;
-  Sprite_Data[bVar2 + 0xb] = bVar1 + 0x10;
-  Sprite_Data[bVar2 + 0x17] = bVar1 + 0x10;
+  SPRITE_X(bVar2, 0) = Enemy_Rel_XPos;
+  SPRITE_X(bVar2, 3) = bVar1;
+  SPRITE_X(bVar2, 1) = bVar1 + 8;
+  SPRITE_X(bVar2, 4) = bVar1 + 8;
+  SPRITE_X(bVar2, 2) = bVar1 + 0x10;
+  SPRITE_X(bVar2, 5) = bVar1 + 0x10;
   byte bStack0000 = Enemy_Y_Position[param_1];
   bVar1 = bStack0000;
   if (bStack0000 < 0x20) {
-    bVar1 = 0xf8;
+    bVar1 = SPRITE_Y_OFFSCREEN;
   }
-  DumpThreeSpr(bVar1, bVar2);
+
+  // Inlined: DumpThreeSpr
+  SPRITE_Y(bVar2, 0) = bVar1;
+  SPRITE_Y(bVar2, 1) = bVar1;
+  SPRITE_Y(bVar2, 2) = bVar1;
+
   bStack0000 += 0x80;
   if (bStack0000 < 0x20) {
-    bStack0000 = 0xf8;
+    bStack0000 = SPRITE_Y_OFFSCREEN;
   }
-  Sprite_Data[bVar2 + 0xc] = bStack0000;
-  Sprite_Data[bVar2 + 0x10] = bStack0000;
-  Sprite_Data[bVar2 + 0x14] = bStack0000;
+  SPRITE_Y(bVar2, 3) = bStack0000;
+  SPRITE_Y(bVar2, 4) = bStack0000;
+  SPRITE_Y(bVar2, 5) = bStack0000;
   bVar1 = Enemy_OffscreenBits;
   if ((Enemy_OffscreenBits & 8) != 0) {
-    Sprite_Data[bVar2] = 0xf8;
-    Sprite_Data[bVar2 + 0xc] = 0xf8;
+    SPRITE_Y(bVar2, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(bVar2, 3) = SPRITE_Y_OFFSCREEN;
   }
   if ((bVar1 & 4) != 0) {
-    Sprite_Data[bVar2 + 4] = 0xf8;
-    Sprite_Data[bVar2 + 0x10] = 0xf8;
+    SPRITE_Y(bVar2, 1) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(bVar2, 4) = SPRITE_Y_OFFSCREEN;
   }
   if ((bVar1 & 2) != 0) {
-    Sprite_Data[bVar2 + 8] = 0xf8;
-    Sprite_Data[bVar2 + 0x14] = 0xf8;
+    SPRITE_Y(bVar2, 2) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(bVar2, 5) = SPRITE_Y_OFFSCREEN;
   }
   return ObjectOffset;
 }
@@ -11392,10 +11391,10 @@ void DrawBubble(const byte param_1) {
 
   if ((SprObject_Y_HighPos[0] == 1) && ((Bubble_OffscreenBits & 8) == 0)) {
     bVar1 = Bubble_SprDataOffset[param_1];
-    Sprite_Data[bVar1 + 3] = Bubble_Rel_XPos;
-    Sprite_Data[bVar1] = Bubble_Rel_YPos;
-    Sprite_Data[bVar1 + 1] = 0x74;
-    Sprite_Data[bVar1 + 2] = 2;
+    SPRITE_X(bVar1, 0) = Bubble_Rel_XPos;
+    SPRITE_Y(bVar1, 0) = Bubble_Rel_YPos;
+    SPRITE_TILE(bVar1, 0) = 0x74;
+    SPRITE_ATTR(bVar1, 0) = 2;
   }
 }
 
@@ -11433,12 +11432,12 @@ void PlayerGfxHandler(void) {
       }
       bVar1 = 0;
       if (PlayerSize != 0) {
-        if (Sprite_Data[abVar2 + 0x19] == PlayerGraphicsTable[158]) {
+        if (SPRITE_TILE(abVar2, 6) == PlayerGraphicsTable[158]) {
           return;
         }
         bVar1 = 1;
       }
-      Sprite_Data[abVar2 + 0x19] = SwimKickTileNum[bVar1];
+      SPRITE_TILE(abVar2, 6) = SwimKickTileNum[bVar1];
     }
   }
 }
@@ -11471,20 +11470,33 @@ void PlayerGfxProcessing(const byte param_1) {
     }
   }
 
+  const byte sprite_offset = PlayerOrSprDataOffset[0];
+
   if (SprObject_OffscrBits[0] & 0x10) {
-    DumpTwoSpr(0xf8, PlayerOrSprDataOffset[0] + 0x18);
+    // Inlined: DumpTwoSpr
+    const byte off = SPRITE_calculate_wrap(sprite_offset, 6);
+    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
   }
 
   if (SprObject_OffscrBits[0] & 0x20) {
-    DumpTwoSpr(0xf8, PlayerOrSprDataOffset[0] + 0x10);
+    // Inlined: DumpTwoSpr
+    const byte off = SPRITE_calculate_wrap(sprite_offset, 4);
+    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
   }
 
   if (SprObject_OffscrBits[0] & 0x40) {
-    DumpTwoSpr(0xf8, PlayerOrSprDataOffset[0] + 0x08);
+    // Inlined: DumpTwoSpr
+    const byte off = SPRITE_calculate_wrap(sprite_offset, 2);
+    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
   }
 
   if (SprObject_OffscrBits[0] & 0x80) {
-    DumpTwoSpr(0xf8, PlayerOrSprDataOffset[0]);
+    // Inlined: DumpTwoSpr
+    SPRITE_Y(sprite_offset, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(sprite_offset, 1) = SPRITE_Y_OFFSCREEN;
   }
 }
 
@@ -11495,7 +11507,7 @@ void PlayerGfxProcessing(const byte param_1) {
 void DrawPlayer_Intermediate(void) {
   DrawPlayerLoop(0xb8, 4, IntermediatePlayerData[0], IntermediatePlayerData[1], IntermediatePlayerData[2],
                  IntermediatePlayerData[3], IntermediatePlayerData[5]);
-  Sprite_Data[34] = Sprite_Data[38] | 0x40;
+  SPRITE_ATTR(0, 8) = SPRITE_ATTR(0, 9) | 0x40;
 }
 
 
@@ -11678,11 +11690,18 @@ void ChkForPlayerAttrib(void) {
       return;
     }
   }
-  Sprite_Data[PlayerOrSprDataOffset[0] + 0x12] = Sprite_Data[PlayerOrSprDataOffset[0] + 0x12] & 0x3f;
-  Sprite_Data[abVar1 + 0x16] = (Sprite_Data[abVar1 + 0x16] & 0x3f) | 0x40;
+
+  SPRITE_ATTR(PlayerOrSprDataOffset[0], 4) &= 0x3f;
+
+  SPRITE_ATTR(abVar1, 5) &= 0x3f;
+  SPRITE_ATTR(abVar1, 5) |= 0x40;
+
 C_S_IGAtt:
-  Sprite_Data[abVar1 + 0x1a] = Sprite_Data[abVar1 + 0x1a] & 0x3f;
-  Sprite_Data[abVar1 + 0x1e] = (Sprite_Data[abVar1 + 0x1e] & 0x3f) | 0x40;
+
+  SPRITE_ATTR(abVar1, 6) &= 0x3f;
+
+  SPRITE_ATTR(abVar1, 7) &= 0x3f;
+  SPRITE_ATTR(abVar1, 7) |= 0x40;
 }
 
 
@@ -11974,21 +11993,21 @@ struct_xyr02 DrawSpriteObject(const byte param_1, const byte param_2, const byte
   const bool flip_horz = (param_6 & 2) != 0;
 
   if (flip_horz) {
-    Sprite_Data[param_2 + 1] = param_4;
-    Sprite_Data[param_2 + 5] = param_3;
+    SPRITE_TILE(param_2, 0) = param_4;
+    SPRITE_TILE(param_2, 1) = param_3;
   } else {
-    Sprite_Data[param_2 + 1] = param_3;
-    Sprite_Data[param_2 + 5] = param_4;
+    SPRITE_TILE(param_2, 0) = param_3;
+    SPRITE_TILE(param_2, 1) = param_4;
   }
 
-  Sprite_Data[param_2 + 2] = param_7 | (flip_horz ? 0x40 : 0);
-  Sprite_Data[param_2 + 6] = param_7 | (flip_horz ? 0x40 : 0);
+  SPRITE_ATTR(param_2, 0) = param_7 | (flip_horz ? 0x40 : 0);
+  SPRITE_ATTR(param_2, 1) = param_7 | (flip_horz ? 0x40 : 0);
 
-  Sprite_Data[param_2 + 0] = param_5;
-  Sprite_Data[param_2 + 4] = param_5;
+  SPRITE_Y(param_2, 0) = param_5;
+  SPRITE_Y(param_2, 1) = param_5;
 
-  Sprite_Data[param_2 + 3] = param_8;
-  Sprite_Data[param_2 + 7] = param_8 + 8;
+  SPRITE_X(param_2, 0) = param_8;
+  SPRITE_X(param_2, 1) = param_8 + 8;
 
   sVar2.x = param_1 + 2;
   sVar2.y = param_2 + 8;

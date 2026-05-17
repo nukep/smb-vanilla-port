@@ -1462,29 +1462,11 @@ struct_azr02r04r06r07 smb1_BlockBufferCollision(byte param_1,byte param_2,byte p
 void smb1_DrawVine(byte param_1);
 #define DrawVine smb1_DrawVine
 
-byte smb1_SixSpriteStacker(byte param_1,byte param_2,byte param_3);
-#define SixSpriteStacker smb1_SixSpriteStacker
-
 byte smb1_DrawHammer(byte param_1);
 #define DrawHammer smb1_DrawHammer
 
 void smb1_FlagpoleGfxHandler(byte param_1);
 #define FlagpoleGfxHandler smb1_FlagpoleGfxHandler
-
-void smb1_MoveSixSpritesOffscreen(byte param_1);
-#define MoveSixSpritesOffscreen smb1_MoveSixSpritesOffscreen
-
-void smb1_DumpSixSpr(byte param_1,byte param_2);
-#define DumpSixSpr smb1_DumpSixSpr
-
-void smb1_DumpFourSpr(byte param_1,byte param_2);
-#define DumpFourSpr smb1_DumpFourSpr
-
-void smb1_DumpThreeSpr(byte param_1,byte param_2);
-#define DumpThreeSpr smb1_DumpThreeSpr
-
-void smb1_DumpTwoSpr(byte param_1,byte param_2);
-#define DumpTwoSpr smb1_DumpTwoSpr
 
 byte smb1_DrawLargePlatform(byte param_1);
 #define DrawLargePlatform smb1_DrawLargePlatform
@@ -1510,20 +1492,8 @@ struct_xyr02 smb1_DrawEnemyObjRow(byte param_1,byte param_2,byte param_3,byte pa
 struct_xyr02 smb1_DrawOneSpriteRow(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
 #define DrawOneSpriteRow smb1_DrawOneSpriteRow
 
-void smb1_MoveESprRowOffscreen(byte param_1,byte param_2);
-#define MoveESprRowOffscreen smb1_MoveESprRowOffscreen
-
-void smb1_MoveESprColOffscreen(byte param_1,byte param_2);
-#define MoveESprColOffscreen smb1_MoveESprColOffscreen
-
 byte smb1_DrawBlock(byte param_1);
 #define DrawBlock smb1_DrawBlock
-
-void smb1_ChkLeftCo(byte param_1,byte param_2);
-#define ChkLeftCo smb1_ChkLeftCo
-
-byte smb1_MoveColOffscreen(byte param_1);
-#define MoveColOffscreen smb1_MoveColOffscreen
 
 void smb1_DrawBrickChunks(byte param_1);
 #define DrawBrickChunks smb1_DrawBrickChunks

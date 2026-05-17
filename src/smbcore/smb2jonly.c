@@ -679,11 +679,10 @@ void GameOverMenu(void) {
       ContinueMenuSelect ^= 1;
     }
 
-    for (int i = 0; i < 3; i++) {
-      Sprite_Data[i+1] = GameOverCursorData[i];
-    }
-
-    Sprite_Data[0] = GameOverCursorY[ContinueMenuSelect];
+    SPRITE_TILE(0, 0) = GameOverCursorData[0];
+    SPRITE_ATTR(0, 0) = GameOverCursorData[1];
+    SPRITE_X(0, 0)    = GameOverCursorData[2];
+    SPRITE_Y(0, 0)    = GameOverCursorY[ContinueMenuSelect];
     return;
   }
   if (ContinueMenuSelect != 0) {
@@ -882,10 +881,10 @@ void SimulateWind(void) {
     bVar1 = 0;
     bVar2 = Enemy_SprDataOffset[6];
     do {
-      Sprite_Data[bVar2] = LeavesYPos[bVar1];
-      Sprite_Data[bVar2 + 1] = LeavesTile[bVar1];
-      Sprite_Data[bVar2 + 2] = 0x41;
-      Sprite_Data[bVar2 + 3] = LeavesXPos[bVar1];
+      SPRITE_Y(bVar2, 0) = LeavesYPos[bVar1];
+      SPRITE_TILE(bVar2, 0) = LeavesTile[bVar1];
+      SPRITE_ATTR(bVar2, 0) = 0x41;
+      SPRITE_X(bVar2, 0) = LeavesXPos[bVar1];
       bVar1 += 1;
       bVar2 = bVar2 + 4;
       if (bVar1 == 6) {

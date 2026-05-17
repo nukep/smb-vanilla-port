@@ -1459,29 +1459,11 @@ struct_azr02r04r06r07 smb2j_BlockBufferCollision(byte param_1,byte param_2,byte 
 void smb2j_DrawVine(byte param_1);
 #define DrawVine smb2j_DrawVine
 
-byte smb2j_SixSpriteStacker(byte param_1,byte param_2,byte param_3);
-#define SixSpriteStacker smb2j_SixSpriteStacker
-
 byte smb2j_DrawHammer(byte param_1);
 #define DrawHammer smb2j_DrawHammer
 
 void smb2j_FlagpoleGfxHandler(byte param_1);
 #define FlagpoleGfxHandler smb2j_FlagpoleGfxHandler
-
-void smb2j_MoveSixSpritesOffscreen(byte param_1);
-#define MoveSixSpritesOffscreen smb2j_MoveSixSpritesOffscreen
-
-void smb2j_DumpSixSpr(byte param_1,byte param_2);
-#define DumpSixSpr smb2j_DumpSixSpr
-
-void smb2j_DumpFourSpr(byte param_1,byte param_2);
-#define DumpFourSpr smb2j_DumpFourSpr
-
-void smb2j_DumpThreeSpr(byte param_1,byte param_2);
-#define DumpThreeSpr smb2j_DumpThreeSpr
-
-void smb2j_DumpTwoSpr(byte param_1,byte param_2);
-#define DumpTwoSpr smb2j_DumpTwoSpr
 
 byte smb2j_DrawLargePlatform(byte param_1);
 #define DrawLargePlatform smb2j_DrawLargePlatform
@@ -1507,20 +1489,8 @@ struct_xyr02 smb2j_DrawEnemyObjRow(byte param_1,byte param_2,byte param_3,byte p
 struct_xyr02 smb2j_DrawOneSpriteRow(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
 #define DrawOneSpriteRow smb2j_DrawOneSpriteRow
 
-void smb2j_MoveESprRowOffscreen(byte param_1,byte param_2);
-#define MoveESprRowOffscreen smb2j_MoveESprRowOffscreen
-
-void smb2j_MoveESprColOffscreen(byte param_1,byte param_2);
-#define MoveESprColOffscreen smb2j_MoveESprColOffscreen
-
 byte smb2j_DrawBlock(byte param_1);
 #define DrawBlock smb2j_DrawBlock
-
-void smb2j_ChkLeftCo(byte param_1,byte param_2);
-#define ChkLeftCo smb2j_ChkLeftCo
-
-byte smb2j_MoveColOffscreen(byte param_1);
-#define MoveColOffscreen smb2j_MoveColOffscreen
 
 void smb2j_DrawBrickChunks(byte param_1);
 #define DrawBrickChunks smb2j_DrawBrickChunks
