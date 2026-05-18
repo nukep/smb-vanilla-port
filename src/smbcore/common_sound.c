@@ -1,6 +1,11 @@
 // The sound engine for SMB1 for SMB2J are nearly identical, with the exception of SMB2J's Wind and Skid sfxs.
 // There's also the FDS alternate sound engine, but that's only used for SMB2J's ending (not included here).
 
+// If enabled, fixes a rare bug that accesses out-of-bounds envelope data when music changes suddenly.
+// This does not affect gameplay mechanics.
+#define BUG_FIX_SOUND_OUT_OF_BOUNDS_ENVELOPE
+
+
 #ifdef SMB2J_MODE
 static void PlaySkidSfx(void);
 static void ContinueSkidSfx(void);
@@ -168,7 +173,11 @@ void PlayBowserFlame(void) {
 // SMB:f685, SM2MAIN:d69c
 // Signature: [] -> []
 void ContinueBowserFlame(void) {
-  const byte vol = WaterEventMusEnvData[(Noise_SfxLenCounter >> 1) + 0x27];
+  const byte idx = Noise_SfxLenCounter >> 1;
+
+  // NES note: The index is regularly 0, which underflows BowserFlameEnvData-1.
+  const byte vol = BowserFlameEnvData_Minus1[idx];
+
   if (SMB1_ONLY && vol == 0) {
     ContinueMusic();
   } else {
@@ -189,7 +198,7 @@ void PlaySkidSfx(void) {
 // SM2MAIN:d630
 // Signature: [] -> []
 void ContinueSkidSfx(void) {
-  apu_tri_lo(BrickShatterFreqData[Noise_SfxLenCounter + 0xf]);
+  apu_tri_lo(SkidSfxFreqData[Noise_SfxLenCounter - 1]);
   apu_tri_linear(0x18);
   apu_tri_hi(0x18);
   DecrementSfx3Length();
@@ -202,7 +211,8 @@ void PlayWindSfx(void) {
   Noise_SfxLenCounter = 0xc0;
 
   if (BIT(NoiseSoundQueue, 3)) {
-    // This branch never happens in practice
+    // This should be unreachable. Nothing in the original game sets this bit.
+    // Probably a coding oversight from doing an extra `LSR` instruction to check the bit.
     ContinueWindSfx();
   }
 }
@@ -212,7 +222,12 @@ void PlayWindSfx(void) {
 void ContinueWindSfx(void) {
   // SMBJ tested for the NoiseSoundQueue bit here, but it tests for either bit 2 or 3, depending on who called it.
   // We moved these checks to the callers
-  PlayNoiseSfx((WindFreqEnvData[Noise_SfxLenCounter >> 3] >> 4) | 0x10, (WindFreqEnvData[Noise_SfxLenCounter >> 3] & 0xf) | 0x10);
+
+  // There's an off-by-1 bug where the index may be the likely intended length of the envelope table (24).
+  const byte idx = Noise_SfxLenCounter >> 3;
+  const byte env = WindFreqEnvData[idx];
+
+  PlayNoiseSfx((env >> 4) | 0x10, (env & 0xf) | 0x10);
 }
 #endif
 
@@ -615,15 +630,12 @@ void PlaySmackEnemy(void) {
 // SM2MAIN:d45d
 // Signature: [] -> []
 void ContinueSmackEnemy(void) {
-  byte bVar1;
-
   if (Squ1_SfxLenCounter == 8) {
     apu_sq1_lo(0xa0);
-    bVar1 = 0x9f;
+    apu_sq1_vol(0x9f);
   } else {
-    bVar1 = 0x90;
+    apu_sq1_vol(0x90);
   }
-  apu_sq1_vol(bVar1);
   Squ1_SfxLenCounter -= 1;
   if (Squ1_SfxLenCounter == 0) {
     StopSquare1Sfx();
@@ -722,11 +734,11 @@ void PlayPowerUpGrab(void) {
 // SM2MAIN:d527
 // Signature: [] -> []
 void ContinuePowerUpGrab(void) {
-  if ((Squ2_SfxLenCounter & 1) != 0) {
-    DecrementSfx2Length();
-    return;
+  if ((Squ2_SfxLenCounter & 1) == 0) {
+    const byte idx = Squ2_SfxLenCounter >> 1;
+    PlaySqu2Sfx(PowerUpGrabFreqData[idx - 1], 0x5d, 0x7f);
   }
-  PlaySqu2Sfx(ExtraLifeFreqData[(Squ2_SfxLenCounter >> 1) + 5], 0x5d, 0x7f);
+
   DecrementSfx2Length();
 }
 
@@ -960,15 +972,17 @@ void FindEventMusicHeader(const byte param_1, const byte param_2) {
 // SM2MAIN:d731
 // Signature: [Y] -> []
 void LoadHeader(const byte param_1) {
-  byte bVar1;
+  // Get the offset of the header within the data
 
-  bVar1 = MusicHeaderData[param_1 - 1];
-  NoteLenLookupTblOfs = MusicHeaderData[bVar1];
-  MusicData.lo = MusicHeaderData[bVar1 + 1];
-  MusicData.hi = MusicHeaderData[bVar1 + 2];
-  MusicOffset_Triangle = MusicHeaderData[bVar1 + 3];
-  MusicOffset_Square1 = MusicHeaderData[bVar1 + 4];
-  MusicOffset_Noise = MusicHeaderData[bVar1 + 5];
+  const byte off = MusicHeaderData[param_1 - 1];
+
+  NoteLenLookupTblOfs  = MusicHeaderData[off];
+  MusicData.lo         = MusicHeaderData[off + 1];
+  MusicData.hi         = MusicHeaderData[off + 2];
+  MusicOffset_Triangle = MusicHeaderData[off + 3];
+  MusicOffset_Square1  = MusicHeaderData[off + 4];
+  MusicOffset_Noise    = MusicHeaderData[off + 5];
+
   Squ2_NoteLenCounter = 1;
   Squ1_NoteLenCounter = 1;
   Tri_NoteLenCounter = 1;
@@ -1239,19 +1253,20 @@ struct_ay ProcessLengthData(const byte param_1) {
 // SM2MAIN:d914
 // Signature: [] -> [A, X, Y]
 struct_axy LoadControlRegs(void) {
-  struct_axy ret;
+  byte a;
 
-  ret.a = 0x04;
+  if ((EventMusicBuffer & 8) != 0) {
+    a = EndOfCastleMusicEnvData_IntendedLength;
+  } else if ((AreaMusicBuffer & 0x7d) != 0) {
+    a = AreaMusicEnvData_IntendedLength;
+  } else {
+    a = WaterEventMusicEnvData_IntendedLength;
+  }
+
+  struct_axy ret;
+  ret.a = a;
   ret.x = 0x82;
   ret.y = 0x7f;
-
-  if ((EventMusicBuffer & 8) == 0) {
-    if ((AreaMusicBuffer & 0x7d) == 0) {
-      ret.a = 0x28;
-    } else {
-      ret.a = 0x08;
-    }
-  }
 
   return ret;
 }
@@ -1259,14 +1274,41 @@ struct_axy LoadControlRegs(void) {
 // SMB:f8f4
 // SM2MAIN:d930
 // Signature: [Y] -> [A]
-byte LoadEnvelopeData(const byte param_1) {
+byte LoadEnvelopeData(byte idx) {
+  // NES note: The array index regularly goes beyond what's likely their intended bounds.
+  // Usually one item beyond.
+  // When a square note starts, the envelope index is initialized by LoadControlRegs, which sets it to the array's length.
+  // This cases an off-by-1 bug, where the first envelope value played is from the adjacent array.
+  //
+  // Attempting to "fix" it by capping the index changes the sound, so we're keeping the oversight in.
+
+  // There's also a rarer bug where the index can be out of bounds well beyond 1 item.
+  // This happens if the switch for which envelope to play changes more suddenly than expected.
+  // An example is in the x-4 levels when Bowser is killed by a fire flower and the axe is picked up immediately.
+  // It occurs in level 1-4 in this SMB1 TAS (about 2:14 in): https://tasvideos.org/6913S
+
+#ifdef BUG_FIX_SOUND_OUT_OF_BOUNDS_ENVELOPE
+  // Bug fix: Cap if strictly above index array (keeps off-by-1 bug, fixes rarer bug)
+#  define CAP_IDX_TO(n) if (idx > n) { idx = n; }
+#else
+#  define CAP_IDX_TO(N)
+#endif
+
   if ((EventMusicBuffer & 8) != 0) {
-    return EndOfCastleMusicEnvData[param_1];
+    CAP_IDX_TO(EndOfCastleMusicEnvData_IntendedLength);
+
+    return EndOfCastleMusicEnvData[idx];
   } else if ((AreaMusicBuffer & 0x7d) != 0) {
-    return AreaMusicEnvData[param_1];
+    CAP_IDX_TO(AreaMusicEnvData_IntendedLength);
+
+    return AreaMusicEnvData[idx];
   } else {
-    return WaterEventMusEnvData[param_1];
+    CAP_IDX_TO(WaterEventMusicEnvData_IntendedLength);
+
+    return WaterEventMusEnvData[idx];
   }
+
+#undef CAP_IDX_TO
 }
 
 #undef BIT

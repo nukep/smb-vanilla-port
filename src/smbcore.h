@@ -144,6 +144,7 @@ static inline void joy2(struct SMB_buttons *buttons) {
 #define RAM(offset) (SMB_STATE->rammem[offset])
 #define PPURAM(offset) (SMB_STATE->ppuram[offset])
 #define CHRROM(offset) (SMB_STATE->chrrom[offset])
+#define RAM_CONST(offset) ((const byte)SMB_STATE->rammem[offset])
 
 #define SMB1_ONLY (SMB_STATE->which_game == GAME_SMB1)
 #define SMB2J_ONLY (SMB_STATE->which_game == GAME_SMB2J)

@@ -1,6 +1,11 @@
 #ifndef SMBCORE_SMB2JROMARRAYS_H
 #define SMBCORE_SMB2JROMARRAYS_H
 
+#define WindFreqEnvData_IntendedLength 24
+#define EndOfCastleMusicEnvData_IntendedLength 4
+#define AreaMusicEnvData_IntendedLength 8
+#define WaterEventMusicEnvData_IntendedLength 40
+
 // The original game modifies an instruction opcode
 #define PhysicsInstructionOpcode         RAM(0x80f1)
 
@@ -18,13 +23,20 @@
 #define BGColorCtrl_Addr                 RAMARRAY_CONST(0x652B, 4)
 #define BackgroundColors                 RAMARRAY_CONST(0x652F, 8)
 #define PlayerColors                     RAMARRAY(0x6537, 8)
+
+// GameText aliases some other labels, referenced in by GameTextOffsets
+// GameTextOffsets contains 4 entries. WarpZone(Numbers) are referenced explicitly.
+#define GameText                         RAMARRAY_CONST(0x6672, 39+31+11+36)
+// TopStatusBarLine is mutable because the names are patched in PatchPlayerNamePal
 #define TopStatusBarLine                 RAMARRAY(0x6672, 39)
-#define WorldLivesDisplay                RAMARRAY_CONST(0x6699, 31)
-#define TimeUp                           RAMARRAY_CONST(0x66B8, 11)
-#define GameOver                         RAMARRAY_CONST(0x66C3, 36)
+// #define WorldLivesDisplay                RAMARRAY_CONST(0x6699, 31)
+// #define TimeUp                           RAMARRAY_CONST(0x66B8, 11)
+// #define GameOver                         RAMARRAY_CONST(0x66C3, 36)
+
 #define WarpZone                         RAMARRAY_CONST(0x66E7, 37)
 #define WarpZoneNumbers                  RAMARRAY_CONST(0x670C, 11)
 #define GameTextOffsets                  RAMARRAY_CONST(0x6717, 4)
+
 #define ColorRotatePalette               RAMARRAY_CONST(0x68A0, 6)
 #define BlankPalette                     RAMARRAY_CONST(0x68A6, 8)
 #define Palette3Data                     RAMARRAY_CONST(0x68AE, 16)
@@ -53,7 +65,10 @@
 #define PlayerStarting_X_Pos             RAMARRAY_CONST(0x6F56, 4)
 #define AltYPosOffset                    RAMARRAY_CONST(0x6F5A, 2)
 #define PlayerStarting_Y_Pos             RAMARRAY_CONST(0x6F5C, 9)
-#define PlayerBGPriorityData             RAMARRAY_CONST(0x6F65, 8)
+
+// Note: PlayerBGPriorityData overlaps with GameTimerData by one byte. This is expected behavior.
+#define PlayerBGPriorityData             RAMARRAY_CONST(0x6F65, 9)
+
 #define GameTimerData                    RAMARRAY_CONST(0x6F6D, 4)
 #define HalfwayPageNybbles               RAMARRAY(0x6FFD, 18)
 #define BSceneDataOffsets                RAMARRAY_CONST(0x7108, 3)
@@ -96,9 +111,16 @@
 #define Climb_Y_SpeedData                RAMARRAY_CONST(0x7FB6, 3)
 #define Climb_Y_MForceData               RAMARRAY_CONST(0x7FB9, 3)
 #define PlayerAnimTmrData                RAMARRAY_CONST(0x80F8, 3)
-#define FireballXSpdData                 RAMARRAY_CONST(0x81F3, 2)
+
+// A total of 4 items. There's a decrement that wraparounds the lookup.
+#define FireballXSpdData                 RAMARRAY_CONST(0x81F3, 3)
+#define FireballXSpdData_Bug0            RAM_CONST(0x81F3 + 0xFF)
+
 #define Bubble_MForceData                RAMARRAY_CONST(0x82B7, 2)
 #define BubbleTimerData                  RAMARRAY_CONST(0x82B9, 2)
+#define Bubble_MForceData_Bug            RAM_CONST(0x82B7 + 0x6F)
+#define BubbleTimerData_Bug              RAM_CONST(0x82B9 + 0x6F)
+
 #define FlagpoleScoreMods                RAMARRAY_CONST(0x83B4, 5)
 #define FlagpoleScoreDigits              RAMARRAY_CONST(0x83B9, 5)
 #define Jumpspring_Y_PosData             RAMARRAY_CONST(0x842D, 4)
@@ -142,8 +164,13 @@
 #define FirebarMirrorData                RAMARRAY_CONST(0x995F, 4)
 #define FirebarTblOffsets                RAMARRAY_CONST(0x9963, 12)
 #define FirebarYPos                      RAMARRAY_CONST(0x996F, 2)
-#define PRandomSubtracter                RAMARRAY_CONST(0x9B0A, 5)
-#define FlyCCBPriority                   RAMARRAY_CONST(0x9B0F, 5)
+
+// These two are each length 5 in disassemblies, but they're accessed up to index 15.
+// This seems pretty regular.
+// They overlap into 6502 instructions.
+#define PRandomSubtracter                RAMARRAY_CONST(0x9B0A, 16)
+#define FlyCCBPriority                   RAMARRAY_CONST(0x9B0F, 16)
+
 #define LakituDiffAdj                    RAMARRAY_CONST(0x9B5A, 3)
 #define BridgeCollapseData               RAMARRAY_CONST(0x9C12, 15)
 #define PRandomRange                     RAMARRAY_CONST(0x9C96, 4)
@@ -163,9 +190,12 @@
 #define PlayerPosSPlatData               RAMARRAY_CONST(0xA88C, 2)
 #define PlayerBGUpperExtent              RAMARRAY_CONST(0xA8D0, 2)
 #define AreaChangeTimerData              RAMARRAY_CONST(0xAA71, 2)
-#define ClimbXPosAdder                   RAMARRAY_CONST(0xAA96, 2)
-#define ClimbPLocAdder                   RAMARRAY_CONST(0xAA98, 2)
+
+// Note: These overlap with some instructions and each other. See HandleClimbing().
+#define ClimbXPosAdder_Minus1            RAMARRAY_CONST(0xAA95, 4)
+#define ClimbPLocAdder_Minus1            RAMARRAY_CONST(0xAA97, 4)
 #define FlagpoleYPosData                 RAMARRAY_CONST(0xAA9A, 5)
+
 #define SolidMTileUpperExt               RAMARRAY_CONST(0xAC14, 4)
 #define ClimbMTileUpperExt               RAMARRAY_CONST(0xAC1F, 4)
 #define EnemyBGCStateData                RAMARRAY_CONST(0xAC42, 6)
@@ -246,31 +276,33 @@
 #define ExtraLifeFreqData                RAMARRAY_CONST(0xD4A4, 6)
 #define PowerUpGrabFreqData              RAMARRAY_CONST(0xD4AA, 30)
 #define PUp_VGrow_FreqData               RAMARRAY_CONST(0xD4C8, 32)
-#define WindFreqEnvData                  RAMARRAY_CONST(0xD5FB, 24)
+#define WindFreqEnvData                  RAMARRAY_CONST(0xD5FB, WindFreqEnvData_IntendedLength+1)
 #define BrickShatterFreqData             RAMARRAY_CONST(0xD613, 16)
 #define SkidSfxFreqData                  RAMARRAY_CONST(0xD623, 6)
-#define MusicHeaderData                  RAMARRAY_CONST(0xD949, 49)
-#define TimeRunningOutHdr                RAMARRAY_CONST(0xD97A, 5)
-#define Star_CloudHdr                    RAMARRAY_CONST(0xD97F, 6)
-#define EndOfLevelMusHdr                 RAMARRAY_CONST(0xD985, 5)
-#define ResidualHeaderData               RAMARRAY_CONST(0xD98A, 5)
-#define UndergroundMusHdr                RAMARRAY_CONST(0xD98F, 5)
-#define SilenceHdr                       RAMARRAY_CONST(0xD994, 4)
-#define CastleMusHdr                     RAMARRAY_CONST(0xD998, 5)
-#define GameOverMusHdr                   RAMARRAY_CONST(0xD99D, 5)
-#define WaterMusHdr                      RAMARRAY_CONST(0xD9A2, 6)
-#define WinCastleMusHdr                  RAMARRAY_CONST(0xD9A8, 5)
-#define GroundLevelPart1Hdr              RAMARRAY_CONST(0xD9AD, 6)
-#define GroundLevelPart2AHdr             RAMARRAY_CONST(0xD9B3, 6)
-#define GroundLevelPart2BHdr             RAMARRAY_CONST(0xD9B9, 6)
-#define GroundLevelPart2CHdr             RAMARRAY_CONST(0xD9BF, 6)
-#define GroundLevelPart3AHdr             RAMARRAY_CONST(0xD9C5, 6)
-#define GroundLevelPart3BHdr             RAMARRAY_CONST(0xD9CB, 6)
-#define GroundLevelLeadInHdr             RAMARRAY_CONST(0xD9D1, 6)
-#define GroundLevelPart4AHdr             RAMARRAY_CONST(0xD9D7, 6)
-#define GroundLevelPart4BHdr             RAMARRAY_CONST(0xD9DD, 6)
-#define GroundLevelPart4CHdr             RAMARRAY_CONST(0xD9E3, 6)
-#define DeathMusHdr                      RAMARRAY_CONST(0xD9E9, 6)
+
+#define MusicHeaderData                  RAMARRAY_CONST(0xD949, 0xD9EF - 0xD949)
+// #define TimeRunningOutHdr                RAMARRAY_CONST(0xD97A, 5)
+// #define Star_CloudHdr                    RAMARRAY_CONST(0xD97F, 6)
+// #define EndOfLevelMusHdr                 RAMARRAY_CONST(0xD985, 5)
+// #define ResidualHeaderData               RAMARRAY_CONST(0xD98A, 5)
+// #define UndergroundMusHdr                RAMARRAY_CONST(0xD98F, 5)
+// #define SilenceHdr                       RAMARRAY_CONST(0xD994, 4)
+// #define CastleMusHdr                     RAMARRAY_CONST(0xD998, 5)
+// #define GameOverMusHdr                   RAMARRAY_CONST(0xD99D, 5)
+// #define WaterMusHdr                      RAMARRAY_CONST(0xD9A2, 6)
+// #define WinCastleMusHdr                  RAMARRAY_CONST(0xD9A8, 5)
+// #define GroundLevelPart1Hdr              RAMARRAY_CONST(0xD9AD, 6)
+// #define GroundLevelPart2AHdr             RAMARRAY_CONST(0xD9B3, 6)
+// #define GroundLevelPart2BHdr             RAMARRAY_CONST(0xD9B9, 6)
+// #define GroundLevelPart2CHdr             RAMARRAY_CONST(0xD9BF, 6)
+// #define GroundLevelPart3AHdr             RAMARRAY_CONST(0xD9C5, 6)
+// #define GroundLevelPart3BHdr             RAMARRAY_CONST(0xD9CB, 6)
+// #define GroundLevelLeadInHdr             RAMARRAY_CONST(0xD9D1, 6)
+// #define GroundLevelPart4AHdr             RAMARRAY_CONST(0xD9D7, 6)
+// #define GroundLevelPart4BHdr             RAMARRAY_CONST(0xD9DD, 6)
+// #define GroundLevelPart4CHdr             RAMARRAY_CONST(0xD9E3, 6)
+// #define DeathMusHdr                      RAMARRAY_CONST(0xD9E9, 6)
+
 #define Star_CloudMData                  RAMARRAY_CONST(0xD9EF, 73)
 #define GroundM_P1Data                   RAMARRAY_CONST(0xDA38, 27)
 #define SilenceData                      RAMARRAY_CONST(0xDA53, 45)
@@ -293,11 +325,15 @@
 #define EndOfCastleMusData               RAMARRAY_CONST(0xDE88, 120)
 #define FreqRegLookupTbl                 RAMARRAY_CONST(0xDF00, 102)
 #define MusicLengthLookupTbl             RAMARRAY_CONST(0xDF66, 48)
-#define EndOfCastleMusicEnvData          RAMARRAY_CONST(0xDF96, 4)
-#define AreaMusicEnvData                 RAMARRAY_CONST(0xDF9A, 8)
-#define WaterEventMusEnvData             RAMARRAY_CONST(0xDFA2, 40)
-#define BowserFlameEnvData               RAMARRAY_CONST(0xDFCA, 32)
+
+#define EndOfCastleMusicEnvData          RAMARRAY_CONST(0xDF96, EndOfCastleMusicEnvData_IntendedLength+1)
+#define AreaMusicEnvData                 RAMARRAY_CONST(0xDF9A, AreaMusicEnvData_IntendedLength+1)
+#define WaterEventMusEnvData             RAMARRAY_CONST(0xDFA2, WaterEventMusicEnvData_IntendedLength+1)
+
+#define BowserFlameEnvData_Minus1        RAMARRAY_CONST(0xDFCA-1, 32+1)
 #define BrickShatterEnvData              RAMARRAY_CONST(0xDFEA, 16)
+
+
 #define LeavesYPos                       RAMARRAY(0xC52C, 12)
 #define LeavesXPos                       RAMARRAY(0xC538, 12)
 #define LeavesTile                       RAMARRAY_CONST(0xC544, 12)

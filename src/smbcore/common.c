@@ -796,8 +796,8 @@ void GetBackgroundColor(void) {
 
 // SMB:85f1
 // SM2MAIN:654d
-// Signature: [] -> [X]
-byte GetPlayerColors(void) {
+// Signature: [] -> []
+void GetPlayerColors(void) {
   byte bVar3 = 0;
   if (SMB1_ONLY) {
     if (CurrentPlayer != 0) {
@@ -817,18 +817,14 @@ byte GetPlayerColors(void) {
     VRAM_Buffer1[i + VRAM_Buffer1_Offset + 3] = PlayerColors[i + bVar3];
   }
 
-  const byte bVar1 = VRAM_Buffer1_Offset;
-  bVar3 = BackgroundColorCtrl;
-  if (BackgroundColorCtrl == 0) {
-    bVar3 = AreaType;
-  }
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 3] = BackgroundColors[bVar3];
+  const byte idx = BackgroundColorCtrl != 0 ? BackgroundColorCtrl : AreaType;
+
+  VRAM_Buffer1[VRAM_Buffer1_Offset + 3] = BackgroundColors[idx];
   VRAM_Buffer1[VRAM_Buffer1_Offset] = 0x3f;
   VRAM_Buffer1[VRAM_Buffer1_Offset + 1] = 0x10;
   VRAM_Buffer1[VRAM_Buffer1_Offset + 2] = 4;
   VRAM_Buffer1[VRAM_Buffer1_Offset + 7] = 0;
-  VRAM_Buffer1_Offset = VRAM_Buffer1_Offset + 7;
-  return bVar1;
+  VRAM_Buffer1_Offset += 7;
 }
 
 
@@ -1490,8 +1486,12 @@ void GetAreaMusic(void) {
 
 // SMB:9131
 // SM2MAIN:6f71
-// Signature: [r07] -> []
-void Entrance_GameTimerSetup(const byte param_1) {
+// Signature: [] -> []
+void Entrance_GameTimerSetup(void) {
+  // NES Note: $07 is technically an input to this function. However, it's a bug.
+  // This function is always called from a jumptable, which sets $07 to the high byte of the function (0x91 or 0x6f depending on SMB1 or SMB2J)
+  // It's eventually passed to SetupBubble.
+
   SprObject_PageLoc[0] = ScreenEdgeOrLeft_PageLoc[0];
   VerticalForceDown = 0x28;
   PlayerFacingDir = 1;
@@ -1500,14 +1500,24 @@ void Entrance_GameTimerSetup(const byte param_1) {
   Player_CollisionBits -= 1;
   HalfwayPage = 0;
   SwimmingFlag = AreaType == 0;
-  byte bVar1 = PlayerEntranceCtrl;
-  if ((AltEntranceControl != 0) && (AltEntranceControl != 1)) {
-    bVar1 = PlayerStarting_X_Pos[AltEntranceControl + 2];
-  }
+
+  const byte entrance_ctrl =
+    (AltEntranceControl < 2)
+    ? PlayerEntranceCtrl
+    : AltYPosOffset[AltEntranceControl - 2];
+
   SprObject_X_Position[0] = PlayerStarting_X_Pos[AltEntranceControl];
-  SprObject_Y_Position[0] = PlayerStarting_Y_Pos[bVar1];
-  Player_SprAttrib = PlayerBGPriorityData[bVar1];
-  bVar1 = GetPlayerColors();
+  SprObject_Y_Position[0] = PlayerStarting_Y_Pos[entrance_ctrl];
+  Player_SprAttrib = PlayerBGPriorityData[entrance_ctrl];
+
+  // NES note: The GetPlayerColors subroutine sets the X register to the vram offset.
+  // The eventual call to SetupBubble is the only place that indirectly uses it.
+  // We've extracted it out to the caller because it's a bug.
+  // This always seems to be 0 (TODO: verify this)
+  byte buggy_argument_1 = VRAM_Buffer1_Offset;
+
+  GetPlayerColors();
+
   if ((GameTimerSetting != 0) && (FetchNewGameTimerFlag != 0)) {
     GameTimerDisplay[0] = GameTimerData[GameTimerSetting];
     GameTimerDisplay[1] = 0;
@@ -1515,16 +1525,24 @@ void Entrance_GameTimerSetup(const byte param_1) {
     FetchNewGameTimerFlag = 0;
     StarInvincibleTimer = 0;
   }
+
   if (JoypadOverride != 0) {
     Player_State = 3;
     InitBlock_XY_Pos(0);
     Block_Y_Position[0] = 0xf0;
-    bVar1 = 5;
     Setup_Vine(5, 0);
+
+    // The X register was set to 5 as an argument to Setup_Vine. It becomes the new buggy argument.
+    // I'm unsure if this could ever be used, unless a modded ROM has Mario climbing a vine underwater or something.
+    buggy_argument_1 = 5;
   }
+
   if (AreaType == 0) {
-    SetupBubble(bVar1, param_1);
+    // $07 is passed here.
+    const byte buggy_argument_2 = ssw(0x91, 0x6f);
+    SetupBubble_buggy(buggy_argument_1, buggy_argument_2);
   }
+
   GameEngineSubroutine = 7;
 }
 
@@ -1777,7 +1795,7 @@ void AreaParserCore(void) {
     }
   }
   if (ForegroundScenery != 0) {
-    byte bVar44 = BackSceneryMetatiles[ForegroundScenery + 0x23];
+    byte bVar44 = FSceneDataOffsets[ForegroundScenery - 1];
     for (int i = 0; i < 0xd; i++) {
       if (ForeSceneryData[bVar44] != 0) {
         MetatileBuffer[i] = ForeSceneryData[bVar44];
@@ -2715,7 +2733,7 @@ void AxeObj(const byte param_1) {
 // SM2MAIN:7855
 // Signature: [r00] -> []
 void ChainObj(const byte param_1) {
-  RenderUnderPart(C_ObjectRow[param_1 + 1], C_ObjectRow[param_1 - 2], 0);
+  RenderUnderPart(C_ObjectMetatile[param_1 - 2], C_ObjectRow[param_1 - 2], 0);
 }
 
 
@@ -3291,7 +3309,7 @@ enum GameRoutines_jumptable_item {
 void GameRoutines(void) {
   switch (GameEngineSubroutine) {
   case GAMEROUTINES_ENTRANCE_GAMETIMERSETUP:
-    Entrance_GameTimerSetup(ssw(0x91, 0x6f));
+    Entrance_GameTimerSetup();
     return;
 
   case GAMEROUTINES_VINE_AUTOCLIMB:
@@ -4138,7 +4156,12 @@ void FireballObjCore(const byte param_1) {
       Fireball_Y_Position[param_1] = SprObject_Y_Position[0];
       Fireball_Y_HighPos[param_1] = 1;
 
-      Fireball_X_Speed[param_1] = FireballXSpdData[(byte)(PlayerFacingDir - 1)];
+      // PlayerFacingDir may = 0 or 3 sometimes, so this goes out of bounds
+      // The original lookup is FireballXSpdData[(byte)(PlayerFacingDir - 1)].
+      const byte xspd_lookup[4] = { FireballXSpdData_Bug0, FireballXSpdData[0], FireballXSpdData[1], FireballXSpdData[2] };
+      assert_eq_assumption(PlayerFacingDir < 4, true);
+
+      Fireball_X_Speed[param_1] = xspd_lookup[PlayerFacingDir];
       Fireball_Y_Speed[param_1] = 4;
 
       Fireball_BoundBoxCtrl[param_1] = 7;
@@ -4165,52 +4188,71 @@ void FireballObjCore(const byte param_1) {
   }
 }
 
+static inline void check_and_setup_bubble(const byte param_1, const bool random, const bool docheck, const bool bug) {
+  bool setup_bubble = true;
+
+  if (docheck) {
+    if (Bubble_Y_Position[param_1] != SPRITE_Y_OFFSCREEN) {
+      setup_bubble = false;
+    } else if (AirBubbleTimer != 0) {
+      return;
+    }
+  }
+
+  const byte air_bubble_timer = bug ? BubbleTimerData_Bug : BubbleTimerData[random];
+  const byte bubble_mforce_data = bug ? Bubble_MForceData_Bug : Bubble_MForceData[random];
+
+  if (setup_bubble) {
+    const bool c = (PlayerFacingDir & 1) != 0;
+    // NES note: The carry flag causes the constant to be incremented by 1
+    const byte a = c ? (8 + 1) : 0;
+
+    SET_16_16(Bubble_PageLoc[param_1], Bubble_X_Position[param_1],
+              SprObject_PageLoc[0], SprObject_X_Position[0]);
+
+    ADD_UNSIGNED_16_8(Bubble_PageLoc[param_1], Bubble_X_Position[param_1],
+                      a);
+
+    Bubble_Y_Position[param_1] = SprObject_Y_Position[0] + 8;
+    Bubble_Y_HighPos[param_1] = 1;
+
+    AirBubbleTimer = air_bubble_timer;
+  }
+
+  // MoveBubl
+
+  SUB_UNSIGNED_16_8(Bubble_Y_Position[param_1], Bubble_YMF_Dummy[param_1],
+                    bubble_mforce_data);
+
+  if (Bubble_Y_Position[param_1] < 0x20) {
+    Bubble_Y_Position[param_1] = SPRITE_Y_OFFSCREEN;
+  }
+}
 
 // SMB:b6f9
 // SM2MAIN:8265
 // Signature: [X] -> []
 void BubbleCheck(const byte param_1) {
-  if (Bubble_Y_Position[param_1] != SPRITE_Y_OFFSCREEN) {
-    MoveBubl(param_1, PseudoRandomBitReg[param_1 + 1] & 1);
-  } else if (AirBubbleTimer == 0) {
-    SetupBubble(param_1, PseudoRandomBitReg[param_1 + 1] & 1);
-  }
+  const bool docheck = true;
+  const bool bug = false;
+  check_and_setup_bubble(param_1, PseudoRandomBitReg[param_1 + 1] & 1, docheck, bug);
 }
 
 
 // SMB:b70b
 // SM2MAIN:8277
 // Signature: [X, r07] -> []
-void SetupBubble(const byte param_1, const byte param_2) {
-  const bool c = (PlayerFacingDir & 1) != 0;
-  // NES note: The carry flag causes the constant to be incremented by 1
-  const byte a = c ? (8 + 1) : 0;
+void SetupBubble_buggy(const byte buggy_argument_1, const byte buggy_argument_2) {
+  // This procedure is only ever called from Entrance_GameTimerSetup.
+  // BubbleCheck falls through to SetupBubble, but we take care of that case in check_and_setup_bubble.
 
-  SET_16_16(Bubble_PageLoc[param_1], Bubble_X_Position[param_1],
-            SprObject_PageLoc[0], SprObject_X_Position[0]);
+  // unused
+  (void)buggy_argument_2;
 
-  ADD_UNSIGNED_16_8(Bubble_PageLoc[param_1], Bubble_X_Position[param_1],
-                    a);
-
-  Bubble_Y_Position[param_1] = SprObject_Y_Position[0] + 8;
-  Bubble_Y_HighPos[param_1] = 1;
-  AirBubbleTimer = BubbleTimerData[param_2];
-  MoveBubl(param_1, param_2);
-}
-
-
-// SMB:b732
-// SM2MAIN:829e
-// Signature: [X, r07] -> []
-void MoveBubl(const byte param_1, const byte param_2) {
-  byte bVar2 = Bubble_YMF_Dummy[param_1];
-  const byte bVar1 = Bubble_MForceData[param_2];
-  Bubble_YMF_Dummy[param_1] = bVar2 - bVar1;
-  bVar2 = Bubble_Y_Position[param_1] - (bVar2 < bVar1);
-  if (bVar2 < 0x20) {
-    bVar2 = SPRITE_Y_OFFSCREEN;
-  }
-  Bubble_Y_Position[param_1] = bVar2;
+  const bool random_unused = false;
+  const bool docheck = false;
+  const bool bug = true;
+  check_and_setup_bubble(buggy_argument_1, random_unused, docheck, bug);
 }
 
 
@@ -5304,20 +5346,28 @@ byte BlockObjectsCore(const byte param_1) {
 // SM2MAIN:8aa5
 // Signature: [] -> []
 void BlockObjMT_Updater(void) {
-  byte bVar1;
-  byte bVar2;
-
-  for (int j = 0; j < 2; j++) {
-    const int i = 1-j;
+  for (int i = 1; i >= 0; i--) {
     ObjectOffset = i;
-    if ((VRAM_Buffer1[0] == 0) && (Block_RepFlag[i] != 0)) {
-      bVar1 = Block_BBuf_Low[i];
-      bVar2 = Block_Orig_YPos[i];
-      const byte metatile = Block_Metatile[i];
-      Block_Buffers[(int)bVar1 + (int)bVar2] = metatile;
-      ReplaceBlockMetatile(metatile, i, bVar2, bVar1);
-      Block_RepFlag[i] = 0;
+
+    if (VRAM_Buffer1[0] != 0) {
+      continue;
     }
+
+    if (Block_RepFlag[i] == 0) {
+      continue;
+    }
+
+    const byte bbuf_lo = Block_BBuf_Low[i];
+    const byte ypos = Block_Orig_YPos[i];
+    const byte metatile = Block_Metatile[i];
+
+    // NES note: This can indeed go beyond the $0500 page.
+    // This is due to how the indirect store is set up on the 6502.
+    Block_Buffers[(int)bbuf_lo + (int)ypos] = metatile;
+
+    ReplaceBlockMetatile(metatile, i, ypos, bbuf_lo);
+
+    Block_RepFlag[i] = 0;
   }
 }
 
@@ -6228,9 +6278,10 @@ void InitFlyingCheepCheep(const byte param_1) {
     return;
   }
 
+  assert_eq_assumption(param_1 <= 5, true);
+
   const byte rng0 = PseudoRandomBitReg[param_1];
   const byte rng1 = PseudoRandomBitReg[param_1 + 1];
-  const byte rng2 = PseudoRandomBitReg[param_1 + 2];
 
   SmallBBox(param_1);
 
@@ -6239,6 +6290,9 @@ void InitFlyingCheepCheep(const byte param_1) {
   if (param_1 >= ((SecondaryHardMode != 0) ? 4 : 3)) {
     return;
   }
+
+  // This access would be out of bounds if defined earlier
+  const byte rng2 = PseudoRandomBitReg[param_1 + 2];
 
   SpriteVarData2[param_1] = 0xfb;
 
@@ -9682,9 +9736,17 @@ void HandleClimbing(const byte param_1, const byte param_2, const byte param_3) 
   if ((byte)(SprObject_X_Position[0] - ScreenEdgeOrLeft_X_Pos[0]) < 0x10) {
     PlayerFacingDir = 2;
   }
-  SprObject_X_Position[0] = param_3 * 0x10 + ClimbXPosAdder[PlayerFacingDir - 1];
+
+  // NES note: The game assumes PlayerFacingDir is >= 1, but that's not always the case.
+  // It can = 0, and when it is, it references a 6502 instruction operand ($8A in SMB1, $69 in SMB2J).
+  // It occurs in level 2-1 in this SMB1 TAS: https://tasvideos.org/6913S
+  //
+  // It sometimes = 3 as well.
+  // It occurs in level 8-2 in this SMB2J TAS: https://tasvideos.org/5394S
+
+  SprObject_X_Position[0] = param_3 * 0x10 + ClimbXPosAdder_Minus1[PlayerFacingDir];
   if (param_3 == 0) {
-    SprObject_PageLoc[0] = ScreenRight_PageLoc + ClimbXPosAdder[PlayerFacingDir + 1];
+    SprObject_PageLoc[0] = ScreenRight_PageLoc + ClimbPLocAdder_Minus1[PlayerFacingDir];
   }
 }
 

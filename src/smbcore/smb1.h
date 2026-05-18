@@ -322,7 +322,7 @@ void smb1_GetAreaPalette(void);
 void smb1_GetBackgroundColor(void);
 #define GetBackgroundColor smb1_GetBackgroundColor
 
-byte smb1_GetPlayerColors(void);
+void smb1_GetPlayerColors(void);
 #define GetPlayerColors smb1_GetPlayerColors
 
 void smb1_GetAlternatePalette1(void);
@@ -427,7 +427,7 @@ void smb1_SecondaryGameSetup(void);
 void smb1_GetAreaMusic(void);
 #define GetAreaMusic smb1_GetAreaMusic
 
-void smb1_Entrance_GameTimerSetup(byte param_1);
+void smb1_Entrance_GameTimerSetup(void);
 #define Entrance_GameTimerSetup smb1_Entrance_GameTimerSetup
 
 void smb1_PlayerLoseLife(void);
@@ -754,8 +754,8 @@ void smb1_FireballObjCore(byte param_1);
 void smb1_BubbleCheck(byte param_1);
 #define BubbleCheck smb1_BubbleCheck
 
-void smb1_SetupBubble(byte param_1,byte param_2);
-#define SetupBubble smb1_SetupBubble
+void smb1_SetupBubble_buggy(byte param_1,byte param_2);
+#define SetupBubble_buggy smb1_SetupBubble_buggy
 
 void smb1_MoveBubl(byte param_1,byte param_2);
 #define MoveBubl smb1_MoveBubl

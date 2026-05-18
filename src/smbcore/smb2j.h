@@ -328,7 +328,7 @@ void smb2j_GetAreaPalette(void);
 void smb2j_GetBackgroundColor(void);
 #define GetBackgroundColor smb2j_GetBackgroundColor
 
-byte smb2j_GetPlayerColors(void);
+void smb2j_GetPlayerColors(void);
 #define GetPlayerColors smb2j_GetPlayerColors
 
 void smb2j_GetAlternatePalette1(void);
@@ -424,7 +424,7 @@ void smb2j_SecondaryGameSetup(void);
 void smb2j_GetAreaMusic(void);
 #define GetAreaMusic smb2j_GetAreaMusic
 
-void smb2j_Entrance_GameTimerSetup(byte param_1);
+void smb2j_Entrance_GameTimerSetup(void);
 #define Entrance_GameTimerSetup smb2j_Entrance_GameTimerSetup
 
 void smb2j_PlayerLoseLife(void);
@@ -745,8 +745,8 @@ void smb2j_FireballObjCore(byte param_1);
 void smb2j_BubbleCheck(byte param_1);
 #define BubbleCheck smb2j_BubbleCheck
 
-void smb2j_SetupBubble(byte param_1,byte param_2);
-#define SetupBubble smb2j_SetupBubble
+void smb2j_SetupBubble_buggy(byte param_1,byte param_2);
+#define SetupBubble_buggy smb2j_SetupBubble_buggy
 
 void smb2j_MoveBubl(byte param_1,byte param_2);
 #define MoveBubl smb2j_MoveBubl

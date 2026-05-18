@@ -137,12 +137,12 @@ void WriteGameText(const byte param_1) {
 
   bool terminated = false;
   for (int i = 0; i < 256; i++) {
-    if (TopStatusBarLine[offset] == 0xff) {
+    if (GameText[offset] == 0xff) {
       VRAM_Buffer1[i] = 0;
       terminated = true;
       break;
     }
-    VRAM_Buffer1[i] = TopStatusBarLine[offset];
+    VRAM_Buffer1[i] = GameText[offset];
     offset += 1;
   }
   if (!terminated) {
