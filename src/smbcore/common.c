@@ -10496,6 +10496,44 @@ struct_azr02r04r06r07 BlockBufferCollision(const byte use_x, const byte param_2,
 }
 
 
+// Draws a row of two sprites. Implements what happens in DrawSpriteObject.
+//
+// The original games would call DrawSpriteObject/DrawOneSpriteRow/DrawEnemyObjRow,
+// which also took the responsibility of controlling the caller's loops by feeding incremented
+// paramers to the caller.
+// This port eliminates the feeback in favor of providing a `row` argument, because it's easier to understand at a glance.
+static void draw_sprite_row(const byte row,
+                            const byte sproff,
+                            const byte left_tileidx,
+                            const byte right_tileidx,
+                            const byte xpos,
+                            const byte ypos,
+                            const byte attrs,
+                            const bool flip_horz)
+{
+  const byte effective_attrs = attrs | (flip_horz ? 0x40 : 0);
+
+  const byte off = SPRITE_calculate_wrap(sproff, 2*row);
+
+  if (flip_horz) {
+    SPRITE_TILE(off, 0) = right_tileidx;
+    SPRITE_TILE(off, 1) = left_tileidx;
+  } else {
+    SPRITE_TILE(off, 0) = left_tileidx;
+    SPRITE_TILE(off, 1) = right_tileidx;
+  }
+
+  SPRITE_ATTR(off, 0) = effective_attrs;
+  SPRITE_ATTR(off, 1) = effective_attrs;
+
+  SPRITE_Y(off, 0) = ypos + row*8;
+  SPRITE_Y(off, 1) = ypos + row*8;
+
+  SPRITE_X(off, 0) = xpos;
+  SPRITE_X(off, 1) = xpos + 8;
+}
+
+
 // SMB:e435
 // SM2MAIN:b0d9
 // Signature: [Y] -> []
@@ -10570,7 +10608,6 @@ void FlagpoleGfxHandler(const byte param_1) {
 
   const byte xpos = Enemy_Rel_XPos;
   const byte ypos = Enemy_Y_Position[param_1];
-  const byte bVar6 = FlagpoleFNum_Y_Pos;
   // NES note: There's a carry bug after adding 8 and 12 to Enemy_Rel_XPos
   const bool carry_bug = xpos >= 236 && xpos < 248;
 
@@ -10592,16 +10629,18 @@ void FlagpoleGfxHandler(const byte param_1) {
   SPRITE_TILE(off, 2) = 0x7e;
 
   if (FlagpoleCollisionYPos != 0) {
-    const byte bVar1 = FlagpoleScore << 1;
-    DrawOneSpriteRow(FlagpoleScoreNumTiles[bVar1 + 1],
-                     bVar1,
-                     off + 12,
-                     FlagpoleScoreNumTiles[bVar1],
-                     bVar6,
-                     1,
-                     1,
-                     xpos + 20);
+    // Inlined: DrawOneSpriteRow
+
+    const byte bVar1 = FlagpoleScore*2;
+    const byte left_tileidx  = FlagpoleScoreNumTiles[bVar1];
+    const byte right_tileidx = FlagpoleScoreNumTiles[bVar1 + 1];
+    const byte xposN = xpos + 20;
+    const byte yposN = FlagpoleFNum_Y_Pos;
+    const byte attrs = 1;
+    const bool flip_horz = false;
+    draw_sprite_row(0, off + 3*4, left_tileidx, right_tileidx, xposN, yposN, attrs, flip_horz);
   }
+
   if ((Enemy_OffscreenBits & 0xe) != 0) {
     // Inlined: MoveSixSpritesOffscreen
     const byte sprite_offset = Enemy_SprDataOffset[ObjectOffset];
@@ -10727,39 +10766,46 @@ byte JCoinGfxHandler(const byte param_1) {
 // SM2MAIN:b37d
 // Signature: [] -> [X]
 byte DrawPowerUp(void) {
-  byte bVar1;
-  struct_xyr02 sVar9;
+  const byte sproff = Enemy_SprDataOffset[5];
 
-  byte bVar6 = Enemy_Rel_YPos + 8;
-  const byte bVar5 = PowerUpAttributes[PowerUpType] | Enemy_SprAttrib[5];
-  const byte bStack0000 = PowerUpType;
-  byte bVar7 = PowerUpType << 2;
-  const byte bVar2 = 1;
-  const byte bVar3 = Enemy_Rel_XPos;
-  byte bVar8 = Enemy_SprDataOffset[5];
+  {
+    // Inlined: DrawOneSpriteRow
 
-  // Draw two rows
-  for (int i = 0; i < 2; i++) {
-    sVar9 = DrawOneSpriteRow(PowerUpGfxTable[bVar7 + 1], bVar7, bVar8,
-                             PowerUpGfxTable[bVar7], bVar6, bVar2, bVar5,
-                             bVar3);
-    bVar1 = Enemy_SprDataOffset[5];
-    bVar6 = sVar9.r02;
-    bVar8 = sVar9.y;
-    bVar7 = sVar9.x;
+    const byte idx = PowerUpType << 2;
+    const byte left_tileidx_1  = PowerUpGfxTable[idx];
+    const byte right_tileidx_1 = PowerUpGfxTable[idx + 1];
+    const byte left_tileidx_2  = PowerUpGfxTable[(byte)(idx + 2)];
+    const byte right_tileidx_2 = PowerUpGfxTable[(byte)(idx + 2) + 1];
+
+    const byte xpos = Enemy_Rel_XPos;
+    const byte ypos = Enemy_Rel_YPos + 8;
+    const byte attrs = PowerUpAttributes[PowerUpType] | Enemy_SprAttrib[5];
+
+    const bool flip_horz = false;
+
+    draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
+    draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
   }
 
-  if (((bStack0000 != 0) && (bStack0000 != 3)) && (ssw(true, bStack0000 != 4))) {
-    bVar6 = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[5];
-    SPRITE_ATTR(Enemy_SprDataOffset[5], 0) = bVar6;
-    SPRITE_ATTR(bVar1, 1) = bVar6;
-    if (bStack0000 != 1) {
-      SPRITE_ATTR(bVar1, 2) = bVar6;
-      SPRITE_ATTR(bVar1, 3) = bVar6;
+  if ((PowerUpType != 0) && (PowerUpType != 3) && ssw(true, PowerUpType != 4)) {
+    // Flicker the powerup by cycling its palette
+
+    const byte attrs = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[5];
+
+    SPRITE_ATTR(sproff, 0) = attrs;
+    SPRITE_ATTR(sproff, 1) = attrs;
+
+    // If it's a fire flower, only flicker the top half
+    if (PowerUpType != 1) {
+      SPRITE_ATTR(sproff, 2) = attrs;
+      SPRITE_ATTR(sproff, 3) = attrs;
     }
-    SPRITE_ATTR(bVar1, 1) = SPRITE_ATTR(bVar1, 1) | 0x40;
-    SPRITE_ATTR(bVar1, 3) = SPRITE_ATTR(bVar1, 3) | 0x40;
+
+    // Flip the right half horizontally
+    SPRITE_ATTR(sproff, 1) |= 0x40;
+    SPRITE_ATTR(sproff, 3) |= 0x40;
   }
+
   return SprObjectOffscrChk();
 }
 
@@ -10839,7 +10885,7 @@ byte EnemyGfxHandler(const byte param_1) {
       VerticalFlipFlag = bVar4;
     }
     // DrawBowser
-    return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
+    return DrawEnemyObject(bVar4, Enemy_Rel_XPos, bVar5, bVar3, bVar2);
   }
 
   if (bVar4 == 0x24) {
@@ -10924,53 +10970,69 @@ CheckToAnimateEnemy:
 CheckDefeatedState:
   if (ssw(true, MysterySpriteThing4 != 4)) {
     if ((MysterySpriteThing3 & 0x20) == 0) {
-      return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
+      return DrawEnemyObject(bVar4, Enemy_Rel_XPos, bVar5, bVar3, bVar2);
     }
     if (MysterySpriteThing4 < 4) {
-      return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
+      return DrawEnemyObject(bVar4, Enemy_Rel_XPos, bVar5, bVar3, bVar2);
     }
   }
   VerticalFlipFlag = 1;
   MysterySpriteThing2 = 0;
-  return DrawEnemyObject(bVar4, bVar5, bVar2, bVar3, Enemy_Rel_XPos);
+  return DrawEnemyObject(bVar4, Enemy_Rel_XPos, bVar5, bVar3, bVar2);
 }
 
 
 // SMB:ea4b
 // SM2MAIN:b71b
-// Signature: [X, r02, r03, r04, r05] -> [X]
-byte DrawEnemyObject(const byte param_1, const byte param_2, const byte param_3, const byte param_4, const byte param_5) {
-  byte bVar1;
-  byte bVar4;
+// Signature: [X, r05, r02, r04, r03] -> [X]
+byte DrawEnemyObject(const byte table_idx, const byte xpos, const byte ypos, const byte attrs, const byte flags) {
+  {
+    // Inlined: DrawEnemyObjRow
+    const byte sproff = MysterySpriteThing1;
 
-  struct_xyr02 sVar6 = DrawEnemyObjRow(param_1, MysterySpriteThing1, param_2,
-                                       param_3, param_4, param_5);
-  sVar6 = DrawEnemyObjRow(sVar6.x, sVar6.y, sVar6.r02, param_3, param_4, param_5);
-  DrawEnemyObjRow(sVar6.x, sVar6.y, sVar6.r02, param_3, param_4, param_5);
+    byte table_idx_tmp = table_idx;
+
+    const byte left_tileidx_1  = EnemyGraphicsTable[table_idx_tmp];
+    const byte right_tileidx_1 = EnemyGraphicsTable[table_idx_tmp + 1];
+    table_idx_tmp += 2;
+    const byte left_tileidx_2  = EnemyGraphicsTable[table_idx_tmp];
+    const byte right_tileidx_2 = EnemyGraphicsTable[table_idx_tmp + 1];
+    table_idx_tmp += 2;
+    const byte left_tileidx_3  = EnemyGraphicsTable[table_idx_tmp];
+    const byte right_tileidx_3 = EnemyGraphicsTable[table_idx_tmp + 1];
+
+    const bool flip_horz = (flags & 2) != 0;
+
+    draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
+    draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
+    draw_sprite_row(2, sproff, left_tileidx_3, right_tileidx_3, xpos, ypos, attrs, flip_horz);
+  }
+
   const byte bVar3 = Enemy_SprDataOffset[ObjectOffset];
 
   if (MysterySpriteThing4 == 8) {
     return SprObjectOffscrChk();
   }
-  if (VerticalFlipFlag != 0) {
-    const byte attr = SPRITE_ATTR(bVar3, 0) | 0x80;
 
+  if (VerticalFlipFlag != 0) {
     // NES note: If the offset is 254 or 255, this wraparounds the sprite page
     // because it's incremented before passing to DumpSixSpr.
     // This port assumes it can't happen.
     assert_eq_assumption(bVar3 <= 253, true);
 
+    const byte tmpattr = SPRITE_ATTR(bVar3, 0) | 0x80;
+
     // Inlined: DumpSixSpr
     for (int i =  0; i < 6; i++) {
-      SPRITE_ATTR(bVar3, i) = attr;
+      SPRITE_ATTR(bVar3, i) = tmpattr;
     }
 
     byte bVar2 = bVar3;
     if ((MysterySpriteThing4 != 5) && ssw(true, (MysterySpriteThing4 != 4)) && (MysterySpriteThing4 != 0x11) && (MysterySpriteThing4 < 0x15)) {
       bVar2 = bVar3 + 8;
     }
-    bVar4 = SPRITE_TILE(bVar2, 0);
-    bVar1 = SPRITE_TILE(bVar2, 1);
+    const byte bVar4 = SPRITE_TILE(bVar2, 0);
+    const byte bVar1 = SPRITE_TILE(bVar2, 1);
     SPRITE_TILE(bVar2, 0) = SPRITE_TILE(bVar3, 4);
     SPRITE_TILE(bVar2, 1) = SPRITE_TILE(bVar3, 5);
     SPRITE_TILE(bVar3, 5) = bVar1;
@@ -10995,11 +11057,11 @@ byte DrawEnemyObject(const byte param_1, const byte param_2, const byte param_3,
     }
   }
   if (BowserGfxFlag == 0) {
-    bVar4 = SPRITE_ATTR(bVar3, 0) & 0xa3;
+    const byte bVar4 = SPRITE_ATTR(bVar3, 0) & 0xa3;
     SPRITE_ATTR(bVar3, 0) = bVar4;
     SPRITE_ATTR(bVar3, 2) = bVar4;
     SPRITE_ATTR(bVar3, 4) = bVar4;
-    bVar1 = bVar4 | 0x40;
+    byte bVar1 = bVar4 | 0x40;
     if (bVar2 == 5) {
       bVar1 = bVar4 | 0xc0;
     }
@@ -11008,9 +11070,8 @@ byte DrawEnemyObject(const byte param_1, const byte param_2, const byte param_3,
     SPRITE_ATTR(bVar3, 5) = bVar1;
     if (bVar2 == 4) {
       bVar2 = SPRITE_ATTR(bVar3, 2);
-      bVar4 = bVar2 | 0x80;
-      SPRITE_ATTR(bVar3, 2) = bVar4;
-      SPRITE_ATTR(bVar3, 4) = bVar4;
+      SPRITE_ATTR(bVar3, 2) = bVar2 | 0x80;
+      SPRITE_ATTR(bVar3, 4) = bVar2 | 0x80;
       bVar2 |= 0xc0;
       SPRITE_ATTR(bVar3, 3) = bVar2;
       SPRITE_ATTR(bVar3, 5) = bVar2;
@@ -11097,19 +11158,22 @@ byte SprObjectOffscrChk(void) {
 
 // SMB:ebaa
 // SM2MAIN:b885
-// Signature: [X, Y, r02, r03, r04, r05] -> [X, Y, r02]
-struct_xyr02 DrawEnemyObjRow(const byte param_1, const byte param_2, const byte param_3, const byte param_4, const byte param_5, const byte param_6) {
-  return DrawOneSpriteRow(EnemyGraphicsTable[param_1 + 1], param_1, param_2, EnemyGraphicsTable[param_1], param_3,
-                           param_4, param_5, param_6);
+// Signature: [X, Y, r05, r02, r04, r03] -> [X, Y, r02]
+struct_xyr02 DrawEnemyObjRow(const byte table_idx, const byte sproff, const byte xpos, const byte ypos, const byte attrs, const byte flags) {
+  const byte left_tileidx  = EnemyGraphicsTable[table_idx];
+  const byte right_tileidx = EnemyGraphicsTable[table_idx + 1];
+
+  return DrawSpriteObject(table_idx, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flags);
 }
 
 
 // SMB:ebb2
 // SM2MAIN:b88d
-// Signature: [A, X, Y, r00, r02, r03, r04, r05] -> [X, Y, r02]
-struct_xyr02 DrawOneSpriteRow(const byte param_1, const byte param_2, const byte param_3, const byte param_4, const byte param_5, const byte param_6,
-                              const byte param_7, const byte param_8) {
-  return DrawSpriteObject(param_2, param_3, param_4, param_1, param_5, param_6, param_7, param_8);
+// Signature: [X, Y, r00, A, r05, r02, r04, r03] -> [X, Y, r02]
+struct_xyr02 DrawOneSpriteRow(const byte tile_counter, const byte sproff, const byte left_tileidx, const byte right_tileidx, const byte xpos, const byte ypos, const byte attrs, const byte flags) {
+  // This is really just DrawSpriteObject with the right_tileidx parameter assigned to A instead of r01. A shortcut to avoid a "STA" instruction.
+
+  return DrawSpriteObject(tile_counter, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flags);
 }
 
 
@@ -11117,33 +11181,30 @@ struct_xyr02 DrawOneSpriteRow(const byte param_1, const byte param_2, const byte
 // SM2MAIN:b8ac
 // Signature: [X] -> [X]
 byte DrawBlock(const byte param_1) {
-  byte bVar7 = AltOrBlock_SprDataOffset[param_1];
-  byte bVar6 = 0;
-  byte bVar1 = Block_Rel_YPos;
-  const byte bVar3 = Block_Rel_XPos;
-  byte bVar5;
-  do {
-    const struct_xyr02 sVar8 = DrawOneSpriteRow(
-      DefaultBlockObjTiles[bVar6 + 1],
-      bVar6,
-      bVar7,
-      DefaultBlockObjTiles[bVar6],
-      bVar1,
-      1,
-      3,
-      bVar3
-    );
-    bVar5 = ObjectOffset;
-    bVar1 = sVar8.r02;
-    bVar7 = sVar8.y;
-    bVar6 = sVar8.x;
-  } while (bVar6 != 4);
-  bVar7 = AltOrBlock_SprDataOffset[ObjectOffset];
+  {
+    // Inlined: DrawOneSpriteRow
+
+    const byte left_tileidx_1  = DefaultBlockObjTiles[0];
+    const byte right_tileidx_1 = DefaultBlockObjTiles[1];
+    const byte left_tileidx_2  = DefaultBlockObjTiles[2];
+    const byte right_tileidx_2 = DefaultBlockObjTiles[3];
+
+    const byte sproff = AltOrBlock_SprDataOffset[param_1];
+    const byte xpos = Block_Rel_XPos;
+    const byte ypos = Block_Rel_YPos;
+    const byte attrs = 3;
+    const bool flip_horz = false;
+
+    draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
+    draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
+  }
+
+  byte bVar7 = AltOrBlock_SprDataOffset[ObjectOffset];
   if (AreaType != 1) {
     SPRITE_TILE(bVar7, 0) = 0x86;
     SPRITE_TILE(bVar7, 1) = 0x86;
   }
-  if (Block_Metatile[bVar5] == ssw(0xc4, 0xc5)) {
+  if (Block_Metatile[ObjectOffset] == ssw(0xc4, 0xc5)) {
     // Inlined: DumpFourSpr
     // NES note: If the offset is 255, this wraparounds the sprite page
     // because it's incremented before passing to DumpFourSpr.
@@ -11154,7 +11215,6 @@ byte DrawBlock(const byte param_1) {
     SPRITE_TILE(bVar7, 2) = 0x87;
     SPRITE_TILE(bVar7, 3) = 0x87;
 
-    bVar5 = ObjectOffset;
 
     const byte bVar4 = (AreaType != 1) ? 1 : 3;
     SPRITE_ATTR(bVar7, 0) = bVar4;
@@ -11162,6 +11222,7 @@ byte DrawBlock(const byte param_1) {
     SPRITE_ATTR(bVar7, 2) = bVar4 | 0x80;
     SPRITE_ATTR(bVar7, 3) = bVar4 | 0xc0;
   }
+
   if ((Block_OffscreenBits & 4) != 0) {
     SPRITE_Y(bVar7, 1) = SPRITE_Y_OFFSCREEN;
     SPRITE_Y(bVar7, 3) = SPRITE_Y_OFFSCREEN;
@@ -11173,7 +11234,7 @@ byte DrawBlock(const byte param_1) {
     SPRITE_Y(bVar7, 2) = SPRITE_Y_OFFSCREEN;
   }
 
-  return bVar5;
+  return ObjectOffset;
 }
 
 
@@ -11524,21 +11585,26 @@ void RenderPlayerSub(const byte param_1) {
 // SMB:efdc
 // SM2MAIN:bcb7
 // Signature: [X, Y, r02, r03, r04, r05, r07] -> []
-void DrawPlayerLoop(const byte param_1, const byte param_2, const byte param_3, const byte param_4, const byte param_5, const byte param_6, const byte param_7) {
-  byte a = param_1;
-  byte b = param_2;
-  byte c = param_3;
-  byte i = param_7;
-  do {
-    const struct_xyr02 sVar1 = DrawOneSpriteRow(PlayerGraphicsTable[a + 1],
-                                          a, b,
-                                          PlayerGraphicsTable[a],
-                                          c, param_4, param_5, param_6);
-    c = sVar1.r02;
-    b = sVar1.y;
-    a = sVar1.x;
-    i -= 1;
-  } while (i != 0);
+void DrawPlayerLoop(const byte param_1, const byte sproff, const byte ypos, const byte flags, const byte attrs, const byte xpos, const byte num_rows) {
+  // NES note: The loop in the original checks at the end. If num_rows = 0, it loops 256 times.
+  // This never occurs in unmodified ROMS, but it might in modified ones via DrawPlayer_Intermediate.
+  // TODO: have a setting to disable this silly mostly-irrelevant workaround
+  const int actual_num_rows = num_rows != 0 ? num_rows : 256;
+
+  // Inlined: DrawOneSpriteRow
+
+  const bool flip_horz = (flags & 2) != 0;
+
+  byte table_idx = param_1;
+
+  for (int i = 0; i < actual_num_rows; i++) {
+    const byte left_tileidx  = PlayerGraphicsTable[table_idx];
+    const byte right_tileidx = PlayerGraphicsTable[table_idx + 1];
+
+    draw_sprite_row(i, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flip_horz);
+
+    table_idx += 2;
+  }
 }
 
 
@@ -11985,34 +12051,17 @@ byte DividePDiff(const byte param_1, const byte param_2, const bool param_3, con
 
 // SMB:f282
 // SM2MAIN:bf67
-// Signature: [X, Y, r00, r01, r02, r03, r04, r05] -> [X, Y, r02]
-struct_xyr02 DrawSpriteObject(const byte param_1, const byte param_2, const byte param_3, const byte param_4, const byte param_5, const byte param_6,
-                              const byte param_7, const byte param_8) {
-  struct_xyr02 sVar2;
+// Signature: [X, Y, r00, r01, r05, r02, r04, r03] -> [X, Y, r02]
+struct_xyr02 DrawSpriteObject(const byte tile_counter, const byte sproff, const byte left_tileidx, const byte right_tileidx, const byte xpos, const byte ypos, const byte attrs, const byte flags) {
+  struct_xyr02 result;
 
-  const bool flip_horz = (param_6 & 2) != 0;
+  const bool flip_horz = (flags & 2) != 0;
+  draw_sprite_row(0, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flip_horz);
 
-  if (flip_horz) {
-    SPRITE_TILE(param_2, 0) = param_4;
-    SPRITE_TILE(param_2, 1) = param_3;
-  } else {
-    SPRITE_TILE(param_2, 0) = param_3;
-    SPRITE_TILE(param_2, 1) = param_4;
-  }
-
-  SPRITE_ATTR(param_2, 0) = param_7 | (flip_horz ? 0x40 : 0);
-  SPRITE_ATTR(param_2, 1) = param_7 | (flip_horz ? 0x40 : 0);
-
-  SPRITE_Y(param_2, 0) = param_5;
-  SPRITE_Y(param_2, 1) = param_5;
-
-  SPRITE_X(param_2, 0) = param_8;
-  SPRITE_X(param_2, 1) = param_8 + 8;
-
-  sVar2.x = param_1 + 2;
-  sVar2.y = param_2 + 8;
-  sVar2.r02 = param_5 + 8;
-  return sVar2;
+  result.x = tile_counter + 2;
+  result.y = sproff + 8;
+  result.r02 = ypos + 8;
+  return result;
 }
 
 
