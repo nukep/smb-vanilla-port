@@ -1477,7 +1477,7 @@ byte smb2j_DrawPowerUp(void);
 byte smb2j_EnemyGfxHandler(byte param_1);
 #define EnemyGfxHandler smb2j_EnemyGfxHandler
 
-byte smb2j_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+byte smb2j_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
 #define DrawEnemyObject smb2j_DrawEnemyObject
 
 byte smb2j_SprObjectOffscrChk(void);

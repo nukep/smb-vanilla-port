@@ -236,6 +236,14 @@ static inline byte NEGATE(byte x) {
 }
 
 
+#define SWAP(a, b) \
+  do {             \
+    byte tmp = a;  \
+    a = b;         \
+    b = tmp;       \
+  } while (0)
+
+
 // Higher-bit math helpers
 
 // Loads a 16-bit value from two 8-bit values.

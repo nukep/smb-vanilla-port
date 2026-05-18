@@ -98,10 +98,14 @@
 
 #define AreaData                         RAMPTR(0x00E7)
 #define EnemyData                        RAMPTR(0x00E9)
-#define MysterySpriteThing1              RAM(0x00EB)
-#define MysterySpriteThing2              RAM(0x00EC)
-#define MysterySpriteThing3              RAM(0x00ED)
-#define MysterySpriteThing4              RAM(0x00EF)
+
+// $EB to $EF are treated as temporary registers.
+// $EE is never used, but it's in that range.
+// #define rEB                              RAM(0x00EB)
+// #define rEC                              RAM(0x00EC)
+// #define rED                              RAM(0x00ED)
+#define rEF                              RAM(0x00EF)
+
 #define NoteLenLookupTblOfs              RAM(0x00F0)
 #define Square1SoundBuffer               RAM(0x00F1)
 #define Square2SoundBuffer               RAM(0x00F2)

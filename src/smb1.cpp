@@ -148,13 +148,6 @@ void DrawTitleScreen() {
   }
 }
 
-#define SWAP(a, b) \
-  do {             \
-    byte tmp = a;  \
-    a = b;         \
-    b = tmp;       \
-  } while (0)
-
 // Switch between Mario and Luigi.
 // Save and restore their states.
 //
