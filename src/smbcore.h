@@ -417,19 +417,24 @@ public:
   }
   byte &operator[](int i) const {
     // equivalent to LDA addr,X
-    ushort eff = addr + i;
-    if (addr <= 0xFF) {
-      // zero-page wraparound for zero-page adddresses.
-      // in SMB, all indexes of zero-page addresses work like this.
-      // i.e. the imm16,x or imm16,y address modes are never used for zero-page
-      eff = eff & 0xFF;
-    }
+    u16 eff = addr + i;
+
+    // TODO: account for zero-page wraparound for some variables.
+    // some arrays in zero-page use addressing modes that wraparound, while others do not.
+    //
+    // e.g.
+    //    b930: b9 d7 00  lda $00d7, y
+    // and
+    //    b9c5: b5 0f     lda $0f, x
+    //
+    // i haven't observed a wraparound ever happening in practice, but this should be verified
+
     if (length != 0) {
       if (i < 0 || i >= length) {
         warning("Out of bounds for array %04X[%d] at index %d (= %04X)\n", addr, length, i, eff);
       }
     }
-    return RAM(addr + i);
+    return RAM(eff);
   }
 };
 
@@ -451,19 +456,14 @@ public:
   }
   const byte &operator[](int i) const {
     // equivalent to LDA addr,X
-    ushort eff = addr + i;
-    if (addr <= 0xFF) {
-      // zero-page wraparound for zero-page adddresses.
-      // in SMB, all indexes of zero-page addresses work like this.
-      // i.e. the imm16,x or imm16,y address modes are never used for zero-page
-      eff = eff & 0xFF;
-    }
+    u16 eff = addr + i;
+
     if (length != 0) {
       if (i < 0 || i >= length) {
         warning("Out of bounds for array %04X[%d] at index %d (= %04X)\n", addr, length, i, eff);
       }
     }
-    return RAM(addr + i);
+    return RAM(eff);
   }
 };
 
