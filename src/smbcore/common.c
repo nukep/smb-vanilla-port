@@ -947,14 +947,15 @@ void AreaParserTaskControl(void) {
 // Signature: [] -> []
 void ClearBuffersDrawIcon(void) {
   if (OperMode == 0) {
+    // NES note: Zeros out pages $0300 and $0400
     for (int i = 0; i < 256; i++) {
       VRAM_Page[i] = 0;
-      SprObject_X_MoveForce[i] = 0;
+      Objects_Page[i] = 0;
     }
     DrawMushroomIcon();
-    ScreenRoutineTask = ScreenRoutineTask + 1;
+    ScreenRoutineTask += 1;
   } else {
-    OperMode_Task = OperMode_Task + 1;
+    OperMode_Task += 1;
   }
 }
 
@@ -3012,13 +3013,10 @@ byte GetAreaObjYPosition(const byte param_1) { return param_1 * 0x10 + 0x20; }
 ushort GetBlockBufferAddr(byte column) {
   // column is between 0 and 31 inclusive
 
-  // hard-coding the addresses
   if (column < 16) {
-    // Block_Buffer_1
-    return 0x0500 + (column % 16);
+    return BLOCK_BUFFER_PAGE + BLOCK_BUFFER_1_OFFSET + (column % 16);
   } else {
-    // Block_Buffer_2
-    return 0x05d0 + (column % 16);
+    return BLOCK_BUFFER_PAGE + BLOCK_BUFFER_2_OFFSET + (column % 16);
   }
 }
 
@@ -3387,7 +3385,7 @@ void PlayerEntrance(void) {
       if (DisableCollisionDet != 0) {
         Player_State = 3;
         bVar1 = 8;
-        Block_Buffer_1[180] = 8;
+        Block_Buffers[BLOCK_BUFFER_1_OFFSET + 0xb4] = 8;
       }
       AutoControlPlayer(bVar1);
       if (SprObject_X_Position[0] < 0x48) {

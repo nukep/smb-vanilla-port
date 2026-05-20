@@ -20,6 +20,14 @@ glew = dependency('glew', required: get_option('opengl'))
 opengl_sources = glew.found() ? ['src/render_opengl.c'] : ['src/render_opengl_noop.c']
 opengl_args = glew.found() ? ['-DOPENGL_ENABLED'] : []
 
+smbcore_args = []
+
+smbcore_args += ['-DPRINT_WARNINGS_AND_ERRORS']
+
+if get_option('buildtype') == 'debug'
+  smbcore_args += ['-DCHECK_ARRAY_BOUNDS']
+endif
+
 cdata = configuration_data()
 configure_file(output: 'smbport_config.h', configuration: cdata)
 
@@ -27,7 +35,9 @@ smbcore = library('smbcore',
         'src/smbcore.cpp',
         'src/smbcommon.cpp',
         'src/smb1.cpp',
-        'src/smb2j.cpp'
+        'src/smb2j.cpp',
+        c_args:   smbcore_args,
+        cpp_args: smbcore_args
 )
 
 nessndemu = library('nessndemu',

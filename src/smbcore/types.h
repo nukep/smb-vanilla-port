@@ -10,6 +10,10 @@
 #define BUTTON_L 0x02
 #define BUTTON_R 0x01
 
+#define BLOCK_BUFFER_PAGE 0x0500
+#define BLOCK_BUFFER_1_OFFSET 0x00
+#define BLOCK_BUFFER_2_OFFSET 0xd0
+
 // Note that `i` is modulo 64 for bounding boxes, hence the `(byte)` cast.
 
 #define BBOX_TOPLEFT_X(i)  BoundingBoxCoords[(byte)((i)*4) + 0]

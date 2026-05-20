@@ -15,19 +15,38 @@ typedef int8_t i8;
 typedef int16_t i16;
 typedef int32_t i32;
 
-// #define warning printf
-#define warning(...)
+#ifdef _MSC_VER
+#  define NOINLINE __declspec(noinline)
+#  define NORETURN __declspec(noreturn)
+#elif __GNUC__
+#  define NOINLINE __attribute__((noinline))
+#  define NORETURN __attribute__((noreturn))
+#endif
 
-#define assert_smb_crashbug(condition, message) assert(condition)
+#ifdef PRINT_WARNINGS_AND_ERRORS
+#  define error(fmt, ...) fprintf(stderr, "ERROR: " fmt, ##__VA_ARGS__)
+#  define warning(fmt, ...) fprintf(stdout, "WARN: " fmt, ##__VA_ARGS__)
+#else
+#  define error(...)
+#  define warning(...)
+#endif
+
+static inline void assert_smb_crashbug(bool condition, const char *message) {
+  if (!condition) {
+    error("%s\n", message);
+    abort();
+  }
+}
+
+static inline NORETURN void jmpengine_overflow(byte index) {
+  error("JMPENGINE overflow! %02X\n", index);
+  abort();
+}
+
 #define assert_eq_assumption(expected, actual) assert((expected) == (actual))
 #define assert_eq_regressiontest(expected, actual) assert((expected) == (actual))
 
-#ifdef _MSC_VER
-#define NOINLINE __declspec(noinline)
-//#define thread_local __declspec(thread)
-#elif __GNUC__
-#define NOINLINE __attribute__((noinline))
-#endif
+
 
 // Represents the internal PPU register.
 union ppureg {
@@ -210,10 +229,6 @@ static inline void transfer_sprite_data(const byte *data) {
 
     s[i].draw_behind = (attr & 0x20) != 0;
   }
-}
-
-static inline void jmpengine_overflow(byte index) {
-  warning("JMPENGINE overflow! %02X\n", index);
 }
 
 void draw_graphics(struct SMB_state *state);
@@ -406,19 +421,26 @@ class RamByteArray {
 private:
   ushort addr;
   ushort length;
+  int offset;
 
 public:
-  RamByteArray(ushort addr) : addr(addr), length(0) {}
-  RamByteArray(ushort addr, ushort length) : addr(addr), length(length) {}
+  RamByteArray(ushort addr) : addr(addr), length(0), offset(0) {}
+  RamByteArray(ushort addr, ushort length) : addr(addr), length(length), offset(0) {}
+  RamByteArray(ushort addr, ushort length, int offset) : addr(addr), length(length), offset(offset) {}
   byte &operator*() const {
-    return RAM(addr);
+    return RAM(addr + offset);
   }
   byte *operator&() const {
-    return &RAM(addr);
+    return &RAM(addr + offset);
+  }
+  RamByteArray operator+(int i) const {
+    // Adding an array by a constant gives another array.
+    return RamByteArray(addr, length, offset + i);
   }
   byte &operator[](int i) const {
+    const int idx = offset + i;
     // equivalent to LDA addr,X
-    u16 eff = addr + i;
+    u16 eff = addr + idx;
 
     // TODO: account for zero-page wraparound for some variables.
     // some arrays in zero-page use addressing modes that wraparound, while others do not.
@@ -430,11 +452,14 @@ public:
     //
     // i haven't observed a wraparound ever happening in practice, but this should be verified
 
+#ifdef CHECK_ARRAY_BOUNDS
     if (length != 0) {
-      if (i < 0 || i >= length) {
-        warning("Out of bounds for array %04X[%d] at index %d (= %04X)\n", addr, length, i, eff);
+      if (idx < 0 || idx >= length) {
+        warning("Out of bounds for array $%04X length %d. accessed $%04X[%d] (= $%04X)\n", addr, length, addr+offset, i, eff);
       }
     }
+#endif
+
     return RAM(eff);
   }
 };
@@ -459,11 +484,14 @@ public:
     // equivalent to LDA addr,X
     u16 eff = addr + i;
 
+#ifdef CHECK_ARRAY_BOUNDS
     if (length != 0) {
       if (i < 0 || i >= length) {
-        warning("Out of bounds for array %04X[%d] at index %d (= %04X)\n", addr, length, i, eff);
+        warning("Out of bounds for array $%04X length %d. accessed $%04X[%d] (= $%04X)\n", addr, length, addr, i, eff);
       }
     }
+#endif
+
     return RAM(eff);
   }
 };

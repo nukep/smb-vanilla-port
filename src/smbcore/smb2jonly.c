@@ -1093,7 +1093,7 @@ void EraseLivesLines(void) {
 // Signature: [] -> []
 void RunMushroomRetainers(void) {
   MushroomRetainersForW8();
-  if (Block_Buffer_2[56] == 0) {
+  if (Block_Buffers[BLOCK_BUFFER_2_OFFSET + 0x38] == 0) {
     if (HardWorldFlag != 0) {
       RAM(0x611d) = 0xa0;
       DiskIOTask = 0;
