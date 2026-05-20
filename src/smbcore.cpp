@@ -111,37 +111,60 @@ static bool detect_and_load_rom(struct SMB_state *state) {
   if (!read_rom_bytes(state, headerbuf, 16)) {
     return false;
   }
+
   if (headerbuf[0] == 'N' && headerbuf[1] == 'E' && headerbuf[2] == 'S' && headerbuf[3] == 0x1A) {
     // An INES header. Probably SMB1.
-    return load_smb1(state, 0x10, 0x8010);
-  }
-  if (headerbuf[0] == 'F' && headerbuf[1] == 'D' && headerbuf[2] == 'S' && headerbuf[3] == 0x1A) {
+    if (!load_smb1(state, 0x10, 0x8010)) {
+      return false;
+    }
+  } else if (headerbuf[0] == 'F' && headerbuf[1] == 'D' && headerbuf[2] == 'S' && headerbuf[3] == 0x1A) {
     // An FDS header. Probably SMB2J.
     // TODO: there's an FDS version of SMB1. Maybe handle it?
-    return load_smb2j(state, 0x10);
+    if (!load_smb2j(state, 0x10)) {
+      return false;
+    }
   } else {
     // There are some ROMs that don't include an FDS header, but just the single disk image.
-    return load_smb2j(state, 0);
+    if (!load_smb2j(state, 0)) {
+      return false;
+    }
   }
+
+  SMB_ram_finishwrite(state);
+
+  return true;
 }
 
 size_t SMB_state_size(void) { return sizeof(struct SMB_state); }
+
 bool SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb) {
   SMB_STATE = state;
+
   memset(state, 0, sizeof(struct SMB_state));
   state->callbacks = *cb;
   state->start_on_world = 1;
   state->start_on_level = 1;
+
   return detect_and_load_rom(state);
 }
+
 void SMB_start_on_level(struct SMB_state *state, byte world, byte level) {
   state->start_on_world = world;
   state->start_on_level = level;
 }
+
 int SMB_which_game(const struct SMB_state *state) { return state->which_game; }
 
 byte *SMB_ram(struct SMB_state *state) { return state->rammem; }
+
 byte *SMB_ppuram(struct SMB_state *state) { return state->ppuram; }
+
+void SMB_ram_finishwrite(struct SMB_state *state) {
+  // Set a global variable while accessing the RAM values
+  SMB_STATE = state;
+
+  sync_pointers();
+}
 
 void SMB_tick(struct SMB_state *state) {
   // Set a global variable while it's being ticked

@@ -76,7 +76,7 @@ void SMB1_NMI() {
   // The NES wrote to OAM registers to initiate copying sprites
   // $2003 = 0
   // $4014 = 2
-  transfer_sprite_data(&Sprite_Data);
+  transfer_sprite_data(&Sprite_Data[0]);
 
   // VRAM_Buffer_AddrCtrl of 0, 5, 6, 7 are in RAM ($301, $300, $341, $341 respectively). All other ones are in ROM.
   UpdateScreen(&RAM(VRAM_AddrTable_High[VRAM_Buffer_AddrCtrl] * 0x100 + VRAM_AddrTable_Low[VRAM_Buffer_AddrCtrl]));
@@ -104,7 +104,7 @@ void SMB1_NMI() {
   }
 
   // Update PRNG (pseudo-random number generator)
-  update_prng(&PseudoRandomBitReg);
+  update_prng(&PseudoRandomBitReg[0]);
 
   if (Sprite0HitDetectFlag != 0) {
     // In the NES version, the game waits here until a Sprite 0 hit (the bottom of the status bar).

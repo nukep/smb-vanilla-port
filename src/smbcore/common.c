@@ -3044,32 +3044,43 @@ void GetAreaDataAddrs(void) {
   AreaType = area_type;
   AreaAddrsLOffset = loffset;
 
-  const byte off = EnemyAddrHOffsets[area_type] + loffset;
-
+  {
 #ifdef SMB1_MODE
-  EnemyData.lo = EnemyDataAddrLow[off];
-  EnemyData.hi = EnemyDataAddrHigh[off];
+    const byte off = EnemyAddrHOffsets[area_type] + loffset;
+    const byte lo = EnemyDataAddrLow[off];
+    const byte hi = EnemyDataAddrHigh[off];
 #endif
 #ifdef SMB2J_MODE
-  EnemyData.hi = EnemyDataAddrs[(byte)(off * 2) + 1];
-  EnemyData.lo = EnemyDataAddrs[(byte)(off * 2)];
+    const byte off = (EnemyAddrHOffsets[area_type] + loffset) * 2;
+    const byte lo = EnemyDataAddrs[off];
+    const byte hi = EnemyDataAddrs[off + 1];
 #endif
+    const u16 addr = (hi << 8) | lo;
+    STORE_16(EnemyData_addr_hi, EnemyData_addr_lo, addr);
+    EnemyData = rom_ptr(addr);
+  }
 
+  {
 #ifdef SMB1_MODE
-  const byte bVar2_off = (byte)(AreaDataHOffsets[area_type] + loffset);
-  const byte lo = AreaDataAddrLow[bVar2_off];
-  const byte hi = AreaDataAddrHigh[bVar2_off];
+    const byte off = AreaDataHOffsets[area_type] + loffset;
+    const byte lo = AreaDataAddrLow[off];
+    const byte hi = AreaDataAddrHigh[off];
 #endif
 #ifdef SMB2J_MODE
-  const byte bVar2_off = (AreaDataHOffsets[area_type] + loffset) * 2;
-  const byte lo = AreaDataAddrs[bVar2_off];
-  const byte hi = AreaDataAddrs[bVar2_off + 1];
+    const byte off = (AreaDataHOffsets[area_type] + loffset) * 2;
+    const byte lo = AreaDataAddrs[off];
+    const byte hi = AreaDataAddrs[off + 1];
 #endif
-
-  AreaData = (hi << 8) | lo;
+    const u16 addr = (hi << 8) | lo;
+    STORE_16(AreaData_addr_hi, AreaData_addr_lo, addr);
+    AreaData = rom_ptr(addr);
+  }
 
   const byte area_data_0 = AreaData[0];
   // gg ppp fff
+
+  const byte area_data_1 = AreaData[1];
+  // aa bb tttt
 
   const byte gg = area_data_0 >> 6;
   const byte ppp = (area_data_0 & 0x38) >> 3;
@@ -3084,9 +3095,6 @@ void GetAreaDataAddrs(void) {
   PlayerEntranceCtrl = ppp;
   GameTimerSetting = gg;
 
-  const byte area_data_1 = AreaData[1];
-  // aa bb tttt
-
   const byte aa = area_data_1 >> 6;
   const byte bb = (area_data_1 & 0x30) >> 4;
   const byte tttt = area_data_1 & 0xf;
@@ -3100,6 +3108,8 @@ void GetAreaDataAddrs(void) {
     AreaStyle = aa;
   }
 
+  ADD_UNSIGNED_16_8(AreaData_addr_hi, AreaData_addr_lo,
+                    2);
   AreaData += 2;
 }
 

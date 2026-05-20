@@ -206,7 +206,7 @@ void SMB2J_NMI() {
   // The NES wrote to OAM registers to initiate copying sprites
   // $2003 = 0
   // $4014 = 2
-  transfer_sprite_data(&Sprite_Data);
+  transfer_sprite_data(&Sprite_Data[0]);
 
   // Unlike SMB1, SMB2J's address table is 16-bit words, not segmented in hi and lo portions
   // Also unlike SMB1, index 5 (the title screen) is from the ROM.
@@ -237,7 +237,7 @@ void SMB2J_NMI() {
   }
 
   // Update PRNG (pseudo-random number generator)
-  update_prng(&PseudoRandomBitReg);
+  update_prng(&PseudoRandomBitReg[0]);
 
   if ((GamePauseStatus & 1) == 0) {
     if (IRQUpdateFlag != 0) {

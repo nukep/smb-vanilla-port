@@ -4,6 +4,13 @@
 #include "smbcore/vars.h"
 #include "smbcore/types.h"
 
+
+void sync_pointers(void) {
+  AreaData  = rom_ptr(LOAD_16(AreaData_addr_hi, AreaData_addr_lo));
+  EnemyData = rom_ptr(LOAD_16(EnemyData_addr_hi, EnemyData_addr_lo));
+  MusicData = rom_ptr(LOAD_16(MusicData_addr_hi, MusicData_addr_lo));
+}
+
 void set_world_and_level(byte world, byte level) {
   WorldNumber = world;
   LevelNumber = level;

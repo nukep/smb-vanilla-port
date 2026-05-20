@@ -77,6 +77,10 @@ void SMB_tick(struct SMB_state *state);
 byte *SMB_ram(struct SMB_state *state);
 byte *SMB_ppuram(struct SMB_state *state);
 
+// Syncs up internal data structures to match the contents of RAM.
+// Call this after updating the RAM via SMB_ram().
+void SMB_ram_finishwrite(struct SMB_state *state);
+
 #ifdef __cplusplus
 }
 #endif

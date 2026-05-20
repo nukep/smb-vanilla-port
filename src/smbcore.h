@@ -93,6 +93,13 @@ struct SMB_state {
   ppu_state ppu;
   unsigned short scroll_x;
   struct sprite sprites[64];
+
+  // Native pointers to ROM
+  // (right now these are either null or point to somewhere in rammmem)
+
+  const byte *area_data;
+  const byte *enemy_data;
+  const byte *music_data;
 };
 
 // The singleton SMB_state used during the SMB_tick() invocation. This is considered internal and should not be used by callers of the library.
@@ -164,6 +171,24 @@ static inline void joy2(struct SMB_buttons *buttons) {
 #define PPURAM(offset) (SMB_STATE->ppuram[offset])
 #define CHRROM(offset) (SMB_STATE->chrrom[offset])
 #define RAM_CONST(offset) ((const byte)SMB_STATE->rammem[offset])
+
+#define AreaData (SMB_STATE->area_data)
+#define EnemyData (SMB_STATE->enemy_data)
+#define MusicData (SMB_STATE->music_data)
+
+static inline const byte * rom_ptr(const u16 addr) {
+  if (addr == 0) {
+    // Null pointer
+    // We might get this on startup if RAM is uninitialized
+    return 0;
+  }
+
+  if (addr < 0x8000) {
+    warning("Attempt to resolve a pointer to non-ROM. Address: $%04X", addr);
+  }
+
+  return &RAM(addr);
+}
 
 #define SMB1_ONLY (SMB_STATE->which_game == GAME_SMB1)
 #define SMB2J_ONLY (SMB_STATE->which_game == GAME_SMB2J)
@@ -386,35 +411,7 @@ static inline byte find_first_bit_position(byte bits) {
 #endif
 }
 
-// Represents a pointer type. Size is 2 bytes.
-class RamPtr {
-public:
-  // fields, as laid out in 6502 memory
-  byte lo;
-  byte hi;
-
-  RamPtr(ushort addr) : lo(addr & 0xFF), hi(addr >> 8) {}
-  byte &operator*() {
-    return RAM((hi << 8) | lo);
-  }
-  byte &operator[](int i) {
-    // equivalent to LDA (ptr),Y
-    return RAM(((hi << 8) | lo) + i);
-  }
-  operator ushort() const {
-    return (hi << 8) | lo;
-  }
-  RamPtr& operator+=(int i) {
-    ushort addr = *this;
-    *this = RamPtr(addr + i);
-    return *this;
-  }
-};
-
-static inline RamPtr &RAMPtr(ushort offset) {
-  RamPtr *ptr = (RamPtr *)(&RAM(offset));
-  return *ptr;
-}
+#ifdef CHECK_ARRAY_BOUNDS
 
 // Represents a byte array at a specific address.
 class RamByteArray {
@@ -452,13 +449,11 @@ public:
     //
     // i haven't observed a wraparound ever happening in practice, but this should be verified
 
-#ifdef CHECK_ARRAY_BOUNDS
     if (length != 0) {
       if (idx < 0 || idx >= length) {
         warning("Out of bounds for array $%04X length %d. accessed $%04X[%d] (= $%04X)\n", addr, length, addr+offset, i, eff);
       }
     }
-#endif
 
     return RAM(eff);
   }
@@ -484,18 +479,24 @@ public:
     // equivalent to LDA addr,X
     u16 eff = addr + i;
 
-#ifdef CHECK_ARRAY_BOUNDS
     if (length != 0) {
       if (i < 0 || i >= length) {
         warning("Out of bounds for array $%04X length %d. accessed $%04X[%d] (= $%04X)\n", addr, length, addr, i, eff);
       }
     }
-#endif
 
     return RAM(eff);
   }
 };
 
-#define RAMPTR(addr) RAMPtr(addr)
 #define RAMARRAY(addr, length) RamByteArray(addr, length)
 #define RAMARRAY_CONST(addr, length) ConstRamByteArray(addr, length)
+
+#else
+
+// Access the RAM buffer directly, as pointers
+
+#define RAMARRAY(addr, length) (&RAM(addr))
+#define RAMARRAY_CONST(addr, length) ((const byte*)(&RAM(addr)))
+
+#endif

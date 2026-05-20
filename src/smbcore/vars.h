@@ -40,6 +40,19 @@
 #define Objects_Page                     RAMARRAY(0x0400, 0x100)
 
 
+// Pointers
+// Note: The port accesses data using pointers stored elsewhere instead of the 16-bit values here,
+// but we still store the 16-bit 6502 pointers to support save states (for now).
+// These are pointers to ROM.
+
+#define AreaData_addr_lo                 RAM(0x00E7)
+#define AreaData_addr_hi                 RAM(0x00E8)
+#define EnemyData_addr_lo                RAM(0x00E9)
+#define EnemyData_addr_hi                RAM(0x00EA)
+#define MusicData_addr_lo                RAM(0x00F5)
+#define MusicData_addr_hi                RAM(0x00F6)
+
+
 /* common ----------------------- */
 #define ObjectOffset                     RAM(0x0008)
 #define FrameCounter                     RAM(0x0009)
@@ -132,9 +145,6 @@
 #define Misc_Y_Position                  (SprObject_Y_Position + 13)
 #define Bubble_Y_Position                (SprObject_Y_Position + 22)
 
-#define AreaData                         RAMPTR(0x00E7)
-#define EnemyData                        RAMPTR(0x00E9)
-
 // $EB to $EF are treated as temporary registers.
 // $EE is never used, but it's in that range.
 // #define rEB                              RAM(0x00EB)
@@ -147,7 +157,6 @@
 #define Square2SoundBuffer               RAM(0x00F2)
 #define NoiseSoundBuffer                 RAM(0x00F3)
 #define AreaMusicBuffer                  RAM(0x00F4)
-#define MusicData                        RAMPTR(0x00F5)
 #define MusicOffset_Square2              RAM(0x00F7)
 #define MusicOffset_Square1              RAM(0x00F8)
 #define MusicOffset_Triangle             RAM(0x00F9)

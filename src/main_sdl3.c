@@ -140,7 +140,11 @@ bool dump_ppuram(struct SMB_state *state, const char *filename) {
 }
 
 bool load_ram(struct SMB_state *state, const char *filename) {
-  return io_readtobuffer(filename, 0x800, SMB_ram(state));
+  if (!io_readtobuffer(filename, 0x800, SMB_ram(state))) {
+    return false;
+  }
+  SMB_ram_finishwrite(state);
+  return true;
 }
 
 bool dump_ram(struct SMB_state *state, const char *filename) {

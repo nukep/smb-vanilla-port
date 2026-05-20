@@ -1231,19 +1231,29 @@ void AltHard_GetAreaDataAddrs(void) {
   AreaType = area_type;
   AreaAddrsLOffset = loffset;
 
-  const byte off = AltHard_EnemyAddrHOffsets[area_type] + loffset;
+  {
+    const byte off = AltHard_EnemyAddrHOffsets[area_type] + loffset;
+    const byte lo = AltHard_EnemyDataAddrs[(byte)(off * 2)];
+    const byte hi = AltHard_EnemyDataAddrs[(byte)(off * 2) + 1];
+    const u16 addr = (hi << 8) | lo;
+    STORE_16(EnemyData_addr_hi, EnemyData_addr_lo, addr);
+    EnemyData = rom_ptr(addr);
+  }
 
-  EnemyData.lo = AltHard_EnemyDataAddrs[(byte)(off * 2)];
-  EnemyData.hi = AltHard_EnemyDataAddrs[(byte)(off * 2) + 1];
-
-  const byte bVar2 = (AltHard_AreaDataHOffsets[area_type] + loffset) * 2;
-  const byte lo = AltHard_AreaDataAddrs[bVar2];
-  const byte hi = AltHard_AreaDataAddrs[bVar2 + 1];
-
-  AreaData = (hi << 8) | lo;
+  {
+    const byte off = (AltHard_AreaDataHOffsets[area_type] + loffset) * 2;
+    const byte lo = AltHard_AreaDataAddrs[off];
+    const byte hi = AltHard_AreaDataAddrs[off + 1];
+    const u16 addr = (hi << 8) | lo;
+    STORE_16(AreaData_addr_hi, AreaData_addr_lo, addr);
+    AreaData = rom_ptr(addr);
+  }
 
   const byte area_data_0 = AreaData[0];
   // gg ppp fff
+
+  const byte area_data_1 = AreaData[1];
+  // aa bb tttt
 
   const byte gg = area_data_0 >> 6;
   const byte ppp = (area_data_0 & 0x38) >> 3;
@@ -1257,9 +1267,6 @@ void AltHard_GetAreaDataAddrs(void) {
   }
   PlayerEntranceCtrl = ppp;
   GameTimerSetting = gg;
-
-  const byte area_data_1 = AreaData[1];
-  // aa bb tttt
 
   const byte aa = area_data_1 >> 6;
   const byte bb = (area_data_1 & 0x30) >> 4;
@@ -1275,6 +1282,8 @@ void AltHard_GetAreaDataAddrs(void) {
     AreaStyle = aa;
   }
 
+  ADD_UNSIGNED_16_8(AreaData_addr_hi, AreaData_addr_lo,
+                    2);
   AreaData += 2;
 }
 

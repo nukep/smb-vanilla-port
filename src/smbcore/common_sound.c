@@ -977,11 +977,15 @@ void LoadHeader(const byte param_1) {
   const byte off = MusicHeaderData[param_1 - 1];
 
   NoteLenLookupTblOfs  = MusicHeaderData[off];
-  MusicData.lo         = MusicHeaderData[off + 1];
-  MusicData.hi         = MusicHeaderData[off + 2];
+  const byte lo        = MusicHeaderData[off + 1];
+  const byte hi        = MusicHeaderData[off + 2];
   MusicOffset_Triangle = MusicHeaderData[off + 3];
   MusicOffset_Square1  = MusicHeaderData[off + 4];
   MusicOffset_Noise    = MusicHeaderData[off + 5];
+
+  const u16 addr = (hi << 8) | lo;
+  STORE_16(MusicData_addr_hi, MusicData_addr_lo, addr);
+  MusicData = rom_ptr(addr);
 
   Squ2_NoteLenCounter = 1;
   Squ1_NoteLenCounter = 1;

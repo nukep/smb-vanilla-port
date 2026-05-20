@@ -85,17 +85,20 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
 
       // Missing ranges:
       // $00-$07 are temporary registers
+      // $E7-$EA are pointers
       // $EB-$EF are temporary registers
+      // $F5-F6 is a pointer
       // $160-$1FF is the stack (this port doesn't use this)
 
       if (SMB_which_game(userdata->smb_state) == GAME_SMB1) {
-        mem_eq_range(0x0008, 0x00EA);
-        mem_eq_range(0x00F0, 0x00FF);
+        mem_eq_range(0x0008, 0x00E6);
+        mem_eq_range(0x00F0, 0x00F4);
+        mem_eq_range(0x00F7, 0x00FF);
         mem_eq_range(0x0100, 0x015F);
         mem_eq_range(0x0200, 0x07FF);
       } else if (SMB_which_game(userdata->smb_state) == GAME_SMB2J) {
         // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
-        mem_eq_range(0x0010, 0x00EA);
+        mem_eq_range(0x0010, 0x00E6);
         mem_eq_range(0x0109, 0x015F);
         mem_eq_range(0x0200, 0x07FF);
       }
