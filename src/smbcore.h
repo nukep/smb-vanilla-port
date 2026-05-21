@@ -183,8 +183,8 @@ static inline const byte * rom_ptr(const u16 addr) {
     return 0;
   }
 
-  if (addr < 0x8000) {
-    warning("Attempt to resolve a pointer to non-ROM. Address: $%04X", addr);
+  if (addr < 0x6000) {
+    warning("Attempt to resolve a pointer to non-ROM. Address: $%04X\n", addr);
   }
 
   return &RAM(addr);

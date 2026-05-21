@@ -93,7 +93,6 @@
 #define StaircaseHeightData              RAMARRAY_CONST(0x9AA5, 9)
 #define StaircaseRowData                 RAMARRAY_CONST(0x9AAE, 9)
 #define HoleMetatiles                    RAMARRAY_CONST(0x9B3D, 4)
-#define BlockBufferAddr                  RAMARRAY_CONST(0x9BDD, 4)
 #define AreaDataOfsLoopback              RAMARRAY_CONST(0x9BF8, 11)
 #define WorldAddrOffsets                 RAMARRAY_CONST(0x9CB4, 8)
 #define AreaAddrOffsets                  RAMARRAY_CONST(0x9CBC, 0x24)

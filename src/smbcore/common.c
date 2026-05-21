@@ -1,6 +1,44 @@
 #include "types.h"
 #include "vars.h"
 
+// The status bar takes up this many metatiles worth of space
+#define MT_Y_TOP_MARGIN 2
+
+static inline u16 get_block_buffer_offset(u8 column) {
+  // column is between 0 and 31 inclusive
+
+  if (column < 16) {
+    return BLOCK_BUFFER_1_OFFSET + (column % 16);
+  } else {
+    return BLOCK_BUFFER_2_OFFSET + (column % 16);
+  }
+}
+
+static inline u16 MTX_MTY_TO_BLOCKOFF(const u16 mt_x, const u16 mt_y) {
+  return get_block_buffer_offset(mt_x % 32) + mt_y * 16;
+}
+
+static inline u8 MTY_TO_R02(const u16 mt_y) {
+  return mt_y * 16;
+}
+
+static inline u8 MTX_TO_R06(const u16 mt_x) {
+  return get_block_buffer_offset(mt_x % 32) & 0xff;
+}
+
+static inline u8 R02_TO_MTY(const u8 r02) {
+  return r02 / 16;
+}
+
+static inline u16 R06_TO_MTX_lossy(const u8 r06) {
+  if (r06 < BLOCK_BUFFER_2_OFFSET) {
+    return r06;
+  } else {
+    return 16 + r06 - BLOCK_BUFFER_2_OFFSET;
+  }
+}
+
+
 // SMB:8325
 // SM2MAIN:c51b
 // Signature: [] -> []
@@ -994,18 +1032,23 @@ void ResetScreenTimer(void) {
 // Signature: [] -> []
 void RenderAreaGraphics(void) {
   const bool even_column = (CurrentColumnPos & 1) == 0;
+
+  VRAM_Buffer2[VRAM_Buffer2_Offset + 0] = CurrentNTAddr_High;
   VRAM_Buffer2[VRAM_Buffer2_Offset + 1] = CurrentNTAddr_Low;
-  VRAM_Buffer2[VRAM_Buffer2_Offset] = CurrentNTAddr_High;
-  VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = 0x9a;
+
+  // Draw vertically, data is 13*2 bytes
+  VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = 0x80 | (13*2);
 
   for (int i = 0; i < 13; i++) {
     const byte mt = MetatileBuffer[i];
     const byte lo = MetatileGraphics_Low[mt >> 6];
     const byte hi = MetatileGraphics_High[mt >> 6];
-    const u16 addr = CONCAT11(hi, lo);
+
+    const u8 *data = rom_ptr((hi << 8) | lo);
+
     const byte bVar2 = (mt << 2) | ((AreaParserTaskNum & 1) ? 0 : 2);
-    VRAM_Buffer2[VRAM_Buffer2_Offset + 3] = RAM(addr + bVar2);
-    VRAM_Buffer2[VRAM_Buffer2_Offset + 4] = RAM(addr + bVar2 + 1);
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 3] = data[bVar2];
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 4] = data[bVar2 + 1];
 
     byte bVar8 = mt & 0xc0;
     const byte tmp1 = i/2;
@@ -1022,15 +1065,16 @@ void RenderAreaGraphics(void) {
     VRAM_Buffer2_Offset += 2;
   }
 
-  const byte bVar4 = VRAM_Buffer2_Offset - 2;
+  VRAM_Buffer2_Offset += 3;
+  VRAM_Buffer2[VRAM_Buffer2_Offset] = 0;
 
-  VRAM_Buffer2[(byte)(bVar4 + 5)] = 0;
-  VRAM_Buffer2_Offset = bVar4 + 5;
   CurrentNTAddr_Low += 1;
+
   if ((CurrentNTAddr_Low & 0x1f) == 0) {
     CurrentNTAddr_Low = 0x80;
     CurrentNTAddr_High ^= 4;
   }
+
   VRAM_Buffer_AddrCtrl = 6;
 }
 
@@ -1085,20 +1129,57 @@ void ColorRotation(void) {
 }
 
 
+// Draw a 2x2 block at the position at x,y, where x is 0 to 15, and y is 0 to 14.
+// If nt = 0, then draw on the first nametable. Otherwise draw on the second.
+static inline void draw_block_metatile(const byte vramoff, const byte blockgfxidx, const byte x, const byte y, const byte nt) {
+  const u16 nametable = nt == 0 ? 0x2000 : 0x2400;
+  const u16 addr = nametable + (y*2*32) + x*2;
+
+  VRAM_Page[vramoff + 0] = addr >> 8;
+  VRAM_Page[vramoff + 1] = addr & 0xff;
+  VRAM_Page[vramoff + 2] = 2;
+  VRAM_Page[vramoff + 3] = BlockGfxData[blockgfxidx*4 + 0];
+  VRAM_Page[vramoff + 4] = BlockGfxData[blockgfxidx*4 + 1];
+
+  VRAM_Page[vramoff + 5] = addr >> 8;
+  VRAM_Page[vramoff + 6] = (addr & 0xff) + 32;
+  VRAM_Page[vramoff + 7] = 2;
+  VRAM_Page[vramoff + 8] = BlockGfxData[blockgfxidx*4 + 2];
+  VRAM_Page[vramoff + 9] = BlockGfxData[blockgfxidx*4 + 3];
+
+  VRAM_Page[vramoff + 10] = 0;
+}
+
+
 // SMB:8a4d
 // SM2MAIN:692a
-// Signature: [r02, r06] -> []
-void RemoveCoin_Axe(const byte param_1, const byte param_2) {
-  PutBlockMetatile(AreaType == 0 ? 4 : 3, 0x41, param_1, param_2);
+void RemoveCoin_Axe(const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [r02, r06] -> []
+  // Reworked to use metatile coordinates instead of pointer
+  //
+  // Replaces the coin or axe metatile with a blank one
+  // The blank one is different if underwater
+  const byte blockgfxidx = AreaType != 0 ? 3 : 4;
+  const byte vramoff = 0x41;
+
+  const byte x  = mt_x % 16;
+  const byte y  = mt_y + MT_Y_TOP_MARGIN;
+  const byte nt = (mt_x & 0x10) == 0 ? 0 : 1;
+
+  // Inlined: PutBlockMetatile
+  draw_block_metatile(vramoff, blockgfxidx, x, y, nt);
+
   VRAM_Buffer_AddrCtrl = 6;
 }
 
 
 // SMB:8a61
 // SM2MAIN:693e
-// Signature: [A, X, r02, r06] -> []
-void ReplaceBlockMetatile(const byte param_1, const byte param_2, const byte param_3, const byte param_4) {
-  WriteBlockMetatile(param_1, param_3, param_4);
+void ReplaceBlockMetatile(const byte param_1, const byte param_2, const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [A, X, r02, r06] -> []
+  // Reworked to use metatile coordinates instead of pointer
+
+  WriteBlockMetatile(param_1, mt_x, mt_y);
   Block_ResidualCounter += 1;
   Block_RepFlag[param_2] = Block_RepFlag[param_2] - 1;
 }
@@ -1106,78 +1187,46 @@ void ReplaceBlockMetatile(const byte param_1, const byte param_2, const byte par
 
 // SMB:8a6b
 // SM2MAIN:6948
-// Signature: [r02, r06] -> []
-void DestroyBlockMetatile(const byte param_2, const byte param_3) {
-  WriteBlockMetatile(0, param_2, param_3);
+void DestroyBlockMetatile(const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [r02, r06] -> []
+  // Reworked to use metatile coordinates instead of pointer
+
+  WriteBlockMetatile(0, mt_x, mt_y);
 }
 
 
 // SMB:8a6d
 // SM2MAIN:694a
-// Signature: [A, r02, r06] -> []
-void WriteBlockMetatile(const byte param_1, const byte param_3, const byte param_4) {
-  byte bVar1;
+void WriteBlockMetatile(const byte param_1, const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [A, r02, r06] -> []
+  // Reworked to use metatile coordinates instead of pointer
+
+  byte blockgfxidx;
   if (param_1 == 0) {
-    bVar1 = 3;
+    blockgfxidx = 3;
   } else if (param_1 == ssw(0x51, 0x4f)) {
-    bVar1 = 0;
+    blockgfxidx = 0;
   } else if (param_1 == ssw(0x52, 0x50)) {
-    bVar1 = 1;
+    blockgfxidx = 1;
   } else if (param_1 == ssw(0x58, 0x56)) {
-    bVar1 = 0;
+    blockgfxidx = 0;
   } else if (param_1 == ssw(0x5d, 0x5c)) {
-    bVar1 = 1;
+    blockgfxidx = 1;
   } else {
-    bVar1 = 2;
+    blockgfxidx = 2;
   }
-  const byte bVar2 = VRAM_Buffer1_Offset + 1;
-  PutBlockMetatile(bVar1, bVar2, param_3, param_4);
-  MoveVOffset(bVar2);
-}
 
+  const byte vramoff = VRAM_Buffer1_Offset + 1;
 
-// SMB:8a8f
-// SM2MAIN:696c
-// Signature: [Y] -> []
-void MoveVOffset(const byte param_1) {
-  VRAM_Buffer1_Offset = param_1 + 9;
-}
+  const byte x  = mt_x % 16;
+  const byte y  = mt_y + MT_Y_TOP_MARGIN;
+  const byte nt = (mt_x & 0x10) == 0 ? 0 : 1;
 
+  // Inlined: PutBlockMetatile
+  draw_block_metatile(vramoff, blockgfxidx, x, y, nt);
 
-// SMB:8a97
-// SM2MAIN:6974
-// Signature: [A, Y, r02, r06] -> []
-void PutBlockMetatile(const byte param_1, const byte param_3, const byte param_4, const byte param_5) {
-  const ushort nametable = param_5 < 0xd0 ? 0x2000 : 0x2400;
-  const ushort addr = (param_4*4 + 32*4) + ((param_5*2) % 32) + nametable;
-
-  RemBridge(param_1*4, param_3, addr);
-
-  // NES note: The value of `addr >> 8` is set to $05 and eventually used as an input by `BlockBumpedChk`.
-  // It's guaranteed to always be between 0x20 and 0x28 inclusive (usually 0x20 to 0x27).
-  //
-  // The port removes the return value here to keep the implementation simple.
-  // (see BumpBlock for details)
-}
-
-
-// SMB:8acd
-// SM2MAIN:69aa
-// Signature: [X, Y, r04, r05] -> []
-void RemBridge(const byte param_1, const byte param_2, const ushort addr) {
-  // Note: addr is made up of r04 and r05 for lo and hi respectively.
-
-  VRAM_Buffer1[param_2 + 2] = BlockGfxData[param_1];
-  VRAM_Buffer1[param_2 + 3] = BlockGfxData[param_1 + 1];
-  VRAM_Buffer1[param_2 + 7] = BlockGfxData[param_1 + 2];
-  VRAM_Buffer1[param_2 + 8] = BlockGfxData[param_1 + 3];
-  VRAM_Buffer1[param_2] = addr & 0xff;
-  VRAM_Buffer1[param_2 + 5] = (addr & 0xff) + 0x20;
-  VRAM_Page[param_2] = addr >> 8;
-  VRAM_Buffer1[param_2 + 4] = addr >> 8;
-  VRAM_Buffer1[param_2 + 1] = 2;
-  VRAM_Buffer1[param_2 + 6] = 2;
-  VRAM_Buffer1[param_2 + 9] = 0;
+  // Inlined: MoveVOffset
+  VRAM_Buffer1_Offset += 10;
 }
 
 
@@ -1841,13 +1890,17 @@ static void AreaParserCore_step2() {
 
 static void RendBBuf() {
   ProcessAreaData();
-  const ushort addr = GetBlockBufferAddr(BlockBufferColumnPos);
-  for (int i = 0; i < 0xd; i++) {
-    byte bVar5 = MetatileBuffer[i];
-    if (bVar5 < BlockBuffLowBounds[MetatileBuffer[i] >> 6]) {
-      bVar5 = 0;
-    }
-    RAM(addr + (i*0x10)) = bVar5;
+
+  // Inlined: GetBlockBufferAddr
+  // Did it this way to use the Block_Buffers array directly
+
+  const u16 offset = get_block_buffer_offset(BlockBufferColumnPos);
+
+  for (int i = 0; i < 13; i++) {
+    const byte mt = MetatileBuffer[i];
+    const bool cond = mt >= BlockBuffLowBounds[mt >> 6];
+
+    Block_Buffers[offset + (i*0x10)] = cond ? mt : 0;
   }
 }
 
@@ -3005,20 +3058,6 @@ byte GetAreaObjXPosition(void) { return CurrentColumnPos << 4; }
 // SM2MAIN:7a14
 // Signature: [r07] -> [A]
 byte GetAreaObjYPosition(const byte param_1) { return param_1 * 0x10 + 0x20; }
-
-
-// SMB:9be1
-// SM2MAIN:7a22
-// Signature: [A] -> [r06, r07]
-ushort GetBlockBufferAddr(byte column) {
-  // column is between 0 and 31 inclusive
-
-  if (column < 16) {
-    return BLOCK_BUFFER_PAGE + BLOCK_BUFFER_1_OFFSET + (column % 16);
-  } else {
-    return BLOCK_BUFFER_PAGE + BLOCK_BUFFER_2_OFFSET + (column % 16);
-  }
-}
 
 
 // SMB:9c03
@@ -4483,46 +4522,52 @@ void Setup_Vine(const byte param_1, const byte param_2) {
 // SM2MAIN:84d7
 // Signature: [X] -> [X]
 byte VineObjectHandler(const byte param_1) {
-  byte bVarAA;
-  byte bVarBB;
-  byte bVar3;
-  struct_azr02r04r06r07 sVar6;
-
   if (param_1 != 5) {
     return ssw(ObjectOffset, param_1);
   }
-  if ((VineHeight != VineHeightData[(byte)(VineFlagOffset - 1)])) {
+
+  if (VineHeight != VineHeightData[(byte)(VineFlagOffset - 1)]) {
     if ((FrameCounter & 2) != 0) {
       Enemy_Y_Position[5] -= 1;
       VineHeight += 1;
     }
   }
+
   if (VineHeight >= 8) {
     const byte sVar5 = RelativeEnemyPosition(5);
     GetEnemyOffscreenBits(sVar5);
 
-    bVarAA = 0;
-    do {
-      DrawVine(bVarAA);
-      bVar3 = bVarAA;
-      bVarAA += 1;
-    } while (bVar3 != (byte)(VineFlagOffset - 1));
+    // There are loops in the original that loop 256 times if 0, or only once if the decrement is negative,
+    // so it's easier if we just assume this is true.
+    // VineFlagOffset should only be 1 or 2, but the loops in this port are accurate for the following range.
+    assert_eq_assumption(VineFlagOffset >= 1 && VineFlagOffset <= 129, true);
+
+    for (int i = 0; i < VineFlagOffset; i++) {
+      DrawVine(i);
+    }
 
     if ((Enemy_OffscreenBits & 0xc) != 0) {
-      bVar3 = (byte)(VineFlagOffset - 1);
-      do {
-        bVarAA = EraseEnemyObject(VineObjOffset[bVar3]);
-        bVarBB = bVarAA;
-      } while (bVar3 -= 1, bVar3 < 0x80);
-      VineHeight = bVarBB;
-      VineFlagOffset = bVarAA;
+      for (int i = VineFlagOffset-1; i >= 0; i--) {
+        const byte objoff = VineObjOffset[i];
+        EraseEnemyObject(objoff);
+      }
+
+      // NES note: these are set to 0 because EraseEnemyObject always set the A register to 0
+      VineHeight = 0;
+      VineFlagOffset = 0;
     }
 
     if (VineHeight >= 0x20) {
-      sVar6 = BlockBufferCollision(1, 6, 0x1b);
-      bVarAA = sVar6.r02;
-      if ((bVarAA < 0xd0) && (RAM(sVar6.addr + (ushort)bVarAA) == 0)) {
-        RAM(sVar6.addr + (ushort)bVarAA) = ssw(0x26, 0x23);
+      const struct blockbuffer_colli_result sVar6 = BlockBufferCollision(1, 6, 0x1b);
+      const u16 mt_x = sVar6.mt_x;
+      const u16 mt_y = sVar6.mt_y;
+
+      if (mt_y < 13) {
+        const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
+
+        if (Block_Buffers[blockoff] == 0) {
+          Block_Buffers[blockoff] = ssw(0x26, 0x23);
+        }
       }
     }
   }
@@ -4532,15 +4577,18 @@ byte VineObjectHandler(const byte param_1) {
   const byte cmpB = (byte)(Enemy_X_Position[5] - ScreenEdgeOrLeft_X_Pos[0]);
   if ((cmpA >= 0x80) || (cmpB < 9)) {
     Enemy_Flag[5] = 0;
-    bVarAA = BlockBufferAddr[Enemy_PageLoc[5] & 1];
-    bVar3 = BlockBufferAddr[(Enemy_PageLoc[5] & 1) + 2];
-    bVarBB = Enemy_X_Position[5] >> 4;
-    do {
-      if (RAM(CONCAT11(bVar3, bVarAA) + (ushort)bVarBB) == 0x23) {
-        RAM(CONCAT11(bVar3, bVarAA) + (ushort)bVarBB) = 0;
+
+    const bool even_page = (Enemy_PageLoc[5] & 1) == 0;
+
+    const u16 blockoff = even_page ? BLOCK_BUFFER_1_OFFSET : BLOCK_BUFFER_2_OFFSET;
+
+    const byte x = Enemy_X_Position[5] >> 4;
+
+    for (int i = 0; i < 13; i++) {
+      if (Block_Buffers[blockoff + i*0x10 + x] == 0x23) {
+        Block_Buffers[blockoff + i*0x10 + x] = 0;
       }
-      bVarBB += 0x10;
-    } while (bVarBB < 0xd0);
+    }
   }
 #endif
   return ObjectOffset;
@@ -4703,7 +4751,7 @@ void CoinBlock(const byte param_1) {
 // SMB:bb51
 // SM2MAIN:871c
 // Signature: [X, r02, r06] -> [X]
-byte SetupJumpCoin(const byte param_1, const byte param_2, const byte param_3) {
+byte SetupJumpCoin(const byte param_1, const byte r02, const byte r06) {
   // Inlines FindEmptyMiscSlot
 
   JumpCoinMiscOffset = 8;
@@ -4716,8 +4764,8 @@ byte SetupJumpCoin(const byte param_1, const byte param_2, const byte param_3) {
   }
 
   Misc_PageLoc[JumpCoinMiscOffset] = Block_PageLoc2[param_1];
-  Misc_X_Position[JumpCoinMiscOffset] = (param_3 << 4) | 5;
-  Misc_Y_Position[JumpCoinMiscOffset] = param_2 + 0x20 + (param_3 & 0x10 ? 1 : 0);
+  Misc_X_Position[JumpCoinMiscOffset] = (r06 << 4) | 5;
+  Misc_Y_Position[JumpCoinMiscOffset] = r02 + 0x20 + (r06 & 0x10 ? 1 : 0);
   return JCoinC(param_1, JumpCoinMiscOffset);
 }
 
@@ -5006,20 +5054,27 @@ byte PowerUpObjHandler(void) {
 
 // SMB:bced
 // SM2MAIN:88ae
-// Signature: [A, r02, r06, r07] -> []
-void PlayerHeadCollision(const byte param_1, const byte param_2, const ushort addr) {
-  const short sVar1 = addr;
+void PlayerHeadCollision(const byte param_1, const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [A, r02, r06, r07] -> []
+  // Reworked to use metatile coordinates instead of pointer
+
+  const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
+
   Block_State[SprDataOffset_Ctrl] = (PlayerSize == 0) ? 0x12 : 0x11;
-  const byte bStack0000 = param_1;
-  DestroyBlockMetatile(param_2, addr & 0xff);
-  const byte bVar3 = SprDataOffset_Ctrl;
-  Block_Orig_YPos[SprDataOffset_Ctrl] = param_2;
-  Block_BBuf_Low[bVar3] = (byte)sVar1;
-  byte bVar4 = RAM(sVar1 + (ushort)param_2);
+  DestroyBlockMetatile(mt_x, mt_y);
+
+  const byte sprdataoff = SprDataOffset_Ctrl;
+
+  // These are only read from BlockObjMT_Updater.
+  Block_Orig_YPos[sprdataoff] = mt_y * 16;
+  Block_BBuf_Low[sprdataoff] = MTX_TO_R06(mt_x);
+
+  byte bVar4 = Block_Buffers[blockoff];
+
   const struct_yc sVar5 = BlockBumpedChk(bVar4);
   byte bVar2 = (PlayerSize == 0) ? 0 : bVar4;
   if (sVar5.c) {
-    Block_State[bVar3] = 0x11;
+    Block_State[sprdataoff] = 0x11;
     if ((bVar4 == ssw(0x58, 0x56)) || (bVar4 == ssw(0x5d, 0x5c))) {
       if (BrickCoinTimerFlag == 0) {
         BrickCoinTimer = 0xb;
@@ -5030,17 +5085,19 @@ void PlayerHeadCollision(const byte param_1, const byte param_2, const ushort ad
       bVar2 = ssw(0xc4, 0xc5);
     }
   }
-  Block_Metatile[bVar3] = bVar2;
-  InitBlock_XY_Pos(bVar3);
-  RAM(sVar1 + (ushort)param_2) = ssw(0x23, 0x20);
+  Block_Metatile[sprdataoff] = bVar2;
+  InitBlock_XY_Pos(sprdataoff);
+
+  Block_Buffers[blockoff] = ssw(0x23, 0x20);
+
   BlockBounceTimer = 0x10;
   bVar4 = ((CrouchingFlag != 0) || (PlayerSize != 0)) ? 1 : 0;
-  Block_Y_Position[bVar3] = (SprObject_Y_Position[0] + BlockYPosAdderData[bVar4]) & 0xf0;
-  bVar4 = (byte)((ushort)sVar1 >> 8);
-  if (Block_State[bVar3] == 0x11) {
-    BumpBlock(param_2, bStack0000, (byte)sVar1, bVar4);
+  Block_Y_Position[sprdataoff] = (SprObject_Y_Position[0] + BlockYPosAdderData[bVar4]) & 0xf0;
+
+  if (Block_State[sprdataoff] == 0x11) {
+    BumpBlock(mt_x, mt_y, param_1);
   } else {
-    BrickShatter(param_2, (byte)sVar1, bVar4);
+    BrickShatter(mt_x, mt_y);
   }
   SprDataOffset_Ctrl = SprDataOffset_Ctrl ^ 1;
 }
@@ -5090,8 +5147,10 @@ enum BumpBlock_jumptable_item {
 
 // SMB:bd9b
 // SM2MAIN:895c
-// Signature: [r02, r05, r06, r07] -> []
-void BumpBlock(const byte param_1, const byte param_2, const byte param_3, const byte param_4) {
+void BumpBlock(const u16 mt_x, const u16 mt_y, const byte param_2) {
+  // Note: Old signature was [r02, r05, r06, r07] -> []
+  // Reworked to use metatile coordinates instead of pointer
+
   bool bug = false;
   byte bug_addr_hi = 0;
 
@@ -5108,15 +5167,19 @@ void BumpBlock(const byte param_1, const byte param_2, const byte param_3, const
   // Start bug reimplementation here
 
   // -> CheckTopOfBlock
-  if (param_1 != 0) {
-    const short sVar2 = CONCAT11(param_4, param_3);
-    const byte bVar1 = param_1 - 0x10;
-    if (RAM(sVar2 + (ushort)bVar1) == ssw(0xc2, 0xc3)) {
-      // -> RemoveCoin_Axe(bVar1, param_3);
-      //   -> PutBlockMetatile(_, _, bVar1, param_3);
+  if (mt_y > 0) {
+    const u16 mt_y_above = mt_y - 1;
+    const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y_above);
+    if (Block_Buffers[blockoff] == ssw(0xc2, 0xc3)) {
+      // -> RemoveCoin_Axe
+      //   -> PutBlockMetatile
 
-      const ushort nametable = param_3 < 0xd0 ? 0x2000 : 0x2400;
-      const ushort addr = (bVar1*4 + 32*4) + ((param_3*2) % 32) + nametable;
+      const byte x  = mt_x % 16;
+      const byte y  = mt_y_above + MT_Y_TOP_MARGIN;
+      const byte nt = (mt_x & 0x10) == 0 ? 0 : 1;
+      const u16 nametable = nt == 0 ? 0x2000 : 0x2400;
+      const u16 addr = nametable + (y*2*32) + x*2;
+
       // The theorerical range for addr is 0x2080 to 0x289a inclusive.
 
       bug = true;
@@ -5127,7 +5190,7 @@ void BumpBlock(const byte param_1, const byte param_2, const byte param_3, const
   // End bug reimplementation here
 #endif
 
-  const byte bVar2 = CheckTopOfBlock(param_1, param_2, param_3, param_4);
+  const byte bVar2 = CheckTopOfBlock(mt_x, mt_y);
   Square1SoundQueue = 2;
   Block_X_Speed[bVar2] = 0;
   Block_Y_MoveForce[bVar2] = 0;
@@ -5254,11 +5317,11 @@ struct_yc BlockBumpedChk(const byte param_1) {
 
 // SMB:be02
 // SM2MAIN:89d3
-// Signature: [r02, r06, r07] -> []
-void BrickShatter(const byte param_1, const byte param_2, const byte param_3) {
-  const byte in_r05 = 0;
+void BrickShatter(const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [r02, r06, r07] -> []
+  // Reworked to use metatile coordinates instead of pointer
 
-  const byte sVar1 = CheckTopOfBlock(param_1, in_r05, param_2, param_3);
+  const byte sVar1 = CheckTopOfBlock(mt_x, mt_y);
   Block_RepFlag[sVar1] = 1;
   NoiseSoundQueue = 1;
   SpawnBrickChunks(sVar1);
@@ -5270,21 +5333,41 @@ void BrickShatter(const byte param_1, const byte param_2, const byte param_3) {
 
 // SMB:be1f
 // SM2MAIN:89f0
-// Signature: [r02, r05, r06, r07] -> [X]
-byte CheckTopOfBlock(const byte param_1, const byte param_2, const byte param_3, const byte param_4) {
-  byte bVar1;
+byte CheckTopOfBlock(const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [r02, r06, r07] -> [X]
+  // Reworked to use metatile coordinates instead of pointer
 
-  const short sVar2 = CONCAT11(param_4, param_3);
-  byte bVar3 = SprDataOffset_Ctrl;
-  if (param_1 != 0) {
-    bVar1 = param_1 - 0x10;
-    if (RAM(sVar2 + (ushort)bVar1) == ssw(0xc2, 0xc3)) {
-      RAM(sVar2 + (ushort)bVar1) = 0;
-      RemoveCoin_Axe(bVar1, param_3);
-      bVar3 = SetupJumpCoin(SprDataOffset_Ctrl, bVar1, param_3);
+  if (mt_y == 0) {
+    return SprDataOffset_Ctrl;
+  }
+
+  const u16 mt_y_above = mt_y - 1;
+  const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y_above);
+  if (Block_Buffers[blockoff] != ssw(0xc2, 0xc3)) {
+    return SprDataOffset_Ctrl;
+  }
+
+  Block_Buffers[blockoff] = 0;
+  RemoveCoin_Axe(mt_x, mt_y_above);
+
+  const byte sprdataoffset_ctrl = SprDataOffset_Ctrl;
+
+  // Inlines SetupJumpCoin
+  // Inlines FindEmptyMiscSlot
+
+  JumpCoinMiscOffset = 8;
+
+  for (int i = 8; i >= 6; i--) {
+    if (Misc_State[i] == 0) {
+      JumpCoinMiscOffset = i;
+      break;
     }
   }
-  return bVar3;
+
+  Misc_PageLoc[JumpCoinMiscOffset] = Block_PageLoc2[sprdataoffset_ctrl];
+  Misc_X_Position[JumpCoinMiscOffset] = mt_x * 16 + 5;
+  Misc_Y_Position[JumpCoinMiscOffset] = mt_y_above * 16 + 32 + (mt_x & 0x10 ? 1 : 0);
+  return JCoinC(sprdataoffset_ctrl, JumpCoinMiscOffset);
 }
 
 
@@ -5365,15 +5448,18 @@ void BlockObjMT_Updater(void) {
       continue;
     }
 
+    // These are only written from PlayerHeadCollision.
     const byte bbuf_lo = Block_BBuf_Low[i];
     const byte ypos = Block_Orig_YPos[i];
     const byte metatile = Block_Metatile[i];
 
-    // NES note: This can indeed go beyond the $0500 page.
-    // This is due to how the indirect store is set up on the 6502.
-    Block_Buffers[(int)bbuf_lo + (int)ypos] = metatile;
+    const u16 mt_x = R06_TO_MTX_lossy(bbuf_lo);
+    const u16 mt_y = R02_TO_MTY(ypos);
+    const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
 
-    ReplaceBlockMetatile(metatile, i, ypos, bbuf_lo);
+    Block_Buffers[blockoff] = metatile;
+
+    ReplaceBlockMetatile(metatile, i, mt_x, mt_y);
 
     Block_RepFlag[i] = 0;
   }
@@ -7153,8 +7239,8 @@ byte LargePlatformSubroutines(const byte param_1) {
 
 // SMB:c998
 // SM2MAIN:95cd
-// Signature: [X] -> [A]
-byte EraseEnemyObject(const byte param_1) {
+// Signature: [X] -> []
+void EraseEnemyObject(const byte param_1) {
   Enemy_Flag[param_1] = 0;
   Enemy_ID[param_1] = 0;
   Enemy_State[param_1] = 0;
@@ -7163,7 +7249,9 @@ byte EraseEnemyObject(const byte param_1) {
   ShellChainCounter[param_1] = 0;
   Enemy_SprAttrib[param_1] = 0;
   EnemyFrameTimer[param_1] = 0;
-  return 0;
+
+  // NES note: the A register is set to 0 here.
+  // VineObjectHandler uses it
 }
 
 
@@ -7841,7 +7929,6 @@ byte PlayerLakituDiff(const byte param_1, const byte param_2, const byte param_3
 // Signature: [] -> []
 void BridgeCollapse(void) {
   byte bVar1;
-  byte bVar2;
 
   if (Enemy_ID[BowserFront_Offset] == 0x2d) {
     ObjectOffset = BowserFront_Offset;
@@ -7851,10 +7938,25 @@ void BridgeCollapse(void) {
       if (BowserFeetCounter == 0) {
         BowserFeetCounter = 4;
         BowserBodyControls ^= 1;
-        bVar2 = VRAM_Buffer1_Offset + 1;
-        RemBridge(0xc, bVar2, 0x2200 | BridgeCollapseData[BridgeCollapseOffset]);
+
+        const byte data = BridgeCollapseData[BridgeCollapseOffset];
+        const byte x = data % 32;
+        const byte y = data / 32;
+
+        // x and y should be multiples of 2
+        assert_eq_assumption(x % 2, 0);
+        assert_eq_assumption(y % 2, 0);
+
+        const byte vramoff = VRAM_Buffer1_Offset + 1;
+
+        // Inlined: RemBridge
+        draw_block_metatile(vramoff, 3, x/2, (y/2)+8, 0);
+
         bVar1 = ObjectOffset;
-        MoveVOffset(bVar2);
+
+        // Inlined: MoveVOffset
+        VRAM_Buffer1_Offset += 10;
+
         Square2SoundQueue = 8;
         NoiseSoundQueue = 1;
         BridgeCollapseOffset += 1;
@@ -9445,13 +9547,14 @@ bool CheckPlayerVertical(void) {
 
 // SMB:de05
 // SM2MAIN:aa73
-// Signature: [r02, r06, r07] -> []
-static void HandleCoinMetatile(const byte bVar6, const ushort addr) {
-  // addr: lo=r06, hi=r07
+static void HandleCoinMetatile(const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [r02, r06, r07] -> []
+  // Reworked to use metatile coordinates instead of pointer
 
-  // Inlined: ErACM
-  RAM(addr + (ushort)bVar6) = 0;
-  RemoveCoin_Axe(bVar6, addr & 0xff);
+  const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
+  Block_Buffers[blockoff] = 0;
+
+  RemoveCoin_Axe(mt_x, mt_y);
 
   CoinTallyFor1Ups += 1;
   GiveOneCoin();
@@ -9460,9 +9563,9 @@ static void HandleCoinMetatile(const byte bVar6, const ushort addr) {
 
 // SMB:de0e
 // SM2MAIN:aa7c
-// Signature: [r02, r06, r07] -> []
-static void HandleAxeMetatile(const byte bVar6, const ushort addr) {
-  // addr: lo=r06, hi=r07
+static void HandleAxeMetatile(const u16 mt_x, const u16 mt_y) {
+  // Note: Old signature was [r02, r06, r07] -> []
+  // Reworked to use metatile coordinates instead of pointer
 
   OperMode_Task = 0;
   OperMode = 2;
@@ -9471,9 +9574,10 @@ static void HandleAxeMetatile(const byte bVar6, const ushort addr) {
 #endif
   PlayerSpriteVarData1[0] = 0x18;
 
-  // Inlined: ErACM
-  RAM(addr + (ushort)bVar6) = 0;
-  RemoveCoin_Axe(bVar6, addr & 0xff);
+  const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
+  Block_Buffers[blockoff] = 0;
+
+  RemoveCoin_Axe(mt_x, mt_y);
 }
 
 // SMB:dc64
@@ -9484,8 +9588,7 @@ void PlayerBGCollision(void) {
   byte bVar5;
   byte bVar7;
   bool bVar8;
-  struct_azr02r04r06r07 sVar9;
-  struct_azr02r04r06r07 sVar11;
+  struct blockbuffer_colli_result sVar11;
 
   if (DisableCollisionDet != 0) {
     return;
@@ -9528,15 +9631,14 @@ void PlayerBGCollision(void) {
   }
 
 
-  byte bVar6 = PlayerSize + ((CrouchingFlag != 0) ? 1 : 0);
+  const byte bVar6 = PlayerSize + ((CrouchingFlag != 0) ? 1 : 0);
 
   if (PlayerBGUpperExtent[bVar6] <= SprObject_Y_Position[0]) {
-    sVar9 = BlockBufferColli_Head(tmp1);
-    bVar6 = sVar9.r02;
+    const struct blockbuffer_colli_result sVar9 = BlockBufferColli_Head(tmp1);
     const byte bVar1 = sVar9.r04;
     if (!sVar9.z) {
       if (CheckForCoinMTiles(sVar9.a)) {
-        HandleCoinMetatile(bVar6, sVar9.addr);
+        HandleCoinMetatile(sVar9.mt_x, sVar9.mt_y);
         return;
       }
       bVar7 = sVar9.a;
@@ -9550,7 +9652,9 @@ void PlayerBGCollision(void) {
             Square1SoundQueue = 2;
           }
         } else if ((AreaType != 0) && (BlockBounceTimer == 0)) {
-          PlayerHeadCollision(bVar7, bVar6, sVar9.addr);
+          const u16 mt_x = sVar9.mt_x;
+          const u16 mt_y = sVar9.mt_y;
+          PlayerHeadCollision(bVar7, mt_x, mt_y);
           myspd = false;
         }
 
@@ -9566,21 +9670,19 @@ void PlayerBGCollision(void) {
 
   if (SprObject_Y_Position[0] < 0xcf) {
     sVar11 = BlockBufferColli_Feet(tmp1);
-    bVar6 = sVar11.r02;
     if (CheckForCoinMTiles(sVar11.a)) {
-      HandleCoinMetatile(bVar6, sVar11.addr);
+      HandleCoinMetatile(sVar11.mt_x, sVar11.mt_y);
       return;
     }
     const byte bVar1 = sVar11.a;
     sVar11 = BlockBufferColli_Feet(tmp1 + 1);
-    bVar6 = sVar11.r02;
     bVar5 = sVar11.r04;
     bVar2 = sVar11.a;
     bVar7 = bVar1;
     if ((bVar1 != 0) || (bVar2 != 0)) {
       if (bVar1 == 0) {
         if (CheckForCoinMTiles(bVar2)) {
-          HandleCoinMetatile(bVar6, sVar11.addr);
+          HandleCoinMetatile(sVar11.mt_x, sVar11.mt_y);
           return;
         }
         bVar7 = bVar2;
@@ -9588,7 +9690,7 @@ void PlayerBGCollision(void) {
       bVar8 = CheckForClimbMTiles(bVar7);
       if ((!bVar8) && (PlayerSpriteVarData2[0] < 0x80)) {
         if (bVar7 == ssw(0xc5, 0xc6)) {
-          HandleAxeMetatile(bVar6, sVar11.addr);
+          HandleAxeMetatile(sVar11.mt_x, sVar11.mt_y);
           return;
         }
         bVar8 = ChkInvisibleMTiles(bVar7);
@@ -9613,7 +9715,8 @@ void PlayerBGCollision(void) {
 
   // DoPlayerSideCheck
 
-  ushort baddr = 0;
+  u16 mt_x = 0;
+  u16 mt_y = 0;
 
   int i;
   for (i = 2; i >= 1; i--) {
@@ -9625,9 +9728,9 @@ void PlayerBGCollision(void) {
       if (SprObject_Y_Position[0] >= 0xe4) {
         return;
       }
-      sVar9 = BlockBufferColli_Side(tmp1);
-      baddr = sVar9.addr;
-      bVar6 = sVar9.r02;
+      const struct blockbuffer_colli_result sVar9 = BlockBufferColli_Side(tmp1);
+      mt_x = sVar9.mt_x;
+      mt_y = sVar9.mt_y;
       bVar2 = sVar9.r04;
       bVar5 = sVar9.a;
       const bool cond = (sVar9.z) || (bVar5 == ssw(0x1c, 0x19)) || (bVar5 == ssw(0x6b, 0x6d)) || CheckForClimbMTiles(bVar5);
@@ -9644,9 +9747,9 @@ void PlayerBGCollision(void) {
     if (SprObject_Y_Position[0] >= 0xd0) {
       return;
     }
-    sVar9 = BlockBufferColli_Side(tmp1 + 1);
-    baddr = sVar9.addr;
-    bVar6 = sVar9.r02;
+    const struct blockbuffer_colli_result sVar9 = BlockBufferColli_Side(tmp1 + 1);
+    mt_x = sVar9.mt_x;
+    mt_y = sVar9.mt_y;
     bVar2 = sVar9.r04;
     bVar5 = sVar9.a;
     const bool cond = sVar9.z;
@@ -9667,12 +9770,12 @@ void PlayerBGCollision(void) {
 
   if (!ChkInvisibleMTiles(bVar5)) {
     if (CheckForClimbMTiles(bVar5)) {
-      HandleClimbing(bVar5, bVar2, baddr & 0xff);
+      HandleClimbing(bVar5, bVar2, mt_x);
       return;
     }
 
     if (CheckForCoinMTiles(bVar5)) {
-      HandleCoinMetatile(bVar6, baddr);
+      HandleCoinMetatile(mt_x, mt_y);
       return;
     }
     bVar7 = bVar5;
@@ -9710,8 +9813,10 @@ void PlayerBGCollision(void) {
 
 // SMB:de2e
 // SM2MAIN:aa9f
-// Signature: [A, r04, r06] -> []
-void HandleClimbing(const byte param_1, const byte param_2, const byte param_3) {
+void HandleClimbing(const byte param_1, const byte param_2, const u16 mt_x) {
+  // Note: Old signature was [A, r04, r06] -> []
+  // Reworked to use metatile coordinates instead of pointer
+
   if ((param_2 < 6) || (param_2 >= 10)) {
     return;
   }
@@ -9752,8 +9857,11 @@ void HandleClimbing(const byte param_1, const byte param_2, const byte param_3) 
   // It sometimes = 3 as well.
   // It occurs in level 8-2 in this SMB2J TAS: https://tasvideos.org/5394S
 
-  SprObject_X_Position[0] = param_3 * 0x10 + ClimbXPosAdder_Minus1[PlayerFacingDir];
-  if (param_3 == 0) {
+  SprObject_X_Position[0] = (u8)(mt_x * 16) + ClimbXPosAdder_Minus1[PlayerFacingDir];
+
+  if ((mt_x % 32) == 0) {
+    // mt_x is the first column of an even page
+
     SprObject_PageLoc[0] = ScreenRight_PageLoc + ClimbPLocAdder_Minus1[PlayerFacingDir];
   }
 }
@@ -9932,19 +10040,37 @@ byte GetMTileAttrib(const byte x) {
 
 
 // SMB:e1ae
-// Signature: [X] -> [A, X, Z, r02, r04, r06, r07]
-static inline struct_axzr04 ChkUnderEnemy_Ext(const byte param_1, ushort *addr) {
+// SM2MAIN:ae44
+// Signature: [X] -> [A, X, Z, r04]
+struct_axzr04 ChkUnderEnemy(const byte param_1) {
   // Inlined: BlockBufferChk_Enemy
 
   struct_axzr04 sVar1;
 
-  const struct_azr02r04r06r07 sVar2 = BlockBufferCollision(0, param_1 + 1, 0x15);
+  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, param_1 + 1, 0x15);
+  sVar1.a = sVar2.a;
+  sVar1.x = ObjectOffset;
+  sVar1.z = sVar2.a == 0;
+  sVar1.r04 = sVar2.r04;
+  return sVar1;
+}
+
+
+// SMB:e1ae
+// Signature: [X] -> [A, X, Z, r02, r04, r06, r07]
+static inline struct_axzr04 ChkUnderEnemy_Ext(const byte param_1, u16 *blockoff) {
+  // Inlined: BlockBufferChk_Enemy
+
+  struct_axzr04 sVar1;
+
+  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, param_1 + 1, 0x15);
+
   sVar1.a = sVar2.a;
   sVar1.x = ObjectOffset;
   sVar1.z = sVar2.a == 0;
   sVar1.r04 = sVar2.r04;
 
-  *addr = sVar2.addr + sVar2.r02;
+  *blockoff = MTX_MTY_TO_BLOCKOFF(sVar2.mt_x, sVar2.mt_y);
 
   return sVar1;
 }
@@ -9981,8 +10107,8 @@ byte EnemyToBGCollisionDet(const byte param_1) {
 
   struct_axzr04 sVar6;
 #ifdef SMB1_MODE
-  ushort chkunderenemy_addr = 0;
-  sVar6 = ChkUnderEnemy_Ext(param_1, &chkunderenemy_addr);
+  u16 chkunderenemy_blockoff = 0;
+  sVar6 = ChkUnderEnemy_Ext(param_1, &chkunderenemy_blockoff);
 #endif
 #ifdef SMB2J_MODE
   sVar6 = ChkUnderEnemy(param_1);
@@ -9996,7 +10122,7 @@ byte EnemyToBGCollisionDet(const byte param_1) {
 
   if (sVar6.a == ssw(0x23, 0x20)) {
 #ifdef SMB1_MODE
-    RAM(chkunderenemy_addr) = 0;
+    Block_Buffers[chkunderenemy_blockoff] = 0;
 #endif
 
     byte enemy_id = Enemy_ID[bVarCC];
@@ -10247,23 +10373,6 @@ void KillEnemyAboveBlock(const byte param_1) {
 }
 
 
-// SMB:e1ae
-// SM2MAIN:ae44
-// Signature: [X] -> [A, X, Z, r04]
-struct_axzr04 ChkUnderEnemy(const byte param_1) {
-  // Inlined: BlockBufferChk_Enemy
-
-  struct_axzr04 sVar1;
-
-  const struct_azr02r04r06r07 sVar2 = BlockBufferCollision(0, param_1 + 1, 0x15);
-  sVar1.a = sVar2.a;
-  sVar1.x = ObjectOffset;
-  sVar1.z = sVar2.a == 0;
-  sVar1.r04 = sVar2.r04;
-  return sVar1;
-}
-
-
 // SMB:e1b5
 // SM2MAIN:ae4b
 // Signature: [A] -> [Z]
@@ -10392,20 +10501,9 @@ byte SetupEOffsetFBBox(const byte param_1) {
 // SM2MAIN:af27
 // Signature: [X] -> []
 void MoveBoundBoxOffscreen(const byte param_1) {
-  if (param_1 % 64 == 63) {
-    // TODO: should we keep this in? Would this actually happen?
-
-    // NES note: The stores in this subroutine are based on $04B0, plus the y register.
-    // The address $04B0 is $04AC + 4, or BoundingBoxCoords + 4.
-    //
-    // To make things cleaner in the port, we just add 1 to the index to
-    // base it on the usual bounding box array.
-    // This would however wraparound the array early,
-    // so here is the workaround for that:
-
-    RAM(0x05AC) = RAM(0x05AD) = RAM(0x05AE) = RAM(0x05AF) = 0xff;
-    return;
-  }
+  // This condition being false would create wraparound behavior with the bounding box arrays,
+  // so assume it never happens
+  assert_eq_assumption(param_1 % 64 != 63, true);
 
   BBOX_TOPLEFT_X(param_1 + 1)  = 0xff;
   BBOX_TOPLEFT_Y(param_1 + 1)  = 0xff;
@@ -10509,8 +10607,7 @@ bool SprObjectCollisionCore(const byte param_1, const byte param_2) {
 struct_axzr04 BlockBufferChk_Enemy(const byte param_1, const byte param_2, const byte param_3) {
   struct_axzr04 sVar1;
 
-  const struct_azr02r04r06r07 sVar2 = BlockBufferCollision(param_1, param_2 + 1,
-                                                     param_3);
+  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(param_1, param_2 + 1, param_3);
   sVar1.a = sVar2.a;
   sVar1.x = ObjectOffset;
   sVar1.z = sVar2.a == 0;
@@ -10525,7 +10622,7 @@ struct_axzr04 BlockBufferChk_Enemy(const byte param_1, const byte param_2, const
 struct_axz BlockBufferChk_FBall(const byte param_1) {
   struct_axz sVar1;
 
-  const struct_azr02r04r06r07 sVar2 = BlockBufferCollision(0, param_1 + 7, 0x1a);
+  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, param_1 + 7, 0x1a);
   sVar1.a = sVar2.a;
   sVar1.z = sVar1.a == 0;
   sVar1.x = ObjectOffset;
@@ -10536,7 +10633,7 @@ struct_axz BlockBufferChk_FBall(const byte param_1) {
 // SMB:e3e8
 // SM2MAIN:b086
 // Signature: [Y] -> [A, Y, r02, r04, r06, r07]
-struct_azr02r04r06r07 BlockBufferColli_Feet(const byte param_1) {
+struct blockbuffer_colli_result BlockBufferColli_Feet(const byte param_1) {
   // the original implementation returned Y (increments the Y parameter by 1)
   // but we decided to move that to the caller for this port
 
@@ -10547,7 +10644,7 @@ struct_azr02r04r06r07 BlockBufferColli_Feet(const byte param_1) {
 // SMB:e3e9
 // SM2MAIN:b087
 // Signature: [Y] -> [A, Z, r02, r04, r06, r07]
-struct_azr02r04r06r07 BlockBufferColli_Head(const byte param_1) {
+struct blockbuffer_colli_result BlockBufferColli_Head(const byte param_1) {
   return BlockBufferCollision(0, 0, param_1);
 }
 
@@ -10555,36 +10652,36 @@ struct_azr02r04r06r07 BlockBufferColli_Head(const byte param_1) {
 // SMB:e3ec
 // SM2MAIN:b08a
 // Signature: [Y] -> [A, Z, r02, r04, r06, r07]
-struct_azr02r04r06r07 BlockBufferColli_Side(const byte param_1) {
+struct blockbuffer_colli_result BlockBufferColli_Side(const byte param_1) {
   return BlockBufferCollision(1, 0, param_1);
 }
 
 
 // SMB:e3f0
 // SM2MAIN:b08e
-// Signature: [A, X, Y] -> [A, Z, r02, r04, r06, r07]
-struct_azr02r04r06r07 BlockBufferCollision(const byte use_x, const byte param_2, const byte param_3) {
-  const int a = BlockBuffer_X_Adder[param_3];
-  const int b = SprObject_X_Position[param_2];
-  const int c = SprObject_PageLoc[param_2];
-  const ushort addr = GetBlockBufferAddr(((a + b + c*256) / 16) % 32);
+struct blockbuffer_colli_result BlockBufferCollision(const byte use_x, const byte param_2, const byte param_3) {
+  // Note: Old signature was [A, X, Y] -> [A, Z, r02, r04, r06, r07]
+  // Reworked to use metatile coordinates instead of pointer
 
-  const byte bVar2 = ((SprObject_Y_Position[param_2] + BlockBuffer_Y_Adder[param_3]) & 0xf0) - 0x20;
+  const u16 xpos = LOAD_16(SprObject_PageLoc[param_2], SprObject_X_Position[param_2]);
+  const u8 xadder = BlockBuffer_X_Adder[param_3];
 
-  byte bVar3;
-  if (use_x) {
-    bVar3 = SprObject_X_Position[param_2] & 0xf;
-  } else {
-    bVar3 = SprObject_Y_Position[param_2] & 0xf;
-  }
+  const u8 ypos = SprObject_Y_Position[param_2];
+  const u8 yadder = BlockBuffer_Y_Adder[param_3];
 
-  struct_azr02r04r06r07 res;
-  res.a = RAM(addr + (ushort)bVar2);
-  res.z = RAM(addr + (ushort)bVar2) == 0;
-  res.r04 = bVar3;
+  const u16 mt_x = (xpos + xadder) / 16;
+  const u16 mt_y = (ypos + yadder) / 16 - MT_Y_TOP_MARGIN;
 
-  res.r02 = bVar2;
-  res.addr = addr;
+  const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
+
+  struct blockbuffer_colli_result res;
+
+  res.a = Block_Buffers[blockoff];
+  res.z = Block_Buffers[blockoff] == 0;
+  res.r04 = (use_x ? xpos : ypos) & 0xf;
+  res.mt_x = mt_x;
+  res.mt_y = mt_y;
+
   return res;
 }
 

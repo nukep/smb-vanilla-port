@@ -94,7 +94,6 @@
 #define StaircaseHeightData              RAMARRAY_CONST(0x78EC, 9)
 #define StaircaseRowData                 RAMARRAY_CONST(0x78F5, 9)
 #define HoleMetatiles                    RAMARRAY_CONST(0x7986, 4)
-#define BlockBufferAddr                  RAMARRAY_CONST(0x7A1E, 4)
 #define X_SubtracterData                 RAMARRAY_CONST(0x7B8C, 2)
 #define OffscrJoypadBitsData             RAMARRAY_CONST(0x7B8E, 2)
 #define ClimbAdderLow                    RAMARRAY_CONST(0x7F33, 4)

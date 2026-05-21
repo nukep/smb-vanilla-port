@@ -94,16 +94,13 @@ struct struct_ay {
 };
 
 
-typedef struct struct_azr02r04r06r07 struct_azr02r04r06r07;
-
-struct struct_azr02r04r06r07 {
+struct blockbuffer_colli_result {
   byte a;
   bool z;
-  byte r02;
   byte r04;
 
-  // as r06 and r07
-  ushort addr;
+  u16 mt_x;
+  u16 mt_y;
 };
 
 
@@ -367,26 +364,17 @@ void smb1_RenderAttributeTables(void);
 void smb1_ColorRotation(void);
 #define ColorRotation smb1_ColorRotation
 
-void smb1_RemoveCoin_Axe(byte param_1,byte param_2);
+void smb1_RemoveCoin_Axe(u16 mt_x, u16 mt_y);
 #define RemoveCoin_Axe smb1_RemoveCoin_Axe
 
-void smb1_ReplaceBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4);
+void smb1_ReplaceBlockMetatile(byte param_1,byte param_2,u16 mt_x, u16 mt_y);
 #define ReplaceBlockMetatile smb1_ReplaceBlockMetatile
 
-void smb1_DestroyBlockMetatile(byte param_2,byte param_3);
+void smb1_DestroyBlockMetatile(u16 mt_x, u16 mt_y);
 #define DestroyBlockMetatile smb1_DestroyBlockMetatile
 
-void smb1_WriteBlockMetatile(byte param_1,byte param_3,byte param_4);
+void smb1_WriteBlockMetatile(byte param_1,u16 mt_x, u16 mt_y);
 #define WriteBlockMetatile smb1_WriteBlockMetatile
-
-void smb1_MoveVOffset(byte param_1);
-#define MoveVOffset smb1_MoveVOffset
-
-void smb1_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
-#define PutBlockMetatile smb1_PutBlockMetatile
-
-void smb1_RemBridge(byte param_1,byte param_2,ushort addr);
-#define RemBridge smb1_RemBridge
 
 void smb1_InitializeNameTables(void);
 #define InitializeNameTables smb1_InitializeNameTables
@@ -622,9 +610,6 @@ byte smb1_GetAreaObjXPosition(void);
 byte smb1_GetAreaObjYPosition(byte param_1);
 #define GetAreaObjYPosition smb1_GetAreaObjYPosition
 
-ushort smb1_GetBlockBufferAddr(byte param_1);
-#define GetBlockBufferAddr smb1_GetBlockBufferAddr
-
 void smb1_LoadAreaPointer(void);
 #define LoadAreaPointer smb1_LoadAreaPointer
 
@@ -823,13 +808,13 @@ void smb1_PwrUpJmp(void);
 byte smb1_PowerUpObjHandler(void);
 #define PowerUpObjHandler smb1_PowerUpObjHandler
 
-void smb1_PlayerHeadCollision(byte param_1,byte param_2,ushort addr);
+void smb1_PlayerHeadCollision(byte param_1,u16 mt_x, u16 mt_y);
 #define PlayerHeadCollision smb1_PlayerHeadCollision
 
 void smb1_InitBlock_XY_Pos(byte param_1);
 #define InitBlock_XY_Pos smb1_InitBlock_XY_Pos
 
-void smb1_BumpBlock(byte param_1,byte param_2,byte param_3,byte param_4);
+void smb1_BumpBlock(u16 mt_x,u16 mt_y,byte param_2);
 #define BumpBlock smb1_BumpBlock
 
 void smb1_MushFlowerBlock(byte param_1);
@@ -847,10 +832,10 @@ void smb1_VineBlock(void);
 struct_yc smb1_BlockBumpedChk(byte param_1);
 #define BlockBumpedChk smb1_BlockBumpedChk
 
-void smb1_BrickShatter(byte param_1,byte param_2,byte param_3);
+void smb1_BrickShatter(u16 mt_x, u16 mt_y);
 #define BrickShatter smb1_BrickShatter
 
-byte smb1_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
+byte smb1_CheckTopOfBlock(u16 mt_x, u16 mt_y);
 #define CheckTopOfBlock smb1_CheckTopOfBlock
 
 void smb1_SpawnBrickChunks(byte param_1);
@@ -1078,7 +1063,7 @@ byte smb1_RunLargePlatform(byte param_1);
 byte smb1_LargePlatformSubroutines(byte param_1);
 #define LargePlatformSubroutines smb1_LargePlatformSubroutines
 
-byte smb1_EraseEnemyObject(byte param_1);
+void smb1_EraseEnemyObject(byte param_1);
 #define EraseEnemyObject smb1_EraseEnemyObject
 
 byte smb1_MovePodoboo(byte param_1);
@@ -1330,7 +1315,7 @@ bool smb1_CheckPlayerVertical(void);
 void smb1_PlayerBGCollision(void);
 #define PlayerBGCollision smb1_PlayerBGCollision
 
-void smb1_HandleClimbing(byte param_1,byte param_2,byte param_3);
+void smb1_HandleClimbing(byte param_1,byte param_2,u16 mt_x);
 #define HandleClimbing smb1_HandleClimbing
 
 bool smb1_ChkInvisibleMTiles(byte param_1);
@@ -1447,16 +1432,16 @@ struct_axzr04 smb1_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
 struct_axz smb1_BlockBufferChk_FBall(byte param_1);
 #define BlockBufferChk_FBall smb1_BlockBufferChk_FBall
 
-struct_azr02r04r06r07 smb1_BlockBufferColli_Feet(byte param_1);
+struct blockbuffer_colli_result smb1_BlockBufferColli_Feet(byte param_1);
 #define BlockBufferColli_Feet smb1_BlockBufferColli_Feet
 
-struct_azr02r04r06r07 smb1_BlockBufferColli_Head(byte param_1);
+struct blockbuffer_colli_result smb1_BlockBufferColli_Head(byte param_1);
 #define BlockBufferColli_Head smb1_BlockBufferColli_Head
 
-struct_azr02r04r06r07 smb1_BlockBufferColli_Side(byte param_1);
+struct blockbuffer_colli_result smb1_BlockBufferColli_Side(byte param_1);
 #define BlockBufferColli_Side smb1_BlockBufferColli_Side
 
-struct_azr02r04r06r07 smb1_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
+struct blockbuffer_colli_result smb1_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
 #define BlockBufferCollision smb1_BlockBufferCollision
 
 void smb1_DrawVine(byte param_1);

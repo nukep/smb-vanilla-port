@@ -306,7 +306,7 @@
 #define Fireball_BoundBoxCtrl            (SprObj_BoundBoxCtrl + 7)
 #define Misc_BoundBoxCtrl                (SprObj_BoundBoxCtrl + 9)
 
-#define BoundingBoxCoords                RAMARRAY(0x04AC, 72)
+#define BoundingBoxCoords                RAMARRAY(0x04AC, 21*4)
 
 #define Block_Buffers                    RAMARRAY(0x0500, 0x1A0)
 // #define Block_Buffer_1                   RAMARRAY(0x0500, 0xD0)

@@ -67,16 +67,13 @@ struct struct_ayr02r04r06r07 {
 };
 
 
-typedef struct struct_azr02r04r06r07 struct_azr02r04r06r07;
-
-struct struct_azr02r04r06r07 {
+struct blockbuffer_colli_result {
   byte a;
   bool z;
-  byte r02;
   byte r04;
 
-  // as r06 and r07
-  ushort addr;
+  u16 mt_x;
+  u16 mt_y;
 };
 
 
@@ -373,26 +370,17 @@ void smb2j_RenderAttributeTables(void);
 void smb2j_ColorRotation(void);
 #define ColorRotation smb2j_ColorRotation
 
-void smb2j_RemoveCoin_Axe(byte param_1,byte param_2);
+void smb2j_RemoveCoin_Axe(u16 mt_x, u16 mt_y);
 #define RemoveCoin_Axe smb2j_RemoveCoin_Axe
 
-void smb2j_ReplaceBlockMetatile(byte param_1,byte param_2,byte param_3,byte param_4);
+void smb2j_ReplaceBlockMetatile(byte param_1,byte param_2,u16 mt_x, u16 mt_y);
 #define ReplaceBlockMetatile smb2j_ReplaceBlockMetatile
 
-void smb2j_DestroyBlockMetatile(byte param_2,byte param_3);
+void smb2j_DestroyBlockMetatile(u16 mt_x, u16 mt_y);
 #define DestroyBlockMetatile smb2j_DestroyBlockMetatile
 
-void smb2j_WriteBlockMetatile(byte param_1,byte param_3,byte param_4);
+void smb2j_WriteBlockMetatile(byte param_1,u16 mt_x, u16 mt_y);
 #define WriteBlockMetatile smb2j_WriteBlockMetatile
-
-void smb2j_MoveVOffset(byte param_1);
-#define MoveVOffset smb2j_MoveVOffset
-
-void smb2j_PutBlockMetatile(byte param_1,byte param_3,byte param_4,byte param_5);
-#define PutBlockMetatile smb2j_PutBlockMetatile
-
-void smb2j_RemBridge(byte param_1,byte param_2,ushort addr);
-#define RemBridge smb2j_RemBridge
 
 void smb2j_InitializeNameTables(void);
 #define InitializeNameTables smb2j_InitializeNameTables
@@ -622,9 +610,6 @@ byte smb2j_GetAreaObjXPosition(void);
 byte smb2j_GetAreaObjYPosition(byte param_1);
 #define GetAreaObjYPosition smb2j_GetAreaObjYPosition
 
-ushort smb2j_GetBlockBufferAddr(byte param_1);
-#define GetBlockBufferAddr smb2j_GetBlockBufferAddr
-
 void smb2j_GameMode(void);
 #define GameMode smb2j_GameMode
 
@@ -814,13 +799,13 @@ void smb2j_PwrUpJmp(void);
 byte smb2j_PowerUpObjHandler(void);
 #define PowerUpObjHandler smb2j_PowerUpObjHandler
 
-void smb2j_PlayerHeadCollision(byte param_1,byte param_2,ushort addr);
+void smb2j_PlayerHeadCollision(byte param_1,u16 mt_x, u16 mt_y);
 #define PlayerHeadCollision smb2j_PlayerHeadCollision
 
 void smb2j_InitBlock_XY_Pos(byte param_1);
 #define InitBlock_XY_Pos smb2j_InitBlock_XY_Pos
 
-void smb2j_BumpBlock(byte param_1,byte param_2,byte param_3,byte param_4);
+void smb2j_BumpBlock(u16 mt_x,u16 mt_y,byte param_2);
 #define BumpBlock smb2j_BumpBlock
 
 void smb2j_MushFlowerBlock(byte param_1);
@@ -841,10 +826,10 @@ void smb2j_VineBlock(void);
 struct_yc smb2j_BlockBumpedChk(byte param_1);
 #define BlockBumpedChk smb2j_BlockBumpedChk
 
-void smb2j_BrickShatter(byte param_1,byte param_2,byte param_3);
+void smb2j_BrickShatter(u16 mt_x, u16 mt_y);
 #define BrickShatter smb2j_BrickShatter
 
-byte smb2j_CheckTopOfBlock(byte param_1,byte param_2,byte param_3,byte param_4);
+byte smb2j_CheckTopOfBlock(u16 mt_x, u16 mt_y);
 #define CheckTopOfBlock smb2j_CheckTopOfBlock
 
 void smb2j_SpawnBrickChunks(byte param_1);
@@ -1072,7 +1057,7 @@ byte smb2j_RunLargePlatform(byte param_1);
 byte smb2j_LargePlatformSubroutines(byte param_1);
 #define LargePlatformSubroutines smb2j_LargePlatformSubroutines
 
-byte smb2j_EraseEnemyObject(byte param_1);
+void smb2j_EraseEnemyObject(byte param_1);
 #define EraseEnemyObject smb2j_EraseEnemyObject
 
 byte smb2j_MovePodoboo(byte param_1);
@@ -1327,7 +1312,7 @@ bool smb2j_CheckPlayerVertical(void);
 void smb2j_PlayerBGCollision(void);
 #define PlayerBGCollision smb2j_PlayerBGCollision
 
-void smb2j_HandleClimbing(byte param_1,byte param_2,byte param_3);
+void smb2j_HandleClimbing(byte param_1,byte param_2,u16 mt_x);
 #define HandleClimbing smb2j_HandleClimbing
 
 bool smb2j_ChkInvisibleMTiles(byte param_1);
@@ -1444,16 +1429,16 @@ struct_axzr04 smb2j_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3)
 struct_axz smb2j_BlockBufferChk_FBall(byte param_1);
 #define BlockBufferChk_FBall smb2j_BlockBufferChk_FBall
 
-struct_azr02r04r06r07 smb2j_BlockBufferColli_Feet(byte param_1);
+struct blockbuffer_colli_result smb2j_BlockBufferColli_Feet(byte param_1);
 #define BlockBufferColli_Feet smb2j_BlockBufferColli_Feet
 
-struct_azr02r04r06r07 smb2j_BlockBufferColli_Head(byte param_1);
+struct blockbuffer_colli_result smb2j_BlockBufferColli_Head(byte param_1);
 #define BlockBufferColli_Head smb2j_BlockBufferColli_Head
 
-struct_azr02r04r06r07 smb2j_BlockBufferColli_Side(byte param_1);
+struct blockbuffer_colli_result smb2j_BlockBufferColli_Side(byte param_1);
 #define BlockBufferColli_Side smb2j_BlockBufferColli_Side
 
-struct_azr02r04r06r07 smb2j_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
+struct blockbuffer_colli_result smb2j_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
 #define BlockBufferCollision smb2j_BlockBufferCollision
 
 void smb2j_DrawVine(byte param_1);
