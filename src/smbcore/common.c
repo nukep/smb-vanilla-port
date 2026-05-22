@@ -55,7 +55,7 @@ void DrawMushroomIcon(void) {
   }
 #endif
 #ifdef SMB2J_MODE
-  VRAM_Buffer_AddrCtrl = 0x1c;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_MENUCURSORTEMPLATE;
   // Inlined: SetupMenuCursor
   MenuCursorTemplate[3] = MenuCursorTiles[CurrentPlayer];
   MenuCursorTemplate[5] = MenuCursorTiles[CurrentPlayer + 1];
@@ -519,72 +519,6 @@ void PlayerVictoryWalk(void) {
 }
 
 
-// SMB:83f6
-// SM2MAIN:636d
-// Signature: [] -> []
-void PrintVictoryMessages(void) {
-  bool inc_msg_counter = true;
-
-  if (SecondaryMsgCounter == 0) {
-    bool print_msg = false;
-    byte bVar1;
-
-    if (PrimaryMsgCounter == 0) {
-      print_msg = true;
-      bVar1 = 0;
-#ifdef SMB1_MODE
-      bVar1 = (CurrentPlayer != 0) ? 1 : 0;
-#endif
-    } else if (PrimaryMsgCounter < ssw(9,8)) {
-#ifdef SMB1_MODE
-      if (WorldNumber == 7 && PrimaryMsgCounter >= 3) {
-          print_msg = true;
-          bVar1 = PrimaryMsgCounter;
-          // EvalForMusic
-          if (PrimaryMsgCounter == 3) {
-            EventMusicQueue = 4;
-          }
-      }
-      if (WorldNumber != 7 && PrimaryMsgCounter == 2) {
-          print_msg = true;
-          bVar1 = 2;
-      }
-
-      if (WorldNumber != 7 && PrimaryMsgCounter >= 4) {
-        inc_msg_counter = false;
-      }
-#endif
-#ifdef SMB2J_MODE
-      if (PrimaryMsgCounter < 2) {
-        print_msg = true;
-        bVar1 = PrimaryMsgCounter;
-      }
-
-      if (PrimaryMsgCounter >= 3) {
-        inc_msg_counter = false;
-      }
-#endif
-    }
-
-    if (print_msg) {
-      VRAM_Buffer_AddrCtrl = bVar1 + 0xc;
-    }
-  }
-
-  if (inc_msg_counter) {
-    ADD_UNSIGNED_16_8(PrimaryMsgCounter, SecondaryMsgCounter,
-                      4);
-
-    if (PrimaryMsgCounter <= ssw(6,5)) {
-      return;
-    }
-  }
-
-  WorldEndTimer = ssw(6,8);
-  OperMode_Task += 1;
-}
-
-
 // SMB:8461
 // SM2MAIN:63d2
 // Signature: [] -> []
@@ -790,7 +724,7 @@ void InitScreen(void) {
   MoveAllSpritesOffscreen();
   InitializeNameTables();
   if (OperMode != 0) {
-    VRAM_Buffer_AddrCtrl = 3;
+    VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA;
   }
   ScreenRoutineTask = ScreenRoutineTask + 1;
 }
@@ -815,7 +749,19 @@ void SetupIntermediate(void) {
 // SM2MAIN:651f
 // Signature: [] -> []
 void GetAreaPalette(void) {
-  VRAM_Buffer_AddrCtrl = AreaPalette[AreaType];
+  assert_eq_assumption(AreaType < 4, true);
+
+  byte addrctrl;
+
+  switch (AreaType) {
+  case 0: addrctrl = ADDRCTRL_WATERPALETTEDATA; break;
+  case 1: addrctrl = ADDRCTRL_GROUNDPALETTEDATA; break;
+  case 2: addrctrl = ADDRCTRL_UNDERGROUNDPALETTEDATA; break;
+  case 3: addrctrl = ADDRCTRL_CASTLEPALETTEDATA; break;
+  }
+
+  VRAM_Buffer_AddrCtrl = addrctrl;
+
   ScreenRoutineTask = ScreenRoutineTask + 1;
 }
 
@@ -825,8 +771,20 @@ void GetAreaPalette(void) {
 // Signature: [] -> []
 void GetBackgroundColor(void) {
   if (BackgroundColorCtrl != 0) {
-    VRAM_Buffer_AddrCtrl = BGColorCtrl_Addr[BackgroundColorCtrl - 4];
+    assert_eq_assumption(BackgroundColorCtrl >= 4 && BackgroundColorCtrl < 8, true);
+
+    byte addrctrl;
+
+    switch (BackgroundColorCtrl) {
+    case 4: addrctrl = ADDRCTRL_VRAM_BUFFER1; break;
+    case 5: addrctrl = ADDRCTRL_DAYSNOWPALETTEDATA; break;
+    case 6: addrctrl = ADDRCTRL_NIGHTSNOWPALETTEDATA; break;
+    case 7: addrctrl = ADDRCTRL_CASTLEPALETTEDATA; break;
+    }
+
+    VRAM_Buffer_AddrCtrl = addrctrl;
   }
+
   ScreenRoutineTask += 1;
   GetPlayerColors();
 }
@@ -871,7 +829,7 @@ void GetPlayerColors(void) {
 // Signature: [] -> []
 void GetAlternatePalette1(void) {
   if (AreaStyle == 1) {
-    VRAM_Buffer_AddrCtrl = 0xb;
+    VRAM_Buffer_AddrCtrl = ADDRCTRL_MUSHROOMPALETTEDATA;
   }
   ScreenRoutineTask = ScreenRoutineTask + 1;
 }
@@ -976,7 +934,7 @@ void AreaParserTaskControl(void) {
   if (ColumnSets >= 0x80) {
     ScreenRoutineTask += 1;
   }
-  VRAM_Buffer_AddrCtrl = 6;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
 }
 
 
@@ -1075,7 +1033,7 @@ void RenderAreaGraphics(void) {
     CurrentNTAddr_High ^= 4;
   }
 
-  VRAM_Buffer_AddrCtrl = 6;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
 }
 
 
@@ -1097,7 +1055,7 @@ void RenderAttributeTables(void) {
     VRAM_Buffer2_Offset += 4;
   }
   VRAM_Buffer2[VRAM_Buffer2_Offset] = 0;
-  VRAM_Buffer_AddrCtrl = 6;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
 }
 
 
@@ -1169,7 +1127,7 @@ void RemoveCoin_Axe(const u16 mt_x, const u16 mt_y) {
   // Inlined: PutBlockMetatile
   draw_block_metatile(vramoff, blockgfxidx, x, y, nt);
 
-  VRAM_Buffer_AddrCtrl = 6;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
 }
 
 
@@ -2778,7 +2736,7 @@ void CastleBridgeObj(const byte param_1, const byte param_2) {
 // SM2MAIN:7850
 // Signature: [r00] -> []
 void AxeObj(const byte param_1) {
-  VRAM_Buffer_AddrCtrl = 8;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_BOWSERPALETTEDATA;
   ChainObj(param_1);
 }
 
@@ -3260,16 +3218,26 @@ end:
 // SM2MAIN:7acb
 // Signature: [] -> []
 void UpdScrollVar(void) {
-  if (VRAM_Buffer_AddrCtrl != 6) {
-    if (AreaParserTaskNum == 0) {
-      if (0x7f < (byte)(ScrollThirtyTwo - 0x20)) {
-        return;
-      }
-      ScrollThirtyTwo = (ScrollThirtyTwo - 0x20) - (ScrollThirtyTwo < 0x20);
-      VRAM_Buffer2_Offset = 0;
-    }
-    AreaParserTaskHandler();
+  if (VRAM_Buffer_AddrCtrl == ADDRCTRL_VRAM_BUFFER2) {
+    return;
   }
+
+  if (AreaParserTaskNum == 0) {
+    if (ScrollThirtyTwo < 32) {
+      return;
+    }
+
+    // NES note: The comparison to 128+32 is because of the way CMP + BMI works on the 6502
+    // This case isn't likely or intentional (it might not even be possible)
+    if (ScrollThirtyTwo >= 128+32) {
+      return;
+    }
+
+    ScrollThirtyTwo -= 32;
+    VRAM_Buffer2_Offset = 0;
+  }
+
+  AreaParserTaskHandler();
 }
 
 

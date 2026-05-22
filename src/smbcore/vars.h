@@ -186,8 +186,14 @@
 
 // There's a lot of ugly aliasing (overlapping) with VRAM here...
 
-#define VRAM_Data1                       RAMARRAY(0x0300, 0x4C)      // note: this may or may not be the length, but it's the one i've observed in practice
-#define VRAM_Data2                       RAMARRAY(0x0340, 0x92)      // note: this may or may not be the length, but it's the one i've observed in practice
+#define VRAM_Data1                       RAMARRAY(0x0300, 0x100)
+#define VRAM_Data2                       RAMARRAY(0x0340, 0x0C0)
+
+// Note: crosses into $0400 and a bunch of other variables.
+// This should be of little consequence, because memory is cleared before starting new areas.
+// However, it's not cleared before starting the demo, so it might affect that... maybe.
+#define VRAM_SMB1_TitleScreen            RAMARRAY(0x0300, 0x13A)
+
 #define VRAM_Buffer1_Offset              VRAM_Data1[0]
 #define VRAM_Buffer1                     (VRAM_Data1 + 1)
 #define VRAM_Buffer2_Offset              VRAM_Data2[0]

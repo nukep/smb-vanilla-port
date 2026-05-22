@@ -56,6 +56,41 @@ void SMB1_Reset() {
   // But as for the port, we just call the NMI ourselves.
 }
 
+static const u8 * vram_buffer(u8 addr_ctrl, u16 *length) {
+  // The VRAM buffers are tightly coupled with the code, so those are hard-coded in here.
+
+  switch (addr_ctrl) {
+  case ADDRCTRL_VRAM_BUFFER1:
+    *length = 0x10000 - 0x301;
+    return &VRAM_Buffer1[0];
+
+  case ADDRCTRL_SMB1_VRAM_PAGE:
+    // This addr_ctrl is only ever used for the title screen, and it's exactly this length
+    // It's not different unless the ROM is modded
+    *length = 0x13A;
+    return &VRAM_Page[0];
+
+  case ADDRCTRL_VRAM_BUFFER2:
+  case ADDRCTRL_VRAM_BUFFER2_unused:
+    *length = 0x10000 - 0x341;
+    return &VRAM_Buffer2[0];
+
+  default:
+    {
+      // Get the other ones from ROM
+
+      const u8 hi = VRAM_AddrTable_High[addr_ctrl];
+      const u8 lo = VRAM_AddrTable_Low[addr_ctrl];
+      const u16 addr = (hi << 8) | lo;
+
+      // TODO - get actual length of the arrays
+      *length = 0x10000 - addr;
+
+      return rom_ptr(addr);
+    }
+  }
+}
+
 // SMB:8082
 // Signature: [] -> []
 void SMB1_NMI() {
@@ -78,20 +113,19 @@ void SMB1_NMI() {
   // $4014 = 2
   transfer_sprite_data(&Sprite_Data[0]);
 
-  // VRAM_Buffer_AddrCtrl of 0, 5, 6, 7 are in RAM ($301, $300, $341, $341 respectively). All other ones are in ROM.
-  UpdateScreen(&RAM(VRAM_AddrTable_High[VRAM_Buffer_AddrCtrl] * 0x100 + VRAM_AddrTable_Low[VRAM_Buffer_AddrCtrl]));
-
-  if (VRAM_Buffer_AddrCtrl == 6) {
-    // in SMB ROM, VRAM_Buffer_Offset[1] = 0x40
-    RAM(0x300 + VRAM_Buffer_Offset[1]) = 0;
-    VRAM_Buffer1[VRAM_Buffer_Offset[1]] = 0;
+  u16 vram_length = 0;
+  const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
+  update_screen(buf, vram_length);
+  
+  if (VRAM_Buffer_AddrCtrl != ADDRCTRL_VRAM_BUFFER2) {
+    VRAM_Buffer1_Offset = 0;
+    VRAM_Buffer1[0] = 0;
   } else {
-    // in SMB ROM, VRAM_Buffer_Offset[0] = 0x00
-    RAM(0x300 + VRAM_Buffer_Offset[0]) = 0;
-    VRAM_Buffer1[VRAM_Buffer_Offset[0]] = 0;
+    VRAM_Buffer2_Offset = 0;
+    VRAM_Buffer2[0] = 0;
   }
 
-  VRAM_Buffer_AddrCtrl = 0;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER1;
   ppumask(Mirror_PPU_CTRL_REG2);
   SoundEngine();
   apu_end_frame();
@@ -139,9 +173,9 @@ void DrawTitleScreen() {
   if (OperMode == 0) {
     // The drawing data for the title screen is stored in CHR ROM!
     for (int i = 0; i < 0x13A; i++) {
-      RAM(0x300 + i) = CHRROM(0x1EC0 + i);
+      VRAM_SMB1_TitleScreen[i] = CHRROM(0x1EC0 + i);
     }
-    VRAM_Buffer_AddrCtrl = 5;
+    VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB1_VRAM_PAGE;
     ScreenRoutineTask = ScreenRoutineTask + 1;
   } else {
     OperMode_Task = OperMode_Task + 1;

@@ -1,6 +1,60 @@
 #include "types.h"
 #include "vars.h"
 
+
+// SMB:83f6
+// Signature: [] -> []
+void PrintVictoryMessages(void) {
+  bool inc_msg_counter = true;
+
+  static const u8 addrctrl_world8_lookup[] = {
+    ADDRCTRL_SMB1_YOURQUESTISOVER,
+    ADDRCTRL_SMB1_WEPRESENTYOUANEWQUEST,
+    ADDRCTRL_SMB1_PUSHBUTTONB,
+    ADDRCTRL_SMB1_TOSELECTAWORLD,
+  };
+
+  if (SecondaryMsgCounter == 0) {
+    if (PrimaryMsgCounter == 0) {
+      VRAM_Buffer_AddrCtrl = (CurrentPlayer == 0) ? ADDRCTRL_SMB1_THANKYOUMARIO : ADDRCTRL_SMB1_THANKYOULUIGI;
+    } else if (PrimaryMsgCounter < 9) {
+      if (WorldNumber != 7) {
+        if (PrimaryMsgCounter == 2) {
+          VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB1_BUTOURPRINCESSISINANOTHERCASTLE;
+        }
+
+        if (PrimaryMsgCounter >= 4) {
+          inc_msg_counter = false;
+        }
+      } else {
+        if (PrimaryMsgCounter >= 3) {
+            if (PrimaryMsgCounter == 3) {
+              EventMusicQueue = 4;
+            }
+
+            // Anything over 6 would overflow the address control lookup
+            assert_eq_assumption(PrimaryMsgCounter <= 6, true);
+
+            VRAM_Buffer_AddrCtrl = addrctrl_world8_lookup[PrimaryMsgCounter - 3];
+        }
+      }
+    }
+  }
+
+  if (inc_msg_counter) {
+    ADD_UNSIGNED_16_8(PrimaryMsgCounter, SecondaryMsgCounter,
+                      4);
+
+    if (PrimaryMsgCounter <= 6) {
+      return;
+    }
+  }
+
+  WorldEndTimer = 6;
+  OperMode_Task += 1;
+}
+
+
 // SMB:8808
 // Signature: [A] -> []
 void WriteGameText(const byte param_1) {

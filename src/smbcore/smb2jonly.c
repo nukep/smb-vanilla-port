@@ -89,11 +89,42 @@ void jumptable_VictoryModeSubroutines_forW8(const byte param_1) {
 // Signature: [] -> []
 void DrawTitleScreen(void) {
   if (OperMode == 0) {
-    VRAM_Buffer_AddrCtrl = 5;
+    VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_TITLESCREENGFXDATA;
     ScreenRoutineTask = ScreenRoutineTask + 1;
   } else {
     OperMode_Task = OperMode_Task + 1;
   }
+}
+
+
+// SM2MAIN:636d
+// Signature: [] -> []
+void PrintVictoryMessages(void) {
+  bool inc_msg_counter = true;
+
+  if (SecondaryMsgCounter == 0) {
+    if (PrimaryMsgCounter == 0) {
+      VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_THANKYOUMESSAGE;
+    } else if (PrimaryMsgCounter == 1) {
+      VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_BUTOURPRINCESSISINANOTHERCASTLE;
+    } else if (PrimaryMsgCounter < 8) {
+      if (PrimaryMsgCounter >= 3) {
+        inc_msg_counter = false;
+      }
+    }
+  }
+
+  if (inc_msg_counter) {
+    ADD_UNSIGNED_16_8(PrimaryMsgCounter, SecondaryMsgCounter,
+                      4);
+
+    if (PrimaryMsgCounter <= 5) {
+      return;
+    }
+  }
+
+  WorldEndTimer = 8;
+  OperMode_Task += 1;
 }
 
 
@@ -114,7 +145,7 @@ void EndCastleAward(void) {
 // SM2MAIN:64f6
 // Signature: [] -> []
 void InitScreenPalette(void) {
-  VRAM_Buffer_AddrCtrl = 3;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA;
   ScreenRoutineTask = ScreenRoutineTask + 1;
 }
 
@@ -604,7 +635,7 @@ void DiskScreen(void) {
   Mirror_PPU_CTRL_REG2 = 0;
   ppumask(0);
   DisableScreenFlag = DisableScreenFlag + 1;
-  VRAM_Buffer_AddrCtrl = 0x1a;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_DISKSCREENPALETTE;
   DiskIOTask = DiskIOTask + 1;
 }
 
@@ -660,7 +691,7 @@ void DiskErrorHandler(const byte param_1) {
     DiskErrorMainMsg[i+3] = DiskErrorMsgs[bVar1 + i - 7];
   }
 
-  VRAM_Buffer_AddrCtrl = 0x19;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_DISKERRORMAIN;
   MoveAllSpritesOffscreen();
   InitializeNameTables();
 }
@@ -975,7 +1006,7 @@ void ScreenSubsForFinalRoom(void) {
 // SM2DATA3:c612
 // Signature: [] -> []
 void DrawFinalRoom(void) {
-  VRAM_Buffer_AddrCtrl = 0x1b;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_PRINCESSPEACHSROOM;
   IRQUpdateFlag = 0x1b;
   ScreenRoutineTask = ScreenRoutineTask + 1;
 }
@@ -1005,10 +1036,25 @@ void PrintVictoryMsgsForWorld8(void) {
       EraseEndingCounters();
       return;
     }
+
     if (PrimaryMsgCounter == 2) {
       EventMusicQueue = 4;
     }
-    VRAM_Buffer_AddrCtrl = PrimaryMsgCounter + 0xf;
+
+    static const u8 addrctrl_lookup[10] = {
+      ADDRCTRL_SMB2J_FINALROOMPALETTE,
+      ADDRCTRL_SMB2J_THANKYOUMESSAGEFINAL,
+      ADDRCTRL_SMB2J_PEACEISPAVED,
+      ADDRCTRL_SMB2J_WITHKINGDOMSAVED,
+      ADDRCTRL_SMB2J_HURRAH,
+      ADDRCTRL_SMB2J_OURONLYHERO,
+      ADDRCTRL_SMB2J_THISENDSYOURTRIP,
+      ADDRCTRL_SMB2J_OFALONGFRIENDSHIP,
+      ADDRCTRL_SMB2J_POINTSADDED,
+      ADDRCTRL_SMB2J_FOREACHPLAYERLEFT,
+    };
+
+    VRAM_Buffer_AddrCtrl = addrctrl_lookup[PrimaryMsgCounter];
   }
 
   ADD_UNSIGNED_16_8(PrimaryMsgCounter, SecondaryMsgCounter,

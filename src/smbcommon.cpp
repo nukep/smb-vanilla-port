@@ -113,16 +113,35 @@ void dectimers() {
 // This is the only subroutine in all of SMB that writes to the PPU! (aside from WriteNTAddr, which blanks a nametable)
 // Each draw buffer item has the format: <ppu_hi> <ppu_lo> <count> <data...>
 //
-// SMB:8edd, SM2MAIN:6d56
-// Signature: [r00, r01] -> []
-void UpdateScreen(const byte *buf) {
-  while (buf[0] != 0) {
+// SMB:8edd
+// SM2MAIN:6d56
+void update_screen(const byte *buf, const u16 buf_length) {
+  // Original signature: [r00, r01] -> []
+  // Added a maximum buffer length parameter, for memory safety
+
+  u16 vram_idx = 0;
+
+#define READ(var) { if (vram_idx >= buf_length) { return; } var = buf[vram_idx++]; }
+
+  while (vram_idx < buf_length) {
+    u8 ppuhi;
+    u8 ppulo;
+    u8 data_header;
+
+    READ(ppuhi);
+    READ(ppulo);
+    READ(data_header);
+
+    if (ppuhi == 0) {
+      return;
+    }
+
     // Start writing to the PPU address
     ppustatus();
-    ppuaddr(buf[0]);
-    ppuaddr(buf[1]);
+    ppuaddr(ppuhi);
+    ppuaddr(ppulo);
 
-    if (buf[2] & 0x80) {
+    if (data_header & 0x80) {
       // Draw vertically
       Mirror_PPU_CTRL_REG1 |= 0x04;
     } else {
@@ -131,24 +150,27 @@ void UpdateScreen(const byte *buf) {
     }
     ppuctrl(Mirror_PPU_CTRL_REG1);
 
-    int count = buf[2] & 0x3F;
+    int count = data_header & 0x3F;
     if (count == 0) {
       // The original SMB does a do-while loop, and so a count of 0 is actually 256
       count = 256;
     }
 
-    if (buf[2] & 0x40) {
+    if (data_header & 0x40) {
       // Run-length encoding
+
+      u8 val;
+      READ(val);
       for (int i = 0; i < count; i++) {
-        ppudata(buf[3]);
+        ppudata(val);
       }
-      buf += 3 + 1;
     } else {
       // Variable-length
       for (int i = 0; i < count; i++) {
-        ppudata(buf[3 + i]);
+        u8 val;
+        READ(val);
+        ppudata(val);
       }
-      buf += 3 + count;
     }
 
     // The original SMB does these extra, seemingly pointless assignments to the ppuaddr register
@@ -157,9 +179,12 @@ void UpdateScreen(const byte *buf) {
     ppuaddr(0);
     ppuaddr(0);
   }
+
   ppustatus();
   ppuscroll(0);
   ppuscroll(0);
+
+#undef READ
 }
 
 // SMB:8e2d, SM2MAIN:6ca6

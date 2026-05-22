@@ -6,7 +6,7 @@ void sync_pointers(void);
 
 void set_world_and_level(byte world, byte level);
 
-void UpdateScreen(const byte *);
+void update_screen(const byte *buf, const u16 length);
 void WriteNTAddr(byte);
 byte InitializeMemory(byte);
 void ReadJoypads();

@@ -172,6 +172,37 @@ void SMB2J_Reset() {
   // But as for the port, we just call the NMI ourselves.
 }
 
+static const u8 * vram_buffer(u8 addr_ctrl, u16 *length) {
+  // The VRAM buffers are tightly coupled with the code, so those are hard-coded in here.
+
+  // Unlike SMB1, SMB2J's address table is 16-bit words, not segmented in hi and lo portions
+  // Also unlike SMB1, index 5 (the title screen) is from the ROM.
+
+  switch (addr_ctrl) {
+  case ADDRCTRL_VRAM_BUFFER1:
+    *length = 0x10000 - 0x301;
+    return &VRAM_Buffer1[0];
+
+  case ADDRCTRL_VRAM_BUFFER2:
+  case ADDRCTRL_VRAM_BUFFER2_unused:
+    *length = 0x10000 - 0x341;
+    return &VRAM_Buffer2[0];
+
+  default:
+    {
+      // Get the other ones from ROM
+      const u8 hi = VRAM_AddrTable[addr_ctrl * 2 + 1];
+      const u8 lo = VRAM_AddrTable[addr_ctrl * 2];
+      const u16 addr = (hi << 8) | lo;
+
+      // TODO - get actual length of the arrays
+      *length = 0x10000 - addr;
+
+      return rom_ptr(addr);
+    }
+  }
+}
+
 // SM2MAIN:60a0
 // Signature: [] -> []
 void SMB2J_NMI() {
@@ -208,22 +239,20 @@ void SMB2J_NMI() {
   // $4014 = 2
   transfer_sprite_data(&Sprite_Data[0]);
 
-  // Unlike SMB1, SMB2J's address table is 16-bit words, not segmented in hi and lo portions
-  // Also unlike SMB1, index 5 (the title screen) is from the ROM.
-  // VRAM_Buffer_AddrCtrl of 0, 6, 7 are in RAM ($301, $341, $341 respectively). All other ones are in ROM.
-  UpdateScreen(&RAM(VRAM_AddrTable[VRAM_Buffer_AddrCtrl * 2 + 1] * 0x100 + VRAM_AddrTable[VRAM_Buffer_AddrCtrl * 2]));
+  u16 vram_length = 0;
+  const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
+  update_screen(buf, vram_length);
 
-  if (VRAM_Buffer_AddrCtrl == 6) {
-    // in SMB ROM, VRAM_Buffer_Offset[1] = 0x40
-    RAM(0x300 + VRAM_Buffer_Offset[1]) = 0;
-    VRAM_Buffer1[VRAM_Buffer_Offset[1]] = 0;
+  if (VRAM_Buffer_AddrCtrl != ADDRCTRL_VRAM_BUFFER2) {
+    VRAM_Buffer1_Offset = 0;
+    VRAM_Buffer1[0] = 0;
   } else {
-    // in SMB ROM, VRAM_Buffer_Offset[0] = 0x00
-    RAM(0x300 + VRAM_Buffer_Offset[0]) = 0;
-    VRAM_Buffer1[VRAM_Buffer_Offset[0]] = 0;
+    VRAM_Buffer2_Offset = 0;
+    VRAM_Buffer2[0] = 0;
   }
 
-  VRAM_Buffer_AddrCtrl = 0;
+  VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER1;
+
   ppumask(Mirror_PPU_CTRL_REG2);
   enable_interrupt();
   SoundEngine();
