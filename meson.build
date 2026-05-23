@@ -1,4 +1,4 @@
-project('smbport', ['c', 'cpp'],
+project('smbvanilla', ['c', 'cpp'],
         default_options: 'default_library=static')
 
 if get_option('sdl2')
@@ -29,7 +29,7 @@ if get_option('buildtype') == 'debug'
 endif
 
 cdata = configuration_data()
-configure_file(output: 'smbport_config.h', configuration: cdata)
+configure_file(output: 'smbvanilla_config.h', configuration: cdata)
 
 smbcore = library('smbcore',
         'src/smbcore.cpp',
@@ -60,7 +60,7 @@ executable('smb_testrunner',
            link_with: smbcore)
 
 if use_sdl3
-  executable('smbport',
+  executable('smbvanilla',
              ['src/main_sdl3.c',
               'src/audio_sdl3.cpp',
               'src/time.c',
@@ -74,7 +74,7 @@ if use_sdl3
              c_args:   opengl_args,
              cpp_args: opengl_args)
 else
-  executable('smbport',
+  executable('smbvanilla',
              ['src/main_sdl2.c',
               'src/audio_sdl2.cpp',
               'src/time.c',

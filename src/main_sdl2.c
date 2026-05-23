@@ -325,7 +325,7 @@ int main(int argc, char *argv[]) {
 
   /******** Parse config, arguments ********/
 
-  if (!parse_options("smbport.ini", argc, argv, &cfg)) {
+  if (!parse_options("smbvanilla.ini", argc, argv, &cfg)) {
     log_error("Could not parse options");
     goto exit;
   }
@@ -402,7 +402,7 @@ int main(int argc, char *argv[]) {
   }
 #endif
 
-  fe->window = SDL_CreateWindow("smb-port", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256 * fe->video_scale, 240 * fe->video_scale, window_flags);
+  fe->window = SDL_CreateWindow("SMB Vanilla", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256 * fe->video_scale, 240 * fe->video_scale, window_flags);
   if (!fe->window) {
     log_error("Could not create SDL window: %s", SDL_GetError());
     goto exit;

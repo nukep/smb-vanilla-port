@@ -1,4 +1,4 @@
-/* Defines the layout of smbport.ini */
+/* Defines the layout of smbvanilla.ini */
 
 section(general,
         cstr(rom_filename)
