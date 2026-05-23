@@ -141,7 +141,7 @@ void update_screen(const byte *buf, const u16 buf_length) {
     ppuaddr(ppuhi);
     ppuaddr(ppulo);
 
-    if (data_header & 0x80) {
+    if (data_header & DRAW_FLAG_VERTICAL) {
       // Draw vertically
       Mirror_PPU_CTRL_REG1 |= 0x04;
     } else {
@@ -156,7 +156,7 @@ void update_screen(const byte *buf, const u16 buf_length) {
       count = 256;
     }
 
-    if (data_header & 0x40) {
+    if (data_header & DRAW_FLAG_RLE) {
       // Run-length encoding
 
       u8 val;

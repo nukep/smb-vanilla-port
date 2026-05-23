@@ -150,17 +150,6 @@ void InitScreenPalette(void) {
 }
 
 
-// SM2MAIN:65e6
-// Signature: [] -> [A]
-byte GetWorldNumForDisplay(void) {
-  byte bVar1 = WorldNumber;
-  if (HardWorldFlag != 0) {
-    bVar1 = (WorldNumber & 3) + 9;
-  }
-  return bVar1 + 1;
-}
-
-
 // SM2MAIN:671b
 // Signature: [A] -> []
 void WriteGameText(const byte param_1) {
@@ -176,6 +165,7 @@ void WriteGameText(const byte param_1) {
     VRAM_Buffer1[i] = GameText[offset];
     offset += 1;
   }
+
   if (!terminated) {
     VRAM_Buffer1[0] = 0;
   }
@@ -183,73 +173,107 @@ void WriteGameText(const byte param_1) {
   if (param_1 == 1) {
     // Wrote the world and lives display screen
 
-    // Write number of lives (and crown if over 9)
-    VRAM_Buffer1[8] = NumberofLives + 1;
-    if (VRAM_Buffer1[8] >= 10) {
-      VRAM_Buffer1[8] = NumberofLives - 9;
+    const u8 lives_tile = NumberofLives + 1;
+
+    if (lives_tile < 10) {
+      // Draw the number of lives if under 10
+      VRAM_Buffer1[8] = lives_tile;
+    } else {
+      // Draw crown tile, then the number of lives
       VRAM_Buffer1[7] = 0x9f;
+      VRAM_Buffer1[8] = lives_tile - 10;
     }
 
     // Write the world and level numbers
-    VRAM_Buffer1[19] = GetWorldNumForDisplay();
-    VRAM_Buffer1[21] = LevelNumber + 1;
+    // Inlined: GetWorldNumForDisplay
+    const u8 world_number_display = HardWorldFlag == 0 ? WorldNumber + 1 : (WorldNumber & 3) + 10;
+    const u8 level_number_display = LevelNumber + 1;
+    VRAM_Buffer1[19] = world_number_display;
+    VRAM_Buffer1[21] = level_number_display;
   }
 }
 
 
 // SM2MAIN:675e
 // Signature: [A] -> []
-void WriteWarpZoneMessage(const byte param_1) {
-  byte bVar1 = 0xff;
-  do {
-    bVar1 += 1;
-    VRAM_Buffer1[bVar1] = WarpZone[bVar1];
-  } while (WarpZone[bVar1] != 0);
-  VRAM_Buffer1[27] = WarpZoneNumbers[(byte)(param_1 + 0x80)];
-  VRAM_Buffer1_Offset = 0x24;
+void WriteWarpZoneMessage(const byte warp_zone_control) {
+  // "Welcome to warp zone!"
+
+  VRAM_Buffer1_Offset = 0;
+
+  int i;
+  for (i = 0; i < 256; i++) {
+    const u8 val = WarpZone[i];
+    VRAM_Buffer1[i] = val;
+    if (val == 0) {
+      break;
+    }
+  }
+
+  assert_smb_crashbug(i < 256, "An infinite loop would've occurred in the original game");
+
+  // Note: The original game would set the offset to a hard-coded value after the loop (36).
+  // Here we're just setting it to the actual length of the data.
+  VRAM_Buffer1_Offset = i;
+
+  // Bit 7 is always set, so toggle it.
+  const u8 idx = warp_zone_control ^ 0x80;
+  VRAM_Buffer1[27] = WarpZoneNumbers[idx];
 }
 
+
+static inline byte ScrollLockObject_Warp_impl(void) {
+  if (HardWorldFlag != 0) {
+    // 121 = 0x100 - 0x87
+    if (LevelNumber != 121) {
+      return 0x87 + LevelNumber;
+    }
+
+    // NES note: Getting to this point would be a glitch in the original game.
+    // The BNE instruction is meant to be unconditional.
+
+    // The disassembly shows:
+    //   LDA #$87
+    //   CLC
+    //   ADC LevelNumber
+    //   BNE DumpWarpCtrl
+  }
+
+  if (HardWorldFlag == 0 && WorldNumber == 0) {
+    if (AreaType == 1) {
+      return 0x81;
+    }
+
+    if (AreaAddrsLOffset == 0) {
+      return 0x80;
+    }
+
+    return 0x82;
+  }
+
+  if (WorldNumber == 2) {
+    return 0x83;
+  }
+
+  if (WorldNumber == 4) {
+    if (AreaAddrsLOffset == 0xb) {
+      return 0x84;
+    }
+
+    if (AreaType != 1) {
+      return 0x85;
+    }
+
+    return 0x86;
+  }
+
+  return 0x87;
+}
 
 // SM2MAIN:7513
 // Signature: [] -> []
 void ScrollLockObject_Warp(void) {
-  WarpZoneControl = 0x80;
-  if (HardWorldFlag == 0) {
-    if (WorldNumber == 0) {
-      if (AreaType != 1) {
-        if (AreaAddrsLOffset == 0) {
-          goto DumpWarpCtrl;
-        }
-        WarpZoneControl = 0x81;
-      }
-      WarpZoneControl += 1;
-      goto DumpWarpCtrl;
-    }
-  } else {
-    WarpZoneControl = LevelNumber + 0x87;
-    if (WarpZoneControl != 0) {
-      goto DumpWarpCtrl;
-    }
-  }
-  WarpZoneControl = 0x83;
-  if (WorldNumber == 2) {
-    goto DumpWarpCtrl;
-  }
-  WarpZoneControl = 0x84;
-  if (WorldNumber == 4) {
-    if (AreaAddrsLOffset == 0xb) {
-      goto DumpWarpCtrl;
-    }
-    if (AreaType == 1) {
-      goto W5Warp3;
-    }
-  } else {
-    WarpZoneControl = 0x85;
-W5Warp3:
-    WarpZoneControl += 1;
-  }
-  WarpZoneControl += 1;
-DumpWarpCtrl:
+  WarpZoneControl = ScrollLockObject_Warp_impl();
   WriteWarpZoneMessage(WarpZoneControl);
   KillEnemies(0xd);
   ScrollLockObject();
@@ -1096,6 +1120,7 @@ void AwardExtraLives(void) {
 // Signature: [] -> []
 void FadeToBlue(void) {
   EndControlCntr += 1;
+
   if (BlueDelayFlag == 0) {
     if (EndControlCntr != 0) {
       return;
@@ -1105,29 +1130,42 @@ void FadeToBlue(void) {
     return;
   }
 
-  for (int i = 0; i < 0x14; i++) {
+  for (int i = 0; i < 20; i++) {
     VRAM_Buffer1[i] = BlueTransPalette[i];
   }
 
-  const byte bVar1 = BlueColorOfs;
-  byte bVar2 = 0xc;
-  do {
-    VRAM_Buffer1[bVar2 + 3] = BlueTints[bVar1];
-    bVar2 -= 4;
-  } while (bVar2 < 0x80);
-  if ((byte)(BlueColorOfs + 1) == 4) {
+  const u8 val = BlueTints[BlueColorOfs];
+
+  VRAM_Buffer1[3 + 0] = val;
+  VRAM_Buffer1[3 + 4] = val;
+  VRAM_Buffer1[3 + 8] = val;
+  VRAM_Buffer1[3 + 12] = val;
+
+  BlueColorOfs += 1;
+
+  if (BlueColorOfs == 4) {
     OperMode_Task += 1;
   }
-  BlueColorOfs = BlueColorOfs + 1;
 }
 
 
 // SM2DATA3:c710
 // Signature: [] -> []
 void EraseLivesLines(void) {
-  for (int i = 0; i < 9; i++) {
-    VRAM_Buffer1[i] = TwoBlankRows[i];
-  }
+  // Inlining TwoBlankRows, because it's tightly coupled to the code
+
+  const u8 length = 21;
+  const u8 tile = 0x24;
+
+  // Saving and restoring the offset, in case it's not 0
+  // TODO: is this ever not 0?
+  const u8 saved_vramoff = VRAM_Buffer1_Offset;
+  VRAM_Buffer1_Offset = 0;
+
+  VRAM1_DRAW_RLE(PPU_ADDR_NT0_XY(6, 20), length, tile);
+  VRAM1_DRAW_RLE(PPU_ADDR_NT0_XY(6, 21), length, tile);
+
+  VRAM_Buffer1_Offset = saved_vramoff;
 
   OperMode_Task += 1;
   EraseEndingCounters();

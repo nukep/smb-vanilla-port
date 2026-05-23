@@ -60,6 +60,18 @@ void PrintVictoryMessages(void) {
 void WriteGameText(const byte param_1) {
   // param_1 is 0,1,2,3, 4,5,6
 
+  // param_1=0: 0: Top status bar line
+
+  // param_1=1: 2: World and Lives display
+
+  // param_1=2: 5: One-player time-up message: "TIME UP"
+  // param_1=2: 4: Two-player time up message: "MARIO TIME UP"
+
+  // param_1=3: 7: One-player game over message: "GAME OVER"
+  // param_1=3: 6: Two-player game over message: "MARIO GAME OVER"
+
+  // param_1=4,5,6: 9 and 8: Warp zone message: "WELCOME TO WARP ZONE!"
+
   static byte const p1_l[7] = {0,2,5,7,9,9,9};
   static byte const p2_l[7] = {0,2,4,6,8,8,8};
 
@@ -72,12 +84,13 @@ void WriteGameText(const byte param_1) {
 
   bool terminated = false;
   for (int i = 0; i < 256; i++) {
-    if (GameText[offset] == 0xff) {
+    const u8 val = GameText[offset];
+    if (val == 0xff) {
       VRAM_Buffer1[i] = 0;
       terminated = true;
       break;
     }
-    VRAM_Buffer1[i] = GameText[offset];
+    VRAM_Buffer1[i] = val;
     offset += 1;
   }
   if (!terminated) {
@@ -98,27 +111,35 @@ void WriteGameText(const byte param_1) {
   if (param_1 == 1) {
     // Wrote the world and lives display screen
 
-    // Write number of lives (and crown if over 9)
-    VRAM_Buffer1[8] = NumberofLives + 1;
-    if (VRAM_Buffer1[8] >= 10) {
-      VRAM_Buffer1[8] = NumberofLives - 9;
+    const u8 lives_tile = NumberofLives + 1;
+
+    if (lives_tile < 10) {
+      // Draw the number of lives if under 10
+      VRAM_Buffer1[8] = lives_tile;
+    } else {
+      // Draw crown tile, then the number of lives
       VRAM_Buffer1[7] = 0x9f;
+      VRAM_Buffer1[8] = lives_tile - 10;
     }
 
     // Write the world and level numbers
-    VRAM_Buffer1[19] = WorldNumber + 1;
-    VRAM_Buffer1[21] = LevelNumber + 1;
+    const u8 world_number_display = WorldNumber + 1;
+    const u8 level_number_display = LevelNumber + 1;
+    VRAM_Buffer1[19] = world_number_display;
+    VRAM_Buffer1[21] = level_number_display;
+
     return;
   }
 
   if (NumberOfPlayers != 0) {
-    byte bVar1;
+    bool set_name_to_luigi = (CurrentPlayer & 1) != 0;
+
     if ((param_1 == 2) && (OperMode != 3)) {
-      bVar1 = CurrentPlayer ^ 1;
-    } else {
-      bVar1 = CurrentPlayer;
+      // Time up message, and if not in the game over opermode
+      set_name_to_luigi = !set_name_to_luigi;
     }
-    if ((bVar1 & 1) != 0) {
+
+    if (set_name_to_luigi) {
       for (int i = 0; i < 5; i++) {
         VRAM_Buffer1[i + 3] = LuigiName[i];
       }

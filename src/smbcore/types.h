@@ -122,4 +122,78 @@ enum ADDRCTRL_SMB2J {
   ADDRCTRL_SMB2J_SUPERPLAYER,
 };
 
+
+// Draw vertically
+#define DRAW_FLAG_VERTICAL 0x80
+
+// Run-length encoding
+#define DRAW_FLAG_RLE 0x40
+
+static inline void vram_buffer1_draw(u16 ppu_addr, bool vertical, int count, const u8 *items) {
+  const u8 flags = (vertical ? DRAW_FLAG_VERTICAL : 0);
+  const u8 vramoff = VRAM_Buffer1_Offset;
+
+  VRAM_Buffer1[vramoff + 0] = ppu_addr >> 8;
+  VRAM_Buffer1[vramoff + 1] = ppu_addr & 0xff;
+  VRAM_Buffer1[vramoff + 2] = flags | (count & 0x3f);
+  for (int i = 0; i < count; i++) {
+    VRAM_Buffer1[vramoff + 3 + i] = items[i];
+  }
+  VRAM_Buffer1[vramoff + 3 + count] = 0;
+  VRAM_Buffer1_Offset += 3 + count;
+}
+
+static inline void vram_buffer1_rle(u16 ppu_addr, bool vertical, int count, u8 value) {
+  const u8 flags = DRAW_FLAG_RLE | (vertical ? DRAW_FLAG_VERTICAL : 0);
+  const u8 vramoff = VRAM_Buffer1_Offset;
+  VRAM_Buffer1[vramoff + 0] = ppu_addr >> 8;
+  VRAM_Buffer1[vramoff + 1] = ppu_addr & 0xff;
+  VRAM_Buffer1[vramoff + 2] = flags | (count & 0x3f);
+  VRAM_Buffer1[vramoff + 3] = value;
+  VRAM_Buffer1[vramoff + 4] = 0;
+  VRAM_Buffer1_Offset += 4;
+}
+
+#ifdef __cplusplus
+
+  static inline void vram_buffer1_draw_int(u16 ppu_addr, bool vertical, int count, const int *items) {
+    // This exists solely because of the VRAM1_DRAW macro. C++ forbids integer narrowing in constant literals. In C, this wouldn't be necessary.
+    u8 arr[count];
+    for (int i = 0; i < count; i++) {
+      arr[i] = items[i];
+    }
+
+    vram_buffer1_draw(ppu_addr, vertical, count, &arr[0]);
+  }
+
+#define _VRAM_DRAW_COUNT(...) (sizeof((const int[]){__VA_ARGS__}) / sizeof(int))
+
+// Draws a list of items to VRAM_Buffer1.
+// Assumes no wraparound behavior
+#define VRAM1_DRAW(ppu_addr, ...) \
+  vram_buffer1_draw_int(ppu_addr, false, _VRAM_DRAW_COUNT(__VA_ARGS__), (const int[]){ __VA_ARGS__ })
+
+#else
+
+#define _VRAM_DRAW_COUNT(...) (sizeof((const u8[]){__VA_ARGS__}) / sizeof(u8))
+
+// Draws a list of items to VRAM_Buffer1.
+// Assumes no wraparound behavior
+#define VRAM1_DRAW(ppu_addr, ...) \
+  vram_buffer1_draw(ppu_addr, false, _VRAM_DRAW_COUNT(__VA_ARGS__), (const u8[]){ __VA_ARGS__ })
+
+#endif
+
+
+// Draws a single item "length" times to VRAM_Buffer1. Run-length encoding.
+// Assumes no wraparound behavior
+#define VRAM1_DRAW_RLE(ppu_addr, length, value) \
+  vram_buffer1_rle(ppu_addr, false, length, value)
+
+// Get the PPU address for the tile at nametable 0, position (x, y).
+#define PPU_ADDR_NT0_XY(x, y) (0x2000 | ((y)*32) | (x))
+
+#define PPU_ADDR_PALETTE_BG(palette, i) (0x3f00 | ((palette)*4 + (i)))
+#define PPU_ADDR_PALETTE_SPR(palette, i) (0x3f10 | ((palette)*4 + (i)))
+
 #endif

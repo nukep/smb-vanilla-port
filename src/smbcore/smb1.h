@@ -1192,9 +1192,6 @@ void smb1_MovePiranhaPlant(byte param_1);
 byte smb1_BalancePlatform(byte param_1);
 #define BalancePlatform smb1_BalancePlatform
 
-struct_xr00r01 smb1_SetupPlatformRope(byte param_1,byte param_2);
-#define SetupPlatformRope smb1_SetupPlatformRope
-
 byte smb1_InitPlatformFall(byte param_1);
 #define InitPlatformFall smb1_InitPlatformFall
 

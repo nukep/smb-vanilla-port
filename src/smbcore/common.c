@@ -809,18 +809,13 @@ void GetPlayerColors(void) {
     }
   }
 
-  for (int i = 0; i < 4; i++) {
-    VRAM_Buffer1[i + VRAM_Buffer1_Offset + 3] = PlayerColors[i + bVar3];
-  }
-
   const byte idx = BackgroundColorCtrl != 0 ? BackgroundColorCtrl : AreaType;
 
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 3] = BackgroundColors[idx];
-  VRAM_Buffer1[VRAM_Buffer1_Offset] = 0x3f;
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 1] = 0x10;
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 2] = 4;
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 7] = 0;
-  VRAM_Buffer1_Offset += 7;
+  VRAM1_DRAW(PPU_ADDR_PALETTE_SPR(0, 0),
+             BackgroundColors[idx],
+             PlayerColors[1 + bVar3],
+             PlayerColors[2 + bVar3],
+             PlayerColors[3 + bVar3]);
 }
 
 
@@ -849,19 +844,22 @@ void WriteTopStatusLine(void) {
 // Signature: [] -> []
 void WriteBottomStatusLine(void) {
   WriteScoreAndCoinTally();
-  VRAM_Buffer1[VRAM_Buffer1_Offset] = 0x20;
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 1] = 0x73;
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 2] = 3;
+
 #ifdef SMB1_MODE
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 3] = WorldNumber + 1;
+  const u8 world_number_display = WorldNumber + 1;
 #endif
 #ifdef SMB2J_MODE
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 3] = GetWorldNumForDisplay();
+  // Inlined: GetWorldNumForDisplay
+  const u8 world_number_display = HardWorldFlag == 0 ? WorldNumber + 1 : (WorldNumber & 3) + 10;
 #endif
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 4] = 0x28;
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 5] = LevelNumber + 1;
-  VRAM_Buffer1[VRAM_Buffer1_Offset + 6] = 0;
-  VRAM_Buffer1_Offset = VRAM_Buffer1_Offset + 6;
+
+  const u8 level_number_display = LevelNumber + 1;
+
+  VRAM1_DRAW(PPU_ADDR_NT0_XY(19, 3),
+             world_number_display,
+             0x28,
+             level_number_display);
+
   ScreenRoutineTask = ScreenRoutineTask + 1;
 }
 
@@ -993,9 +991,7 @@ void RenderAreaGraphics(void) {
 
   VRAM_Buffer2[VRAM_Buffer2_Offset + 0] = CurrentNTAddr_High;
   VRAM_Buffer2[VRAM_Buffer2_Offset + 1] = CurrentNTAddr_Low;
-
-  // Draw vertically, data is 13*2 bytes
-  VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = 0x80 | (13*2);
+  VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = DRAW_FLAG_VERTICAL | (13*2);
 
   for (int i = 0; i < 13; i++) {
     const byte mt = MetatileBuffer[i];
@@ -1041,19 +1037,30 @@ void RenderAreaGraphics(void) {
 // SM2MAIN:6847
 // Signature: [] -> []
 void RenderAttributeTables(void) {
-  const byte bVar2 = (CurrentNTAddr_Low & 0x1f) < 4 ? CurrentNTAddr_High ^ 4 : CurrentNTAddr_High;
-  const byte tmp = (bVar2 & 4) | 0x23;
-
-  byte bVar1 = (CurrentNTAddr_Low - 4) & 0x1f;
-  bVar1 = 0xc0 + bVar1/4 + (bVar1/2)%2;
-  for (int i = 0; i < 7; i++) {
-    VRAM_Buffer2[VRAM_Buffer2_Offset] = tmp;
-    VRAM_Buffer2[VRAM_Buffer2_Offset + 1] = bVar1 + (i*8) + 8;
-    VRAM_Buffer2[VRAM_Buffer2_Offset + 3] = AttributeBuffer[i];
-    VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = 1;
-    AttributeBuffer[i] = 0;
-    VRAM_Buffer2_Offset += 4;
+  bool even_page = (CurrentNTAddr_High & 0x04) == 0;
+  const byte nt_lo = (CurrentNTAddr_Low - 4) & 0x1f;
+  if (nt_lo >= 32 - 4) {
+    even_page = !even_page;
   }
+
+  // NES note: this bit is unlikely to be set, because CurrentNTAddr_Low seems to always be a multiple of 4.
+  // But this is what the original game does.
+  const byte carry_bug = CurrentNTAddr_Low & 0x02 ? 1 : 0;
+
+  const u16 attrtable = even_page ? 0x23c0 : 0x27c0;
+
+  const u16 ppuaddr = (attrtable | (nt_lo >> 2)) + carry_bug;
+
+  for (int i = 0; i < 7; i++) {
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 0] = ppuaddr >> 8;
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 1] = (ppuaddr & 0xff) + (i+1)*8;
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = 1;
+    VRAM_Buffer2[VRAM_Buffer2_Offset + 3] = AttributeBuffer[i];
+    VRAM_Buffer2_Offset += 4;
+
+    AttributeBuffer[i] = 0;
+  }
+
   VRAM_Buffer2[VRAM_Buffer2_Offset] = 0;
   VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
 }
@@ -1063,26 +1070,29 @@ void RenderAttributeTables(void) {
 // SM2MAIN:68be
 // Signature: [] -> []
 void ColorRotation(void) {
-  byte bVar2;
-  byte bVar3;
+  if ((FrameCounter & 7) != 0) {
+    return;
+  }
 
-  if (((FrameCounter & 7) == 0) && (VRAM_Buffer1_Offset <= 0x30)) {
-    for (int i = 0; i < 8; i++) {
-      VRAM_Buffer1[(byte)(VRAM_Buffer1_Offset + i)] = BlankPalette[i];
-    }
-    bVar3 = AreaType << 2;
-    bVar2 = VRAM_Buffer1_Offset;
-    for (int i = 0; i < 4; i++) {
-      VRAM_Buffer1[bVar2 + 3] = Palette3Data[bVar3];
-      bVar3 += 1;
-      bVar2 += 1;
-    }
-    VRAM_Buffer1[VRAM_Buffer1_Offset + 4] = ColorRotatePalette[ColorRotateOffset];
-    VRAM_Buffer1_Offset += 7;
-    ColorRotateOffset += 1;
-    if (ColorRotateOffset > 5) {
-      ColorRotateOffset = 0;
-    }
+  if (VRAM_Buffer1_Offset > 0x30) {
+    return;
+  }
+
+  // Note: Inlining BlankPalette, because it's tightly coupled with the code
+
+  const byte paloff = AreaType << 2;
+
+  // Rotate the second palette color in particular. This is the coin/block color.
+  VRAM1_DRAW(PPU_ADDR_PALETTE_BG(3, 0),
+             Palette3Data[paloff + 0],
+             ColorRotatePalette[ColorRotateOffset],
+             Palette3Data[paloff + 2],
+             Palette3Data[paloff + 3]);
+
+  ColorRotateOffset += 1;
+
+  if (ColorRotateOffset >= 6) {
+    ColorRotateOffset = 0;
   }
 }
 
@@ -1221,25 +1231,41 @@ void PrintStatusBarNumbers(const byte param_1) {
 // SM2MAIN:6d84
 // Signature: [A] -> []
 void OutputNumbers(const byte param_1) {
-  byte bVar3;
+  const u8 sbtype = (param_1 + 1) & 0xf;
 
-  byte bVar1 = (param_1 + 1) & 0xf;
-  if (bVar1 < 6) {
-    bVar3 = bVar1 * 2;
-    VRAM_Buffer1[VRAM_Buffer1_Offset] = (bVar1 == 0) ? 0x22 : 0x20;
-    VRAM_Buffer1[VRAM_Buffer1_Offset + 1] = StatusBarData[bVar3];
-    VRAM_Buffer1[VRAM_Buffer1_Offset + 2] = StatusBarData[bVar3 + 1];
-    bVar1 = StatusBarOffset[bVar1] - StatusBarData[bVar3 + 1];
-    byte bVar2 = StatusBarData[bVar3 + 1];
-    do {
-      bVar3 = VRAM_Buffer1_Offset;
-      VRAM_Buffer1[bVar3 + 3] = DisplayDigits_Or_TopScoreDisplay[bVar1];
-      bVar1 += 1;
-      VRAM_Buffer1_Offset = bVar3 + 1;
-    } while (bVar2 -= 1, bVar2 != 0);
-    VRAM_Buffer1[(byte)(bVar3 + 1) + 3] = 0;
-    VRAM_Buffer1_Offset = bVar3 + 4;
+  if (sbtype >= 6) {
+    return;
   }
+
+  //        SMB1  SMB2J
+  // sbtype 0     0      Top score display on title screen
+  // sbtype 1,2   1      Player score
+  // sbtype 3,4   2      Coin tally
+  // sbtype 5,6   3      Game timer
+
+  // If the status bar type is the top score display on the title screen,
+  // then place it 16 tiles lower
+  const u8 hi = (sbtype == 0) ? 0x22 : 0x20;
+
+  const u8 lo = StatusBarData[sbtype * 2];
+  const u8 length = StatusBarData[sbtype * 2 + 1];
+
+  VRAM_Buffer1[VRAM_Buffer1_Offset + 0] = hi;
+  VRAM_Buffer1[VRAM_Buffer1_Offset + 1] = lo;
+  VRAM_Buffer1[VRAM_Buffer1_Offset + 2] = length;
+
+  const u8 sboffset = StatusBarOffset[sbtype];
+
+  const int write_length = length == 0 ? 256 : length;
+
+  for (int i = write_length; i > 0; i--) {
+    VRAM_Buffer1[VRAM_Buffer1_Offset + 3] = DisplayDigits_Or_TopScoreDisplay[(byte)(sboffset - i)];
+    VRAM_Buffer1_Offset += 1;
+  }
+
+  VRAM_Buffer1[VRAM_Buffer1_Offset + 3] = 0;
+
+  VRAM_Buffer1_Offset += 3;
 }
 
 
@@ -8410,143 +8436,174 @@ void MovePiranhaPlant(const byte param_1) {
 }
 
 
-// SMB:d432
-// SM2MAIN:a065
-// Signature: [X] -> [X]
-byte BalancePlatform(const byte param_1) {
-  byte bVar1;
-  struct_xr00r01 sVar4;
-
-  byte tmp1 = param_1;
-
-  if (Enemy_Y_HighPos[tmp1] == 3) {
-    EraseEnemyObject(tmp1);
-    return tmp1;
-  }
-  byte bVar3 = Enemy_State[tmp1];
-  if ((bVar3 >= 0x80) || (SMB2J_ONLY && Enemy_ID[bVar3] != 0x24)) {
-    return tmp1;
-  }
-  if (Enemy_MovingDir[tmp1] != 0) {
-    return PlatformFall(tmp1, bVar3);
-  }
-  if (Enemy_Y_Position[tmp1] < 0x2e) {
-    if (bVar3 != HammerThrowingTimer_Or_PlatformCollisionFlag[tmp1]) {
-      Enemy_Y_Position[tmp1] = 0x2f;
-      StopPlatforms(tmp1, bVar3);
-      return tmp1;
-    }
-    return InitPlatformFall(bVar3);
-  }
-  if (Enemy_Y_Position[bVar3] < 0x2e) {
-    if (tmp1 != HammerThrowingTimer_Or_PlatformCollisionFlag[tmp1]) {
-      Enemy_Y_Position[bVar3] = 0x2f;
-      StopPlatforms(tmp1, bVar3);
-      return tmp1;
-    }
-    return InitPlatformFall(bVar3);
-  }
-  byte bStack0000 = Enemy_Y_Position[tmp1];
-  byte bVar2 = HammerThrowingTimer_Or_PlatformCollisionFlag[tmp1];
-  if (bVar2 < 0x80) {
-ColFlg:
-    if (bVar2 == ObjectOffset) {
-PlatDn:
-      tmp1 = MovePlatformDown(tmp1);
-      goto DoOtherPlatform;
-    }
-  } else {
-    bVar2 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[tmp1] + 5;
-    bVar1 = SpriteVarData2[tmp1]
-            + (CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[tmp1] > 0xfa);
-    if (bVar1 >= 0x80) {
-      goto PlatDn;
-    }
-    if (bVar1 == 0) {
-      if (bVar2 < 0xb) {
-        StopPlatforms(tmp1, bVar3);
-        goto DoOtherPlatform;
-      }
-      if (bVar2 < 0xb) {
-        goto ColFlg;
-      }
-    }
-  }
-  tmp1 = MovePlatformUp(tmp1);
-DoOtherPlatform:
-  Enemy_Y_Position[Enemy_State[tmp1]]
-      = (bStack0000 - Enemy_Y_Position[tmp1]) + Enemy_Y_Position[Enemy_State[tmp1]];
-  if (HammerThrowingTimer_Or_PlatformCollisionFlag[tmp1] < 0x80) {
-    PositionPlayerOnVPlat(HammerThrowingTimer_Or_PlatformCollisionFlag[tmp1]);
-  }
-  if (((SpriteVarData2[ObjectOffset]
-        | CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[ObjectOffset])
-       != 0)
-      && (VRAM_Buffer1_Offset < 0x20)) {
-    bVar3 = SpriteVarData2[ObjectOffset];
-    bVar2 = ObjectOffset;
-    bStack0000 = bVar3;
-    sVar4 = SetupPlatformRope(bVar3, ObjectOffset);
-    bVar1 = sVar4.x;
-    VRAM_Buffer1[bVar1] = sVar4.r01;
-    VRAM_Buffer1[bVar1 + 1] = sVar4.r00;
-    VRAM_Buffer1[bVar1 + 2] = 2;
-    if (SpriteVarData2[bVar2] < 0x80) {
-      VRAM_Buffer1[bVar1 + 3] = 0xa2;
-      VRAM_Buffer1[bVar1 + 4] = 0xa3;
-    } else {
-      VRAM_Buffer1[bVar1 + 3] = 0x24;
-      VRAM_Buffer1[bVar1 + 4] = 0x24;
-    }
-    sVar4 = SetupPlatformRope(bVar3 ^ 0xff, Enemy_State[bVar2]);
-    bVar3 = sVar4.x;
-    VRAM_Buffer1[bVar3 + 5] = sVar4.r01;
-    VRAM_Buffer1[bVar3 + 6] = sVar4.r00;
-    VRAM_Buffer1[bVar3 + 7] = 2;
-    if (bStack0000 < 0x80) {
-      VRAM_Buffer1[bVar3 + 8] = 0x24;
-      VRAM_Buffer1[bVar3 + 9] = 0x24;
-    } else {
-      VRAM_Buffer1[bVar3 + 8] = 0xa2;
-      VRAM_Buffer1[bVar3 + 9] = 0xa3;
-    }
-    VRAM_Buffer1[bVar3 + 10] = 0;
-    VRAM_Buffer1_Offset += 10;
-  }
-  return ObjectOffset;
-}
-
-
 // SMB:d541
 // SM2MAIN:a17b
-// Signature: [A, Y] -> [X, r00, r01]
-struct_xr00r01 SetupPlatformRope(const byte param_1, const byte param_2) {
-  const byte ypos = Enemy_Y_Position[param_2] + (param_1 >= 0x80 ? 8 : 0);
+static inline u16 SetupPlatformRope(const bool cond1, const u8 objoff) {
+  // Note: Reworked just to return a PPU address
+  // Original Signature: [A, Y] -> [X, r00, r01]
 
-  u16 xpos;
+  const u8 ypos = Enemy_Y_Position[objoff] + (cond1 ? 0 : 8);
+
+  u16 xpos = LOAD_16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff]);
 
   if (SecondaryHardMode == 0) {
     // NES note: There's a carry bug here.
     // The original game adds 8, then 16 if not in secondary hard mode.
     // The carry result from adding the 16 is used, instead of the total 24.
-    xpos = (Enemy_PageLoc[param_2] << 8) | (Enemy_X_Position[param_2] + 8);
-    xpos += 16;
+
+    if ((xpos & 0xff) >= 256-8) {
+      xpos -= 256;
+    }
+
+    xpos += 24;
   } else {
-    xpos = (Enemy_PageLoc[param_2] << 8) | Enemy_X_Position[param_2];
     xpos += 8;
   }
 
-  struct_xr00r01 sVar4;
-  sVar4.r01 = (((xpos >> 8) & 1) << 2) | (ypos >> 6) | 0x20;
-  byte bVar5 = ((ypos & 0x38) << 2) | ((xpos & 0xf0) >> 3);
+  const u16 nametable = ((xpos & 0x100) == 0) ? 0x2000 : 0x2400;
 
-  if (Enemy_Y_Position[param_2] >= 0xe8) {
-    bVar5 &= 0xbf;
+  const u8 y_tile_pos = ypos >> 3;
+  const u8 x_tile_pos = (xpos & 0xff) >> 3;
+
+  u16 addr = nametable | (y_tile_pos << 5) | (x_tile_pos & 0xfe);
+
+  //                             v bits 7-4 of x
+  // PPU address: 0010 0Nyy yyyx xxx0
+  //                     ^ bits 7-3 of y
+  //                    ^ nametable if x is on odd page
+
+  if (Enemy_Y_Position[objoff] >= 0xe8) {
+    // Turn off bit 6
+    // Probably to prevent the address from going into the attribute table
+    addr &= ~0x0040;
   }
-  sVar4.r00 = bVar5;
-  sVar4.x = VRAM_Buffer1_Offset;
 
-  return sVar4;
+  return addr;
+}
+
+
+// SMB:d432
+// SM2MAIN:a065
+// Signature: [X] -> [X]
+byte BalancePlatform(const byte param_1) {
+  if (Enemy_Y_HighPos[param_1] == 3) {
+    EraseEnemyObject(param_1);
+    return param_1;
+  }
+
+  const byte enemy_state = Enemy_State[param_1];
+
+#ifdef SMB2J_MODE
+  if (Enemy_ID[enemy_state] != 0x24) {
+    return param_1;
+  }
+#endif
+
+  if (enemy_state >= 0x80) {
+    return param_1;
+  }
+
+  if (Enemy_MovingDir[param_1] != 0) {
+    return PlatformFall(param_1, enemy_state);
+  }
+
+  if (Enemy_Y_Position[param_1] < 0x2e) {
+    if (enemy_state != PlatformCollisionFlag[param_1]) {
+      Enemy_Y_Position[param_1] = 0x2f;
+      StopPlatforms(param_1, enemy_state);
+      return param_1;
+    }
+    return InitPlatformFall(enemy_state);
+  }
+
+  if (Enemy_Y_Position[enemy_state] < 0x2e) {
+    if (param_1 != PlatformCollisionFlag[param_1]) {
+      Enemy_Y_Position[enemy_state] = 0x2f;
+      StopPlatforms(param_1, enemy_state);
+      return param_1;
+    }
+    return InitPlatformFall(enemy_state);
+  }
+
+  // 0 = stop
+  // 1 = up
+  // 2 = down
+  int platform_mode = 1;
+
+  const byte bVar2 = PlatformCollisionFlag[param_1];
+
+  if ((bVar2 & 0x80) == 0) {
+    if (bVar2 == ObjectOffset) {
+      platform_mode = 2;
+    }
+  } else {
+    u16 yvel = LOAD_16(Enemy_Y_Speed[param_1], Enemy_Y_MoveForce[param_1]);
+    yvel += 5;
+
+    if ((i16)yvel < 0) {
+      platform_mode = 2;
+    }
+    if (yvel <= 10) {
+      platform_mode = 0;
+    }
+  }
+
+  const byte bStack0000 = Enemy_Y_Position[param_1];
+
+  byte tmp1 = param_1;
+
+  switch (platform_mode) {
+  case 0:
+    StopPlatforms(param_1, enemy_state);
+    break;
+
+  case 1:
+    tmp1 = MovePlatformUp(param_1);
+    break;
+
+  case 2:
+    tmp1 = MovePlatformDown(param_1);
+    break;
+  }
+
+  Enemy_Y_Position[Enemy_State[tmp1]] = (bStack0000 - Enemy_Y_Position[tmp1]) + Enemy_Y_Position[Enemy_State[tmp1]];
+
+  if ((PlatformCollisionFlag[tmp1] & 0x80) == 0) {
+    PositionPlayerOnVPlat(PlatformCollisionFlag[tmp1]);
+  }
+
+  const u8 objoff = ObjectOffset;
+
+  const i16 yvel = LOAD_16(Enemy_Y_Speed[objoff], Enemy_Y_MoveForce[objoff]);
+  const i8 yspd = Enemy_Y_Speed[objoff];
+
+  if ((yvel != 0) && (VRAM_Buffer1_Offset < 32)) {
+    // Draw or erase both ends of the platform ropes
+
+    // Note: This whole block is reworked to be easier to understand.
+    // The logic for writing to the vram is different, but the output is exactly the same.
+
+    const bool cond = yspd >= 0;
+
+
+    // Right hand side
+
+    const u16 ppuaddr_1 = SetupPlatformRope(cond, objoff);
+
+    VRAM1_DRAW(ppuaddr_1,
+               cond ? 0xa2 : 0x24,
+               cond ? 0xa3 : 0x24);
+
+    // Left hand side
+
+    const u16 ppuaddr_2 = SetupPlatformRope(!cond, Enemy_State[objoff]);
+
+    VRAM1_DRAW(ppuaddr_2,
+               !cond ? 0xa2 : 0x24,
+               !cond ? 0xa3 : 0x24);
+  }
+
+  return ObjectOffset;
 }
 
 
@@ -8554,9 +8611,8 @@ struct_xr00r01 SetupPlatformRope(const byte param_1, const byte param_2) {
 // SM2MAIN:a1d2
 // Signature: [Y] -> [X]
 byte InitPlatformFall(const byte param_1) {
-  const byte sVar3 = GetEnemyOffscreenBits(param_1);
+  const byte bVar1 = GetEnemyOffscreenBits(param_1);
 
-  const byte bVar1 = sVar3;
   SetupFloateyNumber(6, bVar1);
   FloateyNum_X_Pos[bVar1] = SprObject_Rel_XPos[0];
   FloateyNum_Y_Pos[bVar1] = SprObject_Y_Position[0];

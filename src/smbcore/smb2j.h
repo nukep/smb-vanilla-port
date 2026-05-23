@@ -337,9 +337,6 @@ void smb2j_WriteTopStatusLine(void);
 void smb2j_WriteBottomStatusLine(void);
 #define WriteBottomStatusLine smb2j_WriteBottomStatusLine
 
-byte smb2j_GetWorldNumForDisplay(void);
-#define GetWorldNumForDisplay smb2j_GetWorldNumForDisplay
-
 void smb2j_DisplayTimeUp(void);
 #define DisplayTimeUp smb2j_DisplayTimeUp
 
@@ -1185,9 +1182,6 @@ void smb2j_MovePiranhaPlant(byte param_1);
 
 byte smb2j_BalancePlatform(byte param_1);
 #define BalancePlatform smb2j_BalancePlatform
-
-struct_xr00r01 smb2j_SetupPlatformRope(byte param_1,byte param_2);
-#define SetupPlatformRope smb2j_SetupPlatformRope
 
 byte smb2j_InitPlatformFall(byte param_1);
 #define InitPlatformFall smb2j_InitPlatformFall
