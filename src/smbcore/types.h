@@ -196,4 +196,18 @@ static inline void vram_buffer1_rle(u16 ppu_addr, bool vertical, int count, u8 v
 #define PPU_ADDR_PALETTE_BG(palette, i) (0x3f00 | ((palette)*4 + (i)))
 #define PPU_ADDR_PALETTE_SPR(palette, i) (0x3f10 | ((palette)*4 + (i)))
 
+// The status bar takes up this many metatiles worth of space
+#define MT_Y_TOP_MARGIN 2
+
+static inline u16 get_block_buffer_offset(u8 column) {
+  // column is between 0 and 31 inclusive
+
+  if (column < 16) {
+    return BLOCK_BUFFER_1_OFFSET + (column % 16);
+  } else {
+    return BLOCK_BUFFER_2_OFFSET + (column % 16);
+  }
+}
+
+
 #endif

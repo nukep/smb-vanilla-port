@@ -148,46 +148,6 @@ void WriteGameText(const byte param_1) {
 }
 
 
-// SMB:96f2
-// Signature: [] -> []
-void ScrollLockObject_Warp(void) {
-  if (WorldNumber == 0) {
-    WarpZoneControl = 4;
-  } else if (AreaType != 1) {
-    WarpZoneControl = 5;
-  } else {
-    WarpZoneControl = 6;
-  }
-  WriteGameText(WarpZoneControl);
-  KillEnemies(0xd);
-  ScrollLockObject();
-}
-
-
-// SMB:9778
-// Signature: [X] -> []
-void MushroomLedge(const byte param_1) {
-  const struct_ycr07 sVar4 = ChkLrgObjLength(param_1);
-  const byte bVar3 = sVar4.r07;
-  if (sVar4.c) {
-    MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
-    NoUnder(0x19, bVar3);
-    return;
-  }
-  const byte bVar2 = AreaObjectLength[param_1];
-  if (bVar2 == 0) {
-    NoUnder(0x1b, bVar3);
-    return;
-  }
-  const byte bVar1 = MushroomLedgeHalfLen[param_1];
-  MetatileBuffer[bVar3] = 0x1a;
-  if (bVar2 == bVar1) {
-    MetatileBuffer[(byte)(bVar3 + 1)] = 0x4f;
-    RenderUnderPart(0x50, bVar3 + 2, 0xf);
-  }
-}
-
-
 // SMB:afc4
 // Signature: [Y] -> []
 void ScrollScreen(const byte param_1) {

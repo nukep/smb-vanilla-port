@@ -337,9 +337,6 @@ void smb1_DisplayTimeUp(void);
 void smb1_DisplayIntermediate(void);
 #define DisplayIntermediate smb1_DisplayIntermediate
 
-void smb1_AreaParserTaskControl(void);
-#define AreaParserTaskControl smb1_AreaParserTaskControl
-
 void smb1_ClearBuffersDrawIcon(void);
 #define ClearBuffersDrawIcon smb1_ClearBuffersDrawIcon
 
@@ -354,12 +351,6 @@ void smb1_ResetSpritesAndScreenTimer(void);
 
 void smb1_ResetScreenTimer(void);
 #define ResetScreenTimer smb1_ResetScreenTimer
-
-void smb1_RenderAreaGraphics(void);
-#define RenderAreaGraphics smb1_RenderAreaGraphics
-
-void smb1_RenderAttributeTables(void);
-#define RenderAttributeTables smb1_RenderAttributeTables
 
 void smb1_ColorRotation(void);
 #define ColorRotation smb1_ColorRotation
@@ -436,185 +427,8 @@ void smb1_TerminateGame(void);
 void smb1_ContinueGame(void);
 #define ContinueGame smb1_ContinueGame
 
-void smb1_AreaParserTaskHandler(void);
-#define AreaParserTaskHandler smb1_AreaParserTaskHandler
-
-void smb1_AreaParserTasks(byte param_1);
-#define AreaParserTasks smb1_AreaParserTasks
-
-void smb1_IncrementColumnPos(void);
-#define IncrementColumnPos smb1_IncrementColumnPos
-
-void smb1_AreaParserCore(void);
-#define AreaParserCore smb1_AreaParserCore
-
-void smb1_ProcessAreaData(void);
-#define ProcessAreaData smb1_ProcessAreaData
-
-void smb1_DecodeAreaData(byte param_1,byte param_2);
-#define DecodeAreaData smb1_DecodeAreaData
-
-void smb1_AlterAreaAttributes(byte param_1);
-#define AlterAreaAttributes smb1_AlterAreaAttributes
-
-void smb1_ScrollLockObject_Warp(void);
-#define ScrollLockObject_Warp smb1_ScrollLockObject_Warp
-
-void smb1_ScrollLockObject(void);
-#define ScrollLockObject smb1_ScrollLockObject
-
 void smb1_KillEnemies(byte param_1);
 #define KillEnemies smb1_KillEnemies
-
-void smb1_AreaFrenzy(byte param_1);
-#define AreaFrenzy smb1_AreaFrenzy
-
-void smb1_AreaStyleObject(byte param_1);
-#define AreaStyleObject smb1_AreaStyleObject
-
-void smb1_TreeLedge(byte param_1);
-#define TreeLedge smb1_TreeLedge
-
-void smb1_MushroomLedge(byte param_1);
-#define MushroomLedge smb1_MushroomLedge
-
-void smb1_NoUnder(byte param_1,byte param_2);
-#define NoUnder smb1_NoUnder
-
-void smb1_PulleyRopeObject(byte param_1);
-#define PulleyRopeObject smb1_PulleyRopeObject
-
-void smb1_CastleObject(byte param_1);
-#define CastleObject smb1_CastleObject
-
-void smb1_WaterPipe(byte param_1);
-#define WaterPipe smb1_WaterPipe
-
-void smb1_IntroPipe(byte param_1);
-#define IntroPipe smb1_IntroPipe
-
-void smb1_ExitPipe(byte param_1);
-#define ExitPipe smb1_ExitPipe
-
-struct_yc smb1_RenderSidewaysPipe(byte param_1,byte param_2);
-#define RenderSidewaysPipe smb1_RenderSidewaysPipe
-
-void smb1_VerticalPipe(byte param_1,byte param_2);
-#define VerticalPipe smb1_VerticalPipe
-
-struct_yr06r07 smb1_GetPipeHeight(byte param_1);
-#define GetPipeHeight smb1_GetPipeHeight
-
-struct_xc smb1_FindEmptyEnemySlot(void);
-#define FindEmptyEnemySlot smb1_FindEmptyEnemySlot
-
-void smb1_Hole_Water(byte param_1);
-#define Hole_Water smb1_Hole_Water
-
-void smb1_QuestionBlockRow_High(byte param_1);
-#define QuestionBlockRow_High smb1_QuestionBlockRow_High
-
-void smb1_QuestionBlockRow_Low(byte param_1);
-#define QuestionBlockRow_Low smb1_QuestionBlockRow_Low
-
-void smb1_Bridge_High(byte param_1);
-#define Bridge_High smb1_Bridge_High
-
-void smb1_Bridge_Middle(byte param_1);
-#define Bridge_Middle smb1_Bridge_Middle
-
-void smb1_Bridge_Low(byte param_1);
-#define Bridge_Low smb1_Bridge_Low
-
-void smb1_FlagBalls_Residual(byte param_1);
-#define FlagBalls_Residual smb1_FlagBalls_Residual
-
-void smb1_FlagpoleObject(void);
-#define FlagpoleObject smb1_FlagpoleObject
-
-void smb1_EndlessRope(void);
-#define EndlessRope smb1_EndlessRope
-
-void smb1_BalancePlatRope(byte param_1);
-#define BalancePlatRope smb1_BalancePlatRope
-
-void smb1_RowOfCoins(byte param_1);
-#define RowOfCoins smb1_RowOfCoins
-
-void smb1_CastleBridgeObj(byte param_1,byte param_2);
-#define CastleBridgeObj smb1_CastleBridgeObj
-
-void smb1_AxeObj(byte param_1);
-#define AxeObj smb1_AxeObj
-
-void smb1_ChainObj(byte param_1);
-#define ChainObj smb1_ChainObj
-
-void smb1_EmptyBlock(byte param_1);
-#define EmptyBlock smb1_EmptyBlock
-
-void smb1_RowOfBricks(byte param_1);
-#define RowOfBricks smb1_RowOfBricks
-
-void smb1_RowOfSolidBlocks(byte param_1);
-#define RowOfSolidBlocks smb1_RowOfSolidBlocks
-
-void smb1_ColumnOfBricks(byte param_1);
-#define ColumnOfBricks smb1_ColumnOfBricks
-
-void smb1_ColumnOfSolidBlocks(byte param_1);
-#define ColumnOfSolidBlocks smb1_ColumnOfSolidBlocks
-
-void smb1_BulletBillCannon(byte param_1);
-#define BulletBillCannon smb1_BulletBillCannon
-
-void smb1_StaircaseObject(byte param_1);
-#define StaircaseObject smb1_StaircaseObject
-
-void smb1_Jumpspring(byte param_1);
-#define Jumpspring smb1_Jumpspring
-
-void smb1_Hidden1UpBlock(byte param_1,byte param_2);
-#define Hidden1UpBlock smb1_Hidden1UpBlock
-
-void smb1_QuestionBlock(byte param_1,byte param_2);
-#define QuestionBlock smb1_QuestionBlock
-
-void smb1_BrickWithCoins(byte param_1,byte param_2);
-#define BrickWithCoins smb1_BrickWithCoins
-
-void smb1_BrickWithItem(byte param_1,byte param_2);
-#define BrickWithItem smb1_BrickWithItem
-
-byte smb1_GetAreaObjectID(byte param_1);
-#define GetAreaObjectID smb1_GetAreaObjectID
-
-void smb1_Hole_Empty(byte param_1);
-#define Hole_Empty smb1_Hole_Empty
-
-byte smb1_RenderUnderPart(byte param_1,byte param_2,byte param_3);
-#define RenderUnderPart smb1_RenderUnderPart
-
-struct_ycr07 smb1_ChkLrgObjLength(byte param_1);
-#define ChkLrgObjLength smb1_ChkLrgObjLength
-
-bool smb1_ChkLrgObjFixedLength(byte param_1,byte param_2);
-#define ChkLrgObjFixedLength smb1_ChkLrgObjFixedLength
-
-struct_yr07 smb1_GetLrgObjAttrib(byte param_1);
-#define GetLrgObjAttrib smb1_GetLrgObjAttrib
-
-byte smb1_GetAreaObjXPosition(void);
-#define GetAreaObjXPosition smb1_GetAreaObjXPosition
-
-byte smb1_GetAreaObjYPosition(byte param_1);
-#define GetAreaObjYPosition smb1_GetAreaObjYPosition
-
-void smb1_LoadAreaPointer(void);
-#define LoadAreaPointer smb1_LoadAreaPointer
-
-void smb1_GetAreaDataAddrs(void);
-#define GetAreaDataAddrs smb1_GetAreaDataAddrs
 
 void smb1_GameMode(void);
 #define GameMode smb1_GameMode

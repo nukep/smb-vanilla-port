@@ -194,108 +194,6 @@ void WriteGameText(const byte param_1) {
 }
 
 
-// SM2MAIN:675e
-// Signature: [A] -> []
-void WriteWarpZoneMessage(const byte warp_zone_control) {
-  // "Welcome to warp zone!"
-
-  VRAM_Buffer1_Offset = 0;
-
-  int i;
-  for (i = 0; i < 256; i++) {
-    const u8 val = WarpZone[i];
-    VRAM_Buffer1[i] = val;
-    if (val == 0) {
-      break;
-    }
-  }
-
-  assert_smb_crashbug(i < 256, "An infinite loop would've occurred in the original game");
-
-  // Note: The original game would set the offset to a hard-coded value after the loop (36).
-  // Here we're just setting it to the actual length of the data.
-  VRAM_Buffer1_Offset = i;
-
-  // Bit 7 is always set, so toggle it.
-  const u8 idx = warp_zone_control ^ 0x80;
-  VRAM_Buffer1[27] = WarpZoneNumbers[idx];
-}
-
-
-static inline byte ScrollLockObject_Warp_impl(void) {
-  if (HardWorldFlag != 0) {
-    // 121 = 0x100 - 0x87
-    if (LevelNumber != 121) {
-      return 0x87 + LevelNumber;
-    }
-
-    // NES note: Getting to this point would be a glitch in the original game.
-    // The BNE instruction is meant to be unconditional.
-
-    // The disassembly shows:
-    //   LDA #$87
-    //   CLC
-    //   ADC LevelNumber
-    //   BNE DumpWarpCtrl
-  }
-
-  if (HardWorldFlag == 0 && WorldNumber == 0) {
-    if (AreaType == 1) {
-      return 0x81;
-    }
-
-    if (AreaAddrsLOffset == 0) {
-      return 0x80;
-    }
-
-    return 0x82;
-  }
-
-  if (WorldNumber == 2) {
-    return 0x83;
-  }
-
-  if (WorldNumber == 4) {
-    if (AreaAddrsLOffset == 0xb) {
-      return 0x84;
-    }
-
-    if (AreaType != 1) {
-      return 0x85;
-    }
-
-    return 0x86;
-  }
-
-  return 0x87;
-}
-
-// SM2MAIN:7513
-// Signature: [] -> []
-void ScrollLockObject_Warp(void) {
-  WarpZoneControl = ScrollLockObject_Warp_impl();
-  WriteWarpZoneMessage(WarpZoneControl);
-  KillEnemies(0xd);
-  ScrollLockObject();
-}
-
-
-// SM2MAIN:75cf
-// Signature: [X] -> []
-void CloudLedge(const byte param_1) {
-  const struct_ycr07 sVar2 = ChkLrgObjLength(param_1);
-  const byte bVar1 = sVar2.r07;
-  if (sVar2.c) {
-    MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
-    NoUnder(0x8a, bVar1);
-  } else if (AreaObjectLength[param_1] == 0) {
-    NoUnder(0x8c, bVar1);
-  } else {
-    MetatileBuffer[bVar1] = 0x8b;
-  }
-}
-
-
 // SM2MAIN:89a1
 // Signature: [X] -> []
 void PoisonMushBlock(const byte param_1) {
@@ -819,68 +717,6 @@ void PatchPlayerNamePal(void) {
 }
 
 
-// SM2DATA2+SM2DATA4:c470
-// Signature: [X] -> []
-void UpsideDownPipe_High(const byte param_1) {
-  char cVar1;
-  byte bVar2;
-  byte bVar4;
-  struct_xc sVar6;
-
-  byte bStack0000 = 1;
-  const struct_yr06r07 sVar7 = GetPipeHeight(param_1);
-  const byte bVar3 = sVar7.r06;
-  byte bVar5 = bStack0000;
-  bStack0000 = sVar7.y;
-  if (AreaObjectLength[param_1] != 0) {
-    sVar6 = FindEmptyEnemySlot();
-    bVar4 = sVar6.x;
-    if (!sVar6.c) {
-      SetupPiranhaPlant(4, bVar4, bVar5);
-      cVar1 = bVar3 * 0x10 + Enemy_Y_Position[bVar4];
-      bVar2 = cVar1 - 10;
-      Enemy_Y_Position[bVar4] = bVar2;
-      CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar4] = bVar2;
-      BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
-      SpriteVarData2[bVar4] = SpriteVarData2[bVar4] + 1;
-    }
-  }
-  bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar5, bVar3 - 1);
-  MetatileBuffer[bVar5] = VerticalPipeData[bStack0000];
-}
-
-
-// SM2DATA2+SM2DATA4:c475
-// Signature: [X] -> []
-void UpsideDownPipe_Low(const byte param_1) {
-  char cVar1;
-  byte bVar2;
-  byte bVar4;
-  struct_xc sVar7;
-
-  byte bStack0000 = 4;
-  const struct_yr06r07 sVar6 = GetPipeHeight(param_1);
-  const byte bVar3 = sVar6.r06;
-  byte bVar5 = bStack0000;
-  bStack0000 = sVar6.y;
-  if (AreaObjectLength[param_1] != 0) {
-    sVar7 = FindEmptyEnemySlot();
-    bVar4 = sVar7.x;
-    if (!sVar7.c) {
-      SetupPiranhaPlant(4, bVar4, bVar5);
-      cVar1 = bVar3 * 0x10 + Enemy_Y_Position[bVar4];
-      bVar2 = cVar1 - 10;
-      Enemy_Y_Position[bVar4] = bVar2;
-      CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar4] = bVar2;
-      BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
-      SpriteVarData2[bVar4] = SpriteVarData2[bVar4] + 1;
-    }
-  }
-  bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar5, bVar3 - 1);
-  MetatileBuffer[bVar5] = VerticalPipeData[bStack0000];
-}
-
-
 // SM2DATA2+SM2DATA4:c4c0
 // Signature: [X] -> []
 void MoveUpsideDownPiranhaP(const byte param_1) {
@@ -961,20 +797,6 @@ void ModifyLeavesPos(void) {
     LeavesXPos[i] += adder + adder + CARRY1(LeavesXPos[i], adder);
     LeavesYPos[i] += adder;
   }
-}
-
-
-// SM2DATA2+SM2DATA4:c5be
-// Signature: [] -> []
-void WindOn(void) {
-  WindFlag = 1;
-}
-
-
-// SM2DATA2+SM2DATA4:c5c2
-// Signature: [] -> []
-void WindOff(void) {
-  WindFlag = 0;
 }
 
 
@@ -1303,72 +1125,6 @@ void WriteNameToVictoryMsg(void) {
       HurrahMsg[i + 0xe] = EndPlayerName_Luigi[i];
     }
   }
-}
-
-
-// SM2DATA4:c2c3
-// Signature: [] -> []
-void AltHard_GetAreaDataAddrs(void) {
-  // Inlined: GetAreaType
-  const byte area_type = (AreaPointer & 0x60) >> 5;
-  const byte loffset = AreaPointer & 0x1f;
-  AreaType = area_type;
-  AreaAddrsLOffset = loffset;
-
-  {
-    const byte off = AltHard_EnemyAddrHOffsets[area_type] + loffset;
-    const byte lo = AltHard_EnemyDataAddrs[(byte)(off * 2)];
-    const byte hi = AltHard_EnemyDataAddrs[(byte)(off * 2) + 1];
-    const u16 addr = (hi << 8) | lo;
-    STORE_16(EnemyData_addr_hi, EnemyData_addr_lo, addr);
-    EnemyData = rom_ptr(addr);
-  }
-
-  {
-    const byte off = (AltHard_AreaDataHOffsets[area_type] + loffset) * 2;
-    const byte lo = AltHard_AreaDataAddrs[off];
-    const byte hi = AltHard_AreaDataAddrs[off + 1];
-    const u16 addr = (hi << 8) | lo;
-    STORE_16(AreaData_addr_hi, AreaData_addr_lo, addr);
-    AreaData = rom_ptr(addr);
-  }
-
-  const byte area_data_0 = AreaData[0];
-  // gg ppp fff
-
-  const byte area_data_1 = AreaData[1];
-  // aa bb tttt
-
-  const byte gg = area_data_0 >> 6;
-  const byte ppp = (area_data_0 & 0x38) >> 3;
-  const byte fff = area_data_0 & 7;
-
-  if (fff >= 4) {
-    ForegroundScenery = 0;
-    BackgroundColorCtrl = fff;
-  } else {
-    ForegroundScenery = fff;
-  }
-  PlayerEntranceCtrl = ppp;
-  GameTimerSetting = gg;
-
-  const byte aa = area_data_1 >> 6;
-  const byte bb = (area_data_1 & 0x30) >> 4;
-  const byte tttt = area_data_1 & 0xf;
-
-  TerrainControl = tttt;
-  BackgroundScenery = bb;
-  AreaStyle = aa;
-  if (aa == 3) {
-    AreaStyle = 0;
-    CloudTypeOverride = 3;
-  } else {
-    AreaStyle = aa;
-  }
-
-  ADD_UNSIGNED_16_8(AreaData_addr_hi, AreaData_addr_lo,
-                    2);
-  AreaData += 2;
 }
 
 

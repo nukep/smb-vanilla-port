@@ -343,26 +343,14 @@ void smb2j_DisplayTimeUp(void);
 void smb2j_DisplayIntermediate(void);
 #define DisplayIntermediate smb2j_DisplayIntermediate
 
-void smb2j_AreaParserTaskControl(void);
-#define AreaParserTaskControl smb2j_AreaParserTaskControl
-
 void smb2j_WriteGameText(byte param_1);
 #define WriteGameText smb2j_WriteGameText
-
-void smb2j_WriteWarpZoneMessage(byte param_1);
-#define WriteWarpZoneMessage smb2j_WriteWarpZoneMessage
 
 void smb2j_ResetSpritesAndScreenTimer(void);
 #define ResetSpritesAndScreenTimer smb2j_ResetSpritesAndScreenTimer
 
 void smb2j_ResetScreenTimer(void);
 #define ResetScreenTimer smb2j_ResetScreenTimer
-
-void smb2j_RenderAreaGraphics(void);
-#define RenderAreaGraphics smb2j_RenderAreaGraphics
-
-void smb2j_RenderAttributeTables(void);
-#define RenderAttributeTables smb2j_RenderAttributeTables
 
 void smb2j_ColorRotation(void);
 #define ColorRotation smb2j_ColorRotation
@@ -430,182 +418,8 @@ void smb2j_TerminateGame(void);
 void smb2j_ContinueGame(void);
 #define ContinueGame smb2j_ContinueGame
 
-void smb2j_AreaParserTaskHandler(void);
-#define AreaParserTaskHandler smb2j_AreaParserTaskHandler
-
-void smb2j_AreaParserTasks(byte param_1);
-#define AreaParserTasks smb2j_AreaParserTasks
-
-void smb2j_IncrementColumnPos(void);
-#define IncrementColumnPos smb2j_IncrementColumnPos
-
-void smb2j_AreaParserCore(void);
-#define AreaParserCore smb2j_AreaParserCore
-
-void smb2j_ProcessAreaData(void);
-#define ProcessAreaData smb2j_ProcessAreaData
-
-void smb2j_DecodeAreaData(byte param_1,byte param_2);
-#define DecodeAreaData smb2j_DecodeAreaData
-
-void smb2j_AlterAreaAttributes(byte param_1);
-#define AlterAreaAttributes smb2j_AlterAreaAttributes
-
-void smb2j_ScrollLockObject_Warp(void);
-#define ScrollLockObject_Warp smb2j_ScrollLockObject_Warp
-
-void smb2j_ScrollLockObject(void);
-#define ScrollLockObject smb2j_ScrollLockObject
-
 void smb2j_KillEnemies(byte param_1);
 #define KillEnemies smb2j_KillEnemies
-
-void smb2j_AreaFrenzy(byte param_1);
-#define AreaFrenzy smb2j_AreaFrenzy
-
-void smb2j_AreaStyleObject(byte param_1);
-#define AreaStyleObject smb2j_AreaStyleObject
-
-void smb2j_TreeLedge(byte param_1);
-#define TreeLedge smb2j_TreeLedge
-
-void smb2j_CloudLedge(byte param_1);
-#define CloudLedge smb2j_CloudLedge
-
-void smb2j_NoUnder(byte param_1,byte param_2);
-#define NoUnder smb2j_NoUnder
-
-void smb2j_PulleyRopeObject(byte param_1);
-#define PulleyRopeObject smb2j_PulleyRopeObject
-
-void smb2j_CastleObject(byte param_1);
-#define CastleObject smb2j_CastleObject
-
-void smb2j_WaterPipe(byte param_1);
-#define WaterPipe smb2j_WaterPipe
-
-void smb2j_IntroPipe(byte param_1);
-#define IntroPipe smb2j_IntroPipe
-
-void smb2j_ExitPipe(byte param_1);
-#define ExitPipe smb2j_ExitPipe
-
-struct_yc smb2j_RenderSidewaysPipe(byte param_1,byte param_2);
-#define RenderSidewaysPipe smb2j_RenderSidewaysPipe
-
-void smb2j_VerticalPipe(byte param_1,byte param_2);
-#define VerticalPipe smb2j_VerticalPipe
-
-struct_yr06r07 smb2j_GetPipeHeight(byte param_1);
-#define GetPipeHeight smb2j_GetPipeHeight
-
-void smb2j_SetupPiranhaPlant(byte param_1,byte param_2,byte param_3);
-#define SetupPiranhaPlant smb2j_SetupPiranhaPlant
-
-struct_xc smb2j_FindEmptyEnemySlot(void);
-#define FindEmptyEnemySlot smb2j_FindEmptyEnemySlot
-
-void smb2j_Hole_Water(byte param_1);
-#define Hole_Water smb2j_Hole_Water
-
-void smb2j_QuestionBlockRow_High(byte param_1);
-#define QuestionBlockRow_High smb2j_QuestionBlockRow_High
-
-void smb2j_QuestionBlockRow_Low(byte param_1);
-#define QuestionBlockRow_Low smb2j_QuestionBlockRow_Low
-
-void smb2j_Bridge_High(byte param_1);
-#define Bridge_High smb2j_Bridge_High
-
-void smb2j_Bridge_Middle(byte param_1);
-#define Bridge_Middle smb2j_Bridge_Middle
-
-void smb2j_Bridge_Low(byte param_1);
-#define Bridge_Low smb2j_Bridge_Low
-
-void smb2j_FlagBalls_Residual(byte param_1);
-#define FlagBalls_Residual smb2j_FlagBalls_Residual
-
-void smb2j_FlagpoleObject(void);
-#define FlagpoleObject smb2j_FlagpoleObject
-
-void smb2j_EndlessRope(void);
-#define EndlessRope smb2j_EndlessRope
-
-void smb2j_BalancePlatRope(byte param_1);
-#define BalancePlatRope smb2j_BalancePlatRope
-
-void smb2j_RowOfCoins(byte param_1);
-#define RowOfCoins smb2j_RowOfCoins
-
-void smb2j_CastleBridgeObj(byte param_1,byte param_2);
-#define CastleBridgeObj smb2j_CastleBridgeObj
-
-void smb2j_AxeObj(byte param_1);
-#define AxeObj smb2j_AxeObj
-
-void smb2j_ChainObj(byte param_1);
-#define ChainObj smb2j_ChainObj
-
-void smb2j_EmptyBlock(byte param_1);
-#define EmptyBlock smb2j_EmptyBlock
-
-void smb2j_RowOfBricks(byte param_1);
-#define RowOfBricks smb2j_RowOfBricks
-
-void smb2j_RowOfSolidBlocks(byte param_1);
-#define RowOfSolidBlocks smb2j_RowOfSolidBlocks
-
-void smb2j_ColumnOfBricks(byte param_1);
-#define ColumnOfBricks smb2j_ColumnOfBricks
-
-void smb2j_ColumnOfSolidBlocks(byte param_1);
-#define ColumnOfSolidBlocks smb2j_ColumnOfSolidBlocks
-
-void smb2j_BulletBillCannon(byte param_1);
-#define BulletBillCannon smb2j_BulletBillCannon
-
-void smb2j_StaircaseObject(byte param_1);
-#define StaircaseObject smb2j_StaircaseObject
-
-void smb2j_Jumpspring(byte param_1);
-#define Jumpspring smb2j_Jumpspring
-
-void smb2j_Hidden1UpBlock(byte param_1,byte param_2);
-#define Hidden1UpBlock smb2j_Hidden1UpBlock
-
-void smb2j_QuestionBlock(byte param_1,byte param_2);
-#define QuestionBlock smb2j_QuestionBlock
-
-void smb2j_BrickWithCoins(byte param_1,byte param_2);
-#define BrickWithCoins smb2j_BrickWithCoins
-
-void smb2j_BrickWithItem(byte param_1,byte param_2);
-#define BrickWithItem smb2j_BrickWithItem
-
-byte smb2j_GetAreaObjectID(byte param_1);
-#define GetAreaObjectID smb2j_GetAreaObjectID
-
-void smb2j_Hole_Empty(byte param_1);
-#define Hole_Empty smb2j_Hole_Empty
-
-byte smb2j_RenderUnderPart(byte param_1,byte param_2,byte param_3);
-#define RenderUnderPart smb2j_RenderUnderPart
-
-struct_ycr07 smb2j_ChkLrgObjLength(byte param_1);
-#define ChkLrgObjLength smb2j_ChkLrgObjLength
-
-bool smb2j_ChkLrgObjFixedLength(byte param_1,byte param_2);
-#define ChkLrgObjFixedLength smb2j_ChkLrgObjFixedLength
-
-struct_yr07 smb2j_GetLrgObjAttrib(byte param_1);
-#define GetLrgObjAttrib smb2j_GetLrgObjAttrib
-
-byte smb2j_GetAreaObjXPosition(void);
-#define GetAreaObjXPosition smb2j_GetAreaObjXPosition
-
-byte smb2j_GetAreaObjYPosition(byte param_1);
-#define GetAreaObjYPosition smb2j_GetAreaObjYPosition
 
 void smb2j_GameMode(void);
 #define GameMode smb2j_GameMode
@@ -1660,20 +1474,8 @@ void smb2j_LoadPhysicsData(void);
 void smb2j_LoadMarioPhysics(void);
 #define LoadMarioPhysics smb2j_LoadMarioPhysics
 
-void smb2j_LoadAreaPointer(void);
-#define LoadAreaPointer smb2j_LoadAreaPointer
-
-void smb2j_FUN_e149(void);
-#define FUN_e149 smb2j_FUN_e149
-
-void smb2j_AltHard_GetAreaDataAddrs(void);
-#define AltHard_GetAreaDataAddrs smb2j_AltHard_GetAreaDataAddrs
-
 void smb2j_ChangeHalfwayPages(void);
 #define ChangeHalfwayPages smb2j_ChangeHalfwayPages
-
-void smb2j_GetAreaDataAddrs(void);
-#define GetAreaDataAddrs smb2j_GetAreaDataAddrs
 
 void smb2j_GameMenuRoutine(void);
 #define GameMenuRoutine smb2j_GameMenuRoutine
@@ -1702,12 +1504,6 @@ void smb2j_PrimaryGameSetup(void);
 void smb2j_PatchPlayerNamePal(void);
 #define PatchPlayerNamePal smb2j_PatchPlayerNamePal
 
-void smb2j_UpsideDownPipe_High(byte param_1);
-#define UpsideDownPipe_High smb2j_UpsideDownPipe_High
-
-void smb2j_UpsideDownPipe_Low(byte param_1);
-#define UpsideDownPipe_Low smb2j_UpsideDownPipe_Low
-
 void smb2j_MoveUpsideDownPiranhaP(byte param_1);
 #define MoveUpsideDownPiranhaP smb2j_MoveUpsideDownPiranhaP
 
@@ -1719,12 +1515,6 @@ void smb2j_SimulateWind(void);
 
 void smb2j_ModifyLeavesPos(void);
 #define ModifyLeavesPos smb2j_ModifyLeavesPos
-
-void smb2j_WindOn(void);
-#define WindOn smb2j_WindOn
-
-void smb2j_WindOff(void);
-#define WindOff smb2j_WindOff
 
 void smb2j_ScreenSubsForFinalRoom(void);
 #define ScreenSubsForFinalRoom smb2j_ScreenSubsForFinalRoom

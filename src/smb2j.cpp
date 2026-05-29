@@ -26,8 +26,10 @@ void UpdateGamesBeaten();
 
 #include "smbcommon.h"
 #include "smbcore/common_sound.c"
+#include "smbcore/area.h"
 #include "smbcore/common.c"
 #include "smbcore/smb2jonly.c"
+#include "smbcore/area.c"
 
 void IRQHandler();
 

@@ -18,8 +18,10 @@ bool TransposePlayers();
 
 #include "smbcommon.h"
 #include "smbcore/common_sound.c"
+#include "smbcore/area.h"
 #include "smbcore/common.c"
 #include "smbcore/smb1only.c"
+#include "smbcore/area.c"
 
 // SMB:8000
 // Signature: [] -> []
