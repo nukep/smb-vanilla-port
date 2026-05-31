@@ -796,7 +796,7 @@ void smb1_DuplicateEnemyObj(byte param_1);
 void smb1_InitBowserFlame(byte param_1);
 #define InitBowserFlame smb1_InitBowserFlame
 
-byte smb1_PutAtRightExtent(byte param_1,byte param_2);
+void smb1_PutAtRightExtent(byte param_1,byte param_2);
 #define PutAtRightExtent smb1_PutAtRightExtent
 
 void smb1_InitFireworks(byte param_1);

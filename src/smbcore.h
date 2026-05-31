@@ -46,6 +46,7 @@ static inline NORETURN void jmpengine_overflow(byte index) {
 #define assert_eq_assumption(expected, actual) assert((expected) == (actual))
 #define assert_eq_regressiontest(expected, actual) assert((expected) == (actual))
 
+#define assert_unreachable() assert(0)
 
 
 // Represents the internal PPU register.
@@ -194,9 +195,6 @@ static inline const byte * rom_ptr(const u16 addr) {
 #define SMB2J_ONLY (SMB_STATE->which_game == GAME_SMB2J)
 #define SMB1_2J_SWITCH(smb1, smb2j) (SMB1_ONLY ? (smb1) : (smb2j))
 #define ssw SMB1_2J_SWITCH
-
-#define FOR_LT(v, count) while (v += 1, v < count)
-#define FOR_NE(v, count) while (v += 1, v != count)
 
 
 #define PPU_STATE (SMB_STATE->ppu)

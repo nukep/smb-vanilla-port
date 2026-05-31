@@ -21,7 +21,7 @@
 #define HammerThrowingTimer_Or_PlatformCollisionFlag PlatformCollisionFlag
 #define CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos Enemy_Y_MoveForce
 #define Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos (SprObject_X_MoveForce + 1)
-#define BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos (SprObject_YMF_Dummy + 1)
+#define BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos Enemy_YMF_Dummy
 #define PlayerOrSprObject_YMF_Dummy      SprObject_YMF_Dummy
 #define PlayerOrSprObject_Y_MoveForce    SprObject_Y_MoveForce
 #define Cannon_Or_Whirlpool_Offset       Cannon_Offset
@@ -408,7 +408,7 @@
 #define AreaObjectLength                 RAMARRAY(0x0730, 3)
 #define AreaStyle                        RAM(0x0733)
 #define StaircaseControl                 RAM(0x0734)
-#define AreaObjectHeight                 RAM(0x0735)
+// #define AreaObjectHeight                 RAM(0x0735)
 #define MushroomLedgeHalfLen             RAMARRAY(0x0736, 3)
 #define EnemyDataOffset                  RAM(0x0739)
 #define EnemyObjectPageLoc               RAM(0x073A)

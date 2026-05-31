@@ -1441,9 +1441,19 @@ void Entrance_GameTimerSetup(void) {
   GetPlayerColors();
 
   if ((GameTimerSetting != 0) && (FetchNewGameTimerFlag != 0)) {
-    GameTimerDisplay[0] = GameTimerData[GameTimerSetting];
-    GameTimerDisplay[1] = 0;
-    GameTimerDisplay[2] = 1;
+    // Initialize the game timer
+
+    // NES note: inlined from GameTimerData
+    static const u16 times[] = {0, 401, 301, 201};
+
+    assert_eq_assumption(GameTimerSetting <= sizeof(times)/sizeof(times[0]), true);
+
+    const u16 time = times[GameTimerSetting];
+
+    GameTimerDisplay[0] = (time / 100) % 10;
+    GameTimerDisplay[1] = (time / 10) % 10;
+    GameTimerDisplay[2] = (time) % 10;
+
     FetchNewGameTimerFlag = 0;
     StarInvincibleTimer = 0;
   }
@@ -1670,8 +1680,6 @@ void GameMode(void) {
 // SM2MAIN:7a47
 // Signature: [] -> []
 void GameCoreRoutine(void) {
-  byte bVar1;
-
 #ifdef SMB1_MODE
   SavedJoypadBits[0] = SavedJoypadBits[CurrentPlayer];
 #endif
@@ -1680,19 +1688,20 @@ void GameCoreRoutine(void) {
     return;
   }
   ProcFireball_Bubble();
-  bVar1 = 0;
-  do {
-    ObjectOffset = bVar1;
-    bVar1 = EnemiesAndLoopsCore(bVar1);
+
+  for (int i = 0; i < 6; i++) {
+    ObjectOffset = i;
+    byte bVar1 = EnemiesAndLoopsCore(i);
     bVar1 = FloateyNumbersRoutine(bVar1);
-  } FOR_NE(bVar1, 6);
+    assert_eq_assumption(bVar1, i);
+  }
+
   GetPlayerOffscreenBits();
   RelativePlayerPosition();
   PlayerGfxHandler();
   BlockObjMT_Updater();
   ObjectOffset = 1;
-  bVar1 = BlockObjectsCore(1);
-  ObjectOffset = bVar1 - 1;
+  ObjectOffset = BlockObjectsCore(1) - 1;
   BlockObjectsCore(ObjectOffset);
   MiscObjectsCore();
   ProcessCannons();
@@ -1705,21 +1714,28 @@ void GameCoreRoutine(void) {
     SimulateWind();
   }
 #endif
-  if (0x7f < (byte)(SprObject_Y_HighPos[0] - 2)) {
+
+  bool do_cycle = true;
+
+  // Note: comparison to 0x82 is because this is a signed comparison
+
+  if (Player_Y_HighPos < 2 || Player_Y_HighPos >= 0x82) {
     if (StarInvincibleTimer == 0) {
       ResetPalStar();
-      goto end;
-    }
-    if ((StarInvincibleTimer == 4) && (IntervalTimerControl == 0)) {
+      do_cycle = false;
+    } else if ((StarInvincibleTimer == 4) && (IntervalTimerControl == 0)) {
       GetAreaMusic();
     }
   }
-  bVar1 = FrameCounter;
-  if (StarInvincibleTimer < 8) {
-    bVar1 = FrameCounter >> 2;
+
+  if (do_cycle) {
+    if (StarInvincibleTimer < 8) {
+      CyclePlayerPalette(FrameCounter >> 3);
+    } else {
+      CyclePlayerPalette(FrameCounter >> 1);
+    }
   }
-  CyclePlayerPalette(bVar1 >> 1);
-end:
+
   PreviousA_B_Buttons = A_B_Buttons;
   Left_Right_Buttons = 0;
   UpdScrollVar();
@@ -3079,48 +3095,57 @@ byte VineObjectHandler(const byte param_1) {
 // SM2MAIN:8587
 // Signature: [] -> []
 void ProcessCannons(void) {
-  byte bVar1;
-  byte sVar3;
-
   if (AreaType == 0) {
     return;
   }
 
-    byte bVar2 = 2;
-    do {
-      ObjectOffset = bVar2;
-      if (Enemy_Flag[bVar2] == 0) {
-        bVar1 = PseudoRandomBitReg[bVar2 + 1] & CannonBitmasks[SecondaryHardMode];
-        if ((bVar1 > 5) || (Cannon_PageLoc[bVar1] == 0)) {
-          goto Chk_BB;
-        }
-        if (Cannon_Timer[bVar1] != 0) {
-          Cannon_Timer[bVar1] = Cannon_Timer[bVar1] - (5 >= bVar1);
-          goto Chk_BB;
-        }
-        if (TimerControl != 0) {
-          goto Chk_BB;
-        }
-        Cannon_Timer[bVar1] = 0xe;
-        Enemy_PageLoc[bVar2] = Cannon_PageLoc[bVar1];
-        Enemy_X_Position[bVar2] = Cannon_X_Position[bVar1];
-        Enemy_Y_Position[bVar2] = Cannon_Y_Position[bVar1] - 8;
-        Enemy_Y_HighPos[bVar2] = 1;
-        Enemy_Flag[bVar2] = 1;
-        Enemy_State[bVar2] = 0;
-        Enemy_BoundBoxCtrl[bVar2] = 9;
-        Enemy_ID[bVar2] = 0x33;
-      } else {
-Chk_BB:
-        if (Enemy_ID[bVar2] == 0x33) {
-          OffscreenBoundsCheck(bVar2);
-          if (Enemy_Flag[bVar2] != 0) {
-            sVar3 = GetEnemyOffscreenBits(bVar2);
-            bVar2 = BulletBillHandler(sVar3);
+  for (int i = 2; i >= 0; i--) {
+    ObjectOffset = i;
+
+    bool chk_bb = true;
+
+    if (Enemy_Flag[i] == 0) {
+      const byte rng = PseudoRandomBitReg[i + 1] & (SecondaryHardMode == 0 ? 15 : 7);
+
+      if (rng < 6) {
+        if (Cannon_PageLoc[rng] != 0) {
+          if (Cannon_Timer[rng] != 0) {
+            Cannon_Timer[rng] -= 1;
+          } else if (TimerControl == 0) {
+            // Fire cannon
+
+            // Note: cannon timer is decremented after this
+            Cannon_Timer[rng] = 14;
+            Enemy_PageLoc[i] = Cannon_PageLoc[rng];
+            Enemy_X_Position[i] = Cannon_X_Position[rng];
+            Enemy_Y_Position[i] = Cannon_Y_Position[rng] - 8;
+            Enemy_Y_HighPos[i] = 1;
+            Enemy_Flag[i] = 1;
+            Enemy_State[i] = 0;
+            Enemy_BoundBoxCtrl[i] = 9;
+            Enemy_ID[i] = 0x33;
+
+            chk_bb = false;
           }
         }
       }
-    } while (bVar2 -= 1, bVar2 < 0x80);
+    }
+
+    if (chk_bb) {
+      if (Enemy_ID[i] == 0x33) {
+        OffscreenBoundsCheck(i);
+        if (Enemy_Flag[i] != 0) {
+          const byte sVar3 = GetEnemyOffscreenBits(i);
+
+          assert_eq_assumption(sVar3, i);
+
+          const byte res = BulletBillHandler(i);
+
+          assert_eq_assumption(res, i);
+        }
+      }
+    }
+  }
 }
 
 
@@ -4996,8 +5021,8 @@ void InitBowserFlame(const byte param_1) {
 
 // SMB:c5d8
 // SM2MAIN:91e9
-// Signature: [A, X] -> [A]
-byte PutAtRightExtent(const byte param_1, const byte param_2) {
+// Signature: [A, X] -> []
+void PutAtRightExtent(const byte param_1, const byte param_2) {
   Enemy_Y_Position[param_2] = param_1;
   const bool bVar1 = ScreenRight_X_Pos >= 0xe0;
   Enemy_X_Position[param_2] = ScreenRight_X_Pos + 0x20;
@@ -5007,7 +5032,8 @@ byte PutAtRightExtent(const byte param_1, const byte param_2) {
   Enemy_Flag[param_2] = 1;
   Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_2] = 0;
   Enemy_State[param_2] = 0;
-  return 0;
+
+  // NES note: The "A" register is set to 0 here. Used by BulletBillCheepCheep
 }
 
 
@@ -5053,51 +5079,84 @@ void InitFireworks(const byte param_1) {
 }
 
 
+// Implements a bag of numbers between 0 and 7 inclusive.
+static inline u8 random_from_bag(const u8 seed, u8 * const set) {
+  // If all numbers are taken, refill the bag
+
+  if (*set == 0xff) {
+    *set = 0;
+  }
+
+  byte i = seed;
+
+  // Find the next available number in the bag
+  while (true) {
+    i &= 7;
+    const u8 mask = 1 << i;
+    if ((mask & *set) == 0) {
+      // Set as taken
+      *set |= mask;
+
+      return i;
+    }
+    i += 1;
+  }
+}
+
+
 // SMB:c69c
 // SM2MAIN:92ad
 // Signature: [X] -> []
 void BulletBillCheepCheep(const byte param_1) {
-  byte bVar1;
+  if (FrenzyEnemyTimer != 0) {
+    return;
+  }
 
-  if (FrenzyEnemyTimer == 0) {
-    if (AreaType == 0) {
-      if (param_1 < 3) {
-        bVar1 = PseudoRandomBitReg[param_1] >= 0xaa;
-        if (WorldNumber != 1) {
-          bVar1 += 1;
-        }
-        bVar1 = SwimCC_IDData[bVar1 & 1];
-Set17ID:
-        Enemy_ID[param_1] = bVar1;
-        if (BitMFilter == 0xff) {
-          BitMFilter = 0;
-        }
-        bVar1 = PseudoRandomBitReg[param_1];
-        while (true) {
-          bVar1 &= 7;
-          if ((Bitmasks[bVar1] & BitMFilter) == 0)
-            break;
-          bVar1 += 1;
-        }
-        BitMFilter = Bitmasks[bVar1] | BitMFilter;
-        bVar1 = PutAtRightExtent(Enemy17YPosData[bVar1], param_1);
-        BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = bVar1;
-        FrenzyEnemyTimer = 0x20;
-        CheckpointEnemyID(param_1);
+  if (AreaType == 0) {
+    // Auto-appearing cheep cheeps (in SMB1 2-2 and 7-2)
+
+    if (param_1 >= 3) {
+      return;
+    }
+
+    // Spawn a random cheep-cheep
+
+    bool red_cheepcheep = PseudoRandomBitReg[param_1] >= 0xaa;
+
+    if (WorldNumber != 1) {
+      red_cheepcheep = !red_cheepcheep;
+    }
+
+    Enemy_ID[param_1] = red_cheepcheep ? 0xb : 0xa;
+  } else {
+    // Auto-appearing bullet bills (in SMB1 5-3 and 6-3)
+
+    // Prevent too many bullet bills from being spawned
+    for (int i = 0; i < 5; i++) {
+      if ((Enemy_Flag[i] != 0) && (Enemy_ID[i] == 8)) {
         return;
       }
-    } else {
-      bVar1 = 0xff;
-      do {
-        bVar1 += 1;
-        if (bVar1 >= 5) {
-          Square2SoundQueue |= 8;
-          bVar1 = 8;
-          goto Set17ID;
-        }
-      } while ((Enemy_Flag[bVar1] == 0) || (Enemy_ID[bVar1] != 8));
     }
+
+    // Bullet sound
+    Square2SoundQueue |= 8;
+
+    // Spawn a bullet bill
+    Enemy_ID[param_1] = 8;
   }
+
+  const u8 rng_bag = random_from_bag(PseudoRandomBitReg[param_1], &BitMFilter);
+
+  // Inlining Enemy17YPosData, because it's only used in this subroutine
+  static const u8 ypos_lookup[8] = {
+    0x40, 0x30, 0x90, 0x50, 0x20, 0x60, 0xa0, 0x70
+  };
+
+  PutAtRightExtent(ypos_lookup[rng_bag], param_1);
+  Enemy_YMF_Dummy[param_1] = 0;
+
+  FrenzyEnemyTimer = 0x20;
+  CheckpointEnemyID(param_1);
 }
 
 
@@ -6005,7 +6064,9 @@ byte MoveBloober(const byte param_1, const bool param_2) {
     return MoveEnemySlowVert(param_1);
   }
 
-  if ((PseudoRandomBitReg[param_1 + 1] & BlooberBitmasks[SecondaryHardMode]) == 0) {
+  const byte rng = PseudoRandomBitReg[param_1 + 1] & (SecondaryHardMode == 0 ? 63 : 3);
+
+  if (rng == 0) {
     byte bVar2;
     bool tmp2;
 

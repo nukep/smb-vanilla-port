@@ -787,7 +787,7 @@ void smb2j_DuplicateEnemyObj(byte param_1);
 void smb2j_InitBowserFlame(byte param_1);
 #define InitBowserFlame smb2j_InitBowserFlame
 
-byte smb2j_PutAtRightExtent(byte param_1,byte param_2);
+void smb2j_PutAtRightExtent(byte param_1,byte param_2);
 #define PutAtRightExtent smb2j_PutAtRightExtent
 
 void smb2j_InitFireworks(byte param_1);

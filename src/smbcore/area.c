@@ -4,12 +4,21 @@
 #include "area.h"
 
 
+// If enabled, fixes a bug where if CurrentPageLoc is > 0x82, modulo 3 is not calculated.
+// This bug is impractical if not impossible to execute in unmodified ROMs,
+// but is still potentially achievable in modified levels.
+//
+// In practice, CurrentPageLoc only goes up to 24 in unmodified ROMs without jumping over the flagpole.
+// It takes between 4 to 5 time units to travel 1 page location by running.
+// To get from page 24 to 0x82, the player would travel 106 pages.
+// If the player ran nonstop from page 24 to 0x82, it would take between 424 to 530 time units.
+#define BUG_FIX_PAGELOC
+
+
 static void RenderAreaGraphics(void);
 static void RenderAttributeTables(void);
 static void IncrementColumnPos(void);
 static void AreaParserCore(void);
-static void AreaParserCore_step2();
-static void RendBBuf();
 static void ProcessAreaData(void);
 static void DecodeAreaData(byte param_1, byte param_2);
 static void AlterAreaAttributes(byte param_1);
@@ -318,90 +327,99 @@ void IncrementColumnPos(void) {
 // SM2MAIN:720d
 // Signature: [] -> []
 void AreaParserCore(void) {
-  byte bVar2;
-
   if (BackloadingFlag != 0) {
     ProcessAreaData();
   }
+
   for (int i = 0; i < 13; i++) {
     MetatileBuffer[i] = 0;
   }
+
   if (BackgroundScenery != 0) {
-    // TODO: check if CurrentPageLoc could ever be greater than 0x82
+    // NES note: If the page location is > 0x82, it breaks a loop that calculates modulo 3.
+
+#ifdef BUG_FIX_PAGELOC
+    const byte bVar44 = CurrentPageLoc % 3;
+
+    const byte tmp2 = BSceneDataOffsets[BackgroundScenery - 1] + bVar44 * 16;
+    const byte back_scenery_data = BackSceneryData[tmp2 + CurrentColumnPos];
+#else
     const byte bVar44 = CurrentPageLoc <= 0x82 ? CurrentPageLoc % 3 : CurrentPageLoc;
 
     const byte v1 = bVar44 * 0x10;
     const byte v2 = BSceneDataOffsets[BackgroundScenery - 1];
     const bool bVar7 = (bVar44 & 0x10) != 0;
 
-    // TODO: check if the carry addition here is necessary. it doesn't seem to happen in practice.
     const byte tmp2 = (v1 + v2 + bVar7) + ((u16)v1 + (u16)v2 + (u16)bVar7 >= 0x100);
+    const byte back_scenery_data = BackSceneryData[tmp2 + CurrentColumnPos];
+#endif
 
-    byte bVar4 = BackSceneryData[tmp2 + CurrentColumnPos];
-    if (bVar4 != 0) {
-      bVar2 = ((bVar4 & 0xf) - 1) * 3;
-      if ((bVar4 & 0xf) == 0) {
-        // shouldn't normally happen
-        bVar2 = 0xfe;
+    if (back_scenery_data != 0) {
+      const byte type = back_scenery_data & 0xf;
+      const byte mt_y = back_scenery_data >> 4;
+
+      byte metatile_offset = (type - 1) * 3;
+      if (type == 0) {
+        // NES note: This shouldn't normally happen.
+        // This is 0xfe instead of 0xfd, because of the carry bit from ASL.
+        metatile_offset = 0xfe;
       }
 
-      bVar4 >>= 4;
       for (int i = 0; i < 3; i++) {
-        MetatileBuffer[bVar4] = BackSceneryMetatiles[bVar2];
-        bVar2 += 1;
-        bVar4 += 1;
-        if (bVar4 == 0xb) {
+        if (mt_y+i == 11) {
           break;
         }
+        MetatileBuffer[mt_y + i] = BackSceneryMetatiles[(byte)(metatile_offset + i)];
       }
     }
   }
+
   if (ForegroundScenery != 0) {
     byte bVar44 = FSceneDataOffsets[ForegroundScenery - 1];
-    for (int i = 0; i < 0xd; i++) {
+    for (int i = 0; i < 13; i++) {
       if (ForeSceneryData[bVar44] != 0) {
         MetatileBuffer[i] = ForeSceneryData[bVar44];
       }
       bVar44 += 1;
     }
   }
-  AreaParserCore_step2();
-  RendBBuf();
-}
 
-static void AreaParserCore_step2() {
-  byte bVar4;
-  if ((AreaType == 0) && (WorldNumber == 7)) {
-    bVar4 = ssw(0x62, 0x63);
-  } else if (CloudTypeOverride != 0) {
-    bVar4 = 0x88;
-  } else {
-    bVar4 = TerrainMetatiles[AreaType];
-  }
-  byte bVar5 = 0;
-  for (int i = (byte)(TerrainControl << 1); i < 256; i++) {
-    byte bVar3 = TerrainRenderBits[i];
-    if ((CloudTypeOverride != 0) && (bVar5 != 0)) {
-      bVar3 &= 8;
+  // RendTerr
+  {
+    byte mt = TerrainMetatiles[AreaType];
+
+    if (CloudTypeOverride != 0) {
+      mt = 0x88;
     }
-    for (int j = 0; j < 8; j++) {
-      if ((Bitmasks[j] & bVar3) != 0) {
-        MetatileBuffer[bVar5] = bVar4;
+
+    // Special exception for water levels in world 8
+    if ((AreaType == 0) && (WorldNumber == 7)) {
+      mt = ssw(0x62, 0x63);
+    }
+
+    const byte bitidx = (byte)(TerrainControl << 1);
+
+    // a 13-bit bitfield
+    u16 bits = LOAD_16(TerrainRenderBits[bitidx+1], TerrainRenderBits[bitidx]);
+
+    if (CloudTypeOverride != 0) {
+      // Render 0-7, and 11
+      bits &= 0x08ff;
+    }
+
+    for (int j = 0; j < 13; j++) {
+      if ((AreaType == 2) && (j >= 11)) {
+        mt = ssw(0x54, 0x6b);
       }
-      bVar5 += 1;
-      if (bVar5 == 0xd) {
-        // this is almost always reached eventually
-        return;
-      }
-      if ((AreaType == 2) && (bVar5 == 0xb)) {
-        bVar4 = ssw(0x54, 0x6b);
+
+      if ((bits & (1 << j)) != 0) {
+        MetatileBuffer[j] = mt;
       }
     }
   }
-}
 
+  // RendBBuf
 
-static void RendBBuf() {
   ProcessAreaData();
 
   // Inlined: GetBlockBufferAddr
@@ -1416,25 +1434,41 @@ void Hole_Empty(const byte param_1) {
 // SMB:9b7d
 // SM2MAIN:79c6
 // Signature: [A, X, Y] -> [X]
-byte RenderUnderPart(const byte param_1, const byte param_2, const byte param_3) {
-  byte i = param_3;
-  byte j = param_2;
-  do {
-    const byte bVar1 = MetatileBuffer[j];
-    AreaObjectHeight = i;
+byte RenderUnderPart(const byte mt, const byte mt_y, const byte param_3) {
+  // Note: Removed AreaObjectHeight global variable ($0735).
+  // It's only ever used in this subroutine.
+
+  byte j = mt_y;
+
+  byte count = param_3 + 1;
+
+  if (param_3 > 0x80) {
+    count = 1;
+  }
+
+  for (int i = 0; i < count; i++) {
+    const byte existing_mt = MetatileBuffer[j];
 
     bool draw_metatile = true;
-    if (bVar1 == 0x17 || bVar1 == ssw(0x1a, 0x8b) || bVar1 > 0xc0) {
+
+    if (existing_mt == 0x17 || existing_mt == ssw(0x1a, 0x8b) || existing_mt > 0xc0) {
         draw_metatile = false;
     }
-    if (SMB1_ONLY && param_1 == 0x50 && bVar1 == 0x54) {
+
+    if (SMB1_ONLY && mt == 0x50 && existing_mt == 0x54) {
         draw_metatile = false;
     }
+
     if (draw_metatile) {
-      MetatileBuffer[j] = param_1;
+      MetatileBuffer[j] = mt;
     }
+
     j += 1;
-  } while ((j < 0xd) && (i = AreaObjectHeight - 1, i < 0x80));
+
+    if (j >= 13) {
+      break;
+    }
+  }
   return j;
 }
 
