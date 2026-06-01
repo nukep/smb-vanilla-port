@@ -171,7 +171,7 @@
 #define FirebarPosLookupTbl              RAMARRAY_CONST(0xCCC7, 99)
 #define FirebarMirrorData                RAMARRAY_CONST(0xCD2A, 4)
 #define FirebarTblOffsets                RAMARRAY_CONST(0xCD2E, 12)
-#define FirebarYPos                      RAMARRAY_CONST(0xCD3A, 2)
+// #define FirebarYPos                      RAMARRAY_CONST(0xCD3A, 2)
 
 // These two are each length 5 in disassemblies, but they're accessed up to index 15.
 // This seems pretty regular.

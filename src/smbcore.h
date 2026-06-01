@@ -333,6 +333,17 @@ static inline byte NEGATE(byte x) {
   dst_lo = dst & 0xff; \
 }
 
+// Performs `dst = dst - src`.
+// dst_* and src_* are 8-bit integers.
+#define SUB_24_24(dst_hi, dst_me, dst_lo, src_hi, src_me, src_lo) { \
+  u32 dst = ((u32)(dst_hi) << 16) | ((u32)(dst_me) << 8) | ((u32)(dst_lo)); \
+  u32 src = ((u32)(src_hi) << 16) | ((u32)(src_me) << 8) | ((u32)(src_lo)); \
+  dst -= src; \
+  dst_hi = (dst >> 16) & 0xff; \
+  dst_me = (dst >> 8) & 0xff; \
+  dst_lo = dst & 0xff; \
+}
+
 // Performs `dst = dst + src`.
 // dst_* are 8-bit integers.
 // src is an 8-bit integer, sign-extended to a 16-bit addend.
@@ -374,6 +385,17 @@ static inline byte ABS_DIFF(byte a, byte b) {
     return b - a;
   } else {
     return a - b;
+  }
+}
+
+// Calcules the signed absolute difference between two bytes.
+// e.g. (0, 255) -> 1
+static inline byte ABS_DIFF_SIGNED(i8 a, i8 b) {
+  byte d = a - b;
+  if (d >= 0x80) {
+    return -d;
+  } else {
+    return d;
   }
 }
 
