@@ -1063,28 +1063,28 @@ void smb2j_EnemySmackScore(byte param_1,byte param_2);
 byte smb2j_PlayerHammerCollision(byte param_1);
 #define PlayerHammerCollision smb2j_PlayerHammerCollision
 
-byte smb2j_HandlePowerUpCollision(byte param_1);
+void smb2j_HandlePowerUpCollision(byte param_1);
 #define HandlePowerUpCollision smb2j_HandlePowerUpCollision
 
-byte smb2j_PlayerEnemyCollision(byte param_1);
+void smb2j_PlayerEnemyCollision(byte param_1);
 #define PlayerEnemyCollision smb2j_PlayerEnemyCollision
 
-byte smb2j_InjurePlayer(void);
+void smb2j_InjurePlayer(void);
 #define InjurePlayer smb2j_InjurePlayer
 
-byte smb2j_ForceInjury(byte param_1);
+void smb2j_ForceInjury(byte param_1);
 #define ForceInjury smb2j_ForceInjury
 
-byte smb2j_SetPRout(byte param_1,byte param_2);
+void smb2j_SetPRout(byte param_1,byte param_2);
 #define SetPRout smb2j_SetPRout
 
 byte smb2j_SetBounce(byte param_1);
 #define SetBounce smb2j_SetBounce
 
-byte smb2j_ChkEnemyFaceRight(byte param_1);
+void smb2j_ChkEnemyFaceRight(byte param_1);
 #define ChkEnemyFaceRight smb2j_ChkEnemyFaceRight
 
-byte smb2j_LInj(byte param_1);
+void smb2j_LInj(byte param_1);
 #define LInj smb2j_LInj
 
 byte smb2j_EnemyFacePlayer(byte param_1);

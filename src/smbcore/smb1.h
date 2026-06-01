@@ -1072,25 +1072,25 @@ void smb1_EnemySmackScore(byte param_1,byte param_2);
 byte smb1_PlayerHammerCollision(byte param_1);
 #define PlayerHammerCollision smb1_PlayerHammerCollision
 
-byte smb1_HandlePowerUpCollision(byte param_1);
+void smb1_HandlePowerUpCollision(byte param_1);
 #define HandlePowerUpCollision smb1_HandlePowerUpCollision
 
-byte smb1_PlayerEnemyCollision(byte param_1);
+void smb1_PlayerEnemyCollision(byte param_1);
 #define PlayerEnemyCollision smb1_PlayerEnemyCollision
 
-byte smb1_InjurePlayer(void);
+void smb1_InjurePlayer(void);
 #define InjurePlayer smb1_InjurePlayer
 
-byte smb1_ForceInjury(byte param_1);
+void smb1_ForceInjury(byte param_1);
 #define ForceInjury smb1_ForceInjury
 
-byte smb1_SetPRout(byte param_1,byte param_2);
+void smb1_SetPRout(byte param_1,byte param_2);
 #define SetPRout smb1_SetPRout
 
-byte smb1_ChkEnemyFaceRight(byte param_1);
+void smb1_ChkEnemyFaceRight(byte param_1);
 #define ChkEnemyFaceRight smb1_ChkEnemyFaceRight
 
-byte smb1_LInj(byte param_1);
+void smb1_LInj(byte param_1);
 #define LInj smb1_LInj
 
 byte smb1_EnemyFacePlayer(byte param_1);

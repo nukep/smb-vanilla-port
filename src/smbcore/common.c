@@ -3191,7 +3191,7 @@ byte BulletBillHandler(const byte param_1) {
   const byte sVar4 = GetEnemyOffscreenBits(arg);
   const byte sVar5 = RelativeEnemyPosition(sVar4);
   byte bVar1 = GetEnemyBoundBox(sVar5);
-  bVar1 = PlayerEnemyCollision(bVar1);
+  PlayerEnemyCollision(bVar1);
   return EnemyGfxHandler(bVar1);
 }
 
@@ -3551,7 +3551,7 @@ byte PowerUpObjHandler(void) {
     const byte sVar4 = GetEnemyOffscreenBits(sVar3);
     GetEnemyBoundBox(sVar4);
     bVar1 = DrawPowerUp();
-    bVar1 = PlayerEnemyCollision(bVar1);
+    PlayerEnemyCollision(bVar1);
     OffscreenBoundsCheck(bVar1);
   }
   return bVar1;
@@ -5578,7 +5578,7 @@ byte RunNormalEnemies(const byte param_1) {
   bVar1 = GetEnemyBoundBox(bVar1);
   bVar1 = EnemyToBGCollisionDet(bVar1);
   bVar1 = EnemiesCollision(bVar1);
-  bVar1 = PlayerEnemyCollision(bVar1);
+  PlayerEnemyCollision(bVar1);
   if (TimerControl == 0) {
     bVar1 = EnemyMovementSubs(bVar1);
   }
@@ -5688,7 +5688,7 @@ byte RunBowserFlame(const byte param_1) {
   const byte sVar2 = GetEnemyOffscreenBits(bVar1);
   const byte sVar3 = RelativeEnemyPosition(sVar2);
   bVar1 = GetEnemyBoundBox(sVar3);
-  bVar1 = PlayerEnemyCollision(bVar1);
+  PlayerEnemyCollision(bVar1);
   OffscreenBoundsCheck(bVar1);
   return bVar1;
 }
@@ -6667,7 +6667,8 @@ byte ProcessBowserHalf(const byte param_1) {
   if (Enemy_State[bVar1] == 0) {
     Enemy_BoundBoxCtrl[bVar1] = 10;
     bVar1 = GetEnemyBoundBox(bVar1);
-    return PlayerEnemyCollision(bVar1);
+    PlayerEnemyCollision(bVar1);
+    return bVar1;
   }
   return bVar1;
 }
@@ -7527,7 +7528,8 @@ byte PlayerHammerCollision(const byte param_1) {
         Misc_Collision_Flag[ObjectOffset] = 1;
         Misc_X_Speed[tmp1] = NEGATE(Misc_X_Speed[tmp1]);
         if (StarInvincibleTimer == 0) {
-          return InjurePlayer();
+          InjurePlayer();
+          return ObjectOffset;
         }
       }
     } else {
@@ -7542,121 +7544,130 @@ byte PlayerHammerCollision(const byte param_1) {
 
 // SMB:d800
 // SM2MAIN:a44f
-// Signature: [X] -> [X]
-byte HandlePowerUpCollision(const byte param_1) {
-  EraseEnemyObject(param_1);
+// Signature: [X] -> []
+void HandlePowerUpCollision(const byte objoff) {
+  // note: the caller always set X to r08
+
+  EraseEnemyObject(objoff);
   if (SMB2J_ONLY && PowerUpType == 4) {
-    return InjurePlayer();
+    InjurePlayer();
+    return;
   }
-  SetupFloateyNumber(6, param_1);
+  SetupFloateyNumber(6, objoff);
   Square2SoundQueue = 0x20;
   if (PowerUpType >= 2) {
     if (PowerUpType == 3) {
-      FloateyNum_Control[param_1] = 0xb;
-      return param_1;
+      FloateyNum_Control[objoff] = 0xb;
+    } else {
+      StarInvincibleTimer = 0x23;
+      AreaMusicQueue = 0x40;
     }
-    StarInvincibleTimer = 0x23;
-    AreaMusicQueue = 0x40;
-    return param_1;
   } else if (PlayerStatus == 0) {
     PlayerStatus = 1;
-    return SetPRout(9, 0);
+    SetPRout(9, 0);
   } else if (PlayerStatus != 1) {
     Square2SoundQueue = 0x20;
-    return param_1;
   } else {
     PlayerStatus = 2;
     GetPlayerColors();
-    return SetPRout(0xc, 0);
+    SetPRout(0xc, 0);
   }
 }
 
 
 // SMB:d853
 // SM2MAIN:a4ab
-// Signature: [X] -> [X]
-byte PlayerEnemyCollision(const byte param_1) {
+// Signature: [X] -> []
+void PlayerEnemyCollision(const byte objoff) {
+  // Note: X is always equal to r08 at the caller
+
   byte bVar1;
   byte bVar2;
   byte bStack0000;
 
+  // TODO: remove
+  assert_eq_assumption(objoff, ObjectOffset);
+
   if (FrameCounter & 1) {
-    return param_1;
+    return;
   }
   if (CheckPlayerVertical()) {
-    return param_1;
+    return;
   }
-  if (EnemyOffscrBitsMasked[param_1] != 0) {
-    return param_1;
+  if (EnemyOffscrBitsMasked[objoff] != 0) {
+    return;
   }
   if (GameEngineSubroutine != 8) {
-    return param_1;
+    return;
   }
-  if ((Enemy_State[param_1] & 0x20) != 0) {
-    return param_1;
+  if ((Enemy_State[objoff] & 0x20) != 0) {
+    return;
   }
 
   // Inlined: GetEnemyBoundBoxOfs
-  const bool bVar3 = PlayerCollisionCore(ObjectOffset * 4 + 4);
+  const bool bVar3 = PlayerCollisionCore(objoff * 4 + 4);
   if (!bVar3) {
-    Enemy_CollisionBits[ObjectOffset] = Enemy_CollisionBits[ObjectOffset] & 0xfe;
-    return ObjectOffset;
+    Enemy_CollisionBits[objoff] = Enemy_CollisionBits[objoff] & 0xfe;
+    return;
   }
 
-  if (Enemy_ID[ObjectOffset] == 0x2e) {
-    return HandlePowerUpCollision(ObjectOffset);
+  if (Enemy_ID[objoff] == 0x2e) {
+    HandlePowerUpCollision(objoff);
+    return;
   }
 
   if (StarInvincibleTimer != 0) {
-    const byte ret = ObjectOffset;
-    ShellOrBlockDefeat(ObjectOffset);
-    return ret;
+    ShellOrBlockDefeat(objoff);
+    return;
   }
 
-  if (((Enemy_CollisionBits[ObjectOffset] & 1) | EnemyOffscrBitsMasked[ObjectOffset]) != 0) {
-    return ObjectOffset;
+  if (((Enemy_CollisionBits[objoff] & 1) | EnemyOffscrBitsMasked[objoff]) != 0) {
+    return;
   }
 
-  Enemy_CollisionBits[ObjectOffset] = Enemy_CollisionBits[ObjectOffset] | 1;
+  Enemy_CollisionBits[objoff] = Enemy_CollisionBits[objoff] | 1;
 
-  if (Enemy_ID[ObjectOffset] == 0xc || Enemy_ID[ObjectOffset] == 0xd) {
-    return InjurePlayer();
+  if (Enemy_ID[objoff] == 0xc || Enemy_ID[objoff] == 0xd) {
+    InjurePlayer();
+    return;
   }
 
 #ifdef SMB2J_MODE
-  if (Enemy_ID[ObjectOffset] == 4) {
-    return InjurePlayer();
+  if (Enemy_ID[objoff] == 4) {
+    InjurePlayer();
+    return;
   }
 #endif
 
-  if ((Enemy_ID[ObjectOffset] != 0x12) && (Enemy_ID[ObjectOffset] != 0x33)) {
-    if (Enemy_ID[ObjectOffset] > 0x14) {
-      return InjurePlayer();
+  if ((Enemy_ID[objoff] != 0x12) && (Enemy_ID[objoff] != 0x33)) {
+    if (Enemy_ID[objoff] > 0x14) {
+      InjurePlayer();
+      return;
     }
     if (AreaType == 0) {
-      return InjurePlayer();
+      InjurePlayer();
+      return;
     }
 
-    if (((Enemy_State[ObjectOffset] & 0x80) == 0) && ((Enemy_State[ObjectOffset] & 6) != 0)) {
-      if (Enemy_ID[ObjectOffset] == 6) {
-        return ObjectOffset;
+    if (((Enemy_State[objoff] & 0x80) == 0) && ((Enemy_State[objoff] & 6) != 0)) {
+      if (Enemy_ID[objoff] == 6) {
+        return;
       }
       Square1SoundQueue = 8;
-      const byte tmp1 = ObjectOffset;
-      Enemy_State[ObjectOffset] |= 0x80;
-      SpriteVarData1[tmp1] = KickedShellXSpdData[EnemyFacePlayer(tmp1)];
-      if (EnemyIntervalTimer[tmp1] < 3) {
-        bVar1 = KickedShellPtsData[EnemyIntervalTimer[tmp1]];
+      Enemy_State[objoff] |= 0x80;
+      SpriteVarData1[objoff] = KickedShellXSpdData[EnemyFacePlayer(objoff)];
+      if (EnemyIntervalTimer[objoff] < 3) {
+        bVar1 = KickedShellPtsData[EnemyIntervalTimer[objoff]];
       } else {
         bVar1 = StompChainCounter + 3;
       }
-      SetupFloateyNumber(bVar1, tmp1);
-      return tmp1;
+      SetupFloateyNumber(bVar1, objoff);
+      return;
     }
   }
 
   if (StompTimer == 0) {
-    if ((Enemy_ID[ObjectOffset] < 7) || (Enemy_Y_Position[ObjectOffset] <= (byte)(SprObject_Y_Position[0] + 0xC))) {
+    if ((Enemy_ID[objoff] < 7) || (Enemy_Y_Position[objoff] <= (byte)(SprObject_Y_Position[0] + 0xC))) {
 
 #ifdef SMB1_MODE
       const bool cond2 = (PlayerSpriteVarData2[0] == 0) || (PlayerSpriteVarData2[0] >= 0x80);
@@ -7667,28 +7678,32 @@ byte PlayerEnemyCollision(const byte param_1) {
 
       if (cond2) {
         if (InjuryTimer != 0) {
-          return ObjectOffset;
+          return;
         }
 
         if (SprObject_Rel_XPos[0] < Enemy_Rel_XPos) {
-          if (Enemy_MovingDir[ObjectOffset] == 1) {
-            return LInj(ObjectOffset);
+          if (Enemy_MovingDir[objoff] == 1) {
+            LInj(objoff);
+            return;
           }
-          return InjurePlayer();
+          InjurePlayer();
+          return;
         }
-        return ChkEnemyFaceRight(ObjectOffset);
+        ChkEnemyFaceRight(objoff);
+        return;
       }
     }
   }
 
-  if (Enemy_ID[ObjectOffset] == 0x12) {
-    return InjurePlayer();
+  if (Enemy_ID[objoff] == 0x12) {
+    InjurePlayer();
+    return;
   }
   Square1SoundQueue = 4;
 
   bool cond = true;
 
-  switch (Enemy_ID[ObjectOffset]) {
+  switch (Enemy_ID[objoff]) {
     case 5:
       bVar2 = StompedEnemyPtsData[1];
       cond = false;
@@ -7713,79 +7728,76 @@ byte PlayerEnemyCollision(const byte param_1) {
       break;
   }
 
-  const byte tmp1 = ObjectOffset;
-
   if (cond) {
-    if (Enemy_ID[tmp1] < 9) {
-      Enemy_State[tmp1] = 4;
+    if (Enemy_ID[objoff] < 9) {
+      Enemy_State[objoff] = 4;
       StompChainCounter += 1;
-      SetupFloateyNumber(StompChainCounter + StompTimer, tmp1);
+      SetupFloateyNumber(StompChainCounter + StompTimer, objoff);
       StompTimer += 1;
-      EnemyIntervalTimer[tmp1] = RevivalRateData[PrimaryHardMode];
+      EnemyIntervalTimer[objoff] = RevivalRateData[PrimaryHardMode];
 #ifdef SMB1_MODE
       PlayerSpriteVarData2[0] = 0xfc;
 #endif
 #ifdef SMB2J_MODE
-      SetBounce(tmp1);
+      SetBounce(objoff);
 #endif
     } else {
 #ifdef SMB2J_MODE
-      Enemy_ID[tmp1] = SetBounce(tmp1);
+      Enemy_ID[objoff] = SetBounce(objoff);
 #endif
-      Enemy_ID[tmp1] &= 1;
-      Enemy_State[tmp1] = 0;
-      SetupFloateyNumber(3, tmp1);
-      InitVStf(tmp1);
-      SpriteVarData1[tmp1] = DemotedKoopaXSpdData[EnemyFacePlayer(tmp1)];
+      Enemy_ID[objoff] &= 1;
+      Enemy_State[objoff] = 0;
+      SetupFloateyNumber(3, objoff);
+      InitVStf(objoff);
+      SpriteVarData1[objoff] = DemotedKoopaXSpdData[EnemyFacePlayer(objoff)];
 #ifdef SMB1_MODE
       PlayerSpriteVarData2[0] = 0xfc;
 #endif
     }
   } else {
-    SetupFloateyNumber(bVar2, tmp1);
-    bStack0000 = Enemy_MovingDir[tmp1];
+    SetupFloateyNumber(bVar2, objoff);
+    bStack0000 = Enemy_MovingDir[objoff];
 #ifdef SMB1_MODE
     // Inlined: SetStun
-    Enemy_State[tmp1] = (Enemy_State[tmp1] & 0xf0) | 2;
+    Enemy_State[objoff] = (Enemy_State[objoff] & 0xf0) | 2;
 #endif
 #ifdef SMB2J_MODE
     // Inlined: NoDemote
     if ((bStack0000 != 0x2e) && (bStack0000 != 6)) {
-      Enemy_State[tmp1] = 2;
+      Enemy_State[objoff] = 2;
     }
 #endif
-    SetStun2(tmp1);
-    Enemy_MovingDir[tmp1] = bStack0000;
-    Enemy_State[tmp1] = 0x20;
-    SpriteVarData1[tmp1] = InitVStf(tmp1);
+    SetStun2(objoff);
+    Enemy_MovingDir[objoff] = bStack0000;
+    Enemy_State[objoff] = 0x20;
+    SpriteVarData1[objoff] = InitVStf(objoff);
 #ifdef SMB1_MODE
     PlayerSpriteVarData2[0] = 0xfd;
 #endif
 #ifdef SMB2J_MODE
-    SetBounce(tmp1);
+    SetBounce(objoff);
 #endif
   }
-  return tmp1;
+  return;
 }
 
 
 // SMB:d92c
 // SM2MAIN:a587
-// Signature: [] -> [X]
-byte InjurePlayer(void) {
+// Signature: [] -> []
+void InjurePlayer(void) {
   if (InjuryTimer == 0) {
     if (SMB1_ONLY || (SMB2J_ONLY && StarInvincibleTimer == 0)) {
-      return ForceInjury(0);
+      ForceInjury(0);
     }
   }
-  return ObjectOffset;
 }
 
 
 // SMB:d931
 // SM2MAIN:a58f
-// Signature: [A] -> [X]
-byte ForceInjury(const byte param_1) {
+// Signature: [A] -> []
+void ForceInjury(const byte param_1) {
   byte bVar1;
 
   if (PlayerStatus == 0) {
@@ -7800,39 +7812,39 @@ byte ForceInjury(const byte param_1) {
     GetPlayerColors();
     bVar1 = 10;
   }
-  return SetPRout(bVar1, 1);
+  SetPRout(bVar1, 1);
 }
 
 
 // SMB:d948
 // SM2MAIN:a5a6
-// Signature: [A, Y] -> [X]
-byte SetPRout(const byte param_1, const byte param_2) {
+// Signature: [A, Y] -> []
+void SetPRout(const byte param_1, const byte param_2) {
   GameEngineSubroutine = param_1;
   Player_State = param_2;
   TimerControl = 0xff;
   ScrollAmount = 0;
-  return ObjectOffset;
 }
 
 
 // SMB:d9f6
 // SM2MAIN:a65f
-// Signature: [X] -> [X]
-byte ChkEnemyFaceRight(const byte param_1) {
+// Signature: [X] -> []
+void ChkEnemyFaceRight(const byte param_1) {
   if (Enemy_MovingDir[param_1] != 1) {
-    return LInj(param_1);
+    LInj(param_1);
+  } else {
+    InjurePlayer();
   }
-  return InjurePlayer();
 }
 
 
 // SMB:d9ff
 // SM2MAIN:a668
-// Signature: [X] -> [X]
-byte LInj(const byte param_1) {
+// Signature: [X] -> []
+void LInj(const byte param_1) {
   EnemyTurnAround(param_1);
-  return InjurePlayer();
+  InjurePlayer();
 }
 
 
