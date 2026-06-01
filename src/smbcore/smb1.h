@@ -1216,13 +1216,13 @@ void smb1_GetFireballBoundBox(byte param_1);
 void smb1_GetMiscBoundBox(byte param_1);
 #define GetMiscBoundBox smb1_GetMiscBoundBox
 
-byte smb1_GetEnemyBoundBox(byte param_1);
+void smb1_GetEnemyBoundBox(byte param_1);
 #define GetEnemyBoundBox smb1_GetEnemyBoundBox
 
-byte smb1_SmallPlatformBoundBox(byte param_1);
+void smb1_SmallPlatformBoundBox(byte param_1);
 #define SmallPlatformBoundBox smb1_SmallPlatformBoundBox
 
-byte smb1_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
+void smb1_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
 #define GetMaskedOffScrBits smb1_GetMaskedOffScrBits
 
 byte smb1_LargePlatformBoundBox(byte param_1);
@@ -1285,10 +1285,10 @@ byte smb1_DrawPowerUp(void);
 byte smb1_EnemyGfxHandler(byte param_1);
 #define EnemyGfxHandler smb1_EnemyGfxHandler
 
-byte smb1_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
+void smb1_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8,byte param_9);
 #define DrawEnemyObject smb1_DrawEnemyObject
 
-byte smb1_SprObjectOffscrChk(void);
+void smb1_SprObjectOffscrChk(byte objoff);
 #define SprObjectOffscrChk smb1_SprObjectOffscrChk
 
 struct_xyr02 smb1_DrawEnemyObjRow(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6);
@@ -1378,7 +1378,7 @@ byte smb1_RelativeFireballPosition(byte param_1);
 byte smb1_RelativeMiscPosition(byte param_1);
 #define RelativeMiscPosition smb1_RelativeMiscPosition
 
-byte smb1_RelativeEnemyPosition(byte param_1);
+void smb1_RelativeEnemyPosition(byte param_1);
 #define RelativeEnemyPosition smb1_RelativeEnemyPosition
 
 byte smb1_RelativeBlockPosition(byte param_1);
