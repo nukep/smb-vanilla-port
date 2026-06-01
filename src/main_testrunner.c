@@ -84,7 +84,7 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
   } while (0)
 
       // Missing ranges:
-      // $00-$07 are temporary registers
+      // $00-$08 are temporary registers
       // $E7-$EA are pointers
       // $EB-$EF are temporary registers
       // $F5-F6 is a pointer
@@ -92,7 +92,7 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
       // $735 is a temporary variable
 
       if (SMB_which_game(userdata->smb_state) == GAME_SMB1) {
-        mem_eq_range(0x0008, 0x00E6);
+        mem_eq_range(0x0009, 0x00E6);
         mem_eq_range(0x00F0, 0x00F4);
         mem_eq_range(0x00F7, 0x00FF);
         mem_eq_range(0x0100, 0x015F);
