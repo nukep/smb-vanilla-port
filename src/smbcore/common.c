@@ -4116,21 +4116,19 @@ void ImposeGravitySprObj(const byte param_1, const byte param_2, const byte para
 
 // SMB:bfb4
 // SM2MAIN:8b85
-// Signature: [X] -> [X]
-byte MovePlatformDown(const byte param_1) {
+// Signature: [X] -> []
+void MovePlatformDown(const byte param_1) {
   const byte bVar1 = (Enemy_ID[param_1] == 0x29) ? 9 : 5;
   ImposeGravity(0, param_1 + 1, bVar1, 10, 3);
-  return ObjectOffset;
 }
 
 
 // SMB:bfb7
 // SM2MAIN:8b88
-// Signature: [X] -> [X]
-byte MovePlatformUp(const byte param_1) {
+// Signature: [X] -> []
+void MovePlatformUp(const byte param_1) {
   const byte bVar1 = (Enemy_ID[param_1] == 0x29) ? 9 : 5;
   ImposeGravity(1, param_1 + 1, bVar1, 10, 3);
-  return ObjectOffset;
 }
 
 
@@ -6771,7 +6769,8 @@ byte RunFireworks(const byte param_1) {
       Enemy_Flag[param_1] = 0;
       Square2SoundQueue = 8;
       DigitModifier[4] = 5;
-      return EndAreaPoints();
+      EndAreaPoints();
+      return ObjectOffset;
     }
   }
   RelativeEnemyPosition(param_1);
@@ -6885,14 +6884,15 @@ byte AwardTimerCastle(void) {
   DigitModifier[5] = 0xff;
   DigitsMathRoutine(ssw(0x23, 0x17));
   DigitModifier[5] = 5;
-  return EndAreaPoints();
+  EndAreaPoints();
+  return ObjectOffset;
 }
 
 
 // SMB:d336
 // SM2MAIN:9f70
-// Signature: [] -> [X]
-byte EndAreaPoints(void) {
+// Signature: [] -> []
+void EndAreaPoints(void) {
 #ifdef SMB1_MODE
   DigitsMathRoutine(CurrentPlayer == 0 ? 0xb : 0x11);
   WriteDigits((CurrentPlayer * 16) + 4);
@@ -6902,8 +6902,6 @@ byte EndAreaPoints(void) {
   DigitsMathRoutine(0xb);
   WriteDigits(2);
 #endif
-
-  return ObjectOffset;
 }
 
 
@@ -7069,7 +7067,8 @@ byte BalancePlatform(const byte param_1) {
   }
 
   if (Enemy_MovingDir[param_1] != 0) {
-    return PlatformFall(param_1, enemy_state);
+    PlatformFall(param_1, enemy_state);
+    return ObjectOffset;
   }
 
   if (Enemy_Y_Position[param_1] < 0x2e) {
@@ -7078,7 +7077,8 @@ byte BalancePlatform(const byte param_1) {
       StopPlatforms(param_1, enemy_state);
       return param_1;
     }
-    return InitPlatformFall(enemy_state);
+    InitPlatformFall(enemy_state, ObjectOffset);
+    return ObjectOffset;
   }
 
   if (Enemy_Y_Position[enemy_state] < 0x2e) {
@@ -7087,7 +7087,8 @@ byte BalancePlatform(const byte param_1) {
       StopPlatforms(param_1, enemy_state);
       return param_1;
     }
-    return InitPlatformFall(enemy_state);
+    InitPlatformFall(enemy_state, ObjectOffset);
+    return ObjectOffset;
   }
 
   // 0 = stop
@@ -7123,11 +7124,13 @@ byte BalancePlatform(const byte param_1) {
     break;
 
   case 1:
-    tmp1 = MovePlatformUp(param_1);
+    MovePlatformUp(param_1);
+    tmp1 = ObjectOffset;
     break;
 
   case 2:
-    tmp1 = MovePlatformDown(param_1);
+    MovePlatformDown(param_1);
+    tmp1 = ObjectOffset;
     break;
   }
 
@@ -7174,10 +7177,9 @@ byte BalancePlatform(const byte param_1) {
 
 // SMB:d598
 // SM2MAIN:a1d2
-// Signature: [Y] -> [X]
-byte InitPlatformFall(const byte param_1) {
+// Signature: [Y, r08] -> []
+void InitPlatformFall(const byte param_1, const byte objoff) {
   GetEnemyOffscreenBits(param_1);
-  const byte objoff = ObjectOffset;
 
   SetupFloateyNumber(6, objoff);
   FloateyNum_X_Pos[objoff] = SprObject_Rel_XPos[0];
@@ -7187,7 +7189,6 @@ byte InitPlatformFall(const byte param_1) {
   // NES note: GetEnemyOffscreenBits sets Y=1. This is later used by StopPlatforms.
   // This is either a bug, or just a way to reuse the value. Either way, it's best extracted out to the caller (here).
   StopPlatforms(objoff, 1);
-  return objoff;
 }
 
 
@@ -7203,15 +7204,14 @@ void StopPlatforms(const byte param_1, const byte param_2) {
 
 // SMB:d5bb
 // SM2MAIN:a1f5
-// Signature: [X, Y] -> [X]
-byte PlatformFall(const byte param_1, const byte param_2) {
+// Signature: [X, Y] -> []
+void PlatformFall(const byte param_1, const byte param_2) {
   const byte bStack0000 = param_2;
   MoveFallingPlatform(param_1);
   MoveFallingPlatform(bStack0000);
   if (HammerThrowingTimer_Or_PlatformCollisionFlag[ObjectOffset] < 0x80) {
     PositionPlayerOnVPlat(HammerThrowingTimer_Or_PlatformCollisionFlag[ObjectOffset]);
   }
-  return ObjectOffset;
 }
 
 
@@ -7230,11 +7230,13 @@ byte YMovingPlatform(const byte param_1) {
     }
   }
   if (SpriteVarData1[param_1] <= Enemy_Y_Position[param_1]) {
-    const byte bVar1 = MovePlatformUp(param_1);
+    MovePlatformUp(param_1);
+    const byte bVar1 = ObjectOffset;
     ChkYPCollision(bVar1);
     return bVar1;
   }
-  const byte bVar1 = MovePlatformDown(param_1);
+  MovePlatformDown(param_1);
+  const byte bVar1 = ObjectOffset;
   ChkYPCollision(bVar1);
   return bVar1;
 }

@@ -712,10 +712,10 @@ void smb1_ImposeGravityBlock(byte param_1);
 void smb1_ImposeGravitySprObj(byte param_1,byte param_2,byte param_3);
 #define ImposeGravitySprObj smb1_ImposeGravitySprObj
 
-byte smb1_MovePlatformDown(byte param_1);
+void smb1_MovePlatformDown(byte param_1);
 #define MovePlatformDown smb1_MovePlatformDown
 
-byte smb1_MovePlatformUp(byte param_1);
+void smb1_MovePlatformUp(byte param_1);
 #define MovePlatformUp smb1_MovePlatformUp
 
 void smb1_ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
@@ -997,7 +997,7 @@ byte smb1_AwardGameTimerPoints(byte param_1);
 byte smb1_AwardTimerCastle(void);
 #define AwardTimerCastle smb1_AwardTimerCastle
 
-byte smb1_EndAreaPoints(void);
+void smb1_EndAreaPoints(void);
 #define EndAreaPoints smb1_EndAreaPoints
 
 byte smb1_RaiseFlagSetoffFWorks(byte param_1);
@@ -1015,13 +1015,13 @@ void smb1_MovePiranhaPlant(byte param_1);
 byte smb1_BalancePlatform(byte param_1);
 #define BalancePlatform smb1_BalancePlatform
 
-byte smb1_InitPlatformFall(byte param_1);
+void smb1_InitPlatformFall(byte param_1, byte objoff);
 #define InitPlatformFall smb1_InitPlatformFall
 
 void smb1_StopPlatforms(byte param_1,byte param_2);
 #define StopPlatforms smb1_StopPlatforms
 
-byte smb1_PlatformFall(byte param_1,byte param_2);
+void smb1_PlatformFall(byte param_1,byte param_2);
 #define PlatformFall smb1_PlatformFall
 
 byte smb1_YMovingPlatform(byte param_1);

@@ -703,10 +703,10 @@ void smb2j_ImposeGravityBlock(byte param_1);
 void smb2j_ImposeGravitySprObj(byte param_1,byte param_2,byte param_3);
 #define ImposeGravitySprObj smb2j_ImposeGravitySprObj
 
-byte smb2j_MovePlatformDown(byte param_1);
+void smb2j_MovePlatformDown(byte param_1);
 #define MovePlatformDown smb2j_MovePlatformDown
 
-byte smb2j_MovePlatformUp(byte param_1);
+void smb2j_MovePlatformUp(byte param_1);
 #define MovePlatformUp smb2j_MovePlatformUp
 
 void smb2j_ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
@@ -988,7 +988,7 @@ byte smb2j_AwardGameTimerPoints(byte param_1);
 byte smb2j_AwardTimerCastle(void);
 #define AwardTimerCastle smb2j_AwardTimerCastle
 
-byte smb2j_EndAreaPoints(void);
+void smb2j_EndAreaPoints(void);
 #define EndAreaPoints smb2j_EndAreaPoints
 
 byte smb2j_RaiseFlagSetoffFWorks(byte param_1);
@@ -1006,13 +1006,13 @@ void smb2j_MovePiranhaPlant(byte param_1);
 byte smb2j_BalancePlatform(byte param_1);
 #define BalancePlatform smb2j_BalancePlatform
 
-byte smb2j_InitPlatformFall(byte param_1);
+void smb2j_InitPlatformFall(byte param_1, byte objoff);
 #define InitPlatformFall smb2j_InitPlatformFall
 
 void smb2j_StopPlatforms(byte param_1,byte param_2);
 #define StopPlatforms smb2j_StopPlatforms
 
-byte smb2j_PlatformFall(byte param_1,byte param_2);
+void smb2j_PlatformFall(byte param_1,byte param_2);
 #define PlatformFall smb2j_PlatformFall
 
 byte smb2j_YMovingPlatform(byte param_1);
