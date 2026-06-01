@@ -160,6 +160,15 @@ struct struct_r01r02r03 {
 };
 
 
+typedef struct struct_azr04 struct_azr04;
+
+struct struct_azr04 {
+  byte a;
+  bool z;
+  byte r04;
+};
+
+
 typedef struct struct_axzr04 struct_axzr04;
 
 struct struct_axzr04 {
@@ -1192,7 +1201,7 @@ byte smb1_HammerBroBGColl(byte param_1);
 void smb1_KillEnemyAboveBlock(byte param_1);
 #define KillEnemyAboveBlock smb1_KillEnemyAboveBlock
 
-struct_axzr04 smb1_ChkUnderEnemy(byte param_1);
+struct_azr04 smb1_ChkUnderEnemy(byte param_1);
 #define ChkUnderEnemy smb1_ChkUnderEnemy
 
 bool smb1_ChkForNonSolids(byte param_1);
@@ -1201,10 +1210,10 @@ bool smb1_ChkForNonSolids(byte param_1);
 byte smb1_FireballBGCollision(byte param_1);
 #define FireballBGCollision smb1_FireballBGCollision
 
-byte smb1_GetFireballBoundBox(byte param_1);
+void smb1_GetFireballBoundBox(byte param_1);
 #define GetFireballBoundBox smb1_GetFireballBoundBox
 
-byte smb1_GetMiscBoundBox(byte param_1);
+void smb1_GetMiscBoundBox(byte param_1);
 #define GetMiscBoundBox smb1_GetMiscBoundBox
 
 byte smb1_GetEnemyBoundBox(byte param_1);
@@ -1219,7 +1228,7 @@ byte smb1_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
 byte smb1_LargePlatformBoundBox(byte param_1);
 #define LargePlatformBoundBox smb1_LargePlatformBoundBox
 
-byte smb1_SetupEOffsetFBBox(byte param_1);
+void smb1_SetupEOffsetFBBox(byte param_1);
 #define SetupEOffsetFBBox smb1_SetupEOffsetFBBox
 
 void smb1_MoveBoundBoxOffscreen(byte param_1);
@@ -1228,7 +1237,7 @@ void smb1_MoveBoundBoxOffscreen(byte param_1);
 void smb1_BoundingBoxCore(byte param_1,byte param_2);
 #define BoundingBoxCore smb1_BoundingBoxCore
 
-byte smb1_CheckRightScreenBBox(byte param_1);
+void smb1_CheckRightScreenBBox(byte param_1);
 #define CheckRightScreenBBox smb1_CheckRightScreenBBox
 
 bool smb1_PlayerCollisionCore(byte param_1);
@@ -1258,7 +1267,7 @@ struct blockbuffer_colli_result smb1_BlockBufferCollision(byte param_1,byte para
 void smb1_DrawVine(byte param_1);
 #define DrawVine smb1_DrawVine
 
-byte smb1_DrawHammer(byte param_1);
+void smb1_DrawHammer(byte param_1, byte objoff);
 #define DrawHammer smb1_DrawHammer
 
 void smb1_FlagpoleGfxHandler(byte param_1);

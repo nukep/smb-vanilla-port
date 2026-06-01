@@ -86,6 +86,15 @@ struct struct_r01r02r03 {
 };
 
 
+typedef struct struct_azr04 struct_azr04;
+
+struct struct_azr04 {
+  byte a;
+  bool z;
+  byte r04;
+};
+
+
 typedef struct struct_axzr04 struct_axzr04;
 
 struct struct_axzr04 {
@@ -1186,7 +1195,7 @@ byte smb2j_HammerBroBGColl(byte param_1);
 void smb2j_KillEnemyAboveBlock(byte param_1);
 #define KillEnemyAboveBlock smb2j_KillEnemyAboveBlock
 
-struct_axzr04 smb2j_ChkUnderEnemy(byte param_1);
+struct_azr04 smb2j_ChkUnderEnemy(byte param_1);
 #define ChkUnderEnemy smb2j_ChkUnderEnemy
 
 bool smb2j_ChkForNonSolids(byte param_1);
@@ -1195,10 +1204,10 @@ bool smb2j_ChkForNonSolids(byte param_1);
 byte smb2j_FireballBGCollision(byte param_1);
 #define FireballBGCollision smb2j_FireballBGCollision
 
-byte smb2j_GetFireballBoundBox(byte param_1);
+void smb2j_GetFireballBoundBox(byte param_1);
 #define GetFireballBoundBox smb2j_GetFireballBoundBox
 
-byte smb2j_GetMiscBoundBox(byte param_1);
+void smb2j_GetMiscBoundBox(byte param_1);
 #define GetMiscBoundBox smb2j_GetMiscBoundBox
 
 byte smb2j_GetEnemyBoundBox(byte param_1);
@@ -1213,7 +1222,7 @@ byte smb2j_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
 byte smb2j_LargePlatformBoundBox(byte param_1);
 #define LargePlatformBoundBox smb2j_LargePlatformBoundBox
 
-byte smb2j_SetupEOffsetFBBox(byte param_1);
+void smb2j_SetupEOffsetFBBox(byte param_1);
 #define SetupEOffsetFBBox smb2j_SetupEOffsetFBBox
 
 void smb2j_MoveBoundBoxOffscreen(byte param_1);
@@ -1222,7 +1231,7 @@ void smb2j_MoveBoundBoxOffscreen(byte param_1);
 void smb2j_BoundingBoxCore(byte param_1,byte param_2);
 #define BoundingBoxCore smb2j_BoundingBoxCore
 
-byte smb2j_CheckRightScreenBBox(byte param_1);
+void smb2j_CheckRightScreenBBox(byte param_1);
 #define CheckRightScreenBBox smb2j_CheckRightScreenBBox
 
 bool smb2j_PlayerCollisionCore(byte param_1);
@@ -1252,7 +1261,7 @@ struct blockbuffer_colli_result smb2j_BlockBufferCollision(byte param_1,byte par
 void smb2j_DrawVine(byte param_1);
 #define DrawVine smb2j_DrawVine
 
-byte smb2j_DrawHammer(byte param_1);
+void smb2j_DrawHammer(byte param_1, byte objoff);
 #define DrawHammer smb2j_DrawHammer
 
 void smb2j_FlagpoleGfxHandler(byte param_1);
