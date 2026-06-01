@@ -673,28 +673,28 @@ byte smb2j_MoveObjectHorizontally(byte param_1);
 void smb2j_MovePlayerVertically(void);
 #define MovePlayerVertically smb2j_MovePlayerVertically
 
-byte smb2j_MoveD_EnemyVertically(byte param_1);
+void smb2j_MoveD_EnemyVertically(byte param_1);
 #define MoveD_EnemyVertically smb2j_MoveD_EnemyVertically
 
-byte smb2j_MoveFallingPlatform(byte param_1);
+void smb2j_MoveFallingPlatform(byte param_1);
 #define MoveFallingPlatform smb2j_MoveFallingPlatform
 
-byte smb2j_MoveRedPTroopaDown(byte param_1);
+void smb2j_MoveRedPTroopaDown(byte param_1);
 #define MoveRedPTroopaDown smb2j_MoveRedPTroopaDown
 
-byte smb2j_MoveRedPTroopaUp(byte param_1);
+void smb2j_MoveRedPTroopaUp(byte param_1);
 #define MoveRedPTroopaUp smb2j_MoveRedPTroopaUp
 
-byte smb2j_MoveDropPlatform(byte param_1);
+void smb2j_MoveDropPlatform(byte param_1);
 #define MoveDropPlatform smb2j_MoveDropPlatform
 
-byte smb2j_MoveEnemySlowVert(byte param_1);
+void smb2j_MoveEnemySlowVert(byte param_1);
 #define MoveEnemySlowVert smb2j_MoveEnemySlowVert
 
-byte smb2j_MoveJ_EnemyVertically(byte param_1);
+void smb2j_MoveJ_EnemyVertically(byte param_1);
 #define MoveJ_EnemyVertically smb2j_MoveJ_EnemyVertically
 
-byte smb2j_SetXMoveAmt(byte param_1,byte param_2,byte param_3);
+void smb2j_SetXMoveAmt(byte param_1,byte param_2,byte param_3);
 #define SetXMoveAmt smb2j_SetXMoveAmt
 
 void smb2j_ImposeGravityBlock(byte param_1);

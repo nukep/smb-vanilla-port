@@ -682,28 +682,28 @@ byte smb1_MoveObjectHorizontally(byte param_1);
 void smb1_MovePlayerVertically(void);
 #define MovePlayerVertically smb1_MovePlayerVertically
 
-byte smb1_MoveD_EnemyVertically(byte param_1);
+void smb1_MoveD_EnemyVertically(byte param_1);
 #define MoveD_EnemyVertically smb1_MoveD_EnemyVertically
 
-byte smb1_MoveFallingPlatform(byte param_1);
+void smb1_MoveFallingPlatform(byte param_1);
 #define MoveFallingPlatform smb1_MoveFallingPlatform
 
-byte smb1_MoveRedPTroopaDown(byte param_1);
+void smb1_MoveRedPTroopaDown(byte param_1);
 #define MoveRedPTroopaDown smb1_MoveRedPTroopaDown
 
-byte smb1_MoveRedPTroopaUp(byte param_1);
+void smb1_MoveRedPTroopaUp(byte param_1);
 #define MoveRedPTroopaUp smb1_MoveRedPTroopaUp
 
-byte smb1_MoveDropPlatform(byte param_1);
+void smb1_MoveDropPlatform(byte param_1);
 #define MoveDropPlatform smb1_MoveDropPlatform
 
-byte smb1_MoveEnemySlowVert(byte param_1);
+void smb1_MoveEnemySlowVert(byte param_1);
 #define MoveEnemySlowVert smb1_MoveEnemySlowVert
 
-byte smb1_MoveJ_EnemyVertically(byte param_1);
+void smb1_MoveJ_EnemyVertically(byte param_1);
 #define MoveJ_EnemyVertically smb1_MoveJ_EnemyVertically
 
-byte smb1_SetXMoveAmt(byte param_1,byte param_2,byte param_3);
+void smb1_SetXMoveAmt(byte param_1,byte param_2,byte param_3);
 #define SetXMoveAmt smb1_SetXMoveAmt
 
 void smb1_ImposeGravityBlock(byte param_1);

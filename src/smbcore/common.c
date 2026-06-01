@@ -3180,7 +3180,8 @@ byte BulletBillHandler(const byte param_1) {
       Square2SoundQueue = 8;
     }
     if ((Enemy_State[param_1] & 0x20) != 0) {
-      MoveEnemyHorizontally(MoveD_EnemyVertically(param_1));
+      MoveD_EnemyVertically(param_1);
+      MoveEnemyHorizontally(ObjectOffset);
     } else {
       MoveEnemyHorizontally(param_1);
     }
@@ -4026,71 +4027,69 @@ void MovePlayerVertically(void) {
 
 // SMB:bf63
 // SM2MAIN:8b34
-// Signature: [X] -> [X]
-byte MoveD_EnemyVertically(const byte param_1) {
+// Signature: [X] -> []
+void MoveD_EnemyVertically(const byte param_1) {
   if (Enemy_State[param_1] == 5) {
-    return MoveFallingPlatform(param_1);
+    MoveFallingPlatform(param_1);
+  } else {
+    SetXMoveAmt(3, param_1, 0x3d);
   }
-  return SetXMoveAmt(3, param_1, 0x3d);
 }
 
 
 // SMB:bf6b
 // SM2MAIN:8b3c
-// Signature: [X] -> [X]
-byte MoveFallingPlatform(const byte param_1) {
-  return SetXMoveAmt(3, param_1, 0x20);
+// Signature: [X] -> []
+void MoveFallingPlatform(const byte param_1) {
+  SetXMoveAmt(3, param_1, 0x20);
 }
 
 
 // SMB:bf70
 // SM2MAIN:8b41
-// Signature: [X] -> [X]
-byte MoveRedPTroopaDown(const byte param_1) {
+// Signature: [X] -> []
+void MoveRedPTroopaDown(const byte param_1) {
   ImposeGravity(0, param_1 + 1, 3, 6, 2);
-  return ObjectOffset;
 }
 
 
 // SMB:bf75
 // SM2MAIN:8b46
-// Signature: [X] -> [X]
-byte MoveRedPTroopaUp(const byte param_1) {
+// Signature: [X] -> []
+void MoveRedPTroopaUp(const byte param_1) {
   ImposeGravity(1, param_1 + 1, 3, 6, 2);
-  return ObjectOffset;
 }
 
 
 // SMB:bf88
 // SM2MAIN:8b59
-// Signature: [X] -> [X]
-byte MoveDropPlatform(const byte param_1) {
-  return SetXMoveAmt(2, param_1, 0x7f);
+// Signature: [X] -> []
+void MoveDropPlatform(const byte param_1) {
+  SetXMoveAmt(2, param_1, 0x7f);
 }
 
 
 // SMB:bf8c
 // SM2MAIN:8b5d
-// Signature: [X] -> [X]
-byte MoveEnemySlowVert(const byte param_1) {
-  return SetXMoveAmt(2, param_1, 0xf);
+// Signature: [X] -> []
+void MoveEnemySlowVert(const byte param_1) {
+  SetXMoveAmt(2, param_1, 0xf);
 }
 
 
 // SMB:bf92
 // SM2MAIN:8b63
-// Signature: [X] -> [X]
-byte MoveJ_EnemyVertically(const byte param_1) {
-  return SetXMoveAmt(3, param_1, 0x1c);
+// Signature: [X] -> []
+void MoveJ_EnemyVertically(const byte param_1) {
+  SetXMoveAmt(3, param_1, 0x1c);
 }
 
 
 // SMB:bf96
 // SM2MAIN:8b67
-// Signature: [A, X, Y] -> [X]
-byte SetXMoveAmt(const byte param_1, const byte param_2, const byte param_3) {
+// Signature: [A, X, Y] -> []
+void SetXMoveAmt(const byte param_1, const byte param_2, const byte param_3) {
   ImposeGravitySprObj(param_1, param_2 + 1, param_3);
-  return ObjectOffset;
 }
 
 
@@ -5810,7 +5809,8 @@ byte MovePodoboo(const byte param_1) {
     EnemyIntervalTimer[param_1] = (bVar1 & 0xf) | 6;
     SpriteVarData2[param_1] = 0xf9;
   }
-  return MoveJ_EnemyVertically(param_1);
+  MoveJ_EnemyVertically(param_1);
+  return ObjectOffset;
 }
 
 
@@ -5924,8 +5924,8 @@ byte MoveNormalEnemy(const byte param_1) {
 
   // FallE
   if (fall_e) {
-    // TODO - look into the call graph for MoveD_EnemeyVertically and why it returns the input
-    const byte tmp1 = MoveD_EnemyVertically(param_1);
+    MoveD_EnemyVertically(param_1);
+    const byte tmp1 = ObjectOffset;
     assert_eq_assumption(tmp1, param_1);
 
     if (Enemy_State[param_1] == 2) {
@@ -5958,7 +5958,8 @@ byte MoveNormalEnemy(const byte param_1) {
 // SM2MAIN:971a
 // Signature: [X] -> [X]
 byte MoveDefeatedEnemy(const byte param_1) {
-  const byte bVar1 = MoveD_EnemyVertically(param_1);
+  MoveD_EnemyVertically(param_1);
+  const byte bVar1 = ObjectOffset;
   MoveEnemyHorizontally(bVar1);
   return ObjectOffset;
 }
@@ -5968,7 +5969,8 @@ byte MoveDefeatedEnemy(const byte param_1) {
 // SM2MAIN:972e
 // Signature: [X] -> [X]
 byte MoveJumpingEnemy(const byte param_1) {
-  const byte bVar1 = MoveJ_EnemyVertically(param_1);
+  MoveJ_EnemyVertically(param_1);
+  const byte bVar1 = ObjectOffset;
   MoveEnemyHorizontally(bVar1);
   return ObjectOffset;
 }
@@ -5988,9 +5990,11 @@ byte ProcMoveRedPTroopa(const byte param_1) {
     }
   }
   if (SpriteVarData1[param_1] <= Enemy_Y_Position[param_1]) {
-    return MoveRedPTroopaUp(param_1);
+    MoveRedPTroopaUp(param_1);
+    return ObjectOffset;
   }
-  return MoveRedPTroopaDown(param_1);
+  MoveRedPTroopaDown(param_1);
+  return ObjectOffset;
 }
 
 
@@ -6066,7 +6070,8 @@ struct_xr00 MoveWithXMCntrs(const byte param_1) {
 // Signature: [X, C] -> [X]
 byte MoveBloober(const byte param_1, const bool param_2) {
   if ((Enemy_State[param_1] & 0x20) != 0) {
-    return MoveEnemySlowVert(param_1);
+    MoveEnemySlowVert(param_1);
+    return ObjectOffset;
   }
 
   const byte rng = PseudoRandomBitReg[param_1 + 1] & (SecondaryHardMode == 0 ? 63 : 3);
@@ -6143,7 +6148,8 @@ void ProcSwimmingB(const byte param_1, const bool param_2) {
 // Signature: [X] -> [X]
 byte MoveBulletBill(const byte param_1) {
   if ((Enemy_State[param_1] & 0x20) != 0) {
-    return MoveJ_EnemyVertically(param_1);
+    MoveJ_EnemyVertically(param_1);
+    return ObjectOffset;
   }
   SpriteVarData1[param_1] = 0xe8;
   MoveEnemyHorizontally(param_1);
@@ -6156,7 +6162,8 @@ byte MoveBulletBill(const byte param_1) {
 // Signature: [X] -> [X]
 byte MoveSwimmingCheepCheep(const byte param_1) {
   if ((Enemy_State[param_1] & 0x20) != 0) {
-    return MoveEnemySlowVert(param_1);
+    MoveEnemySlowVert(param_1);
+    return ObjectOffset;
   }
 
   const u8 cheepcheep_speed = Enemy_ID[param_1] == 0xa ? 0x40 : 0x80;
@@ -6355,10 +6362,12 @@ struct_r01r02r03 GetFirebarPosition(const byte param_1, const byte param_2) {
 byte MoveFlyingCheepCheep(const byte param_1) {
   if ((Enemy_State[param_1] & 0x20) != 0) {
     Enemy_SprAttrib[param_1] = 0;
-    return MoveJ_EnemyVertically(param_1);
+    MoveJ_EnemyVertically(param_1);
+    return ObjectOffset;
   }
   MoveEnemyHorizontally(param_1);
-  const byte bVar2 = SetXMoveAmt(5, ObjectOffset, 0xd);
+  SetXMoveAmt(5, ObjectOffset, 0xd);
+  const byte bVar2 = ObjectOffset;
   byte bVar3 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar2] >> 4;
   byte bVar1 = Enemy_Y_Position[bVar2] - PRandomSubtracter[bVar3];
   if (bVar1 >= 0x80) {
@@ -6399,7 +6408,8 @@ byte MoveLakitu(const byte param_1) {
     MoveEnemyHorizontally(param_1);
     return ObjectOffset;
   }
-  return MoveD_EnemyVertically(param_1);
+  MoveD_EnemyVertically(param_1);
+  return ObjectOffset;
 }
 
 
@@ -6518,7 +6528,8 @@ void BridgeCollapse(void) {
 // SM2MAIN:9c44
 // Signature: [X] -> [X]
 byte MoveD_Bowser(const byte param_1) {
-  const byte bVar1 = MoveEnemySlowVert(param_1);
+  MoveEnemySlowVert(param_1);
+  const byte bVar1 = ObjectOffset;
   return BowserGfxHandler(bVar1);
 }
 
@@ -6586,7 +6597,8 @@ byte RunBowser(const byte param_1) {
   }
 HammerChk:
   if (EnemyFrameTimer[tmp1] == 0) {
-    tmp1 = MoveEnemySlowVert(tmp1);
+    MoveEnemySlowVert(tmp1);
+    tmp1 = ObjectOffset;
     if ((WorldNumber >= 5) && ((FrameCounter & 3) == 0)) {
       sVar3 = SpawnHammerObj();
       tmp1 = sVar3.x;
@@ -7267,7 +7279,8 @@ byte DropPlatform(const byte param_1) {
     return param_1;
   }
 
-  byte tmp = MoveDropPlatform(param_1);
+  MoveDropPlatform(param_1);
+  byte tmp = ObjectOffset;
   PositionPlayerOnVPlat(tmp);
   return tmp;
 }
