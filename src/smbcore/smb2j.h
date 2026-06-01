@@ -661,7 +661,7 @@ byte smb2j_BlockObjectsCore(byte param_1);
 void smb2j_BlockObjMT_Updater(void);
 #define BlockObjMT_Updater smb2j_BlockObjMT_Updater
 
-struct_ax smb2j_MoveEnemyHorizontally(byte param_1);
+byte smb2j_MoveEnemyHorizontally(byte param_1);
 #define MoveEnemyHorizontally smb2j_MoveEnemyHorizontally
 
 byte smb2j_MovePlayerHorizontally(void);
@@ -1384,25 +1384,25 @@ void smb2j_GetObjRelativePosition(byte param_1,byte param_2);
 void smb2j_GetPlayerOffscreenBits(void);
 #define GetPlayerOffscreenBits smb2j_GetPlayerOffscreenBits
 
-byte smb2j_GetFireballOffscreenBits(byte param_1);
+void smb2j_GetFireballOffscreenBits(byte param_1);
 #define GetFireballOffscreenBits smb2j_GetFireballOffscreenBits
 
-byte smb2j_GetBubbleOffscreenBits(byte param_1);
+void smb2j_GetBubbleOffscreenBits(byte param_1);
 #define GetBubbleOffscreenBits smb2j_GetBubbleOffscreenBits
 
-byte smb2j_GetMiscOffscreenBits(byte param_1);
+void smb2j_GetMiscOffscreenBits(byte param_1);
 #define GetMiscOffscreenBits smb2j_GetMiscOffscreenBits
 
 byte smb2j_GetProperObjOffset(byte param_1,byte param_2);
 #define GetProperObjOffset smb2j_GetProperObjOffset
 
-byte smb2j_GetEnemyOffscreenBits(byte param_1);
+void smb2j_GetEnemyOffscreenBits(byte param_1);
 #define GetEnemyOffscreenBits smb2j_GetEnemyOffscreenBits
 
-byte smb2j_GetBlockOffscreenBits(byte param_1);
+void smb2j_GetBlockOffscreenBits(byte param_1);
 #define GetBlockOffscreenBits smb2j_GetBlockOffscreenBits
 
-byte smb2j_GetOffScreenBitsSet(byte param_1,byte param_2);
+void smb2j_GetOffScreenBitsSet(byte param_1,byte param_2);
 #define GetOffScreenBitsSet smb2j_GetOffScreenBitsSet
 
 byte smb2j_GetXOffscreenBits(byte param_1);

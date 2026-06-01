@@ -2670,7 +2670,8 @@ void ProcFireball_Bubble(void) {
     for (int i = 2; i >= 0; i--) {
       ObjectOffset = i;
       BubbleCheck(i);
-      DrawBubble(GetBubbleOffscreenBits(RelativeBubblePosition(i)));
+      GetBubbleOffscreenBits(RelativeBubblePosition(i));
+      DrawBubble(ObjectOffset);
     }
   }
 }
@@ -2719,8 +2720,8 @@ void FireballObjCore(const byte param_1) {
     MoveObjectHorizontally(bVar4);
 
     byte bVar2 = RelativeFireballPosition(ObjectOffset);
-    bVar2 = GetFireballOffscreenBits(bVar2);
-    GetFireballBoundBox(bVar2);
+    GetFireballOffscreenBits(bVar2);
+    GetFireballBoundBox(ObjectOffset);
     bVar2 = ObjectOffset;
     bVar2 = FireballBGCollision(bVar2);
     if ((FBall_OffscreenBits & 0xcc) == 0) {
@@ -2934,8 +2935,8 @@ void FlagpoleRoutine(void) {
         BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[5] = bVar1;
       }
     }
-    const byte sVar4 = GetEnemyOffscreenBits(bVar2);
-    RelativeEnemyPosition(sVar4);
+    GetEnemyOffscreenBits(bVar2);
+    RelativeEnemyPosition(ObjectOffset);
     FlagpoleGfxHandler(ObjectOffset);
   }
 }
@@ -2947,8 +2948,8 @@ void FlagpoleRoutine(void) {
 byte JumpspringHandler(const byte param_1) {
   byte bVar2;
 
-  const byte sVar3 = GetEnemyOffscreenBits(param_1);
-  byte bVar1 = sVar3;
+  GetEnemyOffscreenBits(param_1);
+  byte bVar1 = ObjectOffset;
   if ((TimerControl == 0) && (JumpspringAnimCtrl != 0)) {
     bVar2 = JumpspringAnimCtrl - 1;
     if ((bVar2 & 2) == 0) {
@@ -3136,9 +3137,9 @@ void ProcessCannons(void) {
       if (Enemy_ID[i] == 0x33) {
         OffscreenBoundsCheck(i);
         if (Enemy_Flag[i] != 0) {
-          const byte sVar3 = GetEnemyOffscreenBits(i);
+          GetEnemyOffscreenBits(i);
 
-          assert_eq_assumption(sVar3, i);
+          assert_eq_assumption(ObjectOffset, i);
 
           const byte res = BulletBillHandler(i);
 
@@ -3155,7 +3156,6 @@ void ProcessCannons(void) {
 // Signature: [X] -> [X]
 byte BulletBillHandler(const byte param_1) {
   struct_ncr00 sVar2;
-  struct_ax sVar3;
 
   byte arg;
   if (TimerControl == 0) {
@@ -3180,17 +3180,17 @@ byte BulletBillHandler(const byte param_1) {
       Square2SoundQueue = 8;
     }
     if ((Enemy_State[param_1] & 0x20) != 0) {
-      sVar3 = MoveEnemyHorizontally(MoveD_EnemyVertically(param_1));
+      MoveEnemyHorizontally(MoveD_EnemyVertically(param_1));
     } else {
-      sVar3 = MoveEnemyHorizontally(param_1);
+      MoveEnemyHorizontally(param_1);
     }
-    arg = sVar3.x;
+    arg = ObjectOffset;
   } else {
     arg = param_1;
   }
-  const byte sVar4 = GetEnemyOffscreenBits(arg);
-  RelativeEnemyPosition(sVar4);
+  GetEnemyOffscreenBits(arg);
   byte objoff = ObjectOffset;
+  RelativeEnemyPosition(objoff);
   GetEnemyBoundBox(objoff);
   PlayerEnemyCollision(objoff);
   return EnemyGfxHandler(objoff);
@@ -3333,8 +3333,8 @@ static inline void ProcHammerObj(const int i) {
   }
 
   byte x = i;
-  x = GetMiscOffscreenBits(x);
-  x = RelativeMiscPosition(x);
+  GetMiscOffscreenBits(x);
+  x = RelativeMiscPosition(ObjectOffset);
   GetMiscBoundBox(x);
   DrawHammer(ObjectOffset, ObjectOffset);
 
@@ -3373,8 +3373,8 @@ static inline void ProcJumpCoin(const int i) {
 
   byte x = i;
   x = RelativeMiscPosition(x);
-  x = GetMiscOffscreenBits(x);
-  GetMiscBoundBox(x);
+  GetMiscOffscreenBits(x);
+  GetMiscBoundBox(ObjectOffset);
   x = JCoinGfxHandler(ObjectOffset);
 
   assert_eq_assumption(x, i);
@@ -3549,8 +3549,8 @@ byte PowerUpObjHandler(void) {
       }
     }
     RelativeEnemyPosition(bVar1);
-    const byte sVar4 = GetEnemyOffscreenBits(ObjectOffset);
-    GetEnemyBoundBox(sVar4);
+    GetEnemyOffscreenBits(ObjectOffset);
+    GetEnemyBoundBox(ObjectOffset);
     bVar1 = DrawPowerUp();
     PlayerEnemyCollision(bVar1);
     OffscreenBoundsCheck(bVar1);
@@ -3908,7 +3908,8 @@ byte BlockObjectsCore(const byte param_1) {
   bStack0000 &= 0xf;
   if (bStack0000 == 1) {
     ImposeGravityBlock(param_1 + 9);
-    const byte tmp1 = DrawBlock(GetBlockOffscreenBits(RelativeBlockPosition(ObjectOffset)));
+    GetBlockOffscreenBits(RelativeBlockPosition(ObjectOffset));
+    const byte tmp1 = DrawBlock(ObjectOffset);
     if (4 < (Block_Y_Position[tmp1] & 0xf)) {
       Block_State[tmp1] = 1;
       return tmp1;
@@ -3921,21 +3922,22 @@ byte BlockObjectsCore(const byte param_1) {
     MoveObjectHorizontally(param_1 + 9);
     ImposeGravityBlock(param_1 + 9 + 2);
     MoveObjectHorizontally(param_1 + 9 + 2);
-    const byte tmp1 = GetBlockOffscreenBits(RelativeBlockPosition(ObjectOffset));
-    DrawBrickChunks(tmp1);
-    if (Block_Y_HighPos[tmp1] == 0) {
-      Block_State[tmp1] = bStack0000;
-      return tmp1;
+    GetBlockOffscreenBits(RelativeBlockPosition(ObjectOffset));
+    const byte objoff = ObjectOffset;
+    DrawBrickChunks(objoff);
+    if (Block_Y_HighPos[objoff] == 0) {
+      Block_State[objoff] = bStack0000;
+      return objoff;
     }
-    if (Block_Y_Position[tmp1 + 2] > 0xf0) {
-      Block_Y_Position[tmp1 + 2] = 0xf0;
+    if (Block_Y_Position[objoff + 2] > 0xf0) {
+      Block_Y_Position[objoff + 2] = 0xf0;
     }
-    if (Block_Y_Position[tmp1] < 0xf0) {
-      Block_State[tmp1] = bStack0000;
-      return tmp1;
+    if (Block_Y_Position[objoff] < 0xf0) {
+      Block_State[objoff] = bStack0000;
+      return objoff;
     }
-    Block_State[tmp1] = 0;
-    return tmp1;
+    Block_State[objoff] = 0;
+    return objoff;
   }
 }
 
@@ -3975,14 +3977,9 @@ void BlockObjMT_Updater(void) {
 
 // SMB:bf02
 // SM2MAIN:8ad3
-// Signature: [X] -> [A, X]
-struct_ax MoveEnemyHorizontally(const byte param_1) {
-
-  struct_ax sVar1;
-
-  sVar1.a = MoveObjectHorizontally(param_1 + 1);
-  sVar1.x = ObjectOffset;
-  return sVar1;
+// Signature: [X] -> [A]
+byte MoveEnemyHorizontally(const byte param_1) {
+  return MoveObjectHorizontally(param_1 + 1);
 }
 
 
@@ -5562,8 +5559,8 @@ byte RunEnemyObjectsCore(void) {
 // SM2MAIN:950c
 // Signature: [X] -> [X]
 byte RunRetainerObj(const byte param_1) {
-  const byte sVar2 = GetEnemyOffscreenBits(param_1);
-  RelativeEnemyPosition(sVar2);
+  GetEnemyOffscreenBits(param_1);
+  RelativeEnemyPosition(ObjectOffset);
   return EnemyGfxHandler(ObjectOffset);
 }
 
@@ -5573,8 +5570,8 @@ byte RunRetainerObj(const byte param_1) {
 // Signature: [X] -> [X]
 byte RunNormalEnemies(const byte param_1) {
   Enemy_SprAttrib[param_1] = 0;
-  const byte sVar2 = GetEnemyOffscreenBits(param_1);
-  RelativeEnemyPosition(sVar2);
+  GetEnemyOffscreenBits(param_1);
+  RelativeEnemyPosition(ObjectOffset);
   byte bVar1 = EnemyGfxHandler(ObjectOffset);
   GetEnemyBoundBox(bVar1);
   bVar1 = ObjectOffset;
@@ -5687,8 +5684,8 @@ byte EnemyMovementSubs(const byte param_1) {
 // Signature: [X] -> [X]
 byte RunBowserFlame(const byte param_1) {
   byte bVar1 = ProcBowserFlame(param_1);
-  const byte sVar2 = GetEnemyOffscreenBits(bVar1);
-  RelativeEnemyPosition(sVar2);
+  GetEnemyOffscreenBits(bVar1);
+  RelativeEnemyPosition(ObjectOffset);
   GetEnemyBoundBox(ObjectOffset);
   bVar1 = ObjectOffset;
   PlayerEnemyCollision(bVar1);
@@ -5711,8 +5708,8 @@ byte RunFirebarObj(const byte param_1) {
 // SM2MAIN:9582
 // Signature: [X] -> [X]
 byte RunSmallPlatform(const byte param_1) {
-  const byte a = GetEnemyOffscreenBits(param_1);
-  RelativeEnemyPosition(a);
+  GetEnemyOffscreenBits(param_1);
+  RelativeEnemyPosition(ObjectOffset);
   SmallPlatformBoundBox(ObjectOffset);
   const byte d = SmallPlatformCollision(ObjectOffset);
   RelativeEnemyPosition(d);
@@ -5727,8 +5724,8 @@ byte RunSmallPlatform(const byte param_1) {
 // SM2MAIN:959a
 // Signature: [X] -> [X]
 byte RunLargePlatform(const byte param_1) {
-  const byte a = GetEnemyOffscreenBits(param_1);
-  RelativeEnemyPosition(a);
+  GetEnemyOffscreenBits(param_1);
+  RelativeEnemyPosition(ObjectOffset);
   const byte c = LargePlatformBoundBox(ObjectOffset);
   const byte d = LargePlatformCollision(c);
   const byte e = (TimerControl == 0) ? LargePlatformSubroutines(d) : d;
@@ -5933,8 +5930,8 @@ byte MoveNormalEnemy(const byte param_1) {
 
     if (Enemy_State[param_1] == 2) {
       // MEHor
-      const struct_ax sVar3 = MoveEnemyHorizontally(param_1);
-      return sVar3.x;
+      MoveEnemyHorizontally(param_1);
+      return ObjectOffset;
     }
 
     if (((Enemy_State[param_1] & 0x40) != 0) && (Enemy_ID[param_1] != 0x2e)) {
@@ -5948,9 +5945,9 @@ byte MoveNormalEnemy(const byte param_1) {
   }
   Enemy_X_Speed[param_1] += XSpeedAdderData[bVar2];
 
-  // TODO - look into the call graph for MoveEnemyHorizontally and why it returns the input (to x)
-  const struct_ax sVar3 = MoveEnemyHorizontally(param_1);
-  assert_eq_assumption(sVar3.x, param_1);
+  MoveEnemyHorizontally(param_1);
+  // TODO - remove this once we're sure
+  assert_eq_assumption(ObjectOffset, param_1);
 
   Enemy_X_Speed[param_1] = old_enemy_speed;
   return param_1;
@@ -5962,8 +5959,8 @@ byte MoveNormalEnemy(const byte param_1) {
 // Signature: [X] -> [X]
 byte MoveDefeatedEnemy(const byte param_1) {
   const byte bVar1 = MoveD_EnemyVertically(param_1);
-  const struct_ax sVar2 = MoveEnemyHorizontally(bVar1);
-  return sVar2.x;
+  MoveEnemyHorizontally(bVar1);
+  return ObjectOffset;
 }
 
 
@@ -5972,8 +5969,8 @@ byte MoveDefeatedEnemy(const byte param_1) {
 // Signature: [X] -> [X]
 byte MoveJumpingEnemy(const byte param_1) {
   const byte bVar1 = MoveJ_EnemyVertically(param_1);
-  const struct_ax sVar2 = MoveEnemyHorizontally(bVar1);
-  return sVar2.x;
+  MoveEnemyHorizontally(bVar1);
+  return ObjectOffset;
 }
 
 
@@ -6056,10 +6053,10 @@ struct_xr00 MoveWithXMCntrs(const byte param_1) {
     bVar1 = 2;
   }
   Enemy_MovingDir[param_1] = bVar1;
-  const struct_ax sVar2 = MoveEnemyHorizontally(param_1);
-  sVar3.x = sVar2.x;
+  const byte sVar2 = MoveEnemyHorizontally(param_1);
+  sVar3.x = ObjectOffset;
   SpriteVarData1[sVar3.x] = bStack0000;
-  sVar3.r00 = sVar2.a;
+  sVar3.r00 = sVar2;
   return sVar3;
 }
 
@@ -6149,8 +6146,8 @@ byte MoveBulletBill(const byte param_1) {
     return MoveJ_EnemyVertically(param_1);
   }
   SpriteVarData1[param_1] = 0xe8;
-  const struct_ax sVar2 = MoveEnemyHorizontally(param_1);
-  return sVar2.x;
+  MoveEnemyHorizontally(param_1);
+  return ObjectOffset;
 }
 
 
@@ -6193,38 +6190,39 @@ byte MoveSwimmingCheepCheep(const byte param_1) {
 // SM2MAIN:9971
 // Signature: [X] -> [X]
 byte ProcFirebar(const byte param_1) {
-  const byte sVar4 = GetEnemyOffscreenBits(param_1);
+  GetEnemyOffscreenBits(param_1);
+  const byte objoff = ObjectOffset;
 
   if ((Enemy_OffscreenBits & 8) != 0) {
-    return sVar4;
+    return objoff;
   }
 
   if (TimerControl == 0) {
     // Inlined: FirebarSpin
     // NES note: it's only called once, and inlining reveals a full 16-bit addition and subtraction
 
-    u16 val = LOAD_16(SpriteVarData2[sVar4], SpriteVarData1[sVar4]);
+    u16 val = LOAD_16(SpriteVarData2[objoff], SpriteVarData1[objoff]);
 
-    if (FirebarSpinDirection[sVar4] == 0) {
-      val += FirebarSpinSpeed[sVar4];
+    if (FirebarSpinDirection[objoff] == 0) {
+      val += FirebarSpinSpeed[objoff];
     } else {
-      val -= FirebarSpinSpeed[sVar4];
+      val -= FirebarSpinSpeed[objoff];
     }
 
     val = val & 0x1fff;
 
-    STORE_16(SpriteVarData2[sVar4], SpriteVarData1[sVar4],
+    STORE_16(SpriteVarData2[objoff], SpriteVarData1[objoff],
         val);
   }
 
 
-  byte tmp1 = SpriteVarData2[sVar4];
-  if ((Enemy_ID[sVar4] > 0x1e) && ((tmp1 == 8) || (tmp1 == 0x18))) {
+  byte tmp1 = SpriteVarData2[objoff];
+  if ((Enemy_ID[objoff] > 0x1e) && ((tmp1 == 8) || (tmp1 == 0x18))) {
     tmp1 += 1;
-    SpriteVarData2[sVar4] = tmp1;
+    SpriteVarData2[objoff] = tmp1;
   }
 
-  RelativeEnemyPosition(sVar4);
+  RelativeEnemyPosition(objoff);
   // NES note: There's normally a call to GetFirebarPosition right after RelativeEnemyPosition,
   // but it does nothing. The results are unused.
   // This port omits it.
@@ -6359,8 +6357,8 @@ byte MoveFlyingCheepCheep(const byte param_1) {
     Enemy_SprAttrib[param_1] = 0;
     return MoveJ_EnemyVertically(param_1);
   }
-  const struct_ax sVar4 = MoveEnemyHorizontally(param_1);
-  const byte bVar2 = SetXMoveAmt(5, sVar4.x, 0xd);
+  MoveEnemyHorizontally(param_1);
+  const byte bVar2 = SetXMoveAmt(5, ObjectOffset, 0xd);
   byte bVar3 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar2] >> 4;
   byte bVar1 = Enemy_Y_Position[bVar2] - PRandomSubtracter[bVar3];
   if (bVar1 >= 0x80) {
@@ -6381,7 +6379,6 @@ byte MoveFlyingCheepCheep(const byte param_1) {
 // Signature: [X] -> [X]
 byte MoveLakitu(const byte param_1) {
   byte bVar1;
-  struct_ax sVar2;
 
   if ((Enemy_State[param_1] & 0x20) == 0) {
     if (Enemy_State[param_1] == 0) {
@@ -6399,8 +6396,8 @@ byte MoveLakitu(const byte param_1) {
       bVar1 = 2;
     }
     Enemy_MovingDir[param_1] = bVar1;
-    sVar2 = MoveEnemyHorizontally(param_1);
-    return sVar2.x;
+    MoveEnemyHorizontally(param_1);
+    return ObjectOffset;
   }
   return MoveD_EnemyVertically(param_1);
 }
@@ -6724,8 +6721,9 @@ byte ProcBowserFlame(const byte param_1) {
     Enemy_Rel_XPos += 8;
   }
 
-  const byte sVar6 = GetEnemyOffscreenBits(ObjectOffset);
-  const byte bVar3 = Enemy_SprDataOffset[sVar6];
+  GetEnemyOffscreenBits(ObjectOffset);
+  const byte objoff = ObjectOffset;
+  const byte bVar3 = Enemy_SprDataOffset[objoff];
 
   const byte bits = Enemy_OffscreenBits;
 
@@ -6741,7 +6739,7 @@ byte ProcBowserFlame(const byte param_1) {
   if ((bits & 8) != 0) {
     SPRITE_Y(bVar3, 0) = SPRITE_Y_OFFSCREEN;
   }
-  return sVar6;
+  return objoff;
 }
 
 
@@ -7161,17 +7159,18 @@ byte BalancePlatform(const byte param_1) {
 // SM2MAIN:a1d2
 // Signature: [Y] -> [X]
 byte InitPlatformFall(const byte param_1) {
-  const byte bVar1 = GetEnemyOffscreenBits(param_1);
+  GetEnemyOffscreenBits(param_1);
+  const byte objoff = ObjectOffset;
 
-  SetupFloateyNumber(6, bVar1);
-  FloateyNum_X_Pos[bVar1] = SprObject_Rel_XPos[0];
-  FloateyNum_Y_Pos[bVar1] = SprObject_Y_Position[0];
-  Enemy_MovingDir[bVar1] = 1;
+  SetupFloateyNumber(6, objoff);
+  FloateyNum_X_Pos[objoff] = SprObject_Rel_XPos[0];
+  FloateyNum_Y_Pos[objoff] = SprObject_Y_Position[0];
+  Enemy_MovingDir[objoff] = 1;
 
   // NES note: GetEnemyOffscreenBits sets Y=1. This is later used by StopPlatforms.
   // This is either a bug, or just a way to reuse the value. Either way, it's best extracted out to the caller (here).
-  StopPlatforms(bVar1, 1);
-  return bVar1;
+  StopPlatforms(objoff, 1);
+  return objoff;
 }
 
 
@@ -7278,13 +7277,13 @@ byte DropPlatform(const byte param_1) {
 // SM2MAIN:a277
 // Signature: [X] -> [X]
 byte RightPlatform(const byte param_1) {
-  const struct_ax sVar2 = MoveEnemyHorizontally(param_1);
-  const byte bVar1 = sVar2.x;
-  if (HammerThrowingTimer_Or_PlatformCollisionFlag[bVar1] < 0x80) {
-    SpriteVarData1[bVar1] = 0x10;
-    PositionPlayerOnHPlat(bVar1, sVar2.a);
+  const byte sVar2 = MoveEnemyHorizontally(param_1);
+  const byte objoff = ObjectOffset;
+  if (HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] < 0x80) {
+    SpriteVarData1[objoff] = 0x10;
+    PositionPlayerOnHPlat(objoff, sVar2);
   }
-  return bVar1;
+  return objoff;
 }
 
 
@@ -10674,28 +10673,28 @@ void GetPlayerOffscreenBits(void) {
 
 // SMB:f187
 // SM2MAIN:be6c
-// Signature: [X] -> [X]
-byte GetFireballOffscreenBits(const byte param_1) {
+// Signature: [X] -> []
+void GetFireballOffscreenBits(const byte param_1) {
   const byte bVar1 = GetProperObjOffset(param_1, 0);
-  return GetOffScreenBitsSet(bVar1, 2);
+  GetOffScreenBitsSet(bVar1, 2);
 }
 
 
 // SMB:f191
 // SM2MAIN:be76
-// Signature: [X] -> [X]
-byte GetBubbleOffscreenBits(const byte param_1) {
+// Signature: [X] -> []
+void GetBubbleOffscreenBits(const byte param_1) {
   const byte bVar1 = GetProperObjOffset(param_1, 1);
-  return GetOffScreenBitsSet(bVar1, 3);
+  GetOffScreenBitsSet(bVar1, 3);
 }
 
 
 // SMB:f19b
 // SM2MAIN:be80
-// Signature: [X] -> [X]
-byte GetMiscOffscreenBits(const byte param_1) {
+// Signature: [X] -> []
+void GetMiscOffscreenBits(const byte param_1) {
   const byte bVar1 = GetProperObjOffset(param_1, 2);
-  return GetOffScreenBitsSet(bVar1, 6);
+  GetOffScreenBitsSet(bVar1, 6);
 }
 
 
@@ -10707,32 +10706,30 @@ byte GetProperObjOffset(const byte param_1, const byte param_2) { return param_1
 
 // SMB:f1af
 // SM2MAIN:be94
-// Signature: [X] -> [X]
-byte GetEnemyOffscreenBits(const byte param_1) {
+// Signature: [X] -> []
+void GetEnemyOffscreenBits(const byte param_1) {
   // NES note: GetEnemyOffscreenBits sets Y=1. Used by InitPlatformFall.
-  return GetOffScreenBitsSet(param_1 + 1, 1);
+  GetOffScreenBitsSet(param_1 + 1, 1);
 }
 
 
 // SMB:f1b6
 // SM2MAIN:be9b
-// Signature: [X] -> [X]
-byte GetBlockOffscreenBits(const byte param_1) {
-  return GetOffScreenBitsSet(param_1 + 9, 4);
+// Signature: [X] -> []
+void GetBlockOffscreenBits(const byte param_1) {
+  GetOffScreenBitsSet(param_1 + 9, 4);
 }
 
 
 // SMB:f1c0
 // SM2MAIN:bea5
-// Signature: [X, Y] -> [X]
-byte GetOffScreenBitsSet(const byte param_1, const byte param_2) {
+// Signature: [X, Y] -> []
+void GetOffScreenBitsSet(const byte param_1, const byte param_2) {
   // Inlined: RunOffscrBitsSubs (only used once in the original games)
   const byte xbits = GetXOffscreenBits(param_1);
   const byte ybits = GetYOffscreenBits(param_1);
 
   SprObject_OffscrBits[param_2] = (ybits << 4) | (xbits >> 4);
-
-  return ObjectOffset;
 }
 
 
