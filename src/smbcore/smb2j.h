@@ -607,7 +607,7 @@ byte smb2j_AddToScore(void);
 byte smb2j_WriteScoreAndCoinTally(void);
 #define WriteScoreAndCoinTally smb2j_WriteScoreAndCoinTally
 
-byte smb2j_WriteDigits(byte param_1);
+void smb2j_WriteDigits(byte param_1);
 #define WriteDigits smb2j_WriteDigits
 
 void smb2j_SetupPowerUp(byte param_1);
@@ -958,7 +958,7 @@ byte smb2j_MoveD_Bowser(byte param_1);
 byte smb2j_RunBowser(byte param_1);
 #define RunBowser smb2j_RunBowser
 
-byte smb2j_KillAllEnemies(void);
+void smb2j_KillAllEnemies(void);
 #define KillAllEnemies smb2j_KillAllEnemies
 
 byte smb2j_BowserGfxHandler(byte param_1);

@@ -619,7 +619,7 @@ byte smb1_AddToScore(void);
 byte smb1_WriteScoreAndCoinTally(void);
 #define WriteScoreAndCoinTally smb1_WriteScoreAndCoinTally
 
-byte smb1_WriteDigits(byte param_1);
+void smb1_WriteDigits(byte param_1);
 #define WriteDigits smb1_WriteDigits
 
 void smb1_SetupPowerUp(byte param_1);
@@ -967,7 +967,7 @@ byte smb1_MoveD_Bowser(byte param_1);
 byte smb1_RunBowser(byte param_1);
 #define RunBowser smb1_RunBowser
 
-byte smb1_KillAllEnemies(void);
+void smb1_KillAllEnemies(void);
 #define KillAllEnemies smb1_KillAllEnemies
 
 byte smb1_BowserGfxHandler(byte param_1);

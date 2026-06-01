@@ -3460,24 +3460,25 @@ byte WriteScoreAndCoinTally(void) {
   // Also called "GetSBNybbles" in the SMB1 disassembly
 
   #ifdef SMB1_MODE
-    return WriteDigits(StatusBarNybbles[CurrentPlayer]);
+    WriteDigits(StatusBarNybbles[CurrentPlayer]);
   #endif
 
   #ifdef SMB2J_MODE
-    return WriteDigits(1);
+    WriteDigits(1);
   #endif
+
+  return ObjectOffset;
 }
 
 
 // SMB:bc36
 // SM2MAIN:87ef
-// Signature: [A] -> [X]
-byte WriteDigits(const byte param_1) {
+// Signature: [A] -> []
+void WriteDigits(const byte param_1) {
   PrintStatusBarNumbers(param_1);
   if (VRAM_Buffer1[VRAM_Buffer1_Offset - 6] == 0) {
     VRAM_Buffer1[VRAM_Buffer1_Offset - 6] = 0x24;
   }
-  return ObjectOffset;
 }
 
 
@@ -4236,7 +4237,8 @@ byte ProcLoopCommand(const byte param_1) {
         if (SMB1_ONLY && WorldNumber != 6) {
           if (SprObject_Y_Position[0] != LoopCmdYPosition[idx] || Player_State != 0) {
             ExecGameLoopback(idx);
-            tmp1 = KillAllEnemies();
+            KillAllEnemies();
+            tmp1 = ObjectOffset;
           }
           MultiLoopPassCntr = 0;
           MultiLoopCorrectCntr = 0;
@@ -4254,7 +4256,8 @@ byte ProcLoopCommand(const byte param_1) {
         if (MultiLoopPassCntr == cmp_val) {
           if (MultiLoopCorrectCntr != cmp_val) {
             ExecGameLoopback(idx);
-            tmp1 = KillAllEnemies();
+            KillAllEnemies();
+            tmp1 = ObjectOffset;
           }
           MultiLoopPassCntr = 0;
           MultiLoopCorrectCntr = 0;
@@ -6547,7 +6550,8 @@ byte RunBowser(const byte param_1) {
 
   if ((Enemy_State[tmp1] & 0x20) != 0) {
     if (Enemy_Y_Position[tmp1] >= 0xe0) {
-      return KillAllEnemies();
+      KillAllEnemies();
+      return ObjectOffset;
     }
     return MoveD_Bowser(tmp1);
   }
@@ -6638,14 +6642,13 @@ ChkFireB:
 
 // SMB:d071
 // SM2MAIN:9ca6
-// Signature: [] -> [X]
-byte KillAllEnemies(void) {
+// Signature: [] -> []
+void KillAllEnemies(void) {
   for (int i = 0; i < 5; i++) {
     EraseEnemyObject(i);
   }
 
   EnemyFrenzyBuffer = 0;
-  return ObjectOffset;
 }
 
 
@@ -6892,13 +6895,15 @@ byte AwardTimerCastle(void) {
 byte EndAreaPoints(void) {
 #ifdef SMB1_MODE
   DigitsMathRoutine(CurrentPlayer == 0 ? 0xb : 0x11);
-  return WriteDigits((CurrentPlayer * 16) + 4);
+  WriteDigits((CurrentPlayer * 16) + 4);
 #endif
 
 #ifdef SMB2J_MODE
   DigitsMathRoutine(0xb);
-  return WriteDigits(2);
+  WriteDigits(2);
 #endif
+
+  return ObjectOffset;
 }
 
 
