@@ -652,7 +652,7 @@ byte smb2j_CheckTopOfBlock(u16 mt_x, u16 mt_y);
 void smb2j_SpawnBrickChunks(byte param_1);
 #define SpawnBrickChunks smb2j_SpawnBrickChunks
 
-byte smb2j_BlockObjectsCore(byte param_1);
+void smb2j_BlockObjectsCore(byte param_1);
 #define BlockObjectsCore smb2j_BlockObjectsCore
 
 void smb2j_BlockObjMT_Updater(void);

@@ -1702,8 +1702,9 @@ void GameCoreRoutine(void) {
   PlayerGfxHandler();
   BlockObjMT_Updater();
   ObjectOffset = 1;
-  ObjectOffset = BlockObjectsCore(1) - 1;
-  BlockObjectsCore(ObjectOffset);
+  BlockObjectsCore(1);
+  ObjectOffset = 0;
+  BlockObjectsCore(0);
   MiscObjectsCore();
   ProcessCannons();
   ProcessWhirlpools();
@@ -3253,7 +3254,6 @@ void CoinBlock(const byte param_1) {
   }
 
   JCoinC(param_1, JumpCoinMiscOffset);
-  ObjectOffset = param_1;
 }
 
 
@@ -3714,6 +3714,7 @@ void BumpBlock(const u16 mt_x, const u16 mt_y, const byte param_2) {
   case BUMPBLOCK_COINBLOCK_2:
   case BUMPBLOCK_COINBLOCK_3:
     CoinBlock(bVar2);
+    ObjectOffset = bVar2;
     return;
 
   case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
@@ -3881,12 +3882,12 @@ void SpawnBrickChunks(const byte param_1) {
 
 // SMB:be70
 // SM2MAIN:8a41
-// Signature: [X] -> [X]
-byte BlockObjectsCore(const byte objoff) {
+// Signature: [X] -> []
+void BlockObjectsCore(const byte objoff) {
   byte bStack0000 = Block_State[objoff];
   if (bStack0000 == 0) {
     Block_State[objoff] = 0;
-    return objoff;
+    return;
   }
   bStack0000 &= 0xf;
   if (bStack0000 == 1) {
@@ -3894,14 +3895,13 @@ byte BlockObjectsCore(const byte objoff) {
     RelativeBlockPosition(objoff);
     GetBlockOffscreenBits(objoff);
     DrawBlock(objoff);
-    const byte tmp1 = objoff;
-    if (4 < (Block_Y_Position[tmp1] & 0xf)) {
-      Block_State[tmp1] = 1;
-      return tmp1;
+    if (4 < (Block_Y_Position[objoff] & 0xf)) {
+      Block_State[objoff] = 1;
+      return;
     }
-    Block_RepFlag[tmp1] = 1;
-    Block_State[tmp1] = 0;
-    return tmp1;
+    Block_RepFlag[objoff] = 1;
+    Block_State[objoff] = 0;
+    return;
   } else {
     ImposeGravityBlock(objoff + 9);
     MoveObjectHorizontally(objoff + 9);
@@ -3912,17 +3912,16 @@ byte BlockObjectsCore(const byte objoff) {
     DrawBrickChunks(objoff);
     if (Block_Y_HighPos[objoff] == 0) {
       Block_State[objoff] = bStack0000;
-      return objoff;
+      return;
     }
     if (Block_Y_Position[objoff + 2] > 0xf0) {
       Block_Y_Position[objoff + 2] = 0xf0;
     }
     if (Block_Y_Position[objoff] < 0xf0) {
       Block_State[objoff] = bStack0000;
-      return objoff;
+      return;
     }
     Block_State[objoff] = 0;
-    return objoff;
   }
 }
 
@@ -3932,8 +3931,6 @@ byte BlockObjectsCore(const byte objoff) {
 // Signature: [] -> []
 void BlockObjMT_Updater(void) {
   for (int i = 1; i >= 0; i--) {
-    ObjectOffset = i;
-
     if (VRAM_Buffer1[0] != 0) {
       continue;
     }
@@ -9439,15 +9436,15 @@ void FlagpoleGfxHandler(const byte param_1) {
 // SMB:e5c8
 // SM2MAIN:b26e
 // Signature: [X] -> []
-void DrawLargePlatform(const byte param_1) {
-  const byte sproff1 = Enemy_SprDataOffset[param_1];
+void DrawLargePlatform(const byte objoff) {
+  const byte sproff1 = Enemy_SprDataOffset[objoff];
 
   // Inlined: SixSpriteStacker
   for (int i = 0; i < 6; i++) {
     SPRITE_X_strict(sproff1, i) = Enemy_Rel_XPos + i*8;
   }
 
-  const byte ypos = Enemy_Y_Position[ObjectOffset];
+  const byte ypos = Enemy_Y_Position[objoff];
 
   // Inlined: DumpFourSpr
   SPRITE_Y(sproff1, 0) = ypos;
@@ -9460,7 +9457,7 @@ void DrawLargePlatform(const byte param_1) {
     bVar11 = SPRITE_Y_OFFSCREEN;
   }
 
-  const byte bVar3 = Enemy_SprDataOffset[ObjectOffset];
+  const byte bVar3 = Enemy_SprDataOffset[objoff];
 
   // NES note: If the offset is 254 or 255, this wraparounds the sprite page
   // because it's incremented before passing to DumpSixSpr.
@@ -9478,8 +9475,8 @@ void DrawLargePlatform(const byte param_1) {
     SPRITE_ATTR(bVar3, i) = 2;
   }
 
-  const byte xoffscrbits = GetXOffscreenBits(ObjectOffset+1);
-  const byte bVar1 = Enemy_SprDataOffset[ObjectOffset];
+  const byte xoffscrbits = GetXOffscreenBits(objoff+1);
+  const byte bVar1 = Enemy_SprDataOffset[objoff];
 
   // NES version is unrolled. We rolled up the loop in this port
   for (int i = 0; i < 6; i++) {
@@ -10184,8 +10181,8 @@ void DrawExplosion_Fireworks(const byte param_1, const byte param_2) {
 // SMB:ed66
 // SM2MAIN:ba41
 // Signature: [X] -> []
-void DrawSmallPlatform(const byte param_1) {
-  const byte bVar2 = Enemy_SprDataOffset[param_1];
+void DrawSmallPlatform(const byte objoff) {
+  const byte bVar2 = Enemy_SprDataOffset[objoff];
 
   // NES note: If the offset is 254 or 255, this wraparounds the sprite page
   // because it's incremented before passing to DumpSixSpr.
@@ -10205,7 +10202,7 @@ void DrawSmallPlatform(const byte param_1) {
   SPRITE_X(bVar2, 4) = bVar1 + 8;
   SPRITE_X(bVar2, 2) = bVar1 + 0x10;
   SPRITE_X(bVar2, 5) = bVar1 + 0x10;
-  byte bStack0000 = Enemy_Y_Position[param_1];
+  byte bStack0000 = Enemy_Y_Position[objoff];
   bVar1 = bStack0000;
   if (bStack0000 < 0x20) {
     bVar1 = SPRITE_Y_OFFSCREEN;

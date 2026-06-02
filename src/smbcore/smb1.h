@@ -661,7 +661,7 @@ byte smb1_CheckTopOfBlock(u16 mt_x, u16 mt_y);
 void smb1_SpawnBrickChunks(byte param_1);
 #define SpawnBrickChunks smb1_SpawnBrickChunks
 
-byte smb1_BlockObjectsCore(byte param_1);
+void smb1_BlockObjectsCore(byte param_1);
 #define BlockObjectsCore smb1_BlockObjectsCore
 
 void smb1_BlockObjMT_Updater(void);
