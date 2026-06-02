@@ -1198,7 +1198,7 @@ struct_azr04 smb2j_ChkUnderEnemy(byte param_1);
 bool smb2j_ChkForNonSolids(byte param_1);
 #define ChkForNonSolids smb2j_ChkForNonSolids
 
-byte smb2j_FireballBGCollision(byte param_1);
+void smb2j_FireballBGCollision(byte param_1);
 #define FireballBGCollision smb2j_FireballBGCollision
 
 void smb2j_GetFireballBoundBox(byte param_1);
@@ -1239,9 +1239,6 @@ bool smb2j_SprObjectCollisionCore(byte param_1,byte param_2);
 
 struct_axzr04 smb2j_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
 #define BlockBufferChk_Enemy smb2j_BlockBufferChk_Enemy
-
-struct_axz smb2j_BlockBufferChk_FBall(byte param_1);
-#define BlockBufferChk_FBall smb2j_BlockBufferChk_FBall
 
 struct blockbuffer_colli_result smb2j_BlockBufferColli_Feet(byte param_1);
 #define BlockBufferColli_Feet smb2j_BlockBufferColli_Feet

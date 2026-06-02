@@ -2669,11 +2669,10 @@ void ProcFireball_Bubble(void) {
 
   if (AreaType == 0) {
     for (int i = 2; i >= 0; i--) {
-      ObjectOffset = i;
       BubbleCheck(i);
       RelativeBubblePosition(i);
-      GetBubbleOffscreenBits(ObjectOffset);
-      DrawBubble(ObjectOffset);
+      GetBubbleOffscreenBits(i);
+      DrawBubble(i);
     }
   }
 }
@@ -2682,59 +2681,53 @@ void ProcFireball_Bubble(void) {
 // SMB:b689
 // SM2MAIN:81f5
 // Signature: [X] -> []
-void FireballObjCore(const byte param_1) {
-  // param_1 is always 0 or 1
+void FireballObjCore(const byte objoff) {
+  // objoff is always 0 or 1
 
-  ObjectOffset = param_1;
-
-  if ((Fireball_State[param_1] & 0x80) != 0) {
-    RelativeFireballPosition(param_1);
-    const byte bVar2 = ObjectOffset;
-    DrawExplosion_Fireball(bVar2);
+  if ((Fireball_State[objoff] & 0x80) != 0) {
+    RelativeFireballPosition(objoff);
+    DrawExplosion_Fireball(objoff);
     return;
   }
 
-  if (Fireball_State[param_1] != 0) {
-    if (Fireball_State[param_1] != 1) {
-      ADD_UNSIGNED_16_16_8(Fireball_PageLoc[param_1], Fireball_X_Position[param_1],
+  if (Fireball_State[objoff] != 0) {
+    if (Fireball_State[objoff] != 1) {
+      ADD_UNSIGNED_16_16_8(Fireball_PageLoc[objoff], Fireball_X_Position[objoff],
                            SprObject_PageLoc[0], SprObject_X_Position[0],
                            4);
 
-      Fireball_Y_Position[param_1] = SprObject_Y_Position[0];
-      Fireball_Y_HighPos[param_1] = 1;
+      Fireball_Y_Position[objoff] = SprObject_Y_Position[0];
+      Fireball_Y_HighPos[objoff] = 1;
 
       // PlayerFacingDir may = 0 or 3 sometimes, so this goes out of bounds
       // The original lookup is FireballXSpdData[(byte)(PlayerFacingDir - 1)].
       const byte xspd_lookup[4] = { FireballXSpdData_Bug0, FireballXSpdData[0], FireballXSpdData[1], FireballXSpdData[2] };
       assert_eq_assumption(PlayerFacingDir < 4, true);
 
-      Fireball_X_Speed[param_1] = xspd_lookup[PlayerFacingDir];
-      Fireball_Y_Speed[param_1] = 4;
+      Fireball_X_Speed[objoff] = xspd_lookup[PlayerFacingDir];
+      Fireball_Y_Speed[objoff] = 4;
 
-      Fireball_BoundBoxCtrl[param_1] = 7;
-      Fireball_State[param_1] = Fireball_State[param_1] - 1;
+      Fireball_BoundBoxCtrl[objoff] = 7;
+      Fireball_State[objoff] = Fireball_State[objoff] - 1;
     }
 
-    const byte bVar4 = param_1 + 7;
+    const byte bVar4 = objoff + 7;
 
     const byte in_r01 = 0;
     ImposeGravity(0, bVar4, 0x50, in_r01, 3);
 
     MoveObjectHorizontally(bVar4);
 
-    RelativeFireballPosition(ObjectOffset);
-    byte bVar2 = ObjectOffset;
-    GetFireballOffscreenBits(bVar2);
-    GetFireballBoundBox(ObjectOffset);
-    bVar2 = ObjectOffset;
-    bVar2 = FireballBGCollision(bVar2);
+    RelativeFireballPosition(objoff);
+    GetFireballOffscreenBits(objoff);
+    GetFireballBoundBox(objoff);
+    FireballBGCollision(objoff);
     if ((FBall_OffscreenBits & 0xcc) == 0) {
-      FireballEnemyCollision(bVar2);
-      bVar2 = ObjectOffset;
-      DrawFireball(bVar2);
+      FireballEnemyCollision(objoff);
+      DrawFireball(objoff);
       return;
     }
-    Fireball_State[bVar2] = 0;
+    Fireball_State[objoff] = 0;
   }
 }
 
@@ -3889,19 +3882,19 @@ void SpawnBrickChunks(const byte param_1) {
 // SMB:be70
 // SM2MAIN:8a41
 // Signature: [X] -> [X]
-byte BlockObjectsCore(const byte param_1) {
-  byte bStack0000 = Block_State[param_1];
+byte BlockObjectsCore(const byte objoff) {
+  byte bStack0000 = Block_State[objoff];
   if (bStack0000 == 0) {
-    Block_State[param_1] = 0;
-    return param_1;
+    Block_State[objoff] = 0;
+    return objoff;
   }
   bStack0000 &= 0xf;
   if (bStack0000 == 1) {
-    ImposeGravityBlock(param_1 + 9);
-    RelativeBlockPosition(ObjectOffset);
-    GetBlockOffscreenBits(ObjectOffset);
-    DrawBlock(ObjectOffset);
-    const byte tmp1 = ObjectOffset;
+    ImposeGravityBlock(objoff + 9);
+    RelativeBlockPosition(objoff);
+    GetBlockOffscreenBits(objoff);
+    DrawBlock(objoff);
+    const byte tmp1 = objoff;
     if (4 < (Block_Y_Position[tmp1] & 0xf)) {
       Block_State[tmp1] = 1;
       return tmp1;
@@ -3910,13 +3903,12 @@ byte BlockObjectsCore(const byte param_1) {
     Block_State[tmp1] = 0;
     return tmp1;
   } else {
-    ImposeGravityBlock(param_1 + 9);
-    MoveObjectHorizontally(param_1 + 9);
-    ImposeGravityBlock(param_1 + 9 + 2);
-    MoveObjectHorizontally(param_1 + 9 + 2);
-    RelativeBlockPosition(ObjectOffset);
-    GetBlockOffscreenBits(ObjectOffset);
-    const byte objoff = ObjectOffset;
+    ImposeGravityBlock(objoff + 9);
+    MoveObjectHorizontally(objoff + 9);
+    ImposeGravityBlock(objoff + 9 + 2);
+    MoveObjectHorizontally(objoff + 9 + 2);
+    RelativeBlockPosition(objoff);
+    GetBlockOffscreenBits(objoff);
     DrawBrickChunks(objoff);
     if (Block_Y_HighPos[objoff] == 0) {
       Block_State[objoff] = bStack0000;
@@ -7399,14 +7391,14 @@ void OffscreenBoundsCheck(const byte param_1) {
 // SMB:d6d9
 // SM2MAIN:a319
 // Signature: [X] -> []
-void FireballEnemyCollision(const byte param_1) {
+void FireballEnemyCollision(const byte objoff) {
   byte bVar1;
   byte bVar2;
   bool bVar3;
   byte bStack0000;
 
-  if (((Fireball_State[param_1] != 0) && ((Fireball_State[param_1] & 0x80) == 0)) && ((FrameCounter & 1) == 0)) {
-    bStack0000 = param_1 * 4 + 0x1c;
+  if (((Fireball_State[objoff] != 0) && ((Fireball_State[objoff] & 0x80) == 0)) && ((FrameCounter & 1) == 0)) {
+    bStack0000 = objoff * 4 + 0x1c;
     for (int i = 4; i >= 0; i--) {
       bVar2 = i;
       if (((Enemy_State[bVar2] & 0x20) == 0) && (Enemy_Flag[bVar2] != 0)) {
@@ -7416,7 +7408,7 @@ void FireballEnemyCollision(const byte param_1) {
             if (EnemyOffscrBitsMasked[bVar2] == 0) {
               bVar3 = SprObjectCollisionCore(bVar2 * 4 + 4, bStack0000);
               if (bVar3) {
-                Fireball_State[ObjectOffset] = 0x80;
+                Fireball_State[objoff] = 0x80;
                 HandleEnemyFBallCol(bVar2, bVar2);
               }
             }
@@ -9010,33 +9002,29 @@ bool ChkForNonSolids(const byte v) {
 
 // SMB:e1c8
 // SM2MAIN:ae66
-// Signature: [X] -> [X]
-byte FireballBGCollision(const byte param_1) {
-  bool bVar1;
-  struct_axz sVar2;
+// Signature: [X] -> []
+void FireballBGCollision(const byte objoff) {
+  if (Fireball_Y_Position[objoff] >= 0x18) {
+    // Inlined: BlockBufferChk_FBall
+    const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, objoff + 7, 0x1a);
 
-  if (Fireball_Y_Position[param_1] >= 0x18) {
-    sVar2 = BlockBufferChk_FBall(param_1);
-    const byte tmp1 = sVar2.x;
-    if (!sVar2.z) {
-      bVar1 = ChkForNonSolids(sVar2.a);
+    if (sVar2.a != 0) {
+      const bool bVar1 = ChkForNonSolids(sVar2.a);
       if (!bVar1) {
-        if ((Fireball_Y_Speed[tmp1] < 0x80) && (FireballBouncingFlag[tmp1] == 0)) {
-          Fireball_Y_Speed[tmp1] = 0xfd;
-          FireballBouncingFlag[tmp1] = 1;
-          Fireball_Y_Position[tmp1] = Fireball_Y_Position[tmp1] & 0xf8;
-          return tmp1;
+        if ((Fireball_Y_Speed[objoff] < 0x80) && (FireballBouncingFlag[objoff] == 0)) {
+          Fireball_Y_Speed[objoff] = 0xfd;
+          FireballBouncingFlag[objoff] = 1;
+          Fireball_Y_Position[objoff] = Fireball_Y_Position[objoff] & 0xf8;
+          return;
         }
-        Fireball_State[tmp1] = 0x80;
+        Fireball_State[objoff] = 0x80;
         Square1SoundQueue = 2;
-        return tmp1;
+        return;
       }
     }
-    FireballBouncingFlag[tmp1] = 0;
-    return tmp1;
+    FireballBouncingFlag[objoff] = 0;
   } else {
-    FireballBouncingFlag[param_1] = 0;
-    return param_1;
+    FireballBouncingFlag[objoff] = 0;
   }
 }
 
@@ -9235,20 +9223,6 @@ struct_axzr04 BlockBufferChk_Enemy(const byte param_1, const byte param_2, const
   sVar1.x = ObjectOffset;
   sVar1.z = sVar2.a == 0;
   sVar1.r04 = sVar2.r04;
-  return sVar1;
-}
-
-
-// SMB:e39c
-// SM2MAIN:b03a
-// Signature: [X] -> [A, X, Z]
-struct_axz BlockBufferChk_FBall(const byte param_1) {
-  struct_axz sVar1;
-
-  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, param_1 + 7, 0x1a);
-  sVar1.a = sVar2.a;
-  sVar1.z = sVar1.a == 0;
-  sVar1.x = ObjectOffset;
   return sVar1;
 }
 
@@ -10006,7 +9980,7 @@ struct_xyr02 DrawOneSpriteRow(const byte tile_counter, const byte sproff, const 
 // SMB:ebd1
 // SM2MAIN:b8ac
 // Signature: [X] -> []
-void DrawBlock(const byte param_1) {
+void DrawBlock(const byte objoff) {
   {
     // Inlined: DrawOneSpriteRow
 
@@ -10015,7 +9989,7 @@ void DrawBlock(const byte param_1) {
     const byte left_tileidx_2  = DefaultBlockObjTiles[2];
     const byte right_tileidx_2 = DefaultBlockObjTiles[3];
 
-    const byte sproff = AltOrBlock_SprDataOffset[param_1];
+    const byte sproff = AltOrBlock_SprDataOffset[objoff];
     const byte xpos = Block_Rel_XPos;
     const byte ypos = Block_Rel_YPos;
     const byte attrs = 3;
@@ -10025,12 +9999,12 @@ void DrawBlock(const byte param_1) {
     draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
   }
 
-  byte bVar7 = AltOrBlock_SprDataOffset[ObjectOffset];
+  byte bVar7 = AltOrBlock_SprDataOffset[objoff];
   if (AreaType != 1) {
     SPRITE_TILE(bVar7, 0) = 0x86;
     SPRITE_TILE(bVar7, 1) = 0x86;
   }
-  if (Block_Metatile[ObjectOffset] == ssw(0xc4, 0xc5)) {
+  if (Block_Metatile[objoff] == ssw(0xc4, 0xc5)) {
     // Inlined: DumpFourSpr
     // NES note: If the offset is 255, this wraparounds the sprite page
     // because it's incremented before passing to DumpFourSpr.
@@ -10268,11 +10242,11 @@ void DrawSmallPlatform(const byte param_1) {
 // SMB:ede1
 // SM2MAIN:babc
 // Signature: [X] -> []
-void DrawBubble(const byte param_1) {
+void DrawBubble(const byte objoff) {
   byte bVar1;
 
   if ((SprObject_Y_HighPos[0] == 1) && ((Bubble_OffscreenBits & 8) == 0)) {
-    bVar1 = Bubble_SprDataOffset[param_1];
+    bVar1 = Bubble_SprDataOffset[objoff];
     SPRITE_X(bVar1, 0) = Bubble_Rel_XPos;
     SPRITE_Y(bVar1, 0) = Bubble_Rel_YPos;
     SPRITE_TILE(bVar1, 0) = 0x74;
@@ -10613,8 +10587,8 @@ void RelativeBubblePosition(const byte param_1) {
 // SMB:f13b
 // SM2MAIN:be20
 // Signature: [X] -> []
-void RelativeFireballPosition(const byte param_1) {
-  const byte bVar1 = GetProperObjOffset(param_1, 0);
+void RelativeFireballPosition(const byte objoff) {
+  const byte bVar1 = GetProperObjOffset(objoff, 0);
   GetObjRelativePosition(bVar1, 2);
 }
 
@@ -10639,9 +10613,9 @@ void RelativeEnemyPosition(const byte param_1) {
 // SMB:f159
 // SM2MAIN:be3e
 // Signature: [X] -> []
-void RelativeBlockPosition(const byte param_1) {
-  GetObjRelativePosition(9 + param_1, 4);
-  GetObjRelativePosition(9 + ObjectOffset + 2, 5);
+void RelativeBlockPosition(const byte objoff) {
+  GetObjRelativePosition(9 + objoff, 4);
+  GetObjRelativePosition(9 + objoff + 2, 5);
 }
 
 
@@ -10674,8 +10648,8 @@ void GetFireballOffscreenBits(const byte param_1) {
 // SMB:f191
 // SM2MAIN:be76
 // Signature: [X] -> []
-void GetBubbleOffscreenBits(const byte param_1) {
-  const byte bVar1 = GetProperObjOffset(param_1, 1);
+void GetBubbleOffscreenBits(const byte objoff) {
+  const byte bVar1 = GetProperObjOffset(objoff, 1);
   GetOffScreenBitsSet(bVar1, 3);
 }
 

@@ -1204,7 +1204,7 @@ struct_azr04 smb1_ChkUnderEnemy(byte param_1);
 bool smb1_ChkForNonSolids(byte param_1);
 #define ChkForNonSolids smb1_ChkForNonSolids
 
-byte smb1_FireballBGCollision(byte param_1);
+void smb1_FireballBGCollision(byte param_1);
 #define FireballBGCollision smb1_FireballBGCollision
 
 void smb1_GetFireballBoundBox(byte param_1);
@@ -1245,9 +1245,6 @@ bool smb1_SprObjectCollisionCore(byte param_1,byte param_2);
 
 struct_axzr04 smb1_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
 #define BlockBufferChk_Enemy smb1_BlockBufferChk_Enemy
-
-struct_axz smb1_BlockBufferChk_FBall(byte param_1);
-#define BlockBufferChk_FBall smb1_BlockBufferChk_FBall
 
 struct blockbuffer_colli_result smb1_BlockBufferColli_Feet(byte param_1);
 #define BlockBufferColli_Feet smb1_BlockBufferColli_Feet
