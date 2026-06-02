@@ -568,7 +568,7 @@ void smb2j_ProcessWhirlpools(void);
 void smb2j_FlagpoleRoutine(void);
 #define FlagpoleRoutine smb2j_FlagpoleRoutine
 
-byte smb2j_JumpspringHandler(byte param_1);
+void smb2j_JumpspringHandler(byte param_1);
 #define JumpspringHandler smb2j_JumpspringHandler
 
 void smb2j_Setup_Vine(byte param_1,byte param_2);
@@ -859,16 +859,16 @@ byte smb2j_RunNormalEnemies(byte param_1);
 byte smb2j_EnemyMovementSubs(byte param_1);
 #define EnemyMovementSubs smb2j_EnemyMovementSubs
 
-byte smb2j_RunBowserFlame(byte param_1);
+void smb2j_RunBowserFlame(byte param_1);
 #define RunBowserFlame smb2j_RunBowserFlame
 
-byte smb2j_RunFirebarObj(byte param_1);
+void smb2j_RunFirebarObj(byte param_1);
 #define RunFirebarObj smb2j_RunFirebarObj
 
-byte smb2j_RunSmallPlatform(byte param_1);
+void smb2j_RunSmallPlatform(byte param_1);
 #define RunSmallPlatform smb2j_RunSmallPlatform
 
-byte smb2j_RunLargePlatform(byte param_1);
+void smb2j_RunLargePlatform(byte param_1);
 #define RunLargePlatform smb2j_RunLargePlatform
 
 byte smb2j_LargePlatformSubroutines(byte param_1);
@@ -925,7 +925,7 @@ void smb2j_MoveBulletBill(byte param_1);
 byte smb2j_MoveSwimmingCheepCheep(byte param_1);
 #define MoveSwimmingCheepCheep smb2j_MoveSwimmingCheepCheep
 
-byte smb2j_ProcFirebar(byte param_1);
+void smb2j_ProcFirebar(byte param_1);
 #define ProcFirebar smb2j_ProcFirebar
 
 byte smb2j_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
@@ -949,19 +949,19 @@ byte smb2j_PlayerLakituDiff(byte param_1,byte param_2,byte param_3,byte param_4)
 void smb2j_BridgeCollapse(void);
 #define BridgeCollapse smb2j_BridgeCollapse
 
-byte smb2j_MoveD_Bowser(byte param_1);
+void smb2j_MoveD_Bowser(byte param_1);
 #define MoveD_Bowser smb2j_MoveD_Bowser
 
-byte smb2j_RunBowser(byte param_1);
+void smb2j_RunBowser(byte param_1);
 #define RunBowser smb2j_RunBowser
 
 void smb2j_KillAllEnemies(void);
 #define KillAllEnemies smb2j_KillAllEnemies
 
-byte smb2j_BowserGfxHandler(byte param_1);
+void smb2j_BowserGfxHandler(byte param_1);
 #define BowserGfxHandler smb2j_BowserGfxHandler
 
-byte smb2j_ProcessBowserHalf(byte param_1);
+void smb2j_ProcessBowserHalf(byte param_1);
 #define ProcessBowserHalf smb2j_ProcessBowserHalf
 
 byte smb2j_SetFlameTimer(void);
@@ -1057,7 +1057,7 @@ void smb2j_ShellOrBlockDefeat(byte param_1);
 void smb2j_EnemySmackScore(byte param_1,byte param_2);
 #define EnemySmackScore smb2j_EnemySmackScore
 
-byte smb2j_PlayerHammerCollision(byte param_1);
+void smb2j_PlayerHammerCollision(byte param_1);
 #define PlayerHammerCollision smb2j_PlayerHammerCollision
 
 void smb2j_HandlePowerUpCollision(byte param_1);
@@ -1108,7 +1108,7 @@ byte smb2j_LargePlatformCollision(byte param_1);
 byte smb2j_ChkForPlayerC_LargeP(byte param_1);
 #define ChkForPlayerC_LargeP smb2j_ChkForPlayerC_LargeP
 
-byte smb2j_SmallPlatformCollision(byte param_1);
+void smb2j_SmallPlatformCollision(byte param_1);
 #define SmallPlatformCollision smb2j_SmallPlatformCollision
 
 void smb2j_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3);
@@ -1216,7 +1216,7 @@ void smb2j_SmallPlatformBoundBox(byte param_1);
 void smb2j_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
 #define GetMaskedOffScrBits smb2j_GetMaskedOffScrBits
 
-byte smb2j_LargePlatformBoundBox(byte param_1);
+void smb2j_LargePlatformBoundBox(byte param_1);
 #define LargePlatformBoundBox smb2j_LargePlatformBoundBox
 
 void smb2j_SetupEOffsetFBBox(byte param_1);
@@ -1264,7 +1264,7 @@ void smb2j_FlagpoleGfxHandler(byte param_1);
 void smb2j_DrawLargePlatform(byte param_1);
 #define DrawLargePlatform smb2j_DrawLargePlatform
 
-byte smb2j_JCoinGfxHandler(byte param_1);
+void smb2j_JCoinGfxHandler(byte param_1);
 #define JCoinGfxHandler smb2j_JCoinGfxHandler
 
 void smb2j_DrawPowerUp(void);

@@ -580,7 +580,7 @@ void smb1_ProcessWhirlpools(void);
 void smb1_FlagpoleRoutine(void);
 #define FlagpoleRoutine smb1_FlagpoleRoutine
 
-byte smb1_JumpspringHandler(byte param_1);
+void smb1_JumpspringHandler(byte param_1);
 #define JumpspringHandler smb1_JumpspringHandler
 
 void smb1_Setup_Vine(byte param_1,byte param_2);
@@ -868,16 +868,16 @@ byte smb1_RunNormalEnemies(byte param_1);
 byte smb1_EnemyMovementSubs(byte param_1);
 #define EnemyMovementSubs smb1_EnemyMovementSubs
 
-byte smb1_RunBowserFlame(byte param_1);
+void smb1_RunBowserFlame(byte param_1);
 #define RunBowserFlame smb1_RunBowserFlame
 
-byte smb1_RunFirebarObj(byte param_1);
+void smb1_RunFirebarObj(byte param_1);
 #define RunFirebarObj smb1_RunFirebarObj
 
-byte smb1_RunSmallPlatform(byte param_1);
+void smb1_RunSmallPlatform(byte param_1);
 #define RunSmallPlatform smb1_RunSmallPlatform
 
-byte smb1_RunLargePlatform(byte param_1);
+void smb1_RunLargePlatform(byte param_1);
 #define RunLargePlatform smb1_RunLargePlatform
 
 byte smb1_LargePlatformSubroutines(byte param_1);
@@ -934,7 +934,7 @@ void smb1_MoveBulletBill(byte param_1);
 byte smb1_MoveSwimmingCheepCheep(byte param_1);
 #define MoveSwimmingCheepCheep smb1_MoveSwimmingCheepCheep
 
-byte smb1_ProcFirebar(byte param_1);
+void smb1_ProcFirebar(byte param_1);
 #define ProcFirebar smb1_ProcFirebar
 
 byte smb1_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
@@ -958,19 +958,19 @@ byte smb1_PlayerLakituDiff(byte param_1,byte param_2,byte param_3,byte param_4);
 void smb1_BridgeCollapse(void);
 #define BridgeCollapse smb1_BridgeCollapse
 
-byte smb1_MoveD_Bowser(byte param_1);
+void smb1_MoveD_Bowser(byte param_1);
 #define MoveD_Bowser smb1_MoveD_Bowser
 
-byte smb1_RunBowser(byte param_1);
+void smb1_RunBowser(byte param_1);
 #define RunBowser smb1_RunBowser
 
 void smb1_KillAllEnemies(void);
 #define KillAllEnemies smb1_KillAllEnemies
 
-byte smb1_BowserGfxHandler(byte param_1);
+void smb1_BowserGfxHandler(byte param_1);
 #define BowserGfxHandler smb1_BowserGfxHandler
 
-byte smb1_ProcessBowserHalf(byte param_1);
+void smb1_ProcessBowserHalf(byte param_1);
 #define ProcessBowserHalf smb1_ProcessBowserHalf
 
 byte smb1_SetFlameTimer(void);
@@ -1066,7 +1066,7 @@ void smb1_ShellOrBlockDefeat(byte param_1);
 void smb1_EnemySmackScore(byte param_1,byte param_2);
 #define EnemySmackScore smb1_EnemySmackScore
 
-byte smb1_PlayerHammerCollision(byte param_1);
+void smb1_PlayerHammerCollision(byte param_1);
 #define PlayerHammerCollision smb1_PlayerHammerCollision
 
 void smb1_HandlePowerUpCollision(byte param_1);
@@ -1114,7 +1114,7 @@ byte smb1_LargePlatformCollision(byte param_1);
 byte smb1_ChkForPlayerC_LargeP(byte param_1);
 #define ChkForPlayerC_LargeP smb1_ChkForPlayerC_LargeP
 
-byte smb1_SmallPlatformCollision(byte param_1);
+void smb1_SmallPlatformCollision(byte param_1);
 #define SmallPlatformCollision smb1_SmallPlatformCollision
 
 void smb1_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3);
@@ -1222,7 +1222,7 @@ void smb1_SmallPlatformBoundBox(byte param_1);
 void smb1_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
 #define GetMaskedOffScrBits smb1_GetMaskedOffScrBits
 
-byte smb1_LargePlatformBoundBox(byte param_1);
+void smb1_LargePlatformBoundBox(byte param_1);
 #define LargePlatformBoundBox smb1_LargePlatformBoundBox
 
 void smb1_SetupEOffsetFBBox(byte param_1);
@@ -1270,7 +1270,7 @@ void smb1_FlagpoleGfxHandler(byte param_1);
 void smb1_DrawLargePlatform(byte param_1);
 #define DrawLargePlatform smb1_DrawLargePlatform
 
-byte smb1_JCoinGfxHandler(byte param_1);
+void smb1_JCoinGfxHandler(byte param_1);
 #define JCoinGfxHandler smb1_JCoinGfxHandler
 
 void smb1_DrawPowerUp(void);
