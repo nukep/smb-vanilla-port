@@ -601,10 +601,7 @@ struct_xc smb1_SpawnHammerObj(void);
 void smb1_CoinBlock(byte param_1);
 #define CoinBlock smb1_CoinBlock
 
-byte smb1_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
-#define SetupJumpCoin smb1_SetupJumpCoin
-
-byte smb1_JCoinC(byte param_1,byte param_2);
+void smb1_JCoinC(byte param_1,byte param_2);
 #define JCoinC smb1_JCoinC
 
 void smb1_MiscObjectsCore(void);
@@ -862,7 +859,7 @@ void smb1_PosPlatform(byte param_1,byte param_2);
 byte smb1_RunEnemyObjectsCore(void);
 #define RunEnemyObjectsCore smb1_RunEnemyObjectsCore
 
-byte smb1_RunRetainerObj(byte param_1);
+void smb1_RunRetainerObj(byte param_1);
 #define RunRetainerObj smb1_RunRetainerObj
 
 byte smb1_RunNormalEnemies(byte param_1);
@@ -922,7 +919,7 @@ void smb1_XMoveCntr_GreenPTroopa(byte param_1);
 void smb1_XMoveCntr_Platform(byte param_1,byte param_2);
 #define XMoveCntr_Platform smb1_XMoveCntr_Platform
 
-struct_xr00 smb1_MoveWithXMCntrs(byte param_1);
+byte smb1_MoveWithXMCntrs(byte param_1, byte objoff);
 #define MoveWithXMCntrs smb1_MoveWithXMCntrs
 
 byte smb1_MoveBloober(byte param_1,bool param_2);
@@ -940,10 +937,10 @@ byte smb1_MoveSwimmingCheepCheep(byte param_1);
 byte smb1_ProcFirebar(byte param_1);
 #define ProcFirebar smb1_ProcFirebar
 
-struct_xr06 smb1_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
+byte smb1_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
 #define DrawFirebar_Collision smb1_DrawFirebar_Collision
 
-struct_xr06 smb1_FirebarCollision(byte param_1,byte param_3,byte param_4);
+byte smb1_FirebarCollision(byte param_1,byte param_3,byte param_4);
 #define FirebarCollision smb1_FirebarCollision
 
 struct_r01r02r03 smb1_GetFirebarPosition(byte param_1,byte param_2);
@@ -1030,7 +1027,7 @@ byte smb1_YMovingPlatform(byte param_1);
 void smb1_ChkYPCollision(byte param_1);
 #define ChkYPCollision smb1_ChkYPCollision
 
-byte smb1_XMovingPlatform(byte param_1);
+void smb1_XMovingPlatform(byte param_1, byte objoff);
 #define XMovingPlatform smb1_XMovingPlatform
 
 void smb1_PositionPlayerOnHPlat(byte param_1,byte param_2);

@@ -3260,44 +3260,20 @@ void CoinBlock(const byte param_1) {
   }
 
   JCoinC(param_1, JumpCoinMiscOffset);
-}
-
-
-// SMB:bb51
-// SM2MAIN:871c
-// Signature: [X, r02, r06] -> [X]
-byte SetupJumpCoin(const byte param_1, const byte r02, const byte r06) {
-  // Inlines FindEmptyMiscSlot
-
-  JumpCoinMiscOffset = 8;
-
-  for (int i = 8; i >= 6; i--) {
-    if (Misc_State[i] == 0) {
-      JumpCoinMiscOffset = i;
-      break;
-    }
-  }
-
-  Misc_PageLoc[JumpCoinMiscOffset] = Block_PageLoc2[param_1];
-  Misc_X_Position[JumpCoinMiscOffset] = (r06 << 4) | 5;
-  Misc_Y_Position[JumpCoinMiscOffset] = r02 + 0x20 + (r06 & 0x10 ? 1 : 0);
-  return JCoinC(param_1, JumpCoinMiscOffset);
+  ObjectOffset = param_1;
 }
 
 
 // SMB:bb6c
 // SM2MAIN:8737
-// Signature: [X, Y] -> [X]
-byte JCoinC(const byte param_1, const byte param_2) {
+// Signature: [X, Y] -> []
+void JCoinC(const byte param_1, const byte param_2) {
   Misc_Y_Speed[param_2] = 0xfb;
   Misc_Y_HighPos[param_2] = 1;
   Misc_State[param_2] = 1;
   Square2SoundQueue = 1;
-  ObjectOffset = param_1;
   GiveOneCoin();
-  const byte bVar1 = ObjectOffset;
   CoinTallyFor1Ups = CoinTallyFor1Ups + 1;
-  return bVar1;
 }
 
 
@@ -3886,7 +3862,9 @@ byte CheckTopOfBlock(const u16 mt_x, const u16 mt_y) {
   Misc_PageLoc[JumpCoinMiscOffset] = Block_PageLoc2[sprdataoffset_ctrl];
   Misc_X_Position[JumpCoinMiscOffset] = mt_x * 16 + 5;
   Misc_Y_Position[JumpCoinMiscOffset] = mt_y_above * 16 + 32 + (mt_x & 0x10 ? 1 : 0);
-  return JCoinC(sprdataoffset_ctrl, JumpCoinMiscOffset);
+  JCoinC(sprdataoffset_ctrl, JumpCoinMiscOffset);
+  ObjectOffset = sprdataoffset_ctrl;
+  return ObjectOffset;
 }
 
 
@@ -5561,7 +5539,8 @@ byte RunEnemyObjectsCore(void) {
     }
 
   case RUNENEMYOBJECTSCORE_RUNRETAINEROBJ:
-    return RunRetainerObj(ObjectOffset);
+    RunRetainerObj(ObjectOffset);
+    return ObjectOffset;
 
   default:
     jmpengine_overflow(bVar1);
@@ -5572,12 +5551,11 @@ byte RunEnemyObjectsCore(void) {
 
 // SMB:c8d7
 // SM2MAIN:950c
-// Signature: [X] -> [X]
-byte RunRetainerObj(const byte param_1) {
+// Signature: [X] -> []
+void RunRetainerObj(const byte param_1) {
   GetEnemyOffscreenBits(param_1);
   RelativeEnemyPosition(ObjectOffset);
   EnemyGfxHandler(ObjectOffset);
-  return ObjectOffset;
 }
 
 
@@ -5790,7 +5768,8 @@ byte LargePlatformSubroutines(const byte param_1) {
     return param_1;
 
   case LARGEPLATFORMSUBROUTINES_XMOVINGPLATFORM:
-    return XMovingPlatform(param_1);
+    XMovingPlatform(param_1, ObjectOffset);
+    return ObjectOffset;
 
   case LARGEPLATFORMSUBROUTINES_DROPPLATFORM:
     return DropPlatform(param_1);
@@ -6030,16 +6009,16 @@ byte ProcMoveRedPTroopa(const byte param_1) {
 // Signature: [X] -> [X]
 byte MoveFlyGreenPTroopa(const byte param_1) {
   XMoveCntr_GreenPTroopa(param_1);
-  const struct_xr00 sVar3 = MoveWithXMCntrs(param_1);
-  const byte bVar1 = sVar3.x;
+  const byte objoff = ObjectOffset;
+  MoveWithXMCntrs(param_1, objoff);
   char cVar2 = 1;
   if ((FrameCounter & 3) == 0) {
     if ((FrameCounter & 0x40) == 0) {
       cVar2 = -1;
     }
-    Enemy_Y_Position[bVar1] = Enemy_Y_Position[bVar1] + cVar2;
+    Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] + cVar2;
   }
-  return bVar1;
+  return objoff;
 }
 
 
@@ -6073,10 +6052,8 @@ void XMoveCntr_Platform(const byte param_1, const byte param_2) {
 
 // SMB:cb66
 // SM2MAIN:979b
-// Signature: [X] -> [X, r00]
-struct_xr00 MoveWithXMCntrs(const byte param_1) {
-  struct_xr00 sVar3;
-
+// Signature: [X, r08] -> [r00]
+byte MoveWithXMCntrs(const byte param_1, const byte objoff) {
   const byte bStack0000 = SpriteVarData1[param_1];
   byte bVar1 = 1;
   if ((SpriteVarData2[param_1] & 2) == 0) {
@@ -6085,10 +6062,8 @@ struct_xr00 MoveWithXMCntrs(const byte param_1) {
   }
   Enemy_MovingDir[param_1] = bVar1;
   const byte sVar2 = MoveEnemyHorizontally(param_1);
-  sVar3.x = ObjectOffset;
-  SpriteVarData1[sVar3.x] = bStack0000;
-  sVar3.r00 = sVar2;
-  return sVar3;
+  SpriteVarData1[objoff] = bStack0000;
+  return sVar2;
 }
 
 
@@ -6265,18 +6240,15 @@ byte ProcFirebar(const byte param_1) {
   SPRITE_Y(sproff, 0) = Enemy_Rel_YPos;
   SPRITE_X(sproff, 0) = Enemy_Rel_XPos;
 
-  struct_xr06 sVar8 = FirebarCollision(sproff, Enemy_Rel_XPos, bVar4);
-  byte bVar2 = sVar8.r06;
+  byte bVar2 = FirebarCollision(sproff, Enemy_Rel_XPos, bVar4);
 
-  const byte tmpred = (Enemy_ID[sVar8.x] > 0x1e) ? 11 : 5;
+  const byte tmpred = (Enemy_ID[ObjectOffset] > 0x1e) ? 11 : 5;
 
   for (int i = 0; i < tmpred; i++) {
     struct_r01r02r03 sVar6;
     sVar6 = GetFirebarPosition(tmp1, i);
-    struct_xr06 sVar7 = DrawFirebar_Collision(sVar6.r01, sVar6.r02, sVar6.r03, bVar2);
-    assert_eq_assumption(sVar7.x, ObjectOffset);
+    bVar2 = DrawFirebar_Collision(sVar6.r01, sVar6.r02, sVar6.r03, bVar2);
 
-    bVar2 = sVar7.r06;
     if (i == 4) {
       bVar2 = Enemy_SprDataOffset[DuplicateObj_Offset];
     }
@@ -6292,8 +6264,8 @@ byte ProcFirebar(const byte param_1) {
 
 // SMB:cdbb
 // SM2MAIN:99f0
-// Signature: [r01, r02, r03, r06] -> [X, r06]
-struct_xr06 DrawFirebar_Collision(const byte param_2, const byte param_3, const byte param_4, const byte param_5) {
+// Signature: [r01, r02, r03, r06] -> [r06]
+byte DrawFirebar_Collision(const byte param_2, const byte param_3, const byte param_4, const byte param_5) {
   const byte bVar1 = Enemy_Rel_XPos + ((param_4 & 1) != 0 ? param_2 : -param_2);
 
   SPRITE_X(param_5, 0) = bVar1;
@@ -6308,22 +6280,19 @@ struct_xr06 DrawFirebar_Collision(const byte param_2, const byte param_3, const 
     bVar3 = SPRITE_Y_OFFSCREEN;
   }
   SPRITE_Y(param_5, 0) = bVar3;
+
   return FirebarCollision(param_5, bVar1, bVar3);
 }
 
 
 // SMB:ce08
 // SM2MAIN:9a3d
-// Signature: [Y, r06, r07] -> [X, r06]
-struct_xr06 FirebarCollision(const byte param_1, const byte param_3, const byte param_4) {
-  struct_xr06 sVar5;
-
+// Signature: [Y, r06, r07] -> [r06]
+byte FirebarCollision(const byte param_1, const byte param_3, const byte param_4) {
   DrawFirebar(param_1);
 
   if ((StarInvincibleTimer != 0 && TimerControl != 0) || (Player_Y_HighPos != 1)) {
-    sVar5.x = ObjectOffset;
-    sVar5.r06 = param_1 + 4;
-    return sVar5;
+    return param_1 + 4;
   }
 
   static const u8 firebar_y_pos[3] = {0, 12, 24};
@@ -6352,9 +6321,7 @@ struct_xr06 FirebarCollision(const byte param_1, const byte param_3, const byte 
     }
   }
 
-  sVar5.x = ObjectOffset;
-  sVar5.r06 = param_1 + 4;
-  return sVar5;
+  return param_1 + 4;
 }
 
 
@@ -6699,7 +6666,8 @@ byte BowserGfxHandler(const byte param_1) {
 // Signature: [X] -> [X]
 byte ProcessBowserHalf(const byte param_1) {
   BowserGfxFlag += 1;
-  byte bVar1 = RunRetainerObj(param_1);
+  RunRetainerObj(param_1);
+  byte bVar1 = ObjectOffset;
   if (Enemy_State[bVar1] == 0) {
     Enemy_BoundBoxCtrl[bVar1] = 10;
     GetEnemyBoundBox(bVar1);
@@ -7279,16 +7247,13 @@ void ChkYPCollision(const byte param_1) {
 
 // SMB:d607
 // SM2MAIN:a241
-// Signature: [X] -> [X]
-byte XMovingPlatform(const byte param_1) {
+// Signature: [X, r08] -> []
+void XMovingPlatform(const byte param_1, const byte objoff) {
   XMoveCntr_Platform(0xe, param_1);
-  const struct_xr00 sVar2 = MoveWithXMCntrs(param_1);
-  const byte bVar1 = sVar2.x;
-  if (HammerThrowingTimer_Or_PlatformCollisionFlag[bVar1] < 0x80) {
-    PositionPlayerOnHPlat(bVar1, sVar2.r00);
-    return bVar1;
+  const byte sVar2 = MoveWithXMCntrs(param_1, objoff);
+  if (HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] < 0x80) {
+    PositionPlayerOnHPlat(objoff, sVar2);
   }
-  return bVar1;
 }
 
 

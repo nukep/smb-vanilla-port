@@ -589,10 +589,7 @@ struct_xc smb2j_SpawnHammerObj(void);
 void smb2j_CoinBlock(byte param_1);
 #define CoinBlock smb2j_CoinBlock
 
-byte smb2j_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
-#define SetupJumpCoin smb2j_SetupJumpCoin
-
-byte smb2j_JCoinC(byte param_1,byte param_2);
+void smb2j_JCoinC(byte param_1,byte param_2);
 #define JCoinC smb2j_JCoinC
 
 void smb2j_MiscObjectsCore(void);
@@ -853,7 +850,7 @@ void smb2j_PosPlatform(byte param_1,byte param_2);
 byte smb2j_RunEnemyObjectsCore(void);
 #define RunEnemyObjectsCore smb2j_RunEnemyObjectsCore
 
-byte smb2j_RunRetainerObj(byte param_1);
+void smb2j_RunRetainerObj(byte param_1);
 #define RunRetainerObj smb2j_RunRetainerObj
 
 byte smb2j_RunNormalEnemies(byte param_1);
@@ -913,7 +910,7 @@ void smb2j_XMoveCntr_GreenPTroopa(byte param_1);
 void smb2j_XMoveCntr_Platform(byte param_1,byte param_2);
 #define XMoveCntr_Platform smb2j_XMoveCntr_Platform
 
-struct_xr00 smb2j_MoveWithXMCntrs(byte param_1);
+byte smb2j_MoveWithXMCntrs(byte param_1, byte objoff);
 #define MoveWithXMCntrs smb2j_MoveWithXMCntrs
 
 byte smb2j_MoveBloober(byte param_1,bool param_2);
@@ -931,10 +928,10 @@ byte smb2j_MoveSwimmingCheepCheep(byte param_1);
 byte smb2j_ProcFirebar(byte param_1);
 #define ProcFirebar smb2j_ProcFirebar
 
-struct_xr06 smb2j_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
+byte smb2j_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
 #define DrawFirebar_Collision smb2j_DrawFirebar_Collision
 
-struct_xr06 smb2j_FirebarCollision(byte param_1,byte param_3,byte param_4);
+byte smb2j_FirebarCollision(byte param_1,byte param_3,byte param_4);
 #define FirebarCollision smb2j_FirebarCollision
 
 struct_r01r02r03 smb2j_GetFirebarPosition(byte param_1,byte param_2);
@@ -1021,7 +1018,7 @@ byte smb2j_YMovingPlatform(byte param_1);
 void smb2j_ChkYPCollision(byte param_1);
 #define ChkYPCollision smb2j_ChkYPCollision
 
-byte smb2j_XMovingPlatform(byte param_1);
+void smb2j_XMovingPlatform(byte param_1, byte objoff);
 #define XMovingPlatform smb2j_XMovingPlatform
 
 void smb2j_PositionPlayerOnHPlat(byte param_1,byte param_2);
