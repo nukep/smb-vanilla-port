@@ -412,6 +412,12 @@ int main(int argc, char *argv[]) {
 #ifdef OPENGL_ENABLED
   if (cfg.graphics.opengl) {
     glcontext = SDL_GL_CreateContext(fe->window);
+
+    if (cfg.general.maxspeed) {
+      // We want to play as fast as possible, so disable any vsync
+      SDL_GL_SetSwapInterval(0);
+    }
+
     if (glcontext) {
       fe->smb_gl = malloc(SMBgl_size());
       if (!SMBgl_init(fe->smb_gl)) {
