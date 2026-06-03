@@ -3449,9 +3449,6 @@ void PwrUpJmp(void) {
 // SM2MAIN:883e
 // Signature: [] -> [X]
 byte PowerUpObjHandler(void) {
-  bool bVar2;
-
-  byte bVar1 = 5;
   ObjectOffset = 5;
   if (Enemy_State[5] != 0) {
     if ((char)Enemy_State[5] < 0) {
@@ -3459,17 +3456,16 @@ byte PowerUpObjHandler(void) {
         const bool smb2j_powerups = SMB2J_ONLY && (PowerUpType == 4 || PowerUpType == 5);
         if (PowerUpType == 0 || PowerUpType == 3 || smb2j_powerups) {
           MoveNormalEnemy(5);
-          bVar1 = EnemyToBGCollisionDet(5);
+          EnemyToBGCollisionDet(5);
         } else if (PowerUpType == 2) {
           MoveJumpingEnemy(5);
-          bVar1 = 5;
-          bVar1 = EnemyJump(5);
+          EnemyJump(5);
         }
       }
     } else {
       if ((FrameCounter & 3) == 0) {
         Enemy_Y_Position[5] -= 1;
-        bVar2 = Enemy_State[5] > 0x10;
+        const bool bVar2 = Enemy_State[5] > 0x10;
         Enemy_State[5] = Enemy_State[5] + 1;
         if (bVar2) {
           SpriteVarData1[5] = 0x10;
@@ -3482,7 +3478,7 @@ byte PowerUpObjHandler(void) {
         return 5;
       }
     }
-    RelativeEnemyPosition(bVar1);
+    RelativeEnemyPosition(5);
     GetEnemyOffscreenBits(5);
     GetEnemyBoundBox(5);
     DrawPowerUp();
@@ -5417,7 +5413,8 @@ byte RunEnemyObjectsCore(void) {
 
   switch (bVar1) {
   case RUNENEMYOBJECTSCORE_RUNNORMALENEMIES:
-    return RunNormalEnemies(ObjectOffset);
+    RunNormalEnemies(ObjectOffset);
+    return ObjectOffset;
 
   case RUNENEMYOBJECTSCORE_RUNBOWSERFLAME:
     RunBowserFlame(ObjectOffset);
@@ -5511,23 +5508,21 @@ void RunRetainerObj(const byte objoff) {
 
 // SMB:c8e0
 // SM2MAIN:9515
-// Signature: [X] -> [X]
-byte RunNormalEnemies(const byte objoff) {
+// Signature: [X] -> []
+void RunNormalEnemies(const byte objoff) {
   Enemy_SprAttrib[objoff] = 0;
   GetEnemyOffscreenBits(objoff);
   RelativeEnemyPosition(objoff);
   EnemyGfxHandler(objoff);
   GetEnemyBoundBox(objoff);
 
-  byte bVar1 = objoff;
-  bVar1 = EnemyToBGCollisionDet(objoff);
-  bVar1 = EnemiesCollision(bVar1);
-  PlayerEnemyCollision(bVar1);
+  EnemyToBGCollisionDet(objoff);
+  EnemiesCollision(objoff);
+  PlayerEnemyCollision(objoff);
   if (TimerControl == 0) {
-    bVar1 = EnemyMovementSubs(bVar1);
+    EnemyMovementSubs(objoff);
   }
-  OffscreenBoundsCheck(bVar1);
-  return bVar1;
+  OffscreenBoundsCheck(objoff);
 }
 
 
@@ -5558,74 +5553,80 @@ enum EnemyMovementSubs_jumptable_item {
 
 // SMB:c905
 // SM2MAIN:953a
-// Signature: [X] -> [X]
-byte EnemyMovementSubs(const byte param_1) {
-  switch (Enemy_ID[param_1]) {
+// Signature: [X] -> []
+void EnemyMovementSubs(const byte objoff) {
+  switch (Enemy_ID[objoff]) {
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_1:
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_2:
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_3:
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_4:
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_5:
   case ENEMYMOVEMENTSUBS_MOVENORMALENEMY_6:
-    return MoveNormalEnemy(param_1);
+    MoveNormalEnemy(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVEUPSIDEDOWNPIRANHAP:
     #ifdef SMB2J_MODE
-    MoveUpsideDownPiranhaP(param_1);
-    return param_1;
+    MoveUpsideDownPiranhaP(objoff);
+    return;
     #else
-    return MoveNormalEnemy(param_1);
+    MoveNormalEnemy(objoff);
+    return;
     #endif
 
   case ENEMYMOVEMENTSUBS_PROCHAMMERBRO:
-    return ProcHammerBro(param_1);
+    ProcHammerBro(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVEBLOOBER:
-    return MoveBloober(param_1, false);
+    MoveBloober(objoff, false);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVEBULLETBILL:
-    MoveBulletBill(param_1);
-    return ObjectOffset;
+    MoveBulletBill(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_NOOP_1:
   case ENEMYMOVEMENTSUBS_NOOP_2:
     // NES note: goes to "NoMoveCode" (a no-op)
-    return param_1;
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_1:
   case ENEMYMOVEMENTSUBS_MOVESWIMMINGCHEEPCHEEP_2:
-    return MoveSwimmingCheepCheep(param_1);
+    MoveSwimmingCheepCheep(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVEPODOBOO:
-    MovePodoboo(param_1);
-    return ObjectOffset;
+    MovePodoboo(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVEPIRANHAPLANT:
-    MovePiranhaPlant(param_1);
-    return param_1;
+    MovePiranhaPlant(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVEJUMPINGENEMY:
-    MoveJumpingEnemy(param_1);
-    return ObjectOffset;
+    MoveJumpingEnemy(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_PROCMOVEREDPTROOPA:
-    ProcMoveRedPTroopa(param_1);
-    return ObjectOffset;
+    ProcMoveRedPTroopa(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVEFLYGREENPTROOPA:
-    return MoveFlyGreenPTroopa(param_1);
+    MoveFlyGreenPTroopa(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVELAKITU:
-    MoveLakitu(param_1);
-    return ObjectOffset;
+    MoveLakitu(objoff);
+    return;
 
   case ENEMYMOVEMENTSUBS_MOVEFLYINGCHEEPCHEEP:
-    MoveFlyingCheepCheep(param_1);
-    return ObjectOffset;
+    MoveFlyingCheepCheep(objoff);
+    return;
 
   default:
-    jmpengine_overflow(Enemy_ID[param_1]);
-    return param_1;
+    jmpengine_overflow(Enemy_ID[objoff]);
+    return;
   }
 }
 
@@ -5764,109 +5765,117 @@ void MovePodoboo(const byte param_1) {
 
 // SMB:c9d8
 // SM2MAIN:960d
-// Signature: [X] -> [X]
-byte ProcHammerBro(const byte param_1) {
-  if ((Enemy_State[param_1] & 0x20) != 0) {
-    MoveDefeatedEnemy(param_1);
-    return ObjectOffset;
+// Signature: [X] -> []
+void ProcHammerBro(const byte objoff) {
+  if ((Enemy_State[objoff] & 0x20) != 0) {
+    MoveDefeatedEnemy(objoff);
+    return;
   }
-  if (HammerBroJumpTimer[param_1] != 0) {
-    HammerBroJumpTimer[param_1] = HammerBroJumpTimer[param_1] - 1;
+  if (HammerBroJumpTimer[objoff] != 0) {
+    HammerBroJumpTimer[objoff] = HammerBroJumpTimer[objoff] - 1;
     if ((Enemy_OffscreenBits & 0xc) != 0) {
-      return MoveHammerBroXDir(param_1);
+      MoveHammerBroXDir(objoff);
+      return;
     }
-    if (HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] == 0) {
-      HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = HammerThrowTmrData[SecondaryHardMode];
-      const bool sVar2 = SpawnHammerObj(ObjectOffset);
+    if (HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] == 0) {
+      HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] = HammerThrowTmrData[SecondaryHardMode];
+      const bool sVar2 = SpawnHammerObj(objoff);
       if (sVar2) {
-        Enemy_State[ObjectOffset] = Enemy_State[ObjectOffset] | 8;
-        return MoveHammerBroXDir(ObjectOffset);
+        Enemy_State[objoff] = Enemy_State[objoff] | 8;
+        MoveHammerBroXDir(objoff);
+        return;
       }
-      HammerThrowingTimer_Or_PlatformCollisionFlag[ObjectOffset] = HammerThrowingTimer_Or_PlatformCollisionFlag[ObjectOffset] - 1;
-      return MoveHammerBroXDir(ObjectOffset);
+      HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] = HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] - 1;
+      MoveHammerBroXDir(objoff);
+      return;
     }
-    HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] - 1;
-    return MoveHammerBroXDir(param_1);
+    HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] = HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] - 1;
+    MoveHammerBroXDir(objoff);
+    return;
   }
-  if ((Enemy_State[param_1] & 7) == 1) {
-    return MoveHammerBroXDir(param_1);
+  if ((Enemy_State[objoff] & 7) == 1) {
+    MoveHammerBroXDir(objoff);
+    return;
   }
-  if (Enemy_Y_Position[param_1] >= 0x80) {
-    return SetHJ(param_1, 0xfa, 0);
+  if (Enemy_Y_Position[objoff] >= 0x80) {
+    SetHJ(objoff, 0xfa, 0);
+    return;
   }
-  if (Enemy_Y_Position[param_1] < 0x70) {
-    return SetHJ(param_1, 0xfd, 1);
+  if (Enemy_Y_Position[objoff] < 0x70) {
+    SetHJ(objoff, 0xfd, 1);
+    return;
   }
-  if ((PseudoRandomBitReg[param_1 + 1] & 1) != 0) {
-    return SetHJ(param_1, 0xfd, 0);
+  if ((PseudoRandomBitReg[objoff + 1] & 1) != 0) {
+    SetHJ(objoff, 0xfd, 0);
+    return;
   }
-  return SetHJ(param_1, 0xfa, 0);
+  SetHJ(objoff, 0xfa, 0);
 }
 
 
 // SMB:ca37
 // SM2MAIN:966c
-// Signature: [X, Y, r00] -> [X]
-byte SetHJ(const byte param_1, const byte param_2, const byte param_3) {
-  SpriteVarData2[param_1] = param_2;
-  Enemy_State[param_1] = Enemy_State[param_1] | 1;
-  byte bVar1 = param_3 & PseudoRandomBitReg[param_1 + 2];
+// Signature: [X, Y, r00] -> []
+void SetHJ(const byte objoff, const byte param_2, const byte param_3) {
+  SpriteVarData2[objoff] = param_2;
+  Enemy_State[objoff] = Enemy_State[objoff] | 1;
+  byte bVar1 = param_3 & PseudoRandomBitReg[objoff + 2];
   if (SecondaryHardMode == 0) {
     bVar1 = 0;
   }
-  EnemyFrameTimer[param_1] = HammerBroJumpLData[bVar1];
-  HammerBroJumpTimer[param_1] = PseudoRandomBitReg[param_1 + 1] | 0xc0;
-  return MoveHammerBroXDir(param_1);
+  EnemyFrameTimer[objoff] = HammerBroJumpLData[bVar1];
+  HammerBroJumpTimer[objoff] = PseudoRandomBitReg[objoff + 1] | 0xc0;
+  MoveHammerBroXDir(objoff);
 }
 
 
 // SMB:ca58
 // SM2MAIN:968d
-// Signature: [X] -> [X]
-byte MoveHammerBroXDir(const byte param_1) {
-  SpriteVarData1[param_1] = ((FrameCounter & 0x40) == 0) ? 4 : 0xfc;;
-  const struct_ncr00 sVar2 = PlayerEnemyDiff(param_1);
+// Signature: [X] -> []
+void MoveHammerBroXDir(const byte objoff) {
+  SpriteVarData1[objoff] = ((FrameCounter & 0x40) == 0) ? 4 : 0xfc;;
+  const struct_ncr00 sVar2 = PlayerEnemyDiff(objoff);
   if (!sVar2.n) {
-    if (EnemyIntervalTimer[param_1] == 0) {
-      SpriteVarData1[param_1] = 0xf8;
+    if (EnemyIntervalTimer[objoff] == 0) {
+      SpriteVarData1[objoff] = 0xf8;
     }
   }
-  Enemy_MovingDir[param_1] = (sVar2.n) ? 1 : 2;
-  return MoveNormalEnemy(param_1);
+  Enemy_MovingDir[objoff] = (sVar2.n) ? 1 : 2;
+  MoveNormalEnemy(objoff);
 }
 
 
 // SMB:ca77
 // SM2MAIN:96ac
-// Signature: [X] -> [X]
-byte MoveNormalEnemy(const byte param_1) {
+// Signature: [X] -> []
+void MoveNormalEnemy(const byte objoff) {
   bool fall_e = true;
 
-  if ((Enemy_State[param_1] & 0x40) == 0) {
-    const byte bVar1 = Enemy_State[param_1] & 7;
+  if ((Enemy_State[objoff] & 0x40) == 0) {
+    const byte bVar1 = Enemy_State[objoff] & 7;
 
-    if (Enemy_State[param_1] & 0x80) {
+    if (Enemy_State[objoff] & 0x80) {
       fall_e = false;
-    } else if ((Enemy_State[param_1] & 0x20) != 0) {
-      MoveDefeatedEnemy(param_1);
-      return ObjectOffset;
+    } else if ((Enemy_State[objoff] & 0x20) != 0) {
+      MoveDefeatedEnemy(objoff);
+      return;
     } else if (bVar1 == 0) {
       fall_e = false;
     } else if (bVar1 == 3 || bVar1 == 4 || bVar1 == 6 || bVar1 == 7) {
-      if (EnemyIntervalTimer[param_1] == 0) {
-        Enemy_State[param_1] = 0;
+      if (EnemyIntervalTimer[objoff] == 0) {
+        Enemy_State[objoff] = 0;
         byte bVar2 = FrameCounter & 1;
-        Enemy_MovingDir[param_1] = bVar2 + 1;
+        Enemy_MovingDir[objoff] = bVar2 + 1;
         if (PrimaryHardMode != 0) {
           bVar2 += 2;
         }
-        Enemy_X_Speed[param_1] = RevivedXSpeed[bVar2];
-        return param_1;
+        Enemy_X_Speed[objoff] = RevivedXSpeed[bVar2];
+        return;
       }
-      if ((EnemyIntervalTimer[param_1] == 0xe) && (Enemy_ID[param_1] == 6)) {
-        EraseEnemyObject(param_1);
+      if ((EnemyIntervalTimer[objoff] == 0xe) && (Enemy_ID[objoff] == 6)) {
+        EraseEnemyObject(objoff);
       }
-      return param_1;
+      return;
     }
   }
 
@@ -5874,31 +5883,30 @@ byte MoveNormalEnemy(const byte param_1) {
 
   // FallE
   if (fall_e) {
-    MoveD_EnemyVertically(param_1);
-    const byte tmp1 = ObjectOffset;
-    assert_eq_assumption(tmp1, param_1);
+    MoveD_EnemyVertically(objoff);
+    const byte tmp1 = objoff;
+    assert_eq_assumption(tmp1, objoff);
 
-    if (Enemy_State[param_1] == 2) {
+    if (Enemy_State[objoff] == 2) {
       // MEHor
-      MoveEnemyHorizontally(param_1);
-      return ObjectOffset;
+      MoveEnemyHorizontally(objoff);
+      return;
     }
 
-    if (((Enemy_State[param_1] & 0x40) != 0) && (Enemy_ID[param_1] != 0x2e)) {
+    if (((Enemy_State[objoff] & 0x40) != 0) && (Enemy_ID[objoff] != 0x2e)) {
       bVar2 = 1;
     }
   }
 
-  const byte old_enemy_speed = Enemy_X_Speed[param_1];
+  const byte old_enemy_speed = Enemy_X_Speed[objoff];
   if (old_enemy_speed >= 0x80) {
     bVar2 += 2;
   }
-  Enemy_X_Speed[param_1] += XSpeedAdderData[bVar2];
+  Enemy_X_Speed[objoff] += XSpeedAdderData[bVar2];
 
-  MoveEnemyHorizontally(param_1);
+  MoveEnemyHorizontally(objoff);
 
-  Enemy_X_Speed[param_1] = old_enemy_speed;
-  return param_1;
+  Enemy_X_Speed[objoff] = old_enemy_speed;
 }
 
 
@@ -5946,11 +5954,10 @@ byte ProcMoveRedPTroopa(const byte param_1) {
 
 // SMB:cb25
 // SM2MAIN:975a
-// Signature: [X] -> [X]
-byte MoveFlyGreenPTroopa(const byte param_1) {
-  XMoveCntr_GreenPTroopa(param_1);
-  const byte objoff = ObjectOffset;
-  MoveWithXMCntrs(param_1, objoff);
+// Signature: [X] -> []
+void MoveFlyGreenPTroopa(const byte objoff) {
+  XMoveCntr_GreenPTroopa(objoff);
+  MoveWithXMCntrs(objoff, objoff);
   char cVar2 = 1;
   if ((FrameCounter & 3) == 0) {
     if ((FrameCounter & 0x40) == 0) {
@@ -5958,7 +5965,6 @@ byte MoveFlyGreenPTroopa(const byte param_1) {
     }
     Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] + cVar2;
   }
-  return objoff;
 }
 
 
@@ -6009,47 +6015,46 @@ byte MoveWithXMCntrs(const byte param_1, const byte objoff) {
 
 // SMB:cb89
 // SM2MAIN:97be
-// Signature: [X, C] -> [X]
-byte MoveBloober(const byte param_1, const bool param_2) {
-  if ((Enemy_State[param_1] & 0x20) != 0) {
-    MoveEnemySlowVert(param_1);
-    return ObjectOffset;
+// Signature: [X, C] -> []
+void MoveBloober(const byte objoff, const bool param_2) {
+  if ((Enemy_State[objoff] & 0x20) != 0) {
+    MoveEnemySlowVert(objoff);
+    return;
   }
 
-  const byte rng = PseudoRandomBitReg[param_1 + 1] & (SecondaryHardMode == 0 ? 63 : 3);
+  const byte rng = PseudoRandomBitReg[objoff + 1] & (SecondaryHardMode == 0 ? 63 : 3);
 
   if (rng == 0) {
     byte bVar2;
     bool tmp2;
 
-    if ((param_1 & 1) != 0) {
+    if ((objoff & 1) != 0) {
       bVar2 = Player_MovingDir;
       tmp2 = true;
     } else {
-      const struct_ncr00 sVar3 = PlayerEnemyDiff(param_1);
+      const struct_ncr00 sVar3 = PlayerEnemyDiff(objoff);
       bVar2 = sVar3.n ? 1 : 2;
       tmp2 = sVar3.c;
     }
-    Enemy_MovingDir[param_1] = bVar2;
-    ProcSwimmingB(param_1, tmp2);
+    Enemy_MovingDir[objoff] = bVar2;
+    ProcSwimmingB(objoff, tmp2);
   } else {
-    ProcSwimmingB(param_1, param_2);
+    ProcSwimmingB(objoff, param_2);
   }
 
-  const byte ydiff = Enemy_Y_Position[param_1] - CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
+  const byte ydiff = Enemy_Y_Position[objoff] - CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff];
 
   if (ydiff >= 0x20) {
-    Enemy_Y_Position[param_1] = ydiff;
+    Enemy_Y_Position[objoff] = ydiff;
   }
 
-  if (Enemy_MovingDir[param_1] == 1) {
-    ADD_UNSIGNED_16_8(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
-                      SpriteVarData1[param_1]);
+  if (Enemy_MovingDir[objoff] == 1) {
+    ADD_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
+                      SpriteVarData1[objoff]);
   } else {
-    SUB_UNSIGNED_16_8(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
-                      SpriteVarData1[param_1]);
+    SUB_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
+                      SpriteVarData1[objoff]);
   }
-  return param_1;
 }
 
 
@@ -6100,37 +6105,35 @@ void MoveBulletBill(const byte param_1) {
 
 // SMB:cc4a
 // SM2MAIN:987f
-// Signature: [X] -> [X]
-byte MoveSwimmingCheepCheep(const byte param_1) {
-  if ((Enemy_State[param_1] & 0x20) != 0) {
-    MoveEnemySlowVert(param_1);
-    return ObjectOffset;
+// Signature: [X] -> []
+void MoveSwimmingCheepCheep(const byte objoff) {
+  if ((Enemy_State[objoff] & 0x20) != 0) {
+    MoveEnemySlowVert(objoff);
+    return;
   }
 
-  const u8 cheepcheep_speed = Enemy_ID[param_1] == 0xa ? 0x40 : 0x80;
+  const u8 cheepcheep_speed = Enemy_ID[objoff] == 0xa ? 0x40 : 0x80;
 
-  SUB_24_24(Enemy_PageLoc[param_1], Enemy_X_Position[param_1], Enemy_X_MoveForce[param_1],
+  SUB_24_24(Enemy_PageLoc[objoff], Enemy_X_Position[objoff], Enemy_X_MoveForce[objoff],
             0, 0, cheepcheep_speed);
 
-  if (param_1 > 1) {
-    if (SpriteVarData1[param_1] < 0x10) {
-      SUB_24_24(Enemy_Y_HighPos[param_1], Enemy_Y_Position[param_1], Enemy_YMF_Dummy[param_1],
+  if (objoff > 1) {
+    if (SpriteVarData1[objoff] < 0x10) {
+      SUB_24_24(Enemy_Y_HighPos[objoff], Enemy_Y_Position[objoff], Enemy_YMF_Dummy[objoff],
                 0, 0, ssw(0x20, 0x40));
     } else {
-      ADD_24_24(Enemy_Y_HighPos[param_1], Enemy_Y_Position[param_1], Enemy_YMF_Dummy[param_1],
+      ADD_24_24(Enemy_Y_HighPos[objoff], Enemy_Y_Position[objoff], Enemy_YMF_Dummy[objoff],
                 0, 0, ssw(0x20, 0x40));
     }
 
-    const i8 bVar3 = Enemy_Y_Position[param_1] - Enemy_Y_MoveForce[param_1];
+    const i8 bVar3 = Enemy_Y_Position[objoff] - Enemy_Y_MoveForce[objoff];
 
     if (bVar3 > 0xe) {
-      SpriteVarData1[param_1] = 0;
+      SpriteVarData1[objoff] = 0;
     } else if (bVar3 < -0xe) {
-      SpriteVarData1[param_1] = 0x10;
+      SpriteVarData1[objoff] = 0x10;
     }
   }
-
-  return param_1;
 }
 
 
@@ -7812,26 +7815,26 @@ static inline bool EnemiesCollision_condition(const u8 enemyoff) {
 
 // SMB:da33
 // SM2MAIN:a69c
-// Signature: [X] -> [X]
-byte EnemiesCollision(const byte param_1) {
+// Signature: [X] -> []
+void EnemiesCollision(const byte objoff) {
   if ((FrameCounter & 1) == 0) {
-    return param_1;
+    return;
   }
 
   if (AreaType == 0) {
-    return param_1;
+    return;
   }
 
-  assert_eq_assumption(param_1 < 0x80, true);
+  assert_eq_assumption(objoff < 0x80, true);
 
-  if (EnemiesCollision_condition(param_1)) {
-    return ObjectOffset;
+  if (EnemiesCollision_condition(objoff)) {
+    return;
   }
 
   // Inlined: GetEnemyBoundBoxOfs
-  const u8 bStack0000 = ObjectOffset * 4 + 4;
+  const u8 bStack0000 = objoff * 4 + 4;
 
-  for (int i = param_1 - 1; i >= 0; i--) {
+  for (int i = objoff - 1; i >= 0; i--) {
     if (Enemy_Flag[i] == 0) {
       continue;
     }
@@ -7841,8 +7844,6 @@ byte EnemiesCollision(const byte param_1) {
     }
 
     const bool bVar2 = SprObjectCollisionCore(i * 4 + 4, bStack0000);
-
-    const u8 objoff = ObjectOffset;
 
     // objectoffset must be between 0 and 6 inclusive
 
@@ -7859,8 +7860,6 @@ byte EnemiesCollision(const byte param_1) {
       ProcEnemyCollisions(objoff, i, i);
     }
   }
-
-  return ObjectOffset;
 }
 
 
@@ -8610,49 +8609,48 @@ static inline struct_azr04 ChkUnderEnemy_Ext(const byte param_1, u16 *blockoff) 
 
 // SMB:dfc1
 // SM2MAIN:ac4a
-// Signature: [X] -> [X]
-byte EnemyToBGCollisionDet(const byte param_1) {
+// Signature: [X] -> []
+void EnemyToBGCollisionDet(const byte objoff) {
   struct_ncr00 sVar5;
 
-  if ((Enemy_State[param_1] & 0x20) != 0) {
-    return param_1;
+  if ((Enemy_State[objoff] & 0x20) != 0) {
+    return;
   }
 
-  const bool bVarDD = SubtEnemyYPos(param_1);
+  const bool bVarDD = SubtEnemyYPos(objoff);
   if (!bVarDD) {
-    return param_1;
+    return;
   }
 
-  byte bVarAA = Enemy_ID[param_1];
-  if ((bVarAA == 0x12) && (Enemy_Y_Position[param_1] < 0x25)) {
-    return param_1;
+  byte bVarAA = Enemy_ID[objoff];
+  if ((bVarAA == 0x12) && (Enemy_Y_Position[objoff] < 0x25)) {
+    return;
   }
 
   if (bVarAA == 0xe) {
-    return EnemyJump(param_1);
+    EnemyJump(objoff);
+    return;
   }
   if (bVarAA == 5) {
-    return HammerBroBGColl(param_1);
+    HammerBroBGColl(objoff);
+    return;
   }
   if ((bVarAA != 0x12) && (bVarAA != 0x2e) && (ssw(false, bVarAA == 4) || (bVarAA > 6))) {
-    return param_1;
+    return;
   }
 
 #ifdef SMB1_MODE
   u16 chkunderenemy_blockoff = 0;
-  const struct_azr04 sVar6 = ChkUnderEnemy_Ext(param_1, &chkunderenemy_blockoff);
+  const struct_azr04 sVar6 = ChkUnderEnemy_Ext(objoff, &chkunderenemy_blockoff);
 #endif
 #ifdef SMB2J_MODE
-  const struct_azr04 sVar6 = ChkUnderEnemy(param_1);
+  const struct_azr04 sVar6 = ChkUnderEnemy(objoff);
 #endif
 
-  const u8 objoff = ObjectOffset;
-
   if (sVar6.z || ChkForNonSolids(sVar6.a)) {
-    return ChkForRedKoopa(objoff);
+    ChkForRedKoopa(objoff);
+    return;
   }
-
-  byte bVarCC = objoff;
 
   if (sVar6.a == ssw(0x23, 0x20)) {
 #ifdef SMB1_MODE
@@ -8681,31 +8679,34 @@ byte EnemyToBGCollisionDet(const byte param_1) {
     ChkToStunEnemies(objoff);
 #endif
 
-    return objoff;
+    return;
   }
 
   if ((byte)(sVar6.r04 - 8) > 4) {
-    return ChkForRedKoopa(objoff);
+    ChkForRedKoopa(objoff);
+    return;
   }
   if ((Enemy_State[objoff] & 0x40) == 0) {
     if (((char)Enemy_State[objoff] < 0)) {
-      return DoEnemySideCheck(objoff);
+      DoEnemySideCheck(objoff);
+      return;
     }
     else {
       bVarAA = Enemy_State[objoff];
       if (bVarAA == 0) {
-        return DoEnemySideCheck(objoff);
+        DoEnemySideCheck(objoff);
+        return;
       }
     }
     if (bVarAA != 5) {
       if (bVarAA > 2) {
-        return objoff;
+        return;
       }
       if (Enemy_State[objoff] == 2) {
         EnemyIntervalTimer[objoff] = (Enemy_ID[objoff] == 0x12) ? 0 : 0x10;
         Enemy_State[objoff] = 3;
         EnemyLanding(objoff);
-        return objoff;
+        return;
       }
     }
     if (Enemy_ID[objoff] != 6) {
@@ -8722,18 +8723,17 @@ byte EnemyToBGCollisionDet(const byte param_1) {
         bVarAA += 1;
       }
       if (bVarAA == Enemy_MovingDir[objoff]) {
-        bVarCC = ChkForBump_HammerBroJ(objoff);
+        ChkForBump_HammerBroJ(objoff);
       }
     }
   }
 LandEnemyInitState:
-  EnemyLanding(bVarCC);
-  if ((Enemy_State[bVarCC] & 0x80) != 0) {
-    Enemy_State[bVarCC] = Enemy_State[bVarCC] & 0xbf;
-    return bVarCC;
+  EnemyLanding(objoff);
+  if ((Enemy_State[objoff] & 0x80) != 0) {
+    Enemy_State[objoff] = Enemy_State[objoff] & 0xbf;
+    return;
   }
-  Enemy_State[bVarCC] = 0;
-  return bVarCC;
+  Enemy_State[objoff] = 0;
 }
 
 
@@ -8761,61 +8761,66 @@ void SetStun2(const byte param_1) {
 
 // SMB:e0e2
 // SM2MAIN:ad78
-// Signature: [X] -> [X]
-byte ChkForRedKoopa(const byte param_1) {
+// Signature: [X] -> []
+void ChkForRedKoopa(const byte objoff) {
   byte bVar1;
 
-  if ((Enemy_ID[param_1] == 3) && (Enemy_State[param_1] == 0)) {
-    return ChkForBump_HammerBroJ(param_1);
+  if ((Enemy_ID[objoff] == 3) && (Enemy_State[objoff] == 0)) {
+    ChkForBump_HammerBroJ(objoff);
+    return;
   }
-  if ((char)Enemy_State[param_1] < 0) {
-    bVar1 = Enemy_State[param_1] | 0x40;
+  if ((char)Enemy_State[objoff] < 0) {
+    bVar1 = Enemy_State[objoff] | 0x40;
   } else {
-    bVar1 = EnemyBGCStateData[Enemy_State[param_1]];
+    bVar1 = EnemyBGCStateData[Enemy_State[objoff]];
   }
-  Enemy_State[param_1] = bVar1;
-  return DoEnemySideCheck(param_1);
+  Enemy_State[objoff] = bVar1;
+  DoEnemySideCheck(objoff);
 }
 
 
 // SMB:e0fe
 // SM2MAIN:ad94
-// Signature: [X] -> [X]
-byte DoEnemySideCheck(const byte param_1) {
-  if (Enemy_Y_Position[param_1] < 0x20) {
-    return param_1;
+// Signature: [X] -> []
+void DoEnemySideCheck(const byte objoff) {
+  if (Enemy_Y_Position[objoff] < 0x20) {
+    return;
   }
 
-  byte tmp1 = param_1;
   for (int i = 0x16; i < 0x18; i++) {
     const byte tmp2 = 0x18 - i;
-    if (tmp2 == Enemy_MovingDir[tmp1]) {
-      const struct_axzr04 sVar3 = BlockBufferChk_Enemy(1, tmp1, i);
-      tmp1 = sVar3.x;
+    if (tmp2 == Enemy_MovingDir[objoff]) {
+      // Inlied: BlockBufferChk_Enemy
+      struct_axzr04 sVar3;
+
+      const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(1, objoff + 1, i);
+      sVar3.a = sVar2.a;
+      sVar3.z = sVar2.a == 0;
+      sVar3.r04 = sVar2.r04;
+
       if (!sVar3.z) {
         if (!ChkForNonSolids(sVar3.a)) {
-          return ChkForBump_HammerBroJ(tmp1);
+          ChkForBump_HammerBroJ(objoff);
+          return;
         }
       }
     }
   }
-
-  return tmp1;
 }
 
 
 // SMB:e124
 // SM2MAIN:adba
-// Signature: [X] -> [X]
-byte ChkForBump_HammerBroJ(const byte param_1) {
-  if ((param_1 != 5) && ((char)Enemy_State[param_1] < 0)) {
+// Signature: [X] -> []
+void ChkForBump_HammerBroJ(const byte objoff) {
+  if ((objoff != 5) && ((char)Enemy_State[objoff] < 0)) {
     Square1SoundQueue = 2;
   }
-  if (Enemy_ID[param_1] == 5) {
-    return SetHJ(param_1, 0xfa, 0);
+  if (Enemy_ID[objoff] == 5) {
+    SetHJ(objoff, 0xfa, 0);
+  } else {
+    RXSpd(objoff);
   }
-  RXSpd(param_1);
-  return param_1;
 }
 
 
@@ -8853,12 +8858,11 @@ bool SubtEnemyYPos(const byte param_1) { return 0x43 < (byte)(Enemy_Y_Position[p
 
 // SMB:e163
 // SM2MAIN:adf9
-// Signature: [X] -> [X]
-byte EnemyJump(const byte param_1) {
-  bool bVar2 = SubtEnemyYPos(param_1);
-  if ((bVar2) && (2 < (byte)(SpriteVarData2[param_1] + 2))) {
-    const struct_azr04 sVar3 = ChkUnderEnemy(param_1);
-    const byte objoff = ObjectOffset;
+// Signature: [X] -> []
+void EnemyJump(const byte objoff) {
+  bool bVar2 = SubtEnemyYPos(objoff);
+  if ((bVar2) && (2 < (byte)(SpriteVarData2[objoff] + 2))) {
+    const struct_azr04 sVar3 = ChkUnderEnemy(objoff);
     if (!sVar3.z) {
       bVar2 = ChkForNonSolids(sVar3.a);
       if (!bVar2) {
@@ -8866,32 +8870,29 @@ byte EnemyJump(const byte param_1) {
         SpriteVarData2[objoff] = 0xfd;
       }
     }
-    return DoEnemySideCheck(objoff);
-  } else {
-    return DoEnemySideCheck(param_1);
   }
+  DoEnemySideCheck(objoff);
 }
 
 
 // SMB:e185
 // SM2MAIN:ae1b
-// Signature: [X] -> [X]
-byte HammerBroBGColl(const byte param_1) {
-  const struct_azr04 sVar2 = ChkUnderEnemy(param_1);
-  const byte objoff = ObjectOffset;
+// Signature: [X] -> []
+void HammerBroBGColl(const byte objoff) {
+  const struct_azr04 sVar2 = ChkUnderEnemy(objoff);
   if (!sVar2.z) {
     if (sVar2.a == ssw(0x23, 0x20)) {
       KillEnemyAboveBlock(objoff);
-      return objoff;
+      return;
     }
     if (EnemyFrameTimer[objoff] == 0) {
       Enemy_State[objoff] = Enemy_State[objoff] & 0x88;
       EnemyLanding(objoff);
-      return DoEnemySideCheck(objoff);
+      DoEnemySideCheck(objoff);
+      return;
     }
   }
   Enemy_State[objoff] = Enemy_State[objoff] | 1;
-  return objoff;
 }
 
 
@@ -9124,21 +9125,6 @@ bool SprObjectCollisionCore(const byte param_1, const byte param_2) {
   }
 
   return true;
-}
-
-
-// SMB:e388
-// SM2MAIN:b026
-// Signature: [A, X, Y] -> [A, X, Z, r04]
-struct_axzr04 BlockBufferChk_Enemy(const byte param_1, const byte param_2, const byte param_3) {
-  struct_axzr04 sVar1;
-
-  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(param_1, param_2 + 1, param_3);
-  sVar1.a = sVar2.a;
-  sVar1.x = ObjectOffset;
-  sVar1.z = sVar2.a == 0;
-  sVar1.r04 = sVar2.r04;
-  return sVar1;
 }
 
 

@@ -853,10 +853,10 @@ byte smb2j_RunEnemyObjectsCore(void);
 void smb2j_RunRetainerObj(byte param_1);
 #define RunRetainerObj smb2j_RunRetainerObj
 
-byte smb2j_RunNormalEnemies(byte param_1);
+void smb2j_RunNormalEnemies(byte param_1);
 #define RunNormalEnemies smb2j_RunNormalEnemies
 
-byte smb2j_EnemyMovementSubs(byte param_1);
+void smb2j_EnemyMovementSubs(byte param_1);
 #define EnemyMovementSubs smb2j_EnemyMovementSubs
 
 void smb2j_RunBowserFlame(byte param_1);
@@ -880,16 +880,16 @@ void smb2j_EraseEnemyObject(byte param_1);
 void smb2j_MovePodoboo(byte param_1);
 #define MovePodoboo smb2j_MovePodoboo
 
-byte smb2j_ProcHammerBro(byte param_1);
+void smb2j_ProcHammerBro(byte param_1);
 #define ProcHammerBro smb2j_ProcHammerBro
 
-byte smb2j_SetHJ(byte param_1,byte param_2,byte param_3);
+void smb2j_SetHJ(byte param_1,byte param_2,byte param_3);
 #define SetHJ smb2j_SetHJ
 
-byte smb2j_MoveHammerBroXDir(byte param_1);
+void smb2j_MoveHammerBroXDir(byte param_1);
 #define MoveHammerBroXDir smb2j_MoveHammerBroXDir
 
-byte smb2j_MoveNormalEnemy(byte param_1);
+void smb2j_MoveNormalEnemy(byte param_1);
 #define MoveNormalEnemy smb2j_MoveNormalEnemy
 
 void smb2j_MoveDefeatedEnemy(byte param_1);
@@ -901,7 +901,7 @@ void smb2j_MoveJumpingEnemy(byte param_1);
 byte smb2j_ProcMoveRedPTroopa(byte param_1);
 #define ProcMoveRedPTroopa smb2j_ProcMoveRedPTroopa
 
-byte smb2j_MoveFlyGreenPTroopa(byte param_1);
+void smb2j_MoveFlyGreenPTroopa(byte param_1);
 #define MoveFlyGreenPTroopa smb2j_MoveFlyGreenPTroopa
 
 void smb2j_XMoveCntr_GreenPTroopa(byte param_1);
@@ -913,7 +913,7 @@ void smb2j_XMoveCntr_Platform(byte param_1,byte param_2);
 byte smb2j_MoveWithXMCntrs(byte param_1, byte objoff);
 #define MoveWithXMCntrs smb2j_MoveWithXMCntrs
 
-byte smb2j_MoveBloober(byte param_1,bool param_2);
+void smb2j_MoveBloober(byte param_1,bool param_2);
 #define MoveBloober smb2j_MoveBloober
 
 void smb2j_ProcSwimmingB(byte param_1,bool param_2);
@@ -922,7 +922,7 @@ void smb2j_ProcSwimmingB(byte param_1,bool param_2);
 void smb2j_MoveBulletBill(byte param_1);
 #define MoveBulletBill smb2j_MoveBulletBill
 
-byte smb2j_MoveSwimmingCheepCheep(byte param_1);
+void smb2j_MoveSwimmingCheepCheep(byte param_1);
 #define MoveSwimmingCheepCheep smb2j_MoveSwimmingCheepCheep
 
 void smb2j_ProcFirebar(byte param_1);
@@ -1090,7 +1090,7 @@ byte smb2j_EnemyFacePlayer(byte param_1);
 void smb2j_SetupFloateyNumber(byte param_1,byte param_2);
 #define SetupFloateyNumber smb2j_SetupFloateyNumber
 
-byte smb2j_EnemiesCollision(byte param_1);
+void smb2j_EnemiesCollision(byte param_1);
 #define EnemiesCollision smb2j_EnemiesCollision
 
 void smb2j_ProcEnemyCollisions(byte param_1,byte param_2,byte param_3);
@@ -1156,7 +1156,7 @@ bool smb2j_CheckForCoinMTiles(byte param_1);
 byte smb2j_GetMTileAttrib(byte param_1);
 #define GetMTileAttrib smb2j_GetMTileAttrib
 
-byte smb2j_EnemyToBGCollisionDet(byte param_1);
+void smb2j_EnemyToBGCollisionDet(byte param_1);
 #define EnemyToBGCollisionDet smb2j_EnemyToBGCollisionDet
 
 void smb2j_ChkToStunEnemies(byte param_1);
@@ -1165,13 +1165,13 @@ void smb2j_ChkToStunEnemies(byte param_1);
 void smb2j_SetStun2(byte param_1);
 #define SetStun2 smb2j_SetStun2
 
-byte smb2j_ChkForRedKoopa(byte param_1);
+void smb2j_ChkForRedKoopa(byte param_1);
 #define ChkForRedKoopa smb2j_ChkForRedKoopa
 
-byte smb2j_DoEnemySideCheck(byte param_1);
+void smb2j_DoEnemySideCheck(byte param_1);
 #define DoEnemySideCheck smb2j_DoEnemySideCheck
 
-byte smb2j_ChkForBump_HammerBroJ(byte param_1);
+void smb2j_ChkForBump_HammerBroJ(byte param_1);
 #define ChkForBump_HammerBroJ smb2j_ChkForBump_HammerBroJ
 
 struct_ncr00 smb2j_PlayerEnemyDiff(byte param_1);
@@ -1183,10 +1183,10 @@ void smb2j_EnemyLanding(byte param_1);
 bool smb2j_SubtEnemyYPos(byte param_1);
 #define SubtEnemyYPos smb2j_SubtEnemyYPos
 
-byte smb2j_EnemyJump(byte param_1);
+void smb2j_EnemyJump(byte param_1);
 #define EnemyJump smb2j_EnemyJump
 
-byte smb2j_HammerBroBGColl(byte param_1);
+void smb2j_HammerBroBGColl(byte param_1);
 #define HammerBroBGColl smb2j_HammerBroBGColl
 
 void smb2j_KillEnemyAboveBlock(byte param_1);
@@ -1236,9 +1236,6 @@ bool smb2j_PlayerCollisionCore(byte param_1);
 
 bool smb2j_SprObjectCollisionCore(byte param_1,byte param_2);
 #define SprObjectCollisionCore smb2j_SprObjectCollisionCore
-
-struct_axzr04 smb2j_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
-#define BlockBufferChk_Enemy smb2j_BlockBufferChk_Enemy
 
 struct blockbuffer_colli_result smb2j_BlockBufferColli_Feet(byte param_1);
 #define BlockBufferColli_Feet smb2j_BlockBufferColli_Feet
