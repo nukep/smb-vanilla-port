@@ -580,10 +580,10 @@ void smb2j_VineObjectHandler(byte param_1);
 void smb2j_ProcessCannons(void);
 #define ProcessCannons smb2j_ProcessCannons
 
-byte smb2j_BulletBillHandler(byte param_1);
+void smb2j_BulletBillHandler(byte param_1);
 #define BulletBillHandler smb2j_BulletBillHandler
 
-struct_xc smb2j_SpawnHammerObj(void);
+bool smb2j_SpawnHammerObj(byte objoff);
 #define SpawnHammerObj smb2j_SpawnHammerObj
 
 void smb2j_CoinBlock(byte param_1);
@@ -715,7 +715,7 @@ byte smb2j_EnemiesAndLoopsCore(byte param_1);
 void smb2j_ExecGameLoopback(byte param_1);
 #define ExecGameLoopback smb2j_ExecGameLoopback
 
-byte smb2j_ProcLoopCommand(byte param_1);
+void smb2j_ProcLoopCommand(byte param_1);
 #define ProcLoopCommand smb2j_ProcLoopCommand
 
 void smb2j_InitEnemyObject(byte param_1);
@@ -802,7 +802,7 @@ void smb2j_InitFireworks(byte param_1);
 void smb2j_BulletBillCheepCheep(byte param_1);
 #define BulletBillCheepCheep smb2j_BulletBillCheepCheep
 
-byte smb2j_HandleGroupEnemies(byte param_1);
+void smb2j_HandleGroupEnemies(byte param_1);
 #define HandleGroupEnemies smb2j_HandleGroupEnemies
 
 void smb2j_InitPiranhaPlant(byte param_1);
@@ -1255,7 +1255,7 @@ struct blockbuffer_colli_result smb2j_BlockBufferCollision(byte param_1,byte par
 void smb2j_DrawVine(byte param_1);
 #define DrawVine smb2j_DrawVine
 
-void smb2j_DrawHammer(byte param_1, byte objoff);
+void smb2j_DrawHammer(byte objoff);
 #define DrawHammer smb2j_DrawHammer
 
 void smb2j_FlagpoleGfxHandler(byte param_1);

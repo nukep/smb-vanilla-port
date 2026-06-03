@@ -592,10 +592,10 @@ void smb1_VineObjectHandler(byte param_1);
 void smb1_ProcessCannons(void);
 #define ProcessCannons smb1_ProcessCannons
 
-byte smb1_BulletBillHandler(byte param_1);
+void smb1_BulletBillHandler(byte param_1);
 #define BulletBillHandler smb1_BulletBillHandler
 
-struct_xc smb1_SpawnHammerObj(void);
+bool smb1_SpawnHammerObj(byte objoff);
 #define SpawnHammerObj smb1_SpawnHammerObj
 
 void smb1_CoinBlock(byte param_1);
@@ -724,7 +724,7 @@ byte smb1_EnemiesAndLoopsCore(byte param_1);
 void smb1_ExecGameLoopback(byte param_1);
 #define ExecGameLoopback smb1_ExecGameLoopback
 
-byte smb1_ProcLoopCommand(byte param_1);
+void smb1_ProcLoopCommand(byte param_1);
 #define ProcLoopCommand smb1_ProcLoopCommand
 
 void smb1_InitEnemyObject(byte param_1);
@@ -811,7 +811,7 @@ void smb1_InitFireworks(byte param_1);
 void smb1_BulletBillCheepCheep(byte param_1);
 #define BulletBillCheepCheep smb1_BulletBillCheepCheep
 
-byte smb1_HandleGroupEnemies(byte param_1);
+void smb1_HandleGroupEnemies(byte param_1);
 #define HandleGroupEnemies smb1_HandleGroupEnemies
 
 void smb1_InitPiranhaPlant(byte param_1);
@@ -1261,7 +1261,7 @@ struct blockbuffer_colli_result smb1_BlockBufferCollision(byte param_1,byte para
 void smb1_DrawVine(byte param_1);
 #define DrawVine smb1_DrawVine
 
-void smb1_DrawHammer(byte param_1, byte objoff);
+void smb1_DrawHammer(byte objoff);
 #define DrawHammer smb1_DrawHammer
 
 void smb1_FlagpoleGfxHandler(byte param_1);
