@@ -299,7 +299,7 @@ void AreaParserTaskHandler(void) {
     AreaParserCore();
     // note: setting this is likely not needed
     // setting to random values doesn't fail regression tests
-    ObjectOffset = 0xff;
+    ObjectOffset = 0;
     break;
 
   default:

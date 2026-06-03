@@ -313,7 +313,7 @@ void smb2j_EndCastleAward(void);
 void smb2j_PlayerEndWorld(void);
 #define PlayerEndWorld smb2j_PlayerEndWorld
 
-byte smb2j_FloateyNumbersRoutine(byte param_1);
+void smb2j_FloateyNumbersRoutine(byte param_1);
 #define FloateyNumbersRoutine smb2j_FloateyNumbersRoutine
 
 void smb2j_ScreenRoutines(void);
@@ -613,7 +613,7 @@ void smb2j_SetupPowerUp(byte param_1);
 void smb2j_PwrUpJmp(void);
 #define PwrUpJmp smb2j_PwrUpJmp
 
-byte smb2j_PowerUpObjHandler(void);
+void smb2j_PowerUpObjHandler(void);
 #define PowerUpObjHandler smb2j_PowerUpObjHandler
 
 void smb2j_PlayerHeadCollision(byte param_1,u16 mt_x, u16 mt_y);
@@ -709,7 +709,7 @@ void smb2j_MovePlatformUp(byte param_1);
 void smb2j_ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 #define ImposeGravity smb2j_ImposeGravity
 
-byte smb2j_EnemiesAndLoopsCore(byte param_1);
+void smb2j_EnemiesAndLoopsCore(byte param_1);
 #define EnemiesAndLoopsCore smb2j_EnemiesAndLoopsCore
 
 void smb2j_ExecGameLoopback(byte param_1);
@@ -847,7 +847,7 @@ void smb2j_PlatLiftDown(byte param_1);
 void smb2j_PosPlatform(byte param_1,byte param_2);
 #define PosPlatform smb2j_PosPlatform
 
-byte smb2j_RunEnemyObjectsCore(void);
+void smb2j_RunEnemyObjectsCore(byte objoff);
 #define RunEnemyObjectsCore smb2j_RunEnemyObjectsCore
 
 void smb2j_RunRetainerObj(byte param_1);
@@ -973,13 +973,13 @@ void smb2j_ProcBowserFlame(byte param_1);
 void smb2j_RunFireworks(byte param_1);
 #define RunFireworks smb2j_RunFireworks
 
-byte smb2j_RunStarFlagObj(byte param_1);
+void smb2j_RunStarFlagObj(byte param_1);
 #define RunStarFlagObj smb2j_RunStarFlagObj
 
 void smb2j_GameTimerFireworks(byte param_1);
 #define GameTimerFireworks smb2j_GameTimerFireworks
 
-byte smb2j_AwardGameTimerPoints(byte param_1);
+void smb2j_AwardGameTimerPoints(byte param_1);
 #define AwardGameTimerPoints smb2j_AwardGameTimerPoints
 
 void smb2j_AwardTimerCastle(void);
@@ -988,13 +988,13 @@ void smb2j_AwardTimerCastle(void);
 void smb2j_EndAreaPoints(void);
 #define EndAreaPoints smb2j_EndAreaPoints
 
-byte smb2j_RaiseFlagSetoffFWorks(byte param_1);
+void smb2j_RaiseFlagSetoffFWorks(byte param_1);
 #define RaiseFlagSetoffFWorks smb2j_RaiseFlagSetoffFWorks
 
 void smb2j_DrawStarFlag(byte param_1);
 #define DrawStarFlag smb2j_DrawStarFlag
 
-byte smb2j_DelayToAreaEnd(byte param_1);
+void smb2j_DelayToAreaEnd(byte param_1);
 #define DelayToAreaEnd smb2j_DelayToAreaEnd
 
 void smb2j_MovePiranhaPlant(byte param_1);
@@ -1264,7 +1264,7 @@ void smb2j_DrawLargePlatform(byte param_1);
 void smb2j_JCoinGfxHandler(byte param_1);
 #define JCoinGfxHandler smb2j_JCoinGfxHandler
 
-void smb2j_DrawPowerUp(void);
+void smb2j_DrawPowerUp(byte objoff);
 #define DrawPowerUp smb2j_DrawPowerUp
 
 void smb2j_EnemyGfxHandler(byte param_1);

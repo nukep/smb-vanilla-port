@@ -310,7 +310,7 @@ void smb1_PrintVictoryMessages(void);
 void smb1_PlayerEndWorld(void);
 #define PlayerEndWorld smb1_PlayerEndWorld
 
-byte smb1_FloateyNumbersRoutine(byte param_1);
+void smb1_FloateyNumbersRoutine(byte param_1);
 #define FloateyNumbersRoutine smb1_FloateyNumbersRoutine
 
 void smb1_ScreenRoutines(void);
@@ -625,7 +625,7 @@ void smb1_SetupPowerUp(byte param_1);
 void smb1_PwrUpJmp(void);
 #define PwrUpJmp smb1_PwrUpJmp
 
-byte smb1_PowerUpObjHandler(void);
+void smb1_PowerUpObjHandler(void);
 #define PowerUpObjHandler smb1_PowerUpObjHandler
 
 void smb1_PlayerHeadCollision(byte param_1,u16 mt_x, u16 mt_y);
@@ -718,7 +718,7 @@ void smb1_MovePlatformUp(byte param_1);
 void smb1_ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 #define ImposeGravity smb1_ImposeGravity
 
-byte smb1_EnemiesAndLoopsCore(byte param_1);
+void smb1_EnemiesAndLoopsCore(byte param_1);
 #define EnemiesAndLoopsCore smb1_EnemiesAndLoopsCore
 
 void smb1_ExecGameLoopback(byte param_1);
@@ -856,7 +856,7 @@ void smb1_PlatLiftDown(byte param_1);
 void smb1_PosPlatform(byte param_1,byte param_2);
 #define PosPlatform smb1_PosPlatform
 
-byte smb1_RunEnemyObjectsCore(void);
+void smb1_RunEnemyObjectsCore(byte objoff);
 #define RunEnemyObjectsCore smb1_RunEnemyObjectsCore
 
 void smb1_RunRetainerObj(byte param_1);
@@ -982,13 +982,13 @@ void smb1_ProcBowserFlame(byte param_1);
 void smb1_RunFireworks(byte param_1);
 #define RunFireworks smb1_RunFireworks
 
-byte smb1_RunStarFlagObj(byte param_1);
+void smb1_RunStarFlagObj(byte param_1);
 #define RunStarFlagObj smb1_RunStarFlagObj
 
 void smb1_GameTimerFireworks(byte param_1);
 #define GameTimerFireworks smb1_GameTimerFireworks
 
-byte smb1_AwardGameTimerPoints(byte param_1);
+void smb1_AwardGameTimerPoints(byte param_1);
 #define AwardGameTimerPoints smb1_AwardGameTimerPoints
 
 void smb1_AwardTimerCastle(void);
@@ -997,13 +997,13 @@ void smb1_AwardTimerCastle(void);
 void smb1_EndAreaPoints(void);
 #define EndAreaPoints smb1_EndAreaPoints
 
-byte smb1_RaiseFlagSetoffFWorks(byte param_1);
+void smb1_RaiseFlagSetoffFWorks(byte param_1);
 #define RaiseFlagSetoffFWorks smb1_RaiseFlagSetoffFWorks
 
 void smb1_DrawStarFlag(byte param_1);
 #define DrawStarFlag smb1_DrawStarFlag
 
-byte smb1_DelayToAreaEnd(byte param_1);
+void smb1_DelayToAreaEnd(byte param_1);
 #define DelayToAreaEnd smb1_DelayToAreaEnd
 
 void smb1_MovePiranhaPlant(byte param_1);
@@ -1270,7 +1270,7 @@ void smb1_DrawLargePlatform(byte param_1);
 void smb1_JCoinGfxHandler(byte param_1);
 #define JCoinGfxHandler smb1_JCoinGfxHandler
 
-void smb1_DrawPowerUp(void);
+void smb1_DrawPowerUp(byte objoff);
 #define DrawPowerUp smb1_DrawPowerUp
 
 void smb1_EnemyGfxHandler(byte param_1);

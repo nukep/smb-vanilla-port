@@ -536,26 +536,24 @@ void PlayerEndWorld(void) {
 
 // SMB:84c3
 // SM2MAIN:6421
-// Signature: [X] -> [X]
-byte FloateyNumbersRoutine(const byte param_1) {
-  if (FloateyNum_Control[param_1] == 0) {
-    return param_1;
+// Signature: [X] -> []
+void FloateyNumbersRoutine(const byte objoff) {
+  if (FloateyNum_Control[objoff] == 0) {
+    return;
   }
 
-  byte bVar2 = FloateyNum_Control[param_1];
+  byte bVar2 = FloateyNum_Control[objoff];
   if (bVar2 >= 0xb) {
     bVar2 = 0xb;
   }
-  FloateyNum_Control[param_1] = bVar2;
+  FloateyNum_Control[objoff] = bVar2;
 
-  const byte timer = FloateyNum_Timer[param_1];
+  const byte timer = FloateyNum_Timer[objoff];
   if (timer == 0) {
-    FloateyNum_Control[param_1] = 0;
-    return param_1;
+    FloateyNum_Control[objoff] = 0;
+    return;
   }
-  FloateyNum_Timer[param_1] -= 1;
-
-  byte tmp1 = param_1;
+  FloateyNum_Timer[objoff] -= 1;
 
   if (timer == 0x2b) {
     if (bVar2 == 0xb) {
@@ -564,10 +562,9 @@ byte FloateyNumbersRoutine(const byte param_1) {
     }
     DigitModifier[ScoreUpdateData[bVar2] >> 4] = ScoreUpdateData[bVar2] & 0xf;
     AddToScore();
-    tmp1 = ObjectOffset;
   }
 
-  const byte enemy_id = Enemy_ID[tmp1];
+  const byte enemy_id = Enemy_ID[objoff];
 
   bool cond = false;
 
@@ -577,35 +574,32 @@ byte FloateyNumbersRoutine(const byte param_1) {
     } else if ((enemy_id != 10) && (enemy_id != 0xb)) {
       if (enemy_id > 8) {
         cond = true;
-      } else if (Enemy_State[tmp1] < 2) {
+      } else if (Enemy_State[objoff] < 2) {
         cond = true;
       }
     }
   }
 
-  const byte offset = cond ? AltOrBlock_SprDataOffset[SprDataOffset_Ctrl] : Enemy_SprDataOffset[tmp1];
-  const byte tmp2 = cond ? ObjectOffset : tmp1;
+  const byte offset = cond ? AltOrBlock_SprDataOffset[SprDataOffset_Ctrl] : Enemy_SprDataOffset[objoff];
 
-  const byte ypos = FloateyNum_Y_Pos[tmp2];
+  const byte ypos = FloateyNum_Y_Pos[objoff];
   if (ypos >= 0x18) {
-    FloateyNum_Y_Pos[tmp2] -= 1;
+    FloateyNum_Y_Pos[objoff] -= 1;
   }
 
   // Inlined: DumpTwoSpr
   SPRITE_Y(offset, 0) = ypos - 9;
   SPRITE_Y(offset, 1) = ypos - 9;
 
-  const byte xpos = FloateyNum_X_Pos[tmp2];
+  const byte xpos = FloateyNum_X_Pos[objoff];
   SPRITE_X(offset, 0) = xpos;
   SPRITE_X(offset, 1) = xpos + 8;
   SPRITE_ATTR(offset, 0) = 2;
   SPRITE_ATTR(offset, 1) = 2;
 
-  const byte ctrl = FloateyNum_Control[tmp2];
+  const byte ctrl = FloateyNum_Control[objoff];
   SPRITE_TILE(offset, 0) = FloateyNumTileData[(byte)(ctrl << 1)];
   SPRITE_TILE(offset, 1) = FloateyNumTileData[(byte)(ctrl << 1) + 1];
-
-  return ObjectOffset;
 }
 
 
@@ -1692,18 +1686,15 @@ void GameCoreRoutine(void) {
 
   for (int i = 0; i < 6; i++) {
     ObjectOffset = i;
-    byte bVar1 = EnemiesAndLoopsCore(i);
-    bVar1 = FloateyNumbersRoutine(bVar1);
-    assert_eq_assumption(bVar1, i);
+    EnemiesAndLoopsCore(i);
+    FloateyNumbersRoutine(i);
   }
 
   GetPlayerOffscreenBits();
   RelativePlayerPosition();
   PlayerGfxHandler();
   BlockObjMT_Updater();
-  ObjectOffset = 1;
   BlockObjectsCore(1);
-  ObjectOffset = 0;
   BlockObjectsCore(0);
   MiscObjectsCore();
   ProcessCannons();
@@ -3092,8 +3083,6 @@ void ProcessCannons(void) {
   }
 
   for (int i = 2; i >= 0; i--) {
-    ObjectOffset = i;
-
     bool chk_bb = true;
 
     if (Enemy_Flag[i] == 0) {
@@ -3319,22 +3308,10 @@ static inline void ProcJumpCoin(const byte objoff) {
 // SM2MAIN:8761
 // Signature: [] -> []
 void MiscObjectsCore(void) {
-  // Note: Some of the array accesses of [i] are really [ObjectOffset] in the NES version,
-  // but it's way simpler to convey as the former.
-  // ObjectOffset shares the loop index, and shouldn't change during functions.
-  // We use asserts to make sure functions behave and return the expected values.
-  //
-  // There are _possible_ edge cases (unsure) where buffer overflows to arrays
-  // could wraparound the zero page and set ObjectOffset, but that's such an
-  // annoying possibility that we're just not handling it.
-  // (and it would possibly mangle the temporary registers $00-$07 anyway, so whatever)
-
   for (int i = 8; i >= 0; i--) {
     if (Misc_State[i] == 0) {
       continue;
     }
-
-    ObjectOffset = i;
 
     if ((i8)Misc_State[i] < 0) {
       ProcHammerObj(i);
@@ -3342,8 +3319,6 @@ void MiscObjectsCore(void) {
       ProcJumpCoin(i);
     }
   }
-
-  ObjectOffset = 0;
 }
 
 
@@ -3447,45 +3422,45 @@ void PwrUpJmp(void) {
 
 // SMB:bc85
 // SM2MAIN:883e
-// Signature: [] -> [X]
-byte PowerUpObjHandler(void) {
-  ObjectOffset = 5;
-  if (Enemy_State[5] != 0) {
-    if ((char)Enemy_State[5] < 0) {
+void PowerUpObjHandler(const byte objoff) {
+  // Original signature: [] -> []
+  // Note: This port accepts an objoff argument. The original hard-coded "5".
+
+  if (Enemy_State[objoff] != 0) {
+    if ((char)Enemy_State[objoff] < 0) {
       if (TimerControl == 0) {
         const bool smb2j_powerups = SMB2J_ONLY && (PowerUpType == 4 || PowerUpType == 5);
         if (PowerUpType == 0 || PowerUpType == 3 || smb2j_powerups) {
-          MoveNormalEnemy(5);
-          EnemyToBGCollisionDet(5);
+          MoveNormalEnemy(objoff);
+          EnemyToBGCollisionDet(objoff);
         } else if (PowerUpType == 2) {
-          MoveJumpingEnemy(5);
-          EnemyJump(5);
+          MoveJumpingEnemy(objoff);
+          EnemyJump(objoff);
         }
       }
     } else {
       if ((FrameCounter & 3) == 0) {
-        Enemy_Y_Position[5] -= 1;
-        const bool bVar2 = Enemy_State[5] > 0x10;
-        Enemy_State[5] = Enemy_State[5] + 1;
+        Enemy_Y_Position[objoff] -= 1;
+        const bool bVar2 = Enemy_State[objoff] > 0x10;
+        Enemy_State[objoff] = Enemy_State[objoff] + 1;
         if (bVar2) {
-          SpriteVarData1[5] = 0x10;
-          Enemy_State[5] = 0x80;
-          Enemy_SprAttrib[5] = 0;
-          Enemy_MovingDir[5] = 1;
+          SpriteVarData1[objoff] = 0x10;
+          Enemy_State[objoff] = 0x80;
+          Enemy_SprAttrib[objoff] = 0;
+          Enemy_MovingDir[objoff] = 1;
         }
       }
-      if (Enemy_State[5] < 6) {
-        return 5;
+      if (Enemy_State[objoff] < 6) {
+        return;
       }
     }
-    RelativeEnemyPosition(5);
-    GetEnemyOffscreenBits(5);
-    GetEnemyBoundBox(5);
-    DrawPowerUp();
-    PlayerEnemyCollision(5);
-    OffscreenBoundsCheck(5);
+    RelativeEnemyPosition(objoff);
+    GetEnemyOffscreenBits(objoff);
+    GetEnemyBoundBox(objoff);
+    DrawPowerUp(objoff);
+    PlayerEnemyCollision(objoff);
+    OffscreenBoundsCheck(objoff);
   }
-  return 5;
 }
 
 
@@ -4106,22 +4081,21 @@ void ImposeGravity(const byte param_1, const byte param_2, const byte param_3, c
 
 // SMB:c047
 // SM2MAIN:8c23
-// Signature: [X] -> [X]
-byte EnemiesAndLoopsCore(const byte objoff) {
+// Signature: [X] -> []
+void EnemiesAndLoopsCore(const byte objoff) {
   if (Enemy_Flag[objoff] & 0x80) {
     if (Enemy_Flag[Enemy_Flag[objoff] & 0xf] == 0) {
       Enemy_Flag[objoff] = 0;
     }
   } else {
     if (Enemy_Flag[objoff] != 0) {
-      return RunEnemyObjectsCore();
+      RunEnemyObjectsCore(objoff);
+      return;
     }
     if ((AreaParserTaskNum & 7) != 7) {
       ProcLoopCommand(objoff);
-      return objoff;
     }
   }
-  return objoff;
 }
 
 
@@ -5404,25 +5378,25 @@ enum RunEnemyObjectsCore_jumptable_item {
 
 // SMB:c882
 // SM2MAIN:94b7
-// Signature: [] -> [X]
-byte RunEnemyObjectsCore(void) {
+// Signature: [r08] -> []
+void RunEnemyObjectsCore(const byte objoff) {
   byte bVar1 = 0;
-  if (Enemy_ID[ObjectOffset] >= 0x15) {
-    bVar1 = Enemy_ID[ObjectOffset] - 0x14;
+  if (Enemy_ID[objoff] >= 0x15) {
+    bVar1 = Enemy_ID[objoff] - 0x14;
   }
 
   switch (bVar1) {
   case RUNENEMYOBJECTSCORE_RUNNORMALENEMIES:
-    RunNormalEnemies(ObjectOffset);
-    return ObjectOffset;
+    RunNormalEnemies(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_RUNBOWSERFLAME:
-    RunBowserFlame(ObjectOffset);
-    return ObjectOffset;
+    RunBowserFlame(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_RUNFIREWORKS:
-    RunFireworks(ObjectOffset);
-    return ObjectOffset;
+    RunFireworks(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_NOOP_1:
   case RUNENEMYOBJECTSCORE_NOOP_2:
@@ -5432,7 +5406,7 @@ byte RunEnemyObjectsCore(void) {
   case RUNENEMYOBJECTSCORE_NOOP_6:
   case RUNENEMYOBJECTSCORE_NOOP_7:
     // NES note: goes to "NoRunCode" (a no-op)
-    return ObjectOffset;
+    return;
 
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_1:
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_2:
@@ -5442,8 +5416,8 @@ byte RunEnemyObjectsCore(void) {
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_6:
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_7:
   case RUNENEMYOBJECTSCORE_RUNFIREBAROBJ_8:
-    RunFirebarObj(ObjectOffset);
-    return ObjectOffset;
+    RunFirebarObj(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_1:
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_2:
@@ -5452,46 +5426,48 @@ byte RunEnemyObjectsCore(void) {
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_5:
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_6:
   case RUNENEMYOBJECTSCORE_RUNLARGEPLATFORM_7:
-    RunLargePlatform(ObjectOffset);
-    return ObjectOffset;
+    RunLargePlatform(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_1:
   case RUNENEMYOBJECTSCORE_RUNSMALLPLATFORM_2:
-    RunSmallPlatform(ObjectOffset);
-    return ObjectOffset;
+    RunSmallPlatform(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_RUNBOWSER:
-    RunBowser(ObjectOffset);
-    return ObjectOffset;
+    RunBowser(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_POWERUPOBJHANDLER:
-    return PowerUpObjHandler();
+    // NES note: Power ups are always set to index 5.
+    // The original makes this assumption in PowerUpObjHandler
+    assert_eq_assumption(objoff, 5);
+    PowerUpObjHandler(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_VINEOBJECTHANDLER:
-    VineObjectHandler(ObjectOffset);
-    return ObjectOffset;
+    VineObjectHandler(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_RUNSTARFLAGOBJ:
-    return RunStarFlagObj(ObjectOffset);
+    RunStarFlagObj(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_JUMPSPRINGHANDLER:
-    JumpspringHandler(ObjectOffset);
-    return ObjectOffset;
+    JumpspringHandler(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_WARPZONEOBJECT:
-    {
-      const byte old_object_offset = ObjectOffset;
-      WarpZoneObject(ObjectOffset);
-      return old_object_offset;
-    }
+    WarpZoneObject(objoff);
+    return;
 
   case RUNENEMYOBJECTSCORE_RUNRETAINEROBJ:
-    RunRetainerObj(ObjectOffset);
-    return ObjectOffset;
+    RunRetainerObj(objoff);
+    return;
 
   default:
     jmpengine_overflow(bVar1);
-    return ObjectOffset;
+    return;
   }
 }
 
@@ -5913,20 +5889,18 @@ void MoveNormalEnemy(const byte objoff) {
 // SMB:cae5
 // SM2MAIN:971a
 // Signature: [X] -> []
-void MoveDefeatedEnemy(const byte param_1) {
-  MoveD_EnemyVertically(param_1);
-  const byte bVar1 = ObjectOffset;
-  MoveEnemyHorizontally(bVar1);
+void MoveDefeatedEnemy(const byte objoff) {
+  MoveD_EnemyVertically(objoff);
+  MoveEnemyHorizontally(objoff);
 }
 
 
 // SMB:caf9
 // SM2MAIN:972e
 // Signature: [X] -> []
-void MoveJumpingEnemy(const byte param_1) {
-  MoveJ_EnemyVertically(param_1);
-  const byte bVar1 = ObjectOffset;
-  MoveEnemyHorizontally(bVar1);
+void MoveJumpingEnemy(const byte objoff) {
+  MoveJ_EnemyVertically(objoff);
+  MoveEnemyHorizontally(objoff);
 }
 
 
@@ -6704,31 +6678,34 @@ enum RunStarFlagObj_jumptable_item {
 
 // SMB:d2d9
 // SM2MAIN:9f0e
-// Signature: [X] -> [X]
-byte RunStarFlagObj(const byte objoff) {
+// Signature: [X] -> []
+void RunStarFlagObj(const byte objoff) {
   EnemyFrenzyBuffer = 0;
 
   switch (StarFlagTaskControl) {
   case RUNSTARFLAGOBJ_NOOP:
     // NES note: goes to "StarFlagExit" (a no-op)
-    return objoff;
+    return;
 
   case RUNSTARFLAGOBJ_GAMETIMERFIREWORKS:
     GameTimerFireworks(objoff);
-    return objoff;
+    return;
 
   case RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS:
-    return AwardGameTimerPoints(objoff);
+    AwardGameTimerPoints(objoff);
+    return;
 
   case RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS:
-    return RaiseFlagSetoffFWorks(objoff);
+    RaiseFlagSetoffFWorks(objoff);
+    return;
 
   case RUNSTARFLAGOBJ_DELAYTOAREAEND:
-    return DelayToAreaEnd(objoff);
+    DelayToAreaEnd(objoff);
+    return;
 
   default:
     // No jmpengine_overflow() warning here, because the original NES version takes care of it!
-    return objoff;
+    return;
   }
 }
 
@@ -6736,21 +6713,21 @@ byte RunStarFlagObj(const byte objoff) {
 // SMB:d2f2
 // SM2MAIN:9f27
 // Signature: [X] -> []
-void GameTimerFireworks(const byte param_1) {
+void GameTimerFireworks(const byte objoff) {
   const byte last_digit = GameTimerDisplay[2];
 
-  Enemy_State[param_1] = 0;
+  Enemy_State[objoff] = 0;
   FireworksCounter = 0xff;
 
 #ifdef SMB1_MODE
   if (last_digit == 1) {
-    Enemy_State[param_1] = 5;
+    Enemy_State[objoff] = 5;
     FireworksCounter = 1;
   } else if (last_digit == 3) {
-    Enemy_State[param_1] = 3;
+    Enemy_State[objoff] = 3;
     FireworksCounter = 3;
   } else if (last_digit == 6) {
-    Enemy_State[param_1] = 0;
+    Enemy_State[objoff] = 0;
     FireworksCounter = 6;
   }
 #endif
@@ -6761,11 +6738,11 @@ void GameTimerFireworks(const byte param_1) {
 
     if ((last_digit & 1) == 0) {
       // timer is even
-      Enemy_State[param_1] = 0;
+      Enemy_State[objoff] = 0;
       FireworksCounter = 6;
     } else {
       // timer is odd
-      Enemy_State[param_1] = 3;
+      Enemy_State[objoff] = 3;
       FireworksCounter = 3;
     }
   }
@@ -6777,14 +6754,13 @@ void GameTimerFireworks(const byte param_1) {
 
 // SMB:d312
 // SM2MAIN:9f4c
-// Signature: [X] -> [X]
-byte AwardGameTimerPoints(const byte param_1) {
+// Signature: [X] -> []
+void AwardGameTimerPoints(const byte objoff) {
   if ((GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2]) != 0) {
     AwardTimerCastle();
-    return ObjectOffset;
+  } else {
+    StarFlagTaskControl = StarFlagTaskControl + 1;
   }
-  StarFlagTaskControl = StarFlagTaskControl + 1;
-  return param_1;
 }
 
 
@@ -6820,23 +6796,21 @@ void EndAreaPoints(void) {
 
 // SMB:d34e
 // SM2MAIN:9f7a
-// Signature: [X] -> [X]
-byte RaiseFlagSetoffFWorks(const byte param_1) {
-  if (Enemy_Y_Position[param_1] >= 0x72) {
-    Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
-    DrawStarFlag(param_1);
-    return ObjectOffset;
+// Signature: [X] -> []
+void RaiseFlagSetoffFWorks(const byte objoff) {
+  if (Enemy_Y_Position[objoff] >= 0x72) {
+    Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
+    DrawStarFlag(objoff);
+    return;
   }
   if ((FireworksCounter != 0) && (FireworksCounter < 0x80)) {
     EnemyFrenzyBuffer = 0x16;
-    DrawStarFlag(param_1);
-    return ObjectOffset;
+    DrawStarFlag(objoff);
+    return;
   }
-  DrawStarFlag(param_1);
-  const byte bVar1 = ObjectOffset;
-  EnemyIntervalTimer[bVar1] = 6;
+  DrawStarFlag(objoff);
+  EnemyIntervalTimer[objoff] = 6;
   StarFlagTaskControl = StarFlagTaskControl + 1;
-  return bVar1;
 }
 
 
@@ -6859,15 +6833,12 @@ void DrawStarFlag(const byte param_1) {
 
 // SMB:d3a2
 // SM2MAIN:9fce
-// Signature: [X] -> [X]
-byte DelayToAreaEnd(const byte param_1) {
-  DrawStarFlag(param_1);
-  const byte bVar1 = ObjectOffset;
-  if ((EnemyIntervalTimer[bVar1] == 0) && (EventMusicBuffer == 0)) {
+// Signature: [X] -> []
+void DelayToAreaEnd(const byte objoff) {
+  DrawStarFlag(objoff);
+  if ((EnemyIntervalTimer[objoff] == 0) && (EventMusicBuffer == 0)) {
     StarFlagTaskControl = StarFlagTaskControl + 1;
-    return bVar1;
   }
-  return bVar1;
 }
 
 
@@ -9446,9 +9417,11 @@ void JCoinGfxHandler(const byte objoff) {
 
 // SMB:e6d2
 // SM2MAIN:b37d
-// Signature: [] -> []
-void DrawPowerUp(void) {
-  const byte sproff = Enemy_SprDataOffset[5];
+void DrawPowerUp(const byte objoff) {
+  // Original signature: [] -> []
+  // Note: This port accepts an objoff argument. The original hard-coded "5".
+
+  const byte sproff = Enemy_SprDataOffset[objoff];
 
   {
     // Inlined: DrawOneSpriteRow
@@ -9461,7 +9434,7 @@ void DrawPowerUp(void) {
 
     const byte xpos = Enemy_Rel_XPos;
     const byte ypos = Enemy_Rel_YPos + 8;
-    const byte attrs = PowerUpAttributes[PowerUpType] | Enemy_SprAttrib[5];
+    const byte attrs = PowerUpAttributes[PowerUpType] | Enemy_SprAttrib[objoff];
 
     const bool flip_horz = false;
 
@@ -9472,7 +9445,7 @@ void DrawPowerUp(void) {
   if ((PowerUpType != 0) && (PowerUpType != 3) && ssw(true, PowerUpType != 4)) {
     // Flicker the powerup by cycling its palette
 
-    const byte attrs = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[5];
+    const byte attrs = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[objoff];
 
     SPRITE_ATTR(sproff, 0) = attrs;
     SPRITE_ATTR(sproff, 1) = attrs;
@@ -9488,7 +9461,7 @@ void DrawPowerUp(void) {
     SPRITE_ATTR(sproff, 3) |= 0x40;
   }
 
-  SprObjectOffscrChk(ObjectOffset);
+  SprObjectOffscrChk(objoff);
 }
 
 
