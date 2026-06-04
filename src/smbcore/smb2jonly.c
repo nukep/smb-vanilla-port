@@ -205,10 +205,10 @@ void PoisonMushBlock(const byte param_1) {
 // SM2MAIN:a64e
 // Signature: [X] -> [A]
 byte SetBounce(const byte param_1) {
-  PlayerSpriteVarData2[0] = 0xfa;
+  Player_Y_Speed = 0xfa;
   const byte bVar1 = Enemy_ID[param_1];
   if ((bVar1 == 0xf) || (bVar1 == 0x10)) {
-    PlayerSpriteVarData2[0] = 0xf8;
+    Player_Y_Speed = 0xf8;
   }
   return bVar1;
 }
@@ -752,9 +752,9 @@ void BlowPlayerAround(void) {
   if ((WindFlag != 0) && (AreaType == 1)) {
     const byte mask = (FrameCounter & 0x80) ? 1 : 3;
     if ((FrameCounter & mask) == 0) {
-      SprObject_PageLoc[0] += SprObject_X_Position[0] == 0xff;
+      Player_PageLoc += Player_X_Position == 0xff;
       Player_X_Scroll += 1;
-      SprObject_X_Position[0] = SprObject_X_Position[0] + 1;
+      Player_X_Position = Player_X_Position + 1;
     }
   }
 }

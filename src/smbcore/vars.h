@@ -8,28 +8,21 @@
 
 // some noisy names used during ghidra decompilation
 // should be removed eventually
-#define PlayerSpriteVarData1 SprObject_X_Speed
 #define SpriteVarData1 Enemy_X_Speed
-#define PlayerSpriteVarData2 SprObject_Y_Speed
 #define SpriteVarData2 Enemy_Y_Speed
+
 #define Cannon_Or_Whirlpool_PageLoc      Cannon_PageLoc
 #define Cannon_Or_Whirlpool_X_Position   Cannon_X_Position
 #define Cannon_X_Position_Or_Whirlpool_LeftExtent Cannon_X_Position
-#define Whirlpool_LeftExtent Whirlpool_X_Position
 #define Cannon_Y_Position_Or_Whirlpool_Length Cannon_Y_Position
 #define Cannon_Timer_Or_Whirlpool_Flag   Cannon_Timer
+#define Cannon_Or_Whirlpool_Offset       Cannon_Offset
+
 #define HammerThrowingTimer_Or_PlatformCollisionFlag PlatformCollisionFlag
 #define CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos Enemy_Y_MoveForce
 #define Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos (SprObject_X_MoveForce + 1)
 #define BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos Enemy_YMF_Dummy
-#define PlayerOrSprObject_YMF_Dummy      SprObject_YMF_Dummy
-#define PlayerOrSprObject_Y_MoveForce    SprObject_Y_MoveForce
-#define Cannon_Or_Whirlpool_Offset       Cannon_Offset
-#define PlayerOrSprObj_BoundBoxCtrl  SprObj_BoundBoxCtrl
-#define PlayerOrSprDataOffset        SprDataOffset
 #define AltOrBlock_SprDataOffset     (SprDataOffset + 8)
-#define ScreenEdgeOrLeft_PageLoc ScreenEdge_PageLoc
-#define ScreenEdgeOrLeft_X_Pos ScreenEdge_X_Pos
 #define DisplayDigits_Or_TopScoreDisplay DisplayDigits
 #define PlayerScoreDisplay_Or_ScoreAndCoinDisplay (DisplayDigits + 6)
 
@@ -383,13 +376,10 @@
 #define DemoActionTimer                  RAM(0x0718)
 #define PrimaryMsgCounter                RAM(0x0719)
 
-#define ScreenEdge_PageLoc               RAMARRAY(0x071A, 2)
-#define ScreenLeft_PageLoc               ScreenEdge_PageLoc[0]
-#define ScreenRight_PageLoc              ScreenEdge_PageLoc[1]
-
-#define ScreenEdge_X_Pos                 RAMARRAY(0x071C, 2)
-#define ScreenLeft_X_Pos                 ScreenEdge_X_Pos[0]
-#define ScreenRight_X_Pos                ScreenEdge_X_Pos[1]
+#define ScreenLeft_PageLoc               RAM(0x071A)
+#define ScreenRight_PageLoc              RAM(0x071B)
+#define ScreenLeft_X_Pos                 RAM(0x071C)
+#define ScreenRight_X_Pos                RAM(0x071D)
 
 #define ColumnSets                       RAM(0x071E)
 #define AreaParserTaskNum                RAM(0x071F)

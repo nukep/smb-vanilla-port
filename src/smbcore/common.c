@@ -243,12 +243,12 @@ void SpriteShuffler(void) {
   for (int j = 0; j < 15; j++) {
     const int i = 14 - j;
 
-    if (PlayerOrSprDataOffset[i] >= 0x28) {
-      int amount = (int)PlayerOrSprDataOffset[i] + (int)SprShuffleAmt[SprShuffleAmtOffset];
+    if (SprDataOffset[i] >= 0x28) {
+      int amount = (int)SprDataOffset[i] + (int)SprShuffleAmt[SprShuffleAmtOffset];
       if (amount >= 256) {
         amount = (amount % 256) + 40;
       }
-      PlayerOrSprDataOffset[i] = (byte)amount;
+      SprDataOffset[i] = (byte)amount;
     }
   }
 
@@ -482,7 +482,7 @@ void SetupVictoryMode(void) {
 // SM2MAIN:6334
 // Signature: [] -> []
 void PlayerVictoryWalk(void) {
-  if ((SprObject_PageLoc[0] == VictoryDestPageLoc) && (SprObject_X_Position[0] >= 0x60)) {
+  if ((Player_PageLoc == VictoryDestPageLoc) && (Player_X_Position >= 0x60)) {
     // Stop walking
     VictoryWalkControl = 0;
     AutoControlPlayer(0);
@@ -492,7 +492,7 @@ void PlayerVictoryWalk(void) {
     AutoControlPlayer(1);
   }
 
-  if (ScreenEdgeOrLeft_PageLoc[0] != VictoryDestPageLoc) {
+  if (ScreenLeft_PageLoc != VictoryDestPageLoc) {
     const bool bVar1 = ScrollFractional >= 0x80;
     ScrollFractional = ScrollFractional + 0x80;
     ScrollScreen(bVar1 + 1);
@@ -1271,12 +1271,12 @@ void InitializeArea(void) {
   for (int i = 0; i < 34; i++) {
     Timers[i] = 0;
   }
-  ScreenEdgeOrLeft_PageLoc[0] = HalfwayPage;
+  ScreenLeft_PageLoc = HalfwayPage;
   if (AltEntranceControl != 0) {
-    ScreenEdgeOrLeft_PageLoc[0] = EntrancePage;
+    ScreenLeft_PageLoc = EntrancePage;
   }
-  CurrentPageLoc = ScreenEdgeOrLeft_PageLoc[0];
-  BackloadingFlag = ScreenEdgeOrLeft_PageLoc[0];
+  CurrentPageLoc = ScreenLeft_PageLoc;
+  BackloadingFlag = ScreenLeft_PageLoc;
   const byte bVar1 = GetScreenPosition();
   CurrentNTAddr_High = ((bVar1 & 1) == 0) ? 0x20 : 0x24;
   CurrentNTAddr_Low = 0x80;
@@ -1344,10 +1344,10 @@ void SecondaryGameSetup(void) {
   BackloadingFlag = 0;
   BalPlatformAlignment = 0xff;
 #ifdef SMB1_MODE
-  Mirror_PPU_CTRL_REG1 = (Mirror_PPU_CTRL_REG1 & 0xfe) | (ScreenEdgeOrLeft_PageLoc[0] & 1);
+  Mirror_PPU_CTRL_REG1 = (Mirror_PPU_CTRL_REG1 & 0xfe) | (ScreenLeft_PageLoc & 1);
 #endif
 #ifdef SMB2J_MODE
-  NameTableSelect = ScreenEdgeOrLeft_PageLoc[0] & 1;
+  NameTableSelect = ScreenLeft_PageLoc & 1;
 #endif
   GetAreaMusic();
   SprShuffleAmt[2] = 0x38;
@@ -1355,7 +1355,7 @@ void SecondaryGameSetup(void) {
   SprShuffleAmt[0] = 0x58;
 
   for (int i = 0; i < 0xf; i++) {
-    PlayerOrSprDataOffset[i] = DefaultSprOffsets[i];
+    SprDataOffset[i] = DefaultSprOffsets[i];
   }
 
 #ifdef SMB1_MODE
@@ -1408,10 +1408,10 @@ void Entrance_GameTimerSetup(void) {
   // This function is always called from a jumptable, which sets $07 to the high byte of the function (0x91 or 0x6f depending on SMB1 or SMB2J)
   // It's eventually passed to SetupBubble.
 
-  SprObject_PageLoc[0] = ScreenEdgeOrLeft_PageLoc[0];
+  Player_PageLoc = ScreenLeft_PageLoc;
   VerticalForceDown = 0x28;
   PlayerFacingDir = 1;
-  SprObject_Y_HighPos[0] = 1;
+  Player_Y_HighPos = 1;
   Player_State = 0;
   Player_CollisionBits -= 1;
   HalfwayPage = 0;
@@ -1422,8 +1422,8 @@ void Entrance_GameTimerSetup(void) {
     ? PlayerEntranceCtrl
     : AltYPosOffset[AltEntranceControl - 2];
 
-  SprObject_X_Position[0] = PlayerStarting_X_Pos[AltEntranceControl];
-  SprObject_Y_Position[0] = PlayerStarting_Y_Pos[entrance_ctrl];
+  Player_X_Position = PlayerStarting_X_Pos[AltEntranceControl];
+  Player_Y_Position = PlayerStarting_Y_Pos[entrance_ctrl];
   Player_SprAttrib = PlayerBGPriorityData[entrance_ctrl];
 
   // NES note: The GetPlayerColors subroutine sets the X register to the vram offset.
@@ -1500,7 +1500,7 @@ void PlayerLoseLife(void) {
     bVar1 >>= 4;
   }
   HalfwayPage = bVar1 & 0xf;
-  if ((HalfwayPage != ScreenEdgeOrLeft_PageLoc[0]) && (ScreenEdgeOrLeft_PageLoc[0] <= HalfwayPage)) {
+  if ((HalfwayPage != ScreenLeft_PageLoc) && (ScreenLeft_PageLoc <= HalfwayPage)) {
     HalfwayPage = 0;
   }
 #ifdef SMB1_MODE
@@ -1788,22 +1788,28 @@ void ScrollHandler(void) {
 // Signature: [] -> []
 void ChkPOffscr(void) {
   const byte bits = GetXOffscreenBits(0);
-  byte i;
 
-  if (bits & 0x80) {
-    i = 0;
-  } else if (bits & 0x20) {
-    i = 1;
-  } else {
-    Platform_X_Scroll = 0;
-    return;
-  }
+  const bool b1 = (bits & 0x80) != 0;
+  const bool b2 = (bits & 0x20) != 0;
 
-  SprObject_X_Position[0] = ScreenEdgeOrLeft_X_Pos[i] - X_SubtracterData[i];
-  SprObject_PageLoc[0] = ScreenEdgeOrLeft_PageLoc[i] - (ScreenEdgeOrLeft_X_Pos[i] < X_SubtracterData[i]);
+  if (b1) {
+    const u8 xsubtracterdata = 0;
 
-  if (Left_Right_Buttons != OffscrJoypadBitsData[i]) {
-    PlayerSpriteVarData1[0] = 0;
+    Player_X_Position = ScreenLeft_X_Pos - xsubtracterdata;
+    Player_PageLoc = ScreenLeft_PageLoc - (ScreenLeft_X_Pos < xsubtracterdata);
+
+    if (Left_Right_Buttons != OffscrJoypadBitsData[0]) {
+      Player_X_Speed = 0;
+    }
+  } else if (b2) {
+    const u8 xsubtracterdata = 0x10;
+
+    Player_X_Position = ScreenRight_X_Pos - xsubtracterdata;
+    Player_PageLoc = ScreenRight_PageLoc - (ScreenRight_X_Pos < xsubtracterdata);
+
+    if (Left_Right_Buttons != OffscrJoypadBitsData[1]) {
+      Player_X_Speed = 0;
+    }
   }
 
   Platform_X_Scroll = 0;
@@ -1814,8 +1820,8 @@ void ChkPOffscr(void) {
 // SM2MAIN:7b90
 // Signature: [] -> [A]
 byte GetScreenPosition(void) {
-  ScreenRight_X_Pos = ScreenEdgeOrLeft_X_Pos[0] - 1;
-  ScreenRight_PageLoc = ScreenEdgeOrLeft_PageLoc[0] + (ScreenEdgeOrLeft_X_Pos[0] != 0);
+  ScreenRight_X_Pos = ScreenLeft_X_Pos - 1;
+  ScreenRight_PageLoc = ScreenLeft_PageLoc + (ScreenLeft_X_Pos != 0);
   return ScreenRight_PageLoc;
 }
 
@@ -1909,14 +1915,14 @@ void PlayerEntrance(void) {
   if (AltEntranceControl == 2) {
     if (JoypadOverride == 0) {
       MovePlayerYAxis(0xff);
-      if (SprObject_Y_Position[0] > 0x90) {
+      if (Player_Y_Position > 0x90) {
         return;
       }
     } else {
       if (VineHeight != 0x60) {
         return;
       }
-      DisableCollisionDet = SprObject_Y_Position[0] > 0x98;
+      DisableCollisionDet = Player_Y_Position > 0x98;
       bVar1 = 1;
       if (DisableCollisionDet != 0) {
         Player_State = 3;
@@ -1924,12 +1930,12 @@ void PlayerEntrance(void) {
         Block_Buffers[BLOCK_BUFFER_1_OFFSET + 0xb4] = 8;
       }
       AutoControlPlayer(bVar1);
-      if (SprObject_X_Position[0] < 0x48) {
+      if (Player_X_Position < 0x48) {
         return;
       }
     }
   } else {
-    if (SprObject_Y_Position[0] < 0x30) {
+    if (Player_Y_Position < 0x30) {
       AutoControlPlayer(0);
       return;
     }
@@ -1973,7 +1979,7 @@ void PlayerCtrlRoutine(void) {
   char cVar2;
 
   if (GameEngineSubroutine != 0xb) {
-    if ((AreaType == 0) && ((SprObject_Y_HighPos[0] != 1 || (SprObject_Y_Position[0] >= 0xd0)))) {
+    if ((AreaType == 0) && ((Player_Y_HighPos != 1 || (Player_Y_Position >= 0xd0)))) {
       SavedJoypadBits[0] = 0;
     }
     A_B_Buttons = SavedJoypadBits[0] & (BUTTON_A | BUTTON_B);
@@ -1985,26 +1991,26 @@ void PlayerCtrlRoutine(void) {
     }
   }
   PlayerMovementSubs();
-  PlayerOrSprObj_BoundBoxCtrl[0] = 1;
+  Player_BoundBoxCtrl = 1;
   if (PlayerSize == 0) {
-    PlayerOrSprObj_BoundBoxCtrl[0] = 0;
+    Player_BoundBoxCtrl = 0;
     if (CrouchingFlag != 0) {
-      PlayerOrSprObj_BoundBoxCtrl[0] = 2;
+      Player_BoundBoxCtrl = 2;
     }
   }
-  if ((PlayerSpriteVarData1[0] != 0)) {
-    Player_MovingDir = (PlayerSpriteVarData1[0] < 0x80) ? 1 : 2;
+  if ((Player_X_Speed != 0)) {
+    Player_MovingDir = (Player_X_Speed < 0x80) ? 1 : 2;
   }
   ScrollHandler();
   GetPlayerOffscreenBits();
   const byte bVar3 = RelativePlayerPosition();
   BoundingBoxCore(0, bVar3);
   PlayerBGCollision();
-  if ((((SprObject_Y_Position[0] >= 0x40) && (GameEngineSubroutine != 5)) && (GameEngineSubroutine != 7))
+  if ((((Player_Y_Position >= 0x40) && (GameEngineSubroutine != 5)) && (GameEngineSubroutine != 7))
       && (GameEngineSubroutine >= 4)) {
     Player_SprAttrib &= 0xdf;
   }
-  if ((byte)(SprObject_Y_HighPos[0] - 2) < 0x80) {
+  if ((byte)(Player_Y_HighPos - 2) < 0x80) {
     ScrollLock = 1;
     cVar1 = 4;
     cVar2 = 0;
@@ -2018,7 +2024,7 @@ void PlayerCtrlRoutine(void) {
         cVar1 = 6;
       }
     }
-    if ((byte)(SprObject_Y_HighPos[0] - cVar1) < 0x80) {
+    if ((byte)(Player_Y_HighPos - cVar1) < 0x80) {
       if (0x7f < (byte)(cVar2 - 1U)) {
         JoypadOverride = 0;
         SetEntr();
@@ -2037,7 +2043,7 @@ void PlayerCtrlRoutine(void) {
 // SM2MAIN:7d1f
 // Signature: [] -> []
 void Vine_AutoClimb(void) {
-  if ((SprObject_Y_HighPos[0] == 0) && (SprObject_Y_Position[0] < 0xe4)) {
+  if ((Player_Y_HighPos == 0) && (Player_Y_Position < 0xe4)) {
     SetEntr();
   } else {
     JoypadOverride = 8;
@@ -2080,7 +2086,7 @@ void VerticalPipeEntry(void) {
 // SM2MAIN:7d58
 // Signature: [A] -> []
 void MovePlayerYAxis(const byte param_1) {
-  SprObject_Y_Position[0] = param_1 + SprObject_Y_Position[0];
+  Player_Y_Position = param_1 + Player_Y_Position;
 }
 
 
@@ -2117,10 +2123,10 @@ byte ChgAreaMode(void) {
 // SM2MAIN:7d77
 // Signature: [] -> []
 void EnterSidePipe(void) {
-  PlayerSpriteVarData1[0] = 8;
-  const bool bVar1 = (SprObject_X_Position[0] & 0xf) == 0;
+  Player_X_Speed = 8;
+  const bool bVar1 = (Player_X_Position & 0xf) == 0;
   if (bVar1) {
-    PlayerSpriteVarData1[0] = 0;
+    Player_X_Speed = 0;
   }
   AutoControlPlayer(!bVar1);
 }
@@ -2224,7 +2230,7 @@ void FlagpoleSlide(void) {
     Square1SoundQueue = FlagpoleSoundQueue;
     bVar1 = 0;
     FlagpoleSoundQueue = 0;
-    if (SprObject_Y_Position[0] < 0x9e) {
+    if (Player_Y_Position < 0x9e) {
       bVar1 = 4;
     }
     AutoControlPlayer(bVar1);
@@ -2240,13 +2246,13 @@ void FlagpoleSlide(void) {
 void PlayerEndLevel(void) {
   AutoControlPlayer(1);
 #ifdef SMB1_MODE
-  if ((SprObject_Y_Position[0] >= 0xae) && (ScrollLock != 0)) {
+  if ((Player_Y_Position >= 0xae) && (ScrollLock != 0)) {
     EventMusicQueue = 0x20;
     ScrollLock = 0;
   }
 #endif
 #ifdef SMB2J_MODE
-  if ((SprObject_Y_Position[0] >= 0xae)) {
+  if ((Player_Y_Position >= 0xae)) {
     ScrollLock = 0;
     if (FlagpoleMusicFlag == 0) {
       EventMusicQueue = 0x20;
@@ -2376,14 +2382,14 @@ void FallingSub(void) {
 // SM2MAIN:7ee5
 // Signature: [] -> []
 void JumpSwimSub(void) {
-  if ((PlayerSpriteVarData2[0] < 0x80)
+  if ((Player_Y_Speed < 0x80)
       || (((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0
-           && (DiffToHaltJump <= (byte)(JumpOrigin_Y_Position - SprObject_Y_Position[0]))))) {
+           && (DiffToHaltJump <= (byte)(JumpOrigin_Y_Position - Player_Y_Position))))) {
     VerticalForce = VerticalForceDown;
   }
   if (SwimmingFlag != 0) {
     GetPlayerAnimSpeed();
-    if (SprObject_Y_Position[0] < 0x14) {
+    if (Player_Y_Position < 0x14) {
       VerticalForce = 0x18;
     }
     if (Left_Right_Buttons != 0) {
@@ -2418,8 +2424,8 @@ void LRAir(void) {
 // SM2MAIN:7f3b
 // Signature: [] -> []
 void ClimbingSub(void) {
-  ADD_SIGNED_24_16(SprObject_Y_HighPos[0], SprObject_Y_Position[0], SprObject_YMF_Dummy[0],
-                   PlayerSpriteVarData2[0], SprObject_Y_MoveForce[0]);
+  ADD_SIGNED_24_16(Player_Y_HighPos, Player_Y_Position, Player_YMF_Dummy,
+                   Player_Y_Speed, Player_Y_MoveForce);
 
   const byte bVar3 = Left_Right_Buttons & Player_CollisionBits;
   if (bVar3 != 0) {
@@ -2429,7 +2435,7 @@ void ClimbingSub(void) {
       if (PlayerFacingDir != 1) {
         bVar4 += 1;
       }
-      ADD_16_16(SprObject_PageLoc[0], SprObject_X_Position[0],
+      ADD_16_16(Player_PageLoc, Player_X_Position,
                 ClimbAdderHigh[bVar4], ClimbAdderLow[bVar4]);
       PlayerFacingDir = Left_Right_Buttons ^ 3;
     }
@@ -2451,9 +2457,9 @@ void PlayerPhysicsSub(void) {
         bVar1 = 2;
       }
     }
-    SprObject_Y_MoveForce[0] = Climb_Y_MForceData[bVar1];
+    Player_Y_MoveForce = Climb_Y_MForceData[bVar1];
     PlayerAnimTimerSet = 8;
-    PlayerSpriteVarData2[0] = Climb_Y_SpeedData[bVar1];
+    Player_Y_Speed = Climb_Y_SpeedData[bVar1];
     if (Climb_Y_SpeedData[bVar1] < 0x80) {
       PlayerAnimTimerSet = 4;
     }
@@ -2462,11 +2468,11 @@ void PlayerPhysicsSub(void) {
 
   const bool button_a_newly_pressed = ((A_B_Buttons & BUTTON_A) != 0) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0);
   if ((JumpspringAnimCtrl == 0) && button_a_newly_pressed) {
-    if (Player_State == 0 || (SwimmingFlag != 0 && (JumpSwimTimer != 0 || (PlayerSpriteVarData2[0] < 0x80)))) {
+    if (Player_State == 0 || (SwimmingFlag != 0 && (JumpSwimTimer != 0 || (Player_Y_Speed < 0x80)))) {
       JumpSwimTimer = 0x20;
-      SprObject_YMF_Dummy[0] = 0;
-      JumpOrigin_Y_HighPos = SprObject_Y_HighPos[0];
-      JumpOrigin_Y_Position = SprObject_Y_Position[0];
+      Player_YMF_Dummy = 0;
+      JumpOrigin_Y_HighPos = Player_Y_HighPos;
+      JumpOrigin_Y_Position = Player_Y_Position;
       Player_State = 1;
 
       byte bVar1;
@@ -2491,15 +2497,15 @@ void PlayerPhysicsSub(void) {
 
       VerticalForce = JumpMForceData[bVar1];
       VerticalForceDown = FallMForceData[bVar1];
-      SprObject_Y_MoveForce[0] = InitMForceData[bVar1];
-      PlayerSpriteVarData2[0] = PlayerYSpdData[bVar1];
+      Player_Y_MoveForce = InitMForceData[bVar1];
+      Player_Y_Speed = PlayerYSpdData[bVar1];
 
       if (SwimmingFlag == 0) {
         Square1SoundQueue = (PlayerSize != 0) ? 0x80 : 1;
       } else {
         Square1SoundQueue = 4;
-        if (SprObject_Y_Position[0] < 0x14) {
-          PlayerSpriteVarData2[0] = 0;
+        if (Player_Y_Position < 0x14) {
+          Player_Y_Speed = 0;
         }
       }
     }
@@ -2574,7 +2580,7 @@ void GetPlayerAnimSpeed(void) {
         bVar1 = 0;
       } else if (Player_XSpeedAbsolute < 0xb) {
         Player_MovingDir = PlayerFacingDir;
-        PlayerSpriteVarData1[0] = 0;
+        Player_X_Speed = 0;
         Player_X_MoveForce = 0;
       }
     }
@@ -2639,7 +2645,7 @@ void ProcFireball_Bubble(void) {
     if ((A_B_Buttons & BUTTON_B) != 0) {
       if ((A_B_Buttons & BUTTON_B & PreviousA_B_Buttons) == 0) {
         if (Fireball_State[FireballCounter & 1] == 0) {
-          if (SprObject_Y_HighPos[0] == 1) {
+          if (Player_Y_HighPos == 1) {
             if (CrouchingFlag == 0) {
               if (Player_State != 3) {
                 Square1SoundQueue = 0x20;
@@ -2683,10 +2689,10 @@ void FireballObjCore(const byte objoff) {
   if (Fireball_State[objoff] != 0) {
     if (Fireball_State[objoff] != 1) {
       ADD_UNSIGNED_16_16_8(Fireball_PageLoc[objoff], Fireball_X_Position[objoff],
-                           SprObject_PageLoc[0], SprObject_X_Position[0],
+                           Player_PageLoc, Player_X_Position,
                            4);
 
-      Fireball_Y_Position[objoff] = SprObject_Y_Position[0];
+      Fireball_Y_Position[objoff] = Player_Y_Position;
       Fireball_Y_HighPos[objoff] = 1;
 
       // PlayerFacingDir may = 0 or 3 sometimes, so this goes out of bounds
@@ -2741,12 +2747,12 @@ static inline void check_and_setup_bubble(const byte param_1, const bool random,
     const byte a = c ? (8 + 1) : 0;
 
     SET_16_16(Bubble_PageLoc[param_1], Bubble_X_Position[param_1],
-              SprObject_PageLoc[0], SprObject_X_Position[0]);
+              Player_PageLoc, Player_X_Position);
 
     ADD_UNSIGNED_16_8(Bubble_PageLoc[param_1], Bubble_X_Position[param_1],
                       a);
 
-    Bubble_Y_Position[param_1] = SprObject_Y_Position[0] + 8;
+    Bubble_Y_Position[param_1] = Player_Y_Position + 8;
     Bubble_Y_HighPos[param_1] = 1;
 
     AirBubbleTimer = air_bubble_timer;
@@ -2795,8 +2801,8 @@ void SetupBubble_buggy(const byte buggy_argument_1, const byte buggy_argument_2)
 void RunGameTimer(void) {
   byte bVar1;
 
-  bool cond = SprObject_Y_HighPos[0] < 2;
-  cond = cond || ssw(false, SprObject_Y_HighPos[0] >= 0x82);
+  bool cond = Player_Y_HighPos < 2;
+  cond = cond || ssw(false, Player_Y_HighPos >= 0x82);
 
   if ((((OperMode != 0) && (GameEngineSubroutine >= 8)) && (GameEngineSubroutine != 0xb))
       && ((cond && (GameTimerCtrlTimer == 0)))) {
@@ -2822,11 +2828,11 @@ void RunGameTimer(void) {
 // SM2MAIN:8310
 // Signature: [X] -> []
 void WarpZoneObject(const byte objoff) {
-  if ((ScrollLock != 0) && ((SprObject_Y_Position[0] & SprObject_Y_HighPos[0]) == 0)) {
+  if ((ScrollLock != 0) && ((Player_Y_Position & Player_Y_HighPos) == 0)) {
     if (SMB1_ONLY) {
       WarpZoneControl += 1;
     }
-    ScrollLock = SprObject_Y_Position[0] & SprObject_Y_HighPos[0];
+    ScrollLock = Player_Y_Position & Player_Y_HighPos;
     EraseEnemyObject(objoff);
   }
 }
@@ -2850,8 +2856,8 @@ void ProcessWhirlpools(void) {
     const byte whirlpool_x_hi = Cannon_Or_Whirlpool_PageLoc[i];
     const byte whirlpool_x_lo = Cannon_X_Position_Or_Whirlpool_LeftExtent[i];
 
-    const byte player_x_hi = SprObject_PageLoc[0];
-    const byte player_x_lo = SprObject_X_Position[0];
+    const byte player_x_hi = Player_PageLoc;
+    const byte player_x_lo = Player_X_Position;
 
     const byte length = Cannon_Y_Position_Or_Whirlpool_Length[i];
 
@@ -2873,12 +2879,12 @@ void ProcessWhirlpools(void) {
         if (diff > (length / 2)) {
           // On the right side of the whirlpool
           // Pull the player to the left
-          SUB_UNSIGNED_16_8(SprObject_PageLoc[0], SprObject_X_Position[0],
+          SUB_UNSIGNED_16_8(Player_PageLoc, Player_X_Position,
                             1);
         } else if ((Player_CollisionBits & 1) != 0) {
           // On the left side of the whirlpool, with collision bit
           // Pull the player to the right
-          ADD_UNSIGNED_16_8(SprObject_PageLoc[0], SprObject_X_Position[0],
+          ADD_UNSIGNED_16_8(Player_PageLoc, Player_X_Position,
                             1);
         }
       }
@@ -2900,7 +2906,7 @@ void ProcessWhirlpools(void) {
 void FlagpoleRoutine(void) {
   if (Enemy_ID[5] == 0x30) {
     if ((GameEngineSubroutine == 4) && (Player_State == 3)) {
-      if ((Enemy_Y_Position[5] >= 0xaa) || (SprObject_Y_Position[0] >= 0xa2)) {
+      if ((Enemy_Y_Position[5] >= 0xaa) || (Player_Y_Position >= 0xa2)) {
         if (SMB2J_ONLY && FlagpoleScore == 5) {
           NumberofLives += 1;
           Square2SoundQueue = 0x40;
@@ -2910,7 +2916,7 @@ void FlagpoleRoutine(void) {
         }
         GameEngineSubroutine = 5;
       } else {
-        const bool bVar3 = SprObject_Y_Position[0] >= 0xa2;
+        const bool bVar3 = Player_Y_Position >= 0xa2;
         const byte bVar1 = (BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[5] - 1) + bVar3;
         Enemy_Y_Position[5] = Enemy_Y_Position[5] + 1 + ((BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[5] != 0) || (bVar3 && bVar1 == 0));
         FlagpoleFNum_Y_Pos = (FlagpoleFNum_Y_Pos - 1) - (FlagpoleFNum_YMFDummy != 0xff);
@@ -2933,9 +2939,9 @@ void JumpspringHandler(const byte objoff) {
   if ((TimerControl == 0) && (JumpspringAnimCtrl != 0)) {
     const byte bVar2 = JumpspringAnimCtrl - 1;
     if ((bVar2 & 2) == 0) {
-      SprObject_Y_Position[0] += 2;
+      Player_Y_Position += 2;
     } else {
-      SprObject_Y_Position[0] -= 2;
+      Player_Y_Position -= 2;
     }
     Enemy_Y_Position[objoff] = SpriteVarData1[objoff] + Jumpspring_Y_PosData[bVar2];
     if ((((bVar2 != 0) && ((A_B_Buttons & BUTTON_A) != 0)) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0))) {
@@ -2945,7 +2951,7 @@ void JumpspringHandler(const byte objoff) {
       }
     }
     if (bVar2 == 3) {
-      PlayerSpriteVarData2[0] = JumpspringForce;
+      Player_Y_Speed = JumpspringForce;
       JumpspringAnimCtrl = 0;
     }
   }
@@ -3050,8 +3056,8 @@ void VineObjectHandler(const byte objoff) {
   }
 
 #ifdef SMB2J_MODE
-  const byte cmpA = (byte)((Enemy_PageLoc[5] - ScreenEdgeOrLeft_PageLoc[0]) - (Enemy_X_Position[5] < ScreenEdgeOrLeft_X_Pos[0]));
-  const byte cmpB = (byte)(Enemy_X_Position[5] - ScreenEdgeOrLeft_X_Pos[0]);
+  const byte cmpA = (byte)((Enemy_PageLoc[5] - ScreenLeft_PageLoc) - (Enemy_X_Position[5] < ScreenLeft_X_Pos));
+  const byte cmpB = (byte)(Enemy_X_Position[5] - ScreenLeft_X_Pos);
   if ((cmpA >= 0x80) || (cmpB < 9)) {
     Enemy_Flag[5] = 0;
 
@@ -3501,7 +3507,7 @@ void PlayerHeadCollision(const byte param_1, const u16 mt_x, const u16 mt_y) {
 
   BlockBounceTimer = 0x10;
   bVar4 = ((CrouchingFlag != 0) || (PlayerSize != 0)) ? 1 : 0;
-  Block_Y_Position[sprdataoff] = (SprObject_Y_Position[0] + BlockYPosAdderData[bVar4]) & 0xf0;
+  Block_Y_Position[sprdataoff] = (Player_Y_Position + BlockYPosAdderData[bVar4]) & 0xf0;
 
   if (Block_State[sprdataoff] == 0x11) {
     BumpBlock(mt_x, mt_y, param_1);
@@ -3517,13 +3523,13 @@ void PlayerHeadCollision(const byte param_1, const u16 mt_x, const u16 mt_y) {
 // Signature: [X] -> []
 void InitBlock_XY_Pos(const byte param_1) {
   ADD_UNSIGNED_16_16_8(Block_PageLoc[param_1], Block_X_Position[param_1],
-                       SprObject_PageLoc[0], SprObject_X_Position[0],
+                       Player_PageLoc, Player_X_Position,
                        8);
 
   Block_X_Position[param_1] &= 0xf0;
   Block_PageLoc2[param_1] = Block_PageLoc[param_1];
 
-  Block_Y_HighPos[param_1] = SprObject_Y_HighPos[0];
+  Block_Y_HighPos[param_1] = Player_Y_HighPos;
 }
 
 
@@ -3603,7 +3609,7 @@ void BumpBlock(const u16 mt_x, const u16 mt_y, const byte param_2) {
   Square1SoundQueue = 2;
   Block_X_Speed[bVar2] = 0;
   Block_Y_MoveForce[bVar2] = 0;
-  PlayerSpriteVarData2[0] = 0;
+  Player_Y_Speed = 0;
   Block_Y_Speed[bVar2] = 0xfe;
 
   struct_yc sVar4;
@@ -3734,7 +3740,7 @@ void BrickShatter(const u16 mt_x, const u16 mt_y) {
   Block_RepFlag[sVar1] = 1;
   NoiseSoundQueue = 1;
   SpawnBrickChunks(sVar1);
-  PlayerSpriteVarData2[0] = 0xfe;
+  Player_Y_Speed = 0xfe;
   DigitModifier[5] = 5;
   AddToScore();
 }
@@ -3900,7 +3906,7 @@ byte MovePlayerHorizontally(void) {
 // Signature: [X] -> [A]
 byte MoveObjectHorizontally(const byte param_1) {
   // NES note: the original sign-extends the high nibble (ORA #$F0), but we just cast it to signed here.
-  const i16 b = ((i16)(i8)PlayerSpriteVarData1[param_1]) << 4;
+  const i16 b = ((i16)(i8)SprObject_X_Speed[param_1]) << 4;
 
   const byte old_x = SprObject_X_Position[param_1];
 
@@ -4098,9 +4104,9 @@ void EnemiesAndLoopsCore(const byte objoff) {
 // SM2MAIN:8c77
 // Signature: [Y] -> []
 void ExecGameLoopback(const byte param_1) {
-  SprObject_PageLoc[0] = SprObject_PageLoc[0] - 4;
+  Player_PageLoc = Player_PageLoc - 4;
   CurrentPageLoc = CurrentPageLoc - 4;
-  ScreenEdgeOrLeft_PageLoc[0] = ScreenEdgeOrLeft_PageLoc[0] - 4;
+  ScreenLeft_PageLoc = ScreenLeft_PageLoc - 4;
   ScreenRight_PageLoc = ScreenRight_PageLoc - 4;
   AreaObjectPageLoc = AreaObjectPageLoc - 4;
   EnemyObjectPageSel = 0;
@@ -4125,12 +4131,12 @@ void ProcLoopCommand(const byte objoff) {
           continue;
         }
 
-        if (SprObject_Y_Position[0] == LoopCmdYPosition[idx] && Player_State == 0) {
+        if (Player_Y_Position == LoopCmdYPosition[idx] && Player_State == 0) {
           MultiLoopCorrectCntr += 1;
         }
 
         if (SMB1_ONLY && WorldNumber != 6) {
-          if (SprObject_Y_Position[0] != LoopCmdYPosition[idx] || Player_State != 0) {
+          if (Player_Y_Position != LoopCmdYPosition[idx] || Player_State != 0) {
             ExecGameLoopback(idx);
             KillAllEnemies();
           }
@@ -4704,7 +4710,7 @@ void LakituAndSpinyHandler(const byte objoff) {
 
   for (int i = 4; i >= 0; i--) {
     if (Enemy_ID[i] == 0x11) {
-      if (SprObject_Y_Position[0] < 0x2c) {
+      if (Player_Y_Position < 0x2c) {
         return;
       }
       if (Enemy_State[i] != 0) {
@@ -4804,9 +4810,9 @@ void InitFlyingCheepCheep(const byte objoff) {
 
   byte currng = rng0 & 3;
 
-  if (PlayerSpriteVarData1[0] == 0) {
+  if (Player_X_Speed == 0) {
     currng += 0;
-  } else if (PlayerSpriteVarData1[0] <= 0x18) {
+  } else if (Player_X_Speed <= 0x18) {
     currng += 4;
   } else {
     currng += 8;
@@ -4815,7 +4821,7 @@ void InitFlyingCheepCheep(const byte objoff) {
   SpriteVarData1[objoff] = FlyCCXSpeedData[currng];
   Enemy_MovingDir[objoff] = 1;
 
-  if (PlayerSpriteVarData1[0] == 0) {
+  if (Player_X_Speed == 0) {
     if ((rng1 & 3) != 0) {
       currng = rng2 & 0xf;
     }
@@ -4827,7 +4833,7 @@ void InitFlyingCheepCheep(const byte objoff) {
   }
 
   SET_16_16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
-            SprObject_PageLoc[0], SprObject_X_Position[0]);
+            Player_PageLoc, Player_X_Position);
 
   if ((currng & 2) == 0) {
     SUB_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
@@ -6063,7 +6069,7 @@ void ProcSwimmingB(const byte param_1, const bool param_2) {
       }
     }
   } else if ((EnemyIntervalTimer[param_1] == 0)
-      && (SprObject_Y_Position[0] <= (byte)(Enemy_Y_Position[param_1] + 0x10 + param_2))) {
+      && (Player_Y_Position <= (byte)(Enemy_Y_Position[param_1] + 0x10 + param_2))) {
     SpriteVarData2[param_1] = 0;
   } else if ((FrameCounter & 1) == 0) {
     Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 1;
@@ -7066,8 +7072,8 @@ void InitPlatformFall(const byte param_1, const byte objoff) {
   GetEnemyOffscreenBits(param_1);
 
   SetupFloateyNumber(6, objoff);
-  FloateyNum_X_Pos[objoff] = SprObject_Rel_XPos[0];
-  FloateyNum_Y_Pos[objoff] = SprObject_Y_Position[0];
+  FloateyNum_X_Pos[objoff] = Player_Rel_XPos;
+  FloateyNum_Y_Pos[objoff] = Player_Y_Position;
   Enemy_MovingDir[objoff] = 1;
 
   // NES note: GetEnemyOffscreenBits sets Y=1. This is later used by StopPlatforms.
@@ -7149,7 +7155,7 @@ void XMovingPlatform(const byte objoff) {
 // SM2MAIN:a24e
 // Signature: [X, r00] -> []
 void PositionPlayerOnHPlat(const byte param_1, const byte param_2) {
-  ADD_SIGNED_16_8(SprObject_PageLoc[0], SprObject_X_Position[0], param_2);
+  ADD_SIGNED_16_8(Player_PageLoc, Player_X_Position, param_2);
 
   Platform_X_Scroll = param_2;
   PositionPlayerOnVPlat(param_1);
@@ -7233,10 +7239,10 @@ void OffscreenBoundsCheck(const byte param_1) {
   bool bVar7;
   byte abVar5;
   if (bVar1 == 5 || bVar1 == 0xd || ssw(false, bVar1 == 4)) {
-    abVar5 = ScreenEdgeOrLeft_X_Pos[0] + 0x38 + 1;
-    bVar7 = ScreenEdgeOrLeft_X_Pos[0] >= 200 || abVar5 == 0;
+    abVar5 = ScreenLeft_X_Pos + 0x38 + 1;
+    bVar7 = ScreenLeft_X_Pos >= 200 || abVar5 == 0;
   } else {
-    abVar5 = ScreenEdgeOrLeft_X_Pos[0];
+    abVar5 = ScreenLeft_X_Pos;
     bVar7 = bVar1 >= 0xd;
   }
   const bool bVar2 = abVar5 >= 0x48;
@@ -7244,14 +7250,14 @@ void OffscreenBoundsCheck(const byte param_1) {
   const bool bVar4 = abVar5 > 0x48;
   const bool nk = (bVar7 && bVar2) || (bVar3 && bVar4);
   const bool k = !nk;
-  const bool bVar8 = nk || (!nk && ScreenEdgeOrLeft_PageLoc[0] != 0);
+  const bool bVar8 = nk || (!nk && ScreenLeft_PageLoc != 0);
   const byte bVar6 = ScreenRight_X_Pos + 0x48 + bVar8;
 
   const byte e_ploc = Enemy_PageLoc[param_1];
   const byte e_xp = Enemy_X_Position[param_1];
   const bool p = (ScreenRight_X_Pos >= 0xb8) || (bVar8 && bVar6 == 0);
   const byte q = (byte)(abVar5 + 0xb8 - !bVar7);
-  const byte sl_ploc = ScreenEdgeOrLeft_PageLoc[0];
+  const byte sl_ploc = ScreenLeft_PageLoc;
   const byte sr_ploc = ScreenRight_PageLoc;
 
   const bool A = (byte)(e_ploc - sl_ploc + k - (e_xp < q)) >= 0x80;
@@ -7548,13 +7554,13 @@ void PlayerEnemyCollision(const byte objoff) {
   }
 
   if (StompTimer == 0) {
-    if ((Enemy_ID[objoff] < 7) || (Enemy_Y_Position[objoff] <= (byte)(SprObject_Y_Position[0] + 0xC))) {
+    if ((Enemy_ID[objoff] < 7) || (Enemy_Y_Position[objoff] <= (byte)(Player_Y_Position + 0xC))) {
 
 #ifdef SMB1_MODE
-      const bool cond2 = (PlayerSpriteVarData2[0] == 0) || (PlayerSpriteVarData2[0] >= 0x80);
+      const bool cond2 = (Player_Y_Speed == 0) || (Player_Y_Speed >= 0x80);
 #endif
 #ifdef SMB2J_MODE
-      const bool cond2 = (PlayerSpriteVarData2[0] == 0) || (PlayerSpriteVarData2[0] > 0x80);
+      const bool cond2 = (Player_Y_Speed == 0) || (Player_Y_Speed > 0x80);
 #endif
 
       if (cond2) {
@@ -7562,7 +7568,7 @@ void PlayerEnemyCollision(const byte objoff) {
           return;
         }
 
-        if (SprObject_Rel_XPos[0] < Enemy_Rel_XPos) {
+        if (Player_Rel_XPos < Enemy_Rel_XPos) {
           if (Enemy_MovingDir[objoff] == 1) {
             LInj(objoff);
             return;
@@ -7617,7 +7623,7 @@ void PlayerEnemyCollision(const byte objoff) {
       StompTimer += 1;
       EnemyIntervalTimer[objoff] = RevivalRateData[PrimaryHardMode];
 #ifdef SMB1_MODE
-      PlayerSpriteVarData2[0] = 0xfc;
+      Player_Y_Speed = 0xfc;
 #endif
 #ifdef SMB2J_MODE
       SetBounce(objoff);
@@ -7632,7 +7638,7 @@ void PlayerEnemyCollision(const byte objoff) {
       InitVStf(objoff);
       SpriteVarData1[objoff] = DemotedKoopaXSpdData[EnemyFacePlayer(objoff)];
 #ifdef SMB1_MODE
-      PlayerSpriteVarData2[0] = 0xfc;
+      Player_Y_Speed = 0xfc;
 #endif
     }
   } else {
@@ -7653,7 +7659,7 @@ void PlayerEnemyCollision(const byte objoff) {
     Enemy_State[objoff] = 0x20;
     SpriteVarData1[objoff] = InitVStf(objoff);
 #ifdef SMB1_MODE
-    PlayerSpriteVarData2[0] = 0xfd;
+    Player_Y_Speed = 0xfd;
 #endif
 #ifdef SMB2J_MODE
     SetBounce(objoff);
@@ -7683,9 +7689,9 @@ void ForceInjury(const byte param_1) {
 
   if (PlayerStatus == 0) {
     EventMusicQueue = 1;
-    PlayerSpriteVarData2[0] = 0xfc;
+    Player_Y_Speed = 0xfc;
     bVar1 = 0xb;
-    PlayerSpriteVarData1[0] = PlayerStatus;
+    Player_X_Speed = PlayerStatus;
   } else {
     InjuryTimer = 8;
     Square1SoundQueue = 0x10;
@@ -7955,10 +7961,10 @@ void ProcLPlatCollisions(const byte param_1, const byte param_2, const byte para
   assert_eq_assumption(param_2, (param_1+1)*4);
   const byte param_2_div4 = param_2 / 4;
 
-  if (((byte)(BBOX_BOTRIGHT_Y(param_2_div4) - BBOX_TOPLEFT_Y(0)) < 4) && (PlayerSpriteVarData2[0] >= 0x80)) {
-    PlayerSpriteVarData2[0] = 1;
+  if (((byte)(BBOX_BOTRIGHT_Y(param_2_div4) - BBOX_TOPLEFT_Y(0)) < 4) && (Player_Y_Speed >= 0x80)) {
+    Player_Y_Speed = 1;
   }
-  if (((byte)(BBOX_BOTRIGHT_Y(0) - BBOX_TOPLEFT_Y(param_2_div4)) < 6) && (PlayerSpriteVarData2[0] < 0x80)) {
+  if (((byte)(BBOX_BOTRIGHT_Y(0) - BBOX_TOPLEFT_Y(param_2_div4)) < 6) && (Player_Y_Speed < 0x80)) {
     byte tmp3 = param_3;
     if ((Enemy_ID[param_1] != 0x2b) && (Enemy_ID[param_1] != 0x2c)) {
       tmp3 = param_1;
@@ -7984,10 +7990,10 @@ void ProcLPlatCollisions(const byte param_1, const byte param_2, const byte para
 void PositionPlayerOnS_Plat(const byte param_1, const byte param_2) {
   const byte bVar1 = Enemy_Y_Position[param_2] + PlayerPosSPlatData[param_1 - 1];
   if ((GameEngineSubroutine != 0xb) && (Enemy_Y_HighPos[param_2] == 1)) {
-    SprObject_Y_Position[0] = bVar1 - 0x20;
-    SprObject_Y_HighPos[0] = 1 - (bVar1 < 0x20);
-    PlayerSpriteVarData2[0] = 0;
-    SprObject_Y_MoveForce[0] = 0;
+    Player_Y_Position = bVar1 - 0x20;
+    Player_Y_HighPos = 1 - (bVar1 < 0x20);
+    Player_Y_Speed = 0;
+    Player_Y_MoveForce = 0;
   }
 }
 
@@ -7997,10 +8003,10 @@ void PositionPlayerOnS_Plat(const byte param_1, const byte param_2) {
 // Signature: [X] -> []
 void PositionPlayerOnVPlat(const byte param_1) {
   if ((GameEngineSubroutine != 0xb) && (Enemy_Y_HighPos[param_1] == 1)) {
-    SprObject_Y_Position[0] = Enemy_Y_Position[param_1] - 0x20;
-    SprObject_Y_HighPos[0] = 1 - (Enemy_Y_Position[param_1] < 0x20);
-    PlayerSpriteVarData2[0] = 0;
-    SprObject_Y_MoveForce[0] = 0;
+    Player_Y_Position = Enemy_Y_Position[param_1] - 0x20;
+    Player_Y_HighPos = 1 - (Enemy_Y_Position[param_1] < 0x20);
+    Player_Y_Speed = 0;
+    Player_Y_MoveForce = 0;
   }
 }
 
@@ -8010,7 +8016,7 @@ void PositionPlayerOnVPlat(const byte param_1) {
 // Signature: [] -> [C]
 bool CheckPlayerVertical(void) {
 #ifdef SMB1_MODE
-  return SprObject_OffscrBits[0] >= 0xf0 || (SprObject_Y_HighPos[0] == 1 && SprObject_Y_Position[0] >= 0xd0);
+  return SprObject_OffscrBits[0] >= 0xf0 || (Player_Y_HighPos == 1 && Player_Y_Position >= 0xd0);
 #endif
 #ifdef SMB2J_MODE
   return (SprObject_OffscrBits[0] & 0xf0) != 0;
@@ -8045,7 +8051,7 @@ static void HandleAxeMetatile(const u16 mt_x, const u16 mt_y) {
 #ifdef SMB2J_MODE
   LoadMarioPhysics();
 #endif
-  PlayerSpriteVarData1[0] = 0x18;
+  Player_X_Speed = 0x18;
 
   const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
   Block_Buffers[blockoff] = 0;
@@ -8081,13 +8087,13 @@ void PlayerBGCollision(void) {
     Player_State = 1;
   }
 
-  if (SprObject_Y_HighPos[0] != 1) {
+  if (Player_Y_HighPos != 1) {
     return;
   }
 
   Player_CollisionBits = 0xff;
 
-  if (SprObject_Y_Position[0] > 0xce) {
+  if (Player_Y_Position > 0xce) {
     return;
   }
 
@@ -8106,7 +8112,7 @@ void PlayerBGCollision(void) {
 
   const byte bVar6 = PlayerSize + ((CrouchingFlag != 0) ? 1 : 0);
 
-  if (PlayerBGUpperExtent[bVar6] <= SprObject_Y_Position[0]) {
+  if (PlayerBGUpperExtent[bVar6] <= Player_Y_Position) {
     const struct blockbuffer_colli_result sVar9 = BlockBufferColli_Head(tmp1);
     const byte bVar1 = sVar9.r04;
     if (!sVar9.z) {
@@ -8115,7 +8121,7 @@ void PlayerBGCollision(void) {
         return;
       }
       bVar7 = sVar9.a;
-      if ((PlayerSpriteVarData2[0] >= 0x80) && (bVar1 >= 4)) {
+      if ((Player_Y_Speed >= 0x80) && (bVar1 >= 4)) {
         bVar8 = CheckForSolidMTiles(bVar7);
 
         bool myspd = true;
@@ -8133,7 +8139,7 @@ void PlayerBGCollision(void) {
 
         if (myspd) {
           // MYSpd
-          PlayerSpriteVarData2[0] = 1;
+          Player_Y_Speed = 1;
         }
       }
     }
@@ -8141,7 +8147,7 @@ void PlayerBGCollision(void) {
 
   // DoFootCheck
 
-  if (SprObject_Y_Position[0] < 0xcf) {
+  if (Player_Y_Position < 0xcf) {
     sVar11 = BlockBufferColli_Feet(tmp1);
     if (CheckForCoinMTiles(sVar11.a)) {
       HandleCoinMetatile(sVar11.mt_x, sVar11.mt_y);
@@ -8161,7 +8167,7 @@ void PlayerBGCollision(void) {
         bVar7 = bVar2;
       }
       bVar8 = CheckForClimbMTiles(bVar7);
-      if ((!bVar8) && (PlayerSpriteVarData2[0] < 0x80)) {
+      if ((!bVar8) && (Player_Y_Speed < 0x80)) {
         if (bVar7 == ssw(0xc5, 0xc6)) {
           HandleAxeMetatile(sVar11.mt_x, sVar11.mt_y);
           return;
@@ -8174,10 +8180,10 @@ void PlayerBGCollision(void) {
               return;
             }
             ChkForLandJumpSpring(bVar7);
-            SprObject_Y_Position[0] &= 0xf0;
+            Player_Y_Position &= 0xf0;
             HandlePipeEntry(bVar2, bVar1);
-            PlayerSpriteVarData2[0] = 0;
-            SprObject_Y_MoveForce[0] = 0;
+            Player_Y_Speed = 0;
+            Player_Y_MoveForce = 0;
             StompChainCounter = 0;
           }
           Player_State = 0;
@@ -8197,8 +8203,8 @@ void PlayerBGCollision(void) {
     tmp1 += 1;
     // +3, +2
 
-    if (SprObject_Y_Position[0] >= 0x20) {
-      if (SprObject_Y_Position[0] >= 0xe4) {
+    if (Player_Y_Position >= 0x20) {
+      if (Player_Y_Position >= 0xe4) {
         return;
       }
       const struct blockbuffer_colli_result sVar9 = BlockBufferColli_Side(tmp1);
@@ -8214,10 +8220,10 @@ void PlayerBGCollision(void) {
 
     // BHalf
 
-    if (SprObject_Y_Position[0] < 8) {
+    if (Player_Y_Position < 8) {
       return;
     }
-    if (SprObject_Y_Position[0] >= 0xd0) {
+    if (Player_Y_Position >= 0xd0) {
       return;
     }
     const struct blockbuffer_colli_result sVar9 = BlockBufferColli_Side(tmp1 + 1);
@@ -8262,8 +8268,8 @@ void PlayerBGCollision(void) {
         Square1SoundQueue = 0x10;
       }
       Player_SprAttrib |= 0x20;
-      if ((SprObject_X_Position[0] & 0xf) != 0) {
-        ChangeAreaTimer = AreaChangeTimerData[ScreenEdgeOrLeft_PageLoc[0] != 0];
+      if ((Player_X_Position & 0xf) != 0) {
+        ChangeAreaTimer = AreaChangeTimerData[ScreenLeft_PageLoc != 0];
       }
 
       // 7 != 8, so this seems redundant. But it's in the assembly.
@@ -8328,7 +8334,7 @@ void HandleClimbing(const byte param_1, const byte param_2, const u16 mt_x) {
     GameEngineSubroutine = 1;
   }
   Player_State = 3;
-  PlayerSpriteVarData1[0] = 0;
+  Player_X_Speed = 0;
   Player_X_MoveForce = 0;
   if ((byte)(Player_X_Position - ScreenLeft_X_Pos) < 0x10) {
     PlayerFacingDir = 2;
@@ -8413,9 +8419,9 @@ void HandlePipeEntry(const byte param_1, const byte param_2) {
     Player_SprAttrib = 0x20;
     if (WarpZoneControl != 0) {
       if (SMB1_ONLY) {
-        if (SprObject_X_Position[0] < 0x60) {
+        if (Player_X_Position < 0x60) {
           bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4];
-        } else if (SprObject_X_Position[0] < 0xa0) {
+        } else if (Player_X_Position < 0xa0) {
           bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4 + 1];
         } else {
           bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4 + 2];
@@ -8452,11 +8458,11 @@ void ImpedePlayerMove(const byte param_1) {
   bool nxspd;
 
   if (param_1 == 1) {
-    nxspd = PlayerSpriteVarData1[0] < 0x80;
+    nxspd = Player_X_Speed < 0x80;
     bVar2 = 1;
     bVar1 = -1;
   } else {
-    nxspd = (byte)(PlayerSpriteVarData1[0] - 1) >= 0x80;
+    nxspd = (byte)(Player_X_Speed - 1) >= 0x80;
     bVar2 = 2;
     bVar1 = 1;
   }
@@ -8465,9 +8471,9 @@ void ImpedePlayerMove(const byte param_1) {
     // NXSpd
 
     SideCollisionTimer = 0x10;
-    PlayerSpriteVarData1[0] = 0;
+    Player_X_Speed = 0;
 
-    ADD_SIGNED_16_8(SprObject_PageLoc[0], SprObject_X_Position[0],
+    ADD_SIGNED_16_8(Player_PageLoc, Player_X_Position,
                     bVar1);
   }
 
@@ -8778,7 +8784,7 @@ void ChkForBump_HammerBroJ(const byte objoff) {
 // SM2MAIN:add9
 // Signature: [X] -> [N, C, r00]
 struct_ncr00 PlayerEnemyDiff(const byte param_1) {
-  const u16 player_pos = (SprObject_PageLoc[0] << 8) | (SprObject_X_Position[0]);
+  const u16 player_pos = (Player_PageLoc << 8) | (Player_X_Position);
   const u16 enemy_pos = (Enemy_PageLoc[param_1] << 8) | (Enemy_X_Position[param_1]);
 
   const i16 diff = enemy_pos - player_pos;
@@ -8939,8 +8945,8 @@ void SmallPlatformBoundBox(const byte objoff) {
 // SM2MAIN:aef0
 // Signature: [X, Y, r00] -> []
 void GetMaskedOffScrBits(const byte objoff, const byte param_2, const byte param_3) {
-  byte bVar1 = (Enemy_PageLoc[objoff] - ScreenEdgeOrLeft_PageLoc[0]) - (Enemy_X_Position[objoff] < ScreenEdgeOrLeft_X_Pos[0]);
-  if ((bVar1 < 0x80) && ((byte)(bVar1 | (Enemy_X_Position[objoff] - ScreenEdgeOrLeft_X_Pos[0])) != 0)) {
+  byte bVar1 = (Enemy_PageLoc[objoff] - ScreenLeft_PageLoc) - (Enemy_X_Position[objoff] < ScreenLeft_X_Pos);
+  if ((bVar1 < 0x80) && ((byte)(bVar1 | (Enemy_X_Position[objoff] - ScreenLeft_X_Pos)) != 0)) {
     bVar1 = param_3 & Enemy_OffscreenBits;
   } else {
     bVar1 = param_2 & Enemy_OffscreenBits;
@@ -8999,7 +9005,7 @@ void MoveBoundBoxOffscreen(const byte objoff) {
 void BoundingBoxCore(const byte param_1, const byte param_2) {
   const byte bVar1 = SprObject_Rel_YPos[param_2];
   const byte bVar2 = SprObject_Rel_XPos[param_2];
-  const byte bVar4 = PlayerOrSprObj_BoundBoxCtrl[param_1] * 4;
+  const byte bVar4 = SprObj_BoundBoxCtrl[param_1] * 4;
 
   BBOX_TOPLEFT_X(param_1) = bVar2 + BoundBoxCtrlData[bVar4];
   BBOX_BOTRIGHT_X(param_1)= bVar2 + BoundBoxCtrlData[bVar4 + 2];
@@ -9018,7 +9024,7 @@ void CheckRightScreenBBox(const byte param_1) {
   // NES note: The "Y" register is technically an input, but's always X*4 (param_1*4) in practice.
   // This value comes from BoundingBoxCore.
 
-  const u16 screen_left_pos = (ScreenEdgeOrLeft_PageLoc[0] << 8) | ScreenEdgeOrLeft_X_Pos[0];
+  const u16 screen_left_pos = (ScreenLeft_PageLoc << 8) | ScreenLeft_X_Pos;
   const u16 object_x_pos = (SprObject_PageLoc[param_1] << 8) | SprObject_X_Position[param_1];
 
   const u8 a = BBOX_BOTRIGHT_X(param_1);
@@ -9930,7 +9936,7 @@ void DrawBrickChunks(const byte objoff) {
   const byte x1 = Block_Rel_XPos;
   const byte x2 = Block_Rel_XPos_2;
 
-  const byte b = Block_Orig_XPos[objoff] - ScreenEdgeOrLeft_X_Pos[0];
+  const byte b = Block_Orig_XPos[objoff] - ScreenLeft_X_Pos;
 
   // Set X for all 4 sprites
   SPRITE_X(off, 0) = x1;
@@ -10098,7 +10104,7 @@ void DrawSmallPlatform(const byte objoff) {
 void DrawBubble(const byte objoff) {
   byte bVar1;
 
-  if ((SprObject_Y_HighPos[0] == 1) && ((Bubble_OffscreenBits & 8) == 0)) {
+  if ((Player_Y_HighPos == 1) && ((Bubble_OffscreenBits & 8) == 0)) {
     bVar1 = Bubble_SprDataOffset[objoff];
     SPRITE_X(bVar1, 0) = Bubble_Rel_XPos;
     SPRITE_Y(bVar1, 0) = Bubble_Rel_YPos;
@@ -10135,9 +10141,9 @@ void PlayerGfxHandler(void) {
     }
     FindPlayerAction();
     if ((FrameCounter & 4) == 0) {
-      abVar2 = PlayerOrSprDataOffset[0];
+      abVar2 = Player_SprDataOffset;
       if ((PlayerFacingDir & 1) == 0) {
-        abVar2 = PlayerOrSprDataOffset[0] + 4;
+        abVar2 = Player_SprDataOffset + 4;
       }
       bVar1 = 0;
       if (PlayerSize != 0) {
@@ -10172,14 +10178,14 @@ void PlayerGfxProcessing(const byte param_1) {
     if (PlayerAnimTimer < FireballThrowingTimer) {
       FireballThrowingTimer = PlayerAnimTimer;
       PlayerGfxOffset = PlayerGfxTblOffsets[7];
-      const byte bVar3 = ((PlayerSpriteVarData1[0] | Left_Right_Buttons) != 0) ? 3 : 4;
+      const byte bVar3 = ((Player_X_Speed | Left_Right_Buttons) != 0) ? 3 : 4;
       RenderPlayerSub(bVar3);
     } else {
       FireballThrowingTimer = 0;
     }
   }
 
-  const byte sprite_offset = PlayerOrSprDataOffset[0];
+  const byte sprite_offset = Player_SprDataOffset;
 
   if (SprObject_OffscrBits[0] & 0x10) {
     // Inlined: DumpTwoSpr
@@ -10224,9 +10230,9 @@ void DrawPlayer_Intermediate(void) {
 // SM2MAIN:bc99
 // Signature: [A] -> []
 void RenderPlayerSub(const byte param_1) {
-  Player_Pos_ForScroll = SprObject_Rel_XPos[0];
-  DrawPlayerLoop(PlayerGfxOffset, PlayerOrSprDataOffset[0], SprObject_Rel_YPos[0], PlayerFacingDir,
-                 Player_SprAttrib, SprObject_Rel_XPos[0], param_1);
+  Player_Pos_ForScroll = Player_Rel_XPos;
+  DrawPlayerLoop(PlayerGfxOffset, Player_SprDataOffset, Player_Rel_YPos, PlayerFacingDir,
+                 Player_SprAttrib, Player_Rel_XPos, param_1);
 }
 
 
@@ -10264,7 +10270,7 @@ byte ProcessPlayerAction(void) {
 
   if (Player_State == 3) {
     bVar1 = 5;
-    if (PlayerSpriteVarData2[0] != 0) {
+    if (Player_Y_Speed != 0) {
       return ThreeFrameExtent(GetGfxOffsetAdder(5));
     }
   } else {
@@ -10287,7 +10293,7 @@ byte ProcessPlayerAction(void) {
       bVar1 = 6;
       if (CrouchingFlag == 0) {
         bVar1 = 2;
-        if ((PlayerSpriteVarData1[0] | Left_Right_Buttons) != 0) {
+        if ((Player_X_Speed | Left_Right_Buttons) != 0) {
           if ((Player_XSpeedAbsolute < 9) || ((Player_MovingDir & PlayerFacingDir) != 0)) {
             return FourFrameExtent(GetGfxOffsetAdder(4));
           }
@@ -10395,7 +10401,7 @@ byte GetOffsetFromAnimCtrl(const byte param_1, const byte param_2) {
 // SM2MAIN:bdce
 // Signature: [] -> []
 void ChkForPlayerAttrib(void) {
-  const byte abVar1 = PlayerOrSprDataOffset[0];
+  const byte abVar1 = Player_SprDataOffset;
   if (GameEngineSubroutine != 0xb) {
     if (((PlayerGfxOffset == 0x50) || (PlayerGfxOffset == 0xb8)) || (PlayerGfxOffset == 0xc0)) {
       goto C_S_IGAtt;
@@ -10405,7 +10411,7 @@ void ChkForPlayerAttrib(void) {
     }
   }
 
-  SPRITE_ATTR(PlayerOrSprDataOffset[0], 4) &= 0x3f;
+  SPRITE_ATTR(Player_SprDataOffset, 4) &= 0x3f;
 
   SPRITE_ATTR(abVar1, 5) &= 0x3f;
   SPRITE_ATTR(abVar1, 5) |= 0x40;
@@ -10477,7 +10483,7 @@ void RelativeBlockPosition(const byte objoff) {
 // Signature: [X, Y] -> []
 void GetObjRelativePosition(const byte param_1, const byte param_2) {
   SprObject_Rel_YPos[param_2] = SprObject_Y_Position[param_1];
-  SprObject_Rel_XPos[param_2] = SprObject_X_Position[param_1] - ScreenEdgeOrLeft_X_Pos[0];
+  SprObject_Rel_XPos[param_2] = SprObject_X_Position[param_1] - ScreenLeft_X_Pos;
 }
 
 
@@ -10551,30 +10557,19 @@ void GetOffScreenBitsSet(const byte param_1, const byte param_2) {
 }
 
 
-// keeping the original version for now, in case of regressions (though I made extra sure there aren't any)
-static inline byte original_xoff_f(const byte param_1, byte bVar3) {
-  const byte bVar1 = (ScreenEdgeOrLeft_PageLoc[bVar3] - SprObject_PageLoc[param_1]) - (ScreenEdgeOrLeft_X_Pos[bVar3] < SprObject_X_Position[param_1]);
-  byte bVar2 = DefaultXOnscreenOfs[bVar3];
-  if ((bVar1 < 0x80)) {
-    bVar2 = DefaultXOnscreenOfs[bVar3 + 1];
-    if (0x7f < (byte)(bVar1 - 1)) {
-      bVar2 = DividePDiff(8, bVar2, bVar3, 0x38,
-                          ScreenEdgeOrLeft_X_Pos[bVar3] - SprObject_X_Position[param_1]);
-    }
-  }
-  return bVar2;
-}
-
-static byte xoff_f(const byte param_1, byte a) {
+static byte xoff_f(const byte param_1, byte is_right) {
   // a seriously inlined/simplified version of the original.
   // part of GetXOffscreenBits
 
-  const int j = ScreenEdgeOrLeft_PageLoc[a] - SprObject_PageLoc[param_1];
-  const int ik = ScreenEdgeOrLeft_X_Pos[a] - SprObject_X_Position[param_1];
+  const u8 pageloc = is_right == 0 ? ScreenLeft_PageLoc : ScreenRight_PageLoc;
+  const u8 xpos = is_right == 0 ? ScreenLeft_X_Pos : ScreenRight_X_Pos;
+
+  const int j = pageloc - SprObject_PageLoc[param_1];
+  const int ik = xpos - SprObject_X_Position[param_1];
 
   int z = ik + j*256;
 
-  // wraparound as a signed 16-bit number to achieve the same glitchy behavior
+  // wraparound as is_right signed 16-bit number to achieve the same glitchy behavior
   if (z >= 0x8000) { z -= 0x10000; }
   if (z < -0x8000) { z += 0x10000; }
 
@@ -10588,7 +10583,7 @@ static byte xoff_f(const byte param_1, byte a) {
     v = 0xf;
   }
 
-  if (a) {
+  if (is_right) {
     v = (v+8)%16;
   }
   return v;
@@ -10604,20 +10599,6 @@ byte GetXOffscreenBits(const byte param_1) {
   }
   i = xoff_f(param_1, 0);
   return XOffscreenBitsData[i];
-}
-
-// keeping the original version for now, in case of regressions (though I made extra sure there aren't any)
-static byte original_yoff_f(const byte param_1, byte bVar3) {
-  const byte bVar1 = (1 - SprObject_Y_HighPos[param_1]) - (HighPosUnitData[bVar3] < SprObject_Y_Position[param_1]);
-  byte bVar2 = DefaultYOnscreenOfs[bVar3];
-  if ((bVar1 < 0x80)) {
-    bVar2 = DefaultYOnscreenOfs[bVar3 + 1];
-    if (0x7f < (byte)(bVar1 - 1)) {
-      bVar2 = DividePDiff(4, bVar2, bVar3, 0x20,
-                          HighPosUnitData[bVar3] - SprObject_Y_Position[param_1]);
-    }
-  }
-  return bVar2;
 }
 
 static byte yoff_f(const byte param_1, bool a) {
@@ -10664,29 +10645,11 @@ static byte yoff_f(const byte param_1, bool a) {
 // Signature: [X] -> [A]
 byte GetYOffscreenBits(const byte param_1) {
   byte i = yoff_f(param_1, 1);
-  assert_eq_regressiontest(original_yoff_f(param_1, 1), i);
   if (YOffscreenBitsData[i] != 0) {
     return YOffscreenBitsData[i];
   }
   i = yoff_f(param_1, 0);
-  assert_eq_regressiontest(original_yoff_f(param_1, 0), i);
   return YOffscreenBitsData[i];
-}
-
-
-// SMB:f26d
-// SM2MAIN:bf52
-// Signature: [A, X, Y, r06, r07] -> [X]
-byte DividePDiff(const byte param_1, const byte param_2, const bool param_3, const byte param_4, const byte param_5) {
-  // note: to be removed once other old code is removed
-  if (param_5 >= param_4) {
-    return param_2;
-  }
-  byte a = (param_5 / 8) % 8;
-  if (!param_3) {
-    a = a + param_1;
-  }
-  return a;
 }
 
 

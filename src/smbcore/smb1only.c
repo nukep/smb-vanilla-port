@@ -153,11 +153,11 @@ void WriteGameText(const byte param_1) {
 void ScrollScreen(const byte param_1) {
   ScrollAmount = param_1;
   ScrollThirtyTwo += param_1;
-  ADD_UNSIGNED_16_8(ScreenEdgeOrLeft_PageLoc[0], ScreenEdgeOrLeft_X_Pos[0],
+  ADD_UNSIGNED_16_8(ScreenLeft_PageLoc, ScreenLeft_X_Pos,
                     param_1);
-  HorizontalScroll = ScreenEdgeOrLeft_X_Pos[0];
+  HorizontalScroll = ScreenLeft_X_Pos;
   Mirror_PPU_CTRL_REG1 &= 0xfe;
-  Mirror_PPU_CTRL_REG1 |= ScreenEdgeOrLeft_PageLoc[0] & 1;
+  Mirror_PPU_CTRL_REG1 |= ScreenLeft_PageLoc & 1;
   GetScreenPosition();
   ScrollIntervalTimer = 8;
   ChkPOffscr();

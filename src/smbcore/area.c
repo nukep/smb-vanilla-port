@@ -25,7 +25,6 @@ static void AlterAreaAttributes(byte param_1);
 static void ScrollLockObject_Warp(void);
 static void ScrollLockObject(void);
 static void AreaFrenzy(byte param_1);
-static void AreaStyleObject(byte param_1);
 static void TreeLedge(byte param_1);
 static void NoUnder(byte param_1, byte param_2);
 static void PulleyRopeObject(byte param_1);
@@ -608,8 +607,28 @@ bool DecodeAreaData(const byte objoff, const byte param_2) {
     return true;
 
   case DECODEAREADATA_AREASTYLEOBJECT:
-    AreaStyleObject(objoff);
-    return true;
+    switch (AreaStyle) {
+    case AREASTYLEOBJECT_TREELEDGE:
+      TreeLedge(objoff);
+      return true;
+
+    case AREASTYLEOBJECT_MUSHROOMLEDGE:
+#ifdef SMB1_MODE
+      MushroomLedge(objoff);
+#endif
+#ifdef SMB2J_MODE
+      CloudLedge(objoff);
+#endif
+      return true;
+
+    case AREASTYLEOBJECT_BULLETBILLCANNON:
+      BulletBillCannon(objoff);
+      return true;
+
+    default:
+      jmpengine_overflow(AreaStyle);
+      return true;
+    }
 
   case DECODEAREADATA_ROWOFBRICKS:
     RowOfBricks(objoff);
@@ -837,35 +856,6 @@ void AreaFrenzy(const byte param_1) {
     }
   } while (FrenzyIDData[param_1 - 8] != Enemy_ID[bVar1]);
   EnemyFrenzyQueue = 0;
-}
-
-
-// SMB:9740
-// SM2MAIN:7597
-// Signature: [X] -> []
-void AreaStyleObject(const byte param_1) {
-  switch (AreaStyle) {
-  case AREASTYLEOBJECT_TREELEDGE:
-    TreeLedge(param_1);
-    return;
-
-  case AREASTYLEOBJECT_MUSHROOMLEDGE:
-#ifdef SMB1_MODE
-    MushroomLedge(param_1);
-#endif
-#ifdef SMB2J_MODE
-    CloudLedge(param_1);
-#endif
-    return;
-
-  case AREASTYLEOBJECT_BULLETBILLCANNON:
-    BulletBillCannon(param_1);
-    return;
-
-  default:
-    jmpengine_overflow(AreaStyle);
-    return;
-  }
 }
 
 
@@ -1313,13 +1303,14 @@ void BulletBillCannon(const byte param_1) {
       RenderUnderPart(ssw(0x66, 0x67), bVar1 + 2, bVar2);
     }
   }
-  const byte bVar2 = Cannon_Or_Whirlpool_Offset;
-  bVar1 = GetAreaObjYPosition(bVar1);
-  Cannon_Y_Position_Or_Whirlpool_Length[bVar2] = bVar1;
-  Cannon_Or_Whirlpool_PageLoc[bVar2] = CurrentPageLoc;
-  bVar1 = GetAreaObjXPosition();
-  Cannon_X_Position_Or_Whirlpool_LeftExtent[bVar2] = bVar1;
-  Cannon_Or_Whirlpool_Offset = bVar2 + 1;
+
+  const byte y = GetAreaObjYPosition(bVar1);
+  Cannon_Y_Position_Or_Whirlpool_Length[Cannon_Or_Whirlpool_Offset] = y;
+  Cannon_Or_Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc;
+  const byte x = GetAreaObjXPosition();
+  Cannon_X_Position_Or_Whirlpool_LeftExtent[Cannon_Or_Whirlpool_Offset] = x;
+
+  Cannon_Or_Whirlpool_Offset += 1;
   if (Cannon_Or_Whirlpool_Offset > 5) {
     Cannon_Or_Whirlpool_Offset = 0;
   }
@@ -1420,15 +1411,15 @@ byte GetAreaObjectID(const byte param_1) { return param_1; }
 // SM2MAIN:798a
 // Signature: [X] -> []
 void Hole_Empty(const byte param_1) {
-  byte bVar1;
-
   const struct_ycr07 sVar3 = ChkLrgObjLength(param_1);
   const byte bVar2 = sVar3.y;
   if ((sVar3.c) && (AreaType == 0)) {
-    bVar1 = GetAreaObjXPosition();
-    Cannon_X_Position_Or_Whirlpool_LeftExtent[Cannon_Or_Whirlpool_Offset] = bVar1 - 0x10;
-    Cannon_Or_Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc - (bVar1 < 0x10);
+    const byte x = GetAreaObjXPosition();
+
+    Cannon_X_Position_Or_Whirlpool_LeftExtent[Cannon_Or_Whirlpool_Offset] = x - 0x10;
+    Cannon_Or_Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc - (x < 0x10);
     Cannon_Y_Position_Or_Whirlpool_Length[Cannon_Or_Whirlpool_Offset] = (bVar2 + 2) * 0x10;
+
     Cannon_Or_Whirlpool_Offset += 1;
     if (Cannon_Or_Whirlpool_Offset >= 5) {
       Cannon_Or_Whirlpool_Offset = 0;
