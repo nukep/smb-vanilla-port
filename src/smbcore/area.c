@@ -20,7 +20,7 @@ static void RenderAttributeTables(void);
 static void IncrementColumnPos(void);
 static void AreaParserCore(void);
 static void ProcessAreaData(void);
-static void DecodeAreaData(byte param_1, byte param_2);
+static bool DecodeAreaData(byte param_1, byte param_2);
 static void AlterAreaAttributes(byte param_1);
 static void ScrollLockObject_Warp(void);
 static void ScrollLockObject(void);
@@ -440,17 +440,15 @@ void AreaParserCore(void) {
 // SM2MAIN:7319
 // Signature: [] -> []
 void ProcessAreaData(void) {
-  do {
-    byte bVar1 = 2;
-    do {
+  while (true) {
+    for (int objoff = 2; objoff >= 0; objoff--) {
       BehindAreaParserFlag = 0;
-      ObjectOffset = bVar1;
 
       bool decode = true;
 
       if (AreaData[AreaDataOffset] == 0xfd) {
         decode = true;
-      } else if (AreaObjectLength[bVar1] < 0x80) {
+      } else if (AreaObjectLength[objoff] < 0x80) {
         decode = true;
       } else {
         const byte second_byte = AreaData[AreaDataOffset + 1];
@@ -483,7 +481,17 @@ void ProcessAreaData(void) {
 
       if (decode) {
         // RdyDecode
-        DecodeAreaData(bVar1, AreaDataOffset);
+        if (!DecodeAreaData(objoff, AreaDataOffset)) {
+          BackloadingFlag = 0;
+          BehindAreaParserFlag = 0;
+
+          // ChkLength
+          if (AreaObjectLength[0] < 0x80) {
+            AreaObjectLength[0] -= 1;
+          }
+
+          return;
+        }
       } else {
         // NextAObj
         // inlined: IncAreaObjOffset
@@ -492,32 +500,33 @@ void ProcessAreaData(void) {
       }
 
       // ChkLength
-      if (AreaObjectLength[ObjectOffset] < 0x80) {
-        AreaObjectLength[ObjectOffset] = AreaObjectLength[ObjectOffset] - 1;
+      if (AreaObjectLength[objoff] < 0x80) {
+        AreaObjectLength[objoff] -= 1;
       }
-      bVar1 = ObjectOffset;
-    } while (bVar1 -= 1, bVar1 < 0x80);
+    }
+
     if ((BehindAreaParserFlag == 0) && (BackloadingFlag == 0)) {
       return;
     }
-  } while (true);
+  }
 }
 
 
 // SMB:9595
 // SM2MAIN:73a6
-// Signature: [X, Y] -> []
-void DecodeAreaData(const byte param_1, const byte param_2) {
+bool DecodeAreaData(const byte objoff, const byte param_2) {
+  // Note: reworked to return false if r08 is set to 0. Unmodified otherwise.
+  // X = r08 on call.
+  // Original signature: [X, Y, r08] -> [r08]
+
   byte tmp1 = param_2;
-  if (AreaObjectLength[param_1] < 0x80) {
-    tmp1 = AreaObjOffsetBuffer[param_1];
+  if (AreaObjectLength[objoff] < 0x80) {
+    tmp1 = AreaObjOffsetBuffer[objoff];
   }
 
   if (AreaData[tmp1] == 0xfd) {
-    return;
+    return true;
   }
-
-  const byte bVar3 = ObjectOffset;
 
   const byte data = AreaData[(byte)(tmp1 + 1)];
 
@@ -532,7 +541,7 @@ void DecodeAreaData(const byte param_1, const byte param_2) {
   case 0xd:
     cVar2 = ssw(0x22, 0x28);
     if ((data & 0x40) == 0) {
-      return;
+      return true;
     }
     if ((data & 0x7f) == 0x4b) {
       LoopCommand += 1;
@@ -562,30 +571,28 @@ void DecodeAreaData(const byte param_1, const byte param_2) {
     break;
   }
 
-  if (AreaObjectLength[ObjectOffset] >= 0x80) {
+  if (AreaObjectLength[objoff] >= 0x80) {
     if (AreaObjectPageLoc != CurrentPageLoc) {
       if ((AreaData[AreaDataOffset] & 0xf) != 0xe) {
-        return;
+        return true;
       }
       if (BackloadingFlag == 0) {
-        return;
+        return true;
       }
     } else {
       // InitRear
       if (BackloadingFlag != 0) {
-        BackloadingFlag = 0;
-        BehindAreaParserFlag = 0;
-        ObjectOffset = 0;
-        return;
+        // Note: moved BackloadingFlag and BehindAreaParserFlag clear to caller instead
+        return false;
       }
 
       // BackColC
       if ((AreaData[AreaDataOffset] >> 4) != CurrentColumnPos) {
-        return;
+        return true;
       }
     }
     // StarAObj
-    AreaObjOffsetBuffer[ObjectOffset] = AreaDataOffset;
+    AreaObjOffsetBuffer[objoff] = AreaDataOffset;
 
     // inlined: IncAreaObjOffset
     AreaDataOffset += 2;
@@ -597,191 +604,191 @@ void DecodeAreaData(const byte param_1, const byte param_2) {
   switch (jmptable_idx) {
   case DECODEAREADATA_VERTICALPIPE_1:
   case DECODEAREADATA_VERTICALPIPE_2:
-    VerticalPipe(bVar3, bVar1);
-    return;
+    VerticalPipe(objoff, bVar1);
+    return true;
 
   case DECODEAREADATA_AREASTYLEOBJECT:
-    AreaStyleObject(bVar3);
-    return;
+    AreaStyleObject(objoff);
+    return true;
 
   case DECODEAREADATA_ROWOFBRICKS:
-    RowOfBricks(bVar3);
-    return;
+    RowOfBricks(objoff);
+    return true;
 
   case DECODEAREADATA_ROWOFSOLIDBLOCKS:
-    RowOfSolidBlocks(bVar3);
-    return;
+    RowOfSolidBlocks(objoff);
+    return true;
 
   case DECODEAREADATA_ROWOFCOINS:
-    RowOfCoins(bVar3);
-    return;
+    RowOfCoins(objoff);
+    return true;
 
   case DECODEAREADATA_COLUMNOFBRICKS:
-    ColumnOfBricks(bVar3);
-    return;
+    ColumnOfBricks(objoff);
+    return true;
 
   case DECODEAREADATA_COLUMNOFSOLIDBLOCKS:
-    ColumnOfSolidBlocks(bVar3);
-    return;
+    ColumnOfSolidBlocks(objoff);
+    return true;
 
   case DECODEAREADATA_HOLE_EMPTY:
-    Hole_Empty(bVar3);
-    return;
+    Hole_Empty(objoff);
+    return true;
 
   case DECODEAREADATA_PULLEYROPEOBJECT:
-    PulleyRopeObject(bVar3);
-    return;
+    PulleyRopeObject(objoff);
+    return true;
 
   case DECODEAREADATA_BRIDGE_HIGH:
-    Bridge_High(bVar3);
-    return;
+    Bridge_High(objoff);
+    return true;
 
   case DECODEAREADATA_BRIDGE_MIDDLE:
-    Bridge_Middle(bVar3);
-    return;
+    Bridge_Middle(objoff);
+    return true;
 
   case DECODEAREADATA_BRIDGE_LOW:
-    Bridge_Low(bVar3);
-    return;
+    Bridge_Low(objoff);
+    return true;
 
   case DECODEAREADATA_HOLE_WATER:
-    Hole_Water(bVar3);
-    return;
+    Hole_Water(objoff);
+    return true;
 
   case DECODEAREADATA_QUESTIONBLOCKROW_HIGH:
-    QuestionBlockRow_High(bVar3);
-    return;
+    QuestionBlockRow_High(objoff);
+    return true;
 
   case DECODEAREADATA_QUESTIONBLOCKROW_LOW:
-    QuestionBlockRow_Low(bVar3);
-    return;
+    QuestionBlockRow_Low(objoff);
+    return true;
 
   case DECODEAREADATA_ENDLESSROPE:
     EndlessRope();
-    return;
+    return true;
 
   case DECODEAREADATA_BALANCEPLATROPE:
-    BalancePlatRope(bVar3);
-    return;
+    BalancePlatRope(objoff);
+    return true;
 
   case DECODEAREADATA_CASTLEOBJECT:
-    CastleObject(bVar3);
-    return;
+    CastleObject(objoff);
+    return true;
 
   case DECODEAREADATA_STAIRCASEOBJECT:
-    StaircaseObject(bVar3);
-    return;
+    StaircaseObject(objoff);
+    return true;
 
   case DECODEAREADATA_EXITPIPE:
-    ExitPipe(bVar3);
-    return;
+    ExitPipe(objoff);
+    return true;
 
   case DECODEAREADATA_FLAGBALLS_RESIDUAL:
-    FlagBalls_Residual(bVar3);
-    return;
+    FlagBalls_Residual(objoff);
+    return true;
 
   case DECODEAREADATA_QUESTIONBLOCK_1:
   case DECODEAREADATA_QUESTIONBLOCK_2:
   case DECODEAREADATA_QUESTIONBLOCK_3:
-    QuestionBlock(bVar3, bVar1);
-    return;
+    QuestionBlock(objoff, bVar1);
+    return true;
 
   case DECODEAREADATA_HIDDEN1UPBLOCK:
-    Hidden1UpBlock(bVar3, bVar1);
-    return;
+    Hidden1UpBlock(objoff, bVar1);
+    return true;
 
   case DECODEAREADATA_BRICKWITHITEM_1:
   case DECODEAREADATA_BRICKWITHITEM_2:
   case DECODEAREADATA_BRICKWITHITEM_3:
   case DECODEAREADATA_BRICKWITHITEM_4:
-    BrickWithItem(bVar3, bVar1);
-    return;
+    BrickWithItem(objoff, bVar1);
+    return true;
 
   case DECODEAREADATA_BRICKWITHCOINS:
-    BrickWithCoins(bVar3, bVar1);
-    return;
+    BrickWithCoins(objoff, bVar1);
+    return true;
 
   case DECODEAREADATA_WATERPIPE:
-    WaterPipe(bVar3);
-    return;
+    WaterPipe(objoff);
+    return true;
 
   case DECODEAREADATA_EMPTYBLOCK:
-    EmptyBlock(bVar3);
-    return;
+    EmptyBlock(objoff);
+    return true;
 
   case DECODEAREADATA_JUMPSPRING:
-    Jumpspring(bVar3);
-    return;
+    Jumpspring(objoff);
+    return true;
 
   case DECODEAREADATA_INTROPIPE:
-    IntroPipe(bVar3);
-    return;
+    IntroPipe(objoff);
+    return true;
 
   case DECODEAREADATA_FLAGPOLEOBJECT:
     FlagpoleObject();
-    return;
+    return true;
 
   case DECODEAREADATA_AXEOBJ:
     AxeObj(bVar1);
-    return;
+    return true;
 
   case DECODEAREADATA_CHAINOBJ:
     ChainObj(bVar1);
-    return;
+    return true;
 
   case DECODEAREADATA_CASTLEBRIDGEOBJ:
-    CastleBridgeObj(bVar3, bVar1);
-    return;
+    CastleBridgeObj(objoff, bVar1);
+    return true;
 
   case DECODEAREADATA_SCROLLLOCKOBJECT_WARP:
     ScrollLockObject_Warp();
-    return;
+    return true;
 
   case DECODEAREADATA_SCROLLLOCKOBJECT_1:
   case DECODEAREADATA_SCROLLLOCKOBJECT_2:
     ScrollLockObject();
-    return;
+    return true;
 
   case DECODEAREADATA_AREAFRENZY_1:
   case DECODEAREADATA_AREAFRENZY_2:
   case DECODEAREADATA_AREAFRENZY_3:
     AreaFrenzy(bVar1);
-    return;
+    return true;
 
   case DECODEAREADATA_NOOP:
     // NES note: goes to "LoopCmdE" (a no-op)
-    return;
+    return true;
 
   case DECODEAREADATA_ALTERAREAATTRIBUTES:
-    AlterAreaAttributes(bVar3);
-    return;
+    AlterAreaAttributes(objoff);
+    return true;
 
 #ifdef SMB2J_MODE
   case DECODEAREADATA_QUESTIONBLOCK_4:
   case DECODEAREADATA_QUESTIONBLOCK_5:
   case DECODEAREADATA_QUESTIONBLOCK_6:
-    QuestionBlock(bVar3, bVar1);
-    return;
+    QuestionBlock(objoff, bVar1);
+    return true;
 
   case DECODEAREADATA_BRICKWITHITEM_5:
-    BrickWithItem(bVar3, bVar1);
-    return;
+    BrickWithItem(objoff, bVar1);
+    return true;
 
   case DECODEAREADATA_UPSIDEDOWNPIPE_HIGH:
-    UpsideDownPipe_High(bVar3);
-    return;
+    UpsideDownPipe_High(objoff);
+    return true;
 
   case DECODEAREADATA_UPSIDEDOWNPIPE_LOW:
-    UpsideDownPipe_Low(bVar3);
-    return;
+    UpsideDownPipe_Low(objoff);
+    return true;
 
   case DECODEAREADATA_WINDON:
     WindOn();
-    return;
+    return true;
 
   case DECODEAREADATA_WINDOFF:
     WindOff();
-    return;
+    return true;
 #endif
 
   default:

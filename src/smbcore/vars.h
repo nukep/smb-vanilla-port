@@ -54,7 +54,7 @@
 
 
 /* common ----------------------- */
-#define ObjectOffset                     RAM(0x0008)
+// #define ObjectOffset                     RAM(0x0008)
 #define FrameCounter                     RAM(0x0009)
 #define A_B_Buttons                      RAM(0x000A)
 #define Up_Down_Buttons                  RAM(0x000B)

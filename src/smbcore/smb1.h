@@ -160,6 +160,15 @@ struct struct_r01r02r03 {
 };
 
 
+typedef struct struct_azr04 struct_azr04;
+
+struct struct_azr04 {
+  byte a;
+  bool z;
+  byte r04;
+};
+
+
 typedef struct struct_axzr04 struct_axzr04;
 
 struct struct_axzr04 {
@@ -301,7 +310,7 @@ void smb1_PrintVictoryMessages(void);
 void smb1_PlayerEndWorld(void);
 #define PlayerEndWorld smb1_PlayerEndWorld
 
-byte smb1_FloateyNumbersRoutine(byte param_1);
+void smb1_FloateyNumbersRoutine(byte param_1);
 #define FloateyNumbersRoutine smb1_FloateyNumbersRoutine
 
 void smb1_ScreenRoutines(void);
@@ -571,46 +580,43 @@ void smb1_ProcessWhirlpools(void);
 void smb1_FlagpoleRoutine(void);
 #define FlagpoleRoutine smb1_FlagpoleRoutine
 
-byte smb1_JumpspringHandler(byte param_1);
+void smb1_JumpspringHandler(byte param_1);
 #define JumpspringHandler smb1_JumpspringHandler
 
 void smb1_Setup_Vine(byte param_1,byte param_2);
 #define Setup_Vine smb1_Setup_Vine
 
-byte smb1_VineObjectHandler(byte param_1);
+void smb1_VineObjectHandler(byte param_1);
 #define VineObjectHandler smb1_VineObjectHandler
 
 void smb1_ProcessCannons(void);
 #define ProcessCannons smb1_ProcessCannons
 
-byte smb1_BulletBillHandler(byte param_1);
+void smb1_BulletBillHandler(byte param_1);
 #define BulletBillHandler smb1_BulletBillHandler
 
-struct_xc smb1_SpawnHammerObj(void);
+bool smb1_SpawnHammerObj(byte objoff);
 #define SpawnHammerObj smb1_SpawnHammerObj
 
 void smb1_CoinBlock(byte param_1);
 #define CoinBlock smb1_CoinBlock
 
-byte smb1_SetupJumpCoin(byte param_1,byte param_2,byte param_3);
-#define SetupJumpCoin smb1_SetupJumpCoin
-
-byte smb1_JCoinC(byte param_1,byte param_2);
+void smb1_JCoinC(byte param_1,byte param_2);
 #define JCoinC smb1_JCoinC
 
 void smb1_MiscObjectsCore(void);
 #define MiscObjectsCore smb1_MiscObjectsCore
 
-byte smb1_GiveOneCoin(void);
+void smb1_GiveOneCoin(void);
 #define GiveOneCoin smb1_GiveOneCoin
 
-byte smb1_AddToScore(void);
+void smb1_AddToScore(void);
 #define AddToScore smb1_AddToScore
 
-byte smb1_WriteScoreAndCoinTally(void);
+void smb1_WriteScoreAndCoinTally(void);
 #define WriteScoreAndCoinTally smb1_WriteScoreAndCoinTally
 
-byte smb1_WriteDigits(byte param_1);
+void smb1_WriteDigits(byte param_1);
 #define WriteDigits smb1_WriteDigits
 
 void smb1_SetupPowerUp(byte param_1);
@@ -619,7 +625,7 @@ void smb1_SetupPowerUp(byte param_1);
 void smb1_PwrUpJmp(void);
 #define PwrUpJmp smb1_PwrUpJmp
 
-byte smb1_PowerUpObjHandler(void);
+void smb1_PowerUpObjHandler(void);
 #define PowerUpObjHandler smb1_PowerUpObjHandler
 
 void smb1_PlayerHeadCollision(byte param_1,u16 mt_x, u16 mt_y);
@@ -655,13 +661,13 @@ byte smb1_CheckTopOfBlock(u16 mt_x, u16 mt_y);
 void smb1_SpawnBrickChunks(byte param_1);
 #define SpawnBrickChunks smb1_SpawnBrickChunks
 
-byte smb1_BlockObjectsCore(byte param_1);
+void smb1_BlockObjectsCore(byte param_1);
 #define BlockObjectsCore smb1_BlockObjectsCore
 
 void smb1_BlockObjMT_Updater(void);
 #define BlockObjMT_Updater smb1_BlockObjMT_Updater
 
-struct_ax smb1_MoveEnemyHorizontally(byte param_1);
+byte smb1_MoveEnemyHorizontally(byte param_1);
 #define MoveEnemyHorizontally smb1_MoveEnemyHorizontally
 
 byte smb1_MovePlayerHorizontally(void);
@@ -673,28 +679,28 @@ byte smb1_MoveObjectHorizontally(byte param_1);
 void smb1_MovePlayerVertically(void);
 #define MovePlayerVertically smb1_MovePlayerVertically
 
-byte smb1_MoveD_EnemyVertically(byte param_1);
+void smb1_MoveD_EnemyVertically(byte param_1);
 #define MoveD_EnemyVertically smb1_MoveD_EnemyVertically
 
-byte smb1_MoveFallingPlatform(byte param_1);
+void smb1_MoveFallingPlatform(byte param_1);
 #define MoveFallingPlatform smb1_MoveFallingPlatform
 
-byte smb1_MoveRedPTroopaDown(byte param_1);
+void smb1_MoveRedPTroopaDown(byte param_1);
 #define MoveRedPTroopaDown smb1_MoveRedPTroopaDown
 
-byte smb1_MoveRedPTroopaUp(byte param_1);
+void smb1_MoveRedPTroopaUp(byte param_1);
 #define MoveRedPTroopaUp smb1_MoveRedPTroopaUp
 
-byte smb1_MoveDropPlatform(byte param_1);
+void smb1_MoveDropPlatform(byte param_1);
 #define MoveDropPlatform smb1_MoveDropPlatform
 
-byte smb1_MoveEnemySlowVert(byte param_1);
+void smb1_MoveEnemySlowVert(byte param_1);
 #define MoveEnemySlowVert smb1_MoveEnemySlowVert
 
-byte smb1_MoveJ_EnemyVertically(byte param_1);
+void smb1_MoveJ_EnemyVertically(byte param_1);
 #define MoveJ_EnemyVertically smb1_MoveJ_EnemyVertically
 
-byte smb1_SetXMoveAmt(byte param_1,byte param_2,byte param_3);
+void smb1_SetXMoveAmt(byte param_1,byte param_2,byte param_3);
 #define SetXMoveAmt smb1_SetXMoveAmt
 
 void smb1_ImposeGravityBlock(byte param_1);
@@ -703,28 +709,28 @@ void smb1_ImposeGravityBlock(byte param_1);
 void smb1_ImposeGravitySprObj(byte param_1,byte param_2,byte param_3);
 #define ImposeGravitySprObj smb1_ImposeGravitySprObj
 
-byte smb1_MovePlatformDown(byte param_1);
+void smb1_MovePlatformDown(byte param_1);
 #define MovePlatformDown smb1_MovePlatformDown
 
-byte smb1_MovePlatformUp(byte param_1);
+void smb1_MovePlatformUp(byte param_1);
 #define MovePlatformUp smb1_MovePlatformUp
 
 void smb1_ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
 #define ImposeGravity smb1_ImposeGravity
 
-byte smb1_EnemiesAndLoopsCore(byte param_1);
+void smb1_EnemiesAndLoopsCore(byte param_1);
 #define EnemiesAndLoopsCore smb1_EnemiesAndLoopsCore
 
 void smb1_ExecGameLoopback(byte param_1);
 #define ExecGameLoopback smb1_ExecGameLoopback
 
-byte smb1_ProcLoopCommand(byte param_1);
+void smb1_ProcLoopCommand(byte param_1);
 #define ProcLoopCommand smb1_ProcLoopCommand
 
 void smb1_InitEnemyObject(byte param_1);
 #define InitEnemyObject smb1_InitEnemyObject
 
-byte smb1_CheckThreeBytes(void);
+void smb1_CheckThreeBytes(void);
 #define CheckThreeBytes smb1_CheckThreeBytes
 
 void smb1_CheckpointEnemyID(byte param_1);
@@ -805,7 +811,7 @@ void smb1_InitFireworks(byte param_1);
 void smb1_BulletBillCheepCheep(byte param_1);
 #define BulletBillCheepCheep smb1_BulletBillCheepCheep
 
-byte smb1_HandleGroupEnemies(byte param_1);
+void smb1_HandleGroupEnemies(byte param_1);
 #define HandleGroupEnemies smb1_HandleGroupEnemies
 
 void smb1_InitPiranhaPlant(byte param_1);
@@ -850,61 +856,61 @@ void smb1_PlatLiftDown(byte param_1);
 void smb1_PosPlatform(byte param_1,byte param_2);
 #define PosPlatform smb1_PosPlatform
 
-byte smb1_RunEnemyObjectsCore(void);
+void smb1_RunEnemyObjectsCore(byte objoff);
 #define RunEnemyObjectsCore smb1_RunEnemyObjectsCore
 
-byte smb1_RunRetainerObj(byte param_1);
+void smb1_RunRetainerObj(byte param_1);
 #define RunRetainerObj smb1_RunRetainerObj
 
-byte smb1_RunNormalEnemies(byte param_1);
+void smb1_RunNormalEnemies(byte param_1);
 #define RunNormalEnemies smb1_RunNormalEnemies
 
-byte smb1_EnemyMovementSubs(byte param_1);
+void smb1_EnemyMovementSubs(byte param_1);
 #define EnemyMovementSubs smb1_EnemyMovementSubs
 
-byte smb1_RunBowserFlame(byte param_1);
+void smb1_RunBowserFlame(byte param_1);
 #define RunBowserFlame smb1_RunBowserFlame
 
-byte smb1_RunFirebarObj(byte param_1);
+void smb1_RunFirebarObj(byte param_1);
 #define RunFirebarObj smb1_RunFirebarObj
 
-byte smb1_RunSmallPlatform(byte param_1);
+void smb1_RunSmallPlatform(byte param_1);
 #define RunSmallPlatform smb1_RunSmallPlatform
 
-byte smb1_RunLargePlatform(byte param_1);
+void smb1_RunLargePlatform(byte param_1);
 #define RunLargePlatform smb1_RunLargePlatform
 
-byte smb1_LargePlatformSubroutines(byte param_1);
+void smb1_LargePlatformSubroutines(byte param_1);
 #define LargePlatformSubroutines smb1_LargePlatformSubroutines
 
 void smb1_EraseEnemyObject(byte param_1);
 #define EraseEnemyObject smb1_EraseEnemyObject
 
-byte smb1_MovePodoboo(byte param_1);
+void smb1_MovePodoboo(byte param_1);
 #define MovePodoboo smb1_MovePodoboo
 
-byte smb1_ProcHammerBro(byte param_1);
+void smb1_ProcHammerBro(byte param_1);
 #define ProcHammerBro smb1_ProcHammerBro
 
-byte smb1_SetHJ(byte param_1,byte param_2,byte param_3);
+void smb1_SetHJ(byte param_1,byte param_2,byte param_3);
 #define SetHJ smb1_SetHJ
 
-byte smb1_MoveHammerBroXDir(byte param_1);
+void smb1_MoveHammerBroXDir(byte param_1);
 #define MoveHammerBroXDir smb1_MoveHammerBroXDir
 
-byte smb1_MoveNormalEnemy(byte param_1);
+void smb1_MoveNormalEnemy(byte param_1);
 #define MoveNormalEnemy smb1_MoveNormalEnemy
 
-byte smb1_MoveDefeatedEnemy(byte param_1);
+void smb1_MoveDefeatedEnemy(byte param_1);
 #define MoveDefeatedEnemy smb1_MoveDefeatedEnemy
 
-byte smb1_MoveJumpingEnemy(byte param_1);
+void smb1_MoveJumpingEnemy(byte param_1);
 #define MoveJumpingEnemy smb1_MoveJumpingEnemy
 
-byte smb1_ProcMoveRedPTroopa(byte param_1);
+void smb1_ProcMoveRedPTroopa(byte param_1);
 #define ProcMoveRedPTroopa smb1_ProcMoveRedPTroopa
 
-byte smb1_MoveFlyGreenPTroopa(byte param_1);
+void smb1_MoveFlyGreenPTroopa(byte param_1);
 #define MoveFlyGreenPTroopa smb1_MoveFlyGreenPTroopa
 
 void smb1_XMoveCntr_GreenPTroopa(byte param_1);
@@ -913,37 +919,37 @@ void smb1_XMoveCntr_GreenPTroopa(byte param_1);
 void smb1_XMoveCntr_Platform(byte param_1,byte param_2);
 #define XMoveCntr_Platform smb1_XMoveCntr_Platform
 
-struct_xr00 smb1_MoveWithXMCntrs(byte param_1);
+byte smb1_MoveWithXMCntrs(byte objoff);
 #define MoveWithXMCntrs smb1_MoveWithXMCntrs
 
-byte smb1_MoveBloober(byte param_1,bool param_2);
+void smb1_MoveBloober(byte param_1,bool param_2);
 #define MoveBloober smb1_MoveBloober
 
 void smb1_ProcSwimmingB(byte param_1,bool param_2);
 #define ProcSwimmingB smb1_ProcSwimmingB
 
-byte smb1_MoveBulletBill(byte param_1);
+void smb1_MoveBulletBill(byte param_1);
 #define MoveBulletBill smb1_MoveBulletBill
 
-byte smb1_MoveSwimmingCheepCheep(byte param_1);
+void smb1_MoveSwimmingCheepCheep(byte param_1);
 #define MoveSwimmingCheepCheep smb1_MoveSwimmingCheepCheep
 
-byte smb1_ProcFirebar(byte param_1);
+void smb1_ProcFirebar(byte param_1);
 #define ProcFirebar smb1_ProcFirebar
 
-struct_xr06 smb1_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
+byte smb1_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
 #define DrawFirebar_Collision smb1_DrawFirebar_Collision
 
-struct_xr06 smb1_FirebarCollision(byte param_1,byte param_3,byte param_4);
+byte smb1_FirebarCollision(byte param_1,byte param_3,byte param_4);
 #define FirebarCollision smb1_FirebarCollision
 
 struct_r01r02r03 smb1_GetFirebarPosition(byte param_1,byte param_2);
 #define GetFirebarPosition smb1_GetFirebarPosition
 
-byte smb1_MoveFlyingCheepCheep(byte param_1);
+void smb1_MoveFlyingCheepCheep(byte param_1);
 #define MoveFlyingCheepCheep smb1_MoveFlyingCheepCheep
 
-byte smb1_MoveLakitu(byte param_1);
+void smb1_MoveLakitu(byte param_1);
 #define MoveLakitu smb1_MoveLakitu
 
 byte smb1_PlayerLakituDiff(byte param_1,byte param_2,byte param_3,byte param_4);
@@ -952,85 +958,85 @@ byte smb1_PlayerLakituDiff(byte param_1,byte param_2,byte param_3,byte param_4);
 void smb1_BridgeCollapse(void);
 #define BridgeCollapse smb1_BridgeCollapse
 
-byte smb1_MoveD_Bowser(byte param_1);
+void smb1_MoveD_Bowser(byte param_1);
 #define MoveD_Bowser smb1_MoveD_Bowser
 
-byte smb1_RunBowser(byte param_1);
+void smb1_RunBowser(byte param_1);
 #define RunBowser smb1_RunBowser
 
-byte smb1_KillAllEnemies(void);
+void smb1_KillAllEnemies(void);
 #define KillAllEnemies smb1_KillAllEnemies
 
-byte smb1_BowserGfxHandler(byte param_1);
+void smb1_BowserGfxHandler(byte param_1);
 #define BowserGfxHandler smb1_BowserGfxHandler
 
-byte smb1_ProcessBowserHalf(byte param_1);
+void smb1_ProcessBowserHalf(byte param_1);
 #define ProcessBowserHalf smb1_ProcessBowserHalf
 
 byte smb1_SetFlameTimer(void);
 #define SetFlameTimer smb1_SetFlameTimer
 
-byte smb1_ProcBowserFlame(byte param_1);
+void smb1_ProcBowserFlame(byte param_1);
 #define ProcBowserFlame smb1_ProcBowserFlame
 
-byte smb1_RunFireworks(byte param_1);
+void smb1_RunFireworks(byte param_1);
 #define RunFireworks smb1_RunFireworks
 
-byte smb1_RunStarFlagObj(byte param_1);
+void smb1_RunStarFlagObj(byte param_1);
 #define RunStarFlagObj smb1_RunStarFlagObj
 
 void smb1_GameTimerFireworks(byte param_1);
 #define GameTimerFireworks smb1_GameTimerFireworks
 
-byte smb1_AwardGameTimerPoints(byte param_1);
+void smb1_AwardGameTimerPoints(byte param_1);
 #define AwardGameTimerPoints smb1_AwardGameTimerPoints
 
-byte smb1_AwardTimerCastle(void);
+void smb1_AwardTimerCastle(void);
 #define AwardTimerCastle smb1_AwardTimerCastle
 
-byte smb1_EndAreaPoints(void);
+void smb1_EndAreaPoints(void);
 #define EndAreaPoints smb1_EndAreaPoints
 
-byte smb1_RaiseFlagSetoffFWorks(byte param_1);
+void smb1_RaiseFlagSetoffFWorks(byte param_1);
 #define RaiseFlagSetoffFWorks smb1_RaiseFlagSetoffFWorks
 
-byte smb1_DrawStarFlag(byte param_1);
+void smb1_DrawStarFlag(byte param_1);
 #define DrawStarFlag smb1_DrawStarFlag
 
-byte smb1_DelayToAreaEnd(byte param_1);
+void smb1_DelayToAreaEnd(byte param_1);
 #define DelayToAreaEnd smb1_DelayToAreaEnd
 
 void smb1_MovePiranhaPlant(byte param_1);
 #define MovePiranhaPlant smb1_MovePiranhaPlant
 
-byte smb1_BalancePlatform(byte param_1);
+void smb1_BalancePlatform(byte param_1);
 #define BalancePlatform smb1_BalancePlatform
 
-byte smb1_InitPlatformFall(byte param_1);
+void smb1_InitPlatformFall(byte param_1, byte objoff);
 #define InitPlatformFall smb1_InitPlatformFall
 
 void smb1_StopPlatforms(byte param_1,byte param_2);
 #define StopPlatforms smb1_StopPlatforms
 
-byte smb1_PlatformFall(byte param_1,byte param_2);
+void smb1_PlatformFall(byte param_1,byte param_2);
 #define PlatformFall smb1_PlatformFall
 
-byte smb1_YMovingPlatform(byte param_1);
+void smb1_YMovingPlatform(byte param_1);
 #define YMovingPlatform smb1_YMovingPlatform
 
 void smb1_ChkYPCollision(byte param_1);
 #define ChkYPCollision smb1_ChkYPCollision
 
-byte smb1_XMovingPlatform(byte param_1);
+void smb1_XMovingPlatform(byte objoff);
 #define XMovingPlatform smb1_XMovingPlatform
 
 void smb1_PositionPlayerOnHPlat(byte param_1,byte param_2);
 #define PositionPlayerOnHPlat smb1_PositionPlayerOnHPlat
 
-byte smb1_DropPlatform(byte param_1);
+void smb1_DropPlatform(byte param_1);
 #define DropPlatform smb1_DropPlatform
 
-byte smb1_RightPlatform(byte param_1);
+void smb1_RightPlatform(byte objoff);
 #define RightPlatform smb1_RightPlatform
 
 void smb1_MoveLargeLiftPlat(byte param_1);
@@ -1048,7 +1054,7 @@ void smb1_ChkSmallPlatCollision(byte param_1);
 void smb1_OffscreenBoundsCheck(byte param_1);
 #define OffscreenBoundsCheck smb1_OffscreenBoundsCheck
 
-byte smb1_FireballEnemyCollision(byte param_1);
+void smb1_FireballEnemyCollision(byte param_1);
 #define FireballEnemyCollision smb1_FireballEnemyCollision
 
 void smb1_HandleEnemyFBallCol(byte param_1,byte param_2);
@@ -1060,28 +1066,28 @@ void smb1_ShellOrBlockDefeat(byte param_1);
 void smb1_EnemySmackScore(byte param_1,byte param_2);
 #define EnemySmackScore smb1_EnemySmackScore
 
-byte smb1_PlayerHammerCollision(byte param_1);
+void smb1_PlayerHammerCollision(byte param_1);
 #define PlayerHammerCollision smb1_PlayerHammerCollision
 
-byte smb1_HandlePowerUpCollision(byte param_1);
+void smb1_HandlePowerUpCollision(byte param_1);
 #define HandlePowerUpCollision smb1_HandlePowerUpCollision
 
-byte smb1_PlayerEnemyCollision(byte param_1);
+void smb1_PlayerEnemyCollision(byte param_1);
 #define PlayerEnemyCollision smb1_PlayerEnemyCollision
 
-byte smb1_InjurePlayer(void);
+void smb1_InjurePlayer(void);
 #define InjurePlayer smb1_InjurePlayer
 
-byte smb1_ForceInjury(byte param_1);
+void smb1_ForceInjury(byte param_1);
 #define ForceInjury smb1_ForceInjury
 
-byte smb1_SetPRout(byte param_1,byte param_2);
+void smb1_SetPRout(byte param_1,byte param_2);
 #define SetPRout smb1_SetPRout
 
-byte smb1_ChkEnemyFaceRight(byte param_1);
+void smb1_ChkEnemyFaceRight(byte param_1);
 #define ChkEnemyFaceRight smb1_ChkEnemyFaceRight
 
-byte smb1_LInj(byte param_1);
+void smb1_LInj(byte param_1);
 #define LInj smb1_LInj
 
 byte smb1_EnemyFacePlayer(byte param_1);
@@ -1090,7 +1096,7 @@ byte smb1_EnemyFacePlayer(byte param_1);
 void smb1_SetupFloateyNumber(byte param_1,byte param_2);
 #define SetupFloateyNumber smb1_SetupFloateyNumber
 
-byte smb1_EnemiesCollision(byte param_1);
+void smb1_EnemiesCollision(byte param_1);
 #define EnemiesCollision smb1_EnemiesCollision
 
 void smb1_ProcEnemyCollisions(byte param_1,byte param_2,byte param_3);
@@ -1102,16 +1108,13 @@ void smb1_EnemyTurnAround(byte param_1);
 void smb1_RXSpd(byte param_1);
 #define RXSpd smb1_RXSpd
 
-byte smb1_LargePlatformCollision(byte param_1);
+void smb1_LargePlatformCollision(byte param_1);
 #define LargePlatformCollision smb1_LargePlatformCollision
 
-byte smb1_ChkForPlayerC_LargeP(byte param_1);
-#define ChkForPlayerC_LargeP smb1_ChkForPlayerC_LargeP
-
-byte smb1_SmallPlatformCollision(byte param_1);
+void smb1_SmallPlatformCollision(byte param_1);
 #define SmallPlatformCollision smb1_SmallPlatformCollision
 
-byte smb1_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3);
+void smb1_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3, byte objoff);
 #define ProcLPlatCollisions smb1_ProcLPlatCollisions
 
 void smb1_PositionPlayerOnS_Plat(byte param_1,byte param_2);
@@ -1156,7 +1159,7 @@ bool smb1_CheckForCoinMTiles(byte param_1);
 byte smb1_GetMTileAttrib(byte param_1);
 #define GetMTileAttrib smb1_GetMTileAttrib
 
-byte smb1_EnemyToBGCollisionDet(byte param_1);
+void smb1_EnemyToBGCollisionDet(byte param_1);
 #define EnemyToBGCollisionDet smb1_EnemyToBGCollisionDet
 
 void smb1_ChkToStunEnemies(byte param_1,byte param_2);
@@ -1165,13 +1168,13 @@ void smb1_ChkToStunEnemies(byte param_1,byte param_2);
 void smb1_SetStun2(byte param_1);
 #define SetStun2 smb1_SetStun2
 
-byte smb1_ChkForRedKoopa(byte param_1);
+void smb1_ChkForRedKoopa(byte param_1);
 #define ChkForRedKoopa smb1_ChkForRedKoopa
 
-byte smb1_DoEnemySideCheck(byte param_1);
+void smb1_DoEnemySideCheck(byte param_1);
 #define DoEnemySideCheck smb1_DoEnemySideCheck
 
-byte smb1_ChkForBump_HammerBroJ(byte param_1);
+void smb1_ChkForBump_HammerBroJ(byte param_1);
 #define ChkForBump_HammerBroJ smb1_ChkForBump_HammerBroJ
 
 struct_ncr00 smb1_PlayerEnemyDiff(byte param_1);
@@ -1183,43 +1186,43 @@ void smb1_EnemyLanding(byte param_1);
 bool smb1_SubtEnemyYPos(byte param_1);
 #define SubtEnemyYPos smb1_SubtEnemyYPos
 
-byte smb1_EnemyJump(byte param_1);
+void smb1_EnemyJump(byte param_1);
 #define EnemyJump smb1_EnemyJump
 
-byte smb1_HammerBroBGColl(byte param_1);
+void smb1_HammerBroBGColl(byte param_1);
 #define HammerBroBGColl smb1_HammerBroBGColl
 
 void smb1_KillEnemyAboveBlock(byte param_1);
 #define KillEnemyAboveBlock smb1_KillEnemyAboveBlock
 
-struct_axzr04 smb1_ChkUnderEnemy(byte param_1);
+struct_azr04 smb1_ChkUnderEnemy(byte param_1);
 #define ChkUnderEnemy smb1_ChkUnderEnemy
 
 bool smb1_ChkForNonSolids(byte param_1);
 #define ChkForNonSolids smb1_ChkForNonSolids
 
-byte smb1_FireballBGCollision(byte param_1);
+void smb1_FireballBGCollision(byte param_1);
 #define FireballBGCollision smb1_FireballBGCollision
 
-byte smb1_GetFireballBoundBox(byte param_1);
+void smb1_GetFireballBoundBox(byte param_1);
 #define GetFireballBoundBox smb1_GetFireballBoundBox
 
-byte smb1_GetMiscBoundBox(byte param_1);
+void smb1_GetMiscBoundBox(byte param_1);
 #define GetMiscBoundBox smb1_GetMiscBoundBox
 
-byte smb1_GetEnemyBoundBox(byte param_1);
+void smb1_GetEnemyBoundBox(byte param_1);
 #define GetEnemyBoundBox smb1_GetEnemyBoundBox
 
-byte smb1_SmallPlatformBoundBox(byte param_1);
+void smb1_SmallPlatformBoundBox(byte param_1);
 #define SmallPlatformBoundBox smb1_SmallPlatformBoundBox
 
-byte smb1_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
+void smb1_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
 #define GetMaskedOffScrBits smb1_GetMaskedOffScrBits
 
-byte smb1_LargePlatformBoundBox(byte param_1);
+void smb1_LargePlatformBoundBox(byte param_1);
 #define LargePlatformBoundBox smb1_LargePlatformBoundBox
 
-byte smb1_SetupEOffsetFBBox(byte param_1);
+void smb1_SetupEOffsetFBBox(byte param_1);
 #define SetupEOffsetFBBox smb1_SetupEOffsetFBBox
 
 void smb1_MoveBoundBoxOffscreen(byte param_1);
@@ -1228,7 +1231,7 @@ void smb1_MoveBoundBoxOffscreen(byte param_1);
 void smb1_BoundingBoxCore(byte param_1,byte param_2);
 #define BoundingBoxCore smb1_BoundingBoxCore
 
-byte smb1_CheckRightScreenBBox(byte param_1);
+void smb1_CheckRightScreenBBox(byte param_1);
 #define CheckRightScreenBBox smb1_CheckRightScreenBBox
 
 bool smb1_PlayerCollisionCore(byte param_1);
@@ -1236,12 +1239,6 @@ bool smb1_PlayerCollisionCore(byte param_1);
 
 bool smb1_SprObjectCollisionCore(byte param_1,byte param_2);
 #define SprObjectCollisionCore smb1_SprObjectCollisionCore
-
-struct_axzr04 smb1_BlockBufferChk_Enemy(byte param_1,byte param_2,byte param_3);
-#define BlockBufferChk_Enemy smb1_BlockBufferChk_Enemy
-
-struct_axz smb1_BlockBufferChk_FBall(byte param_1);
-#define BlockBufferChk_FBall smb1_BlockBufferChk_FBall
 
 struct blockbuffer_colli_result smb1_BlockBufferColli_Feet(byte param_1);
 #define BlockBufferColli_Feet smb1_BlockBufferColli_Feet
@@ -1258,28 +1255,28 @@ struct blockbuffer_colli_result smb1_BlockBufferCollision(byte param_1,byte para
 void smb1_DrawVine(byte param_1);
 #define DrawVine smb1_DrawVine
 
-byte smb1_DrawHammer(byte param_1);
+void smb1_DrawHammer(byte objoff);
 #define DrawHammer smb1_DrawHammer
 
 void smb1_FlagpoleGfxHandler(byte param_1);
 #define FlagpoleGfxHandler smb1_FlagpoleGfxHandler
 
-byte smb1_DrawLargePlatform(byte param_1);
+void smb1_DrawLargePlatform(byte param_1);
 #define DrawLargePlatform smb1_DrawLargePlatform
 
-byte smb1_JCoinGfxHandler(byte param_1);
+void smb1_JCoinGfxHandler(byte param_1);
 #define JCoinGfxHandler smb1_JCoinGfxHandler
 
-byte smb1_DrawPowerUp(void);
+void smb1_DrawPowerUp(byte objoff);
 #define DrawPowerUp smb1_DrawPowerUp
 
-byte smb1_EnemyGfxHandler(byte param_1);
+void smb1_EnemyGfxHandler(byte param_1);
 #define EnemyGfxHandler smb1_EnemyGfxHandler
 
-byte smb1_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
+void smb1_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8,byte param_9);
 #define DrawEnemyObject smb1_DrawEnemyObject
 
-byte smb1_SprObjectOffscrChk(void);
+void smb1_SprObjectOffscrChk(byte objoff);
 #define SprObjectOffscrChk smb1_SprObjectOffscrChk
 
 struct_xyr02 smb1_DrawEnemyObjRow(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6);
@@ -1288,7 +1285,7 @@ struct_xyr02 smb1_DrawEnemyObjRow(byte param_1,byte param_2,byte param_3,byte pa
 struct_xyr02 smb1_DrawOneSpriteRow(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
 #define DrawOneSpriteRow smb1_DrawOneSpriteRow
 
-byte smb1_DrawBlock(byte param_1);
+void smb1_DrawBlock(byte param_1);
 #define DrawBlock smb1_DrawBlock
 
 void smb1_DrawBrickChunks(byte param_1);
@@ -1303,10 +1300,10 @@ void smb1_DrawFirebar(byte param_1);
 void smb1_DrawExplosion_Fireball(byte param_1);
 #define DrawExplosion_Fireball smb1_DrawExplosion_Fireball
 
-byte smb1_DrawExplosion_Fireworks(byte param_1,byte param_2);
+void smb1_DrawExplosion_Fireworks(byte param_1,byte param_2);
 #define DrawExplosion_Fireworks smb1_DrawExplosion_Fireworks
 
-byte smb1_DrawSmallPlatform(byte param_1);
+void smb1_DrawSmallPlatform(byte param_1);
 #define DrawSmallPlatform smb1_DrawSmallPlatform
 
 void smb1_DrawBubble(byte param_1);
@@ -1360,19 +1357,19 @@ void smb1_ChkForPlayerAttrib(void);
 byte smb1_RelativePlayerPosition(void);
 #define RelativePlayerPosition smb1_RelativePlayerPosition
 
-byte smb1_RelativeBubblePosition(byte param_1);
+void smb1_RelativeBubblePosition(byte param_1);
 #define RelativeBubblePosition smb1_RelativeBubblePosition
 
-byte smb1_RelativeFireballPosition(byte param_1);
+void smb1_RelativeFireballPosition(byte param_1);
 #define RelativeFireballPosition smb1_RelativeFireballPosition
 
-byte smb1_RelativeMiscPosition(byte param_1);
+void smb1_RelativeMiscPosition(byte param_1);
 #define RelativeMiscPosition smb1_RelativeMiscPosition
 
-byte smb1_RelativeEnemyPosition(byte param_1);
+void smb1_RelativeEnemyPosition(byte param_1);
 #define RelativeEnemyPosition smb1_RelativeEnemyPosition
 
-byte smb1_RelativeBlockPosition(byte param_1);
+void smb1_RelativeBlockPosition(byte param_1);
 #define RelativeBlockPosition smb1_RelativeBlockPosition
 
 void smb1_GetObjRelativePosition(byte param_1,byte param_2);
@@ -1381,25 +1378,25 @@ void smb1_GetObjRelativePosition(byte param_1,byte param_2);
 void smb1_GetPlayerOffscreenBits(void);
 #define GetPlayerOffscreenBits smb1_GetPlayerOffscreenBits
 
-byte smb1_GetFireballOffscreenBits(byte param_1);
+void smb1_GetFireballOffscreenBits(byte param_1);
 #define GetFireballOffscreenBits smb1_GetFireballOffscreenBits
 
-byte smb1_GetBubbleOffscreenBits(byte param_1);
+void smb1_GetBubbleOffscreenBits(byte param_1);
 #define GetBubbleOffscreenBits smb1_GetBubbleOffscreenBits
 
-byte smb1_GetMiscOffscreenBits(byte param_1);
+void smb1_GetMiscOffscreenBits(byte param_1);
 #define GetMiscOffscreenBits smb1_GetMiscOffscreenBits
 
 byte smb1_GetProperObjOffset(byte param_1,byte param_2);
 #define GetProperObjOffset smb1_GetProperObjOffset
 
-byte smb1_GetEnemyOffscreenBits(byte param_1);
+void smb1_GetEnemyOffscreenBits(byte param_1);
 #define GetEnemyOffscreenBits smb1_GetEnemyOffscreenBits
 
-byte smb1_GetBlockOffscreenBits(byte param_1);
+void smb1_GetBlockOffscreenBits(byte param_1);
 #define GetBlockOffscreenBits smb1_GetBlockOffscreenBits
 
-byte smb1_GetOffScreenBitsSet(byte param_1,byte param_2);
+void smb1_GetOffScreenBitsSet(byte param_1,byte param_2);
 #define GetOffScreenBitsSet smb1_GetOffScreenBitsSet
 
 byte smb1_GetXOffscreenBits(byte param_1);
