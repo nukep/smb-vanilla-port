@@ -399,7 +399,6 @@ void VictoryMode(void) {
     if (SMB2J_ONLY && (WorldNumber == 7) && (OperMode_Task == 5 || OperMode_Task == 0xd)) {
       return;
     }
-    ObjectOffset = 0;
     EnemiesAndLoopsCore(0);
   }
   RelativePlayerPosition();
@@ -1685,7 +1684,6 @@ void GameCoreRoutine(void) {
   ProcFireball_Bubble();
 
   for (int i = 0; i < 6; i++) {
-    ObjectOffset = i;
     EnemiesAndLoopsCore(i);
     FloateyNumbersRoutine(i);
   }
@@ -1731,7 +1729,6 @@ void GameCoreRoutine(void) {
 
   PreviousA_B_Buttons = A_B_Buttons;
   Left_Right_Buttons = 0;
-  ObjectOffset = 5;
   UpdScrollVar();
 }
 
@@ -3638,7 +3635,6 @@ void BumpBlock(const u16 mt_x, const u16 mt_y, const byte param_2) {
   case BUMPBLOCK_COINBLOCK_2:
   case BUMPBLOCK_COINBLOCK_3:
     CoinBlock(bVar2);
-    ObjectOffset = bVar2;
     return;
 
   case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
@@ -3781,8 +3777,7 @@ byte CheckTopOfBlock(const u16 mt_x, const u16 mt_y) {
   Misc_X_Position[JumpCoinMiscOffset] = mt_x * 16 + 5;
   Misc_Y_Position[JumpCoinMiscOffset] = mt_y_above * 16 + 32 + (mt_x & 0x10 ? 1 : 0);
   JCoinC(sprdataoffset_ctrl, JumpCoinMiscOffset);
-  ObjectOffset = sprdataoffset_ctrl;
-  return ObjectOffset;
+  return sprdataoffset_ctrl;
 }
 
 
@@ -6381,7 +6376,7 @@ byte PlayerLakituDiff(const byte param_1, const byte param_2, const byte param_3
 // Signature: [] -> []
 void BridgeCollapse(void) {
   if (Enemy_ID[BowserFront_Offset] == 0x2d) {
-    ObjectOffset = BowserFront_Offset;
+    const byte objoff = BowserFront_Offset;
     if (Enemy_State[BowserFront_Offset] == 0) {
       BowserFeetCounter -= 1;
       if (BowserFeetCounter == 0) {
@@ -6408,16 +6403,16 @@ void BridgeCollapse(void) {
         NoiseSoundQueue = 1;
         BridgeCollapseOffset += 1;
         if (BridgeCollapseOffset == 0xf) {
-          InitVStf(ObjectOffset);
-          Enemy_State[ObjectOffset] = 0x40;
+          InitVStf(objoff);
+          Enemy_State[objoff] = 0x40;
           Square2SoundQueue = 0x80;
         }
       }
-      BowserGfxHandler(ObjectOffset);
+      BowserGfxHandler(objoff);
       return;
     }
-    if (((Enemy_State[ObjectOffset] & 0x40) != 0) && (Enemy_Y_Position[ObjectOffset] < 0xe0)) {
-      MoveD_Bowser(ObjectOffset);
+    if (((Enemy_State[objoff] & 0x40) != 0) && (Enemy_Y_Position[objoff] < 0xe0)) {
+      MoveD_Bowser(objoff);
       return;
     }
   }

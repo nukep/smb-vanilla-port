@@ -297,9 +297,6 @@ void AreaParserTaskHandler(void) {
   case AREAPARSERTASKS_AREAPARSERCORE_1:
   case AREAPARSERTASKS_AREAPARSERCORE_2:
     AreaParserCore();
-    // note: setting this is likely not needed
-    // setting to random values doesn't fail regression tests
-    ObjectOffset = 0;
     break;
 
   default:

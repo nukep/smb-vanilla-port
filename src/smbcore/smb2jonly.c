@@ -1099,7 +1099,6 @@ void MushroomRetainersForW8(void) {
       Enemy_Y_Position[0] = MRetainerYPos[BlueColorOfs];
       Enemy_Rel_XPos = MRetainerXPos[BlueColorOfs];
       WorldNumber = 0;
-      ObjectOffset = 0;
       EnemyGfxHandler(0);
     }
   } while (BlueColorOfs -= 1, BlueColorOfs != 0);
