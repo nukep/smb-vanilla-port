@@ -754,7 +754,7 @@ void smb2j_InitBloober(byte param_1);
 byte smb2j_SmallBBox(byte param_1);
 #define SmallBBox smb2j_SmallBBox
 
-void smb2j_InitRedPTroopa(byte param_1,bool param_2);
+void smb2j_InitRedPTroopa(byte param_1);
 #define InitRedPTroopa smb2j_InitRedPTroopa
 
 byte smb2j_InitVStf(byte param_1);
@@ -1048,7 +1048,7 @@ void smb2j_OffscreenBoundsCheck(byte param_1);
 void smb2j_FireballEnemyCollision(byte param_1);
 #define FireballEnemyCollision smb2j_FireballEnemyCollision
 
-void smb2j_HandleEnemyFBallCol(byte param_1,byte param_2);
+void smb2j_HandleEnemyFBallCol(byte param_1);
 #define HandleEnemyFBallCol smb2j_HandleEnemyFBallCol
 
 void smb2j_ShellOrBlockDefeat(byte param_1);
@@ -1093,7 +1093,7 @@ void smb2j_SetupFloateyNumber(byte param_1,byte param_2);
 void smb2j_EnemiesCollision(byte param_1);
 #define EnemiesCollision smb2j_EnemiesCollision
 
-void smb2j_ProcEnemyCollisions(byte param_1,byte param_2,byte param_3);
+void smb2j_ProcEnemyCollisions(byte param_1,byte param_2);
 #define ProcEnemyCollisions smb2j_ProcEnemyCollisions
 
 void smb2j_EnemyTurnAround(byte param_1);

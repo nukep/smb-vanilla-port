@@ -763,7 +763,7 @@ void smb1_InitBloober(byte param_1);
 byte smb1_SmallBBox(byte param_1);
 #define SmallBBox smb1_SmallBBox
 
-void smb1_InitRedPTroopa(byte param_1,bool param_2);
+void smb1_InitRedPTroopa(byte param_1);
 #define InitRedPTroopa smb1_InitRedPTroopa
 
 byte smb1_InitVStf(byte param_1);
@@ -1057,7 +1057,7 @@ void smb1_OffscreenBoundsCheck(byte param_1);
 void smb1_FireballEnemyCollision(byte param_1);
 #define FireballEnemyCollision smb1_FireballEnemyCollision
 
-void smb1_HandleEnemyFBallCol(byte param_1,byte param_2);
+void smb1_HandleEnemyFBallCol(byte param_1);
 #define HandleEnemyFBallCol smb1_HandleEnemyFBallCol
 
 void smb1_ShellOrBlockDefeat(byte param_1);
@@ -1099,7 +1099,7 @@ void smb1_SetupFloateyNumber(byte param_1,byte param_2);
 void smb1_EnemiesCollision(byte param_1);
 #define EnemiesCollision smb1_EnemiesCollision
 
-void smb1_ProcEnemyCollisions(byte param_1,byte param_2,byte param_3);
+void smb1_ProcEnemyCollisions(byte param_1,byte param_2);
 #define ProcEnemyCollisions smb1_ProcEnemyCollisions
 
 void smb1_EnemyTurnAround(byte param_1);

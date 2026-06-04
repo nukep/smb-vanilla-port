@@ -2765,10 +2765,10 @@ static inline void check_and_setup_bubble(const byte param_1, const bool random,
 // SMB:b6f9
 // SM2MAIN:8265
 // Signature: [X] -> []
-void BubbleCheck(const byte param_1) {
+void BubbleCheck(const byte objoff) {
   const bool docheck = true;
   const bool bug = false;
-  check_and_setup_bubble(param_1, PseudoRandomBitReg[param_1 + 1] & 1, docheck, bug);
+  check_and_setup_bubble(objoff, PseudoRandomBitReg[objoff + 1] & 1, docheck, bug);
 }
 
 
@@ -3928,11 +3928,11 @@ void MovePlayerVertically(void) {
 // SMB:bf63
 // SM2MAIN:8b34
 // Signature: [X] -> []
-void MoveD_EnemyVertically(const byte param_1) {
-  if (Enemy_State[param_1] == 5) {
-    MoveFallingPlatform(param_1);
+void MoveD_EnemyVertically(const byte objoff) {
+  if (Enemy_State[objoff] == 5) {
+    MoveFallingPlatform(objoff);
   } else {
-    SetXMoveAmt(3, param_1, 0x3d);
+    SetXMoveAmt(3, objoff, 0x3d);
   }
 }
 
@@ -3948,40 +3948,40 @@ void MoveFallingPlatform(const byte param_1) {
 // SMB:bf70
 // SM2MAIN:8b41
 // Signature: [X] -> []
-void MoveRedPTroopaDown(const byte param_1) {
-  ImposeGravity(0, param_1 + 1, 3, 6, 2);
+void MoveRedPTroopaDown(const byte objoff) {
+  ImposeGravity(0, objoff + 1, 3, 6, 2);
 }
 
 
 // SMB:bf75
 // SM2MAIN:8b46
 // Signature: [X] -> []
-void MoveRedPTroopaUp(const byte param_1) {
-  ImposeGravity(1, param_1 + 1, 3, 6, 2);
+void MoveRedPTroopaUp(const byte objoff) {
+  ImposeGravity(1, objoff + 1, 3, 6, 2);
 }
 
 
 // SMB:bf88
 // SM2MAIN:8b59
 // Signature: [X] -> []
-void MoveDropPlatform(const byte param_1) {
-  SetXMoveAmt(2, param_1, 0x7f);
+void MoveDropPlatform(const byte objoff) {
+  SetXMoveAmt(2, objoff, 0x7f);
 }
 
 
 // SMB:bf8c
 // SM2MAIN:8b5d
 // Signature: [X] -> []
-void MoveEnemySlowVert(const byte param_1) {
-  SetXMoveAmt(2, param_1, 0xf);
+void MoveEnemySlowVert(const byte objoff) {
+  SetXMoveAmt(2, objoff, 0xf);
 }
 
 
 // SMB:bf92
 // SM2MAIN:8b63
 // Signature: [X] -> []
-void MoveJ_EnemyVertically(const byte param_1) {
-  SetXMoveAmt(3, param_1, 0x1c);
+void MoveJ_EnemyVertically(const byte objoff) {
+  SetXMoveAmt(3, objoff, 0x1c);
 }
 
 
@@ -4016,18 +4016,18 @@ void ImposeGravitySprObj(const byte param_1, const byte param_2, const byte para
 // SMB:bfb4
 // SM2MAIN:8b85
 // Signature: [X] -> []
-void MovePlatformDown(const byte param_1) {
-  const byte bVar1 = (Enemy_ID[param_1] == 0x29) ? 9 : 5;
-  ImposeGravity(0, param_1 + 1, bVar1, 10, 3);
+void MovePlatformDown(const byte objoff) {
+  const byte bVar1 = (Enemy_ID[objoff] == 0x29) ? 9 : 5;
+  ImposeGravity(0, objoff + 1, bVar1, 10, 3);
 }
 
 
 // SMB:bfb7
 // SM2MAIN:8b88
 // Signature: [X] -> []
-void MovePlatformUp(const byte param_1) {
-  const byte bVar1 = (Enemy_ID[param_1] == 0x29) ? 9 : 5;
-  ImposeGravity(1, param_1 + 1, bVar1, 10, 3);
+void MovePlatformUp(const byte objoff) {
+  const byte bVar1 = (Enemy_ID[objoff] == 0x29) ? 9 : 5;
+  ImposeGravity(1, objoff + 1, bVar1, 10, 3);
 }
 
 
@@ -4355,6 +4355,11 @@ void CheckpointEnemyID(const byte param_1) {
     EnemyOffscrBitsMasked[param_1] = 1;
   }
 
+  // For most of these, param_1 = objoff ($08)
+  // exceptions may be:
+  // Enemy_ID = 0,2,6 (HandleGroupEnemies)
+  const byte objoff = param_1;
+
   switch (bVar1) {
   case CHECKPOINTENEMYID_INITNORMALENEMY_1:
   case CHECKPOINTENEMYID_INITNORMALENEMY_2:
@@ -4363,17 +4368,17 @@ void CheckpointEnemyID(const byte param_1) {
     return;
 
   case CHECKPOINTENEMYID_INITREDKOOPA:
-    InitRedKoopa(param_1);
+    InitRedKoopa(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITPARANHAPLANT_SMB2J:
     if (SMB2J_ONLY) {
-      InitPiranhaPlant(param_1);
+      InitPiranhaPlant(objoff);
     }
     return;
 
   case CHECKPOINTENEMYID_INITHAMMERBRO:
-    InitHammerBro(param_1);
+    InitHammerBro(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITGOOMBA:
@@ -4381,11 +4386,11 @@ void CheckpointEnemyID(const byte param_1) {
     return;
 
   case CHECKPOINTENEMYID_INITBLOOBER:
-    InitBloober(param_1);
+    InitBloober(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITBULLETBILL:
-    InitBulletBill(param_1);
+    InitBulletBill(objoff);
     return;
 
   case CHECKPOINTENEMYID_NOOP_1:
@@ -4410,31 +4415,31 @@ void CheckpointEnemyID(const byte param_1) {
 
   case CHECKPOINTENEMYID_INITCHEEPCHEEP_1:
   case CHECKPOINTENEMYID_INITCHEEPCHEEP_2:
-    InitCheepCheep(param_1);
+    InitCheepCheep(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITPODOBOO:
-    InitPodoboo(param_1);
+    InitPodoboo(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITPIRANHAPLANT:
-    InitPiranhaPlant(param_1);
+    InitPiranhaPlant(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITJUMPGPTROOPA:
-    InitJumpGPTroopa(param_1);
+    InitJumpGPTroopa(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITREDPTROOPA:
-    InitRedPTroopa(param_1, false);
+    InitRedPTroopa(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITHORIZFLYSWIMENEMY:
-    InitHorizFlySwimEnemy(param_1);
+    InitHorizFlySwimEnemy(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITLAKITU:
-    InitLakitu(param_1);
+    InitLakitu(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITENEMYFRENZY_1:
@@ -4442,59 +4447,59 @@ void CheckpointEnemyID(const byte param_1) {
   case CHECKPOINTENEMYID_INITENEMYFRENZY_3:
   case CHECKPOINTENEMYID_INITENEMYFRENZY_4:
   case CHECKPOINTENEMYID_INITENEMYFRENZY_5:
-    InitEnemyFrenzy(param_1);
+    InitEnemyFrenzy(objoff);
     return;
 
   case CHECKPOINTENEMYID_ENDFRENZY:
-    EndFrenzy(param_1);
+    EndFrenzy(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITSHORTFIREBAR_1:
   case CHECKPOINTENEMYID_INITSHORTFIREBAR_2:
   case CHECKPOINTENEMYID_INITSHORTFIREBAR_3:
   case CHECKPOINTENEMYID_INITSHORTFIREBAR_4:
-    InitShortFirebar(param_1);
+    InitShortFirebar(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITLONGFIREBAR:
-    InitLongFirebar(param_1);
+    InitLongFirebar(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITBALPLATFORM:
-    InitBalPlatform(param_1);
+    InitBalPlatform(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITVERTPLATFORM:
-    InitVertPlatform(param_1);
+    InitVertPlatform(objoff);
     return;
 
   case CHECKPOINTENEMYID_LARGELIFTUP:
-    LargeLiftUp(param_1);
+    LargeLiftUp(objoff);
     return;
 
   case CHECKPOINTENEMYID_LARGELIFTDOWN:
-    LargeLiftDown(param_1);
+    LargeLiftDown(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITHORIPLATFORM_1:
   case CHECKPOINTENEMYID_INITHORIPLATFORM_2:
-    InitHoriPlatform(param_1);
+    InitHoriPlatform(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITDROPPLATFORM:
-    InitDropPlatform(param_1);
+    InitDropPlatform(objoff);
     return;
 
   case CHECKPOINTENEMYID_PLATLIFTUP:
-    PlatLiftUp(param_1);
+    PlatLiftUp(objoff);
     return;
 
   case CHECKPOINTENEMYID_PLATLIFTDOWN:
-    PlatLiftDown(param_1);
+    PlatLiftDown(objoff);
     return;
 
   case CHECKPOINTENEMYID_INITBOWSER:
-    InitBowser(param_1);
+    InitBowser(objoff);
     return;
 
   case CHECKPOINTENEMYID_PWRUPJMP:
@@ -4504,11 +4509,11 @@ void CheckpointEnemyID(const byte param_1) {
   case CHECKPOINTENEMYID_SETUP_VINE:
     // NES note: Y is set to 0x60 by the jump engine and used by Setup_Vine. This is a bug.
     // The bug is worked around in Setup_Vine.
-    Setup_Vine(param_1, 0x60);
+    Setup_Vine(objoff, 0x60);
     return;
 
   case CHECKPOINTENEMYID_INITRETAINEROBJ:
-    InitRetainerObj(param_1);
+    InitRetainerObj(objoff);
     return;
 
   default:
@@ -4529,12 +4534,12 @@ void InitGoomba(const byte param_1) {
 // SMB:c2f7
 // SM2MAIN:8edb
 // Signature: [X] -> []
-void InitPodoboo(const byte param_1) {
-  Enemy_Y_HighPos[param_1] = 2;
-  Enemy_Y_Position[param_1] = 2;
-  EnemyIntervalTimer[param_1] = 1;
-  Enemy_State[param_1] = 0;
-  SmallBBox(param_1);
+void InitPodoboo(const byte objoff) {
+  Enemy_Y_HighPos[objoff] = 2;
+  Enemy_Y_Position[objoff] = 2;
+  EnemyIntervalTimer[objoff] = 1;
+  Enemy_State[objoff] = 0;
+  SmallBBox(objoff);
 }
 
 
@@ -4560,24 +4565,24 @@ void InitNormalEnemy(const byte param_1) {
 // SMB:c31e
 // SM2MAIN:8f02
 // Signature: [X] -> []
-void InitRedKoopa(const byte param_1) {
-  InitNormalEnemy(param_1);
-  Enemy_State[param_1] = 1;
+void InitRedKoopa(const byte objoff) {
+  InitNormalEnemy(objoff);
+  Enemy_State[objoff] = 1;
 }
 
 
 // SMB:c328
 // SM2MAIN:8f0c
 // Signature: [X] -> []
-void InitHammerBro(const byte param_1) {
-  HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = 0;
-  SpriteVarData1[param_1] = 0;
+void InitHammerBro(const byte objoff) {
+  HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] = 0;
+  SpriteVarData1[objoff] = 0;
   if (SMB1_ONLY || (SMB2J_ONLY && WorldNumber < 6)) {
-    EnemyIntervalTimer[param_1] = HBroWalkingTimerData[SecondaryHardMode];
+    EnemyIntervalTimer[objoff] = HBroWalkingTimerData[SecondaryHardMode];
   }
-  Enemy_BoundBoxCtrl[param_1] = 0xb;
-  Enemy_MovingDir[param_1] = 2;
-  InitVStf(param_1);
+  Enemy_BoundBoxCtrl[objoff] = 0xb;
+  Enemy_MovingDir[objoff] = 2;
+  InitVStf(objoff);
 }
 
 
@@ -4595,9 +4600,9 @@ void InitHorizFlySwimEnemy(const byte param_1) {
 // SMB:c342
 // SM2MAIN:8f2d
 // Signature: [X] -> []
-void InitBloober(const byte param_1) {
-  SpriteVarData1[param_1] = 0;
-  SmallBBox(param_1);
+void InitBloober(const byte objoff) {
+  SpriteVarData1[objoff] = 0;
+  SmallBBox(objoff);
 }
 
 
@@ -4613,17 +4618,20 @@ byte SmallBBox(const byte param_1) {
 
 // SMB:c34a
 // SM2MAIN:8f35
-// Signature: [X, C] -> []
-void InitRedPTroopa(const byte param_1, const bool param_2) {
+// Signature: [X] -> []
+void InitRedPTroopa(const byte objoff) {
   char cVar1 = 0x30;
-  Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] = Enemy_Y_Position[param_1];
-  if (Enemy_Y_Position[param_1] >= 0x80) {
+  Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[objoff] = Enemy_Y_Position[objoff];
+  if (Enemy_Y_Position[objoff] >= 0x80) {
     cVar1 = -0x20;
   }
-  SpriteVarData1[param_1] = cVar1 + Enemy_Y_Position[param_1] + param_2;
-  Enemy_BoundBoxCtrl[param_1] = 3;
-  Enemy_MovingDir[param_1] = 2;
-  InitVStf(param_1);
+
+  // NES note: Carry flag is set to 0 by the caller. ADC without carry is here.
+  SpriteVarData1[objoff] = cVar1 + Enemy_Y_Position[objoff];
+
+  Enemy_BoundBoxCtrl[objoff] = 3;
+  Enemy_MovingDir[objoff] = 2;
+  InitVStf(objoff);
 }
 
 
@@ -4640,30 +4648,30 @@ byte InitVStf(const byte param_1) {
 // SMB:c36b
 // SM2MAIN:8f56
 // Signature: [X] -> []
-void InitBulletBill(const byte param_1) {
-  Enemy_MovingDir[param_1] = 2;
-  Enemy_BoundBoxCtrl[param_1] = 9;
+void InitBulletBill(const byte objoff) {
+  Enemy_MovingDir[objoff] = 2;
+  Enemy_BoundBoxCtrl[objoff] = 9;
 }
 
 
 // SMB:c375
 // SM2MAIN:8f60
 // Signature: [X] -> []
-void InitCheepCheep(const byte param_1) {
-  SmallBBox(param_1);
-  SpriteVarData1[param_1] = PseudoRandomBitReg[param_1] & 0x10;
-  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = Enemy_Y_Position[param_1];
+void InitCheepCheep(const byte objoff) {
+  SmallBBox(objoff);
+  SpriteVarData1[objoff] = PseudoRandomBitReg[objoff] & 0x10;
+  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff] = Enemy_Y_Position[objoff];
 }
 
 
 // SMB:c385
 // SM2MAIN:8f70
 // Signature: [X] -> []
-void InitLakitu(const byte param_1) {
+void InitLakitu(const byte objoff) {
   if (EnemyFrenzyBuffer == 0) {
-    SetupLakitu(param_1);
+    SetupLakitu(objoff);
   } else {
-    EraseEnemyObject(param_1);
+    EraseEnemyObject(objoff);
   }
 }
 
@@ -4672,6 +4680,8 @@ void InitLakitu(const byte param_1) {
 // SM2MAIN:8f75
 // Signature: [X] -> []
 void SetupLakitu(const byte param_1) {
+  // param_1 is not necessarily objoff
+
   LakituReappearTimer = 0;
   InitHorizFlySwimEnemy(param_1);
   Enemy_BoundBoxCtrl[param_1] = 3;
@@ -4681,60 +4691,60 @@ void SetupLakitu(const byte param_1) {
 // SMB:c3a4
 // SM2MAIN:8f8f
 // Signature: [X] -> []
-void LakituAndSpinyHandler(const byte param_1) {
-  byte bVar1;
-  byte bVar3;
+void LakituAndSpinyHandler(const byte objoff) {
+  if (FrenzyEnemyTimer != 0) {
+    return;
+  }
 
-  if ((FrenzyEnemyTimer == 0) && (param_1 < 5)) {
-    FrenzyEnemyTimer = 0x80;
-    for (int i = 4; i >= 0; i--) {
-      if (Enemy_ID[i] == 0x11) {
-        if (SprObject_Y_Position[0] < 0x2c) {
-          FrenzyEnemyTimer = 0x80;
-          return;
-        }
-        if (Enemy_State[i] != 0) {
-          FrenzyEnemyTimer = 0x80;
-          return;
-        }
-        Enemy_PageLoc[param_1] = Enemy_PageLoc[i];
-        Enemy_X_Position[param_1] = Enemy_X_Position[i];
-        Enemy_Y_HighPos[param_1] = 1;
-        Enemy_Y_Position[param_1] = Enemy_Y_Position[i] - 8;
-        bVar1 = PseudoRandomBitReg[param_1] & 3;
+  if (objoff >= 5) {
+    return;
+  }
 
-        // NES note: The original uses ObjectOffset ($08) from this point onward instead of X,
-        // but it's always the same as the previous X register value in practice
+  FrenzyEnemyTimer = 0x80;
 
-        PlayerLakituDiff(param_1, PRDiffAdjustData[bVar1], PRDiffAdjustData[bVar1 + 4],
-                         PRDiffAdjustData[bVar1 + 8]);
-        bVar1 = SmallBBox(param_1);
-        bVar3 = 2;
-        SpriteVarData1[param_1] = bVar1;
-        if (bVar1 < 0x80) {
-          bVar3 = 1;
-        }
-        Enemy_MovingDir[param_1] = bVar3;
-        SpriteVarData2[param_1] = 0xfd;
-        Enemy_Flag[param_1] = 1;
-        Enemy_State[param_1] = 5;
+  for (int i = 4; i >= 0; i--) {
+    if (Enemy_ID[i] == 0x11) {
+      if (SprObject_Y_Position[0] < 0x2c) {
         return;
       }
+      if (Enemy_State[i] != 0) {
+        return;
+      }
+      Enemy_PageLoc[objoff] = Enemy_PageLoc[i];
+      Enemy_X_Position[objoff] = Enemy_X_Position[i];
+      Enemy_Y_HighPos[objoff] = 1;
+      Enemy_Y_Position[objoff] = Enemy_Y_Position[i] - 8;
+
+      const byte rng = PseudoRandomBitReg[objoff] & 3;
+
+      PlayerLakituDiff(objoff,
+                       PRDiffAdjustData[rng],
+                       PRDiffAdjustData[rng + 4],
+                       PRDiffAdjustData[rng + 8]);
+
+      const byte bVar1 = SmallBBox(objoff);
+      SpriteVarData1[objoff] = bVar1;
+      Enemy_MovingDir[objoff] = (bVar1 < 0x80) ? 1 : 2;
+      SpriteVarData2[objoff] = 0xfd;
+      Enemy_Flag[objoff] = 1;
+      Enemy_State[objoff] = 5;
+      return;
     }
-    LakituReappearTimer += 1;
-    if (LakituReappearTimer > ssw(6, 2)) {
-      for (int i = 4; i >= 0; i--) {
-        if (Enemy_Flag[i] == 0) {
-          Enemy_State[i] = 0;
-          Enemy_ID[i] = 0x11;
-          SetupLakitu(i);
-          bVar1 = 0x20;
-          if (SMB2J_ONLY && (HardWorldFlag != 0 || WorldNumber >= 6)) {
-            bVar1 = 0x60;
-          }
-          PutAtRightExtent(bVar1, i);
-          return;
+  }
+
+  LakituReappearTimer += 1;
+  if (LakituReappearTimer > ssw(6, 2)) {
+    for (int i = 4; i >= 0; i--) {
+      if (Enemy_Flag[i] == 0) {
+        Enemy_State[i] = 0;
+        Enemy_ID[i] = 0x11;
+        SetupLakitu(i);
+        byte bVar1 = 0x20;
+        if (SMB2J_ONLY && (HardWorldFlag != 0 || WorldNumber >= 6)) {
+          bVar1 = 0x60;
         }
+        PutAtRightExtent(bVar1, i);
+        return;
       }
     }
   }
@@ -4744,53 +4754,53 @@ void LakituAndSpinyHandler(const byte param_1) {
 // SMB:c459
 // SM2MAIN:9052
 // Signature: [X] -> []
-void InitLongFirebar(const byte param_1) {
-  DuplicateEnemyObj(param_1);
-  InitShortFirebar(param_1);
+void InitLongFirebar(const byte objoff) {
+  DuplicateEnemyObj(objoff);
+  InitShortFirebar(objoff);
 }
 
 
 // SMB:c45c
 // SM2MAIN:9055
 // Signature: [X] -> []
-void InitShortFirebar(const byte param_1) {
-  SpriteVarData1[param_1] = 0;
-  FirebarSpinSpeed[param_1] = FirebarSpinSpdData[(byte)(Enemy_ID[param_1] - 0x1b)];
-  FirebarSpinDirection[param_1] = FirebarSpinDirData[(byte)(Enemy_ID[param_1] - 0x1b)];
-  Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 4;
+void InitShortFirebar(const byte objoff) {
+  SpriteVarData1[objoff] = 0;
+  FirebarSpinSpeed[objoff] = FirebarSpinSpdData[(byte)(Enemy_ID[objoff] - 0x1b)];
+  FirebarSpinDirection[objoff] = FirebarSpinDirData[(byte)(Enemy_ID[objoff] - 0x1b)];
+  Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] + 4;
 
-  ADD_UNSIGNED_16_8(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
+  ADD_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
                     4);
 
-  Enemy_BoundBoxCtrl[param_1] = 3;
+  Enemy_BoundBoxCtrl[objoff] = 3;
 }
 
 
 // SMB:c4a8
 // SM2MAIN:90a1
 // Signature: [X] -> []
-void InitFlyingCheepCheep(const byte param_1) {
+void InitFlyingCheepCheep(const byte objoff) {
   if (FrenzyEnemyTimer != 0) {
     return;
   }
 
-  assert_eq_assumption(param_1 <= 5, true);
+  assert_eq_assumption(objoff <= 5, true);
 
-  const byte rng0 = PseudoRandomBitReg[param_1];
-  const byte rng1 = PseudoRandomBitReg[param_1 + 1];
+  const byte rng0 = PseudoRandomBitReg[objoff];
+  const byte rng1 = PseudoRandomBitReg[objoff + 1];
 
-  SmallBBox(param_1);
+  SmallBBox(objoff);
 
   FrenzyEnemyTimer = FlyCCTimerData[rng1 & 3];
 
-  if (param_1 >= ((SecondaryHardMode != 0) ? 4 : 3)) {
+  if (objoff >= ((SecondaryHardMode != 0) ? 4 : 3)) {
     return;
   }
 
   // This access would be out of bounds if defined earlier
-  const byte rng2 = PseudoRandomBitReg[param_1 + 2];
+  const byte rng2 = PseudoRandomBitReg[objoff + 2];
 
-  SpriteVarData2[param_1] = 0xfb;
+  SpriteVarData2[objoff] = 0xfb;
 
   byte currng = rng0 & 3;
 
@@ -4802,8 +4812,8 @@ void InitFlyingCheepCheep(const byte param_1) {
     currng += 8;
   }
 
-  SpriteVarData1[param_1] = FlyCCXSpeedData[currng];
-  Enemy_MovingDir[param_1] = 1;
+  SpriteVarData1[objoff] = FlyCCXSpeedData[currng];
+  Enemy_MovingDir[objoff] = 1;
 
   if (PlayerSpriteVarData1[0] == 0) {
     if ((rng1 & 3) != 0) {
@@ -4811,38 +4821,35 @@ void InitFlyingCheepCheep(const byte param_1) {
     }
 
     if ((currng & 2) != 0) {
-      SpriteVarData1[param_1] *= 1;
-      Enemy_MovingDir[param_1] += 1;
+      SpriteVarData1[objoff] *= 1;
+      Enemy_MovingDir[objoff] += 1;
     }
   }
 
-  SET_16_16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
+  SET_16_16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
             SprObject_PageLoc[0], SprObject_X_Position[0]);
 
   if ((currng & 2) == 0) {
-    SUB_UNSIGNED_16_8(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
+    SUB_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
                       FlyCCXPositionData[currng]);
   } else {
-    ADD_UNSIGNED_16_8(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
+    ADD_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
                       FlyCCXPositionData[currng]);
   }
 
-  Enemy_Flag[param_1] = 1;
-  Enemy_Y_HighPos[param_1] = 1;
-  Enemy_Y_Position[param_1] = SPRITE_Y_OFFSCREEN;
+  Enemy_Flag[objoff] = 1;
+  Enemy_Y_HighPos[objoff] = 1;
+  Enemy_Y_Position[objoff] = SPRITE_Y_OFFSCREEN;
 }
 
 
 // SMB:c549
 // SM2MAIN:9142
-// Signature: [X, r08] -> []
-void InitBowser(const byte param_1) {
+// Signature: [X] -> []
+void InitBowser(const byte objoff) {
   if (SMB2J_ONLY) {
-    // NES note: SMB2J uses $08 (ObjectOffset) here instead of X,
-    // but they're always the same value
-
     for (int i = 0; i < 5; i++) {
-      if (i == param_1) {
+      if (i == objoff) {
         continue;
       }
       if (Enemy_ID[i] == 0x2d) {
@@ -4852,15 +4859,15 @@ void InitBowser(const byte param_1) {
     }
   }
 
-  DuplicateEnemyObj(param_1);
+  DuplicateEnemyObj(objoff);
   BowserBodyControls = 0;
   BridgeCollapseOffset = 0;
-  BowserOrigXPos = Enemy_X_Position[param_1];
+  BowserOrigXPos = Enemy_X_Position[objoff];
   BowserFireBreathTimer = 0xdf;
-  BowserFront_Offset = param_1;
-  Enemy_MovingDir[param_1] = 0xdf;
+  BowserFront_Offset = objoff;
+  Enemy_MovingDir[objoff] = 0xdf;
   BowserFeetCounter = 0x20;
-  EnemyFrameTimer[param_1] = 0x20;
+  EnemyFrameTimer[objoff] = 0x20;
   BowserHitPoints = 5;
   BowserMovementSpeed = 2;
 }
@@ -4869,7 +4876,7 @@ void InitBowser(const byte param_1) {
 // SMB:c575
 // SM2MAIN:9186
 // Signature: [X] -> []
-void DuplicateEnemyObj(const byte param_1) {
+void DuplicateEnemyObj(const byte objoff) {
   int i;
   for (i = 0; Enemy_Flag[i] != 0; i++) {
   }
@@ -4877,23 +4884,23 @@ void DuplicateEnemyObj(const byte param_1) {
   // i = first offset with flag=0
 
   DuplicateObj_Offset = i;
-  Enemy_Flag[i] = param_1 | 0x80;
-  Enemy_PageLoc[i] = Enemy_PageLoc[param_1];
-  Enemy_X_Position[i] = Enemy_X_Position[param_1];
-  Enemy_Flag[param_1] = 1;
+  Enemy_Flag[i] = objoff | 0x80;
+  Enemy_PageLoc[i] = Enemy_PageLoc[objoff];
+  Enemy_X_Position[i] = Enemy_X_Position[objoff];
+  Enemy_Flag[objoff] = 1;
   Enemy_Y_HighPos[i] = 1;
-  Enemy_Y_Position[i] = Enemy_Y_Position[param_1];
+  Enemy_Y_Position[i] = Enemy_Y_Position[objoff];
 }
 
 
 // SMB:c5a3
 // SM2MAIN:91b4
 // Signature: [X] -> []
-void InitBowserFlame(const byte param_1) {
+void InitBowserFlame(const byte objoff) {
   if (FrenzyEnemyTimer != 0) {
     return;
   }
-  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = 0;
+  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff] = 0;
   byte bVar1 = BowserFront_Offset;
   NoiseSoundQueue |= 2;
   if (Enemy_ID[BowserFront_Offset] != 0x2d) {
@@ -4902,22 +4909,22 @@ void InitBowserFlame(const byte param_1) {
     if (SecondaryHardMode != 0) {
       FrenzyEnemyTimer = bVar1 + 0x10;
     }
-    BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = PseudoRandomBitReg[param_1] & 3;
-    PutAtRightExtent(FlameYPosData[PseudoRandomBitReg[param_1] & 3], param_1);
+    BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[objoff] = PseudoRandomBitReg[objoff] & 3;
+    PutAtRightExtent(FlameYPosData[PseudoRandomBitReg[objoff] & 3], objoff);
     return;
   }
-  Enemy_X_Position[param_1] = Enemy_X_Position[BowserFront_Offset] - 0xe;
-  Enemy_PageLoc[param_1] = Enemy_PageLoc[bVar1];
-  Enemy_Y_Position[param_1] = Enemy_Y_Position[bVar1] + 8;
-  BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = PseudoRandomBitReg[param_1] & 3;
-  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1]
-      = FlameYMFAdderData[Enemy_Y_Position[param_1] <= FlameYPosData[PseudoRandomBitReg[param_1] & 3]];
+  Enemy_X_Position[objoff] = Enemy_X_Position[BowserFront_Offset] - 0xe;
+  Enemy_PageLoc[objoff] = Enemy_PageLoc[bVar1];
+  Enemy_Y_Position[objoff] = Enemy_Y_Position[bVar1] + 8;
+  BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[objoff] = PseudoRandomBitReg[objoff] & 3;
+  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff]
+      = FlameYMFAdderData[Enemy_Y_Position[objoff] <= FlameYPosData[PseudoRandomBitReg[objoff] & 3]];
   EnemyFrenzyBuffer = 0;
-  Enemy_BoundBoxCtrl[param_1] = 8;
-  Enemy_Y_HighPos[param_1] = 1;
-  Enemy_Flag[param_1] = 1;
-  Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] = 0;
-  Enemy_State[param_1] = 0;
+  Enemy_BoundBoxCtrl[objoff] = 8;
+  Enemy_Y_HighPos[objoff] = 1;
+  Enemy_Flag[objoff] = 1;
+  Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[objoff] = 0;
+  Enemy_State[objoff] = 0;
 }
 
 
@@ -4942,7 +4949,7 @@ void PutAtRightExtent(const byte param_1, const byte param_2) {
 // SMB:c63d
 // SM2MAIN:924e
 // Signature: [X] -> []
-void InitFireworks(const byte param_1) {
+void InitFireworks(const byte objoff) {
   if (FrenzyEnemyTimer != 0) {
     return;
   }
@@ -4968,16 +4975,16 @@ void InitFireworks(const byte param_1) {
   x -= 0x30;
   x += FireworksXPosData[bVar3];
 
-  STORE_16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
+  STORE_16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
            x);
 
-  Enemy_Y_Position[param_1] = FireworksYPosData[bVar3];
-  Enemy_Y_HighPos[param_1] = 1;
+  Enemy_Y_Position[objoff] = FireworksYPosData[bVar3];
+  Enemy_Y_HighPos[objoff] = 1;
 
-  Enemy_Flag[param_1] = 1;
+  Enemy_Flag[objoff] = 1;
 
-  SpriteVarData1[param_1] = 0;
-  SpriteVarData2[param_1] = 8;
+  SpriteVarData1[objoff] = 0;
+  SpriteVarData2[objoff] = 8;
 }
 
 
@@ -5009,7 +5016,7 @@ static inline u8 random_from_bag(const u8 seed, u8 * const set) {
 // SMB:c69c
 // SM2MAIN:92ad
 // Signature: [X] -> []
-void BulletBillCheepCheep(const byte param_1) {
+void BulletBillCheepCheep(const byte objoff) {
   if (FrenzyEnemyTimer != 0) {
     return;
   }
@@ -5017,19 +5024,19 @@ void BulletBillCheepCheep(const byte param_1) {
   if (AreaType == 0) {
     // Auto-appearing cheep cheeps (in SMB1 2-2 and 7-2)
 
-    if (param_1 >= 3) {
+    if (objoff >= 3) {
       return;
     }
 
     // Spawn a random cheep-cheep
 
-    bool red_cheepcheep = PseudoRandomBitReg[param_1] >= 0xaa;
+    bool red_cheepcheep = PseudoRandomBitReg[objoff] >= 0xaa;
 
     if (WorldNumber != 1) {
       red_cheepcheep = !red_cheepcheep;
     }
 
-    Enemy_ID[param_1] = red_cheepcheep ? 0xb : 0xa;
+    Enemy_ID[objoff] = red_cheepcheep ? 0xb : 0xa;
   } else {
     // Auto-appearing bullet bills (in SMB1 5-3 and 6-3)
 
@@ -5044,21 +5051,21 @@ void BulletBillCheepCheep(const byte param_1) {
     Square2SoundQueue |= 8;
 
     // Spawn a bullet bill
-    Enemy_ID[param_1] = 8;
+    Enemy_ID[objoff] = 8;
   }
 
-  const u8 rng_bag = random_from_bag(PseudoRandomBitReg[param_1], &BitMFilter);
+  const u8 rng_bag = random_from_bag(PseudoRandomBitReg[objoff], &BitMFilter);
 
   // Inlining Enemy17YPosData, because it's only used in this subroutine
   static const u8 ypos_lookup[8] = {
     0x40, 0x30, 0x90, 0x50, 0x20, 0x60, 0xa0, 0x70
   };
 
-  PutAtRightExtent(ypos_lookup[rng_bag], param_1);
-  Enemy_YMF_Dummy[param_1] = 0;
+  PutAtRightExtent(ypos_lookup[rng_bag], objoff);
+  Enemy_YMF_Dummy[objoff] = 0;
 
   FrenzyEnemyTimer = 0x20;
-  CheckpointEnemyID(param_1);
+  CheckpointEnemyID(objoff);
 }
 
 
@@ -5128,7 +5135,7 @@ void HandleGroupEnemies(const byte param_1) {
 // SMB:c787
 // SM2MAIN:9398
 // Signature: [X] -> []
-void InitPiranhaPlant(const byte param_1) {
+void InitPiranhaPlant(const byte objoff) {
   #ifdef SMB2J_MODE
     EnemyAttributeData[13] = 0x22;
     PiranhaPlantCompareOperand = 0x13;
@@ -5137,12 +5144,12 @@ void InitPiranhaPlant(const byte param_1) {
       PiranhaPlantCompareOperand = 0x21;
     }
   #endif
-  SpriteVarData1[param_1] = 1;
-  Enemy_State[param_1] = 0;
-  SpriteVarData2[param_1] = 0;
-  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = Enemy_Y_Position[param_1];
-  BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1] = Enemy_Y_Position[param_1] - 0x18;
-  Enemy_BoundBoxCtrl[param_1] = 9;
+  SpriteVarData1[objoff] = 1;
+  Enemy_State[objoff] = 0;
+  SpriteVarData2[objoff] = 0;
+  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff] = Enemy_Y_Position[objoff];
+  BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[objoff] = Enemy_Y_Position[objoff] - 0x18;
+  Enemy_BoundBoxCtrl[objoff] = 9;
 }
 
 
@@ -5159,12 +5166,12 @@ enum InitEnemyFrenzy_jumptable_item {
 // SMB:c7a0
 // SM2MAIN:93d5
 // Signature: [X] -> []
-void InitEnemyFrenzy(const byte param_1) {
-  EnemyFrenzyBuffer = Enemy_ID[param_1];
+void InitEnemyFrenzy(const byte objoff) {
+  EnemyFrenzyBuffer = Enemy_ID[objoff];
 
-  switch (Enemy_ID[param_1] - 0x12) {
+  switch (Enemy_ID[objoff] - 0x12) {
   case INITENEMYFRENZY_LAKITUANDSPINYHANDLER:
-    LakituAndSpinyHandler(param_1);
+    LakituAndSpinyHandler(objoff);
     return;
 
   case INITENEMYFRENZY_NOOP:
@@ -5172,23 +5179,23 @@ void InitEnemyFrenzy(const byte param_1) {
     return;
 
   case INITENEMYFRENZY_INITFLYINGCHEEPCHEEP:
-    InitFlyingCheepCheep(param_1);
+    InitFlyingCheepCheep(objoff);
     return;
 
   case INITENEMYFRENZY_INITBOWSERFLAME:
-    InitBowserFlame(param_1);
+    InitBowserFlame(objoff);
     return;
 
   case INITENEMYFRENZY_INITFIREWORKS:
-    InitFireworks(param_1);
+    InitFireworks(objoff);
     return;
 
   case INITENEMYFRENZY_BULLETBILLCHEEPCHEEP:
-    BulletBillCheepCheep(param_1);
+    BulletBillCheepCheep(objoff);
     return;
 
   default:
-    jmpengine_overflow(Enemy_ID[param_1] - 0x12);
+    jmpengine_overflow(Enemy_ID[objoff] - 0x12);
   }
 }
 
@@ -5196,7 +5203,7 @@ void InitEnemyFrenzy(const byte param_1) {
 // SMB:c7b8
 // SM2MAIN:93ed
 // Signature: [X] -> []
-void EndFrenzy(const byte param_1) {
+void EndFrenzy(const byte objoff) {
   for (int i = 0; i < 6; i++) {
     if (Enemy_ID[i] == 0x11) {
       Enemy_State[i] = 1;
@@ -5204,131 +5211,131 @@ void EndFrenzy(const byte param_1) {
   }
 
   EnemyFrenzyBuffer = 0;
-  Enemy_Flag[param_1] = 0;
+  Enemy_Flag[objoff] = 0;
 }
 
 
 // SMB:c7d1
 // SM2MAIN:9406
 // Signature: [X] -> []
-void InitJumpGPTroopa(const byte param_1) {
-  Enemy_MovingDir[param_1] = 2;
-  SpriteVarData1[param_1] = ssw(0xf8, 0xf4);
-  Enemy_BoundBoxCtrl[param_1] = 3;
+void InitJumpGPTroopa(const byte objoff) {
+  Enemy_MovingDir[objoff] = 2;
+  SpriteVarData1[objoff] = ssw(0xf8, 0xf4);
+  Enemy_BoundBoxCtrl[objoff] = 3;
 }
 
 
 // SMB:c7df
 // SM2MAIN:9414
 // Signature: [X] -> []
-void InitBalPlatform(const byte param_1) {
-  Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
-  Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
+void InitBalPlatform(const byte objoff) {
+  Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
+  Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
   if (SecondaryHardMode == 0) {
-    PosPlatform(param_1, 2);
+    PosPlatform(objoff, 2);
   }
   const bool bVar1 = BalPlatformAlignment >= 0x80;
-  Enemy_State[param_1] = BalPlatformAlignment;
+  Enemy_State[objoff] = BalPlatformAlignment;
   BalPlatformAlignment = 0xff;
   if (bVar1) {
-    BalPlatformAlignment = param_1;
+    BalPlatformAlignment = objoff;
   }
-  Enemy_MovingDir[param_1] = 0;
-  PosPlatform(param_1, 0);
-  InitDropPlatform(param_1);
+  Enemy_MovingDir[objoff] = 0;
+  PosPlatform(objoff, 0);
+  InitDropPlatform(objoff);
 }
 
 
 // SMB:c803
 // SM2MAIN:9438
 // Signature: [X] -> []
-void InitDropPlatform(const byte param_1) {
-  HammerThrowingTimer_Or_PlatformCollisionFlag[param_1] = 0xff;
-  InitVStf(param_1);
-  SPBBox(param_1);
+void InitDropPlatform(const byte objoff) {
+  HammerThrowingTimer_Or_PlatformCollisionFlag[objoff] = 0xff;
+  InitVStf(objoff);
+  SPBBox(objoff);
 }
 
 
 // SMB:c80b
 // SM2MAIN:9440
 // Signature: [X] -> []
-void InitHoriPlatform(const byte param_1) {
-  SpriteVarData1[param_1] = 0;
-  InitVStf(param_1);
-  SPBBox(param_1);
+void InitHoriPlatform(const byte objoff) {
+  SpriteVarData1[objoff] = 0;
+  InitVStf(objoff);
+  SPBBox(objoff);
 }
 
 
 // SMB:c812
 // SM2MAIN:9447
 // Signature: [X] -> []
-void InitVertPlatform(const byte param_1) {
+void InitVertPlatform(const byte objoff) {
   char cVar2 = 0x40;
-  byte bVar1 = Enemy_Y_Position[param_1];
+  byte bVar1 = Enemy_Y_Position[objoff];
   if (bVar1 >= 0x80) {
     bVar1 = NEGATE(bVar1);
     cVar2 = -0x40;
   }
-  Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[param_1] = bVar1;
-  SpriteVarData1[param_1] = cVar2 + Enemy_Y_Position[param_1];
-  InitVStf(param_1);
-  SPBBox(param_1);
+  Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos[objoff] = bVar1;
+  SpriteVarData1[objoff] = cVar2 + Enemy_Y_Position[objoff];
+  InitVStf(objoff);
+  SPBBox(objoff);
 }
 
 
 // SMB:c82b
 // SM2MAIN:9460
 // Signature: [X] -> []
-void SPBBox(const byte param_1) {
-  Enemy_BoundBoxCtrl[param_1] = ((AreaType != 3) && (SecondaryHardMode == 0)) ? 6 : 5;
+void SPBBox(const byte objoff) {
+  Enemy_BoundBoxCtrl[objoff] = ((AreaType != 3) && (SecondaryHardMode == 0)) ? 6 : 5;
 }
 
 
 // SMB:c83f
 // SM2MAIN:9474
 // Signature: [X] -> []
-void LargeLiftUp(const byte param_1) {
-  PlatLiftUp(param_1);
-  SPBBox(param_1);
+void LargeLiftUp(const byte objoff) {
+  PlatLiftUp(objoff);
+  SPBBox(objoff);
 }
 
 
 // SMB:c845
 // SM2MAIN:947a
 // Signature: [X] -> []
-void LargeLiftDown(const byte param_1) {
-  PlatLiftDown(param_1);
-  SPBBox(param_1);
+void LargeLiftDown(const byte objoff) {
+  PlatLiftDown(objoff);
+  SPBBox(objoff);
 }
 
 
 // SMB:c84b
 // SM2MAIN:9480
 // Signature: [X] -> []
-void PlatLiftUp(const byte param_1) {
-  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = 0x10;
-  SpriteVarData2[param_1] = 0xff;
-  PosPlatform(param_1, 1);
-  Enemy_BoundBoxCtrl[param_1] = 4;
+void PlatLiftUp(const byte objoff) {
+  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff] = 0x10;
+  SpriteVarData2[objoff] = 0xff;
+  PosPlatform(objoff, 1);
+  Enemy_BoundBoxCtrl[objoff] = 4;
 }
 
 
 // SMB:c857
 // SM2MAIN:948c
 // Signature: [X] -> []
-void PlatLiftDown(const byte param_1) {
-  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = 0xf0;
-  SpriteVarData2[param_1] = 0;
-  PosPlatform(param_1, 1);
-  Enemy_BoundBoxCtrl[param_1] = 4;
+void PlatLiftDown(const byte objoff) {
+  CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff] = 0xf0;
+  SpriteVarData2[objoff] = 0;
+  PosPlatform(objoff, 1);
+  Enemy_BoundBoxCtrl[objoff] = 4;
 }
 
 
 // SMB:c871
 // SM2MAIN:94a6
 // Signature: [X, Y] -> []
-void PosPlatform(const byte param_1, const byte param_2) {
-  ADD_16_16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1],
+void PosPlatform(const byte objoff, const byte param_2) {
+  ADD_16_16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
             PlatPosDataHigh[param_2], PlatPosDataLow[param_2]);
 }
 
@@ -5725,17 +5732,17 @@ void EraseEnemyObject(const byte param_1) {
 // SMB:c9b0
 // SM2MAIN:95e5
 // Signature: [X] -> []
-void MovePodoboo(const byte param_1) {
+void MovePodoboo(const byte objoff) {
   byte bVar1;
 
-  if (EnemyIntervalTimer[param_1] == 0) {
-    InitPodoboo(param_1);
-    bVar1 = PseudoRandomBitReg[param_1 + 1];
-    CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1] = bVar1 | 0x80;
-    EnemyIntervalTimer[param_1] = (bVar1 & 0xf) | 6;
-    SpriteVarData2[param_1] = 0xf9;
+  if (EnemyIntervalTimer[objoff] == 0) {
+    InitPodoboo(objoff);
+    bVar1 = PseudoRandomBitReg[objoff + 1];
+    CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff] = bVar1 | 0x80;
+    EnemyIntervalTimer[objoff] = (bVar1 & 0xf) | 6;
+    SpriteVarData2[objoff] = 0xf9;
   }
-  MoveJ_EnemyVertically(param_1);
+  MoveJ_EnemyVertically(objoff);
 }
 
 
@@ -5945,28 +5952,28 @@ void MoveFlyGreenPTroopa(const byte objoff) {
 // SMB:cb45
 // SM2MAIN:977a
 // Signature: [X] -> []
-void XMoveCntr_GreenPTroopa(const byte param_1) {
-  XMoveCntr_Platform(0x13, param_1);
+void XMoveCntr_GreenPTroopa(const byte objoff) {
+  XMoveCntr_Platform(0x13, objoff);
 }
 
 
 // SMB:cb47
 // SM2MAIN:977c
 // Signature: [A, X] -> []
-void XMoveCntr_Platform(const byte param_1, const byte param_2) {
+void XMoveCntr_Platform(const byte param_1, const byte objoff) {
   if ((FrameCounter & 3) != 0) {
     return;
   }
-  if ((SpriteVarData2[param_2] & 1) != 0) {
-    if (SpriteVarData1[param_2] != 0) {
-      SpriteVarData1[param_2] = SpriteVarData1[param_2] - 1;
+  if ((SpriteVarData2[objoff] & 1) != 0) {
+    if (SpriteVarData1[objoff] != 0) {
+      SpriteVarData1[objoff] = SpriteVarData1[objoff] - 1;
       return;
     }
-  } else if (SpriteVarData1[param_2] != param_1) {
-    SpriteVarData1[param_2] = SpriteVarData1[param_2] + 1;
+  } else if (SpriteVarData1[objoff] != param_1) {
+    SpriteVarData1[objoff] = SpriteVarData1[objoff] + 1;
     return;
   }
-  SpriteVarData2[param_2] = SpriteVarData2[param_2] + 1;
+  SpriteVarData2[objoff] = SpriteVarData2[objoff] + 1;
 }
 
 
@@ -6067,12 +6074,12 @@ void ProcSwimmingB(const byte param_1, const bool param_2) {
 // SMB:cc36
 // SM2MAIN:986b
 // Signature: [X] -> []
-void MoveBulletBill(const byte param_1) {
-  if ((Enemy_State[param_1] & 0x20) != 0) {
-    MoveJ_EnemyVertically(param_1);
+void MoveBulletBill(const byte objoff) {
+  if ((Enemy_State[objoff] & 0x20) != 0) {
+    MoveJ_EnemyVertically(objoff);
   } else {
-    SpriteVarData1[param_1] = 0xe8;
-    MoveEnemyHorizontally(param_1);
+    SpriteVarData1[objoff] = 0xe8;
+    MoveEnemyHorizontally(objoff);
   }
 }
 
@@ -6290,28 +6297,28 @@ void MoveFlyingCheepCheep(const byte objoff) {
 // SMB:cf28
 // SM2MAIN:9b5d
 // Signature: [X] -> []
-void MoveLakitu(const byte param_1) {
+void MoveLakitu(const byte objoff) {
   byte bVar1;
 
-  if ((Enemy_State[param_1] & 0x20) == 0) {
-    if (Enemy_State[param_1] == 0) {
+  if ((Enemy_State[objoff] & 0x20) == 0) {
+    if (Enemy_State[objoff] == 0) {
       EnemyFrenzyBuffer = 0x12;
-      bVar1 = PlayerLakituDiff(param_1, LakituDiffAdj[0], LakituDiffAdj[1], LakituDiffAdj[2]);
+      bVar1 = PlayerLakituDiff(objoff, LakituDiffAdj[0], LakituDiffAdj[1], LakituDiffAdj[2]);
     } else {
-      SpriteVarData2[param_1] = 0;
+      SpriteVarData2[objoff] = 0;
       EnemyFrenzyBuffer = 0;
       bVar1 = 0x10;
     }
-    SpriteVarData1[param_1] = bVar1;
+    SpriteVarData1[objoff] = bVar1;
     bVar1 = 1;
-    if ((SpriteVarData2[param_1] & 1) == 0) {
-      SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
+    if ((SpriteVarData2[objoff] & 1) == 0) {
+      SpriteVarData1[objoff] = NEGATE(SpriteVarData1[objoff]);
       bVar1 = 2;
     }
-    Enemy_MovingDir[param_1] = bVar1;
-    MoveEnemyHorizontally(param_1);
+    Enemy_MovingDir[objoff] = bVar1;
+    MoveEnemyHorizontally(objoff);
   } else {
-    MoveD_EnemyVertically(param_1);
+    MoveD_EnemyVertically(objoff);
   }
 }
 
@@ -6319,9 +6326,9 @@ void MoveLakitu(const byte param_1) {
 // SMB:cf6c
 // SM2MAIN:9ba1
 // Signature: [X, r01, r02, r03] -> [A]
-byte PlayerLakituDiff(const byte param_1, const byte param_2, const byte param_3, const byte param_4) {
+byte PlayerLakituDiff(const byte objoff, const byte param_2, const byte param_3, const byte param_4) {
   byte bVar2 = 0;
-  const struct_ncr00 sVar4 = PlayerEnemyDiff(param_1);
+  const struct_ncr00 sVar4 = PlayerEnemyDiff(objoff);
   byte bVar1 = sVar4.r00;
   if (sVar4.n) {
     bVar2 += 1;
@@ -6330,15 +6337,15 @@ byte PlayerLakituDiff(const byte param_1, const byte param_2, const byte param_3
 
   if (bVar1 >= 0x3c) {
     bVar1 = 0x3c;
-    if (Enemy_ID[param_1] == 0x11) {
-      if (bVar2 != SpriteVarData2[param_1]) {
-        if (SpriteVarData2[param_1] != 0) {
-          SpriteVarData1[param_1] = SpriteVarData1[param_1] - 1;
-          if (SpriteVarData1[param_1] != 0) {
-            return SpriteVarData1[param_1];
+    if (Enemy_ID[objoff] == 0x11) {
+      if (bVar2 != SpriteVarData2[objoff]) {
+        if (SpriteVarData2[objoff] != 0) {
+          SpriteVarData1[objoff] = SpriteVarData1[objoff] - 1;
+          if (SpriteVarData1[objoff] != 0) {
+            return SpriteVarData1[objoff];
           }
         }
-        SpriteVarData2[param_1] = bVar2;
+        SpriteVarData2[objoff] = bVar2;
       }
     }
   }
@@ -6361,7 +6368,7 @@ byte PlayerLakituDiff(const byte param_1, const byte param_2, const byte param_3
 
   if ((Player_X_Speed == 0) || (ScrollAmount == 0)) {
     return param_2 - bVar1;
-  } else if ((Enemy_ID[param_1] != 0x12) && (SpriteVarData2[param_1] == 0)) {
+  } else if ((Enemy_ID[objoff] != 0x12) && (SpriteVarData2[objoff] == 0)) {
     return param_2 - bVar1;
   } else if ((Player_X_Speed <= 0x18) || (ScrollAmount <= 1)) {
     return param_3 - bVar1;
@@ -6843,44 +6850,44 @@ void DelayToAreaEnd(const byte objoff) {
 // SMB:d3b0
 // SM2MAIN:9fdc
 // Signature: [X] -> []
-void MovePiranhaPlant(const byte param_1) {
-  if ((Enemy_State[param_1] == 0) && (EnemyFrameTimer[param_1] == 0)) {
-    if (SpriteVarData2[param_1] == 0) {
-      if (SpriteVarData1[param_1] < 0x80) {
-        const struct_ncr00 sVar4 = PlayerEnemyDiff(param_1);
+void MovePiranhaPlant(const byte objoff) {
+  if ((Enemy_State[objoff] == 0) && (EnemyFrameTimer[objoff] == 0)) {
+    if (SpriteVarData2[objoff] == 0) {
+      if (SpriteVarData1[objoff] < 0x80) {
+        const struct_ncr00 sVar4 = PlayerEnemyDiff(objoff);
         const byte bVar3 = sVar4.n ? -sVar4.r00 : sVar4.r00;
 
         if (bVar3 < PiranhaPlantCompareOperand) {
           // PutinPipe
-          Enemy_SprAttrib[param_1] = 0x20;
+          Enemy_SprAttrib[objoff] = 0x20;
           return;
         }
       }
 
-      SpriteVarData1[param_1] *= -1;
-      SpriteVarData2[param_1] += 1;
+      SpriteVarData1[objoff] *= -1;
+      SpriteVarData2[objoff] += 1;
     }
 
-    const byte bVar3 = SpriteVarData1[param_1] >= 0x80
-      ? BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1]
-      : CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
+    const byte bVar3 = SpriteVarData1[objoff] >= 0x80
+      ? BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[objoff]
+      : CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[objoff];
 
     if (TimerControl == 0) {
       const bool cond1 = (SMB2J_ONLY && EnemyAttributeData[13] == 0x22) || ((FrameCounter & 1) != 0);
 
       if (cond1) {
-        Enemy_Y_Position[param_1] += SpriteVarData1[param_1];
+        Enemy_Y_Position[objoff] += SpriteVarData1[objoff];
 
-        if (Enemy_Y_Position[param_1] == bVar3) {
-          SpriteVarData2[param_1] = 0;
-          EnemyFrameTimer[param_1] = 0x40;
+        if (Enemy_Y_Position[objoff] == bVar3) {
+          SpriteVarData2[objoff] = 0;
+          EnemyFrameTimer[objoff] = 0x40;
         }
       }
     }
   }
 
   // PutinPipe
-  Enemy_SprAttrib[param_1] = 0x20;
+  Enemy_SprAttrib[objoff] = 0x20;
 }
 
 
@@ -7279,29 +7286,23 @@ void OffscreenBoundsCheck(const byte param_1) {
 // SM2MAIN:a319
 // Signature: [X] -> []
 void FireballEnemyCollision(const byte objoff) {
-  byte bVar1;
-  byte bVar2;
-  bool bVar3;
-  byte bStack0000;
+  if (Fireball_State[objoff] == 0) { return; }
+  if ((Fireball_State[objoff] & 0x80) != 0) { return; }
+  if ((FrameCounter & 1) != 0) { return; }
 
-  if (((Fireball_State[objoff] != 0) && ((Fireball_State[objoff] & 0x80) == 0)) && ((FrameCounter & 1) == 0)) {
-    bStack0000 = objoff * 4 + 0x1c;
-    for (int i = 4; i >= 0; i--) {
-      bVar2 = i;
-      if (((Enemy_State[bVar2] & 0x20) == 0) && (Enemy_Flag[bVar2] != 0)) {
-        bVar1 = Enemy_ID[bVar2];
-        if ((bVar1 < 0x24) || (bVar1 > 0x2a)) {
-          if ((bVar1 != 6 || (Enemy_State[bVar2] < 2))) {
-            if (EnemyOffscrBitsMasked[bVar2] == 0) {
-              bVar3 = SprObjectCollisionCore(bVar2 * 4 + 4, bStack0000);
-              if (bVar3) {
-                Fireball_State[objoff] = 0x80;
-                HandleEnemyFBallCol(bVar2, bVar2);
-              }
-            }
-          }
-        }
-      }
+  for (int i = 4; i >= 0; i--) {
+    const byte enemy_id = Enemy_ID[i];
+
+    if ((Enemy_State[i] & 0x20) != 0) { continue; }
+    if (Enemy_Flag[i] == 0) { continue; }
+    if (enemy_id >= 0x24 && enemy_id <= 0x2a) { continue; }
+    if (enemy_id == 6 && Enemy_State[i] >= 2) { continue; }
+    if (EnemyOffscrBitsMasked[i] != 0) { continue; }
+
+    const bool bVar3 = SprObjectCollisionCore(i * 4 + 4, objoff * 4 + 0x1c);
+    if (bVar3) {
+      Fireball_State[objoff] = 0x80;
+      HandleEnemyFBallCol(i);
     }
   }
 }
@@ -7309,31 +7310,31 @@ void FireballEnemyCollision(const byte objoff) {
 
 // SMB:d73e
 // SM2MAIN:a37f
-// Signature: [X, r01] -> []
-void HandleEnemyFBallCol(const byte param_1, const byte param_2) {
+// Signature: [X+r01] -> []
+void HandleEnemyFBallCol(const byte param_1) {
   byte bVar2;
   RelativeEnemyPosition(param_1);
-  if ((Enemy_Flag[param_2] < 0x80) || (Enemy_ID[Enemy_Flag[param_2] & 0xf] != 0x2d)) {
-    const byte bVar1 = Enemy_ID[param_2];
-    if (bVar1 == 2) {
+  if ((Enemy_Flag[param_1] < 0x80) || (Enemy_ID[Enemy_Flag[param_1] & 0xf] != 0x2d)) {
+    const byte enemy_id = Enemy_ID[param_1];
+    if (enemy_id == 2) {
       return;
     }
-    bVar2 = param_2;
-    if (bVar1 != 0x2d) {
-      if (bVar1 == 8) {
+    bVar2 = param_1;
+    if (enemy_id != 0x2d) {
+      if (enemy_id == 8) {
         return;
       }
-      if (bVar1 == 0xc) {
+      if (enemy_id == 0xc) {
         return;
       }
-      if (bVar1 > 0x14) {
+      if (enemy_id > 0x14) {
         return;
       }
-      ShellOrBlockDefeat(param_2);
+      ShellOrBlockDefeat(param_1);
       return;
     }
   } else {
-    bVar2 = Enemy_Flag[param_2] & 0xf;
+    bVar2 = Enemy_Flag[param_1] & 0xf;
   }
   BowserHitPoints -= 1;
   if (BowserHitPoints != 0) {
@@ -7345,7 +7346,7 @@ void HandleEnemyFBallCol(const byte param_1, const byte param_2) {
   Enemy_ID[bVar2] = BowserIdentities[WorldNumber];
   Enemy_State[bVar2] = (WorldNumber < 3) ? 0x23 : 0x20;
   Square2SoundQueue = 0x80;
-  EnemySmackScore(9, param_2);
+  EnemySmackScore(9, param_1);
 }
 
 
@@ -7710,9 +7711,9 @@ void SetPRout(const byte param_1, const byte param_2) {
 // SMB:d9f6
 // SM2MAIN:a65f
 // Signature: [X] -> []
-void ChkEnemyFaceRight(const byte param_1) {
-  if (Enemy_MovingDir[param_1] != 1) {
-    LInj(param_1);
+void ChkEnemyFaceRight(const byte objoff) {
+  if (Enemy_MovingDir[objoff] != 1) {
+    LInj(objoff);
   } else {
     InjurePlayer();
   }
@@ -7722,8 +7723,8 @@ void ChkEnemyFaceRight(const byte param_1) {
 // SMB:d9ff
 // SM2MAIN:a668
 // Signature: [X] -> []
-void LInj(const byte param_1) {
-  EnemyTurnAround(param_1);
+void LInj(const byte objoff) {
+  EnemyTurnAround(objoff);
   InjurePlayer();
 }
 
@@ -7731,13 +7732,13 @@ void LInj(const byte param_1) {
 // SMB:da05
 // SM2MAIN:a66e
 // Signature: [X] -> [Y]
-byte EnemyFacePlayer(const byte param_1) {
+byte EnemyFacePlayer(const byte objoff) {
   byte bVar1 = 1;
-  const struct_ncr00 sVar2 = PlayerEnemyDiff(param_1);
+  const struct_ncr00 sVar2 = PlayerEnemyDiff(objoff);
   if (sVar2.n) {
     bVar1 += 1;
   }
-  Enemy_MovingDir[param_1] = bVar1;
+  Enemy_MovingDir[objoff] = bVar1;
   return bVar1 - 1;
 }
 
@@ -7810,10 +7811,10 @@ void EnemiesCollision(const byte objoff) {
     if (!bVar2) {
       Enemy_CollisionBits[i] &= ~bitsmask;
     } else if ((Enemy_State[objoff] & 0x80) != 0 || (Enemy_State[i] & 0x80) != 0) {
-      ProcEnemyCollisions(objoff, i, i);
+      ProcEnemyCollisions(objoff, i);
     } else if ((Enemy_CollisionBits[i] & bitsmask) == 0) {
       Enemy_CollisionBits[i] |= bitsmask;
-      ProcEnemyCollisions(objoff, i, i);
+      ProcEnemyCollisions(objoff, i);
     }
   }
 }
@@ -7821,8 +7822,8 @@ void EnemiesCollision(const byte objoff) {
 
 // SMB:dab4
 // SM2MAIN:a725
-// Signature: [X, Y, r01] -> []
-void ProcEnemyCollisions(const byte objoff, const byte param_2, const byte param_3) {
+// Signature: [X, Y+r01] -> []
+void ProcEnemyCollisions(const byte objoff, const byte param_2) {
   if (((Enemy_State[param_2] | Enemy_State[objoff]) & 0x20) == 0) {
     if (Enemy_State[objoff] < 6) {
       if (Enemy_State[param_2] < 6) {
@@ -7832,19 +7833,17 @@ void ProcEnemyCollisions(const byte objoff, const byte param_2, const byte param
       }
       if (Enemy_ID[param_2] != 5) {
         ShellOrBlockDefeat(objoff);
-        SetupFloateyNumber(ShellChainCounter[param_3] + 4, objoff);
-        ShellChainCounter[param_3] = ShellChainCounter[param_3] + 1;
+        SetupFloateyNumber(ShellChainCounter[param_2] + 4, objoff);
+        ShellChainCounter[param_2] = ShellChainCounter[param_2] + 1;
         return;
       }
     } else if (Enemy_ID[objoff] != 5) {
       if ((char)Enemy_State[param_2] < 0) {
         SetupFloateyNumber(6, objoff);
         ShellOrBlockDefeat(objoff);
-        ShellOrBlockDefeat(param_3);
-      } else {
-        ShellOrBlockDefeat(param_2);
       }
-      SetupFloateyNumber(ShellChainCounter[objoff] + 4, param_3);
+      ShellOrBlockDefeat(param_2);
+      SetupFloateyNumber(ShellChainCounter[objoff] + 4, param_2);
       ShellChainCounter[objoff] = ShellChainCounter[objoff] + 1;
     }
   }
@@ -8527,12 +8526,12 @@ byte GetMTileAttrib(const byte x) {
 // SMB:e1ae
 // SM2MAIN:ae44
 // Signature: [X] -> [A, Z, r04]
-struct_azr04 ChkUnderEnemy(const byte param_1) {
+struct_azr04 ChkUnderEnemy(const byte objoff) {
   // Inlined: BlockBufferChk_Enemy
 
   struct_azr04 sVar1;
 
-  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, param_1 + 1, 0x15);
+  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, objoff + 1, 0x15);
   sVar1.a = sVar2.a;
   sVar1.z = sVar2.a == 0;
   sVar1.r04 = sVar2.r04;
@@ -8542,12 +8541,12 @@ struct_azr04 ChkUnderEnemy(const byte param_1) {
 
 // SMB:e1ae
 // Signature: [X] -> [A, Z, r02, r04, r06, r07]
-static inline struct_azr04 ChkUnderEnemy_Ext(const byte param_1, u16 *blockoff) {
+static inline struct_azr04 ChkUnderEnemy_Ext(const byte objoff, u16 *blockoff) {
   // Inlined: BlockBufferChk_Enemy
 
   struct_azr04 sVar1;
 
-  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, param_1 + 1, 0x15);
+  const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, objoff + 1, 0x15);
 
   sVar1.a = sVar2.a;
   sVar1.z = sVar2.a == 0;
@@ -8795,16 +8794,18 @@ struct_ncr00 PlayerEnemyDiff(const byte param_1) {
 // SMB:e14f
 // SM2MAIN:ade5
 // Signature: [X] -> []
-void EnemyLanding(const byte param_1) {
-  InitVStf(param_1);
-  Enemy_Y_Position[param_1] = (Enemy_Y_Position[param_1] & 0xf0) | 8;
+void EnemyLanding(const byte objoff) {
+  InitVStf(objoff);
+  Enemy_Y_Position[objoff] = (Enemy_Y_Position[objoff] & 0xf0) | 8;
 }
 
 
 // SMB:e15b
 // SM2MAIN:adf1
 // Signature: [X] -> [C]
-bool SubtEnemyYPos(const byte param_1) { return 0x43 < (byte)(Enemy_Y_Position[param_1] + 0x3e); }
+bool SubtEnemyYPos(const byte objoff) {
+  return (byte)(Enemy_Y_Position[objoff] + 0x3e) > 0x43;
+}
 
 
 // SMB:e163
@@ -8850,9 +8851,9 @@ void HammerBroBGColl(const byte objoff) {
 // SMB:e18e
 // SM2MAIN:ae24
 // Signature: [X] -> []
-void KillEnemyAboveBlock(const byte param_1) {
-  ShellOrBlockDefeat(param_1);
-  SpriteVarData2[param_1] = 0xfc;
+void KillEnemyAboveBlock(const byte objoff) {
+  ShellOrBlockDefeat(objoff);
+  SpriteVarData2[objoff] = 0xfc;
 }
 
 
@@ -8901,8 +8902,8 @@ void FireballBGCollision(const byte objoff) {
 // SMB:e22d
 // SM2MAIN:aecb
 // Signature: [X] -> []
-void GetFireballBoundBox(const byte param_1) {
-  const byte bVar1 = param_1 + 7;
+void GetFireballBoundBox(const byte objoff) {
+  const byte bVar1 = objoff + 7;
   BoundingBoxCore(bVar1, 2);
   CheckRightScreenBBox(bVar1);
 }
@@ -8970,8 +8971,8 @@ void LargePlatformBoundBox(const byte objoff) {
 // SMB:e27c
 // SM2MAIN:af1a
 // Signature: [X] -> []
-void SetupEOffsetFBBox(const byte param_1) {
-  const byte bVar1 = param_1 + 1;
+void SetupEOffsetFBBox(const byte objoff) {
+  const byte bVar1 = objoff + 1;
   BoundingBoxCore(bVar1, 1);
   CheckRightScreenBBox(bVar1);
 }
@@ -8980,15 +8981,15 @@ void SetupEOffsetFBBox(const byte param_1) {
 // SMB:e289
 // SM2MAIN:af27
 // Signature: [X] -> []
-void MoveBoundBoxOffscreen(const byte param_1) {
+void MoveBoundBoxOffscreen(const byte objoff) {
   // This condition being false would create wraparound behavior with the bounding box arrays,
   // so assume it never happens
-  assert_eq_assumption(param_1 % 64 != 63, true);
+  assert_eq_assumption(objoff % 64 != 63, true);
 
-  BBOX_TOPLEFT_X(param_1 + 1)  = 0xff;
-  BBOX_TOPLEFT_Y(param_1 + 1)  = 0xff;
-  BBOX_BOTRIGHT_X(param_1 + 1) = 0xff;
-  BBOX_BOTRIGHT_Y(param_1 + 1) = 0xff;
+  BBOX_TOPLEFT_X(objoff + 1)  = 0xff;
+  BBOX_TOPLEFT_Y(objoff + 1)  = 0xff;
+  BBOX_BOTRIGHT_X(objoff + 1) = 0xff;
+  BBOX_BOTRIGHT_Y(objoff + 1) = 0xff;
 }
 
 
@@ -9891,11 +9892,11 @@ void DrawBlock(const byte objoff) {
 // SMB:ec53
 // SM2MAIN:b92e
 // Signature: [X] -> []
-void DrawBrickChunks(const byte param_1) {
+void DrawBrickChunks(const byte objoff) {
   const byte tilepalette = GameEngineSubroutine != 5 ? 3 : 2;
   const byte tileidx = GameEngineSubroutine != 5 ? 0x84 : 0x75;
 
-  const byte off = AltOrBlock_SprDataOffset[param_1];
+  const byte off = AltOrBlock_SprDataOffset[objoff];
 
   // NES note: If the sprite offset is 254 or 255, this wraparounds the sprite page
   // because it's incremented before passing to DumpFourSpr.
@@ -9929,7 +9930,7 @@ void DrawBrickChunks(const byte param_1) {
   const byte x1 = Block_Rel_XPos;
   const byte x2 = Block_Rel_XPos_2;
 
-  const byte b = Block_Orig_XPos[param_1] - ScreenEdgeOrLeft_X_Pos[0];
+  const byte b = Block_Orig_XPos[objoff] - ScreenEdgeOrLeft_X_Pos[0];
 
   // Set X for all 4 sprites
   SPRITE_X(off, 0) = x1;
@@ -9969,8 +9970,8 @@ void DrawBrickChunks(const byte param_1) {
 // SMB:ecde
 // SM2MAIN:b9b9
 // Signature: [X] -> []
-void DrawFireball(const byte param_1) {
-  const byte bVar1 = FBall_SprDataOffset[param_1];
+void DrawFireball(const byte objoff) {
+  const byte bVar1 = FBall_SprDataOffset[objoff];
   SPRITE_Y(bVar1, 0) = Fireball_Rel_YPos;
   SPRITE_X(bVar1, 0) = Fireball_Rel_XPos;
   DrawFirebar(bVar1);
@@ -9989,14 +9990,14 @@ void DrawFirebar(const byte param_1) {
 // SMB:ed09
 // SM2MAIN:b9e4
 // Signature: [X] -> []
-void DrawExplosion_Fireball(const byte param_1) {
-  byte bVar1 = Fireball_State[param_1];
-  Fireball_State[param_1] = Fireball_State[param_1] + 1;
+void DrawExplosion_Fireball(const byte objoff) {
+  byte bVar1 = Fireball_State[objoff];
+  Fireball_State[objoff] = Fireball_State[objoff] + 1;
   bVar1 = bVar1 >> 1 & 7;
   if (bVar1 < 3) {
-    DrawExplosion_Fireworks(bVar1, AltOrBlock_SprDataOffset[param_1]);
+    DrawExplosion_Fireworks(bVar1, AltOrBlock_SprDataOffset[objoff]);
   } else {
-    Fireball_State[param_1] = 0;
+    Fireball_State[objoff] = 0;
   }
 }
 
@@ -10430,8 +10431,8 @@ byte RelativePlayerPosition(void) {
 // SMB:f131
 // SM2MAIN:be16
 // Signature: [X] -> []
-void RelativeBubblePosition(const byte param_1) {
-  const byte bVar1 = GetProperObjOffset(param_1, 1);
+void RelativeBubblePosition(const byte objoff) {
+  const byte bVar1 = GetProperObjOffset(objoff, 1);
   GetObjRelativePosition(bVar1, 3);
 }
 
