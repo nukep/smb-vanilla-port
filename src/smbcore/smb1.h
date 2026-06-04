@@ -880,7 +880,7 @@ void smb1_RunSmallPlatform(byte param_1);
 void smb1_RunLargePlatform(byte param_1);
 #define RunLargePlatform smb1_RunLargePlatform
 
-byte smb1_LargePlatformSubroutines(byte param_1);
+void smb1_LargePlatformSubroutines(byte param_1);
 #define LargePlatformSubroutines smb1_LargePlatformSubroutines
 
 void smb1_EraseEnemyObject(byte param_1);
@@ -907,7 +907,7 @@ void smb1_MoveDefeatedEnemy(byte param_1);
 void smb1_MoveJumpingEnemy(byte param_1);
 #define MoveJumpingEnemy smb1_MoveJumpingEnemy
 
-byte smb1_ProcMoveRedPTroopa(byte param_1);
+void smb1_ProcMoveRedPTroopa(byte param_1);
 #define ProcMoveRedPTroopa smb1_ProcMoveRedPTroopa
 
 void smb1_MoveFlyGreenPTroopa(byte param_1);
@@ -919,7 +919,7 @@ void smb1_XMoveCntr_GreenPTroopa(byte param_1);
 void smb1_XMoveCntr_Platform(byte param_1,byte param_2);
 #define XMoveCntr_Platform smb1_XMoveCntr_Platform
 
-byte smb1_MoveWithXMCntrs(byte param_1, byte objoff);
+byte smb1_MoveWithXMCntrs(byte objoff);
 #define MoveWithXMCntrs smb1_MoveWithXMCntrs
 
 void smb1_MoveBloober(byte param_1,bool param_2);
@@ -1009,7 +1009,7 @@ void smb1_DelayToAreaEnd(byte param_1);
 void smb1_MovePiranhaPlant(byte param_1);
 #define MovePiranhaPlant smb1_MovePiranhaPlant
 
-byte smb1_BalancePlatform(byte param_1);
+void smb1_BalancePlatform(byte param_1);
 #define BalancePlatform smb1_BalancePlatform
 
 void smb1_InitPlatformFall(byte param_1, byte objoff);
@@ -1021,22 +1021,22 @@ void smb1_StopPlatforms(byte param_1,byte param_2);
 void smb1_PlatformFall(byte param_1,byte param_2);
 #define PlatformFall smb1_PlatformFall
 
-byte smb1_YMovingPlatform(byte param_1);
+void smb1_YMovingPlatform(byte param_1);
 #define YMovingPlatform smb1_YMovingPlatform
 
 void smb1_ChkYPCollision(byte param_1);
 #define ChkYPCollision smb1_ChkYPCollision
 
-void smb1_XMovingPlatform(byte param_1, byte objoff);
+void smb1_XMovingPlatform(byte objoff);
 #define XMovingPlatform smb1_XMovingPlatform
 
 void smb1_PositionPlayerOnHPlat(byte param_1,byte param_2);
 #define PositionPlayerOnHPlat smb1_PositionPlayerOnHPlat
 
-byte smb1_DropPlatform(byte param_1);
+void smb1_DropPlatform(byte param_1);
 #define DropPlatform smb1_DropPlatform
 
-void smb1_RightPlatform(byte param_1, byte objoff);
+void smb1_RightPlatform(byte objoff);
 #define RightPlatform smb1_RightPlatform
 
 void smb1_MoveLargeLiftPlat(byte param_1);
@@ -1108,16 +1108,13 @@ void smb1_EnemyTurnAround(byte param_1);
 void smb1_RXSpd(byte param_1);
 #define RXSpd smb1_RXSpd
 
-byte smb1_LargePlatformCollision(byte param_1);
+void smb1_LargePlatformCollision(byte param_1);
 #define LargePlatformCollision smb1_LargePlatformCollision
-
-byte smb1_ChkForPlayerC_LargeP(byte param_1);
-#define ChkForPlayerC_LargeP smb1_ChkForPlayerC_LargeP
 
 void smb1_SmallPlatformCollision(byte param_1);
 #define SmallPlatformCollision smb1_SmallPlatformCollision
 
-void smb1_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3);
+void smb1_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3, byte objoff);
 #define ProcLPlatCollisions smb1_ProcLPlatCollisions
 
 void smb1_PositionPlayerOnS_Plat(byte param_1,byte param_2);

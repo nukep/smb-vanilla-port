@@ -871,7 +871,7 @@ void smb2j_RunSmallPlatform(byte param_1);
 void smb2j_RunLargePlatform(byte param_1);
 #define RunLargePlatform smb2j_RunLargePlatform
 
-byte smb2j_LargePlatformSubroutines(byte param_1);
+void smb2j_LargePlatformSubroutines(byte param_1);
 #define LargePlatformSubroutines smb2j_LargePlatformSubroutines
 
 void smb2j_EraseEnemyObject(byte param_1);
@@ -898,7 +898,7 @@ void smb2j_MoveDefeatedEnemy(byte param_1);
 void smb2j_MoveJumpingEnemy(byte param_1);
 #define MoveJumpingEnemy smb2j_MoveJumpingEnemy
 
-byte smb2j_ProcMoveRedPTroopa(byte param_1);
+void smb2j_ProcMoveRedPTroopa(byte param_1);
 #define ProcMoveRedPTroopa smb2j_ProcMoveRedPTroopa
 
 void smb2j_MoveFlyGreenPTroopa(byte param_1);
@@ -910,7 +910,7 @@ void smb2j_XMoveCntr_GreenPTroopa(byte param_1);
 void smb2j_XMoveCntr_Platform(byte param_1,byte param_2);
 #define XMoveCntr_Platform smb2j_XMoveCntr_Platform
 
-byte smb2j_MoveWithXMCntrs(byte param_1, byte objoff);
+byte smb2j_MoveWithXMCntrs(byte objoff);
 #define MoveWithXMCntrs smb2j_MoveWithXMCntrs
 
 void smb2j_MoveBloober(byte param_1,bool param_2);
@@ -1000,7 +1000,7 @@ void smb2j_DelayToAreaEnd(byte param_1);
 void smb2j_MovePiranhaPlant(byte param_1);
 #define MovePiranhaPlant smb2j_MovePiranhaPlant
 
-byte smb2j_BalancePlatform(byte param_1);
+void smb2j_BalancePlatform(byte param_1);
 #define BalancePlatform smb2j_BalancePlatform
 
 void smb2j_InitPlatformFall(byte param_1, byte objoff);
@@ -1012,22 +1012,22 @@ void smb2j_StopPlatforms(byte param_1,byte param_2);
 void smb2j_PlatformFall(byte param_1,byte param_2);
 #define PlatformFall smb2j_PlatformFall
 
-byte smb2j_YMovingPlatform(byte param_1);
+void smb2j_YMovingPlatform(byte param_1);
 #define YMovingPlatform smb2j_YMovingPlatform
 
 void smb2j_ChkYPCollision(byte param_1);
 #define ChkYPCollision smb2j_ChkYPCollision
 
-void smb2j_XMovingPlatform(byte param_1, byte objoff);
+void smb2j_XMovingPlatform(byte objoff);
 #define XMovingPlatform smb2j_XMovingPlatform
 
 void smb2j_PositionPlayerOnHPlat(byte param_1,byte param_2);
 #define PositionPlayerOnHPlat smb2j_PositionPlayerOnHPlat
 
-byte smb2j_DropPlatform(byte param_1);
+void smb2j_DropPlatform(byte param_1);
 #define DropPlatform smb2j_DropPlatform
 
-void smb2j_RightPlatform(byte param_1, byte objoff);
+void smb2j_RightPlatform(byte objoff);
 #define RightPlatform smb2j_RightPlatform
 
 void smb2j_MoveLargeLiftPlat(byte param_1);
@@ -1102,16 +1102,13 @@ void smb2j_EnemyTurnAround(byte param_1);
 void smb2j_RXSpd(byte param_1);
 #define RXSpd smb2j_RXSpd
 
-byte smb2j_LargePlatformCollision(byte param_1);
+void smb2j_LargePlatformCollision(byte param_1);
 #define LargePlatformCollision smb2j_LargePlatformCollision
-
-byte smb2j_ChkForPlayerC_LargeP(byte param_1);
-#define ChkForPlayerC_LargeP smb2j_ChkForPlayerC_LargeP
 
 void smb2j_SmallPlatformCollision(byte param_1);
 #define SmallPlatformCollision smb2j_SmallPlatformCollision
 
-void smb2j_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3);
+void smb2j_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3, byte objoff);
 #define ProcLPlatCollisions smb2j_ProcLPlatCollisions
 
 void smb2j_PositionPlayerOnS_Plat(byte param_1,byte param_2);
