@@ -8,9 +8,6 @@
 
 // some noisy names used during ghidra decompilation
 // should be removed eventually
-#define SpriteVarData1 Enemy_X_Speed
-#define SpriteVarData2 Enemy_Y_Speed
-
 #define Cannon_Or_Whirlpool_PageLoc      Cannon_PageLoc
 #define Cannon_Or_Whirlpool_X_Position   Cannon_X_Position
 #define Cannon_X_Position_Or_Whirlpool_LeftExtent Cannon_X_Position
@@ -22,7 +19,7 @@
 #define CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos Enemy_Y_MoveForce
 #define Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos (SprObject_X_MoveForce + 1)
 #define BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos Enemy_YMF_Dummy
-#define AltOrBlock_SprDataOffset     (SprDataOffset + 8)
+
 #define DisplayDigits_Or_TopScoreDisplay DisplayDigits
 #define PlayerScoreDisplay_Or_ScoreAndCoinDisplay (DisplayDigits + 6)
 
@@ -81,16 +78,16 @@
 #define Block_X_Speed                    (SprObject_X_Speed + 9)
 #define Misc_X_Speed                     (SprObject_X_Speed + 13)
 
-//# define BlooperMoveSpeed                 RAMARRAY(0x0058, 0)
-//# define CheepCheepMoveMFlag              RAMARRAY(0x0058, 0)
-//# define ExplosionGfxCounter              RAMARRAY(0x0058, 0)
-//# define FirebarSpinState_Low             RAMARRAY(0x0058, 0)
-//# define Jumpspring_FixedYPos             RAMARRAY(0x0058, 0)
-//# define LakituMoveSpeed                  RAMARRAY(0x0058, 0)
-//# define PiranhaPlant_Y_Speed             RAMARRAY(0x0058, 0)
-//# define RedPTroopaCenterYPos             RAMARRAY(0x0058, 0)
-//# define XMoveSecondaryCounter            RAMARRAY(0x0058, 0)
-//# define YPlatformCenterYPos              RAMARRAY(0x0058, 0)
+#define BlooperMoveSpeed                 Enemy_X_Speed
+#define CheepCheepMoveMFlag              Enemy_X_Speed
+#define ExplosionGfxCounter              Enemy_X_Speed
+#define FirebarSpinState_Low             Enemy_X_Speed
+#define Jumpspring_FixedYPos             Enemy_X_Speed
+#define LakituMoveSpeed                  Enemy_X_Speed
+#define PiranhaPlant_Y_Speed             Enemy_X_Speed
+#define RedPTroopaCenterYPos             Enemy_X_Speed
+#define XMoveSecondaryCounter            Enemy_X_Speed
+#define YPlatformCenterYPos              Enemy_X_Speed
 
 #define SprObject_PageLoc                RAMARRAY(0x006D, 25)	// 3 more, because of bubbles
 #define Player_PageLoc                   SprObject_PageLoc[0]
@@ -115,12 +112,12 @@
 #define Block_Y_Speed                    (SprObject_Y_Speed + 9)
 #define Misc_Y_Speed                     (SprObject_Y_Speed + 13)
 
-//# define BlooperMoveCounter               RAMARRAY(0x00A0, 0)
-//# define ExplosionTimerCounter            RAMARRAY(0x00A0, 0)
-//# define FirebarSpinState_High            RAMARRAY(0x00A0, 0)
-//# define LakituMoveDirection              RAMARRAY(0x00A0, 0)
-//# define PiranhaPlant_MoveFlag            RAMARRAY(0x00A0, 0)
-//# define XMovePrimaryCounter              RAMARRAY(0x00A0, 0)
+#define BlooperMoveCounter               Enemy_Y_Speed
+#define ExplosionTimerCounter            Enemy_Y_Speed
+#define FirebarSpinState_High            Enemy_Y_Speed
+#define LakituMoveDirection              Enemy_Y_Speed
+#define PiranhaPlant_MoveFlag            Enemy_Y_Speed
+#define XMovePrimaryCounter              Enemy_Y_Speed
 
 #define SprObject_Y_HighPos              RAMARRAY(0x00B5, 25)	// 3 more, because of bubbles
 #define Player_Y_HighPos                 SprObject_Y_HighPos[0]
@@ -250,7 +247,8 @@
 #define Block_Metatile                   RAMARRAY(0x03E8, 2)
 #define Block_PageLoc2                   RAMARRAY(0x03EA, 2)
 #define Block_RepFlag                    RAMARRAY(0x03EC, 2)
-#define SprDataOffset_Ctrl               RAM(0x03EE)
+#define BlockOffsetToggle                RAM(0x03EE) // Called SprDataOffset_Ctrl in doppelganger disasm
+#define BLockOffsetToggle2               dd
 #define Block_ResidualCounter            RAM(0x03F0)
 #define Block_Orig_XPos                  RAMARRAY(0x03F1, 2)
 #define AttributeBuffer                  RAMARRAY(0x03F9, 7)
@@ -341,8 +339,8 @@
 #define SprDataOffset                    RAMARRAY(0x06E4, 24)
 #define Player_SprDataOffset             SprDataOffset[0]
 #define Enemy_SprDataOffset              (SprDataOffset + 1)
-#define Alt_SprDataOffset                (SprDataOffset + 8)
 #define Block_SprDataOffset              (SprDataOffset + 8)
+#define Alt_SprDataOffset                Block_SprDataOffset
 #define Bubble_SprDataOffset             (SprDataOffset + 10)
 #define FBall_SprDataOffset              (SprDataOffset + 13)
 #define Misc_SprDataOffset               (SprDataOffset + 15)

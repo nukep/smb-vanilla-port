@@ -725,20 +725,20 @@ void MoveUpsideDownPiranhaP(const byte param_1) {
   byte bVar3;
 
   if ((Enemy_State[param_1] == 0) && (EnemyFrameTimer[param_1] == 0)) {
-    if (SpriteVarData2[param_1] == 0) {
-      SpriteVarData1[param_1] = NEGATE(SpriteVarData1[param_1]);
-      SpriteVarData2[param_1] = SpriteVarData2[param_1] + 1;
+    if (PiranhaPlant_MoveFlag[param_1] == 0) {
+      PiranhaPlant_Y_Speed[param_1] = NEGATE(PiranhaPlant_Y_Speed[param_1]);
+      PiranhaPlant_MoveFlag[param_1] = PiranhaPlant_MoveFlag[param_1] + 1;
     }
     bVar3 = BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1];
-    if (SpriteVarData1[param_1] >= 0x80) {
+    if (PiranhaPlant_Y_Speed[param_1] >= 0x80) {
       bVar3 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
     }
     if (TimerControl == 0) {
       bVar1 = Enemy_Y_Position[param_1];
-      bVar2 = SpriteVarData1[param_1];
+      bVar2 = PiranhaPlant_Y_Speed[param_1];
       Enemy_Y_Position[param_1] = bVar1 + bVar2;
       if ((byte)(bVar1 + bVar2) == bVar3) {
-        SpriteVarData2[param_1] = 0;
+        PiranhaPlant_MoveFlag[param_1] = 0;
         EnemyFrameTimer[param_1] = 0x20;
       }
     }
@@ -779,7 +779,7 @@ void SimulateWind(void) {
       bVar1 += 1;
       bVar2 = bVar2 + 4;
       if (bVar1 == 6) {
-        bVar2 = AltOrBlock_SprDataOffset[0];
+        bVar2 = Alt_SprDataOffset[0];
       }
     } while (bVar1 != 0xc);
   }

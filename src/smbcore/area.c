@@ -1346,7 +1346,7 @@ void Jumpspring(const byte param_1) {
   Enemy_PageLoc[bVar3] = CurrentPageLoc;
   bVar2 = GetAreaObjYPosition(bVar1);
   Enemy_Y_Position[bVar3] = bVar2;
-  SpriteVarData1[bVar3] = bVar2;
+  Jumpspring_FixedYPos[bVar3] = bVar2;
   Enemy_ID[bVar3] = 0x32;
   Enemy_Y_HighPos[bVar3] = 1;
   Enemy_Flag[bVar3] = Enemy_Flag[bVar3] + 1;
@@ -1872,7 +1872,7 @@ void UpsideDownPipe_High(const byte param_1) {
       Enemy_Y_Position[bVar4] = bVar2;
       CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar4] = bVar2;
       BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
-      SpriteVarData2[bVar4] = SpriteVarData2[bVar4] + 1;
+      PiranhaPlant_MoveFlag[bVar4] = PiranhaPlant_MoveFlag[bVar4] + 1;
     }
   }
   bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar5, bVar3 - 1);
@@ -1903,7 +1903,7 @@ void UpsideDownPipe_Low(const byte param_1) {
       Enemy_Y_Position[bVar4] = bVar2;
       CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar4] = bVar2;
       BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
-      SpriteVarData2[bVar4] = SpriteVarData2[bVar4] + 1;
+      PiranhaPlant_MoveFlag[bVar4] = PiranhaPlant_MoveFlag[bVar4] + 1;
     }
   }
   bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar5, bVar3 - 1);
