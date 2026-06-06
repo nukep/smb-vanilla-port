@@ -847,15 +847,16 @@ void ScrollLockObject(void) {
 // SM2MAIN:7582
 // Signature: [r00] -> []
 void AreaFrenzy(const byte param_1) {
-  byte bVar1 = 5;
-  do {
-    bVar1 -= 1;
-    if (bVar1 >= 0x80) {
-      EnemyFrenzyQueue = FrenzyIDData[param_1 - 8];
+  const byte enemy_id = FrenzyIDData[param_1 - 8];
+
+  for (int i = 0; i < 5; i++) {
+    if (Enemy_ID[i] == enemy_id) {
+      EnemyFrenzyQueue = 0;
       return;
     }
-  } while (FrenzyIDData[param_1 - 8] != Enemy_ID[bVar1]);
-  EnemyFrenzyQueue = 0;
+  }
+
+  EnemyFrenzyQueue = enemy_id;
 }
 
 
@@ -942,7 +943,7 @@ void CastleObject(const byte param_1) {
       Enemy_Y_HighPos[bVar4] = 1;
       Enemy_Flag[bVar4] = 1;
       Enemy_Y_Position[bVar4] = 0x90;
-      Enemy_ID[bVar4] = 0x31;
+      Enemy_ID[bVar4] = A_STARFLAG;
       return;
     }
   }
@@ -1007,7 +1008,7 @@ struct_yc RenderSidewaysPipe(const byte param_1, const byte param_2) {
 // SMB:N/A (inlined in VerticalPipe)
 // SM2MAIN:7772
 // Signature: [A, X, r07] -> []
-void SetupPiranhaPlant(const byte param_1, const byte param_2, const byte param_3) {
+void SetupPiranhaPlant(const byte enemy_id, const byte param_2, const byte param_3) {
   const u16 xpos = (CurrentPageLoc << 8) + GetAreaObjXPosition() + 8;
   Enemy_X_Position[param_2] = xpos & 0xff;
   Enemy_PageLoc[param_2] = xpos >> 8;
@@ -1016,7 +1017,7 @@ void SetupPiranhaPlant(const byte param_1, const byte param_2, const byte param_
   Enemy_Y_Position[param_2] = GetAreaObjYPosition(param_3);
 
   Enemy_Flag[param_2] = 1;
-  Enemy_ID[param_2] = param_1;
+  Enemy_ID[param_2] = enemy_id;
 
   InitPiranhaPlant(param_2);
 }
@@ -1047,7 +1048,7 @@ void VerticalPipe(const byte param_1, const byte param_2) {
   if (check) {
     sVar6 = FindEmptyEnemySlot();
     if (!sVar6.c) {
-      SetupPiranhaPlant(0xd, sVar6.x, bVar2);
+      SetupPiranhaPlant(A_PIRANHA_PLANT, sVar6.x, bVar2);
     }
   }
 
@@ -1176,7 +1177,7 @@ void FlagpoleObject(void) {
   Enemy_PageLoc[5] = CurrentPageLoc - (bVar1 < 8);
   Enemy_Y_Position[5] = 0x30;
   FlagpoleFNum_Y_Pos = 0xb0;
-  Enemy_ID[5] = 0x30;
+  Enemy_ID[5] = A_FLAGPOLE;
   Enemy_Flag[5] = Enemy_Flag[5] + 1;
 }
 
@@ -1347,7 +1348,7 @@ void Jumpspring(const byte param_1) {
   bVar2 = GetAreaObjYPosition(bVar1);
   Enemy_Y_Position[bVar3] = bVar2;
   Jumpspring_FixedYPos[bVar3] = bVar2;
-  Enemy_ID[bVar3] = 0x32;
+  Enemy_ID[bVar3] = A_JUMPSPRING;
   Enemy_Y_HighPos[bVar3] = 1;
   Enemy_Flag[bVar3] = Enemy_Flag[bVar3] + 1;
   MetatileBuffer[bVar1] = ssw(0x67, 0x68);
@@ -1857,7 +1858,7 @@ static inline void UpsideDownPipe_impl(const byte objoff, const byte val) {
     const struct_xc sVar7 = FindEmptyEnemySlot();
     const byte bVar4 = sVar7.x;
     if (!sVar7.c) {
-      SetupPiranhaPlant(4, bVar4, val);
+      SetupPiranhaPlant(A_PIRANHA_PLANT_SMB2J, bVar4, val);
       const byte cVar1 = bVar3 * 0x10 + Enemy_Y_Position[bVar4];
       const byte bVar2 = cVar1 - 10;
       Enemy_Y_Position[bVar4] = bVar2;

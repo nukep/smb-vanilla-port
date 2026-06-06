@@ -757,7 +757,7 @@ byte smb2j_SmallBBox(byte param_1);
 void smb2j_InitRedPTroopa(byte param_1);
 #define InitRedPTroopa smb2j_InitRedPTroopa
 
-byte smb2j_InitVStf(byte param_1);
+void smb2j_InitVStf(byte param_1);
 #define InitVStf smb2j_InitVStf
 
 void smb2j_InitBulletBill(byte param_1);
@@ -1075,7 +1075,7 @@ void smb2j_ForceInjury(byte param_1);
 void smb2j_SetPRout(byte param_1,byte param_2);
 #define SetPRout smb2j_SetPRout
 
-byte smb2j_SetBounce(byte param_1);
+void smb2j_SetBounce(byte param_1);
 #define SetBounce smb2j_SetBounce
 
 void smb2j_ChkEnemyFaceRight(byte param_1);
@@ -1098,9 +1098,6 @@ void smb2j_ProcEnemyCollisions(byte param_1,byte param_2);
 
 void smb2j_EnemyTurnAround(byte param_1);
 #define EnemyTurnAround smb2j_EnemyTurnAround
-
-void smb2j_RXSpd(byte param_1);
-#define RXSpd smb2j_RXSpd
 
 void smb2j_LargePlatformCollision(byte param_1);
 #define LargePlatformCollision smb2j_LargePlatformCollision

@@ -766,7 +766,7 @@ byte smb1_SmallBBox(byte param_1);
 void smb1_InitRedPTroopa(byte param_1);
 #define InitRedPTroopa smb1_InitRedPTroopa
 
-byte smb1_InitVStf(byte param_1);
+void smb1_InitVStf(byte param_1);
 #define InitVStf smb1_InitVStf
 
 void smb1_InitBulletBill(byte param_1);
@@ -1104,9 +1104,6 @@ void smb1_ProcEnemyCollisions(byte param_1,byte param_2);
 
 void smb1_EnemyTurnAround(byte param_1);
 #define EnemyTurnAround smb1_EnemyTurnAround
-
-void smb1_RXSpd(byte param_1);
-#define RXSpd smb1_RXSpd
 
 void smb1_LargePlatformCollision(byte param_1);
 #define LargePlatformCollision smb1_LargePlatformCollision

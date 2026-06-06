@@ -1,5 +1,6 @@
 #include "types.h"
 #include "vars.h"
+#include "consts.h"
 
 enum VictoryModeSubroutines_forW8_jumptable_item {
   VICTORYMODESUBROUTINES_FORW8_BRIDGECOLLAPSE,
@@ -203,14 +204,13 @@ void PoisonMushBlock(const byte param_1) {
 
 
 // SM2MAIN:a64e
-// Signature: [X] -> [A]
-byte SetBounce(const byte param_1) {
+// Signature: [X] -> []
+void SetBounce(const byte param_1) {
   Player_Y_Speed = 0xfa;
-  const byte bVar1 = Enemy_ID[param_1];
-  if ((bVar1 == 0xf) || (bVar1 == 0x10)) {
+  const byte enemy_id = Enemy_ID[param_1];
+  if ((enemy_id == A_RED_PARATROOPA) || (enemy_id == A_GREEN_PARATROOPA_HORIZONTAL)) {
     Player_Y_Speed = 0xf8;
   }
-  return bVar1;
 }
 
 
@@ -221,16 +221,25 @@ void ChkToStunEnemies(const byte param_1) {
   // The NES implementation did a bunch of compares to hoan in on the object types,
   // but it's more obvious to just do the comparisons directly.
 
-  if (Enemy_ID[param_1] == 6 || Enemy_ID[param_1] == 0x2e) {
+  const byte enemy_id = Enemy_ID[param_1];
+
+  if (enemy_id == A_GOOMBA || enemy_id == A_POWERUP) {
     SetStun2(param_1);
     return;
   }
 
   // Turn these enemies into koopas
-  if (Enemy_ID[param_1] == 9)  { Enemy_ID[param_1] = 1; }
-  if (Enemy_ID[param_1] == 14) { Enemy_ID[param_1] = 0; }
-  if (Enemy_ID[param_1] == 15) { Enemy_ID[param_1] = 1; }
-  if (Enemy_ID[param_1] == 16) { Enemy_ID[param_1] = 0; }
+  switch (enemy_id) {
+  case A_GREEN_PARATROOPA_INPLACE:
+  case A_RED_PARATROOPA:
+    Enemy_ID[param_1] = A_RED_KOOPA_GREENLIKE;
+    break;
+
+  case A_GREEN_PARATROOPA:
+  case A_GREEN_PARATROOPA_HORIZONTAL:
+    Enemy_ID[param_1] = A_GREEN_KOOPA;
+    break;
+  }
 
   Enemy_State[param_1] = 2;
   SetStun2(param_1);
@@ -1107,7 +1116,7 @@ void MushroomRetainersForW8(void) {
     if ((BlueDelayFlag < 4)
         || (FlashMRSpriteDataOfs[(byte)((BlueDelayFlag - 4) - (BlueDelayFlag < 4))] != MRSpriteDataOfs[BlueColorOfs])) {
       Enemy_SprDataOffset[0] = MRSpriteDataOfs[BlueColorOfs];
-      Enemy_ID[0] = 0x35;
+      Enemy_ID[0] = A_RETAINER;
       Enemy_Y_Position[0] = MRetainerYPos[BlueColorOfs];
       Enemy_Rel_XPos = MRetainerXPos[BlueColorOfs];
       WorldNumber = 0;

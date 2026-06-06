@@ -1,5 +1,6 @@
 #include "types.h"
 #include "vars.h"
+#include "consts.h"
 
 
 // SMB:83f6
@@ -166,13 +167,20 @@ void ScrollScreen(const byte param_1) {
 
 // SMB:e01b
 // Signature: [A, X] -> []
-void ChkToStunEnemies(const byte param_1, const byte param_2) {
+void ChkToStunEnemies(const byte enemy_id, const byte param_2) {
   // Turn these enemies into koopas
-  if (param_1 == 9)  { Enemy_ID[param_2] = 1; }
-  if (param_1 == 13) { Enemy_ID[param_2] = 1; }
-  if (param_1 == 14) { Enemy_ID[param_2] = 0; }
-  if (param_1 == 15) { Enemy_ID[param_2] = 1; }
-  if (param_1 == 16) { Enemy_ID[param_2] = 0; }
+  switch (enemy_id) {
+  case A_GREEN_PARATROOPA_INPLACE:
+  case A_RED_PARATROOPA:
+  case A_PIRANHA_PLANT:
+    Enemy_ID[param_2] = A_RED_KOOPA_GREENLIKE;
+    break;
+
+  case A_GREEN_PARATROOPA:
+  case A_GREEN_PARATROOPA_HORIZONTAL:
+    Enemy_ID[param_2] = A_GREEN_KOOPA;
+    break;
+  }
 
   // Inlined: SetStun
 
