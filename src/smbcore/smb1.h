@@ -1090,7 +1090,7 @@ void smb1_ChkEnemyFaceRight(byte param_1);
 void smb1_LInj(byte param_1);
 #define LInj smb1_LInj
 
-byte smb1_EnemyFacePlayer(byte param_1);
+bool smb1_EnemyFacePlayer(byte param_1);
 #define EnemyFacePlayer smb1_EnemyFacePlayer
 
 void smb1_SetupFloateyNumber(byte param_1,byte param_2);

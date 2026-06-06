@@ -632,10 +632,12 @@ void GameOverMenu(void) {
       ContinueMenuSelect ^= 1;
     }
 
+    assert_eq_assumption(ContinueMenuSelect <= 1, true);
+
     SPRITE_TILE(0, 0) = GameOverCursorData[0];
     SPRITE_ATTR(0, 0) = GameOverCursorData[1];
     SPRITE_X(0, 0)    = GameOverCursorData[2];
-    SPRITE_Y(0, 0)    = GameOverCursorY[ContinueMenuSelect];
+    SPRITE_Y(0, 0)    = ContinueMenuSelect == 0 ? 0x77 : 0x8f;
     return;
   }
   if (ContinueMenuSelect != 0) {
@@ -644,9 +646,9 @@ void GameOverMenu(void) {
     return;
   }
   NumberofLives = 2;
-  LevelNumber = ContinueMenuSelect;
-  AreaNumber = ContinueMenuSelect;
-  CoinTally = ContinueMenuSelect;
+  LevelNumber = 0;
+  AreaNumber = 0;
+  CoinTally = 0;
   for (int i = 0; i < 12; i++) {
     DisplayDigits[i + 6] = 0;
   }
@@ -703,16 +705,26 @@ static void LoadLuigiPhysics(void) {
 // SM2MAIN:c5ff
 // Signature: [] -> []
 void PatchPlayerNamePal(void) {
-  const byte off = PlayerNameOffsets[CurrentPlayer];
-  for (int i = 0; i < 5; i++) {
-    const byte j = (byte)(off-4 + i);
-    TopStatusBarLine[i + 3] = PlayerNameData[j];
-    ThankYouMessage[i + 13] = PlayerNameData[j];
-  }
+  assert_eq_assumption(CurrentPlayer <= 1, true);
 
-  for (int i = 0; i < 4; i++) {
-    const byte j = (byte)(off-4-CurrentPlayer + i);
-    PlayerColors[i] = PlayerPaletteData[j];
+  // Note: Inlined the offsets. The code assumes a length of 5 for both names, anyway.
+
+  if (CurrentPlayer == 0) {
+    for (int i = 0; i < 5; i++) {
+      TopStatusBarLine[i + 3] = PlayerNameMario[i];
+      ThankYouMessage[i + 13] = PlayerNameMario[i];
+    }
+    for (int i = 0; i < 4; i++) {
+      PlayerColors[i] = PlayerPaletteMario[i];
+    }
+  } else {
+    for (int i = 0; i < 5; i++) {
+      TopStatusBarLine[i + 3] = PlayerNameLuigi[i];
+      ThankYouMessage[i + 13] = PlayerNameLuigi[i];
+    }
+    for (int i = 0; i < 4; i++) {
+      PlayerColors[i] = PlayerPaletteLuigi[i];
+    }
   }
 }
 

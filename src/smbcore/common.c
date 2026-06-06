@@ -1416,14 +1416,35 @@ void Entrance_GameTimerSetup(void) {
   HalfwayPage = 0;
   SwimmingFlag = AreaType == 0;
 
-  const byte entrance_ctrl =
-    (AltEntranceControl < 2)
-    ? PlayerEntranceCtrl
-    : AltYPosOffset[AltEntranceControl - 2];
+  assert_eq_assumption(PlayerEntranceCtrl < 8, true);
+  assert_eq_assumption(AltEntranceControl < 4, true);
 
-  Player_X_Position = PlayerStarting_X_Pos[AltEntranceControl];
-  Player_Y_Position = PlayerStarting_Y_Pos[entrance_ctrl];
-  Player_SprAttrib = PlayerBGPriorityData[entrance_ctrl];
+  switch (AltEntranceControl) {
+  case 0:
+  case 1:
+  {
+    static const byte starting_xpos[2] = {0x28,0x18};
+    static const byte starting_ypos[8] = {0x00,0x20,0xb0,0x50,0x00,0x00,0xb0,0xb0};
+    static const bool bg_priority[8]   = {0,1,0,0,0,0,0,0};
+
+    Player_X_Position = starting_xpos[AltEntranceControl];
+    Player_Y_Position = starting_ypos[PlayerEntranceCtrl];
+    Player_SprAttrib = bg_priority[PlayerEntranceCtrl] ? 0x20 : 0;
+    break;
+  }
+
+  case 2:
+    Player_X_Position = 0x38;
+    Player_Y_Position = 0xf0;
+    Player_SprAttrib = 0x20;
+    break;
+
+  case 3:
+    Player_X_Position = 0x28;
+    Player_Y_Position = 0;
+    Player_SprAttrib = 0;
+    break;
+  }
 
   // NES note: The GetPlayerColors subroutine sets the X register to the vram offset.
   // The eventual call to SetupBubble is the only place that indirectly uses it.
@@ -1797,7 +1818,7 @@ void ChkPOffscr(void) {
     Player_X_Position = ScreenLeft_X_Pos - xsubtracterdata;
     Player_PageLoc = ScreenLeft_PageLoc - (ScreenLeft_X_Pos < xsubtracterdata);
 
-    if (Left_Right_Buttons != OffscrJoypadBitsData[0]) {
+    if (Left_Right_Buttons != BUTTON_R) {
       Player_X_Speed = 0;
     }
   } else if (b2) {
@@ -1806,7 +1827,7 @@ void ChkPOffscr(void) {
     Player_X_Position = ScreenRight_X_Pos - xsubtracterdata;
     Player_PageLoc = ScreenRight_PageLoc - (ScreenRight_X_Pos < xsubtracterdata);
 
-    if (Left_Right_Buttons != OffscrJoypadBitsData[1]) {
+    if (Left_Right_Buttons != BUTTON_L) {
       Player_X_Speed = 0;
     }
   }
@@ -2737,8 +2758,13 @@ static inline void check_and_setup_bubble(const byte param_1, const bool random,
     }
   }
 
-  const byte air_bubble_timer = bug ? BubbleTimerData_Bug : BubbleTimerData[random];
-  const byte bubble_mforce_data = bug ? Bubble_MForceData_Bug : Bubble_MForceData[random];
+  const byte air_bubble_timer_lookup[] = {0x40, 0x20, BubbleTimerData_Bug};
+  const byte bubble_mforce_data_lookup[] = {0xff, 0x50, Bubble_MForceData_Bug};
+
+  const int idx = bug ? 2 : (random ? 1 : 0);
+
+  const byte air_bubble_timer = air_bubble_timer_lookup[idx];
+  const byte bubble_mforce_data = bubble_mforce_data_lookup[idx];
 
   if (setup_bubble) {
     const bool c = (PlayerFacingDir & 1) != 0;
@@ -3008,7 +3034,13 @@ void VineObjectHandler(const byte objoff) {
     return;
   }
 
-  if (VineHeight != VineHeightData[(byte)(VineFlagOffset - 1)]) {
+  // It's easier to assume these are the only two values.
+  // It simplifies loops and lookups.
+  assert_eq_assumption(VineFlagOffset == 1 || VineFlagOffset == 2, true);
+
+  const byte checkheight = VineFlagOffset == 1 ? 0x30 : 0x60;
+
+  if (VineHeight != checkheight) {
     if ((FrameCounter & 2) != 0) {
       Enemy_Y_Position[5] -= 1;
       VineHeight += 1;
@@ -3019,20 +3051,16 @@ void VineObjectHandler(const byte objoff) {
     RelativeEnemyPosition(5);
     GetEnemyOffscreenBits(objoff);
 
-    // There are loops in the original that loop 256 times if 0, or only once if the decrement is negative,
-    // so it's easier if we just assume this is true.
-    // VineFlagOffset should only be 1 or 2, but the loops in this port are accurate for the following range.
-    assert_eq_assumption(VineFlagOffset >= 1 && VineFlagOffset <= 129, true);
-
-    for (int i = 0; i < VineFlagOffset; i++) {
-      DrawVine(i);
+    DrawVine(0);
+    if (VineFlagOffset == 2) {
+      DrawVine(1);
     }
 
     if ((Enemy_OffscreenBits & 0xc) != 0) {
-      for (int i = VineFlagOffset-1; i >= 0; i--) {
-        const byte vineobjoff = VineObjOffset[i];
-        EraseEnemyObject(vineobjoff);
+      if (VineFlagOffset == 2) {
+        EraseEnemyObject(VineObjOffset[1]);
       }
+      EraseEnemyObject(VineObjOffset[0]);
 
       // NES note: these are set to 0 because EraseEnemyObject always set the A register to 0
       VineHeight = 0;
@@ -3143,10 +3171,10 @@ void BulletBillHandler(const byte objoff) {
 
       if (sVar2.n) {
         Enemy_MovingDir[objoff] = 1;
-        Enemy_X_Speed[objoff] = BulletBillXSpdData[0];
+        Enemy_X_Speed[objoff] = 0x18;
       } else {
         Enemy_MovingDir[objoff] = 2;
-        Enemy_X_Speed[objoff] = BulletBillXSpdData[1];
+        Enemy_X_Speed[objoff] = -0x18;
       }
 
       if ((byte)(sVar2.r00 + 0x28 + sVar2.c) < 0x50) {
@@ -3331,7 +3359,7 @@ void GiveOneCoin(void) {
   DigitModifier[5] = 1;
 
 #ifdef SMB1_MODE
-  DigitsMathRoutine(CoinTallyOffsets[CurrentPlayer]);
+  DigitsMathRoutine(CurrentPlayer == 0 ? 0x17 : 0x1d);
 #endif
 #ifdef SMB2J_MODE
   DigitsMathRoutine(0x11);
@@ -3353,7 +3381,7 @@ void GiveOneCoin(void) {
 // Signature: [] -> []
 void AddToScore(void) {
 #ifdef SMB1_MODE
-  DigitsMathRoutine(ScoreOffsets[CurrentPlayer]);
+  DigitsMathRoutine(CurrentPlayer == 0 ? 11 : 17);
 #endif
 
 #ifdef SMB2J_MODE
@@ -3371,7 +3399,7 @@ void WriteScoreAndCoinTally(void) {
   // Also called "GetSBNybbles" in the SMB1 disassembly
 
   #ifdef SMB1_MODE
-    WriteDigits(StatusBarNybbles[CurrentPlayer]);
+    WriteDigits(CurrentPlayer == 0 ? 2 : 19);
   #endif
 
   #ifdef SMB2J_MODE
@@ -3505,8 +3533,8 @@ void PlayerHeadCollision(const byte param_1, const u16 mt_x, const u16 mt_y) {
   Block_Buffers[blockoff] = ssw(0x23, 0x20);
 
   BlockBounceTimer = 0x10;
-  bVar4 = ((CrouchingFlag != 0) || (PlayerSize != 0)) ? 1 : 0;
-  Block_Y_Position[sprdataoff] = (Player_Y_Position + BlockYPosAdderData[bVar4]) & 0xf0;
+  const byte yadderdata = ((CrouchingFlag == 0) && (PlayerSize == 0)) ? 0x4 : 0x12;
+  Block_Y_Position[sprdataoff] = (Player_Y_Position + yadderdata) & 0xf0;
 
   if (Block_State[sprdataoff] == 0x11) {
     BumpBlock(mt_x, mt_y, param_1);
@@ -4004,7 +4032,7 @@ void SetXMoveAmt(const byte param_1, const byte param_2, const byte param_3) {
 void ImposeGravityBlock(const byte param_1) {
   const byte in_r01 = 0;
 
-  ImposeGravity(0, param_1, 0x50, in_r01, MaxSpdBlockData[1]);
+  ImposeGravity(0, param_1, 0x50, in_r01, 8);
 }
 
 
@@ -4560,7 +4588,7 @@ void InitRetainerObj(const byte param_1) {
 // SM2MAIN:8ef2
 // Signature: [X] -> []
 void InitNormalEnemy(const byte param_1) {
-  Enemy_X_Speed[param_1] = NormalXSpdData[PrimaryHardMode != 0];
+  Enemy_X_Speed[param_1] = PrimaryHardMode != 0 ? -12 : -8;
   Enemy_BoundBoxCtrl[param_1] = 3;
   Enemy_MovingDir[param_1] = 2;
   InitVStf(param_1);
@@ -4914,15 +4942,18 @@ void InitBowserFlame(const byte objoff) {
     if (SecondaryHardMode != 0) {
       FrenzyEnemyTimer = bVar1 + 0x10;
     }
-    BowserFlamePRandomOfs[objoff] = PseudoRandomBitReg[objoff] & 3;
-    PutAtRightExtent(FlameYPosData[PseudoRandomBitReg[objoff] & 3], objoff);
+
+    const byte rng = PseudoRandomBitReg[objoff] & 3;
+    BowserFlamePRandomOfs[objoff] = rng;
+    PutAtRightExtent(FlameYPosData[rng], objoff);
     return;
   }
+  const byte rng = PseudoRandomBitReg[objoff] & 3;
   Enemy_X_Position[objoff] = Enemy_X_Position[BowserFront_Offset] - 0xe;
   Enemy_PageLoc[objoff] = Enemy_PageLoc[bVar1];
   Enemy_Y_Position[objoff] = Enemy_Y_Position[bVar1] + 8;
-  BowserFlamePRandomOfs[objoff] = PseudoRandomBitReg[objoff] & 3;
-  Enemy_Y_MoveForce[objoff] = FlameYMFAdderData[Enemy_Y_Position[objoff] <= FlameYPosData[PseudoRandomBitReg[objoff] & 3]];
+  BowserFlamePRandomOfs[objoff] = rng;
+  Enemy_Y_MoveForce[objoff] = Enemy_Y_Position[objoff] <= FlameYPosData[rng] ? 1 : 0xff;
   EnemyFrenzyBuffer = 0;
   Enemy_BoundBoxCtrl[objoff] = 8;
   Enemy_Y_HighPos[objoff] = 1;
@@ -5804,13 +5835,19 @@ void ProcHammerBro(const byte objoff) {
 // SM2MAIN:966c
 // Signature: [X, Y, r00] -> []
 void SetHJ(const byte objoff, const byte param_2, const byte param_3) {
+  // param_3 is always 0 or 1
+
   Enemy_Y_Speed[objoff] = param_2;
   Enemy_State[objoff] = Enemy_State[objoff] | 1;
-  byte bVar1 = param_3 & PseudoRandomBitReg[objoff + 2];
-  if (SecondaryHardMode == 0) {
-    bVar1 = 0;
+
+  EnemyFrameTimer[objoff] = 0x20;
+
+  if (param_3 && SecondaryHardMode != 0) {
+    if (PseudoRandomBitReg[objoff + 2] & 1) {
+      EnemyFrameTimer[objoff] = 0x37;
+    }
   }
-  EnemyFrameTimer[objoff] = HammerBroJumpLData[bVar1];
+
   HammerBroJumpTimer[objoff] = PseudoRandomBitReg[objoff + 1] | 0xc0;
   MoveHammerBroXDir(objoff);
 }
@@ -7539,7 +7576,7 @@ void PlayerEnemyCollision(const byte objoff) {
       }
       Square1SoundQueue = 8;
       Enemy_State[objoff] |= 0x80;
-      Enemy_X_Speed[objoff] = KickedShellXSpdData[EnemyFacePlayer(objoff)];
+      Enemy_X_Speed[objoff] = EnemyFacePlayer(objoff) ? -0x30 : 0x30;
       if (EnemyIntervalTimer[objoff] < 3) {
         bVar1 = KickedShellPtsData[EnemyIntervalTimer[objoff]];
       } else {
@@ -7633,7 +7670,7 @@ void PlayerEnemyCollision(const byte objoff) {
       Enemy_State[objoff] = 0;
       SetupFloateyNumber(3, objoff);
       InitVStf(objoff);
-      Enemy_X_Speed[objoff] = DemotedKoopaXSpdData[EnemyFacePlayer(objoff)];
+      Enemy_X_Speed[objoff] = EnemyFacePlayer(objoff) ? -8 : 8;
 #ifdef SMB1_MODE
       Player_Y_Speed = 0xfc;
 #endif
@@ -7735,14 +7772,10 @@ void LInj(const byte objoff) {
 // SMB:da05
 // SM2MAIN:a66e
 // Signature: [X] -> [Y]
-byte EnemyFacePlayer(const byte objoff) {
-  byte bVar1 = 1;
+bool EnemyFacePlayer(const byte objoff) {
   const struct_ncr00 sVar2 = PlayerEnemyDiff(objoff);
-  if (sVar2.n) {
-    bVar1 += 1;
-  }
-  Enemy_MovingDir[objoff] = bVar1;
-  return bVar1 - 1;
+  Enemy_MovingDir[objoff] = sVar2.n ? 2 : 1;
+  return sVar2.n;
 }
 
 
@@ -8106,10 +8139,13 @@ void PlayerBGCollision(void) {
     tmp1 = BlockBufferAdderData[2];
   }
 
+  // Note: assuming these both cannot be non-zero. it simplifies a lookup.
+  assert_eq_assumption(PlayerSize == 0 || CrouchingFlag == 0, true);
+  assert_eq_assumption(PlayerSize <= 1, true);
 
-  const byte bVar6 = PlayerSize + ((CrouchingFlag != 0) ? 1 : 0);
+  const byte upperextent = (PlayerSize != 0 || CrouchingFlag != 0) ? 0x10 : 0x20;
 
-  if (PlayerBGUpperExtent[bVar6] <= Player_Y_Position) {
+  if (upperextent <= Player_Y_Position) {
     const struct blockbuffer_colli_result sVar9 = BlockBufferColli_Head(tmp1);
     const byte bVar1 = sVar9.r04;
     if (!sVar9.z) {
@@ -8266,7 +8302,7 @@ void PlayerBGCollision(void) {
       }
       Player_SprAttrib |= 0x20;
       if ((Player_X_Position & 0xf) != 0) {
-        ChangeAreaTimer = AreaChangeTimerData[ScreenLeft_PageLoc != 0];
+        ChangeAreaTimer = ScreenLeft_PageLoc != 0 ? 0x34 : 0xa0;
       }
 
       // 7 != 8, so this seems redundant. But it's in the assembly.
@@ -8708,7 +8744,7 @@ void SetStun2(const byte param_1) {
   if ((Enemy_ID[param_1] != 0x33) && (Enemy_ID[param_1] != 8)) {
     Enemy_MovingDir[param_1] = sVar2.n ? 2 : 1;
   }
-  Enemy_X_Speed[param_1] = EnemyBGCXSpdData[sVar2.n ? 1 : 0];
+  Enemy_X_Speed[param_1] = sVar2.n ? -16 : 16;
 }
 
 
@@ -9180,11 +9216,13 @@ static void draw_sprite_row(const byte row,
 // SMB:e435
 // SM2MAIN:b0d9
 // Signature: [Y] -> []
-void DrawVine(const byte param_1) {
-  const byte sproff = Enemy_SprDataOffset[VineObjOffset[param_1]];
+void DrawVine(const byte vineoff) {
+  // vineoff is either 0 or 1
+
+  const byte sproff = Enemy_SprDataOffset[VineObjOffset[vineoff]];
 
   const byte xpos = Enemy_Rel_XPos;
-  const byte ypos = Enemy_Rel_YPos + VineYPosAdder[param_1];
+  const byte ypos = Enemy_Rel_YPos + (vineoff == 0 ? 0 : 0x30);
 
   for (int i = 0; i < 6; i++) {
     const bool even = i % 2 == 0;
@@ -9196,7 +9234,7 @@ void DrawVine(const byte param_1) {
     SPRITE_TILE_semistrict(sproff, i) = 0xe1;
   }
 
-  if (param_1 == 0) {
+  if (vineoff == 0) {
     SPRITE_TILE(sproff, 0) = 0xe0;
   }
 
@@ -9595,7 +9633,7 @@ CheckToAnimateEnemy:
       }
       goto CheckDefeatedState;
     }
-    if ((FrameCounter & EnemyAnimTimingBMask[0]) != 0) {
+    if ((FrameCounter & 0x8) != 0) {
       goto CheckDefeatedState;
     }
   } else {
