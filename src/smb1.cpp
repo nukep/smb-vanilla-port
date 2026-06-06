@@ -33,7 +33,7 @@ void SMB1_Reset() {
   byte initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
 
   for (int i = 0; i < 6; i++) {
-    if (DisplayDigits_Or_TopScoreDisplay[i] > 9) {
+    if (DisplayDigits[i] > 9) {
       initialize_upto = 0xfe;
       break;
     }

@@ -1305,10 +1305,10 @@ void BulletBillCannon(const byte param_1) {
   }
 
   const byte y = GetAreaObjYPosition(bVar1);
-  Cannon_Y_Position_Or_Whirlpool_Length[Cannon_Or_Whirlpool_Offset] = y;
-  Cannon_Or_Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc;
+  Cannon_Y_Position[Cannon_Or_Whirlpool_Offset] = y;
+  Cannon_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc;
   const byte x = GetAreaObjXPosition();
-  Cannon_X_Position_Or_Whirlpool_LeftExtent[Cannon_Or_Whirlpool_Offset] = x;
+  Cannon_X_Position[Cannon_Or_Whirlpool_Offset] = x;
 
   Cannon_Or_Whirlpool_Offset += 1;
   if (Cannon_Or_Whirlpool_Offset > 5) {
@@ -1416,9 +1416,9 @@ void Hole_Empty(const byte param_1) {
   if ((sVar3.c) && (AreaType == 0)) {
     const byte x = GetAreaObjXPosition();
 
-    Cannon_X_Position_Or_Whirlpool_LeftExtent[Cannon_Or_Whirlpool_Offset] = x - 0x10;
-    Cannon_Or_Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc - (x < 0x10);
-    Cannon_Y_Position_Or_Whirlpool_Length[Cannon_Or_Whirlpool_Offset] = (bVar2 + 2) * 0x10;
+    Whirlpool_X_Position[Cannon_Or_Whirlpool_Offset] = x - 0x10;
+    Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc - (x < 0x10);
+    Whirlpool_Length[Cannon_Or_Whirlpool_Offset] = (bVar2 + 2) * 0x10;
 
     Cannon_Or_Whirlpool_Offset += 1;
     if (Cannon_Or_Whirlpool_Offset >= 5) {
@@ -1848,68 +1848,41 @@ void WriteWarpZoneMessage(const byte warp_zone_control) {
   VRAM_Buffer1[27] = WarpZoneNumbers[idx];
 }
 
+static inline void UpsideDownPipe_impl(const byte objoff, const byte val) {
+  const struct_yr06r07 sVar6 = GetPipeHeight(objoff);
+  const byte bVar3 = sVar6.r06;
+  const byte bStack0000 = sVar6.y;
 
-// SM2DATA2+SM2DATA4:c470
-// Signature: [X] -> []
-void UpsideDownPipe_High(const byte param_1) {
-  char cVar1;
-  byte bVar2;
-  byte bVar4;
-  struct_xc sVar6;
-
-  byte bStack0000 = 1;
-  const struct_yr06r07 sVar7 = GetPipeHeight(param_1);
-  const byte bVar3 = sVar7.r06;
-  byte bVar5 = bStack0000;
-  bStack0000 = sVar7.y;
-  if (AreaObjectLength[param_1] != 0) {
-    sVar6 = FindEmptyEnemySlot();
-    bVar4 = sVar6.x;
-    if (!sVar6.c) {
-      SetupPiranhaPlant(4, bVar4, bVar5);
-      cVar1 = bVar3 * 0x10 + Enemy_Y_Position[bVar4];
-      bVar2 = cVar1 - 10;
+  if (AreaObjectLength[objoff] != 0) {
+    const struct_xc sVar7 = FindEmptyEnemySlot();
+    const byte bVar4 = sVar7.x;
+    if (!sVar7.c) {
+      SetupPiranhaPlant(4, bVar4, val);
+      const byte cVar1 = bVar3 * 0x10 + Enemy_Y_Position[bVar4];
+      const byte bVar2 = cVar1 - 10;
       Enemy_Y_Position[bVar4] = bVar2;
-      CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar4] = bVar2;
-      BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
+      PiranhaPlantDownYPos[bVar4] = bVar2;
+      PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
       PiranhaPlant_MoveFlag[bVar4] = PiranhaPlant_MoveFlag[bVar4] + 1;
     }
   }
-  bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar5, bVar3 - 1);
+
+  const byte bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], val, bVar3 - 1);
   MetatileBuffer[bVar5] = VerticalPipeData[bStack0000];
+}
+
+// SM2DATA2+SM2DATA4:c470
+// Signature: [X] -> []
+void UpsideDownPipe_High(const byte objoff) {
+  UpsideDownPipe_impl(objoff, 1);
 }
 
 
 // SM2DATA2+SM2DATA4:c475
 // Signature: [X] -> []
-void UpsideDownPipe_Low(const byte param_1) {
-  char cVar1;
-  byte bVar2;
-  byte bVar4;
-  struct_xc sVar7;
-
-  byte bStack0000 = 4;
-  const struct_yr06r07 sVar6 = GetPipeHeight(param_1);
-  const byte bVar3 = sVar6.r06;
-  byte bVar5 = bStack0000;
-  bStack0000 = sVar6.y;
-  if (AreaObjectLength[param_1] != 0) {
-    sVar7 = FindEmptyEnemySlot();
-    bVar4 = sVar7.x;
-    if (!sVar7.c) {
-      SetupPiranhaPlant(4, bVar4, bVar5);
-      cVar1 = bVar3 * 0x10 + Enemy_Y_Position[bVar4];
-      bVar2 = cVar1 - 10;
-      Enemy_Y_Position[bVar4] = bVar2;
-      CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[bVar4] = bVar2;
-      BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
-      PiranhaPlant_MoveFlag[bVar4] = PiranhaPlant_MoveFlag[bVar4] + 1;
-    }
-  }
-  bVar5 = RenderUnderPart(VerticalPipeData[bStack0000 + 2], bVar5, bVar3 - 1);
-  MetatileBuffer[bVar5] = VerticalPipeData[bStack0000];
+void UpsideDownPipe_Low(const byte objoff) {
+  UpsideDownPipe_impl(objoff, 4);
 }
-
 
 // SM2DATA2+SM2DATA4:c5be
 // Signature: [] -> []

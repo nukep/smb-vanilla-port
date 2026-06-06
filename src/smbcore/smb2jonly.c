@@ -648,7 +648,7 @@ void GameOverMenu(void) {
   AreaNumber = ContinueMenuSelect;
   CoinTally = ContinueMenuSelect;
   for (int i = 0; i < 12; i++) {
-    PlayerScoreDisplay_Or_ScoreAndCoinDisplay[i] = 0;
+    DisplayDigits[i + 6] = 0;
   }
   Hidden1UpFlag += 1;
   ContinueGame();
@@ -729,9 +729,9 @@ void MoveUpsideDownPiranhaP(const byte param_1) {
       PiranhaPlant_Y_Speed[param_1] = NEGATE(PiranhaPlant_Y_Speed[param_1]);
       PiranhaPlant_MoveFlag[param_1] = PiranhaPlant_MoveFlag[param_1] + 1;
     }
-    bVar3 = BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos[param_1];
+    bVar3 = PiranhaPlantUpYPos[param_1];
     if (PiranhaPlant_Y_Speed[param_1] >= 0x80) {
-      bVar3 = CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos[param_1];
+      bVar3 = PiranhaPlantDownYPos[param_1];
     }
     if (TimerControl == 0) {
       bVar1 = Enemy_Y_Position[param_1];

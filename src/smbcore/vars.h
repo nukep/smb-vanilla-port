@@ -6,24 +6,6 @@
 // TODO: Fix aliasing with the $0300 page. Many of the variables there overlap.
 
 
-// some noisy names used during ghidra decompilation
-// should be removed eventually
-#define Cannon_Or_Whirlpool_PageLoc      Cannon_PageLoc
-#define Cannon_Or_Whirlpool_X_Position   Cannon_X_Position
-#define Cannon_X_Position_Or_Whirlpool_LeftExtent Cannon_X_Position
-#define Cannon_Y_Position_Or_Whirlpool_Length Cannon_Y_Position
-#define Cannon_Timer_Or_Whirlpool_Flag   Cannon_Timer
-#define Cannon_Or_Whirlpool_Offset       Cannon_Offset
-
-#define HammerThrowingTimer_Or_PlatformCollisionFlag PlatformCollisionFlag
-#define CheepCheepOrigYPos_Or_Enemy_Y_MoveForce_Or_PiranhaPlantDownYPos Enemy_Y_MoveForce
-#define Enemy_X_MoveForce_Or_RedPTroopaOrigXPos_Or_YPlatformTopYPos (SprObject_X_MoveForce + 1)
-#define BowserFlamePRandomOfs_Or_Enemy_YMF_Dummy_Or_PiranhaPlantUpYPos Enemy_YMF_Dummy
-
-#define DisplayDigits_Or_TopScoreDisplay DisplayDigits
-#define PlayerScoreDisplay_Or_ScoreAndCoinDisplay (DisplayDigits + 6)
-
-
 // These are used largely to zero-out the memory in these regions
 
 #define VRAM_Page                        RAMARRAY(0x0300, 0x100)
@@ -263,8 +245,9 @@
 #define Player_YMF_Dummy   SprObject_YMF_Dummy[0]
 #define Enemy_YMF_Dummy                  (SprObject_YMF_Dummy + 1)
 
-// #define BowserFlamePRandomOfs            (SprObject_YMF_Dummy + 1)
-// #define PiranhaPlantUpYPos               (SprObject_YMF_Dummy + 1)
+// reuses memory
+#define BowserFlamePRandomOfs            Enemy_YMF_Dummy
+#define PiranhaPlantUpYPos               Enemy_YMF_Dummy
 
 #define Bubble_YMF_Dummy                 RAMARRAY(0x042C, 3)
 #define SprObject_Y_MoveForce            RAMARRAY(0x0433, 22)
@@ -272,20 +255,20 @@
 #define Enemy_Y_MoveForce                (SprObject_Y_MoveForce + 1)
 #define Block_Y_MoveForce                (SprObject_Y_MoveForce + 9)
 
-// #define CheepCheepOrigYPos               (SprObject_Y_MoveForce + 1)
-// #define PiranhaPlantDownYPos             (SprObject_Y_MoveForce + 1)
+// reuses memory
+#define CheepCheepOrigYPos               Enemy_Y_MoveForce
+#define PiranhaPlantDownYPos             Enemy_Y_MoveForce
 
 #define MaximumLeftSpeed                 RAM(0x0450)
 #define MaximumRightSpeed                RAM(0x0456)
 
-#define Cannon_Offset                    RAM(0x046A)
+#define Cannon_Or_Whirlpool_Offset       RAM(0x046A)
 #define Cannon_PageLoc                   RAMARRAY(0x046B, 6)
 #define Cannon_X_Position                RAMARRAY(0x0471, 6)
 #define Cannon_Y_Position                RAMARRAY(0x0477, 6)
 #define Cannon_Timer                     RAMARRAY(0x047D, 6)
 
 // the whirlpools reuse memory from the cannons (or vice-versa)
-#define Whirlpool_Offset                 Cannon_Offset
 #define Whirlpool_PageLoc                Cannon_PageLoc
 #define Whirlpool_X_Position             Cannon_X_Position
 #define Whirlpool_Length                 Cannon_Y_Position
@@ -502,10 +485,7 @@
 #define GroundMusicHeaderOfs             SoundMemory[0x17]
 #define AltRegContentFlag                SoundMemory[0x1A]
 
-#define DisplayDigits                    RAMARRAY(0x07D7, 0x24)
-#define TopScoreDisplay                  DisplayDigits
-#define PlayerScoreDisplay               (DisplayDigits + 6)
-#define ScoreAndCoinDisplay              (DisplayDigits + 6)
+#define DisplayDigits                    RAMARRAY(0x07D7, 36)
 
 #define WarmBootValidation               RAM(0x07FF)
 /* smb1 ----------------------- */
