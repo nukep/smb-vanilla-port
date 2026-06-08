@@ -3,11 +3,15 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct testrunner_userdata {
   FILE *romfile;
   struct SMB_state *smb_state;
   struct SMB_buttons joy1_buttons;
+
+  bool mode_failframe;
+  int failframe_result;
 };
 
 bool open_rom(struct testrunner_userdata *userdata, const char *filename) {
@@ -51,6 +55,8 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
   int errorcount = 0;
   bool printerrors = true;
 
+  const int max_errorcount = 100;
+
   while (movie_next(movie, &movie_buttons, ram)) {
 
     if (framecounter != 0) {
@@ -60,28 +66,18 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
 
       byte *compareto = SMB_ram(userdata->smb_state);
 
-      // RAM errors start at frame 16600, when we go underwater
+#define RANGE_N 64
 
-#define mem_eq_range(from, upto)                                                                           \
-  do {                                                                                                     \
-    const byte *a = ram;                                                                                   \
-    const byte *b = compareto;                                                                             \
-    size_t len = (upto) + 1 - (from);                                                                      \
-    for (size_t i = (from); i <= (upto); i++) {                                                            \
-      if (a[i] != b[i]) {                                                                                  \
-        if (printerrors) {                                                                                 \
-          fprintf(stderr, "Caused by frame %05d: RAM not equal: At %04lX: %02X expected vs %02X actual\n", \
-                  framecounter - 1, i, a[i], b[i]);                                                        \
-          errorcount += 1;                                                                                 \
-          if (errorcount >= 1000) {                                                                        \
-            printerrors = false;                                                                           \
-            fprintf(stderr, "Too many errors. Not printing any more...\n");                                \
-          }                                                                                                \
-          success = false;                                                                                 \
-        }                                                                                                  \
-      }                                                                                                    \
-    }                                                                                                      \
-  } while (0)
+#define mem_eq_range(from, upto) { \
+        if (range_curidx >= RANGE_N) { fprintf(stderr, "FATAL: too many memory ranges\n"); return false; } \
+        range_from[range_curidx] = from; \
+        range_upto[range_curidx] = upto; \
+        range_curidx += 1; \
+      }
+
+      int range_curidx = 0;
+      int range_from[RANGE_N] = {};
+      int range_upto[RANGE_N] = {};
 
       // Missing ranges:
       // $00-$08 are temporary registers
@@ -104,6 +100,34 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
         mem_eq_range(0x0109, 0x015F);
         mem_eq_range(0x0200, 0x0734);
         mem_eq_range(0x0736, 0x07FF);
+      }
+
+      for (int j = 0; j < range_curidx; j++) {
+        const byte *a = ram;
+        const byte *b = compareto;
+        const int from = range_from[j];
+        const int upto = range_upto[j];
+
+        for (int i = from; i <= upto; i++) {
+          if (a[i] != b[i]) {
+
+            if (userdata->mode_failframe) {
+              userdata->failframe_result = framecounter - 1;
+              return false;
+            }
+
+            if (printerrors) {
+              fprintf(stderr, "Caused by frame %05d: RAM not equal: At %04X: %02X expected vs %02X actual\n",
+                      framecounter - 1, i, a[i], b[i]);
+              errorcount += 1;
+              if (errorcount >= max_errorcount) {
+                printerrors = false;
+                fprintf(stderr, "Too many errors. Not printing any more...\n");
+              }
+              success = false;
+            }
+          }
+        }
       }
     }
 
@@ -141,10 +165,16 @@ int main(int argc, char *argv[]) {
   const char *rom_filename = argv[1];
   const char *movie_prefix = argv[2];
   uint32_t upto_frame = 0;
+  bool mode_failframe = false;
 
   if (argc > 3) {
-    if (sscanf(argv[3], "%" SCNd32, &upto_frame) != 1) {
-      upto_frame = 0;
+    // Support a mode to print the failed frame, if any
+    if (strcmp(argv[3], "--print-failframe") == 0) {
+      mode_failframe = true;
+    } else {
+      if (sscanf(argv[3], "%" SCNd32, &upto_frame) != 1) {
+        upto_frame = 0;
+      }
     }
   }
 
@@ -163,6 +193,7 @@ int main(int argc, char *argv[]) {
   }
 
   userdata.smb_state = smb_state;
+  userdata.mode_failframe = mode_failframe;
 
   struct SMB_callbacks callbacks = {0};
   callbacks.userdata = &userdata;
@@ -185,10 +216,17 @@ int main(int argc, char *argv[]) {
   }
   bool success = run_movie(&movie, &userdata, upto_frame);
 
-  if (success) {
-    printf("✅ Movie passed RAM tests\n");
-  } else {
-    printf("❌ Movie failed RAM tests\n");
+  if (mode_failframe) {
+    printf("failframe result: %d\n", userdata.failframe_result);
+    success = true;
+  }
+
+  if (!mode_failframe) {
+    if (success) {
+      printf("✅ Movie passed RAM tests\n");
+    } else {
+      printf("❌ Movie failed RAM tests\n");
+    }
   }
 
   movie_fini(&movie);

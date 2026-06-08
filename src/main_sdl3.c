@@ -213,6 +213,14 @@ int sdl_tick(void *userdata) {
           dump_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename);
           dump_ram(smb_state, fe->cfg->debug.dump_ram_filename);
           break;
+        case SDL_SCANCODE_ESCAPE:
+          // Stop the movie and let the player take control
+          if (fe->movie) {
+            movie_fini(fe->movie);
+            free(fe->movie);
+            fe->movie = 0;
+          }
+          break;
         default:
           break;
         }
