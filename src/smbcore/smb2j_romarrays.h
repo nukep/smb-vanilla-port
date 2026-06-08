@@ -12,6 +12,9 @@
 // The original game modifies an instruction operand
 #define PiranhaPlantCompareOperand       RAM(0x9ffe)
 
+// If in World 4+, or the hard worlds
+#define PiranhaPlantHardMode (PiranhaPlantCompareOperand != 0x21)
+
 #define GamesBeatenCount                 RAM(0xD29F)
 
 #define VRAM_AddrTable                   RAMARRAY_CONST(0x6060, 62)
