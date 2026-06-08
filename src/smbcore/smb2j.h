@@ -961,9 +961,6 @@ void smb2j_KillAllEnemies(void);
 void smb2j_BowserGfxHandler(byte param_1);
 #define BowserGfxHandler smb2j_BowserGfxHandler
 
-void smb2j_ProcessBowserHalf(byte param_1);
-#define ProcessBowserHalf smb2j_ProcessBowserHalf
-
 byte smb2j_SetFlameTimer(void);
 #define SetFlameTimer smb2j_SetFlameTimer
 
@@ -1263,9 +1260,6 @@ void smb2j_DrawPowerUp(byte objoff);
 
 void smb2j_EnemyGfxHandler(byte param_1);
 #define EnemyGfxHandler smb2j_EnemyGfxHandler
-
-void smb2j_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8,byte param_9);
-#define DrawEnemyObject smb2j_DrawEnemyObject
 
 void smb2j_SprObjectOffscrChk(byte objoff);
 #define SprObjectOffscrChk smb2j_SprObjectOffscrChk

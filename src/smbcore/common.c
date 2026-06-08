@@ -3151,7 +3151,7 @@ void ProcessCannons(void) {
             Enemy_Flag[i] = 1;
             Enemy_State[i] = 0;
             Enemy_BoundBoxCtrl[i] = 9;
-            Enemy_ID[i] = A_UNK_0x33;
+            Enemy_ID[i] = A_BULLET_BILL_CANNON;
 
             chk_bb = false;
           }
@@ -3160,7 +3160,7 @@ void ProcessCannons(void) {
     }
 
     if (chk_bb) {
-      if (Enemy_ID[i] == A_UNK_0x33) {
+      if (Enemy_ID[i] == A_BULLET_BILL_CANNON) {
         OffscreenBoundsCheck(i);
         if (Enemy_Flag[i] != 0) {
           GetEnemyOffscreenBits(i);
@@ -6428,34 +6428,54 @@ void KillAllEnemies(void) {
 }
 
 
+static void EnemyGfxHandler_bowser(const byte objoff, const byte bowser_gfx_flag);
+
+
 // SMB:d17b
 // SM2MAIN:9db0
 // Signature: [X] -> []
 void BowserGfxHandler(const byte objoff) {
-  ProcessBowserHalf(objoff);
-  const char cVar3 = ((Enemy_MovingDir[objoff] & 1) != 0) ? -0x10 : 0x10;
-  Enemy_X_Position[DuplicateObj_Offset] = cVar3 + Enemy_X_Position[objoff];
-  Enemy_Y_Position[DuplicateObj_Offset] = Enemy_Y_Position[objoff] + 8;
-  Enemy_State[DuplicateObj_Offset] = Enemy_State[objoff];
-  Enemy_MovingDir[DuplicateObj_Offset] = Enemy_MovingDir[objoff];
+  assert_eq_assumption(BowserGfxFlag, 0);
 
-  Enemy_ID[DuplicateObj_Offset] = A_BOWSER;
-  ProcessBowserHalf(DuplicateObj_Offset);
-  BowserGfxFlag = 0;
-}
+  // NES note: BowserGfxFlag ($036a) is only used here and the EnemyGfxHandler tree.
+  // It's been optimized away.
+  // Between the increment and its uses, there are no accidental array reads/writes in the original that could access it.
 
+  // Inlined: ProcessBowserHalf
+  // Inlined: RunRetainerObj
 
-// SMB:d1bc
-// SM2MAIN:9df1
-// Signature: [X] -> []
-void ProcessBowserHalf(const byte objoff) {
-  BowserGfxFlag += 1;
-  RunRetainerObj(objoff);
+  // Inlined: RunRetainerObj
+  GetEnemyOffscreenBits(objoff);
+  RelativeEnemyPosition(objoff);
+  EnemyGfxHandler_bowser(objoff, 1);
+
   if (Enemy_State[objoff] == 0) {
     Enemy_BoundBoxCtrl[objoff] = 10;
     GetEnemyBoundBox(objoff);
     PlayerEnemyCollision(objoff);
   }
+
+  const byte dup_objoff = DuplicateObj_Offset;
+
+  const char cVar3 = ((Enemy_MovingDir[objoff] & 1) != 0) ? -0x10 : 0x10;
+  Enemy_X_Position[dup_objoff] = cVar3 + Enemy_X_Position[objoff];
+  Enemy_Y_Position[dup_objoff] = Enemy_Y_Position[objoff] + 8;
+  Enemy_State[dup_objoff] = Enemy_State[objoff];
+  Enemy_MovingDir[dup_objoff] = Enemy_MovingDir[objoff];
+
+  Enemy_ID[dup_objoff] = A_BOWSER;
+
+  GetEnemyOffscreenBits(dup_objoff);
+  RelativeEnemyPosition(dup_objoff);
+  EnemyGfxHandler_bowser(dup_objoff, 2);
+
+  if (Enemy_State[dup_objoff] == 0) {
+    Enemy_BoundBoxCtrl[dup_objoff] = 10;
+    GetEnemyBoundBox(dup_objoff);
+    PlayerEnemyCollision(dup_objoff);
+  }
+
+  assert_eq_assumption(BowserGfxFlag, 0);
 }
 
 
@@ -7426,7 +7446,7 @@ void PlayerEnemyCollision(const byte objoff) {
   }
 #endif
 
-  if ((enemy_id != A_SPINY) && (enemy_id != A_UNK_0x33)) {
+  if ((enemy_id != A_SPINY) && (enemy_id != A_BULLET_BILL_CANNON)) {
     if (!is_actor_enemy(enemy_id)) {
       InjurePlayer();
       return;
@@ -7454,7 +7474,7 @@ void PlayerEnemyCollision(const byte objoff) {
     }
   }
 
-  assert_eq_assumption(is_actor_enemy(enemy_id) || enemy_id == A_UNK_0x33, true);
+  assert_eq_assumption(is_actor_enemy(enemy_id) || enemy_id == A_BULLET_BILL_CANNON, true);
 
   if (StompTimer == 0) {
     bool cond1 = false;
@@ -7520,7 +7540,7 @@ void PlayerEnemyCollision(const byte objoff) {
 
     case A_BULLET_BILL:
     case A_FLYING_CHEEPCHEEP:
-    case A_UNK_0x33:
+    case A_BULLET_BILL_CANNON:
       bVar2 = StompedEnemyPtsData[0];
       cond3 = false;
       break;
@@ -8653,7 +8673,7 @@ void SetStun2(const byte param_1) {
 
   const struct_ncr00 sVar2 = PlayerEnemyDiff(param_1);
 
-  if ((Enemy_ID[param_1] != A_UNK_0x33) && (Enemy_ID[param_1] != A_BULLET_BILL)) {
+  if ((Enemy_ID[param_1] != A_BULLET_BILL_CANNON) && (Enemy_ID[param_1] != A_BULLET_BILL)) {
     Enemy_MovingDir[param_1] = sVar2.n ? 2 : 1;
   }
   Enemy_X_Speed[param_1] = sVar2.n ? -16 : 16;
@@ -9402,106 +9422,130 @@ void DrawPowerUp(const byte objoff) {
   SprObjectOffscrChk(objoff);
 }
 
+static inline void modify_jumpspring_colors(void) {
+#ifdef SMB2J_MODE
+  EnemyAttributeData[0x18] = 2;
+  if (((WorldNumber == 1) || (WorldNumber == 2)) || (WorldNumber == 6)) {
+    EnemyAttributeData[0x18] = 1;
+  }
+  EnemyAttributeData[0x19] = EnemyAttributeData[0x18];
+  EnemyAttributeData[0x1a] = EnemyAttributeData[0x18];
+#endif
+}
+
+static void DrawEnemyObject(const byte tableoff, const byte xpos, const byte ypos, const byte attrs,
+                            const bool flip_vert, const bool flip_horz,
+                            const byte sproff, const byte tmprEC, const byte enemy_id);
 
 // SMB:e87d
 // SM2MAIN:b52c
 // Signature: [X] -> []
 void EnemyGfxHandler(const byte objoff) {
-#ifdef SMB2J_MODE
-  EnemyAttributeData[24] = 2;
-  if (((WorldNumber == 1) || (WorldNumber == 2)) || (WorldNumber == 6)) {
-    EnemyAttributeData[24] = 1;
-  }
-  EnemyAttributeData[25] = EnemyAttributeData[24];
-  EnemyAttributeData[26] = EnemyAttributeData[24];
-#endif
+  // This is quite complex.
+  // Fortunately, this subroutine doesn't mutate any global state,
+  // except for VerticalFlipFlag (optimized out), temporary $EB-$EF regs (optimized out), and the tail calls.
+
+  // Note that all Bowser paths have been extracted out to EnemyGfxHandler_bowser.
+  assert_eq_assumption(BowserGfxFlag, 0);
+
+  // right before any array reads could access writes we optimized away
+  assert_eq_assumption(objoff < 0xeb - 0xcf, true);
+
+  modify_jumpspring_colors();
 
   byte ypos = Enemy_Y_Position[objoff];
 
   // sproff @ $eb
   const byte sproff = Enemy_SprDataOffset[objoff];
 
-  VerticalFlipFlag = 0;
-  byte movingdir = Enemy_MovingDir[objoff];
+  bool flip_horz = (Enemy_MovingDir[objoff] & 2) != 0;
   byte attrs = Enemy_SprAttrib[objoff];
 
-  byte enemy_id = Enemy_ID[objoff];
+  const byte enemy_id = Enemy_ID[objoff];
+  byte table_idx = enemy_id;
 
-  if (((enemy_id == A_PIRANHA_PLANT) && (PiranhaPlant_Y_Speed[objoff] < 0x80)) && (EnemyFrameTimer[objoff] != 0)) {
-    return;
+  if (enemy_id == A_PIRANHA_PLANT) {
+    if ((PiranhaPlant_Y_Speed[objoff] < 0x80) && (EnemyFrameTimer[objoff] != 0)) {
+      return;
+    }
   }
 
-  // tmprEC @ $ec
   byte tmprEC = Enemy_State[objoff] & 0x1f;
-
 
   if (enemy_id == A_RETAINER) {
     tmprEC = 0;
-    movingdir = 1;
-    enemy_id = 0x15;
+    flip_horz = false;
+    table_idx = 0x15;
   }
 
-  // enemy_state @ $ed
-  const byte enemy_state = enemy_id != A_UNK_0x33 ? Enemy_State[objoff] : 0;
+  const byte enemy_state = enemy_id != A_BULLET_BILL_CANNON ? Enemy_State[objoff] : 0;
 
-  if (enemy_id == A_UNK_0x33) {
+  if (enemy_id == A_BULLET_BILL_CANNON) {
     ypos -= 1;
     attrs = (EnemyFrameTimer[objoff] != 0) ? 0x23 : 3;
     tmprEC = 0;
-    enemy_id = 8;
+    table_idx = A_BULLET_BILL;
   }
+
   if (enemy_id == A_JUMPSPRING) {
+    static const byte jumpspring_offsets[5] = {
+      0x18, 0x19, 0x1a, 0x19, 0x18
+    };
+
+    assert_eq_assumption(JumpspringAnimCtrl < 5, true);
     tmprEC = 3;
-    enemy_id = JumpspringFrameOffsets[JumpspringAnimCtrl];
+    table_idx = jumpspring_offsets[JumpspringAnimCtrl];
   }
-  if ((enemy_id == A_PODOBOO) && (Enemy_Y_Speed[objoff] < 0x80)) {
-    VerticalFlipFlag = 1;
-  }
-  if (BowserGfxFlag != 0) {
-    enemy_id = (BowserGfxFlag != 1) ? 0x17 : 0x16;
-  }
+
   if (enemy_id == A_GOOMBA) {
-    if (Enemy_State[objoff] > 1) {
+    if (enemy_state > 1) {
       tmprEC = 4;
     }
-    if ((((Enemy_State[objoff] & 0x20) | TimerControl) == 0) && ((FrameCounter & 8) == 0)) {
-      movingdir ^= 3;
+
+    if ((((enemy_state & 0x20) | TimerControl) == 0) && ((FrameCounter & 8) == 0)) {
+      // Make the goomba waddle around
+      flip_horz = !flip_horz;
     }
   }
-  attrs = EnemyAttributeData[enemy_id] | attrs;
-  byte tableoff = EnemyGfxTableOffsets[enemy_id];
 
-  if (BowserGfxFlag != 0) {
-    if (BowserGfxFlag == 1) {
-      if (BowserBodyControls >= 0x80) {
-        tableoff = 0xde;
-      }
+  // The table indicies are mostly the same as actor ids, with some subtle differences
+  // enemy_id -> table_idx
+  // 53 -> 21
+  // 51 -> 8
+  // 50 -> 24, 25, 26
+
+  assert_eq_assumption(table_idx < 0x1b, true);
+
+  attrs |= EnemyAttributeData[table_idx];
+  byte tableoff = EnemyGfxTableOffsets[table_idx];
+
+  // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
+  rEF = table_idx;
+
+  if (enemy_id == A_LAKITU) {
+    const bool rightside_up = (enemy_state & 0x20) == 0;
+
+    if (rightside_up && FrenzyEnemyTimer < 0x10) {
+      tableoff += 6;
+    }
+
+    // CheckDefeatedState
+
+    if (rightside_up) {
+      const bool flip_vert = false;
+      DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, flip_vert, flip_horz, sproff, tmprEC, enemy_id);
     } else {
-      if ((BowserBodyControls & 1) != 0) {
-        tableoff = 0xe4;
-      }
-      if ((enemy_state & 0x20) != 0) {
-        ypos -= 0x10;
-      }
+      const bool flip_vert = true;
+      DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, flip_vert, flip_horz, sproff, 0, enemy_id);
     }
-    if ((enemy_state & 0x20) != 0) {
-      VerticalFlipFlag = tableoff;
-    }
-    // DrawBowser
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, movingdir, objoff, sproff, tmprEC, enemy_id);
+    SprObjectOffscrChk(objoff);
     return;
   }
 
-  if (tableoff == 0x90) {
-    if (((enemy_state & 0x20) == 0) && (FrenzyEnemyTimer < 0x10)) {
-      tableoff = 0x96;
-    }
-    goto CheckDefeatedState;
-  } else if (tableoff == 0x24) {
+  if (enemy_id == A_SPINY) {
     if (tmprEC == 5) {
-      tableoff = 0x30;
-      movingdir = 2;
-      tmprEC = 5;
+      tableoff += 12;
+      flip_horz = true;
     }
   } else {
     if (tmprEC > 1) {
@@ -9509,11 +9553,11 @@ void EnemyGfxHandler(const byte objoff) {
       case A_GREEN_KOOPA:
       case A_RED_KOOPA_GREENLIKE:
       case A_RED_KOOPA:
-        tableoff = 0x5a;
+        tableoff = TOFF_KOOPA_SHELL_UPSIDEDOWN_1;
         break;
 
       case A_BUZZY_BEETLE:
-        tableoff = 0x7e;
+        tableoff = TOFF_BUZZY_BEETLE_SHELL_1;
         ypos += 1;
         break;
       }
@@ -9523,21 +9567,21 @@ void EnemyGfxHandler(const byte objoff) {
       switch (enemy_id) {
       case A_GOOMBA:
         if ((enemy_state & 0x20) == 0) {
-          tableoff = 0x8a;
+          tableoff = TOFF_SQUISHED_GOOMBA;
           ypos += 1;
         } else {
-          tableoff = 0x54;
+          tableoff = TOFF_GOOMBA;
           ypos += 2;
         }
         break;
 
       case A_BUZZY_BEETLE:
-        tableoff = 0x72;
+        tableoff = TOFF_BUZZY_BEETLE_SHELL_UPSIDEDOWN_1;
         ypos += 1;
         break;
 
       default:
-        tableoff = 0x66;
+        tableoff = TOFF_KOOPA_SHELL_1;
         ypos += 2;
         break;
       }
@@ -9553,33 +9597,38 @@ void EnemyGfxHandler(const byte objoff) {
         if ((enemy_state & 8) == 0) {
           add_tableoff = false;
         } else {
-          tableoff = 0xb4;
+          tableoff += 12;
           check_to_animate_enemy = true;
         }
       } else {
         check_to_animate_enemy = true;
       }
-    } else if (tableoff == 0x48) {
+    } else if (tableoff == TOFF_CHEEPCHEEP_1) {
       check_to_animate_enemy = true;
     } else if (EnemyIntervalTimer[objoff] >= 5) {
       add_tableoff = false;
-    } else if (tableoff != 0x3c) {
-      check_to_animate_enemy = true;
-    } else if (EnemyIntervalTimer[objoff] == 1) {
-      add_tableoff = false;
+    } else if (tableoff == TOFF_BLOOBER_1) {
+      if (EnemyIntervalTimer[objoff] == 1) {
+        add_tableoff = false;
+      } else {
+        ypos += 3;
+      }
     } else {
-      ypos += 3;
+      check_to_animate_enemy = true;
     }
 
     if (check_to_animate_enemy) {
-      if ((enemy_id == A_GOOMBA) || (enemy_id == A_BULLET_BILL) || (enemy_id == A_PODOBOO) || (is_actor_unknown_class(enemy_id))) {
+      if (enemy_id == A_GOOMBA || enemy_id == A_BULLET_BILL || enemy_id == A_BULLET_BILL_CANNON || enemy_id == A_PODOBOO || enemy_id == A_JUMPSPRING) {
         add_tableoff = false;
-      } else if (enemy_id == A_BOWSER_FLAME) {
+      } else if (enemy_id == A_RETAINER || enemy_id == A_BOWSER_FLAME) {
+        // Also bowser flame, because the original compares the table index.
+        // bowser's flame overlaps with it
+
         if (ssw(WorldNumber < 7, true)) {
           tmprEC = 3;
         }
         if (WorldNumber < 7) {
-          tableoff = 0xa2;
+          tableoff = TOFF_MUSHROOM_RETAINER;
         }
         add_tableoff = false;
       } else if ((FrameCounter & 0x8) != 0) {
@@ -9596,8 +9645,7 @@ void EnemyGfxHandler(const byte objoff) {
     }
   }
 
-
-CheckDefeatedState:
+  // CheckDefeatedState
 
   bool rightside_up = (enemy_state & 0x20) == 0;
 
@@ -9610,21 +9658,115 @@ CheckDefeatedState:
 #endif
 
   if (rightside_up) {
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, movingdir, objoff, sproff, tmprEC, enemy_id);
+    bool flip_vert = false;
+
+    if ((enemy_id == A_PODOBOO) && (Enemy_Y_Speed[objoff] < 0x80)) {
+      flip_vert = true;
+    }
+
+    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, flip_vert, flip_horz, sproff, tmprEC, enemy_id);
   } else {
-    VerticalFlipFlag = 1;
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, movingdir, objoff, sproff, 0, enemy_id);
+    const bool flip_vert = true;
+    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, flip_vert, flip_horz, sproff, 0, enemy_id);
   }
+  SprObjectOffscrChk(objoff);
 }
 
+static void EnemyGfxHandler_bowser(const byte objoff, const byte bowser_gfx_flag) {
+  // This is quite complex.
+  // Fortunately, this subroutine doesn't mutate any global state,
+  // except for VerticalFlipFlag (optimized out), and the tail calls.
+
+  // right before any array reads could access writes we optimized away
+  assert_eq_assumption(objoff < 0xeb - 0xcf, true);
+
+  assert_eq_assumption(Enemy_ID[objoff] == A_BOWSER, true);
+
+  byte ypos = Enemy_Y_Position[objoff];
+
+  // sproff @ $eb
+  const byte sproff = Enemy_SprDataOffset[objoff];
+
+  bool flip_vert = false;
+  const bool flip_horz = (Enemy_MovingDir[objoff] & 2) != 0;
+
+  const byte enemy_state = Enemy_State[objoff];
+
+  // 0x16 -> front
+  // 0x17 -> rear
+
+  const byte attrs = Enemy_SprAttrib[objoff] | 1;
+  byte tableoff = (bowser_gfx_flag == 1) ? TOFF_BOWSER_FRONT_1 : TOFF_BOWSER_REAR_1;
+
+  // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
+  rEF = (bowser_gfx_flag == 1) ? 0x16 : 0x17;
+
+  if (bowser_gfx_flag == 1) {
+    if ((BowserBodyControls & 0x80) != 0) {
+      // Close Bowser's mouth
+      tableoff = TOFF_BOWSER_FRONT_2;
+    }
+  } else {
+    if ((BowserBodyControls & 1) != 0) {
+      // Make Bowser's feet stomp
+      tableoff = TOFF_BOWSER_REAR_2;
+    }
+  }
+
+  // Bowser can turn upside down in World 8-4
+  if ((enemy_state & 0x20) != 0) {
+    if (bowser_gfx_flag != 1) {
+      ypos -= 0x10;
+    }
+
+    flip_vert = true;
+  }
+
+  // DrawBowser
+
+  const byte xpos = Enemy_Rel_XPos;
+
+  {
+    // Inlined: DrawEnemyObjRow
+
+    const byte left_tileidx_1  = EnemyGraphicsTable[tableoff + 0];
+    const byte right_tileidx_1 = EnemyGraphicsTable[tableoff + 1];
+    const byte left_tileidx_2  = EnemyGraphicsTable[tableoff + 2];
+    const byte right_tileidx_2 = EnemyGraphicsTable[tableoff + 3];
+    const byte left_tileidx_3  = EnemyGraphicsTable[tableoff + 4];
+    const byte right_tileidx_3 = EnemyGraphicsTable[tableoff + 5];
+
+    draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
+    draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
+    draw_sprite_row(2, sproff, left_tileidx_3, right_tileidx_3, xpos, ypos, attrs, flip_horz);
+  }
+
+  if (flip_vert) {
+    assert_eq_assumption(sproff <= 253, true);
+
+    // Flip all tiles vertically
+    // Inlined: DumpSixSpr
+    const byte tmpattr = SPRITE_ATTR(sproff, 0) | 0x80;
+    for (int i =  0; i < 6; i++) {
+      SPRITE_ATTR(sproff, i) = tmpattr;
+    }
+
+    SWAP(SPRITE_TILE(sproff, 0), SPRITE_TILE(sproff, 4));
+    SWAP(SPRITE_TILE(sproff, 1), SPRITE_TILE(sproff, 5));
+  }
+
+  SprObjectOffscrChk(objoff);
+}
 
 // SMB:ea4b
 // SM2MAIN:b71b
-// Signature: [X, r05, r02, r04, r03, r08, rEB, rEC, rEF] -> []
-void DrawEnemyObject(const byte tableoff, const byte xpos, const byte ypos, const byte attrs, const byte movingdir,
-    const byte objoff,
-    const byte sproff, const byte tmprEC, const byte enemy_id) {
+static void DrawEnemyObject(const byte tableoff, const byte xpos, const byte ypos, const byte attrs,
+                            const bool flip_vert, const bool flip_horz,
+                            const byte sproff, const byte tmprEC, const byte enemy_id)
+{
   {
+    // Old signature: [X, r05, r02, r04, r03, r08, rEB, rEC, rEF] -> []
+
     // Inlined: DrawEnemyObjRow
 
     byte tableoff_tmp = tableoff;
@@ -9638,108 +9780,143 @@ void DrawEnemyObject(const byte tableoff, const byte xpos, const byte ypos, cons
     const byte left_tileidx_3  = EnemyGraphicsTable[tableoff_tmp];
     const byte right_tileidx_3 = EnemyGraphicsTable[tableoff_tmp + 1];
 
-    const bool flip_horz = (movingdir & 2) != 0;
-
     draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
     draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
     draw_sprite_row(2, sproff, left_tileidx_3, right_tileidx_3, xpos, ypos, attrs, flip_horz);
   }
 
-  // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
-  rEF = enemy_id;
-
-  const byte bVar3 = Enemy_SprDataOffset[objoff];
-
-  if (enemy_id == A_BULLET_BILL) {
-    SprObjectOffscrChk(objoff);
+  if (enemy_id == A_BULLET_BILL || enemy_id == A_BULLET_BILL_CANNON) {
     return;
   }
 
-  if (VerticalFlipFlag != 0) {
+  if (flip_vert) {
     // NES note: If the offset is 254 or 255, this wraparounds the sprite page
     // because it's incremented before passing to DumpSixSpr.
     // This port assumes it can't happen.
-    assert_eq_assumption(bVar3 <= 253, true);
+    assert_eq_assumption(sproff <= 253, true);
 
-    const byte tmpattr = SPRITE_ATTR(bVar3, 0) | 0x80;
-
+    // Flip all tiles vertically
     // Inlined: DumpSixSpr
+    const byte tmpattr = SPRITE_ATTR(sproff, 0) | 0x80;
     for (int i =  0; i < 6; i++) {
-      SPRITE_ATTR(bVar3, i) = tmpattr;
+      SPRITE_ATTR(sproff, i) = tmpattr;
     }
 
-    byte bVar2 = bVar3;
-    if ((enemy_id != A_HAMMER_BRO) && ssw(true, (enemy_id != A_PIRANHA_PLANT_SMB2J)) && (enemy_id != A_LAKITU) && is_actor_enemy(enemy_id)) {
-      bVar2 = SPRITE_calculate_wrap(bVar3, 2);
+    bool swap_rows_0_and_2 = false;
+
+    if (enemy_id == A_HAMMER_BRO) {
+      swap_rows_0_and_2 = true;
     }
 
-    SWAP(SPRITE_TILE(bVar2, 0), SPRITE_TILE(bVar3, 4));
-    SWAP(SPRITE_TILE(bVar2, 1), SPRITE_TILE(bVar3, 5));
+#ifdef SMB2J_MODE
+    if (enemy_id == A_PIRANHA_PLANT_SMB2J) {
+      swap_rows_0_and_2 = true;
+    }
+#endif
+
+    if (enemy_id == A_LAKITU) {
+      swap_rows_0_and_2 = true;
+    }
+
+    if (!is_actor_enemy(enemy_id) && enemy_id != A_BULLET_BILL_CANNON) {
+      swap_rows_0_and_2 = true;
+    }
+
+    if (swap_rows_0_and_2) {
+      SWAP(SPRITE_TILE(sproff, 0), SPRITE_TILE(sproff, 4));
+      SWAP(SPRITE_TILE(sproff, 1), SPRITE_TILE(sproff, 5));
+    } else {
+      const byte bVar2 = SPRITE_calculate_wrap(sproff, 2);
+      SWAP(SPRITE_TILE(bVar2, 0), SPRITE_TILE(sproff, 4));
+      SWAP(SPRITE_TILE(bVar2, 1), SPRITE_TILE(sproff, 5));
+    }
   }
 
-  if (BowserGfxFlag != 0) {
-    SprObjectOffscrChk(objoff);
-    return;
-  }
+  // Note: the original returned early on BowserGfxFlag, but the logic's been extracted to EnemyGfxHandler_bowser
+
   if (enemy_id == A_HAMMER_BRO) {
-    SprObjectOffscrChk(objoff);
     return;
   }
-  if ((enemy_id != A_BLOOBER) && (enemy_id != A_PIRANHA_PLANT) && ssw(true, (enemy_id != A_PIRANHA_PLANT_SMB2J)) && (enemy_id != A_PODOBOO)) {
-    if ((enemy_id == A_SPINY) && (tmprEC != 5)) {
-      goto CheckToMirrorLakitu;
-    }
-    if (enemy_id == A_BOWSER_FLAME) {
-      SPRITE_ATTR(bVar3, 5) = 0x42;
-    }
-    if (tmprEC < 2) {
-      goto CheckToMirrorLakitu;
-    }
+
+  if (enemy_id == A_RETAINER || enemy_id == A_BOWSER_FLAME) {
+    // Also bowser flame, because the original compares the table index.
+    // bowser's flame overlaps with it
+    SPRITE_ATTR(sproff, 5) = 0x42;
   }
-  if (BowserGfxFlag == 0) {
-    const byte bVar4 = SPRITE_ATTR(bVar3, 0) & 0xa3;
-    SPRITE_ATTR(bVar3, 0) = bVar4;
-    SPRITE_ATTR(bVar3, 2) = bVar4;
-    SPRITE_ATTR(bVar3, 4) = bVar4;
-    byte bVar1 = bVar4 | 0x40;
+
+  bool cond1 = false;
+
+  if (tmprEC == 0 || tmprEC == 1) {
+    cond1 |= enemy_id == A_BLOOBER;
+    cond1 |= enemy_id == A_PIRANHA_PLANT;
+#ifdef SMB2J_MODE
+    cond1 |= enemy_id == A_PIRANHA_PLANT_SMB2J;
+#endif
+    cond1 |= enemy_id == A_PODOBOO;
+  } else {
+    cond1 = true;
+  }
+
+  if ((enemy_id == A_SPINY) && (tmprEC != 5)) {
+    // This may be redundant.
+    // for A_SPINY, then tmprEC only ever seems to be 0, 1, and 5.
+    // TODO: check if this is truly redundant.
+    cond1 = false;
+  }
+
+  if (cond1) {
+    // Do not flip the left column tiles horizontally
+    const byte attr = SPRITE_ATTR(sproff, 0) & 0xa3;
+
     if (tmprEC == 5) {
-      bVar1 = bVar4 | 0xc0;
-    }
-    SPRITE_ATTR(bVar3, 1) = bVar1;
-    SPRITE_ATTR(bVar3, 3) = bVar1;
-    SPRITE_ATTR(bVar3, 5) = bVar1;
-    if (tmprEC == 4) {
-      const byte bVar9 = SPRITE_ATTR(bVar3, 2);
-      SPRITE_ATTR(bVar3, 2) = bVar9 | 0x80;
-      SPRITE_ATTR(bVar3, 4) = bVar9 | 0x80;
-      SPRITE_ATTR(bVar3, 3) = bVar9 | 0xc0;
-      SPRITE_ATTR(bVar3, 5) = bVar9 | 0xc0;
+      SPRITE_ATTR(sproff, 0) = attr;
+      SPRITE_ATTR(sproff, 2) = attr;
+      SPRITE_ATTR(sproff, 4) = attr;
+
+      SPRITE_ATTR(sproff, 1) = attr | 0x80 | 0x40;
+      SPRITE_ATTR(sproff, 3) = attr | 0x80 | 0x40;
+      SPRITE_ATTR(sproff, 5) = attr | 0x80 | 0x40;
+    } else if (tmprEC == 4) {
+      SPRITE_ATTR(sproff, 0) = attr;
+      SPRITE_ATTR(sproff, 2) = attr | 0x80;
+      SPRITE_ATTR(sproff, 4) = attr | 0x80;
+
+      SPRITE_ATTR(sproff, 1) = attr | 0x40;
+      SPRITE_ATTR(sproff, 3) = attr | 0x80 | 0x40;
+      SPRITE_ATTR(sproff, 5) = attr | 0x80 | 0x40;
+    } else {
+      SPRITE_ATTR(sproff, 0) = attr;
+      SPRITE_ATTR(sproff, 2) = attr;
+      SPRITE_ATTR(sproff, 4) = attr;
+
+      SPRITE_ATTR(sproff, 1) = attr | 0x40;
+      SPRITE_ATTR(sproff, 3) = attr | 0x40;
+      SPRITE_ATTR(sproff, 5) = attr | 0x40;
     }
   }
-CheckToMirrorLakitu:
+
   if (enemy_id == A_LAKITU) {
-    if (VerticalFlipFlag == 0) {
-      SPRITE_ATTR(bVar3, 4) &= 0x81;
-      SPRITE_ATTR(bVar3, 5) |= 0x41;
+    if (!flip_vert) {
+      SPRITE_ATTR(sproff, 4) &= 0x81;
+      SPRITE_ATTR(sproff, 5) |= 0x41;
       if (FrenzyEnemyTimer < 0x10) {
-        const byte bVar9 = SPRITE_ATTR(bVar3, 5);
-        SPRITE_ATTR(bVar3, 3) = bVar9;
-        SPRITE_ATTR(bVar3, 2) = bVar9 & 0x81;
+        const byte bVar9 = SPRITE_ATTR(sproff, 5);
+        SPRITE_ATTR(sproff, 3) = bVar9;
+        SPRITE_ATTR(sproff, 2) = bVar9 & 0x81;
       }
-      SprObjectOffscrChk(objoff);
       return;
     }
-    SPRITE_ATTR(bVar3, 0) = SPRITE_ATTR(bVar3, 0) & 0x81;
-    SPRITE_ATTR(bVar3, 1) = SPRITE_ATTR(bVar3, 1) | 0x41;
+    SPRITE_ATTR(sproff, 0) = SPRITE_ATTR(sproff, 0) & 0x81;
+    SPRITE_ATTR(sproff, 1) = SPRITE_ATTR(sproff, 1) | 0x41;
   }
-  if (is_actor_unknown_class(enemy_id)) {
+
+  if (enemy_id == A_JUMPSPRING) {
     const byte ead = ssw(0x02, EnemyAttributeData[24]);
-    SPRITE_ATTR(bVar3, 2) = ead | 0x80;
-    SPRITE_ATTR(bVar3, 4) = ead | 0x80;
-    SPRITE_ATTR(bVar3, 3) = ead | 0xc0;
-    SPRITE_ATTR(bVar3, 5) = ead | 0xc0;
+    SPRITE_ATTR(sproff, 2) = ead | 0x80;
+    SPRITE_ATTR(sproff, 4) = ead | 0x80;
+    SPRITE_ATTR(sproff, 3) = ead | 0xc0;
+    SPRITE_ATTR(sproff, 5) = ead | 0xc0;
   }
-  SprObjectOffscrChk(objoff);
 }
 
 

@@ -164,7 +164,6 @@
 #define EnemyGraphicsTable               RAMARRAY_CONST(0xB3ED, 258)
 #define EnemyGfxTableOffsets             RAMARRAY_CONST(0xB4EF, 27)
 #define EnemyAttributeData               RAMARRAY(0xB50A, 27)
-#define JumpspringFrameOffsets           RAMARRAY_CONST(0xB527, 5)
 #define DefaultBlockObjTiles             RAMARRAY_CONST(0xB8A8, 4)
 #define ExplosionTiles                   RAMARRAY_CONST(0xB9E1, 3)
 #define PlayerGfxTblOffsets              RAMARRAY_CONST(0xBAE2, 16)
