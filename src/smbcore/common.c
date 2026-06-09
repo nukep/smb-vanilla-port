@@ -6167,6 +6167,9 @@ void MoveFlyingCheepCheep(const byte objoff) {
     Enemy_Y_MoveForce[objoff] = bVar1 + 0x10;
     bVar3 = (byte)(bVar1 + 0x10) >> 4;
   }
+
+  // NES note: this array is ultimately unused by the time Enemy_SprAttrib reaches EnemyGfxHandler.
+  // This array also overflows into code.
   Enemy_SprAttrib[objoff] = FlyCCBPriority[bVar3];
 }
 
@@ -9431,9 +9434,147 @@ void DrawPowerUp(const byte objoff) {
 }
 
 
-static void DrawEnemyObject(const byte tableoff, const byte xpos, const byte ypos, const byte attrs,
-                            const bool flip_vert, const bool flip_horz,
-                            const byte sproff, const byte tmprEC, const byte enemy_id);
+static inline void draw_enemy_object_2x3(const byte tableoff, const byte sproff,
+                                         const byte xpos, const byte ypos,
+                                         const byte attrs, const bool flip_horz)
+{
+  // Inlined: DrawEnemyObjRow
+
+  byte tableoff_tmp = tableoff;
+
+  const byte left_tileidx_1  = EnemyGraphicsTable[tableoff_tmp];
+  const byte right_tileidx_1 = EnemyGraphicsTable[tableoff_tmp + 1];
+  tableoff_tmp += 2;
+  const byte left_tileidx_2  = EnemyGraphicsTable[tableoff_tmp];
+  const byte right_tileidx_2 = EnemyGraphicsTable[tableoff_tmp + 1];
+  tableoff_tmp += 2;
+  const byte left_tileidx_3  = EnemyGraphicsTable[tableoff_tmp];
+  const byte right_tileidx_3 = EnemyGraphicsTable[tableoff_tmp + 1];
+
+  draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
+  draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
+  draw_sprite_row(2, sproff, left_tileidx_3, right_tileidx_3, xpos, ypos, attrs, flip_horz);
+}
+
+
+static void draw_enemy_object(const byte tableoff, const byte xpos, const byte ypos, const byte attrs,
+                              const bool flip_vert, const bool flip_horz,
+                              const bool mirror_tiles,
+                              const byte sproff, const byte tmprEC, const byte enemy_id
+                              )
+{
+  // Old signature: [X, r05, r02, r04, r03, r08, rEB, rEC, rEF] -> []
+
+  draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, attrs, flip_horz);
+
+  if (flip_vert) {
+    // NES note: If the offset is 254 or 255, this wraparounds the sprite page
+    // because it's incremented before passing to DumpSixSpr.
+    // This port assumes it can't happen.
+    assert_eq_assumption(sproff <= 253, true);
+
+    // Flip all tiles vertically
+    // Inlined: DumpSixSpr
+    const byte tmpattr = SPRITE_ATTR(sproff, 0) | 0x80;
+    for (int i =  0; i < 6; i++) {
+      SPRITE_ATTR(sproff, i) = tmpattr;
+    }
+
+    bool swap_rows_0_and_2 = false;
+
+    if (enemy_id == A_HAMMER_BRO) {
+      swap_rows_0_and_2 = true;
+    }
+
+#ifdef SMB2J_MODE
+    if (enemy_id == A_PIRANHA_PLANT_SMB2J) {
+      swap_rows_0_and_2 = true;
+    }
+#endif
+
+    if (enemy_id == A_LAKITU) {
+      swap_rows_0_and_2 = true;
+    }
+
+    if (enemy_id == A_JUMPSPRING || enemy_id == A_RETAINER) {
+      // This shouldn't happen... but it's in the original.
+      swap_rows_0_and_2 = true;
+    }
+
+    if (swap_rows_0_and_2) {
+      SWAP(SPRITE_TILE(sproff, 0), SPRITE_TILE(sproff, 4));
+      SWAP(SPRITE_TILE(sproff, 1), SPRITE_TILE(sproff, 5));
+    } else {
+      const byte bVar2 = SPRITE_calculate_wrap(sproff, 2);
+      SWAP(SPRITE_TILE(bVar2, 0), SPRITE_TILE(sproff, 4));
+      SWAP(SPRITE_TILE(bVar2, 1), SPRITE_TILE(sproff, 5));
+    }
+  }
+
+  if (enemy_id == A_RETAINER) {
+    // Bottom right: flip horizontally, set palette to 2
+    SPRITE_ATTR(sproff, 5) = 0x42;
+  }
+
+  if (mirror_tiles) {
+    // Do not flip the left column tiles horizontally
+    const byte attr = SPRITE_ATTR(sproff, 0) & 0xa3;
+
+    SPRITE_ATTR(sproff, 0) = attr;
+    SPRITE_ATTR(sproff, 2) = attr;
+    SPRITE_ATTR(sproff, 4) = attr;
+
+    SPRITE_ATTR(sproff, 1) = attr | 0x40;
+    SPRITE_ATTR(sproff, 3) = attr | 0x40;
+    SPRITE_ATTR(sproff, 5) = attr | 0x40;
+
+    if (tmprEC == 5) {
+      // Flip right column vertically (effectively rotated 180 degrees)
+      SPRITE_ATTR(sproff, 1) |= 0x80;
+      SPRITE_ATTR(sproff, 3) |= 0x80;
+      SPRITE_ATTR(sproff, 5) |= 0x80;
+    }
+
+    if (tmprEC == 4) {
+      // Flip bottom two rows vertically
+      SPRITE_ATTR(sproff, 2) |= 0x80;
+      SPRITE_ATTR(sproff, 4) |= 0x80;
+
+      SPRITE_ATTR(sproff, 3) |= 0x80;
+      SPRITE_ATTR(sproff, 5) |= 0x80;
+    }
+  }
+
+
+  if (enemy_id == A_LAKITU) {
+    if (!flip_vert) {
+      SPRITE_ATTR(sproff, 4) &= 0x81;
+      SPRITE_ATTR(sproff, 5) |= 0x41;
+      if (FrenzyEnemyTimer < 0x10) {
+        const byte bVar9 = SPRITE_ATTR(sproff, 5);
+        SPRITE_ATTR(sproff, 2) = bVar9 & 0x81;
+        SPRITE_ATTR(sproff, 3) = bVar9;
+      }
+    } else {
+      SPRITE_ATTR(sproff, 0) &= 0x81;
+      SPRITE_ATTR(sproff, 1) |= 0x41;
+    }
+  }
+
+  if (enemy_id == A_JUMPSPRING) {
+    byte ead = 2;
+#ifdef SMB2J_MODE
+  if (((WorldNumber == 1) || (WorldNumber == 2)) || (WorldNumber == 6)) {
+    ead = 1;
+  }
+#endif
+    SPRITE_ATTR(sproff, 2) = ead | 0x80;
+    SPRITE_ATTR(sproff, 4) = ead | 0x80;
+    SPRITE_ATTR(sproff, 3) = ead | 0xc0;
+    SPRITE_ATTR(sproff, 5) = ead | 0xc0;
+  }
+}
+
 
 // SMB:e87d
 // SM2MAIN:b52c
@@ -9459,16 +9600,19 @@ void EnemyGfxHandler(const byte objoff) {
   // right before any array reads could access writes we optimized away
   assert_eq_assumption(objoff < 0xeb - 0xcf, true);
 
+  const byte enemy_id = Enemy_ID[objoff];
+
+  assert_eq_assumption(is_actor_enemy(enemy_id) || enemy_id == A_JUMPSPRING || enemy_id == A_BULLET_BILL_CANNON || enemy_id == A_RETAINER, true);
+
   byte ypos = Enemy_Y_Position[objoff];
 
   // sproff @ $eb
   const byte sproff = Enemy_SprDataOffset[objoff];
 
   bool flip_horz = (Enemy_MovingDir[objoff] & 2) != 0;
-  const byte attrs_orig = Enemy_SprAttrib[objoff];
-  byte attrs = attrs_orig;
 
-  const byte enemy_id = Enemy_ID[objoff];
+  bool draw_behind = false;
+  byte attrs = 0;
 
   if (enemy_id == A_PIRANHA_PLANT) {
     if ((PiranhaPlant_Y_Speed[objoff] < 0x80) && (EnemyFrameTimer[objoff] != 0)) {
@@ -9479,44 +9623,21 @@ void EnemyGfxHandler(const byte objoff) {
   // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
   rEF = enemy_id;
 
-  byte tmprEC = Enemy_State[objoff] & 0x1f;
+  const byte enemy_state = Enemy_State[objoff];
+  byte st = enemy_state & 0x1f;
 
-  const byte enemy_state = enemy_id != A_BULLET_BILL_CANNON ? Enemy_State[objoff] : 0;
-
-  assert_eq_assumption(enemy_id < 0x1b || enemy_id == A_JUMPSPRING || enemy_id == A_BULLET_BILL_CANNON || enemy_id == A_RETAINER, true);
-
-
-  if (enemy_id == A_LAKITU) {
-    const bool rightside_up = (enemy_state & 0x20) == 0;
-
-    attrs = attrs_orig | 0x01;
-
-    byte tableoff;
-
-    if (!rightside_up || FrenzyEnemyTimer >= 16) {
-      tableoff = TOFF_LAKITU_1;
-    } else {
-      tableoff = TOFF_LAKITU_2;
-    }
-
-    // CheckDefeatedState
-
-    const bool flip_vert = !rightside_up;
-    if (flip_vert) {
-      tmprEC = 0;
-    }
-
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, flip_vert, flip_horz, sproff, tmprEC, enemy_id);
-    SprObjectOffscrChk(objoff);
-    return;
-  }
-
+  bool flip_vert = (enemy_state & 0x20) != 0;
   byte tableoff;
 
-  bool rightside_up = (enemy_state & 0x20) == 0;
+  // 0xff means there's no next table offset
+  byte next_tableoff = 0xff;
 
+  bool mirror_tiles = false;
   bool check_to_animate_enemy = false;
   bool add_tableoff = false;
+  byte palette = 1;
+
+  const bool cond1 = (enemy_state & 0xa0) == 0 && TimerControl == 0;
 
   if (EnemyIntervalTimer[objoff] < 5) {
     add_tableoff = true;
@@ -9525,41 +9646,58 @@ void EnemyGfxHandler(const byte objoff) {
 
   switch (enemy_id) {
   case A_LAKITU:
+    palette = 1;
+
+    if (flip_vert || FrenzyEnemyTimer >= 16) {
+      tableoff = TOFF_LAKITU_1;
+    } else {
+      tableoff = TOFF_LAKITU_2;
+    }
+
+    add_tableoff = false;
     break;
 
   case A_SPINY:
-    attrs = attrs_orig | 0x02;
+    palette = 2;
 
     tableoff = TOFF_SPINY_1;
+    next_tableoff = TOFF_SPINY_2;
 
-    if (tmprEC == 5) {
+    if (st == 5) {
       tableoff = TOFF_SPINY_EGG_1;
+      next_tableoff = TOFF_SPINY_EGG_2;
       flip_horz = true;
+      if (!flip_vert) { mirror_tiles = true; }
     }
+
     break;
 
   case A_GREEN_KOOPA:
   case A_RED_KOOPA_GREENLIKE:
   case A_RED_KOOPA:
-    attrs = attrs_orig | 0x01;
+    palette = 1;
 
     if (enemy_id == A_RED_KOOPA || enemy_id == A_RED_KOOPA_GREENLIKE) {
-      attrs = attrs_orig | 0x02;
+      palette = 2;
     }
 
     tableoff = TOFF_KOOPA_1;
+    next_tableoff = TOFF_KOOPA_2;
 
-    if (tmprEC > 1) {
+    if (st > 1) {
       tableoff = TOFF_KOOPA_SHELL_UPSIDEDOWN_1;
+      next_tableoff = TOFF_KOOPA_SHELL_UPSIDEDOWN_2;
     }
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
-    rightside_up = true;
+    flip_vert = false;
 
+    if (st > 1) { mirror_tiles = true; }
     break;
 
 #ifdef SMB1_MODE
@@ -9567,67 +9705,78 @@ void EnemyGfxHandler(const byte objoff) {
     // A glitched version of a koopa
 
     tableoff = TOFF_KOOPA_1;
-    attrs = attrs_orig | 0x01;
+    next_tableoff = TOFF_KOOPA_2;
+    palette = 1;
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
+
+    if (flip_vert) { st = 0; }
+    if (st > 1) { mirror_tiles = true; }
     break;
 #endif
 
   case A_BUZZY_BEETLE:
-    attrs = attrs_orig | 0x03;
+    palette = 3;
 
     tableoff = TOFF_BUZZY_BEETLE_1;
+    next_tableoff = TOFF_BUZZY_BEETLE_2;
 
-    if (!(tmprEC == 0 || tmprEC == 1)) {
+    if (st > 1) {
       tableoff = TOFF_BUZZY_BEETLE_SHELL_1;
+      next_tableoff = TOFF_BUZZY_BEETLE_SHELL_2;
       ypos += 1;
     }
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_BUZZY_BEETLE_SHELL_UPSIDEDOWN_1;
+      next_tableoff = TOFF_BUZZY_BEETLE_SHELL_UPSIDEDOWN_2;
       ypos += 1;
     }
 
-    rightside_up = true;
+    flip_vert = false;
+
+    if (st > 1) { mirror_tiles = true; }
     break;
 
   case A_GOOMBA:
-    attrs = attrs_orig | 0x03;
+    palette = 3;
 
     tableoff = TOFF_GOOMBA;
 
-    if (enemy_state > 1) {
-      tmprEC = 4;
-    }
+    if (flip_vert) {
+      ypos += 2;
+    } else {
+      if (TimerControl == 0 && (FrameCounter & 8) == 0) {
+        // Make the goomba waddle around
+        flip_horz = !flip_horz;
+      }
 
-    if ((((enemy_state & 0x20) | TimerControl) == 0) && ((FrameCounter & 8) == 0)) {
-      // Make the goomba waddle around
-      flip_horz = !flip_horz;
-    }
-
-    if (tmprEC == 4) {
-      if ((enemy_state & 0x20) == 0) {
+      if (enemy_state > 1) {
         tableoff = TOFF_SQUISHED_GOOMBA;
         ypos += 1;
-      } else {
-        ypos += 2;
+        st = 4;
+        mirror_tiles = true;
       }
     }
 
     add_tableoff = false;
+
     break;
 
   case A_HAMMER_BRO:
-    attrs = attrs_orig | 0x01;
+    palette = 1;
 
     tableoff = TOFF_HAMMER_BRO_1;
+    next_tableoff = TOFF_HAMMER_BRO_2;
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
@@ -9638,37 +9787,47 @@ void EnemyGfxHandler(const byte objoff) {
         add_tableoff = false;
       } else {
         tableoff = TOFF_HAMMER_BRO_3;
+        next_tableoff = TOFF_HAMMER_BRO_4;
       }
     }
+
     break;
 
   case A_CHEEPCHEEP_GRAY:
   case A_CHEEPCHEEP_RED:
   case A_FLYING_CHEEPCHEEP:
-    attrs = attrs_orig | 0x02;
+    palette = 2;
 
     if (enemy_id == A_CHEEPCHEEP_GRAY) {
-      attrs = attrs_orig | 0x01;
+      palette = 1;
     }
 
     tableoff = TOFF_CHEEPCHEEP_1;
+    next_tableoff = TOFF_CHEEPCHEEP_2;
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
     add_tableoff = true;
     check_to_animate_enemy = true;
+
+
+    if (flip_vert) { st = 0; }
+    if (st > 1) { mirror_tiles = true; }
     break;
 
   case A_BLOOBER:
-    attrs = attrs_orig | 0x03;
+    palette = 3;
 
     tableoff = TOFF_BLOOBER_1;
+    next_tableoff = TOFF_BLOOBER_2;
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
@@ -9684,6 +9843,8 @@ void EnemyGfxHandler(const byte objoff) {
     } else {
       add_tableoff = false;
     }
+
+    mirror_tiles = true;
     break;
 
   case A_BULLET_BILL_CANNON:
@@ -9691,40 +9852,39 @@ void EnemyGfxHandler(const byte objoff) {
     rEF = 0x8;
 
     ypos -= 1;
-    tmprEC = 0;
 
   case A_BULLET_BILL:
-    attrs = (EnemyFrameTimer[objoff] != 0) ? 0x23 : 3;
-
-    if (enemy_id == A_BULLET_BILL) {
-      attrs = attrs_orig | 3;
-    }
+    palette = 3;
+    draw_behind = EnemyFrameTimer[objoff] != 0;
 
     tableoff = TOFF_BULLET_BILL;
 
-    if (tmprEC == 4) {
-      tableoff = TOFF_KOOPA_SHELL_1;
-      ypos += 2;
+    if (enemy_id == A_BULLET_BILL) {
+      draw_behind = false;
+      if (st == 4) {
+        tableoff = TOFF_KOOPA_SHELL_1;
+        ypos += 2;
+      }
     }
 
     add_tableoff = false;
+    flip_vert = false;
+
     break;
 
   case A_PODOBOO:
-    attrs = attrs_orig | 0x02;
+    palette = 2;
 
     tableoff = TOFF_PODOBOO;
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
       ypos += 2;
     }
 
     add_tableoff = false;
 
-    if (rightside_up) {
-
-    }
+    mirror_tiles = true;
     break;
 
   case A_JUMPSPRING:
@@ -9742,20 +9902,22 @@ void EnemyGfxHandler(const byte objoff) {
     assert_eq_assumption(JumpspringAnimCtrl < 5, true);
     tableoff = jumpspring_offsets[JumpspringAnimCtrl];
 
-    attrs = attrs_orig | 2;
+    palette = 2;
 
 #ifdef SMB2J_MODE
   if (((WorldNumber == 1) || (WorldNumber == 2)) || (WorldNumber == 6)) {
-    attrs = attrs_orig | 1;
+    palette = 1;
   }
 #endif
 
     // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
     rEF = jumpspring_indices[JumpspringAnimCtrl];
 
-    tmprEC = 3;
-
     add_tableoff = false;
+
+    st = 0;
+
+    mirror_tiles = true;
     break;
 
   case A_RETAINER:
@@ -9763,52 +9925,50 @@ void EnemyGfxHandler(const byte objoff) {
     rEF = 0x15;
 
     flip_horz = false;
-    tmprEC = 0;
 
-  case A_BOWSER_FLAME:
-    attrs = attrs_orig | 0x02;
-
-    // Also bowser flame, because the original compares the table index.
-    // Bowser's flame overlaps with it
+    palette = 2;
 
     tableoff = TOFF_PRINCESS_OR_DOOR;
 
-    if (tmprEC == 4) {
-      tableoff = TOFF_KOOPA_SHELL_1;
-      ypos += 2;
-    }
-
     if (EnemyIntervalTimer[objoff] < 5) {
       if (ssw(WorldNumber < 7, true)) {
-        tmprEC = 3;
+        if (!flip_vert) {
+          st = 0;
+          mirror_tiles = true;
+        }
       }
       if (WorldNumber < 7) {
         tableoff = TOFF_MUSHROOM_RETAINER;
       }
-      add_tableoff = false;
     }
+    add_tableoff = false;
+
     break;
 
 #ifdef SMB2J_MODE
   case A_PIRANHA_PLANT_SMB2J:
 
-    rightside_up = false;
+    flip_vert = true;
 #endif
   case A_PIRANHA_PLANT:
-    tableoff = TOFF_PIRANHA_PLANT;
-    attrs = attrs_orig | 0x21;
+    tableoff = TOFF_PIRANHA_PLANT_1;
+    next_tableoff = TOFF_PIRANHA_PLANT_2;
+    palette = 1;
+    draw_behind = true;
 
 #ifdef SMB2J_MODE
     if (PiranhaPlantHardMode) {
-      attrs = attrs_orig | 0x22;
+      palette = 2;
     }
 #endif
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
+    mirror_tiles = true;
     break;
 
   case A_GREEN_PARATROOPA:
@@ -9816,72 +9976,75 @@ void EnemyGfxHandler(const byte objoff) {
   case A_GREEN_PARATROOPA_HORIZONTAL:
   case A_GREEN_PARATROOPA_INPLACE:
     tableoff = TOFF_PARATROOPA_1;
-    attrs = attrs_orig | 1;
+    next_tableoff = TOFF_PARATROOPA_2;
+    palette = 1;
 
     if (enemy_id == A_RED_PARATROOPA) {
-      attrs = attrs_orig | 2;
+      palette = 2;
     }
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
+
+    if (flip_vert) { st = 0; }
+    if (st > 1) { mirror_tiles = true; }
     break;
 
   case A_UNK_0x13:
     // This is a glitch. table offset and attributes are literally 0xff.
 
     tableoff = 0xff;
+    next_tableoff = 0x05;
     attrs = 0xff;
 
-    if (tmprEC == 4) {
+    if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
+    if (flip_vert) { st = 0; }
+    if (st > 1) { mirror_tiles = true; }
     break;
 
   default:
     // Any remaining actors should be unreachable
     assert_eq_assumption(false, true);
 
-    // tableoff = EnemyGfxTableOffsets[enemy_id];
-    // attrs = attrs_orig | EnemyAttributeData[enemy_id];
-    //
-    // if (tmprEC == 4) {
-    //   tableoff = TOFF_KOOPA_SHELL_1;
-    //   ypos += 2;
-    // }
-
     break;
   }
 
-  if (check_to_animate_enemy) {
-    if ((FrameCounter & 0x8) != 0) {
-      add_tableoff = false;
-    }
-  }
-
-  if (add_tableoff) {
-    if ((enemy_state & 0xa0) == 0) {
-      if (TimerControl == 0) {
-        tableoff += 6;
+  if (add_tableoff && next_tableoff != 0xff) {
+    if (cond1) {
+      if (!check_to_animate_enemy) {
+        tableoff = next_tableoff;
+      }
+      if ((FrameCounter & 0x8) == 0) {
+        tableoff = next_tableoff;
       }
     }
   }
 
-  if (rightside_up) {
-    bool flip_vert = false;
-
+  if (!flip_vert) {
     if ((enemy_id == A_PODOBOO) && (Enemy_Y_Speed[objoff] < 0x80)) {
       flip_vert = true;
     }
-
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, flip_vert, flip_horz, sproff, tmprEC, enemy_id);
-  } else {
-    const bool flip_vert = true;
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, flip_vert, flip_horz, sproff, 0, enemy_id);
   }
+
+  // Note: Enemy_SprAttrib[objoff] is always 0 for EnemyGfxHandler. This is used in the original, so keeping it here for now.
+  // RunNormalEnemies sets this to 0 right before calling EnemyGfxHandler. The other non-enemy actor types never assign it to non-zero.
+  // The intent of this variable is to draw sprites behind nametable tiles (with an attribute value of 0x20).
+  // The use of this array is mostly residual, and is only meaningfully used in DrawPowerUp.
+  const byte attrs_behind = Enemy_SprAttrib[objoff];
+  attrs |= attrs_behind;
+
+  attrs |= palette;
+  attrs |= draw_behind ? 0x20 : 0;
+
+  draw_enemy_object(tableoff, Enemy_Rel_XPos, ypos, attrs, flip_vert, flip_horz, mirror_tiles, sproff, st, enemy_id);
   SprObjectOffscrChk(objoff);
 }
 
@@ -9939,20 +10102,7 @@ static void EnemyGfxHandler_bowser(const byte objoff, const byte bowser_gfx_flag
 
   const byte xpos = Enemy_Rel_XPos;
 
-  {
-    // Inlined: DrawEnemyObjRow
-
-    const byte left_tileidx_1  = EnemyGraphicsTable[tableoff + 0];
-    const byte right_tileidx_1 = EnemyGraphicsTable[tableoff + 1];
-    const byte left_tileidx_2  = EnemyGraphicsTable[tableoff + 2];
-    const byte right_tileidx_2 = EnemyGraphicsTable[tableoff + 3];
-    const byte left_tileidx_3  = EnemyGraphicsTable[tableoff + 4];
-    const byte right_tileidx_3 = EnemyGraphicsTable[tableoff + 5];
-
-    draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
-    draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
-    draw_sprite_row(2, sproff, left_tileidx_3, right_tileidx_3, xpos, ypos, attrs, flip_horz);
-  }
+  draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, attrs, flip_horz);
 
   if (flip_vert) {
     assert_eq_assumption(sproff <= 253, true);
@@ -9969,172 +10119,6 @@ static void EnemyGfxHandler_bowser(const byte objoff, const byte bowser_gfx_flag
   }
 
   SprObjectOffscrChk(objoff);
-}
-
-// SMB:ea4b
-// SM2MAIN:b71b
-static void DrawEnemyObject(const byte tableoff, const byte xpos, const byte ypos, const byte attrs,
-                            const bool flip_vert, const bool flip_horz,
-                            const byte sproff, const byte tmprEC, const byte enemy_id)
-{
-  {
-    // Old signature: [X, r05, r02, r04, r03, r08, rEB, rEC, rEF] -> []
-
-    // Inlined: DrawEnemyObjRow
-
-    byte tableoff_tmp = tableoff;
-
-    const byte left_tileidx_1  = EnemyGraphicsTable[tableoff_tmp];
-    const byte right_tileidx_1 = EnemyGraphicsTable[tableoff_tmp + 1];
-    tableoff_tmp += 2;
-    const byte left_tileidx_2  = EnemyGraphicsTable[tableoff_tmp];
-    const byte right_tileidx_2 = EnemyGraphicsTable[tableoff_tmp + 1];
-    tableoff_tmp += 2;
-    const byte left_tileidx_3  = EnemyGraphicsTable[tableoff_tmp];
-    const byte right_tileidx_3 = EnemyGraphicsTable[tableoff_tmp + 1];
-
-    draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
-    draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
-    draw_sprite_row(2, sproff, left_tileidx_3, right_tileidx_3, xpos, ypos, attrs, flip_horz);
-  }
-
-  if (enemy_id == A_BULLET_BILL || enemy_id == A_BULLET_BILL_CANNON) {
-    return;
-  }
-
-  if (flip_vert) {
-    // NES note: If the offset is 254 or 255, this wraparounds the sprite page
-    // because it's incremented before passing to DumpSixSpr.
-    // This port assumes it can't happen.
-    assert_eq_assumption(sproff <= 253, true);
-
-    // Flip all tiles vertically
-    // Inlined: DumpSixSpr
-    const byte tmpattr = SPRITE_ATTR(sproff, 0) | 0x80;
-    for (int i =  0; i < 6; i++) {
-      SPRITE_ATTR(sproff, i) = tmpattr;
-    }
-
-    bool swap_rows_0_and_2 = false;
-
-    if (enemy_id == A_HAMMER_BRO) {
-      swap_rows_0_and_2 = true;
-    }
-
-#ifdef SMB2J_MODE
-    if (enemy_id == A_PIRANHA_PLANT_SMB2J) {
-      swap_rows_0_and_2 = true;
-    }
-#endif
-
-    if (enemy_id == A_LAKITU) {
-      swap_rows_0_and_2 = true;
-    }
-
-    if (!is_actor_enemy(enemy_id) && enemy_id != A_BULLET_BILL_CANNON) {
-      swap_rows_0_and_2 = true;
-    }
-
-    if (swap_rows_0_and_2) {
-      SWAP(SPRITE_TILE(sproff, 0), SPRITE_TILE(sproff, 4));
-      SWAP(SPRITE_TILE(sproff, 1), SPRITE_TILE(sproff, 5));
-    } else {
-      const byte bVar2 = SPRITE_calculate_wrap(sproff, 2);
-      SWAP(SPRITE_TILE(bVar2, 0), SPRITE_TILE(sproff, 4));
-      SWAP(SPRITE_TILE(bVar2, 1), SPRITE_TILE(sproff, 5));
-    }
-  }
-
-  // Note: the original returned early on BowserGfxFlag, but the logic's been extracted to EnemyGfxHandler_bowser
-
-  if (enemy_id == A_HAMMER_BRO) {
-    return;
-  }
-
-  if (enemy_id == A_RETAINER || enemy_id == A_BOWSER_FLAME) {
-    // Also bowser flame, because the original compares the table index.
-    // bowser's flame overlaps with it
-    SPRITE_ATTR(sproff, 5) = 0x42;
-  }
-
-  bool cond1 = false;
-
-  if (tmprEC == 0 || tmprEC == 1) {
-    cond1 |= enemy_id == A_BLOOBER;
-    cond1 |= enemy_id == A_PIRANHA_PLANT;
-#ifdef SMB2J_MODE
-    cond1 |= enemy_id == A_PIRANHA_PLANT_SMB2J;
-#endif
-    cond1 |= enemy_id == A_PODOBOO;
-  } else {
-    cond1 = true;
-  }
-
-  if ((enemy_id == A_SPINY) && (tmprEC != 5)) {
-    // This may be redundant.
-    // for A_SPINY, then tmprEC only ever seems to be 0, 1, and 5.
-    // TODO: check if this is truly redundant.
-    cond1 = false;
-  }
-
-  if (cond1) {
-    // Do not flip the left column tiles horizontally
-    const byte attr = SPRITE_ATTR(sproff, 0) & 0xa3;
-
-    if (tmprEC == 5) {
-      SPRITE_ATTR(sproff, 0) = attr;
-      SPRITE_ATTR(sproff, 2) = attr;
-      SPRITE_ATTR(sproff, 4) = attr;
-
-      SPRITE_ATTR(sproff, 1) = attr | 0x80 | 0x40;
-      SPRITE_ATTR(sproff, 3) = attr | 0x80 | 0x40;
-      SPRITE_ATTR(sproff, 5) = attr | 0x80 | 0x40;
-    } else if (tmprEC == 4) {
-      SPRITE_ATTR(sproff, 0) = attr;
-      SPRITE_ATTR(sproff, 2) = attr | 0x80;
-      SPRITE_ATTR(sproff, 4) = attr | 0x80;
-
-      SPRITE_ATTR(sproff, 1) = attr | 0x40;
-      SPRITE_ATTR(sproff, 3) = attr | 0x80 | 0x40;
-      SPRITE_ATTR(sproff, 5) = attr | 0x80 | 0x40;
-    } else {
-      SPRITE_ATTR(sproff, 0) = attr;
-      SPRITE_ATTR(sproff, 2) = attr;
-      SPRITE_ATTR(sproff, 4) = attr;
-
-      SPRITE_ATTR(sproff, 1) = attr | 0x40;
-      SPRITE_ATTR(sproff, 3) = attr | 0x40;
-      SPRITE_ATTR(sproff, 5) = attr | 0x40;
-    }
-  }
-
-  if (enemy_id == A_LAKITU) {
-    if (!flip_vert) {
-      SPRITE_ATTR(sproff, 4) &= 0x81;
-      SPRITE_ATTR(sproff, 5) |= 0x41;
-      if (FrenzyEnemyTimer < 0x10) {
-        const byte bVar9 = SPRITE_ATTR(sproff, 5);
-        SPRITE_ATTR(sproff, 3) = bVar9;
-        SPRITE_ATTR(sproff, 2) = bVar9 & 0x81;
-      }
-    } else {
-      SPRITE_ATTR(sproff, 0) &= 0x81;
-      SPRITE_ATTR(sproff, 1) |= 0x41;
-    }
-  }
-
-  if (enemy_id == A_JUMPSPRING) {
-    byte ead = 2;
-#ifdef SMB2J_MODE
-  if (((WorldNumber == 1) || (WorldNumber == 2)) || (WorldNumber == 6)) {
-    ead = 1;
-  }
-#endif
-    SPRITE_ATTR(sproff, 2) = ead | 0x80;
-    SPRITE_ATTR(sproff, 4) = ead | 0x80;
-    SPRITE_ATTR(sproff, 3) = ead | 0xc0;
-    SPRITE_ATTR(sproff, 5) = ead | 0xc0;
-  }
 }
 
 

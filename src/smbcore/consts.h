@@ -155,7 +155,8 @@ enum gfx_table_offsets {
   TOFF_HAMMER_BRO_3=0xb4,
   TOFF_HAMMER_BRO_4=0xba,
 
-  TOFF_PIRANHA_PLANT=0xc0,
+  TOFF_PIRANHA_PLANT_1=0xc0,
+  TOFF_PIRANHA_PLANT_2=0xc6,
 
   TOFF_PODOBOO=0xcc,
 
