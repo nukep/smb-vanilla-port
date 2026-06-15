@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 
-void sync_pointers(void);
+void sync_data(void);
 
 void set_world_and_level(byte world, byte level);
 

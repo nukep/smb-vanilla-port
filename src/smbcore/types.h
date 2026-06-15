@@ -179,6 +179,9 @@ static inline void vram_buffer1_rle(u16 ppu_addr, bool vertical, int count, u8 v
 #define VRAM1_DRAW(ppu_addr, ...) \
   vram_buffer1_draw_int(ppu_addr, false, _VRAM_DRAW_COUNT(__VA_ARGS__), (const int[]){ __VA_ARGS__ })
 
+#define VRAM1_DRAW_VERTICAL(ppu_addr, ...) \
+vram_buffer1_draw_int(ppu_addr, true, _VRAM_DRAW_COUNT(__VA_ARGS__), (const int[]){ __VA_ARGS__ })
+
 #else
 
 #define _VRAM_DRAW_COUNT(...) (sizeof((const u8[]){__VA_ARGS__}) / sizeof(u8))
@@ -187,6 +190,9 @@ static inline void vram_buffer1_rle(u16 ppu_addr, bool vertical, int count, u8 v
 // Assumes no wraparound behavior
 #define VRAM1_DRAW(ppu_addr, ...) \
   vram_buffer1_draw(ppu_addr, false, _VRAM_DRAW_COUNT(__VA_ARGS__), (const u8[]){ __VA_ARGS__ })
+
+#define VRAM1_DRAW_VERTICAL(ppu_addr, ...) \
+  vram_buffer1_draw(ppu_addr, true, _VRAM_DRAW_COUNT(__VA_ARGS__), (const u8[]){ __VA_ARGS__ })
 
 #endif
 

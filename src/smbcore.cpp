@@ -163,7 +163,7 @@ void SMB_ram_finishwrite(struct SMB_state *state) {
   // Set a global variable while accessing the RAM values
   SMB_STATE = state;
 
-  sync_pointers();
+  sync_data();
 }
 
 void SMB_tick(struct SMB_state *state) {

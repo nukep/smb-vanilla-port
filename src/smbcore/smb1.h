@@ -1234,15 +1234,6 @@ bool smb1_PlayerCollisionCore(byte param_1);
 bool smb1_SprObjectCollisionCore(byte param_1,byte param_2);
 #define SprObjectCollisionCore smb1_SprObjectCollisionCore
 
-struct blockbuffer_colli_result smb1_BlockBufferColli_Feet(byte param_1);
-#define BlockBufferColli_Feet smb1_BlockBufferColli_Feet
-
-struct blockbuffer_colli_result smb1_BlockBufferColli_Head(byte param_1);
-#define BlockBufferColli_Head smb1_BlockBufferColli_Head
-
-struct blockbuffer_colli_result smb1_BlockBufferColli_Side(byte param_1);
-#define BlockBufferColli_Side smb1_BlockBufferColli_Side
-
 struct blockbuffer_colli_result smb1_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
 #define BlockBufferCollision smb1_BlockBufferCollision
 
@@ -1377,9 +1368,6 @@ void smb1_GetBubbleOffscreenBits(byte param_1);
 
 void smb1_GetMiscOffscreenBits(byte param_1);
 #define GetMiscOffscreenBits smb1_GetMiscOffscreenBits
-
-byte smb1_GetProperObjOffset(byte param_1,byte param_2);
-#define GetProperObjOffset smb1_GetProperObjOffset
 
 void smb1_GetEnemyOffscreenBits(byte param_1);
 #define GetEnemyOffscreenBits smb1_GetEnemyOffscreenBits

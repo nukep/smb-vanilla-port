@@ -1228,15 +1228,6 @@ bool smb2j_PlayerCollisionCore(byte param_1);
 bool smb2j_SprObjectCollisionCore(byte param_1,byte param_2);
 #define SprObjectCollisionCore smb2j_SprObjectCollisionCore
 
-struct blockbuffer_colli_result smb2j_BlockBufferColli_Feet(byte param_1);
-#define BlockBufferColli_Feet smb2j_BlockBufferColli_Feet
-
-struct blockbuffer_colli_result smb2j_BlockBufferColli_Head(byte param_1);
-#define BlockBufferColli_Head smb2j_BlockBufferColli_Head
-
-struct blockbuffer_colli_result smb2j_BlockBufferColli_Side(byte param_1);
-#define BlockBufferColli_Side smb2j_BlockBufferColli_Side
-
 struct blockbuffer_colli_result smb2j_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
 #define BlockBufferCollision smb2j_BlockBufferCollision
 
@@ -1372,9 +1363,6 @@ void smb2j_GetBubbleOffscreenBits(byte param_1);
 void smb2j_GetMiscOffscreenBits(byte param_1);
 #define GetMiscOffscreenBits smb2j_GetMiscOffscreenBits
 
-byte smb2j_GetProperObjOffset(byte param_1,byte param_2);
-#define GetProperObjOffset smb2j_GetProperObjOffset
-
 void smb2j_GetEnemyOffscreenBits(byte param_1);
 #define GetEnemyOffscreenBits smb2j_GetEnemyOffscreenBits
 
@@ -1500,9 +1488,6 @@ void smb2j_BlowPlayerAround(void);
 
 void smb2j_SimulateWind(void);
 #define SimulateWind smb2j_SimulateWind
-
-void smb2j_ModifyLeavesPos(void);
-#define ModifyLeavesPos smb2j_ModifyLeavesPos
 
 void smb2j_ScreenSubsForFinalRoom(void);
 #define ScreenSubsForFinalRoom smb2j_ScreenSubsForFinalRoom

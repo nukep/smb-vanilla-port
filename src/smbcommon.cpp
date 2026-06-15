@@ -5,10 +5,14 @@
 #include "smbcore/types.h"
 
 
-void sync_pointers(void) {
+void sync_data(void) {
+  // The engine defines some internal data structures
+  // Synchronize them by reading the game RAM
+
   AreaData  = rom_ptr(LOAD_16(AreaData_addr_hi, AreaData_addr_lo));
   EnemyData = rom_ptr(LOAD_16(EnemyData_addr_hi, EnemyData_addr_lo));
   MusicData = rom_ptr(LOAD_16(MusicData_addr_hi, MusicData_addr_lo));
+  PatchCurrentPlayer = CurrentPlayer;
 }
 
 void set_world_and_level(byte world, byte level) {

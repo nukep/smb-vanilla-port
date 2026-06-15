@@ -108,6 +108,9 @@ struct SMB_state {
   const byte *area_data;
   const byte *enemy_data;
   const byte *music_data;
+
+  // For SMB2J
+  byte patch_current_player;
 };
 
 // The singleton SMB_state used during the SMB_tick() invocation. This is considered internal and should not be used by callers of the library.
@@ -183,6 +186,8 @@ static inline void joy2(struct SMB_buttons *buttons) {
 #define AreaData (SMB_STATE->area_data)
 #define EnemyData (SMB_STATE->enemy_data)
 #define MusicData (SMB_STATE->music_data)
+
+#define PatchCurrentPlayer (SMB_STATE->patch_current_player)
 
 static inline const byte * rom_ptr(const u16 addr) {
   if (addr == 0) {

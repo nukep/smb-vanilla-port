@@ -643,10 +643,10 @@ void GameOverMenu(void) {
 
     assert_eq_assumption(ContinueMenuSelect <= 1, true);
 
-    SPRITE_TILE(0, 0) = GameOverCursorData[0];
-    SPRITE_ATTR(0, 0) = GameOverCursorData[1];
-    SPRITE_X(0, 0)    = GameOverCursorData[2];
-    SPRITE_Y(0, 0)    = ContinueMenuSelect == 0 ? 0x77 : 0x8f;
+    SPRITE_TILE(0, 0) = 0x5b;
+    SPRITE_ATTR(0, 0) = 2;
+    SPRITE_X(0, 0)    = 72;
+    SPRITE_Y(0, 0)    = ContinueMenuSelect == 0 ? 119 : 143;
     return;
   }
   if (ContinueMenuSelect != 0) {
@@ -684,30 +684,16 @@ void LoadMarioPhysics(void) {
   // The original game modifies an instruction to "ASL" (restores a bitshift intruction that's there by default)
   PhysicsInstructionOpcode = 0x0e;
 
-  for (int i = 0; i < 7; i++) {
-    JumpMForceData[i] = JumpMForceData_Mario[i];
-  }
-  for (int i = 0; i < 7; i++) {
-    FallMForceData[i] = FallMForceData_Mario[i];
-  }
-  for (int i = 0; i < 3; i++) {
-    FrictionData[i] = FrictionData_Mario[i];
-  }
+  // NES note: This originally updated lookup tables used by PlayerPhysicsSub.
+  // The logic is moved there.
 }
 
 static void LoadLuigiPhysics(void) {
   // The original game modifies an instruction to "RTS" (early-returns from that subroutine)
   PhysicsInstructionOpcode = 0x60;
 
-  for (int i = 0; i < 7; i++) {
-    JumpMForceData[i] = JumpMForceData_Luigi[i];
-  }
-  for (int i = 0; i < 7; i++) {
-    FallMForceData[i] = FallMForceData_Luigi[i];
-  }
-  for (int i = 0; i < 3; i++) {
-    FrictionData[i] = FrictionData_Luigi[i];
-  }
+  // NES note: This originally updated lookup tables used by PlayerPhysicsSub.
+  // The logic is moved there.
 }
 
 
@@ -718,21 +704,22 @@ void PatchPlayerNamePal(void) {
 
   // Note: Inlined the offsets. The code assumes a length of 5 for both names, anyway.
 
+  // Note: The original overwrites the player's palette, which is eventually
+  // used by GetPlayerColors.
+  // This is removed in favor of just checking in GetPlayerColors if Mario or Luigi is playing.
+  // TODO: This subroutine name is now a misnomer. Change it.
+
+  PatchCurrentPlayer = CurrentPlayer;
+
   if (CurrentPlayer == 0) {
     for (int i = 0; i < 5; i++) {
       TopStatusBarLine[i + 3] = PlayerNameMario[i];
       ThankYouMessage[i + 13] = PlayerNameMario[i];
     }
-    for (int i = 0; i < 4; i++) {
-      PlayerColors[i] = PlayerPaletteMario[i];
-    }
   } else {
     for (int i = 0; i < 5; i++) {
       TopStatusBarLine[i + 3] = PlayerNameLuigi[i];
       ThankYouMessage[i + 13] = PlayerNameLuigi[i];
-    }
-    for (int i = 0; i < 4; i++) {
-      PlayerColors[i] = PlayerPaletteLuigi[i];
     }
   }
 }
@@ -784,39 +771,55 @@ void BlowPlayerAround(void) {
 // SM2DATA2+SM2DATA4:c550
 // Signature: [] -> []
 void SimulateWind(void) {
-  byte bVar1;
-  byte bVar2;
+  // TODO: bring in LeavesXPos/LeavesYPos,
+  // figure out a way to accumulate it
 
-  if (WindFlag != 0) {
-    NoiseSoundQueue = 4;
-    ModifyLeavesPos();
-    bVar1 = 0;
-    bVar2 = Enemy_SprDataOffset[6];
-    do {
-      SPRITE_Y(bVar2, 0) = LeavesYPos[bVar1];
-      SPRITE_TILE(bVar2, 0) = LeavesTile[bVar1];
-      SPRITE_ATTR(bVar2, 0) = 0x41;
-      SPRITE_X(bVar2, 0) = LeavesXPos[bVar1];
-      bVar1 += 1;
-      bVar2 = bVar2 + 4;
-      if (bVar1 == 6) {
-        bVar2 = Alt_SprDataOffset[0];
-      }
-    } while (bVar1 != 0xc);
+  // static const byte xpos[12] = {
+  //   0x30, 0x30, 0x30, 0x60, 0x60, 0xa0,
+  //   0xa0, 0xa0, 0xd0, 0xd0, 0xd0, 0x60,
+  // };
+  // static const byte ypos[12] = {
+  //   0x30, 0x70, 0xb8, 0x50, 0x98, 0x30,
+  //   0x70, 0xb8, 0x50, 0x98, 0x30, 0x70,
+  // };
+
+  static const byte tile[12] = {
+    0x7b, 0x7b, 0x7b, 0x7b, 0x7a, 0x7a,
+    0x7b, 0x7b, 0x7b, 0x7a, 0x7b, 0x7a,
+  };
+
+  static const byte posadder[12] = {
+    0x57, 0x57, 0x56, 0x56, 0x58, 0x58,
+    0x56, 0x56, 0x57, 0x58, 0x57, 0x58,
+  };
+
+  if (WindFlag == 0) {
+    return;
   }
-}
 
+  NoiseSoundQueue = 4;
 
-// SM2DATA2+SM2DATA4:c5a1
-// Signature: [] -> []
-void ModifyLeavesPos(void) {
+  // Inlined: ModifyLeavesPos
   for (int i = 0; i < 12; i++) {
     // The carry seems like an oversight in the original game,
     // because the intent is to double the adder for the X axis
     // (The disassembly has two ADC instructions in a row)
-    const byte adder = LeavesPosAdder[i];
+    const byte adder = posadder[i];
     LeavesXPos[i] += adder + adder + CARRY1(LeavesXPos[i], adder);
     LeavesYPos[i] += adder;
+  }
+
+  byte sproff = Enemy_SprDataOffset[6];
+
+  for (int i = 0; i < 12; i++) {
+    SPRITE_Y(sproff, 0) = LeavesYPos[i];
+    SPRITE_TILE(sproff, 0) = tile[i];
+    SPRITE_ATTR(sproff, 0) = SPRATTR_FLIPHORZ | 1;
+    SPRITE_X(sproff, 0) = LeavesXPos[i];
+    sproff = sproff + 4;
+    if (i+1 == 6) {
+      sproff = Alt_SprDataOffset[0];
+    }
   }
 }
 
@@ -973,16 +976,21 @@ void FadeToBlue(void) {
     return;
   }
 
-  for (int i = 0; i < 20; i++) {
-    VRAM_Buffer1[i] = BlueTransPalette[i];
-  }
+  const byte blue_tints[4] = { 0x01, 0x02, 0x11, 0x21 };
 
-  const u8 val = BlueTints[BlueColorOfs];
+  const u8 val = blue_tints[BlueColorOfs];
 
-  VRAM_Buffer1[3 + 0] = val;
-  VRAM_Buffer1[3 + 4] = val;
-  VRAM_Buffer1[3 + 8] = val;
-  VRAM_Buffer1[3 + 12] = val;
+  const byte oldoff = VRAM_Buffer1_Offset;
+
+  VRAM_Buffer1_Offset = 0;
+
+  VRAM1_DRAW(PPU_ADDR_PALETTE_BG(0,0),
+             val, 0x30, 0x0f, 0x0f,
+             val, 0x30, 0x10, 0x00,
+             val, 0x21, 0x12, 0x21,
+             val, 0x27, 0x17, 0x00);
+
+  VRAM_Buffer1_Offset = oldoff;
 
   BlueColorOfs += 1;
 

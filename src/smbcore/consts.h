@@ -172,4 +172,21 @@ enum gfx_table_offsets {
   TOFF_JUMPSPRING_3=0xfc,
 };
 
+
+#ifdef SMB1_MODE
+static const byte BrickQBlockMetatiles[] = {
+  0xc1, 0xc0, 0x5f, 0x60,                   // used by question blocks
+  0x55, 0x56, 0x57, 0x58, 0x59,             // used by ground level types
+  0x5a, 0x5b, 0x5c, 0x5d, 0x5e,             // used by other level types
+};
+#endif
+
+#ifdef SMB2J_MODE
+static const byte BrickQBlockMetatiles[] = {
+  0xc1, 0xc2, 0xc0, 0x5e, 0x5f, 0x60, 0x61, // used by question blocks
+  0x52, 0x53, 0x54, 0x55, 0x56, 0x57,       // used by ground level bricks
+  0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d,       // used by other level bricks
+};
+#endif
+
 #endif
