@@ -158,8 +158,8 @@
 
 // There's a lot of ugly aliasing (overlapping) with VRAM here...
 
-#define VRAM_Data1                       RAMARRAY(0x0300, 0x100)
-#define VRAM_Data2                       RAMARRAY(0x0340, 0x0C0)
+#define VRAM_Data1                       RAMARRAY(0x0300, 0x63)
+#define VRAM_Data2                       RAMARRAY(0x0340, 0xC0)
 
 // Note: crosses into $0400 and a bunch of other variables.
 // This should be of little consequence, because memory is cleared before starting new areas.
@@ -169,6 +169,10 @@
 #define VRAM_Buffer1_Offset              VRAM_Data1[0]
 #define VRAM_Buffer1                     (VRAM_Data1 + 1)
 #define VRAM_Buffer2_Offset              VRAM_Data2[0]
+
+// This is accessed exclusively by the area subroutines.
+// Writes might overwrite the other variables below on level start,
+// but a page clear happens afterwards on SecondaryGameSetup
 #define VRAM_Buffer2                     (VRAM_Data2 + 1)
 
 #define BowserBodyControls               RAM(0x0363)

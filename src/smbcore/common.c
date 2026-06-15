@@ -3151,7 +3151,7 @@ void ProcessCannons(void) {
             Enemy_Flag[i] = 1;
             Enemy_State[i] = 0;
             Enemy_BoundBoxCtrl[i] = 9;
-            Enemy_ID[i] = A_UNK_0x33;
+            Enemy_ID[i] = A_BULLET_BILL_CANNON;
 
             chk_bb = false;
           }
@@ -3160,7 +3160,7 @@ void ProcessCannons(void) {
     }
 
     if (chk_bb) {
-      if (Enemy_ID[i] == A_UNK_0x33) {
+      if (Enemy_ID[i] == A_BULLET_BILL_CANNON) {
         OffscreenBoundsCheck(i);
         if (Enemy_Flag[i] != 0) {
           GetEnemyOffscreenBits(i);
@@ -5104,11 +5104,12 @@ void HandleGroupEnemies(const byte param_1) {
 // SM2MAIN:9398
 // Signature: [X] -> []
 void InitPiranhaPlant(const byte objoff) {
+  // NES note: SMB2J sets EnemyAttributeData[13] to give the plants a different color on hard worlds,
+  // but this port moves the logic into EnemyGfxHandler
+
   #ifdef SMB2J_MODE
-    EnemyAttributeData[13] = 0x22;
     PiranhaPlantCompareOperand = 0x13;
     if ((HardWorldFlag == 0) && (WorldNumber < 3)) {
-      EnemyAttributeData[13] = 0x21;
       PiranhaPlantCompareOperand = 0x21;
     }
   #endif
@@ -6166,6 +6167,9 @@ void MoveFlyingCheepCheep(const byte objoff) {
     Enemy_Y_MoveForce[objoff] = bVar1 + 0x10;
     bVar3 = (byte)(bVar1 + 0x10) >> 4;
   }
+
+  // NES note: this array is ultimately unused by the time Enemy_SprAttrib reaches EnemyGfxHandler.
+  // This array also overflows into code.
   Enemy_SprAttrib[objoff] = FlyCCBPriority[bVar3];
 }
 
@@ -6428,34 +6432,54 @@ void KillAllEnemies(void) {
 }
 
 
+static void EnemyGfxHandler_bowser(const byte objoff, const byte bowser_gfx_flag);
+
+
 // SMB:d17b
 // SM2MAIN:9db0
 // Signature: [X] -> []
 void BowserGfxHandler(const byte objoff) {
-  ProcessBowserHalf(objoff);
-  const char cVar3 = ((Enemy_MovingDir[objoff] & 1) != 0) ? -0x10 : 0x10;
-  Enemy_X_Position[DuplicateObj_Offset] = cVar3 + Enemy_X_Position[objoff];
-  Enemy_Y_Position[DuplicateObj_Offset] = Enemy_Y_Position[objoff] + 8;
-  Enemy_State[DuplicateObj_Offset] = Enemy_State[objoff];
-  Enemy_MovingDir[DuplicateObj_Offset] = Enemy_MovingDir[objoff];
+  assert_eq_assumption(BowserGfxFlag, 0);
 
-  Enemy_ID[DuplicateObj_Offset] = A_BOWSER;
-  ProcessBowserHalf(DuplicateObj_Offset);
-  BowserGfxFlag = 0;
-}
+  // NES note: BowserGfxFlag ($036a) is only used here and the EnemyGfxHandler tree.
+  // It's been optimized away.
+  // Between the increment and its uses, there are no accidental array reads/writes in the original that could access it.
 
+  // Inlined: ProcessBowserHalf
+  // Inlined: RunRetainerObj
 
-// SMB:d1bc
-// SM2MAIN:9df1
-// Signature: [X] -> []
-void ProcessBowserHalf(const byte objoff) {
-  BowserGfxFlag += 1;
-  RunRetainerObj(objoff);
+  // Inlined: RunRetainerObj
+  GetEnemyOffscreenBits(objoff);
+  RelativeEnemyPosition(objoff);
+  EnemyGfxHandler_bowser(objoff, 1);
+
   if (Enemy_State[objoff] == 0) {
     Enemy_BoundBoxCtrl[objoff] = 10;
     GetEnemyBoundBox(objoff);
     PlayerEnemyCollision(objoff);
   }
+
+  const byte dup_objoff = DuplicateObj_Offset;
+
+  const char cVar3 = ((Enemy_MovingDir[objoff] & 1) != 0) ? -0x10 : 0x10;
+  Enemy_X_Position[dup_objoff] = cVar3 + Enemy_X_Position[objoff];
+  Enemy_Y_Position[dup_objoff] = Enemy_Y_Position[objoff] + 8;
+  Enemy_State[dup_objoff] = Enemy_State[objoff];
+  Enemy_MovingDir[dup_objoff] = Enemy_MovingDir[objoff];
+
+  Enemy_ID[dup_objoff] = A_BOWSER;
+
+  GetEnemyOffscreenBits(dup_objoff);
+  RelativeEnemyPosition(dup_objoff);
+  EnemyGfxHandler_bowser(dup_objoff, 2);
+
+  if (Enemy_State[dup_objoff] == 0) {
+    Enemy_BoundBoxCtrl[dup_objoff] = 10;
+    GetEnemyBoundBox(dup_objoff);
+    PlayerEnemyCollision(dup_objoff);
+  }
+
+  assert_eq_assumption(BowserGfxFlag, 0);
 }
 
 
@@ -6748,7 +6772,14 @@ void MovePiranhaPlant(const byte objoff) {
       : PiranhaPlantDownYPos[objoff];
 
     if (TimerControl == 0) {
-      const bool cond1 = (SMB2J_ONLY && EnemyAttributeData[13] == 0x22) || ((FrameCounter & 1) != 0);
+      bool cond1 = (FrameCounter & 1) != 0;
+
+      // NES note: The original SMB2J compared EnemyAttributeData[13],
+      // but it's a value in code that's changed by InitPiranhaPlant.
+      // It's indirectly checking for World 4 or hard worlds.
+#ifdef SMB2J_MODE
+      cond1 |= PiranhaPlantHardMode;
+#endif
 
       if (cond1) {
         Enemy_Y_Position[objoff] += PiranhaPlant_Y_Speed[objoff];
@@ -7426,7 +7457,7 @@ void PlayerEnemyCollision(const byte objoff) {
   }
 #endif
 
-  if ((enemy_id != A_SPINY) && (enemy_id != A_UNK_0x33)) {
+  if ((enemy_id != A_SPINY) && (enemy_id != A_BULLET_BILL_CANNON)) {
     if (!is_actor_enemy(enemy_id)) {
       InjurePlayer();
       return;
@@ -7454,7 +7485,7 @@ void PlayerEnemyCollision(const byte objoff) {
     }
   }
 
-  assert_eq_assumption(is_actor_enemy(enemy_id) || enemy_id == A_UNK_0x33, true);
+  assert_eq_assumption(is_actor_enemy(enemy_id) || enemy_id == A_BULLET_BILL_CANNON, true);
 
   if (StompTimer == 0) {
     bool cond1 = false;
@@ -7520,7 +7551,7 @@ void PlayerEnemyCollision(const byte objoff) {
 
     case A_BULLET_BILL:
     case A_FLYING_CHEEPCHEEP:
-    case A_UNK_0x33:
+    case A_BULLET_BILL_CANNON:
       bVar2 = StompedEnemyPtsData[0];
       cond3 = false;
       break;
@@ -8653,7 +8684,7 @@ void SetStun2(const byte param_1) {
 
   const struct_ncr00 sVar2 = PlayerEnemyDiff(param_1);
 
-  if ((Enemy_ID[param_1] != A_UNK_0x33) && (Enemy_ID[param_1] != A_BULLET_BILL)) {
+  if ((Enemy_ID[param_1] != A_BULLET_BILL_CANNON) && (Enemy_ID[param_1] != A_BULLET_BILL)) {
     Enemy_MovingDir[param_1] = sVar2.n ? 2 : 1;
   }
   Enemy_X_Speed[param_1] = sVar2.n ? -16 : 16;
@@ -9403,342 +9434,702 @@ void DrawPowerUp(const byte objoff) {
 }
 
 
+static inline void draw_enemy_object_2x3(const byte tableoff, const byte sproff,
+                                         const byte xpos, const byte ypos,
+                                         const byte palette,
+                                         const bool draw_behind,
+                                         bool flip_horz,
+                                         const bool flip_vert,
+                                         const bool tall,
+                                         const bool mirror_horz)
+{
+  // Inlined: DrawEnemyObjRow
+
+  const byte attrs = (draw_behind ? SPRATTR_DRAWBEHIND : 0) | palette;
+
+  byte tableoff_tmp = tableoff;
+
+  const byte left_tileidx_1  = EnemyGraphicsTable[tableoff_tmp];
+  const byte right_tileidx_1 = EnemyGraphicsTable[tableoff_tmp + 1];
+  tableoff_tmp += 2;
+  const byte left_tileidx_2  = EnemyGraphicsTable[tableoff_tmp];
+  const byte right_tileidx_2 = EnemyGraphicsTable[tableoff_tmp + 1];
+  tableoff_tmp += 2;
+  const byte left_tileidx_3  = EnemyGraphicsTable[tableoff_tmp];
+  const byte right_tileidx_3 = EnemyGraphicsTable[tableoff_tmp + 1];
+
+  draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
+  draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
+  draw_sprite_row(2, sproff, left_tileidx_3, right_tileidx_3, xpos, ypos, attrs, flip_horz);
+
+  if (flip_vert) {
+    // NES note: If the offset is 254 or 255, this wraparounds the sprite page
+    // because it's incremented before passing to DumpSixSpr.
+    // This port assumes it can't happen.
+    assert_eq_assumption(sproff <= 253, true);
+
+    // Flip all tiles vertically
+    // Inlined: DumpSixSpr
+    const byte tmpattr = SPRITE_ATTR(sproff, 0) | SPRATTR_FLIPVERT;
+    for (int i =  0; i < 6; i++) {
+      SPRITE_ATTR(sproff, i) = tmpattr;
+    }
+
+    if (tall) {
+      SWAP(SPRITE_TILE(sproff, 0), SPRITE_TILE(sproff, 4));
+      SWAP(SPRITE_TILE(sproff, 1), SPRITE_TILE(sproff, 5));
+    } else {
+      const byte bVar2 = SPRITE_calculate_wrap(sproff, 2);
+      SWAP(SPRITE_TILE(bVar2, 0), SPRITE_TILE(sproff, 4));
+      SWAP(SPRITE_TILE(bVar2, 1), SPRITE_TILE(sproff, 5));
+    }
+  }
+
+  if (mirror_horz) {
+    // Do not flip the left column tiles horizontally
+    const byte attr = SPRITE_ATTR(sproff, 0) & ~SPRATTR_FLIPHORZ;
+
+    SPRITE_ATTR(sproff, 0) = attr;
+    SPRITE_ATTR(sproff, 2) = attr;
+    SPRITE_ATTR(sproff, 4) = attr;
+
+    SPRITE_ATTR(sproff, 1) = attr | SPRATTR_FLIPHORZ;
+    SPRITE_ATTR(sproff, 3) = attr | SPRATTR_FLIPHORZ;
+    SPRITE_ATTR(sproff, 5) = attr | SPRATTR_FLIPHORZ;
+  }
+}
+
+
 // SMB:e87d
 // SM2MAIN:b52c
 // Signature: [X] -> []
 void EnemyGfxHandler(const byte objoff) {
-#ifdef SMB2J_MODE
-  EnemyAttributeData[24] = 2;
-  if (((WorldNumber == 1) || (WorldNumber == 2)) || (WorldNumber == 6)) {
-    EnemyAttributeData[24] = 1;
+  // Renders the actor to tiles.
+  // This is heavily refactored and doesn't closely resemble the original machine code.
+  //
+  // The table offsets are inlined because they're highly coupled to the code.
+  // Many assumptions about actor state are made to make the code more approachable.
+  //
+  // Everything is handled on a per-actor basis, instead of the hodge-podge of
+  // spaghetti and tacked-on exceptions that the original did.
+  //
+  // The original would compare table indices, which are derived from Enemy_ID.
+  // This implementation does a more straight-forward comparison to Enemy_ID, to keep it understandable.
+  //   enemy_id -> table_idx
+  //   53 (A_RETAINER)           -> 21
+  //   51 (A_BULLET_BILL_CANNON) -> 8
+  //   50 (A_JUMPSPRING)         -> 24, 25, 26
+  //   *                         -> * (otherwise, keep the same)
+
+  // Note that all Bowser paths have been extracted out to EnemyGfxHandler_bowser.
+  assert_eq_assumption(BowserGfxFlag, 0);
+
+  // right before any array reads could access writes we optimized away
+  assert_eq_assumption(objoff < 0xeb - 0xcf, true);
+
+  const byte enemy_id = Enemy_ID[objoff];
+
+  assert_eq_assumption(is_actor_enemy(enemy_id) || enemy_id == A_JUMPSPRING || enemy_id == A_BULLET_BILL_CANNON || enemy_id == A_RETAINER, true);
+
+  // Note: Enemy_SprAttrib[objoff] is always 0 for EnemyGfxHandler.
+  // RunNormalEnemies sets this to 0 right before calling EnemyGfxHandler. The other non-enemy actor types never assign it to non-zero.
+  // The intent of this variable is to draw sprites behind nametable tiles (with an attribute value of 0x20).
+  // The use of this array is mostly residual, and is only meaningfully used in DrawPowerUp.
+  assume_weak_original(Enemy_SprAttrib[objoff] == 0);
+
+  if (enemy_id == A_PIRANHA_PLANT) {
+    if ((PiranhaPlant_Y_Speed[objoff] < 0x80) && (EnemyFrameTimer[objoff] != 0)) {
+      return;
+    }
   }
-  EnemyAttributeData[25] = EnemyAttributeData[24];
-  EnemyAttributeData[26] = EnemyAttributeData[24];
+
+  // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
+  rEF = enemy_id;
+
+  const byte xpos = Enemy_Rel_XPos;
+  byte ypos = Enemy_Y_Position[objoff];
+
+  const byte sproff = Enemy_SprDataOffset[objoff];
+  const byte interval_timer = EnemyIntervalTimer[objoff];
+  const byte enemy_state = Enemy_State[objoff];
+  const byte st = enemy_state & 0x1f;
+
+  bool flip_horz = (Enemy_MovingDir[objoff] & 2) != 0;
+
+  bool draw_behind = false;
+
+  bool flip_vert = (enemy_state & 0x20) != 0;
+
+  byte tableoff;
+  byte next_tableoff;
+
+  bool mirror_horz = false;
+  byte palette = 1;
+  bool tall = false;
+
+  const bool cond1 = (enemy_state & 0xa0) == 0 && TimerControl == 0;
+
+  switch (enemy_id) {
+  case A_LAKITU:
+    palette = 1;
+    tall = true;
+
+    if (flip_vert || FrenzyEnemyTimer >= 16) {
+      tableoff = TOFF_LAKITU_1;
+    } else {
+      tableoff = TOFF_LAKITU_2;
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
+    if (!flip_vert) {
+      SPRITE_ATTR(sproff, 4) &= ~(SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPHORZ;
+      if (FrenzyEnemyTimer < 16) {
+        const byte bVar9 = SPRITE_ATTR(sproff, 5);
+        SPRITE_ATTR(sproff, 2) = bVar9 & ~(SPRATTR_FLIPHORZ);
+        SPRITE_ATTR(sproff, 3) = bVar9;
+      }
+    } else {
+      SPRITE_ATTR(sproff, 0) &= ~(SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 1) |= SPRATTR_FLIPHORZ;
+    }
+    break;
+
+  case A_SPINY:
+    palette = 2;
+
+    tableoff = TOFF_SPINY_1;
+    next_tableoff = TOFF_SPINY_2;
+
+    if (st == 5) {
+      tableoff = TOFF_SPINY_EGG_1;
+      next_tableoff = TOFF_SPINY_EGG_2;
+      flip_horz = true;
+      mirror_horz = true;
+    }
+
+    assume_weak_original(interval_timer == 0);
+
+    if (cond1) {
+      if ((FrameCounter & 0x8) == 0) {
+        tableoff = next_tableoff;
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
+    if (st == 5) {
+      // Flip right column vertically (effectively rotated 180 degrees)
+      SPRITE_ATTR(sproff, 1) |= 0x80;
+      SPRITE_ATTR(sproff, 3) |= 0x80;
+      SPRITE_ATTR(sproff, 5) |= 0x80;
+    }
+    break;
+
+  case A_GREEN_KOOPA:
+  case A_RED_KOOPA_GREENLIKE:
+  case A_RED_KOOPA:
+    palette = 1;
+
+    if (enemy_id == A_RED_KOOPA || enemy_id == A_RED_KOOPA_GREENLIKE) {
+      palette = 2;
+    }
+
+    tableoff = TOFF_KOOPA_1;
+    next_tableoff = TOFF_KOOPA_2;
+
+    if (st > 1) {
+      tableoff = TOFF_KOOPA_SHELL_UPSIDEDOWN_1;
+      next_tableoff = TOFF_KOOPA_SHELL_UPSIDEDOWN_2;
+    }
+
+    if (st == 4) {
+      tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
+      ypos += 2;
+    }
+
+    flip_vert = false;
+
+    if (st > 1) { mirror_horz = true; }
+
+    if (interval_timer < 5) {
+      if (cond1) {
+        if ((FrameCounter & 0x8) == 0) {
+          tableoff = next_tableoff;
+        }
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
+    if (st == 4) {
+      // Flip bottom two rows vertically
+      SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
+      SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
+
+      SPRITE_ATTR(sproff, 3) |= SPRATTR_FLIPVERT;
+      SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPVERT;
+    }
+
+    break;
+
+#ifdef SMB1_MODE
+  case A_PIRANHA_PLANT_SMB2J:
+    // A glitched version of a koopa
+
+    tableoff = TOFF_KOOPA_1;
+    next_tableoff = TOFF_KOOPA_2;
+    palette = 1;
+
+    if (st == 4) {
+      tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
+      ypos += 2;
+    }
+
+    if (!flip_vert && st > 1) { mirror_horz = true; }
+
+    if (interval_timer < 5) {
+      if (cond1) {
+        if ((FrameCounter & 0x8) == 0) {
+          tableoff = next_tableoff;
+        }
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
+    if (!flip_vert && st == 4) {
+      // Flip bottom two rows vertically
+      SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
+      SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
+
+      SPRITE_ATTR(sproff, 3) |= SPRATTR_FLIPVERT;
+      SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPVERT;
+    }
+
+    break;
 #endif
+
+  case A_BUZZY_BEETLE:
+    palette = 3;
+
+    tableoff = TOFF_BUZZY_BEETLE_1;
+    next_tableoff = TOFF_BUZZY_BEETLE_2;
+
+    if (st > 1) {
+      tableoff = TOFF_BUZZY_BEETLE_SHELL_1;
+      next_tableoff = TOFF_BUZZY_BEETLE_SHELL_2;
+      ypos += 1;
+    }
+
+    if (st == 4) {
+      tableoff = TOFF_BUZZY_BEETLE_SHELL_UPSIDEDOWN_1;
+      next_tableoff = TOFF_BUZZY_BEETLE_SHELL_UPSIDEDOWN_2;
+      ypos += 1;
+    }
+
+    flip_vert = false;
+
+    if (st > 1) { mirror_horz = true; }
+
+    if (interval_timer < 5) {
+      if (cond1) {
+        if ((FrameCounter & 0x8) == 0) {
+          tableoff = next_tableoff;
+        }
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
+    if (st == 4) {
+      // Flip bottom two rows vertically
+      SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
+      SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
+
+      SPRITE_ATTR(sproff, 3) |= SPRATTR_FLIPVERT;
+      SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPVERT;
+    }
+    break;
+
+  case A_GOOMBA:
+    palette = 3;
+
+    tableoff = TOFF_GOOMBA;
+
+    if (flip_vert) {
+      ypos += 2;
+    } else {
+      if (TimerControl == 0 && (FrameCounter & 8) == 0) {
+        // Make the goomba waddle around
+        flip_horz = !flip_horz;
+      }
+
+      if (enemy_state > 1) {
+        tableoff = TOFF_STOMPED_GOOMBA;
+        ypos += 1;
+        mirror_horz = true;
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
+    if (enemy_state > 1) {
+      // Ensure bottom two rows are flipped vertically
+      SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
+      SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
+
+      SPRITE_ATTR(sproff, 3) |= SPRATTR_FLIPVERT;
+      SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPVERT;
+    }
+    break;
+
+  case A_HAMMER_BRO:
+    palette = 1;
+    tall = true;
+
+    tableoff = TOFF_HAMMER_BRO_1;
+    next_tableoff = TOFF_HAMMER_BRO_2;
+
+    assume_weak_original(st != 4);
+
+    if ((enemy_state & 8) != 0) {
+        tableoff = TOFF_HAMMER_BRO_3;
+        next_tableoff = TOFF_HAMMER_BRO_4;
+    }
+
+    if (enemy_state == 0 || (enemy_state & 8) != 0) {
+      if (cond1) {
+        if ((FrameCounter & 0x8) == 0) {
+          tableoff = next_tableoff;
+        }
+      }
+    }
+
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  case A_CHEEPCHEEP_GRAY:
+  case A_CHEEPCHEEP_RED:
+  case A_FLYING_CHEEPCHEEP:
+    palette = 2;
+
+    if (enemy_id == A_CHEEPCHEEP_GRAY) {
+      palette = 1;
+    }
+
+    tableoff = TOFF_CHEEPCHEEP_1;
+    next_tableoff = TOFF_CHEEPCHEEP_2;
+
+    assume_weak_original(st <= 2);
+    assume_weak_original(st != 2 || flip_vert);  // if st == 2 then flip_vert
+
+    if (cond1) {
+      if ((FrameCounter & 0x8) == 0) {
+        tableoff = next_tableoff;
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  case A_BLOOBER:
+    palette = 3;
+
+    tableoff = TOFF_BLOOBER_1;
+    next_tableoff = TOFF_BLOOBER_2;
+
+    assume_weak_original(st <= 2);
+
+    if (interval_timer != 1 && interval_timer < 5) {
+      ypos += 3;
+      if (cond1) {
+        tableoff = next_tableoff;
+      }
+    }
+
+    mirror_horz = true;
+
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  case A_BULLET_BILL_CANNON:
+    // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
+    rEF = 0x8;
+
+    palette = 3;
+
+    tableoff = TOFF_BULLET_BILL;
+
+    ypos -= 1;
+    draw_behind = EnemyFrameTimer[objoff] != 0;
+
+    flip_vert = false;
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  case A_BULLET_BILL:
+    palette = 3;
+
+    tableoff = TOFF_BULLET_BILL;
+
+    draw_behind = false;
+    assume_weak_original(st != 4);
+
+    flip_vert = false;
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  case A_PODOBOO:
+    palette = 2;
+
+    tableoff = TOFF_PODOBOO;
+
+    assume_weak_original(st != 4);
+
+    mirror_horz = true;
+
+    if (Enemy_Y_Speed[objoff] < 0x80) {
+      flip_vert = true;
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  case A_JUMPSPRING:
+    static const byte jumpspring_offsets[5] = {
+      TOFF_JUMPSPRING_1,
+      TOFF_JUMPSPRING_2,
+      TOFF_JUMPSPRING_3,
+      TOFF_JUMPSPRING_2,
+      TOFF_JUMPSPRING_1,
+    };
+    static const byte jumpspring_indices[5] = {
+      0x18, 0x19, 0x1a, 0x19, 0x18
+    };
+
+    assert_eq_assumption(JumpspringAnimCtrl < 5, true);
+    tableoff = jumpspring_offsets[JumpspringAnimCtrl];
+
+    palette = 2;
+    tall = true;
+
+#ifdef SMB2J_MODE
+    if (((WorldNumber == 1) || (WorldNumber == 2)) || (WorldNumber == 6)) {
+      palette = 1;
+    }
+#endif
+
+    // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
+    rEF = jumpspring_indices[JumpspringAnimCtrl];
+
+    mirror_horz = true;
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
+    SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
+    SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
+    SPRITE_ATTR(sproff, 3) |= SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ;
+    SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ;
+    break;
+
+  case A_RETAINER:
+    // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
+    rEF = 0x15;
+
+    flip_horz = false;
+
+    palette = 2;
+    tall = true;
+
+    assume_weak_original(interval_timer == 0);
+    assume_weak_original(!flip_vert);
+
+    if (WorldNumber < 7) {
+      tableoff = TOFF_MUSHROOM_RETAINER;
+      mirror_horz = true;
+    } else {
+      tableoff = TOFF_PRINCESS_OR_DOOR;
+
+      // In SMB2J, it's a door, which has mirrored tiles
+#ifdef SMB2J_MODE
+      mirror_horz = true;
+#endif
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
+#ifdef SMB1_MODE
+  if (WorldNumber == 7) {
+    // Bottom right: flip horizontally
+    SPRITE_ATTR(sproff, 5) ^= 0x40;
+  }
+#endif
+    break;
+
+#ifdef SMB2J_MODE
+  case A_PIRANHA_PLANT_SMB2J:
+
+    flip_vert = true;
+    tall = true;
+#endif
+  case A_PIRANHA_PLANT:
+    tableoff = TOFF_PIRANHA_PLANT_1;
+    next_tableoff = TOFF_PIRANHA_PLANT_2;
+    palette = 1;
+    draw_behind = true;
+
+#ifdef SMB2J_MODE
+    if (PiranhaPlantHardMode) {
+      palette = 2;
+    }
+#endif
+
+    assume_weak_original(st != 4);
+
+    mirror_horz = true;
+
+    assume_weak_original(interval_timer == 0);
+
+    if (cond1) {
+      if ((FrameCounter & 0x8) == 0) {
+        tableoff = next_tableoff;
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  case A_GREEN_PARATROOPA:
+  case A_RED_PARATROOPA:
+  case A_GREEN_PARATROOPA_HORIZONTAL:
+  case A_GREEN_PARATROOPA_INPLACE:
+    tableoff = TOFF_PARATROOPA_1;
+    next_tableoff = TOFF_PARATROOPA_2;
+    palette = 1;
+
+    if (enemy_id == A_RED_PARATROOPA) {
+      palette = 2;
+    }
+
+    assume_weak_original(st != 4);
+
+    if (st == 4) {
+      tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
+      ypos += 2;
+    }
+
+    if (st > 1) { mirror_horz = true; }
+
+    assume_weak_original(!flip_vert);
+    assume_weak_original(interval_timer == 0);
+
+    if (cond1) {
+      if ((FrameCounter & 0x8) == 0) {
+        tableoff = next_tableoff;
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  case A_UNK_0x13:
+    // This is a glitch. table offset and attributes are literally 0xff.
+
+    tableoff = 0xff;
+    next_tableoff = 0x05;
+
+    draw_behind = true;
+    palette = 0xff;
+
+    if (st == 4) {
+      tableoff = TOFF_KOOPA_SHELL_1;
+      next_tableoff = TOFF_KOOPA_SHELL_2;
+      ypos += 2;
+    }
+
+    if (!flip_vert && st > 1) { mirror_horz = true; }
+
+    if (interval_timer < 5) {
+      if (cond1) {
+        if ((FrameCounter & 0x8) == 0) {
+          tableoff = next_tableoff;
+        }
+      }
+    }
+
+    draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+    break;
+
+  default:
+    // Any remaining actors should be unreachable
+    assert_eq_assumption(false, true);
+
+    break;
+  }
+
+  SprObjectOffscrChk(objoff);
+}
+
+static void EnemyGfxHandler_bowser(const byte objoff, const byte bowser_gfx_flag) {
+  // right before any array reads could access writes we optimized away
+  assert_eq_assumption(objoff < 0xeb - 0xcf, true);
+
+  assert_eq_assumption(Enemy_ID[objoff] == A_BOWSER, true);
+
+  assume_weak_original(Enemy_SprAttrib[objoff] == 0);
+
+  const byte xpos = Enemy_Rel_XPos;
+  const bool tall = true;
+  const bool mirror_horz = false;
+  const byte palette = 1;
+  const bool draw_behind = false;
 
   byte ypos = Enemy_Y_Position[objoff];
 
   // sproff @ $eb
   const byte sproff = Enemy_SprDataOffset[objoff];
 
-  VerticalFlipFlag = 0;
-  byte movingdir = Enemy_MovingDir[objoff];
-  byte attrs = Enemy_SprAttrib[objoff];
+  const byte enemy_state = Enemy_State[objoff];
 
-  byte enemy_id = Enemy_ID[objoff];
+  // Bowser can turn upside down in World 8-4
+  const bool flip_vert = (enemy_state & 0x20) != 0;
 
-  if (((enemy_id == A_PIRANHA_PLANT) && (PiranhaPlant_Y_Speed[objoff] < 0x80)) && (EnemyFrameTimer[objoff] != 0)) {
-    return;
-  }
+  const bool flip_horz = (Enemy_MovingDir[objoff] & 2) != 0;
 
-  // tmprEC @ $ec
-  byte tmprEC = Enemy_State[objoff] & 0x1f;
-
-
-  if (enemy_id == A_RETAINER) {
-    tmprEC = 0;
-    movingdir = 1;
-    enemy_id = 0x15;
-  }
-
-  // enemy_state @ $ed
-  const byte enemy_state = enemy_id != A_UNK_0x33 ? Enemy_State[objoff] : 0;
-
-  if (enemy_id == A_UNK_0x33) {
-    ypos -= 1;
-    attrs = (EnemyFrameTimer[objoff] != 0) ? 0x23 : 3;
-    tmprEC = 0;
-    enemy_id = 8;
-  }
-  if (enemy_id == A_JUMPSPRING) {
-    tmprEC = 3;
-    enemy_id = JumpspringFrameOffsets[JumpspringAnimCtrl];
-  }
-  if ((enemy_id == A_PODOBOO) && (Enemy_Y_Speed[objoff] < 0x80)) {
-    VerticalFlipFlag = 1;
-  }
-  if (BowserGfxFlag != 0) {
-    enemy_id = (BowserGfxFlag != 1) ? 0x17 : 0x16;
-  }
-  if (enemy_id == A_GOOMBA) {
-    if (Enemy_State[objoff] > 1) {
-      tmprEC = 4;
-    }
-    if ((((Enemy_State[objoff] & 0x20) | TimerControl) == 0) && ((FrameCounter & 8) == 0)) {
-      movingdir ^= 3;
-    }
-  }
-  attrs = EnemyAttributeData[enemy_id] | attrs;
-  byte tableoff = EnemyGfxTableOffsets[enemy_id];
-
-  if (BowserGfxFlag != 0) {
-    if (BowserGfxFlag == 1) {
-      if (BowserBodyControls >= 0x80) {
-        tableoff = 0xde;
-      }
-    } else {
-      if ((BowserBodyControls & 1) != 0) {
-        tableoff = 0xe4;
-      }
-      if ((enemy_state & 0x20) != 0) {
-        ypos -= 0x10;
-      }
-    }
-    if ((enemy_state & 0x20) != 0) {
-      VerticalFlipFlag = tableoff;
-    }
-    // DrawBowser
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, movingdir, objoff, sproff, tmprEC, enemy_id);
-    return;
-  }
-
-  if (tableoff == 0x90) {
-    if (((enemy_state & 0x20) == 0) && (FrenzyEnemyTimer < 0x10)) {
-      tableoff = 0x96;
-    }
-    goto CheckDefeatedState;
-  } else if (tableoff == 0x24) {
-    if (tmprEC == 5) {
-      tableoff = 0x30;
-      movingdir = 2;
-      tmprEC = 5;
-    }
-  } else {
-    if (tmprEC > 1) {
-      switch (enemy_id) {
-      case A_GREEN_KOOPA:
-      case A_RED_KOOPA_GREENLIKE:
-      case A_RED_KOOPA:
-        tableoff = 0x5a;
-        break;
-
-      case A_BUZZY_BEETLE:
-        tableoff = 0x7e;
-        ypos += 1;
-        break;
-      }
-    }
-
-    if (tmprEC == 4) {
-      switch (enemy_id) {
-      case A_GOOMBA:
-        if ((enemy_state & 0x20) == 0) {
-          tableoff = 0x8a;
-          ypos += 1;
-        } else {
-          tableoff = 0x54;
-          ypos += 2;
-        }
-        break;
-
-      case A_BUZZY_BEETLE:
-        tableoff = 0x72;
-        ypos += 1;
-        break;
-
-      default:
-        tableoff = 0x66;
-        ypos += 2;
-        break;
-      }
-    }
-  }
-
-  {
-    bool check_to_animate_enemy = false;
-    bool add_tableoff = true;
-
-    if (enemy_id == A_HAMMER_BRO) {
-      if (enemy_state != 0) {
-        if ((enemy_state & 8) == 0) {
-          add_tableoff = false;
-        } else {
-          tableoff = 0xb4;
-          check_to_animate_enemy = true;
-        }
-      } else {
-        check_to_animate_enemy = true;
-      }
-    } else if (tableoff == 0x48) {
-      check_to_animate_enemy = true;
-    } else if (EnemyIntervalTimer[objoff] >= 5) {
-      add_tableoff = false;
-    } else if (tableoff != 0x3c) {
-      check_to_animate_enemy = true;
-    } else if (EnemyIntervalTimer[objoff] == 1) {
-      add_tableoff = false;
-    } else {
-      ypos += 3;
-    }
-
-    if (check_to_animate_enemy) {
-      if ((enemy_id == A_GOOMBA) || (enemy_id == A_BULLET_BILL) || (enemy_id == A_PODOBOO) || (is_actor_unknown_class(enemy_id))) {
-        add_tableoff = false;
-      } else if (enemy_id == A_BOWSER_FLAME) {
-        if (ssw(WorldNumber < 7, true)) {
-          tmprEC = 3;
-        }
-        if (WorldNumber < 7) {
-          tableoff = 0xa2;
-        }
-        add_tableoff = false;
-      } else if ((FrameCounter & 0x8) != 0) {
-        add_tableoff = false;
-      }
-    }
-
-    if (add_tableoff) {
-      if ((enemy_state & 0xa0) == 0) {
-        if (TimerControl == 0) {
-          tableoff += 6;
-        }
-      }
-    }
-  }
-
-
-CheckDefeatedState:
-
-  bool rightside_up = (enemy_state & 0x20) == 0;
-
-  rightside_up |= enemy_id == A_GREEN_KOOPA || enemy_id == A_RED_KOOPA_GREENLIKE || enemy_id == A_BUZZY_BEETLE || enemy_id == A_RED_KOOPA;
-
-#ifdef SMB2J_MODE
-  if (enemy_id == A_PIRANHA_PLANT_SMB2J) {
-    rightside_up = false;
-  }
-#endif
-
-  if (rightside_up) {
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, movingdir, objoff, sproff, tmprEC, enemy_id);
-  } else {
-    VerticalFlipFlag = 1;
-    DrawEnemyObject(tableoff, Enemy_Rel_XPos, ypos, attrs, movingdir, objoff, sproff, 0, enemy_id);
-  }
-}
-
-
-// SMB:ea4b
-// SM2MAIN:b71b
-// Signature: [X, r05, r02, r04, r03, r08, rEB, rEC, rEF] -> []
-void DrawEnemyObject(const byte tableoff, const byte xpos, const byte ypos, const byte attrs, const byte movingdir,
-    const byte objoff,
-    const byte sproff, const byte tmprEC, const byte enemy_id) {
-  {
-    // Inlined: DrawEnemyObjRow
-
-    byte tableoff_tmp = tableoff;
-
-    const byte left_tileidx_1  = EnemyGraphicsTable[tableoff_tmp];
-    const byte right_tileidx_1 = EnemyGraphicsTable[tableoff_tmp + 1];
-    tableoff_tmp += 2;
-    const byte left_tileidx_2  = EnemyGraphicsTable[tableoff_tmp];
-    const byte right_tileidx_2 = EnemyGraphicsTable[tableoff_tmp + 1];
-    tableoff_tmp += 2;
-    const byte left_tileidx_3  = EnemyGraphicsTable[tableoff_tmp];
-    const byte right_tileidx_3 = EnemyGraphicsTable[tableoff_tmp + 1];
-
-    const bool flip_horz = (movingdir & 2) != 0;
-
-    draw_sprite_row(0, sproff, left_tileidx_1, right_tileidx_1, xpos, ypos, attrs, flip_horz);
-    draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
-    draw_sprite_row(2, sproff, left_tileidx_3, right_tileidx_3, xpos, ypos, attrs, flip_horz);
-  }
+  byte tableoff;
 
   // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
-  rEF = enemy_id;
+  rEF = (bowser_gfx_flag == 1) ? 0x16 : 0x17;
 
-  const byte bVar3 = Enemy_SprDataOffset[objoff];
-
-  if (enemy_id == A_BULLET_BILL) {
-    SprObjectOffscrChk(objoff);
-    return;
-  }
-
-  if (VerticalFlipFlag != 0) {
-    // NES note: If the offset is 254 or 255, this wraparounds the sprite page
-    // because it's incremented before passing to DumpSixSpr.
-    // This port assumes it can't happen.
-    assert_eq_assumption(bVar3 <= 253, true);
-
-    const byte tmpattr = SPRITE_ATTR(bVar3, 0) | 0x80;
-
-    // Inlined: DumpSixSpr
-    for (int i =  0; i < 6; i++) {
-      SPRITE_ATTR(bVar3, i) = tmpattr;
+  if (bowser_gfx_flag == 1) {
+    tableoff = TOFF_BOWSER_FRONT_1;
+    if ((BowserBodyControls & 0x80) != 0) {
+      // Close Bowser's mouth
+      tableoff = TOFF_BOWSER_FRONT_2;
+    }
+  } else {
+    tableoff = TOFF_BOWSER_REAR_1;
+    if ((BowserBodyControls & 1) != 0) {
+      // Make Bowser's feet stomp
+      tableoff = TOFF_BOWSER_REAR_2;
     }
 
-    byte bVar2 = bVar3;
-    if ((enemy_id != A_HAMMER_BRO) && ssw(true, (enemy_id != A_PIRANHA_PLANT_SMB2J)) && (enemy_id != A_LAKITU) && is_actor_enemy(enemy_id)) {
-      bVar2 = SPRITE_calculate_wrap(bVar3, 2);
+    if (flip_vert) {
+      ypos -= 0x10;
     }
-
-    SWAP(SPRITE_TILE(bVar2, 0), SPRITE_TILE(bVar3, 4));
-    SWAP(SPRITE_TILE(bVar2, 1), SPRITE_TILE(bVar3, 5));
   }
 
-  if (BowserGfxFlag != 0) {
-    SprObjectOffscrChk(objoff);
-    return;
-  }
-  if (enemy_id == A_HAMMER_BRO) {
-    SprObjectOffscrChk(objoff);
-    return;
-  }
-  if ((enemy_id != A_BLOOBER) && (enemy_id != A_PIRANHA_PLANT) && ssw(true, (enemy_id != A_PIRANHA_PLANT_SMB2J)) && (enemy_id != A_PODOBOO)) {
-    if ((enemy_id == A_SPINY) && (tmprEC != 5)) {
-      goto CheckToMirrorLakitu;
-    }
-    if (enemy_id == A_BOWSER_FLAME) {
-      SPRITE_ATTR(bVar3, 5) = 0x42;
-    }
-    if (tmprEC < 2) {
-      goto CheckToMirrorLakitu;
-    }
-  }
-  if (BowserGfxFlag == 0) {
-    const byte bVar4 = SPRITE_ATTR(bVar3, 0) & 0xa3;
-    SPRITE_ATTR(bVar3, 0) = bVar4;
-    SPRITE_ATTR(bVar3, 2) = bVar4;
-    SPRITE_ATTR(bVar3, 4) = bVar4;
-    byte bVar1 = bVar4 | 0x40;
-    if (tmprEC == 5) {
-      bVar1 = bVar4 | 0xc0;
-    }
-    SPRITE_ATTR(bVar3, 1) = bVar1;
-    SPRITE_ATTR(bVar3, 3) = bVar1;
-    SPRITE_ATTR(bVar3, 5) = bVar1;
-    if (tmprEC == 4) {
-      const byte bVar9 = SPRITE_ATTR(bVar3, 2);
-      SPRITE_ATTR(bVar3, 2) = bVar9 | 0x80;
-      SPRITE_ATTR(bVar3, 4) = bVar9 | 0x80;
-      SPRITE_ATTR(bVar3, 3) = bVar9 | 0xc0;
-      SPRITE_ATTR(bVar3, 5) = bVar9 | 0xc0;
-    }
-  }
-CheckToMirrorLakitu:
-  if (enemy_id == A_LAKITU) {
-    if (VerticalFlipFlag == 0) {
-      SPRITE_ATTR(bVar3, 4) &= 0x81;
-      SPRITE_ATTR(bVar3, 5) |= 0x41;
-      if (FrenzyEnemyTimer < 0x10) {
-        const byte bVar9 = SPRITE_ATTR(bVar3, 5);
-        SPRITE_ATTR(bVar3, 3) = bVar9;
-        SPRITE_ATTR(bVar3, 2) = bVar9 & 0x81;
-      }
-      SprObjectOffscrChk(objoff);
-      return;
-    }
-    SPRITE_ATTR(bVar3, 0) = SPRITE_ATTR(bVar3, 0) & 0x81;
-    SPRITE_ATTR(bVar3, 1) = SPRITE_ATTR(bVar3, 1) | 0x41;
-  }
-  if (is_actor_unknown_class(enemy_id)) {
-    const byte ead = ssw(0x02, EnemyAttributeData[24]);
-    SPRITE_ATTR(bVar3, 2) = ead | 0x80;
-    SPRITE_ATTR(bVar3, 4) = ead | 0x80;
-    SPRITE_ATTR(bVar3, 3) = ead | 0xc0;
-    SPRITE_ATTR(bVar3, 5) = ead | 0xc0;
-  }
+  draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
+
   SprObjectOffscrChk(objoff);
 }
 

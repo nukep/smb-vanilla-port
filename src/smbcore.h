@@ -46,6 +46,13 @@ static inline NORETURN void jmpengine_overflow(byte index) {
 #define assert_eq_assumption(expected, actual) assert((expected) == (actual))
 #define assert_eq_regressiontest(expected, actual) assert((expected) == (actual))
 
+// Expected behavior in the original. Won't fatally break the game if it's false. Mostly there to give a heads-up to anyone modifying the code.
+// Code may rely on the assumption.
+// These are conditions that could be relaxed for things like enhancements to the game.
+#define assume_weak_original(truthy) { \
+  if (!(truthy)) { warning("Behavior differs from expectation. %s:%d:%s: assume_weak_original(%s)\n", __FILE__, __LINE__, __func__, #truthy); } \
+}
+
 #define assert_unreachable() assert(0)
 
 

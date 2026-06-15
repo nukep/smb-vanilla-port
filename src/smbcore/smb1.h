@@ -970,9 +970,6 @@ void smb1_KillAllEnemies(void);
 void smb1_BowserGfxHandler(byte param_1);
 #define BowserGfxHandler smb1_BowserGfxHandler
 
-void smb1_ProcessBowserHalf(byte param_1);
-#define ProcessBowserHalf smb1_ProcessBowserHalf
-
 byte smb1_SetFlameTimer(void);
 #define SetFlameTimer smb1_SetFlameTimer
 
@@ -1269,9 +1266,6 @@ void smb1_DrawPowerUp(byte objoff);
 
 void smb1_EnemyGfxHandler(byte param_1);
 #define EnemyGfxHandler smb1_EnemyGfxHandler
-
-void smb1_DrawEnemyObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8,byte param_9);
-#define DrawEnemyObject smb1_DrawEnemyObject
 
 void smb1_SprObjectOffscrChk(byte objoff);
 #define SprObjectOffscrChk smb1_SprObjectOffscrChk

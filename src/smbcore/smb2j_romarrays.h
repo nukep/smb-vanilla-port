@@ -12,6 +12,9 @@
 // The original game modifies an instruction operand
 #define PiranhaPlantCompareOperand       RAM(0x9ffe)
 
+// If in World 4+, or the hard worlds
+#define PiranhaPlantHardMode (PiranhaPlantCompareOperand != 0x21)
+
 #define GamesBeatenCount                 RAM(0xD29F)
 
 #define VRAM_AddrTable                   RAMARRAY_CONST(0x6060, 62)
@@ -164,7 +167,6 @@
 #define EnemyGraphicsTable               RAMARRAY_CONST(0xB3ED, 258)
 #define EnemyGfxTableOffsets             RAMARRAY_CONST(0xB4EF, 27)
 #define EnemyAttributeData               RAMARRAY(0xB50A, 27)
-#define JumpspringFrameOffsets           RAMARRAY_CONST(0xB527, 5)
 #define DefaultBlockObjTiles             RAMARRAY_CONST(0xB8A8, 4)
 #define ExplosionTiles                   RAMARRAY_CONST(0xB9E1, 3)
 #define PlayerGfxTblOffsets              RAMARRAY_CONST(0xBAE2, 16)
