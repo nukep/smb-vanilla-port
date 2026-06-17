@@ -63,7 +63,6 @@ static void Hidden1UpBlock(byte param_1, byte param_2);
 static void QuestionBlock(byte param_1, byte param_2);
 static void BrickWithCoins(byte param_1, byte param_2);
 static void BrickWithItem(byte param_1, byte param_2);
-static byte GetAreaObjectID(byte param_1);
 static void Hole_Empty(byte param_1);
 static byte RenderUnderPart(byte param_1, byte param_2, byte param_3);
 static struct_ycr07 ChkLrgObjLength(byte param_1);
@@ -1371,8 +1370,7 @@ void Hidden1UpBlock(const byte param_1, const byte param_2) {
 // SM2MAIN:7957
 // Signature: [X, r00] -> []
 void QuestionBlock(const byte param_1, const byte param_2) {
-  const byte bVar1 = GetAreaObjectID(param_2);
-  const byte bStack0000 = BrickQBlockMetatiles[bVar1];
+  const byte bStack0000 = BrickQBlockMetatiles[param_2];
   const struct_yr07 sVar2 = GetLrgObjAttrib(param_1);
   RenderUnderPart(bStack0000, sVar2.r07, 0);
 }
@@ -1391,21 +1389,14 @@ void BrickWithCoins(const byte param_1, const byte param_2) {
 // SM2MAIN:7962
 // Signature: [X, r00] -> []
 void BrickWithItem(const byte param_1, const byte param_2) {
-  const byte bVar2 = GetAreaObjectID(param_2);
   char cVar1 = 0;
   if (AreaType != 1) {
     cVar1 = ssw(5, 6);
   }
-  const byte bStack0000 = BrickQBlockMetatiles[(byte)(cVar1 + bVar2)];
+  const byte bStack0000 = BrickQBlockMetatiles[(byte)(cVar1 + param_2)];
   const struct_yr07 sVar3 = GetLrgObjAttrib(param_1);
   RenderUnderPart(bStack0000, sVar3.r07, 0);
 }
-
-
-// SMB:9b36
-// SM2MAIN:797f
-// Signature: [r00] -> [Y]
-byte GetAreaObjectID(const byte param_1) { return param_1; }
 
 
 // SMB:9b41
