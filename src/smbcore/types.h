@@ -10,7 +10,6 @@
 #define BUTTON_L 0x02
 #define BUTTON_R 0x01
 
-#define BLOCK_BUFFER_PAGE 0x0500
 #define BLOCK_BUFFER_1_OFFSET 0x00
 #define BLOCK_BUFFER_2_OFFSET 0xd0
 
@@ -211,14 +210,71 @@ vram_buffer1_draw_int(ppu_addr, true, _VRAM_DRAW_COUNT(__VA_ARGS__), (const int[
 // The status bar takes up this many metatiles worth of space
 #define MT_Y_TOP_MARGIN 2
 
-static inline u16 get_block_buffer_offset(u8 column) {
-  // column is between 0 and 31 inclusive
+static inline u16 MTX_MTY_TO_BLOCKOFF(const u16 mt_x, const u16 mt_y) {
+  const u16 off = (mt_x % 32) < 16 ? BLOCK_BUFFER_1_OFFSET : BLOCK_BUFFER_2_OFFSET;
 
-  if (column < 16) {
-    return BLOCK_BUFFER_1_OFFSET + (column % 16);
+  return off + (mt_x % 16) + (mt_y & 0xf) * 16;
+}
+
+static inline u8 MTX_TO_R06(const u16 mt_x) {
+  return MTX_MTY_TO_BLOCKOFF(mt_x, 0);
+}
+
+static inline u16 R06_TO_MTX_lossy(const u8 r06) {
+  if (r06 < BLOCK_BUFFER_2_OFFSET) {
+    return r06;
   } else {
-    return BLOCK_BUFFER_2_OFFSET + (column % 16);
+    return 16 + r06 - BLOCK_BUFFER_2_OFFSET;
   }
+}
+
+static inline u8 get_metatile(const u16 mt_x, const u16 mt_y) {
+  const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
+
+  if (blockoff >= 0x1a0) {
+    // Block_Buffers overlaps with other variables, and they're accidentally accessed regularly.
+    // This access would be out of bounds
+    // Read whichever variable would be read in the original memory layout
+
+    // cannot be >= 0x1d0
+    assert_eq_assumption(blockoff < 0x1d0, true);
+
+#define X(addr, var) if (blockoff == (addr)-0x500) { return var; }
+#define XARRAY(addr, var) if (blockoff >= (addr)-0x500) { return var[blockoff - ((addr) - 0x500)]; }
+
+    // mt_y = 15
+
+    X(0x06CF, DuplicateObj_Offset);
+    X(0x06CE, FireballCounter);
+    X(0x06CD, EnemyFrenzyQueue);
+    X(0x06CC, SecondaryHardMode);
+    X(0x06CB, EnemyFrenzyBuffer);
+
+    // mt_y = 14
+
+    XARRAY(0x06BE, Misc_Collision_Flag);
+    X(0x06BC, BrickCoinTimerFlag);
+    X(0x06B7, JumpCoinMiscOffset);
+
+    // mt_y = 13
+
+    XARRAY(0x06AE, HammerEnemyOffset);
+    XARRAY(0x06A1, MetatileBuffer);
+    X(0x06A0, BlockBufferColumnPos);
+
+#undef XARRAY
+#undef X
+
+  }
+  return Block_Buffers[blockoff];
+}
+
+static inline void set_metatile(const u16 mt_x, const u16 mt_y, const u8 metatile) {
+  const u16 blockoff = MTX_MTY_TO_BLOCKOFF(mt_x, mt_y);
+  if (blockoff >= 0x1a0) {
+    warning("SET METATILE OVERFLOW: (%d,%d) <- 0x%02X\n", mt_x, mt_y, metatile);
+  }
+  Block_Buffers[blockoff] = metatile;
 }
 
 

@@ -421,15 +421,14 @@ void AreaParserCore(void) {
   ProcessAreaData();
 
   // Inlined: GetBlockBufferAddr
-  // Did it this way to use the Block_Buffers array directly
 
-  const u16 offset = get_block_buffer_offset(BlockBufferColumnPos);
+  const u16 mt_x = BlockBufferColumnPos;
 
   for (int i = 0; i < 13; i++) {
     const byte mt = MetatileBuffer[i];
     const bool cond = mt >= BlockBuffLowBounds[mt >> 6];
 
-    Block_Buffers[offset + (i*0x10)] = cond ? mt : 0;
+    set_metatile(mt_x, i, cond ? mt : 0);
   }
 }
 

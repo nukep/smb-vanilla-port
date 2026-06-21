@@ -32,14 +32,6 @@ struct struct_axyz {
 };
 
 
-typedef struct struct_nr00 struct_nr00;
-
-struct struct_nr00 {
-  bool n;
-  byte r00;
-};
-
-
 typedef struct struct_ncr00 struct_ncr00;
 
 struct struct_ncr00 {
@@ -96,7 +88,6 @@ struct struct_ay {
 
 struct blockbuffer_colli_result {
   byte a;
-  bool z;
   byte r04;
 
   u16 mt_x;
@@ -110,28 +101,6 @@ struct struct_axy {
   byte a;
   byte x;
   byte y;
-};
-
-
-typedef struct struct_axz struct_axz;
-
-struct struct_axz {
-  byte a;
-  byte x;
-  bool z;
-};
-
-
-typedef struct struct_axzr02r04r06r07 struct_axzr02r04r06r07;
-
-struct struct_axzr02r04r06r07 {
-  byte a;
-  byte x;
-  bool z;
-  byte r02;
-  byte r04;
-  byte r06;
-  byte r07;
 };
 
 
@@ -164,17 +133,6 @@ typedef struct struct_azr04 struct_azr04;
 
 struct struct_azr04 {
   byte a;
-  bool z;
-  byte r04;
-};
-
-
-typedef struct struct_axzr04 struct_axzr04;
-
-struct struct_axzr04 {
-  byte a;
-  byte x;
-  bool z;
   byte r04;
 };
 
@@ -1189,9 +1147,6 @@ void smb1_HammerBroBGColl(byte param_1);
 void smb1_KillEnemyAboveBlock(byte param_1);
 #define KillEnemyAboveBlock smb1_KillEnemyAboveBlock
 
-struct_azr04 smb1_ChkUnderEnemy(byte param_1);
-#define ChkUnderEnemy smb1_ChkUnderEnemy
-
 bool smb1_ChkForNonSolids(byte param_1);
 #define ChkForNonSolids smb1_ChkForNonSolids
 
@@ -1236,6 +1191,9 @@ bool smb1_SprObjectCollisionCore(byte param_1,byte param_2);
 
 struct blockbuffer_colli_result smb1_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
 #define BlockBufferCollision smb1_BlockBufferCollision
+
+struct blockbuffer_colli_result smb1_BlockBufferCollision_coords(byte param_1,byte param_2,byte param_3);
+#define BlockBufferCollision_coords smb1_BlockBufferCollision_coords
 
 void smb1_DrawVine(byte param_1);
 #define DrawVine smb1_DrawVine

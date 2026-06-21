@@ -22,14 +22,6 @@ struct struct_xr00r01 {
 };
 
 
-typedef struct struct_nr00 struct_nr00;
-
-struct struct_nr00 {
-  bool n;
-  byte r00;
-};
-
-
 typedef struct struct_ncr00 struct_ncr00;
 
 struct struct_ncr00 {
@@ -69,7 +61,6 @@ struct struct_ayr02r04r06r07 {
 
 struct blockbuffer_colli_result {
   byte a;
-  bool z;
   byte r04;
 
   u16 mt_x;
@@ -90,17 +81,6 @@ typedef struct struct_azr04 struct_azr04;
 
 struct struct_azr04 {
   byte a;
-  bool z;
-  byte r04;
-};
-
-
-typedef struct struct_axzr04 struct_axzr04;
-
-struct struct_axzr04 {
-  byte a;
-  byte x;
-  bool z;
   byte r04;
 };
 
@@ -113,14 +93,6 @@ struct struct_axyz {
   byte y;
   bool z;
 };
-
-typedef struct struct_az struct_az;
-
-struct struct_az {
-  byte a;
-  bool z;
-};
-
 
 typedef struct struct_ayz struct_ayz;
 
@@ -145,15 +117,6 @@ struct struct_axy {
   byte a;
   byte x;
   byte y;
-};
-
-
-typedef struct struct_axz struct_axz;
-
-struct struct_axz {
-  byte a;
-  byte x;
-  bool z;
 };
 
 
@@ -1183,9 +1146,6 @@ void smb2j_HammerBroBGColl(byte param_1);
 void smb2j_KillEnemyAboveBlock(byte param_1);
 #define KillEnemyAboveBlock smb2j_KillEnemyAboveBlock
 
-struct_azr04 smb2j_ChkUnderEnemy(byte param_1);
-#define ChkUnderEnemy smb2j_ChkUnderEnemy
-
 bool smb2j_ChkForNonSolids(byte param_1);
 #define ChkForNonSolids smb2j_ChkForNonSolids
 
@@ -1230,6 +1190,9 @@ bool smb2j_SprObjectCollisionCore(byte param_1,byte param_2);
 
 struct blockbuffer_colli_result smb2j_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
 #define BlockBufferCollision smb2j_BlockBufferCollision
+
+struct blockbuffer_colli_result smb2j_BlockBufferCollision_coords(byte param_1,byte param_2,byte param_3);
+#define BlockBufferCollision_coords smb2j_BlockBufferCollision_coords
 
 void smb2j_DrawVine(byte param_1);
 #define DrawVine smb2j_DrawVine

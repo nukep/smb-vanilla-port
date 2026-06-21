@@ -1028,34 +1028,42 @@ void EraseLivesLines(void) {
 // Signature: [] -> []
 void RunMushroomRetainers(void) {
   MushroomRetainersForW8();
-  if (Block_Buffers[BLOCK_BUFFER_2_OFFSET + 0x38] == 0) {
-    if (HardWorldFlag != 0) {
-      RAM(0x611d) = 0xa0;
-      DiskIOTask = 0;
-      OperMode_Task = 0;
-      if ((HardWorldFlag == 0) && (CompletedWorlds == 0xff)) {
-        CompletedWorlds = 0;
-        NumberofLives = 0;
-        FantasyW9MsgFlag = 0;
-        AreaNumber = 0;
-        LevelNumber = 0;
-        OperMode_Task = 0;
-        WorldNumber += 1;
-        if (WorldNumber >= 8) {
-          WorldNumber = 8;
-        }
-        LoadAreaPointer();
-        FetchNewGameTimerFlag = FetchNewGameTimerFlag + 1;
-        OperMode = 1;
-        return;
-      }
-      CompletedWorlds = 0;
-      OperMode = 0;
-      TitleScreenMode();
-      return;
-    }
-    OperMode_Task += 1;
+
+  // The "absolute" x coordinate is not put in here, but it's on an odd page (+ 16).
+  const u16 mt_x = 16 + 8;
+  const u16 mt_y = 3;
+
+  if (get_metatile(mt_x, mt_y) != 0) {
+    return;
   }
+
+  if (HardWorldFlag == 0) {
+    OperMode_Task += 1;
+    return;
+  }
+
+  RAM(0x611d) = 0xa0;
+  DiskIOTask = 0;
+  OperMode_Task = 0;
+  if ((HardWorldFlag == 0) && (CompletedWorlds == 0xff)) {
+    CompletedWorlds = 0;
+    NumberofLives = 0;
+    FantasyW9MsgFlag = 0;
+    AreaNumber = 0;
+    LevelNumber = 0;
+    OperMode_Task = 0;
+    WorldNumber += 1;
+    if (WorldNumber >= 8) {
+      WorldNumber = 8;
+    }
+    LoadAreaPointer();
+    FetchNewGameTimerFlag = FetchNewGameTimerFlag + 1;
+    OperMode = 1;
+    return;
+  }
+  CompletedWorlds = 0;
+  OperMode = 0;
+  TitleScreenMode();
 }
 
 
