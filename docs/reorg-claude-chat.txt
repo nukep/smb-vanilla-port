@@ -1,0 +1,826 @@
+(technically an AI-generated doc)
+
+ ▐▛███▜▌   Claude Code v2.1.186
+▝▜█████▛▘  anthropic/claude-4.6-sonnet-20260217 · API Usage Billing
+  ▘▘ ▝▝    ~/repos/smb-vanilla-port
+
+
+❯ Suggest a plan to reorganize the code. Read docs/reorg.txt for my notes. Do   
+  NOT read common.c, area.c, smb1only.c, or smb2jonly.c - they are too large    
+  and their implementations do not affect the overall design. if you need       
+  function signatures, read the header files instead.                           
+
+  Thought for 3s (ctrl+o to expand)
+
+● I'll read your notes and explore the codebase structure to build a solid
+  reorganization plan.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Let me read the header files to understand the current interfaces and types.
+
+  Read 5 files (ctrl+o to expand)
+
+● Now let me read the remaining relevant headers.
+
+  Thought for 3s, read 6 files, listed 1 directory (ctrl+o to expand)
+
+● Now I have a solid picture of the codebase. Let me also glance at the PPU
+  header and the docs/decisions file.
+
+  Thought for 2m 27s, read 3 files (ctrl+o to expand)
+
+● Here's a reorganization plan based on your notes and the actual code:
+
+  ---
+  Reorganization Plan
+
+  Problem Summary
+
+  All three drawbacks in reorg.txt stem from the same root: the game engine code
+  (common.c, area.c, etc.) is tightly coupled to SMB_STATE and callbacks
+  through macros defined in smbcore.h. The #included .c files are a symptom of
+  this — they can't be compiled separately because they depend on context
+  (SMB1_MODE, RAM, draw_tile, etc.) injected by the including translation unit.
+
+  ---
+  Proposed Structure
+
+  Step 1: Extract an interface layer (smbcore/interface.h)
+
+  Split smbcore.h into two concerns:
+
+  - smbcore.h — keep utility types, math macros (LOAD_16, ADD_16_16, etc.),
+  ppureg/ppu_state/sprite structs, and non-interface helpers. No references to
+  SMB_STATE.
+  - smbcore/interface.h — new file, selected at build time. Defines the macros
+  the game code actually uses to touch hardware: RAM, PPURAM, CHRROM, AreaData,
+  EnemyData, draw_tile, apu_write_register, joy1, joy2, etc.
+
+  Two reference implementations:
+
+  ┌───────────────────────────────┬──────────────────────────────────────────┐
+  │             File              │               Description                │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │                               │ Current behavior: all macros go through  │
+  │ smbcore/interface_callbacks.h │ SMB_STATE->... and                       │
+  │                               │ SMB_STATE->callbacks.*                   │
+  ├───────────────────────────────┼──────────────────────────────────────────┤
+  │                               │ Embedded-friendly: macros resolve to     │
+  │ smbcore/interface_globals.h   │ global arrays/variables; callbacks       │
+  │                               │ replaced with extern function            │
+  │                               │ declarations                             │
+  └───────────────────────────────┴──────────────────────────────────────────┘
+
+  smb1.cpp and smb2j.cpp #include the chosen interface before including the .c
+  files. The game code itself doesn't change.
+
+  This means the singleton SMB_STATE and thread_local pattern become concerns of
+  interface_callbacks.h only — they disappear from the embedded path entirely.
+
+  Step 2: Rename #included .c files to .inc
+
+  Rename common.c, area.c, common_sound.c, smb1only.c, smb2jonly.c to .inc (or
+  .c.inc). No code changes required; just eliminates confusion about whether
+  they're standalone compilation units. The build system already ignores them.
+
+  Step 3: ROM array relocatability
+
+  smb_romarrays.h and smb2j_romarrays.h currently hardcode data arrays. For
+  FDS/PAL support, the ROM addresses of these arrays shift.
+
+  Two categories of data in those files:
+
+  - Code-like data (enemy speeds, physics constants, etc.) — keep hardcoded. Per
+  decisions.md this is intentional.
+  - Level-editable data (area pointers, music pointers, tile lookups used by the
+  renderer) — convert to ROM-offset indirection, similar to how
+  AreaData/EnemyData/MusicData are already handled. Store the ROM base address
+  at load time; arrays become rom_ptr(base + offset) lookups. This naturally
+  accommodates FDS and PAL with different base addresses.
+
+  The ROM loading code in smbcore.cpp (load_smb1, load_smb2j) already has a
+  natural place to set these base addresses.
+
+  ---
+  Summary of Changes
+
+  ┌────────────────────────────────┬────────────────────────────────────────┐
+  │              File              │                 Change                 │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ smbcore.h                      │ Remove SMB_STATE, callback wrappers,   │
+  │                                │ RAM/PPURAM/draw_tile macros            │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ smbcore/interface_callbacks.h  │ New — contains everything removed from │
+  │                                │  smbcore.h                             │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ smbcore/interface_globals.h    │ New — alternate embedded-target        │
+  │                                │ interface                              │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ smbcore/interface.h            │ New — thin selector that #includes one │
+  │                                │  of the two above                      │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ common.c → common.inc          │ Rename only                            │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ area.c → area.inc              │ Rename only                            │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ common_sound.c →               │ Rename only                            │
+  │ common_sound.inc               │                                        │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ smb1only.c → smb1only.inc      │ Rename only                            │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ smb2jonly.c → smb2jonly.inc    │ Rename only                            │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │                                │ Add #include "smbcore/interface.h" (or │
+  │ smb1.cpp, smb2j.cpp            │  specific impl); update .inc include   │
+  │                                │ paths                                  │
+  ├────────────────────────────────┼────────────────────────────────────────┤
+  │ smb_romarrays.h,               │ Migrate level-editable arrays to       │
+  │ smb2j_romarrays.h              │ ROM-offset indirection; keep code-like │
+  │                                │  data                                  │
+  └────────────────────────────────┴────────────────────────────────────────┘
+
+  ---
+  What This Doesn't Touch
+
+  - smbcommon.cpp — it uses the public SMB_STATE explicitly via
+  SMB_ram_finishwrite, which is fine since it's part of the callbacks-based
+  public API
+  - smbcore.cpp — the SMB_* public API stays as-is; it's the implementation of
+  interface_callbacks.h's system
+  - mario.h — public API unchanged
+  - The build system — no new compiled targets; the .inc rename is invisible to
+  Meson
+
+  ---
+  The biggest risk is phasing the interface extraction: smbcore.h currently
+  bleeds into everything. I'd suggest doing it in this order: (1) rename .c →
+  .inc first (zero risk), (2) extract interface macros into
+  interface_callbacks.h and verify nothing breaks, (3) write interface_globals.h
+  as a second target, (4) tackle ROM relocatability last since it requires more
+  research into which arrays in smb_romarrays.h are level-editable vs.
+  code-like.
+
+✻ Sautéed for 3m 22s
+
+※ recap: Planning a reorganization of the smbcore library to decouple the game engine from the SMB_STATE singleton and callback system, enabling embedded targets. Next action: rename the #included .c files to .inc as a zero-risk first step. (disable recaps in /config)
+
+❯ I actually want a new library for each game. one for smb1, and one for smb2j. 
+  i don't really want to #include the c files anymore.                          
+
+  Thought for 1m 47s (ctrl+o to expand)
+
+● Let me look at a few more details before planning.
+
+  Thought for 2m 14s, searched for 3 patterns, read 3 files (ctrl+o to expand)
+
+● Now I have a complete picture. There's one structural issue to flag before the
+  plan: smbcommon.cpp (containing dectimers, update_screen, WriteNTAddr, etc.)
+  currently lives in libsmbcore alongside smbcore.cpp, but the game TUs call
+  those functions. That creates a circular dependency once the game code is its
+  own library. The plan addresses that.
+
+  ---
+  Reorganization Plan: Separate Game Libraries
+
+  New library structure
+
+  ┌──────────────┬──────────────────────────────┬───────────────────────────┐
+  │   Library    │           Sources            │           Notes           │
+  ├──────────────┼──────────────────────────────┼───────────────────────────┤
+  │ libsmbcommon │ smbcommon.cpp                │ Shared utilities callable │
+  │              │                              │  by both game libs        │
+  ├──────────────┼──────────────────────────────┼───────────────────────────┤
+  │ libsmb1      │ smb1.cpp, common_sound.c,    │ Compiled with -DSMB1_MODE │
+  │              │ common.c, smb1only.c, area.c │                           │
+  ├──────────────┼──────────────────────────────┼───────────────────────────┤
+  │              │ smb2j.cpp, common_sound.c,   │ Compiled with             │
+  │ libsmb2j     │ common.c, smb2jonly.c,       │ -DSMB2J_MODE              │
+  │              │ area.c                       │                           │
+  ├──────────────┼──────────────────────────────┼───────────────────────────┤
+  │              │                              │ Public API; links libsmb1 │
+  │ libsmbcore   │ smbcore.cpp                  │  + libsmb2j +             │
+  │              │                              │ libsmbcommon              │
+  └──────────────┴──────────────────────────────┴───────────────────────────┘
+
+  smbcommon.cpp has no #ifdef SMB1_MODE / #ifdef SMB2J_MODE guards — only
+  runtime SMB1_ONLY / SMB2J_ONLY checks — so it compiles once without any
+  per-game context and can be shared.
+
+  ---
+  Making the shared .c files compile-standalone
+
+  The blocker is that common_sound.c, common.c, and area.c currently inherit
+  their context (macros, includes, ROM arrays) from the including .cpp. To
+  compile them as independent TUs they need that context injected at the top.
+
+  Step 1 — Create per-game context headers:
+
+  smbcore/smb1_context.h     ← defines SMB1_MODE, includes smb_romarrays.h /
+  smb1.h / vars.h / types.h / smbcommon.h
+  smbcore/smb2j_context.h    ← defines SMB2J_MODE, includes smb2j_romarrays.h /
+  smb2j.h / vars.h / types.h / smbcommon.h
+
+  Step 2 — Add #include at the top of each shared .c file:
+
+  The build system compiles the shared files with a per-library forced include
+  (-include smbcore/smb1_context.h for libsmb1, same idea for libsmb2j). The
+  source files themselves don't name which game — the build system decides. This
+  is better than adding a #include "game_context.h" inline because the .c files
+  stay game-agnostic.
+
+  Alternatively, two thin wrapper .c files per shared file (e.g. smb1_common.c →
+  #include "smb1_context.h" then #include "common.c") if forced includes are
+  undesirable. But with -include this trick isn't needed.
+
+  Step 3 — Resolve the static functions (already noted TODO in area.h):
+
+  LoadAreaPointer, GetAreaDataAddrs, AreaParserTaskControl,
+  AreaParserTaskHandler in area.h are currently static because they're only
+  visible within the including TU. With separate compilation they must become
+  non-static. area.h gains proper extern declarations; the static keyword is
+  removed from the definitions in area.c.
+
+  Step 4 — Strip #include "*.c" from smb1.cpp and smb2j.cpp:
+
+  Each file becomes just the entry point: top-of-file definitions (defines,
+  SMB2J FDS helpers, etc.) plus SMB1_Reset/SMB1_NMI or SMB2J_Reset/SMB2J_NMI.
+
+  ---
+  Build system changes (meson.build)
+
+  libsmbcommon = library('smbcommon', 'src/smbcommon.cpp', ...)
+
+  libsmb1 = library('smb1',
+    ['src/smb1.cpp',
+     'src/smbcore/common_sound.c',
+     'src/smbcore/common.c',
+     'src/smbcore/smb1only.c',
+     'src/smbcore/area.c'],
+    cpp_args: ['-DSMB1_MODE', '-include', 'src/smbcore/smb1_context.h'],
+    c_args:   ['-DSMB1_MODE', '-include', 'src/smbcore/smb1_context.h'],
+    link_with: libsmbcommon)
+
+  libsmb2j = library('smb2j',
+    ['src/smb2j.cpp',
+     'src/smbcore/common_sound.c',
+     'src/smbcore/common.c',
+     'src/smbcore/smb2jonly.c',
+     'src/smbcore/area.c'],
+    cpp_args: ['-DSMB2J_MODE', '-include', 'src/smbcore/smb2j_context.h'],
+    c_args:   ['-DSMB2J_MODE', '-include', 'src/smbcore/smb2j_context.h'],
+    link_with: libsmbcommon)
+
+  libsmbcore = library('smbcore', 'src/smbcore.cpp',
+    link_with: [libsmb1, libsmb2j, libsmbcommon])
+
+  ---
+  What doesn't change
+
+  - mario.h public API — untouched
+  - smbcore.cpp runtime dispatch on which_game — still works, just links against
+  two game libs
+  - smb1only.c / smb2jonly.c — become proper TUs without any internal changes
+  (they were never shared between games)
+  - smbcore/vars.h, types.h, structs.h — pure headers, no change
+
+  ---
+  Suggested order of work
+
+  1. Create smb1_context.h and smb2j_context.h — no code change, just extraction
+  of what's already at the top of smb1.cpp/smb2j.cpp
+  2. Promote smb1only.c/smb2jonly.c to standalone TUs first (they have no
+  shared-file complications) — lets you validate the build setup before touching
+  the shared files
+  3. Split libsmbcommon out of libsmbcore in meson.build
+  4. Promote common_sound.c, common.c, area.c — requires the static fix in
+  area.h
+  5. Remove #include "*.c" lines from smb1.cpp/smb2j.cpp
+
+✻ Worked for 4m 33s
+
+❯ I also eventually want to get rid of the redefines for the function names in  
+  smb1.h and smb2j.h. as such, the two libraries would have conflicting         
+  symbols, so it's not viable to link them both together. my long term vision   
+  is actually to either dynamically load whichever library is needed, or to     
+  statically link one to an executable (e.g. a smbvanilla1 and smbvanilla2j     
+  executable).                                                                  
+
+  Thought for 4s (ctrl+o to expand)
+
+● Let me look at those header redefines before adjusting the plan.
+
+  Thought for 1m 1s, read 2 files (ctrl+o to expand)
+
+● Now I have the full picture. The smb1_/smb2j_ prefix + #define alias pattern
+  in those headers is specifically what makes coexistence possible today — and
+  what you want to eventually dismantle.
+
+  ---
+  Adjusted Reorganization Plan
+
+  What changes about the goal
+
+  The current design keeps both games in one binary by namespacing functions:
+  smb1_GameMode and smb2j_GameMode coexist via #define GameMode smb1_GameMode
+  injected into each TU. You want to go the opposite direction: drop the
+  namespace, accept symbol conflicts, and enforce single-game-per-binary
+  instead.
+
+  This means smbcore.cpp's runtime dispatch on which_game also needs to go away
+  eventually — it can only exist while both games are linked together.
+
+  ---
+  New target library structure
+
+  ┌──────────────┬──────────────────────────────────────────────────────────┐
+  │   Library    │                         Contents                         │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ libsmb1      │ smb1.cpp, common.c, area.c, common_sound.c, smb1only.c   │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ libsmb2j     │ smb2j.cpp, common.c, area.c, common_sound.c, smb2jonly.c │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ libsmbcommon │ smbcommon.cpp (shared utilities with no game context)    │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ libsmbcore   │ smbcore.cpp — but see Phase 3 below                      │
+  └──────────────┴──────────────────────────────────────────────────────────┘
+
+  These cannot all be linked into one binary once Phase 2 is complete. Instead:
+
+  ┌────────────────────────┬────────────────────────────────────────────────┐
+  │         Binary         │                     Links                      │
+  ├────────────────────────┼────────────────────────────────────────────────┤
+  │ smbvanilla (or         │ libsmbcore + libsmb1 + libsmbcommon            │
+  │ smbvanilla1)           │                                                │
+  ├────────────────────────┼────────────────────────────────────────────────┤
+  │ smbvanilla2j           │ libsmbcore + libsmb2j + libsmbcommon           │
+  ├────────────────────────┼────────────────────────────────────────────────┤
+  │ dynamic variant        │ libsmbcore + libsmbcommon + dlopen of          │
+  │                        │ libsmb1.so or libsmb2j.so                      │
+  └────────────────────────┴────────────────────────────────────────────────┘
+
+  ---
+  Phase 1 — Make the shared .c files standalone TUs
+
+  Same as before:
+
+  - Create smbcore/smb1_context.h and smbcore/smb2j_context.h — each defines the
+  game mode macro and pulls in the appropriate romarrays/vars/types/smbcommon
+  headers. This is just an extraction of what's already at the top of smb1.cpp /
+  smb2j.cpp.
+  - Use -include src/smbcore/smb1_context.h (etc.) in the build system to inject
+  context into the shared .c TUs without modifying the files themselves.
+  - Remove static from LoadAreaPointer, GetAreaDataAddrs, AreaParserTaskControl,
+  AreaParserTaskHandler in area.h (the existing TODO comment there).
+  - Remove the #include "*.c" lines from smb1.cpp and smb2j.cpp.
+
+  This phase is pure structural change — no renaming yet, no symbol conflicts.
+
+  ---
+  Phase 2 — Drop the smb1_/smb2j_ prefixes and aliases
+
+  Once each game is its own TU set, the prefix scheme is no longer needed and
+  can be inverted:
+
+  - In smb1only.c, smb2jonly.c, and the shared .c files: function definitions
+  just use the natural names (GameMode, ScrollHandler, etc.) — no prefix.
+  - Delete all #define Foo smb1_Foo / #define Foo smb2j_Foo lines from smb1.h /
+  smb2j.h.
+  - Rename smb1_Foo/smb2j_Foo declarations in those headers to plain Foo.
+  - The struct sections of smb1.h and smb2j.h are already essentially identical.
+  They can be merged into a single smbcore/game.h that both context headers
+  pull in.
+
+  After this point, libsmb1 and libsmb2j have conflicting symbols and cannot be
+  linked together. That's intentional.
+
+  ---
+  Phase 3 — Decouple smbcore.cpp from dual-game dispatch
+
+  smbcore.cpp currently:
+  1. Contains smb2j_load_file (which calls SMB2J-specific functions)
+  2. Dispatches SMB_tick → SMB1_NMI or SMB2J_NMI based on runtime which_game
+
+  Both need to change:
+
+  3a. Move ROM loading into the game libraries.
+  load_smb1 and the smb2j_load_file/load_smb2j code move into smb1.cpp and
+  smb2j.cpp respectively. The game libraries expose a single entry point like
+  SMB_load_rom(struct SMB_state *state) that smbcore.cpp calls. SMB2J's version
+  handles the FDS disk parsing; SMB1's handles the INES format.
+  detect_and_load_rom in smbcore.cpp is replaced by a call to this function.
+
+  3b. Replace named entry points with generic ones.
+  SMB1_Reset, SMB1_NMI → become SMB_Reset, SMB_NMI in libsmb1
+  SMB2J_Reset, SMB2J_NMI → become SMB_Reset, SMB_NMI in libsmb2j
+
+  smbcore.cpp declares these as extern "C" without a game prefix and calls them
+  directly. The which_game runtime check in SMB_tick disappears. which_game
+  itself may eventually be removed from SMB_state, or set at build time.
+
+  ---
+  Phase 4 — Build system
+
+  libsmbcommon = library('smbcommon', 'src/smbcommon.cpp', ...)
+
+  smb1_context_flag = ['-include', 'src/smbcore/smb1_context.h', '-DSMB1_MODE']
+  smb2j_context_flag = ['-include', 'src/smbcore/smb2j_context.h',
+  '-DSMB2J_MODE']
+
+  libsmb1 = library('smb1',
+    ['src/smb1.cpp', 'src/smbcore/common.c', 'src/smbcore/area.c',
+     'src/smbcore/common_sound.c', 'src/smbcore/smb1only.c'],
+    c_args: smb1_context_flag, cpp_args: smb1_context_flag,
+    link_with: libsmbcommon)
+
+  libsmb2j = library('smb2j',
+    ['src/smb2j.cpp', 'src/smbcore/common.c', 'src/smbcore/area.c',
+     'src/smbcore/common_sound.c', 'src/smbcore/smb2jonly.c'],
+    c_args: smb2j_context_flag, cpp_args: smb2j_context_flag,
+    link_with: libsmbcommon)
+
+  # After Phase 3, smbcore no longer links both game libs.
+  # Instead, two separate smbcore libraries (or just link at the executable
+  level):
+
+  executable('smbvanilla',   ..., link_with: [smbcore_sources, libsmb1,
+  libsmbcommon])
+  executable('smbvanilla2j', ..., link_with: [smbcore_sources, libsmb2j,
+  libsmbcommon])
+
+  ---
+  Suggested order
+
+  1. Phase 1 — Standalone TUs, context headers, remove #include "*.c". Zero
+  semantic change, verifiable by test suite passing.
+  2. Phase 2 — Drop prefixes and aliases. Still compiles both games but now
+  errors if you try to link both. Verify each game executable independently.
+  3. Phase 3a — Move ROM loading into game libraries. Validates the SMB_load_rom
+  interface.
+  4. Phase 3b — Rename Reset/NMI, remove which_game dispatch from smbcore.cpp.
+  5. Phase 4 — Wire up the two executables (or dynamic loading) in the build
+  system.
+
+  The biggest risk is Phase 3 — smbcore.cpp is currently glue between the two
+  games and the public API, and pulling that apart touches the SMB_state
+  lifecycle and the public mario.h interface. I'd defer which_game removal from
+  SMB_state until you're sure no callers depend on it (the testrunner uses
+  SMB_which_game, per the original notes).
+
+✻ Brewed for 1m 43s
+
+❯ smbcore is really mostly dispatch and inteface code, which should also be     
+  absorbed into other files. smbcommon should be compiled as a module in each   
+  library. so really, we're working with two libraries. adjust the plan to      
+  consider this.                                                                
+
+  Thought for 41s (ctrl+o to expand)
+
+● Good. Let me think through what that means for each current file before
+  writing the plan.
+
+  smbcore.cpp contains: SMB_STATE definition, public API (SMB_state_init,
+  SMB_tick, SMB_state_size, SMB_ram, etc.), ROM detection/loading, and
+  draw_graphics. All of that either splits by game or compiles identically into
+  both libraries.
+
+  smbcommon.cpp contains: sync_data, set_world_and_level, InitializeMemory,
+  dectimers, update_screen, WriteNTAddr, ReadJoypads, ReadPortBits, update_prng.
+  It currently uses runtime SMB1_ONLY/SMB2J_ONLY — when compiled into a
+  single-game library with its context header, those become compile-time
+  constants.
+
+  ---
+  Adjusted Plan: Two Libraries
+
+  Final source composition
+
+  ┌──────────┬───────────────────────────────────────────────────────────────┐
+  │ Library  │                            Sources                            │
+  ├──────────┼───────────────────────────────────────────────────────────────┤
+  │ libsmb1  │ smb1.cpp, smbcommon.cpp, common.c, area.c, common_sound.c,    │
+  │          │ smb1only.c                                                    │
+  ├──────────┼───────────────────────────────────────────────────────────────┤
+  │ libsmb2j │ smb2j.cpp, smbcommon.cpp, common.c, area.c, common_sound.c,   │
+  │          │ smb2jonly.c                                                   │
+  └──────────┴───────────────────────────────────────────────────────────────┘
+
+  smbcore.cpp is deleted. mario.h remains as the public header.
+
+  ---
+  Phase 1 — Make shared .c files standalone TUs
+
+  Same as before:
+
+  - Create smbcore/smb1_context.h and smbcore/smb2j_context.h, each pulling in
+  the right romarrays/vars/types/smbcommon headers under a game mode define.
+  This is just extracting what's already at the top of smb1.cpp/smb2j.cpp.
+  - Compile shared .c files with -include src/smbcore/smb1_context.h (etc.) — no
+  changes to source files.
+  - Remove static from LoadAreaPointer etc. in area.h (the existing TODO).
+  - Remove #include "*.c" from smb1.cpp/smb2j.cpp.
+
+  ---
+  Phase 2 — Drop the smb1_/smb2j_ prefixes and aliases
+
+  - Function definitions in the game TUs use plain names (GameMode,
+  ScrollHandler, etc.).
+  - Delete all #define Foo smb1_Foo and #define Foo smb2j_Foo lines from
+  smb1.h/smb2j.h.
+  - Rename remaining smb1_Foo/smb2j_Foo declarations to plain Foo.
+  - Merge the identical struct sections of smb1.h/smb2j.h into a single
+  smbcore/game.h included by both context headers.
+
+  After this phase, the two libraries have conflicting symbols and cannot be
+  linked together.
+
+  ---
+  Phase 3 — Absorb smbcore.cpp and fold smbcommon.cpp into each library
+
+  3a. Split ROM loading out of smbcore.cpp into the game files.
+
+  load_smb1 and the SMB1 branch of detect_and_load_rom move into smb1.cpp.
+  smb2j_load_file and load_smb2j are already in smb2j.cpp (via the current
+  extern "C" declaration). Each game file exposes a single SMB_load_rom(struct 
+  SMB_state *) that handles its own format detection.
+
+  3b. Move the public API into each game library.
+
+  SMB_state_init, SMB_tick, SMB_state_size, SMB_ram, SMB_ppuram,
+  SMB_ram_finishwrite, SMB_start_on_level, SMB_which_game, and draw_graphics all
+  move into smb1.cpp/smb2j.cpp. SMB_tick no longer dispatches on which_game —
+  it just calls SMB_Reset/SMB_NMI. SMB_STATE thread_local definition moves there
+  too.
+
+  smbcore.cpp is now empty and deleted.
+
+  3c. Compile smbcommon.cpp into each library.
+
+  smbcommon.cpp is added to both library source lists. Compiled with each game's
+  context header, SMB1_ONLY/SMB2J_ONLY in set_world_and_level and
+  InitializeMemory become compile-time constants — the dead branch can be
+  cleaned up when convenient, but it's not required immediately.
+
+  ---
+  Phase 4 — Build system
+
+  smb1_args  = ['-include', 'src/smbcore/smb1_context.h', '-DSMB1_MODE']
+  smb2j_args = ['-include', 'src/smbcore/smb2j_context.h', '-DSMB2J_MODE']
+
+  libsmb1 = library('smb1',
+    ['src/smb1.cpp', 'src/smbcommon.cpp',
+     'src/smbcore/common.c', 'src/smbcore/area.c',
+     'src/smbcore/common_sound.c', 'src/smbcore/smb1only.c'],
+    c_args: smb1_args, cpp_args: smb1_args)
+
+  libsmb2j = library('smb2j',
+    ['src/smb2j.cpp', 'src/smbcommon.cpp',
+     'src/smbcore/common.c', 'src/smbcore/area.c',
+     'src/smbcore/common_sound.c', 'src/smbcore/smb2jonly.c'],
+    c_args: smb2j_args, cpp_args: smb2j_args)
+
+  executable('smbvanilla',   [...], link_with: libsmb1)
+  executable('smbvanilla2j', [...], link_with: libsmb2j)
+  # or: libsmb1/libsmb2j as shared libraries for dlopen
+
+  ---
+  Suggested order
+
+  1. Phase 1 — Standalone TUs. Test suite still passes, both games still in one
+  binary.
+  2. Phase 2 — Drop prefixes. Each game now builds independently; verify them
+  separately.
+  3. Phase 3a — Move ROM loading. Validates SMB_load_rom interface per game.
+  4. Phase 3b+3c — Move public API and fold smbcommon. Delete smbcore.cpp.
+  5. Phase 4 — Wire up two executables in meson.build.
+
+  The main risk is Phase 3b: SMB_state and SMB_STATE are currently defined by
+  smbcore.cpp and smbcore.h together, and they're referenced across many TUs.
+  Moving the definition into smb1.cpp/smb2j.cpp while keeping the extern
+  declaration in smbcore.h is straightforward, but it's worth doing this as its
+  own commit to keep the diff readable.
+
+✻ Baked for 1m 5s
+※ recap: Reorganizing smbcore into two self-contained libraries, libsmb1 and libsmb2j, each compiling their own copy of the shared game code with no common library between them. Next step is Phase 1: create the per-game context headers and make the shared .c files compile as standalone TUs. (disable recaps in /config)
+
+❯ Are we still creating the interface layer, as we described at the beginning?  
+
+  Thought for 23s (ctrl+o to expand)
+
+● No — it quietly dropped out during the second and third revisions as the focus
+  shifted to library structure and prefix removal.
+
+  It still fits, and the two-library plan actually makes it cleaner. The
+  smb1_context.h / smb2j_context.h context headers are the natural selection
+  point. Instead of the context header directly pulling in smbcore.h (which
+  hard-codes SMB_STATE and callbacks for everything), it would #include one of
+  two interface implementations:
+
+  - interface_callbacks.h — what smbcore.h currently does: RAM, draw_tile, joy1,
+  etc. all go through SMB_STATE->rammem[...] and SMB_STATE->callbacks.*
+  - interface_globals.h — embedded-friendly: RAM, draw_tile, etc. resolve to
+  bare global variables/functions, no SMB_STATE struct involved
+
+  The context header picks one at build time. The game TUs (common.c,
+  smb1only.c, etc.) never name which interface they're using — they just call
+  RAM(x) and draw_tile(t).
+
+  This maps cleanly onto the existing phase structure: it belongs in Phase 1
+  alongside the context header creation, since splitting out the interface is
+  part of what makes the context headers useful. Phase 3b (moving the public API
+  into each game library) is also where SMB_state_init and the SMB_STATE
+  singleton would become an interface_callbacks.h concern rather than a global
+  one.
+
+  Do you want to add it back in explicitly, or keep it as a post-reorg follow-on
+  once the library split is stable?
+
+✻ Worked for 29s
+
+❯ put it in the plan so that i have a full picture. put the phase whenever it   
+  makes sense.                                                                  
+
+  Thought for 11s (ctrl+o to expand)
+
+● Complete Reorganization Plan
+
+  Final target
+
+  Two libraries, libsmb1 and libsmb2j, each independently self-contained and
+  exposing the same mario.h public API. A game-agnostic interface layer controls
+  how the game code reaches hardware abstractions, making embedded and
+  non-callback builds possible. The libraries cannot be linked together.
+
+  ┌──────────┬───────────────────────────────────────────────────────────────┐
+  │ Library  │                            Sources                            │
+  ├──────────┼───────────────────────────────────────────────────────────────┤
+  │ libsmb1  │ smb1.cpp, smbcommon.cpp, common.c, area.c, common_sound.c,    │
+  │          │ smb1only.c                                                    │
+  ├──────────┼───────────────────────────────────────────────────────────────┤
+  │ libsmb2j │ smb2j.cpp, smbcommon.cpp, common.c, area.c, common_sound.c,   │
+  │          │ smb2jonly.c                                                   │
+  └──────────┴───────────────────────────────────────────────────────────────┘
+
+  ---
+  Phase 1 — Context headers, interface layer, standalone TUs
+
+  1a. Split smbcore.h into two parts.
+
+  smbcore.h currently mixes two concerns: utility code (math macros, ppureg,
+  ppu_state, byte/ushort typedefs, RamByteArray, helper functions like
+  CONCAT11/CARRY1/etc.) and the interface layer (RAM, PPURAM, draw_tile, joy1,
+  apu_write_register, SMB_STATE, etc.). Split them:
+
+  - smbcore.h — keep only the game-agnostic utilities: types, math macros,
+  ppureg/ppu_state/sprite, assert_*, RamByteArray, jmpengine_overflow, CONCAT11,
+  SWAP, ADD_16_16, etc. No reference to SMB_STATE or callbacks.
+  - smbcore/interface.h — thin selector that #includes one of the two
+  implementations below.
+
+  1b. Create two interface implementations.
+
+  smbcore/interface_callbacks.h — extracts what's currently in smbcore.h that
+  goes through SMB_STATE: RAM, PPURAM, CHRROM, AreaData, EnemyData, MusicData,
+  draw_tile, can_draw_tile, apu_write_register, apu_end_frame, joy1, joy2,
+  announce_main_scroll, transfer_sprite_data, smb2j_load_games_beaten,
+  smb2j_save_games_beaten, update_pattern_tables, PPU_STATE, rom_ptr,
+  joystick_strobe, all APU_REG inlines, SMB_STATE extern, etc.
+
+  smbcore/interface_globals.h — new file. Same macro/function names, but
+  implemented as bare globals and extern function declarations. No SMB_STATE
+  struct. No callbacks. RAM(x) becomes smbglobals_ram[x]. Intended for embedded
+  targets where everything is global.
+
+  1c. Create per-game context headers.
+
+  smbcore/smb1_context.h:
+  #define SMB1_MODE
+  #include "smbcore.h"
+  #include "smbcore/interface.h"      // picks interface_callbacks or 
+  interface_globals
+  #include "smbcore/smb_romarrays.h"
+  #include "smbcore/vars.h"
+  #include "smbcore/smb1.h"
+  #include "smbcore/types.h"
+  #include "smbcommon.h"
+
+  smbcore/smb2j_context.h — same shape with SMB2J equivalents.
+
+  These are just extractions of what already exists at the top of
+  smb1.cpp/smb2j.cpp.
+
+  1d. Compile shared .c files as standalone TUs.
+
+  Use -include src/smbcore/smb1_context.h (etc.) in the build system — no
+  changes to source files. The game code calls RAM(x), draw_tile(t), etc.
+  without knowing which interface is behind them.
+
+  Remove static from LoadAreaPointer, GetAreaDataAddrs, AreaParserTaskControl,
+  AreaParserTaskHandler in area.h (the existing TODO).
+
+  Remove #include "*.c" from smb1.cpp and smb2j.cpp.
+
+  ---
+  Phase 2 — Drop the smb1_/smb2j_ prefixes and aliases
+
+  - Function definitions use plain names (GameMode, ScrollHandler, etc.) — no
+  prefix.
+  - Delete all #define Foo smb1_Foo / #define Foo smb2j_Foo lines from
+  smb1.h/smb2j.h.
+  - Rename smb1_Foo/smb2j_Foo declarations to plain Foo.
+  - Merge the identical struct sections of smb1.h/smb2j.h into smbcore/game.h,
+  included by both context headers.
+
+  After this phase the two libraries have conflicting symbols and cannot be
+  linked together. Verify each game executable independently.
+
+  ---
+  Phase 3 — Absorb smbcore.cpp, fold in smbcommon.cpp
+
+  3a. Move ROM loading into each game file.
+
+  load_smb1 and the SMB1 branch of detect_and_load_rom move into smb1.cpp.
+  smb2j_load_file and load_smb2j (currently split awkwardly between smbcore.cpp
+  and smb2j.cpp via extern "C") consolidate entirely into smb2j.cpp. Each game
+  exposes SMB_load_rom(struct SMB_state *) that handles its own format
+  detection.
+
+  3b. Move the public API into each game file.
+
+  SMB_state_init, SMB_tick, SMB_state_size, SMB_ram, SMB_ppuram,
+  SMB_ram_finishwrite, SMB_start_on_level, SMB_which_game, and draw_graphics all
+  move into smb1.cpp/smb2j.cpp. SMB_tick no longer dispatches on which_game —
+  it just calls SMB_Reset/SMB_NMI directly (those generic names replace
+  SMB1_Reset/SMB1_NMI etc.).
+
+  SMB_STATE thread_local definition and SMB_state_init's assignment of it move
+  here too — these are interface_callbacks.h concerns. In interface_globals.h
+  there is no SMB_STATE at all; SMB_state_init would be replaced with a simpler
+  init that sets up the global arrays.
+
+  smbcore.cpp is now empty and deleted.
+
+  3c. Compile smbcommon.cpp into each library.
+
+  smbcommon.cpp is added to both library source lists. Compiled under each
+  context header, SMB1_ONLY/SMB2J_ONLY in set_world_and_level and
+  InitializeMemory become compile-time constants. The dead branches can be
+  removed when convenient.
+
+  ---
+  Phase 4 — Build system
+
+  smb1_args  = ['-include', 'src/smbcore/smb1_context.h', '-DSMB1_MODE']
+  smb2j_args = ['-include', 'src/smbcore/smb2j_context.h', '-DSMB2J_MODE']
+
+  libsmb1 = library('smb1',
+    ['src/smb1.cpp', 'src/smbcommon.cpp',
+     'src/smbcore/common.c', 'src/smbcore/area.c',
+     'src/smbcore/common_sound.c', 'src/smbcore/smb1only.c'],
+    c_args: smb1_args, cpp_args: smb1_args)
+
+  libsmb2j = library('smb2j',
+    ['src/smb2j.cpp', 'src/smbcommon.cpp',
+     'src/smbcore/common.c', 'src/smbcore/area.c',
+     'src/smbcore/common_sound.c', 'src/smbcore/smb2jonly.c'],
+    c_args: smb2j_args, cpp_args: smb2j_args)
+
+  executable('smbvanilla',   [...], link_with: libsmb1)
+  executable('smbvanilla2j', [...], link_with: libsmb2j)
+  # or build libsmb1/libsmb2j as shared libraries for dlopen
+
+  ---
+  Suggested order and key risks
+
+  ┌───────┬──────────────────────────────────────────────────────────────────┐
+  │ Phase │                               Risk                               │
+  ├───────┼──────────────────────────────────────────────────────────────────┤
+  │ 1     │ Low — pure structural extraction, test suite should pass         │
+  │       │ unchanged                                                        │
+  ├───────┼──────────────────────────────────────────────────────────────────┤
+  │ 2     │ Low-medium — large diff but mechanical; verify each game binary  │
+  │       │ independently                                                    │
+  ├───────┼──────────────────────────────────────────────────────────────────┤
+  │ 3a    │ Medium — smb2j_load_file's extern "C" split needs careful        │
+  │       │ consolidation                                                    │
+  ├───────┼──────────────────────────────────────────────────────────────────┤
+  │       │ Medium — SMB_STATE definition moves; every TU that references it │
+  │ 3b    │  via extern needs the declaration to remain in smbcore.h (or a   │
+  │       │ new header) until 3b is complete                                 │
+  ├───────┼──────────────────────────────────────────────────────────────────┤
+  │ 3c    │ Low — compile-time constant folding is a cleanup, not a          │
+  │       │ correctness issue                                                │
+  └───────┴──────────────────────────────────────────────────────────────────┘
+
+  SMB_which_game is referenced by the testrunner — worth keeping it in mario.h
+  even if which_game eventually leaves SMB_state, just returning a compile-time
+  constant per library.
+
+✻ Baked for 46s
+
+※ recap: Planning a reorganization of the SMB port into two separate self-contained libraries, libsmb1 and libsmb2j, each with its own interface layer. The plan is finalized and ready to begin implementing Phase 1. (disable recaps in /config)
+
+❯ create a plan document in the docs folder                                     
+
+  Thought for 4s (ctrl+o to expand)
+
