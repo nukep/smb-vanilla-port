@@ -18,9 +18,13 @@ typedef int32_t i32;
 #ifdef _MSC_VER
 #  define NOINLINE __declspec(noinline)
 #  define NORETURN __declspec(noreturn)
+#  define likely(x)   (x)
+#  define unlikely(x) (x)
 #elif __GNUC__
 #  define NOINLINE __attribute__((noinline))
 #  define NORETURN __attribute__((noreturn))
+#  define likely(x)   (__builtin_expect(!!(x), 1))
+#  define unlikely(x) (__builtin_expect(!!(x), 0))
 #endif
 
 #ifdef PRINT_WARNINGS_AND_ERRORS
@@ -32,7 +36,7 @@ typedef int32_t i32;
 #endif
 
 static inline void assert_smb_crashbug(bool condition, const char *message) {
-  if (!condition) {
+  if (unlikely(!condition)) {
     error("%s\n", message);
     abort();
   }
@@ -50,7 +54,7 @@ static inline NORETURN void jmpengine_overflow(byte index) {
 // Code may rely on the assumption.
 // These are conditions that could be relaxed for things like enhancements to the game.
 #define assume_weak_original(truthy) { \
-  if (!(truthy)) { warning("Behavior differs from expectation. %s:%d:%s: assume_weak_original(%s)\n", __FILE__, __LINE__, __func__, #truthy); } \
+  if (unlikely(!(truthy))) { warning("Behavior differs from expectation. %s:%d:%s: assume_weak_original(%s)\n", __FILE__, __LINE__, __func__, #truthy); } \
 }
 
 #define assert_unreachable() assert(0)
@@ -190,13 +194,13 @@ static inline void joy2(struct SMB_buttons *buttons) {
 #define PatchCurrentPlayer (SMB_STATE->patch_current_player)
 
 static inline const byte * rom_ptr(const u16 addr) {
-  if (addr == 0) {
+  if (unlikely(addr == 0)) {
     // Null pointer
     // We might get this on startup if RAM is uninitialized
     return 0;
   }
 
-  if (addr < 0x6000) {
+  if (unlikely(addr < 0x6000)) {
     warning("Attempt to resolve a pointer to non-ROM. Address: $%04X\n", addr);
   }
 
@@ -482,7 +486,7 @@ public:
     // i haven't observed a wraparound ever happening in practice, but this should be verified
 
     if (length != 0) {
-      if (idx < 0 || idx >= length) {
+      if (unlikely(idx < 0 || idx >= length)) {
         warning("Out of bounds for array $%04X length %d. accessed $%04X[%d] (= $%04X)\n", addr, length, addr+offset, i, eff);
       }
     }
@@ -512,7 +516,7 @@ public:
     u16 eff = addr + i;
 
     if (length != 0) {
-      if (i < 0 || i >= length) {
+      if (unlikely(i < 0 || i >= length)) {
         warning("Out of bounds for array $%04X length %d. accessed $%04X[%d] (= $%04X)\n", addr, length, addr, i, eff);
       }
     }
