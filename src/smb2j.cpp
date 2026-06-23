@@ -236,10 +236,12 @@ void SMB2J_NMI() {
   ppuscroll(0);
   ppuscroll(0);
 
+  struct sprite sprites[64];
+
   // The NES wrote to OAM registers to initiate copying sprites
   // $2003 = 0
   // $4014 = 2
-  transfer_sprite_data(&Sprite_Data[0]);
+  transfer_sprite_data(&sprites[0], &Sprite_Data[0]);
 
   u16 vram_length = 0;
   const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
@@ -284,9 +286,7 @@ void SMB2J_NMI() {
   // The FDS version loops here until IRQAckFlag is 0.
   trigger_scroll_irq_if_havent_yet();
 
-  // The scroll is known
-  announce_main_scroll(SMB_STATE->ppu.t.NN * 256 + SMB_STATE->ppu.t.XXXXX * 8 + SMB_STATE->ppu.x);
-  draw_graphics(SMB_STATE);
+  draw_graphics(&sprites[0]);
 
   ppustatus();
 

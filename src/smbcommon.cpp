@@ -4,6 +4,8 @@
 #include "smbcore/vars.h"
 #include "smbcore/types.h"
 
+#include <string.h>
+
 
 void sync_data(void) {
   // The engine defines some internal data structures
@@ -218,8 +220,8 @@ void WriteNTAddr(byte ppu_page) {
 // SMB:8e5c, SM2MAIN:6cd5
 // Signature: [] -> []
 void ReadJoypads() {
-  joystick_strobe(1);
-  joystick_strobe(0);
+  // joystick_strobe(1);
+  // joystick_strobe(0);
   ReadPortBits(0);
   ReadPortBits(1);
 }

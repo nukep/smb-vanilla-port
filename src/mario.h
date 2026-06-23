@@ -1,18 +1,11 @@
 #ifndef MARIO_H
 #define MARIO_H
 
-#include <stddef.h>
+#include "base_public.h"
 
 #ifdef __cplusplus
 extern "C" {
-#else
-#include <stdbool.h>
 #endif
-
-typedef unsigned char byte;
-typedef unsigned short ushort;
-typedef unsigned char u8;
-typedef unsigned short u16;
 
 #define GAME_SMB1 0
 #define GAME_SMB2J 1

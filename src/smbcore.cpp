@@ -2,6 +2,8 @@
 
 #include "smbcore.h"
 
+#include <string.h>
+
 extern "C" {
 void SMB1_Reset();
 void SMB1_NMI();
@@ -192,16 +194,16 @@ void SMB_tick(struct SMB_state *state) {
   }
 }
 
-static inline void draw_nametable_tile(const struct SMB_state *state, int x, int y, ushort ppu_offset, int tilex,
+static inline void draw_nametable_tile(int x, int y, ushort ppu_offset, int tilex,
                                        int tiley) {
   int j = tilex;
   int i = tiley;
   int off = i * 32 + j;
-  int tileidx = state->ppuram[ppu_offset + off] + 0x100;
+  int tileidx = PPURAM(ppu_offset + off) + 0x100;
   // Find which part of the pallete to use
   // Look it up in the attribute table
 
-  byte a = state->ppuram[ppu_offset + 0x03c0 + (i / 4) * 8 + (j / 4)];
+  byte a = PPURAM(ppu_offset + 0x03c0 + (i / 4) * 8 + (j / 4));
   a >>= ((j / 2) % 2) * 2;
   a >>= ((i / 2) % 2) * 4;
   a &= 0x03;
@@ -221,53 +223,51 @@ static inline void draw_nametable_tile(const struct SMB_state *state, int x, int
   draw_tile(tile);
 }
 
-static inline void draw_nametable_rect(const struct SMB_state *state, int x, int y, ushort ppu_offset, int fromx,
+static inline void draw_nametable_rect(int x, int y, ushort ppu_offset, int fromx,
                                        int fromy, int tox, int toy) {
   for (int i = fromy; i < toy; i++) {
     for (int j = fromx; j < tox; j++) {
-      draw_nametable_tile(state, x + (j - fromx) * 8, y + (i - fromy) * 8, ppu_offset, j, i);
+      draw_nametable_tile(x + (j - fromx) * 8, y + (i - fromy) * 8, ppu_offset, j, i);
     }
   }
 }
 
-void draw_graphics(struct SMB_state *state) {
-  if (state->callbacks.update_palette) {
-    // The palette can change even if the screen is off (the background color, namely)
-    state->callbacks.update_palette(state->callbacks.userdata, state->ppuram + 0x3F00);
-  }
+void draw_graphics(const struct sprite sprites[64]) {
+  // The palette can change even if the screen is off (the background color, namely)
+  update_palette();
 
-  if (!state->ppu.screen_on) {
+  if (!PPU_STATE.screen_on) {
     return;
   }
   if (!can_draw_tile()) {
     return;
   }
 
-  for (int spriteidx = 0; spriteidx < 64; spriteidx++) {
-    const struct sprite *s = state->sprites + (63 - spriteidx);
-    if (s->draw_behind) {
-      draw_tile(s->tile);
+  for (int spriteidx = 64-1; spriteidx >= 0; spriteidx--) {
+    if (sprites[spriteidx].draw_behind) {
+      draw_tile(sprites[spriteidx].tile);
     }
   }
 
-  // Status bar
-  draw_nametable_rect(state, 0, 0, 0x2000, 0, 0, 32, 4);
+  const u16 scroll_x = PPU_STATE.t.NN * 256 + PPU_STATE.t.XXXXX * 8 + PPU_STATE.x;
 
-  int scroll_off = -(state->scroll_x % 256);
-  int scroll_nametable = state->scroll_x / 256;
+  // Status bar
+  draw_nametable_rect(0, 0, 0x2000, 0, 0, 32, 4);
+
+  int scroll_off = -(scroll_x % 256);
+  int scroll_nametable = scroll_x / 256;
 
   if (scroll_nametable == 0) {
-    draw_nametable_rect(state, scroll_off, 32, 0x2000, 0, 4, 32, 30);
-    draw_nametable_rect(state, 256 + scroll_off, 32, 0x2400, 0, 4, 32, 30);
+    draw_nametable_rect(scroll_off, 32, 0x2000, 0, 4, 32, 30);
+    draw_nametable_rect(256 + scroll_off, 32, 0x2400, 0, 4, 32, 30);
   } else {
-    draw_nametable_rect(state, scroll_off, 32, 0x2400, 0, 4, 32, 30);
-    draw_nametable_rect(state, 256 + scroll_off, 32, 0x2000, 0, 4, 32, 30);
+    draw_nametable_rect(scroll_off, 32, 0x2400, 0, 4, 32, 30);
+    draw_nametable_rect(256 + scroll_off, 32, 0x2000, 0, 4, 32, 30);
   }
 
-  for (int spriteidx = 0; spriteidx < 64; spriteidx++) {
-    const struct sprite *s = state->sprites + (63 - spriteidx);
-    if (!s->draw_behind) {
-      draw_tile(s->tile);
+  for (int spriteidx = 64-1; spriteidx >= 0; spriteidx--) {
+    if (!sprites[spriteidx].draw_behind) {
+      draw_tile(sprites[spriteidx].tile);
     }
   }
 }
