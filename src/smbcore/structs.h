@@ -22,14 +22,6 @@ struct struct_yr07 {
 };
 
 
-typedef struct struct_xc struct_xc;
-
-struct struct_xc {
-  byte x;
-  bool c;
-};
-
-
 typedef struct struct_yr06r07 struct_yr06r07;
 
 struct struct_yr06r07 {
