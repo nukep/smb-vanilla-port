@@ -10494,27 +10494,6 @@ void SprObjectOffscrChk(const byte objoff) {
 }
 
 
-// SMB:ebaa
-// SM2MAIN:b885
-// Signature: [X, Y, r05, r02, r04, r03] -> [X, Y, r02]
-struct_xyr02 DrawEnemyObjRow(const byte table_idx, const byte sproff, const byte xpos, const byte ypos, const byte attrs, const byte flags) {
-  const byte left_tileidx  = EnemyGraphicsTable[table_idx];
-  const byte right_tileidx = EnemyGraphicsTable[table_idx + 1];
-
-  return DrawSpriteObject(table_idx, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flags);
-}
-
-
-// SMB:ebb2
-// SM2MAIN:b88d
-// Signature: [X, Y, r00, A, r05, r02, r04, r03] -> [X, Y, r02]
-struct_xyr02 DrawOneSpriteRow(const byte tile_counter, const byte sproff, const byte left_tileidx, const byte right_tileidx, const byte xpos, const byte ypos, const byte attrs, const byte flags) {
-  // This is really just DrawSpriteObject with the right_tileidx parameter assigned to A instead of r01. A shortcut to avoid a "STA" instruction.
-
-  return DrawSpriteObject(tile_counter, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flags);
-}
-
-
 // SMB:ebd1
 // SM2MAIN:b8ac
 // Signature: [X] -> []
@@ -11359,21 +11338,3 @@ byte GetYOffscreenBits(const byte param_1) {
   assert_eq_assumption(i < 9, true);
   return lookup[i];
 }
-
-
-// SMB:f282
-// SM2MAIN:bf67
-// Signature: [X, Y, r00, r01, r05, r02, r04, r03] -> [X, Y, r02]
-struct_xyr02 DrawSpriteObject(const byte tile_counter, const byte sproff, const byte left_tileidx, const byte right_tileidx, const byte xpos, const byte ypos, const byte attrs, const byte flags) {
-  struct_xyr02 result;
-
-  const bool flip_horz = (flags & 2) != 0;
-  draw_sprite_row(0, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flip_horz);
-
-  result.x = tile_counter + 2;
-  result.y = sproff + 8;
-  result.r02 = ypos + 8;
-  return result;
-}
-
-

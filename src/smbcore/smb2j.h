@@ -1,193 +1,6 @@
 #pragma once
-#pragma pack(push, 1)
 
-
-typedef unsigned char    byte;
-
-typedef struct struct_ycr07 struct_ycr07;
-
-struct struct_ycr07 {
-  byte y;
-  bool c;
-  byte r07;
-};
-
-
-typedef struct struct_xr00r01 struct_xr00r01;
-
-struct struct_xr00r01 {
-  byte x;
-  byte r00;
-  byte r01;
-};
-
-
-typedef struct struct_ncr00 struct_ncr00;
-
-struct struct_ncr00 {
-  bool n;
-  bool c;
-  byte r00;
-};
-
-
-typedef struct struct_xr06 struct_xr06;
-
-struct struct_xr06 {
-  byte x;
-  byte r06;
-};
-
-
-typedef struct struct_r06r07 struct_r06r07;
-
-struct struct_r06r07 {
-  byte r06;
-  byte r07;
-};
-
-
-typedef struct struct_ayr02r04r06r07 struct_ayr02r04r06r07;
-
-struct struct_ayr02r04r06r07 {
-  byte a;
-  byte y;
-  byte r02;
-  byte r04;
-  byte r06;
-  byte r07;
-};
-
-
-struct blockbuffer_colli_result {
-  byte a;
-  byte r04;
-
-  u16 mt_x;
-  u16 mt_y;
-};
-
-
-typedef struct struct_r01r02r03 struct_r01r02r03;
-
-struct struct_r01r02r03 {
-  byte r01;
-  byte r02;
-  byte r03;
-};
-
-
-typedef struct struct_azr04 struct_azr04;
-
-struct struct_azr04 {
-  byte a;
-  byte r04;
-};
-
-
-typedef struct struct_axyz struct_axyz;
-
-struct struct_axyz {
-  byte a;
-  byte x;
-  byte y;
-  bool z;
-};
-
-typedef struct struct_ayz struct_ayz;
-
-struct struct_ayz {
-  byte a;
-  byte y;
-  bool z;
-};
-
-
-typedef struct struct_ay struct_ay;
-
-struct struct_ay {
-  byte a;
-  byte y;
-};
-
-
-typedef struct struct_axy struct_axy;
-
-struct struct_axy {
-  byte a;
-  byte x;
-  byte y;
-};
-
-
-typedef struct struct_yr07 struct_yr07;
-
-struct struct_yr07 {
-  byte y;
-  byte r07;
-};
-
-
-typedef struct struct_ax struct_ax;
-
-struct struct_ax {
-  byte a;
-  byte x;
-};
-
-
-typedef struct struct_xc struct_xc;
-
-struct struct_xc {
-  byte x;
-  bool c;
-};
-
-
-typedef struct struct_xyr02 struct_xyr02;
-
-struct struct_xyr02 {
-  byte x;
-  byte y;
-  byte r02;
-};
-
-
-typedef struct struct_yc struct_yc;
-
-struct struct_yc {
-  byte y;
-  bool c;
-};
-
-
-typedef struct struct_ar00 struct_ar00;
-
-struct struct_ar00 {
-  byte a;
-  byte r00;
-};
-
-
-typedef struct struct_yr06r07 struct_yr06r07;
-
-struct struct_yr06r07 {
-  byte y;
-  byte r06;
-  byte r07;
-};
-
-
-typedef struct struct_xr00 struct_xr00;
-
-struct struct_xr00 {
-  byte x;
-  byte r00;
-};
-
-
-
-
+#include "structs.h"
 
 void smb2j_jumptable_VictoryModeSubroutines_forW8(byte param_1);
 #define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
@@ -1218,12 +1031,6 @@ void smb2j_EnemyGfxHandler(byte param_1);
 void smb2j_SprObjectOffscrChk(byte objoff);
 #define SprObjectOffscrChk smb2j_SprObjectOffscrChk
 
-struct_xyr02 smb2j_DrawEnemyObjRow(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6);
-#define DrawEnemyObjRow smb2j_DrawEnemyObjRow
-
-struct_xyr02 smb2j_DrawOneSpriteRow(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
-#define DrawOneSpriteRow smb2j_DrawOneSpriteRow
-
 void smb2j_DrawBlock(byte param_1);
 #define DrawBlock smb2j_DrawBlock
 
@@ -1343,9 +1150,6 @@ byte smb2j_GetYOffscreenBits(byte param_1);
 
 byte smb2j_DividePDiff(byte param_1,byte param_2,bool param_3,byte param_4,byte param_5);
 #define DividePDiff smb2j_DividePDiff
-
-struct_xyr02 smb2j_DrawSpriteObject(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7,byte param_8);
-#define DrawSpriteObject smb2j_DrawSpriteObject
 
 void smb2j_TitleScreenMode(void);
 #define TitleScreenMode smb2j_TitleScreenMode
@@ -1487,6 +1291,3 @@ void smb2j_MushroomRetainersForW8(void);
 
 void smb2j_WriteNameToVictoryMsg(void);
 #define WriteNameToVictoryMsg smb2j_WriteNameToVictoryMsg
-
-
-#pragma pack(pop)
