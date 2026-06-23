@@ -690,4 +690,877 @@
   memory note about the .c-files-are-C++ fact since it's non-obvious and central
   to the reorg.
 
-✻ Churned for 19m 11s
+✻ Brewed for 19m 11s
+
+❯ /export                                                                       
+  ⎿  Conversation exported to: /home/dan/repos/smb-vanilla-port/2026-06-22-20031
+     0-local-command-caveatcaveat-the-messages-below.txt
+
+● Session model anthropic/claude-4.8-opus-20260528 could not be restored
+  (not a model this version of Claude Code recognizes) — using 
+  claude-opus-4-8 instead.
+
+❯ So for the C++ comment, these files are intended to be C-compatible files.    
+  The eventual goal is to have this project compilable to embedded systems,     
+  which may lack a C++ compiler.                                                
+                                                                                
+  I also want you to focus more on the design of the plan, and not the exact    
+  enumeration of symbols.                                                       
+                                                                                
+  I'd like you to ask me clarifying questions about the design goals if there   
+  are ambiguities.                                                              
+
+  Thought for 1m 6s (ctrl+o to expand)
+
+● This changes my review materially. My "rename to .cpp" recommendation was
+  exactly backwards given the embedded/C goal — the C++ leakage is the tech
+  debt, not something to cement. Let me fix the memory note that framed it
+  wrong, then ask you about the design forks this opens up.
+
+  Thought for 34s, recalled 1 memory, wrote 3 memories (ctrl+o to expand)
+
+● This is an important correction — given the embedded/C goal, "rename to .cpp"
+  was precisely the wrong instinct. The C++ leakage is the debt to peel away,
+  not cement. I've fixed the memory note.
+
+  Before I redesign the plan around C-compatibility, I want to resolve a few
+  genuine forks, since they change the shape of the whole plan rather than just
+  details.
+
+  A few things I see in the code that bear on this:
+  - The C++ dependencies in the shared files come almost entirely through
+  smbcore.h: class RamByteArray/ConstRamByteArray (but only under
+  CHECK_ARRAY_BOUNDS — release builds expand RAMARRAY to plain pointers),
+  thread_local SMB_STATE, and aggregate-init like *buttons = {0}.
+  - types.h already has #ifdef __cplusplus branches, so there's existing
+  awareness of the C/C++ duality.
+  - The top-level files (smb1.cpp/smb2j.cpp — Reset/NMI/tick/draw_graphics) are
+  also C++ today, so "embedded build is C" implies a story for those too, not
+  just the bulk game logic.
+
+● User answered Claude's questions:
+  ⎿  · What does "C-compatible" mean as a target for this reorg? → Actually 
+     compiled as C
+     · For the eventual embedded/C build, how much must be C? → All the core 
+     game logic, so the two libraries that compile the core of SMB1 and SMB2J. 
+     The existing host libraries (like Nes_Audio) can be C++. An embedded build 
+     may choose different libraries, which are not considered right now.
+     · What about the RamByteArray bounds-checker (C++-only, debug-only)? → Keep
+     as C++ debug-only luxury
+
+  Thought for 4m 5s (ctrl+o to expand)
+
+● That resolves the big axes. One genuine design-goal ambiguity remains, and
+  it's the linchpin for how the layering is structured — so I'd rather ask than
+  guess.
+
+  The issue: "the core libraries compile as C" needs a config that actually does
+  so to keep the invariant honest. The natural such config is core + globals 
+  interface + C compiler (no SMB_STATE, no thread_local, no bounds-checker →
+  trivially C). But the callback interface implementation — the one the desktop
+  build uses — currently relies on C++ itself: thread_local SMB_STATE, and ppu.h
+  uses a C++ reference (ushort &v = PPU_STATE.v.value;). So I need to know how
+  far the C requirement reaches.
+
+● User answered Claude's questions:
+  ⎿  · Which build configuration is the one that must actually compile as C (the
+     tested invariant)? → The core with either interface must be able to 
+     compile in C. C++ remains optional for the core, to allow extra features 
+     like array bounds-checking.
+     · How should the interface implementation relate to the core libraries? → 
+     Interface compiled into each lib
+
+  Thought for 6m 7s (ctrl+o to expand)
+
+● Both answers are decisive, and together they pin down the architecture. Let me
+  restate the design they imply, because it inverts a couple of things in the
+  current plan:
+
+  - The C build is the invariant, and it should be the default build — not a
+  special config. Meson compiles .c files with the C compiler by extension, so
+  if the core files stay .c, "compiles as C" is proven continuously by the
+  normal build with zero ceremony. That's the opposite of my earlier "rename to
+  .cpp," which would have destroyed the invariant.
+  - C++ becomes the opt-in luxury (for RamByteArray bounds-checking), reached by
+  force-compiling those same .c files as C++ (-x c++) under CHECK_ARRAY_BOUNDS.
+  So the core is "C by default, C++-compilable on request."
+  - Core-with-either-interface must be C means the callback interface's current
+  C++-isms (thread_local SMB_STATE, ppu.h's ushort &v reference) are themselves
+  debt to make C-clean — not just the bulk game code.
+
+  This reframes the whole plan around the interface seam and dual-language
+  discipline, and demotes the symbol enumeration to a worklist. Let me rewrite
+  it that way.
+
+  Read 1 file (ctrl+o to expand)
+
+● Now I'll rewrite the plan, reframed around C-by-default with C++ as an opt-in,
+  and the interface seam as the central design element. I'll keep the symbol
+  details but demote them to a worklist appendix.
+
+● Write(docs/reorg-claude-plan.md)
+  ⎿  Added 97 lines, removed 121 lines
+        1 -(technically an AI-generated doc)                             
+        1 +(technically an AI-generated doc, reviewed and corrected again
+          +st the actual code)                                           
+        2  
+        3  # Reorg Plan: Two Independent Game Libraries
+        4  
+        5  ## Context
+        6  
+        7 -The current codebase compiles SMB1 and SMB2J into a single `li
+          -bsmbcore` by namespacing all functions with `smb1_`/`smb2j_` p
+          -refixes and using `#define` aliases to let shared `.c` files c
+          -all the right version at compile time. All game code is tied t
+          -o a global `SMB_STATE` singleton accessed via macros in `smbco
+          -re.h`. This makes the library hard to use on embedded targets,
+          - prevents dynamic loading of a single game, and leaves `.c` fi
+          -les as `#include`d fragments rather than real translation unit
+          -s.                                                            
+        7 +The current codebase compiles SMB1 and SMB2J into a single `li
+          +bsmbcore` by namespacing all functions with `smb1_`/`smb2j_` p
+          +refixes and using `#define` aliases to let shared game files c
+          +all the right version at compile time. All game code reaches R
+          +AM/PPU/APU and the host through a global `SMB_STATE` singleton
+          + accessed via macros in `smbcore.h`. The shared game files are
+          + `#include`d as text fragments into `smb1.cpp`/`smb2j.cpp` rat
+          +her than compiled as real translation units.                  
+        8  
+        9 -The goal is two self-contained libraries — `libsmb1` and `libs
+          -mb2j` — each exposing the same `mario.h` public API, with an i
+          -nterface layer that decouples game code from the callback/stat
+          -e mechanism.                                                  
+        9 +The goal is two self-contained libraries — `libsmb1` and `libs
+          +mb2j` — each exposing the same `mario.h` public API, with a sw
+          +appable **interface layer** that decouples the game core from 
+          +the host (RAM storage, callbacks, drawing, audio, input).     
+       10  
+       11 -### Key facts about the current build (verified against the co
+          -de)                                                           
+       11 +## Design goals (decided — these drive every choice below)    
+       12  
+       13 -These facts drive several decisions below. Get them wrong and 
+          -the build breaks.                                             
+       13 +1. **The game core compiles as C.** This is the headline goal 
+          +and an *enforced invariant*, because embedded targets may have
+          + no C++ compiler. "Core" = the two libraries that compile the 
+          +SMB1/SMB2J game logic (`common`, `area`, `common_sound`, the `
+          +*only` files, the shared engine glue, and the per-game top lay
+          +er of `Reset`/`NMI`/`tick`/`draw_graphics`). Host-side librari
+          +es (audio via `Nes_Snd_Emu`, SDL frontends, GL renderer) may s
+          +tay C++ — an embedded build will swap those out anyway and the
+          +y are out of scope here.                                      
+       14  
+       15 -1. **The shared "`.c`" files are actually C++.** `src/smbcore/
+          -common.c`, `area.c`, `common_sound.c`, `smb1only.c`, `smb2jonl
+          -y.c` are named `.c` but compiled as C++. They are **never** li
+          -sted as meson sources today — they are `#include`d textually i
+          -nto `smb1.cpp`/`smb2j.cpp`. They use C++-only constructs reach
+          -able via `smbcore.h` (`class RamByteArray`, `thread_local`, ag
+          -gregate assignment `*buttons = {0};`). Meson selects the compi
+          -ler **by file extension**, so listing them as `.c` sources (as
+          - the original Phase 4 did) would invoke the C compiler and fai
+          -l. They must either be renamed to `.cpp` or compiled as C++ ex
+          -plicitly. **This plan renames them to `.cpp`** (see Phase 1d).
+       15 +2. **C++ is an optional luxury layer, not a requirement.** The
+          + core must *also* be compilable as C++, so that opt-in C++ fea
+          +tures still work — today that means the `RamByteArray`/`ConstR
+          +amByteArray` bounds-checker (enabled only under `CHECK_ARRAY_B
+          +OUNDS`, debug builds). The bounds-checker stays a C++-only deb
+          +ug luxury: C builds use plain pointer arrays and simply don't 
+          +get it. We do **not** reimplement it for C.                   
+       16  
+       17 -2. **Everything is currently one translation unit per game.** 
+          -Because the `.c` files are `#include`d into `smb1.cpp`, all of
+          - SMB1's code is a single TU; likewise SMB2J. This is why `stat
+          -ic` functions and inline glue forward-declarations work across
+          - "files" today. Splitting into real TUs (the entire point of P
+          -hase 1d) breaks every cross-file `static` reference and every 
+          -implicit forward declaration. The two confirmed cross-TU `stat
+          -ic` cases and the glue functions are enumerated below — they m
+          -ust be handled or the link fails.                             
+       17 +3. **The core must compile as C against *either* interface imp
+          +lementation.** There are two interface impls (see below): the 
+          +existing callback/`SMB_STATE` one, and a new bare-globals one 
+          +for embedded. *Both* must be C-clean. This is stricter than it
+          + sounds: it makes the callback interface's current C++-isms (`
+          +thread_local`, a C++ reference in `ppu.h`) into debt that this
+          + reorg must clear, not just the bulk game files.              
+       18  
+       19 -3. **`smbcore.h` and `smbcommon.h` have no include guards.** T
+          -he `-include` injection approach plus any redundant direct `#i
+          -nclude` will double-include them. Phase 1 must add include gua
+          -rds (or `#pragma once`) to every header that will be pulled in
+          - via context, and remove the now-redundant direct includes fro
+          -m the `.cpp` files.                                           
+       19 +4. **Each library embeds one interface implementation at build
+          + time.** Selection is a compile-time switch (e.g. `-DSMB_INTER
+          +FACE_GLOBALS`); there is no runtime interface indirection and 
+          +no separately-linked interface object. This matches the curren
+          +t single-binary shape: choosing an interface means recompiling
+          + the library.                                                 
+       20  
+       21 +### What this means concretely (the load-bearing consequence) 
+       22 +                                                              
+       23 +Meson picks the compiler **by file extension**. So the simples
+          +t, self-enforcing way to guarantee "the core compiles as C" is
+          +: **the core game files keep the `.c` extension and are compil
+          +ed by the C compiler in the default build.** The C invariant i
+          +s then proven continuously by the normal build, for free.     
+       24 +                                                              
+       25 +This *inverts* a tempting move (renaming the shared files to `
+          +.cpp`). Renaming to `.cpp` would quietly destroy the invariant
+          + — it must not happen. Instead:                               
+       26 +                                                              
+       27 +- **Default build: core is C.** `.c` files → C compiler. No `t
+          +hread_local`, no `class`, no references; bounds-checker compil
+          +es out to plain pointers.                                     
+       28 +- **Opt-in C++ build: same `.c` files, force-compiled as C++**
+          + (`-x c++` / meson override) under `CHECK_ARRAY_BOUNDS`, to li
+          +ght up `RamByteArray`. This is the luxury path.               
+       29 +                                                              
+       30 +Everything below serves making those two statements true.     
+       31 +                                                              
+       32  ---
+       33  
+       23 -## Cross-TU symbols that must be declared in a header (the cri
+          -tical gap)                                                    
+       34 +## The central problem: `smbcore.h` mixes three concerns      
+       35  
+       25 -Today these resolve because the caller and definition land in 
+          -the same TU. Once files are real TUs, each needs a real declar
+          -ation in a shared header. Verified call sites:                
+       36 +`smbcore.h` today is one file doing three jobs, and the C++ le
+          +akage all comes from blending them:                           
+       37  
+       27 -| Symbol | Defined in | Called from (other TU) | Currently dec
+          -lared? |                                                      
+       28 -|---|---|---|---|                                             
+       29 -| `SoundEngine` | `common_sound.cpp` (`static`!) | `smb1.cpp`,
+          - `smb2j.cpp` NMI | No — and it's `static` |                   
+       30 -| `DrawTitleScreen` (SMB1) | `smb1.cpp` | `common.cpp` (`Scree
+          -nRoutines`) | No |                                            
+       31 -| `TransposePlayers` (SMB1) | `smb1.cpp` | `common.cpp` | No |
+       32 -| `ScrollScreen` (SMB2J) | `smb2j.cpp` | `common.cpp` (3×) | N
+          -o |                                                           
+       33 -| `LoadFiles` (SMB2J) | `smb2j.cpp` | `smb2jonly.cpp` (4×) | N
+          -o (locally declared in smb2j.cpp) |                           
+       34 -| `UpdateGamesBeaten` (SMB2J) | `smb2j.cpp` | `smb2jonly.cpp` 
+          -| No (locally declared) |                                     
+       35 -| `FDS_drive_status` (SMB2J) | `smb2j.cpp` | `smb2jonly.cpp` (
+          -2×) | No |                                                    
+       36 -| `LoadAreaPointer`, `GetAreaDataAddrs`, `AltHard_GetAreaDataA
+          -ddrs` (SMB2J-only), `AreaParserTaskControl`, `AreaParserTaskHa
+          -ndler` | `area.cpp` (`static`) | `common.cpp` | declared `stat
+          -ic` in `area.h` |                                             
+       38 +| Concern | Examples | C-clean? |                             
+       39 +|---|---|---|                                                 
+       40 +| **A. Pure utility** (game-agnostic, no host) | int typedefs,
+          + math macros (`LOAD_16`…), `CONCAT11`/`NEGATE`/`SWAP`, `find_f
+          +irst_bit_position`, the `ppureg`/`ppu_state`/`sprite` structs,
+          + assert/warn macros | Yes, trivially |                        
+       41 +| **B. Interface surface** (how the core reaches the host) | `
+          +RAM`/`PPURAM`/`CHRROM`, `AreaData`/…, `draw_tile`, APU regs, `
+          +joy1/2`, `announce_main_scroll`, `transfer_sprite_data`, `rom_
+          +ptr`, `ppu.h` hookup, `SMB1_ONLY`/`SMB2J_ONLY` | This is the s
+          +eam — must be C-clean in *both* impls |                       
+       42 +| **C. Callback-impl internals** | `struct SMB_state`, `thread
+          +_local SMB_STATE`, the callback-dispatch inline funcs, `RamByt
+          +eArray` (the C++ luxury) | Currently C++-only; **the debt** | 
+       43  
+       38 -Action: make `SoundEngine` non-`static` and declare it in `smb
+          -common.h` (it is game-agnostic). Move the inline glue forward-
+          -decls currently at the tops of `smb1.cpp`/`smb2j.cpp` (`DrawTi
+          -tleScreen`, `TransposePlayers`, `ScrollScreen`, `LoadFiles`, `
+          -UpdateGamesBeaten`, `FDS_drive_status`, etc.) into the appropr
+          -iate per-game header (`smb1.h`/`smb2j.h`) so the shared TUs ca
+          -n see them. Drop `static` from the five `area.h` functions (th
+          -e original plan only listed four — `AltHard_GetAreaDataAddrs` 
+          -was missed; it is `SMB2J_MODE`-only).                         
+       44 +The reorg is fundamentally about **separating A / B / C** so t
+          +hat the core depends only on A and the *declared interface* of
+          + B, while C (and its C++-isms) is confined to one swappable im
+          +plementation.                                                 
+       45  
+       40 -The two real cross-TU `static` cases were found by scanning; o
+          -ne is a false positive worth noting so a future reader doesn't
+          - re-flag it:                                                  
+       41 -- `common_sound.c::SoundEngine` — **real**, must be de-`static
+          -`ed and declared.                                             
+       42 -- `smb2jonly.c::LoadLuigiPhysics` referenced in `common.c` — *
+          -*false positive**; the two references in `common.c` are inside
+          - comments only. No action.                                    
+       46 +### The three C++-isms in B/C, and where each must go         
+       47  
+       44 ----                                                           
+       48 +1. **`thread_local struct SMB_state *SMB_STATE`** — pure callb
+          +ack-impl internal (concern C). Not C-clean (`thread_local` is 
+          +a C++ keyword; C's spelling is `_Thread_local`/`thread_local` 
+          +via `<threads.h>`). Goal #3 says the callback impl must be C-c
+          +ompilable, so this needs the C spelling (or a macro that resol
+          +ves per-language). Lives only in the callback interface impl; 
+          +the globals impl has no such pointer.                         
+       49  
+       46 -## Phase 1 — Context headers, interface layer, standalone TUs 
+       50 +2. **`ppu.h`'s `ushort &v = PPU_STATE.v.value;`** — a C++ refe
+          +rence, inside the PPU register helpers that are part of the in
+          +terface surface (B). Must be de-referenced (rewrite to a point
+          +er or direct expression) so `ppu.h` is C-clean regardless of i
+          +nterface. This is independent of which impl is chosen.        
+       51  
+       48 -### 1a. Split `smbcore.h`                                     
+       52 +3. **`RamByteArray`/`ConstRamByteArray` + the `*buttons = {0}`
+          + aggregate assignment** — the bounds-checker is the sanctioned
+          + C++ luxury (concern C, debug-only); it stays C++-only and the
+          + C build uses the plain-pointer `RAMARRAY`. The `{0}` aggregat
+          +e assignments in the callback inlines (`joy1`/`joy2`) must be 
+          +written C-compatibly (`*buttons = (struct SMB_buttons){0};`) s
+          +ince those inlines live in the interface impl that must be C-c
+          +lean.                                                         
+       53  
+       50 -- **Keep in `smbcore.h`**: game-agnostic utilities only — `byt
+          -e`/`ushort`/`u8`/`u16`/`i8`/`i16`/`i32` typedefs, the `NOINLIN
+          -E`/`NORETURN`/`likely`/`unlikely` and `error`/`warning` macros
+          -, math macros (`LOAD_16`, `ADD_16_16`, etc.), `ppureg`/`ppu_st
+          -ate`/`sprite` structs, `assert_*`/`assume_weak_original`/`jmpe
+          -ngine_overflow` helpers, `RamByteArray`/`ConstRamByteArray` an
+          -d the `RAMARRAY` macros, `CONCAT11`, `CARRY1`, `NEGATE`, `SWAP
+          -`, `ABS_DIFF`, `find_first_bit_position`. No reference to `SMB
+          -_STATE` or callbacks.                                         
+       51 -  - **Caveat:** `RamByteArray` uses the `RAM()` macro, which i
+          -s an interface concern (it expands to `SMB_STATE->rammem[...]`
+          -). So `smbcore.h` cannot fully avoid depending on `RAM()`. Res
+          -olve by having `smbcore.h` (or the context header) include the
+          - interface header *before* the `RamByteArray` definitions, or 
+          -keep `RamByteArray`/`RAMARRAY` in the interface layer with the
+          - other `RAM`-dependent code. Decide explicitly; do not leave `
+          -RAM` undefined at the point `RamByteArray` is parsed.         
+       52 -- **Move to `smbcore/interface_callbacks.h`**: everything that
+          - goes through `SMB_STATE` — the `SMB_state`/`SMB_callbacks` wi
+          -ring, `RAM`, `PPURAM`, `CHRROM`, `RAM_CONST`, `AreaData`, `Ene
+          -myData`, `MusicData`, `PatchCurrentPlayer`, `read_rom_bytes`, 
+          -`seek_rom`, `draw_tile`, `can_draw_tile`, `apu_write_register`
+          -, `apu_end_frame`, `joy1`, `joy2`, `announce_main_scroll`, `tr
+          -ansfer_sprite_data`, `smb2j_load_games_beaten`, `smb2j_save_ga
+          -mes_beaten`, `update_pattern_tables`, `PPU_STATE` macro + `#in
+          -clude "ppu.h"`, `rom_ptr`, `joystick_strobe`, all `APU_REG` in
+          -lines, the `SMB_STATE` extern declaration, and the `SMB1_ONLY`
+          -/`SMB2J_ONLY`/`SMB1_2J_SWITCH`/`ssw` macros.                  
+       53 -- **Add include guards** to `smbcore.h` (and to the new header
+          -s). It currently has none.                                    
+       54 +Settling these three is the *real* work of Phase 1; the file-s
+          +plitting is bookkeeping around it.                            
+       55  
+       55 -### 1b. Create interface selector and alternate implementation
+       56 +---                                                           
+       57  
+       57 -- **`smbcore/interface.h`**: thin selector — `#include`s `inte
+          -rface_callbacks.h` by default, or `interface_globals.h` when `
+          -SMB_INTERFACE_GLOBALS` is defined at build time.              
+       58 -- **`smbcore/interface_globals.h`**: new file. Same macro/func
+          -tion names as `interface_callbacks.h` but backed by bare globa
+          -ls (`extern byte smbglobals_ram[0x10000]`, etc.) and `extern` 
+          -function declarations. No `SMB_STATE` struct. Intended for emb
+          -edded targets.                                                
+       59 -  - This file is a **stub for now** and is only smoke-tested (
+          -see Verification). It must provide: `RAM`/`PPURAM`/`CHRROM`/`R
+          -AM_CONST`, `AreaData`/`EnemyData`/`MusicData`/`PatchCurrentPla
+          -yer`, the PPU state hook, the APU/joy/draw/scroll/sprite funct
+          -ions, and the `SMB1_ONLY`/`SMB2J_ONLY` constants (which become
+          - compile-time `true`/`false` per library — see Phase 3c). Gett
+          -ing the full surface right is deferred; the goal in Phase 1 is
+          - that it *exists and the selector compiles*.                  
+       58 +## Phase 1 — Carve the interface seam; make the core C-clean  
+       59  
+       61 -### 1c. Create per-game context headers                       
+       60 +The objective of Phase 1 is: **the existing single combined bu
+          +ild still produces identical behavior, but the core game files
+          + now compile as C and reach the host only through a declared i
+          +nterface.** No library split yet — minimize moving parts.     
+       61  
+       63 -**`smbcore/smb1_context.h`**:                                 
+       64 -```c                                                          
+       65 -#define SMB1_MODE                                             
+       66 -#include "smbcore.h"                                          
+       67 -#include "smbcore/interface.h"                                
+       68 -#include "smbcore/smb_romarrays.h"                            
+       69 -#include "smbcore/vars.h"                                     
+       70 -#include "smbcore/smb1.h"                                     
+       71 -#include "smbcore/types.h"                                    
+       72 -#include "smbcore/consts.h"   // smb1only/common/area all #inc
+          -lude "consts.h"                                               
+       73 -#include "smbcommon.h"                                        
+       74 -```                                                           
+       62 +### 1a. Split `smbcore.h` by concern (A / B / C above)        
+       63  
+       76 -**`smbcore/smb2j_context.h`** — same shape with SMB2J equivale
+          -nts (`smb2j_romarrays.h`, `smb2j.h`) and `#define SMB2J_MODE`.
+       64 +- **`smbcore.h` keeps concern A only** — pure utilities, no ho
+          +st, no `SMB_STATE`. Add include guards (it has none today). Ve
+          +rify it is C-clean.                                           
+       65 +- **`smbcore/interface.h`** declares concern B as a contract: 
+          +the macros/functions the core calls to reach the host (`RAM`, 
+          +`draw_tile`, APU, input, `rom_ptr`, the PPU hookup, `SMB1_ONLY
+          +`/`SMB2J_ONLY`, …). It is a *selector*: include `interface_cal
+          +lbacks.h` by default, or `interface_globals.h` under `-DSMB_IN
+          +TERFACE_GLOBALS`.                                             
+       66 +- **`smbcore/interface_callbacks.h`** is concern C: the `SMB_s
+          +tate` struct, the `SMB_STATE` pointer, and the callback-dispat
+          +ch inlines — the existing behavior, now isolated and made **C-
+          +clean** (items 1 & 3 above). The `RamByteArray` luxury can liv
+          +e here or alongside the `RAMARRAY` macro definition; wherever 
+          +it lands, it must be `#ifdef __cplusplus`-gated so the C build
+          + never sees it.                                               
+       67 +- **`smbcore/interface_globals.h`** is the embedded impl: same
+          + names backed by bare `extern` globals (`extern byte smbglobal
+          +s_ram[0x10000]`, …), no `SMB_state`, no callbacks. **Stub for 
+          +now** — its job in this reorg is to *exist and compile as C* (
+          +smoke-test), proving the seam is real. Full embedded semantics
+          + are deferred.                                                
+       68  
+       78 -Notes:                                                        
+       79 -- These extract what is already at the tops of `smb1.cpp` / `s
+          -mb2j.cpp`, **plus** the per-file includes currently inside the
+          - `.c` files (`types.h`, `vars.h`, `consts.h`, `area.h`). Since
+          - injection happens once per TU and the `.c` files also `#inclu
+          -de` these directly, **include guards make the duplication harm
+          -less** — but only if guards exist (they do for `vars.h`/`types
+          -.h`/`consts.h`/`area.h`/romarrays; they do **not** yet for `sm
+          -bcore.h`/`smbcommon.h`). Add the missing guards in 1a.        
+       80 -- The glue forward-declarations and `#define GameTimerDisplay 
+          -GameTimerDisplaySMB1` (resp. SMB2J), and SMB2J's `#define Area
+          -AddrOffsets RAMARRAY_CONST(0xC360, 0x28)`, currently sit in th
+          -e `.cpp` files. Decide where each lands: game-specific `#defin
+          -e`s like `GameTimerDisplay` and `AreaAddrOffsets` belong in th
+          -e context header (or the per-game romarrays header); the cross
+          --TU function decls belong in `smb1.h`/`smb2j.h` (see the table
+          - above). `AreaAddrOffsets` already has an SMB1 definition in `
+          -smb_romarrays.h` but the SMB2J one is a manual `#define` in `s
+          -mb2j.cpp` — consolidate it into `smb2j_romarrays.h` for symmet
+          -ry.                                                           
+       69 +**Layering caveat to settle explicitly:** `RamByteArray` and t
+          +he `RAMARRAY` macros depend on `RAM()`, which is defined by th
+          +e interface impl. So the bounds-checker can't sit "above" the 
+          +interface. Decide the include order (interface impl defines `R
+          +AM` *before* the array wrappers are parsed) and document it; d
+          +on't leave `RAM` undefined where the wrappers expand.         
+       70  
+       82 -### 1d. Make shared files proper translation units            
+       71 +### 1b. Make `ppu.h` C-clean                                  
+       72  
+       84 -- **Rename** `common.c`, `area.c`, `common_sound.c`, `smb1only
+          -.c`, `smb2jonly.c` → `.cpp` (they are already C++; this lets m
+          -eson compile them directly). Update `area.h`'s include and any
+          - references.                                                  
+       85 -- Build system injects context via `-include src/smbcore/smb1_
+          -context.h` (etc.) for each library's source list — no per-file
+          - edits for context.                                           
+       86 -- **Remove `static`** from `LoadAreaPointer`, `GetAreaDataAddr
+          -s`, `AltHard_GetAreaDataAddrs` (SMB2J-only), `AreaParserTaskCo
+          -ntrol`, `AreaParserTaskHandler` in `area.h` (existing TODO com
+          -ment) — and update the definitions in `area.cpp` to match.    
+       87 -- **De-`static` and declare `SoundEngine`** (in `common_sound.
+          -cpp`); add a declaration to `smbcommon.h`.                    
+       88 -- **Hoist the cross-TU glue declarations** from the tops of `s
+          -mb1.cpp`/`smb2j.cpp` into `smb1.h`/`smb2j.h` (see table). Remo
+          -ve the now-redundant local forward-decls.                     
+       89 -- Remove all `#include "*.c"` lines from `smb1.cpp` and `smb2j
+          -.cpp`, and remove the per-file `#include "types.h"`/`"vars.h"`
+          -/`"consts.h"` from the (renamed) shared `.cpp` files if relyin
+          -g on the context injection — *or* leave them and rely on inclu
+          -de guards. Pick one approach and apply it consistently.       
+       73 +De-reference item 2. `ppu.h` is part of the interface surface 
+          +and is included by every core TU, so it must compile as C unde
+          +r either impl.                                                
+       74  
+       91 ----                                                           
+       75 +### 1c. Make the core game files real C translation units     
+       76  
+       93 -## Phase 2 — Drop `smb1_`/`smb2j_` prefixes and aliases       
+       77 +Today `common.c`, `area.c`, `common_sound.c`, `smb1only.c`, `s
+          +mb2jonly.c` are `#include`d into the uber-modules, so the whol
+          +e game is one TU and the C compiler never sees them. To compil
+          +e them as C TUs:                                              
+       78  
+       95 -- Definitions in all game TUs use plain names (`GameMode`, `Sc
+          -rollHandler`, etc.).                                          
+       96 -- Delete every `#define Foo smb1_Foo` / `#define Foo smb2j_Foo
+          -` line from `smbcore/smb1.h` and `smbcore/smb2j.h` (~330 and ~
+          -430 lines respectively — this is mechanical but large; conside
+          -r a script).                                                  
+       97 -- Rename `smb1_Foo`/`smb2j_Foo` declarations to plain `Foo` in
+          - those headers.                                               
+       98 -- Extract the identical struct definitions (`struct_ycr07`, `s
+          -truct_axyz`, `blockbuffer_colli_result`, etc., plus the `#prag
+          -ma pack(push,1)`/`pop` framing) shared by both headers into a 
+          -new `smbcore/game.h`; include it from both context headers. Ke
+          -ep game-specific structs in the respective header (note: `stru
+          -ct_ayz` and `struct_axyz` appear in **both** headers today, so
+          - they go in `game.h`; verify the final per-game remainder is g
+          -enuinely game-specific before leaving it behind).             
+       79 +- Inject the per-game context (the interface selector + per-ga
+          +me headers) via a build-system `-include` of a small `*_contex
+          +t.h`, rather than each file `#include`-ing a pile of headers. 
+          +Keep the files `.c`.                                          
+       80 +- **Cross-TU breakage is the main hazard.** Because everything
+          + is one TU today, `static` functions and implicit forward-decl
+          +s reach across "files." Real TUs break that. The fix is purely
+          + mechanical — give every cross-TU symbol a real declaration in
+          + a shared header and drop `static` where it crosses — but it m
+          +ust be *complete* or the link fails. The specific symbols foun
+          +d by scanning are listed in the Appendix; treat that as a work
+          +list, not as design.                                          
+       81 +- This is also where the C-cleanliness of the core gets *prove
+          +n*: once the files compile as C TUs in the default build, any 
+          +remaining C++-ism is a hard compile error, not a latent risk. 
+       82  
+      100 -After this phase the two libraries have conflicting symbols an
+          -d **cannot be linked together**. The single `smbcore` library 
+          -and the testrunner-against-both-games setup no longer work as-
+          -is (see Phase 4 / Verification). Verify each game binary build
+          -s and runs independently.                                     
+       83 +### 1d. Keep the combined build working                       
+       84  
+       85 +At the end of Phase 1 there is still one `smbcore` library and
+          + the existing executables/testrunner, behavior unchanged. Only
+          + the internal structure (C core + isolated interface) has chan
+          +ged. This keeps the riskiest step (language-cleanliness) decou
+          +pled from the library split.                                  
+       86 +                                                              
+       87  ---
+       88  
+      104 -## Phase 3 — Absorb `smbcore.cpp`, fold in `smbcommon.cpp`    
+       89 +## Phase 2 — Drop the `smb1_`/`smb2j_` prefixes and aliases   
+       90  
+      106 -### 3a. Move ROM loading into game files                      
+       91 +With the core compiling per-game already (via context injectio
+          +n), the namespacing scheme is now dead weight:                
+       92  
+      108 -- `load_smb1` and the SMB1 branch of `detect_and_load_rom` mov
+          -e into `smb1.cpp`.                                            
+      109 -- `smb2j_load_file` + `load_smb2j` + the SMB2J branch of `dete
+          -ct_and_load_rom` (currently split across `smbcore.cpp`/`smb2j.
+          -cpp` via `extern "C"`) consolidate entirely into `smb2j.cpp`. 
+          -The `extern "C"` indirection for `smb2j_load_file` can then be
+          - dropped.                                                     
+      110 -- Each game file exposes a private loader; `detect_and_load_ro
+          -m` becomes per-library (each only knows its own format). Note 
+          -SMB1 currently only handles the iNES path and SMB2J handles th
+          -e two FDS paths — keep that behavior, just split it.          
+       93 +- Game files define plain names (`GameMode`, `ScrollHandler`, 
+          +…); delete the `#define Foo smb1_Foo` alias walls and the pref
+          +ixes from `smb1.h`/`smb2j.h`. This is large and mechanical — s
+          +cript it and diff.                                            
+       94 +- Hoist the struct definitions shared by both per-game headers
+          + (`struct_ycr07`, `struct_axyz`, `blockbuffer_colli_result`, t
+          +he `#pragma pack` framing, …) into a shared `smbcore/game.h`. 
+          +Leave only genuinely game-specific declarations behind (verify
+          + the remainder actually differs).                             
+       95  
+      112 -### 3b. Move public API into each game file                   
+       96 +After this phase the two games have colliding symbols and **ca
+          +nnot be linked into one binary**. That is the point of no retu
+          +rn for "one combined library," and it forces the executable/te
+          +strunner decision in Phase 4. Keep each commit building.      
+       97  
+      114 -Move from `smbcore.cpp` into `smb1.cpp` / `smb2j.cpp`:        
+      115 -- `SMB_state_size`, `SMB_state_init`, `SMB_start_on_level`, `S
+          -MB_which_game`, `SMB_ram`, `SMB_ppuram`, `SMB_ram_finishwrite`
+          -, `SMB_tick`, and the `draw_graphics` + `draw_nametable_tile`/
+          -`draw_nametable_rect` helpers.                                
+      116 -- `SMB_STATE` `thread_local` definition.                      
+      117 -- `SMB1_Reset`/`SMB1_NMI` → renamed to `SMB_Reset`/`SMB_NMI` (
+          -plain names, no prefix); same for SMB2J side. Drop the `extern
+          - "C"` wrappers that only existed to bridge `smbcore.cpp` ↔ the
+          - uber-modules.                                                
+      118 -- `SMB_tick` no longer dispatches on `which_game` — it calls t
+          -his library's `SMB_Reset`/`SMB_NMI` directly. The SMB1-only `s
+          -et_world_and_level` hack in `SMB_tick` stays in `smb1.cpp` (it
+          -'s already SMB1-only — the SMB2J branch has it commented out).
+      119 -- The `SMB_STATE` definition and `SMB_state_init`'s assignment
+          - of it are `interface_callbacks.h` concerns; the `interface_gl
+          -obals.h` build has no `SMB_STATE` and will need its own trivia
+          -l `SMB_state_init`/`SMB_state_size` (deferred with the rest of
+          - the globals stub).                                           
+       98 +---                                                           
+       99  
+      121 -`draw_graphics`/`draw_nametable_*` are byte-identical between 
+          -the two games. To avoid divergence, consider leaving them in a
+          - shared file (`smbcommon.cpp`) rather than copying into both g
+          -ame files. Flag this as a judgment call; copying is acceptable
+          - if the duplication is documented.                            
+      100 +## Phase 3 — Dissolve `smbcore.cpp` into the two libraries    
+      101  
+      123 -`smbcore.cpp` is now empty — delete it, and remove it from the
+          - build.                                                       
+      102 +`smbcore.cpp` currently holds the public API and dispatches `S
+          +MB_tick` on `which_game`. Split it so each game owns its own: 
+      103  
+      125 -Note: `SMB_which_game` is used by the testrunner. Keep it in e
+          -ach library returning a compile-time constant (`GAME_SMB1` or 
+          -`GAME_SMB2J`).                                                
+      104 +- **ROM loading** moves into the respective game file (SMB1 iN
+          +ES path → `smb1`; the FDS paths + `smb2j_load_file` → `smb2j`,
+          + dropping the `extern "C"` bridge that only existed to span th
+          +e uber-modules).                                              
+      105 +- **Public API** (`SMB_state_*`, `SMB_tick`, `SMB_ram[_finishw
+          +rite]`, `SMB_ppuram`, `SMB_which_game`, `draw_graphics`) moves
+          + into each game file. `SMB_tick` stops dispatching on `which_g
+          +ame` and calls this library's `Reset`/`NMI` directly. `SMB_whi
+          +ch_game` returns a compile-time constant per library.         
+      106 +- The `SMB_STATE` definition and its assignment are **callback
+          +-interface concerns** — they belong with `interface_callbacks.
+          +h`'s world, not in shared code. The globals build supplies its
+          + own trivial `SMB_state_size`/`SMB_state_init`. (Deferred with
+          + the rest of the globals stub.)                               
+      107 +- **Shared, game-agnostic code stays shared.** `draw_graphics`
+          +/`draw_nametable_*` are byte-identical across the two games, a
+          +s is `smbcommon.cpp` (`set_world_and_level`, `InitializeMemory
+          +`, `update_screen`, etc.). Prefer compiling one shared source 
+          +into both libraries over copy-pasting into each, to prevent di
+          +vergence. Under each library's context, `SMB1_ONLY`/`SMB2J_ONL
+          +Y` become compile-time constants, so the dead branches can be 
+          +pruned later at leisure.                                      
+      108  
+      127 -### 3c. Compile `smbcommon.cpp` into each library             
+      109 +`smbcore.cpp` ends up empty — delete it.                      
+      110  
+      129 -Add `src/smbcommon.cpp` to both library source lists. Compiled
+          - under each context header, `SMB1_ONLY`/`SMB2J_ONLY` in `set_w
+          -orld_and_level` and `InitializeMemory` become compile-time con
+          -stants (`true`/`false`), so dead branches can be removed at le
+          -isure. (Today `SMB1_ONLY` is `SMB_STATE->which_game == GAME_SM
+          -B1`; under each per-game build it should resolve to a constant
+          - — define it that way in each interface header, keyed off `SMB
+          -1_MODE`/`SMB2J_MODE`.)                                        
+      111 +---                                                           
+      112  
+      131 -`sync_data`, `set_world_and_level`, `update_screen`, `WriteNTA
+          -ddr`, `InitializeMemory`, `ReadJoypads`, `ReadPortBits`, `dect
+          -imers`, `update_prng` all live here and are game-agnostic — th
+          -ey stay in `smbcommon.cpp`, now compiled twice (once per libra
+          -ry) instead of `#include`d.                                   
+      113 +## Phase 4 — Build system                                     
+      114  
+      133 ----                                                           
+      115 +Two libraries, each = shared core `.c` files + that game's `*o
+          +nly.c` + `smbcommon` + the per-game top file, built **as C by 
+          +default** with the context header injected and the interface s
+          +elected:                                                      
+      116  
+      135 -## Phase 4 — Build system (`meson.build`)                     
+      117 +- Default config: C compiler on the core; callback interface; 
+          +this is the C invariant, tested by simply building.           
+      118 +- Luxury config: same core files force-compiled as C++ under `
+          +CHECK_ARRAY_BOUNDS` for `RamByteArray`.                       
+      119 +- Embedded smoke-test config: core + `-DSMB_INTERFACE_GLOBALS`
+          +, compiled as C, must compile cleanly against the globals stub
+          +. This is what continuously proves Goal #3 (core is C-clean ag
+          +ainst *either* interface).                                    
+      120  
+      137 -Replace the single `smbcore` library and its two executables w
+          -ith two libraries and two executables. Because the shared file
+          -s are now `.cpp`, list them directly:                         
+      121 +**Open decision to settle before starting Phase 4 — executable
+          +s & testrunner.** Today one `smbvanilla` plays either game by 
+          +ROM detection, and the testrunner branches on `SMB_which_game`
+          +. After Phase 2 the symbols collide, so one binary can hold on
+          +ly one game. Options:                                         
+      122 +- (a) Two executables (`smbvanilla` SMB1, `smbvanilla2j` SMB2J
+          +) and two testrunner binaries — straightforward, recommended. 
+      123 +- (b) One binary that `dlopen`s a chosen library at runtime — 
+          +preserves "one app, either game" but needs the public API kept
+          + loadable and is more wiring.                                 
+      124  
+      139 -```meson                                                      
+      140 -smb1_args  = ['-include', 'src/smbcore/smb1_context.h']       
+      141 -smb2j_args = ['-include', 'src/smbcore/smb2j_context.h']      
+      142 -# Note: SMB1_MODE/SMB2J_MODE are #defined inside the context h
+          -eaders,                                                       
+      143 -# so -D flags for them are redundant. Keep mode defines in ONE
+          - place                                                        
+      144 -# (the context header) to avoid drift.                        
+      125 +Also update the `wasm` build (`build-wasm/`, currently builds 
+          +`libsmbcore` + `smb_testrunner`).                             
+      126  
+      146 -libsmb1 = library('smb1',                                     
+      147 -  ['src/smb1.cpp', 'src/smbcommon.cpp',                       
+      148 -   'src/smbcore/common.cpp', 'src/smbcore/area.cpp',          
+      149 -   'src/smbcore/common_sound.cpp', 'src/smbcore/smb1only.cpp']
+          -,                                                             
+      150 -  cpp_args: smbcore_args + smb1_args)                         
+      127 +---                                                           
+      128  
+      152 -libsmb2j = library('smb2j',                                   
+      153 -  ['src/smb2j.cpp', 'src/smbcommon.cpp',                      
+      154 -   'src/smbcore/common.cpp', 'src/smbcore/area.cpp',          
+      155 -   'src/smbcore/common_sound.cpp', 'src/smbcore/smb2jonly.cpp'
+          -],                                                            
+      156 -  cpp_args: smbcore_args + smb2j_args)                        
+      157 -```                                                           
+      129 +## Verification (per phase)                                   
+      130  
+      159 -Open question — **executables and the testrunner**:           
+      160 -- The original plan implied a single `smbvanilla` linking `lib
+          -smb1`. But the current `smbvanilla` plays *either* game depend
+          -ing on the ROM you hand it (`detect_and_load_rom`). After the 
+          -split, one executable can only contain one game's symbols. Dec
+          -ide:                                                          
+      161 -  - (a) Two executables, `smbvanilla` (SMB1) and `smbvanilla2j
+          -` (SMB2J), each linking one library; OR                       
+      162 -  - (b) One executable that links *both* libraries — **not pos
+          -sible** after Phase 2 because of symbol collisions (`SMB_tick`
+          -, etc. exist in both). Would require either keeping the public
+          - API symbols namespaced/versioned, or `dlopen`ing one library 
+          -at runtime.                                                   
+      163 -- The **testrunner** currently runs both SMB1 and SMB2J movies
+          - through one binary and branches on `SMB_which_game`. After th
+          -e split it must become two testrunner binaries (one per librar
+          -y) — or one that `dlopen`s. Update `main_testrunner.c` invocat
+          -ion accordingly; the `SMB_which_game`-based range selection st
+          -ays but each binary only ever returns one value.              
+      164 -- `libsmb1`/`libsmb2j` may also be built as shared libraries f
+          -or `dlopen`.                                                  
+      131 +- **Phase 1:** combined build still passes the testrunner for 
+          +both games, behavior unchanged. **New, decisive check:** the c
+          +ore game files now compile as **C** in the default build — thi
+          +s is the moment the C invariant becomes real. Also build the C
+          +++/`CHECK_ARRAY_BOUNDS` config to confirm the luxury path stil
+          +l works, and compile the core as C against the globals stub to
+          + confirm Goal #3.                                             
+      132 +- **Phase 2:** each game builds separately and passes; the com
+          +bined library is gone.                                        
+      133 +- **Phase 3:** `smbcore.cpp` deleted; both libraries pass; `SM
+          +B_which_game` is a per-library constant.                      
+      134 +- **Phase 4:** both executables build/run their ROMs; a per-ga
+          +me testrunner works against each; wasm build updated.         
+      135  
+      166 -This executable/testrunner question should be resolved (probab
+          -ly option a: two of each) before starting Phase 4.            
+      136 +## Sequencing / risk                                          
+      137  
+      138 +- Phase 1 is the hard one and the C-cleanliness work is its sp
+          +ine: do the three C++-ism fixes (thread_local, ppu.h reference
+          +, aggregate-init/bounds-checker gating) **first**, then the fi
+          +le-as-TU split, then prove C compilation — before any library 
+          +split. Land SMB1 first (smaller interface/glue surface) before
+          + SMB2J (more FDS glue).                                       
+      139 +- Keep every commit building; Phase 2's alias deletion is the 
+          +irreversible step.                                            
+      140 +- The two layering pitfalls most likely to cause confusing err
+          +ors: `RamByteArray`-depends-on-`RAM` include order, and the mi
+          +ssing include guards on `smbcore.h`/`smbcommon.h`. Settle both
+          + while writing the new headers.                               
+      141 +                                                              
+      142  ---
+      143  
+      170 -## Verification                                               
+      144 +## Appendix — cross-TU symbol worklist (mechanical, not design
+          +)                                                             
+      145  
+      172 -- After Phase 1: each game still builds (now as separate TUs r
+          -ather than one `#include` blob) and the existing test runner p
+          -asses for both games; neither binary changes behavior. This is
+          - the riskiest phase for link errors — watch for undefined refe
+          -rences from the cross-TU `static`/glue symbols enumerated abov
+          -e.                                                            
+      173 -- After Phase 2: build each game target separately and run the
+          - test runner against each. The combined `smbcore` library no l
+          -onger exists.                                                 
+      174 -- After Phase 3: `smbcore.cpp` is gone; both game binaries sti
+          -ll pass tests; `SMB_which_game` returns a compile-time constan
+          -t in each.                                                    
+      175 -- After Phase 4: `smbvanilla` and `smbvanilla2j` both build, r
+          -un their respective ROMs, and a (per-game) test runner works a
+          -gainst each. Confirm `wasm` build (`build-wasm/`) is updated t
+          -oo — it currently builds `libsmbcore` and `smb_testrunner`.   
+      176 -- Embedded path: build with `-DSMB_INTERFACE_GLOBALS` and conf
+          -irm `interface_globals.h` is selected and compiles cleanly aga
+          -inst a stub environment. (This stub is intentionally incomplet
+          -e in Phase 1; the verification is "selector + globals header c
+          -ompile," not "embedded target runs.")                         
+      146 +Splitting the uber-modules into real TUs breaks symbols that c
+          +urrently resolve only because everything is one TU. Each needs
+          + a real declaration in a shared header (and `static` dropped w
+          +here it crosses). Verified against the code; provided so the i
+          +mplementer doesn't have to re-derive it:                      
+      147  
+      178 -## Suggested ordering / risk notes                            
+      148 +| Symbol | Defined in | Called from (other TU) | Fix |        
+      149 +|---|---|---|---|                                             
+      150 +| `SoundEngine` | `common_sound` (`static`) | `smb1`/`smb2j` N
+          +MI | de-`static`, declare in `smbcommon.h` |                  
+      151 +| `DrawTitleScreen`, `TransposePlayers` (SMB1) | `smb1` | `com
+          +mon` | declare in `smb1.h` |                                  
+      152 +| `ScrollScreen` (SMB2J) | `smb2j` | `common` | declare in `sm
+          +b2j.h` |                                                      
+      153 +| `LoadFiles`, `UpdateGamesBeaten`, `FDS_drive_status` (SMB2J)
+          + | `smb2j` | `smb2jonly` | declare in `smb2j.h` |             
+      154 +| `LoadAreaPointer`, `GetAreaDataAddrs`, `AltHard_GetAreaDataA
+          +ddrs` (SMB2J-only), `AreaParserTaskControl`, `AreaParserTaskHa
+          +ndler` | `area` (`static`) | `common` | drop `static` (existin
+          +g TODO in `area.h`); note all **five**, not four |            
+      155  
+      180 -- Do 1a–1d as one mechanical-but-careful unit and get *one* ga
+          -me (SMB1, the simpler/smaller glue surface) building as real T
+          -Us before touching SMB2J. SMB2J has more glue (`LoadFiles`, `U
+          -pdateGamesBeaten`, FDS shims, `AreaAddrOffsets`, `AltHard_GetA
+          -reaDataAddrs`).                                               
+      181 -- Phase 2's prefix/alias deletion is large and mechanical; scr
+          -ipt it and diff carefully. It's also the point of no return fo
+          -r "one library" — keep the repo bisectable by ensuring each ph
+          -ase builds.                                                   
+      182 -- The `RamByteArray`-depends-on-`RAM` layering (1a) and the no
+          --include-guard issue (1a) are the two things most likely to ca
+          -use confusing compile errors; settle both before writing the n
+          -ew headers.                                                   
+      156 +False positive (do not chase): `smb2jonly`'s `static LoadLuigi
+          +Physics` appears in `common.c` only inside comments.          
+      157 +                                                              
+      158 +Also relocate the small per-game glue that currently sits inli
+          +ne in the uber files: the `GameTimerDisplay` alias and SMB2J's
+          + `AreaAddrOffsets` `#define` belong in each game's context/rom
+          +arrays header (SMB1's `AreaAddrOffsets` already lives in `smb_
+          +romarrays.h`; consolidate SMB2J's there too for symmetry).    
+
+● I've rewritten the plan around your answers. The key reframing:
+
+  The big inversion. My earlier "rename the shared files to .cpp" was exactly
+  wrong for your goal — it would have silently destroyed the C-compilability
+  invariant. The plan now makes C the default build: the core files keep .c, so
+  meson's extension-based dispatch proves "compiles as C" continuously, for
+  free. C++ is demoted to an opt-in luxury (force-compile the same .c files as
+  C++ under CHECK_ARRAY_BOUNDS for the RamByteArray bounds-checker).
+
+  The design now centers on one idea, not a symbol list. smbcore.h blends three
+  concerns — pure utility (A), the interface contract (B), and the callback-impl
+  internals incl. C++-isms (C). The whole reorg is separating A/B/C so the core
+  depends only on A + the declared interface, with C confined to one swappable,
+  recompile-time-selected implementation. The phases serve that.
+
+  Your "either interface must be C" answer raised the bar usefully. It turns the
+  callback interface's own C++-isms into debt this reorg must clear, not just
+  the bulk game code. I isolated exactly three: thread_local SMB_STATE, ppu.h's
+  ushort &v reference, and the RamByteArray/{0}-aggregate pair. Settling those
+  three is now framed as the spine of Phase 1, with file-splitting as
+  bookkeeping around it.
+
+  Symbol enumeration demoted. The cross-TU symbol table moved to an appendix
+  labeled "mechanical, not design," per your request to focus on the design.
+
+  Two things I deliberately left as flagged open decisions rather than guessing,
+  because they're yours to make:
+  - Executables/testrunner after the split — two binaries (recommended) vs. one
+  dlopening binary. The current "one app plays either game by ROM detection"
+  behavior can't survive symbol collision otherwise.
+  - RamByteArray-vs-RAM include ordering — a real layering pitfall since the
+  bounds-checker depends on a macro the interface defines.
+
+  One thing worth your confirmation: I assumed the per-game top layer
+  (Reset/NMI/tick/draw_graphics, currently in .cpp) is part of the "core that
+  must be C." Your "all the core game logic" answer implies yes, but those files
+  lean on draw_graphics and SMB_STATE today — making them C is real work. If
+  you'd rather let that thin top layer stay C++ as a pragmatic shim (with only
+  the bulk logic guaranteed C), tell me and I'll adjust Goal #1's boundary.
+
+✻ Brewed for 6m 1s
