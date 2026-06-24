@@ -1,18 +1,11 @@
+#include "src/base.h"
+#include "src/smbcore/tiles.h"
 #include "types.h"
 #include "vars.h"
 
 #include "area.h"
 
 
-// If enabled, fixes a bug where if CurrentPageLoc is > 0x82, modulo 3 is not calculated.
-// This bug is impractical if not impossible to execute in unmodified ROMs,
-// but is still potentially achievable in modified levels.
-//
-// In practice, CurrentPageLoc only goes up to 24 in unmodified ROMs without jumping over the flagpole.
-// It takes between 4 to 5 time units to travel 1 page location by running.
-// To get from page 24 to 0x82, the player would travel 106 pages.
-// If the player ran nonstop from page 24 to 0x82, it would take between 424 to 530 time units.
-#define BUG_FIX_PAGELOC
 
 
 #define NO_AVAIL_ENEMY_SLOT 5
@@ -334,72 +327,163 @@ void AreaParserCore(void) {
     MetatileBuffer[i] = 0;
   }
 
+  static const u8 backscenery_lookup[3][3][16] = {
+    // clouds
+    {
+      { 0x93, 0x00, 0x00, 0x11, 0x12, 0x12, 0x13, 0x00,
+        0x00, 0x51, 0x52, 0x53, 0x00, 0x00, 0x00, 0x00, },
+      { 0x00, 0x00, 0x01, 0x02, 0x02, 0x03, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x91, 0x92, 0x93, 0x00, },
+      { 0x00, 0x00, 0x00, 0x51, 0x52, 0x53, 0x41, 0x42,
+        0x43, 0x00, 0x00, 0x00, 0x00, 0x00, 0x91, 0x92, },
+    },
+
+    // mountains and bushes
+    {
+      { 0x97, 0x87, 0x88, 0x89, 0x99, 0x00, 0x00, 0x00,
+        0x11, 0x12, 0x13, 0xa4, 0xa5, 0xa5, 0xa5, 0xa6, },
+      { 0x97, 0x98, 0x99, 0x01, 0x02, 0x03, 0x00, 0xa4,
+        0xa5, 0xa6, 0x00, 0x11, 0x12, 0x12, 0x12, 0x13, },
+      { 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x02, 0x03,
+        0x00, 0xa4, 0xa5, 0xa5, 0xa6, 0x00, 0x00, 0x00, },
+    },
+
+    // trees and fences
+    {
+      { 0x11, 0x12, 0x12, 0x13, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x9c, 0x00, 0x8b, 0xaa, 0xaa, },
+      { 0xaa, 0xaa, 0x11, 0x12, 0x13, 0x8b, 0x00, 0x9c,
+        0x9c, 0x00, 0x00, 0x01, 0x02, 0x03, 0x11, 0x12, },
+      { 0x12, 0x13, 0x00, 0x00, 0x00, 0x00, 0xaa, 0xaa,
+        0x9c, 0xaa, 0x00, 0x8b, 0x00, 0x01, 0x02, 0x03, },
+    }
+  };
+
+  static const u8 backscenery_metatiles[][3] = {
+    // Cloud
+    { MT_CLOUD_TL, MT_CLOUD_BL, MT_0 },
+    { MT_CLOUD_TM, MT_CLOUD_BM, MT_0 },
+    { MT_CLOUD_TR, MT_CLOUD_BR, MT_0 },
+
+    // Bush
+    { MT_BUSH_L, MT_0, MT_0 },
+    { MT_BUSH_M, MT_0, MT_0 },
+    { MT_BUSH_R, MT_0, MT_0 },
+
+    // Mountain
+    { MT_0, MT_MOUNTAIN_L, MT_MOUNTAIN_DOTS_1 },
+    { MT_MOUNTAIN_TOP, MT_MOUNTAIN_DOTS_1, MT_MOUNTAIN_GREEN },
+    { MT_0, MT_MOUNTAIN_R, MT_MOUNTAIN_DOTS_2 },
+
+    // Fence
+    { MT_FENCE, MT_0, MT_0 },
+
+    // Tall tree
+    { MT_TREE_TALL_1, MT_TREE_TALL_2, MT_TREE_TRUNK },
+
+    // Short tree
+    { MT_TREE_SHORT, MT_TREE_TRUNK, MT_TREE_TRUNK },
+  };
+
+  assert_eq_assumption(BackgroundScenery <= 3, true);
+  assert_eq_assumption(ForegroundScenery <= 3, true);
+  assert_eq_assumption(CurrentColumnPos < 16, true);
+
   if (BackgroundScenery != 0) {
-    // NES note: If the page location is > 0x82, it breaks a loop that calculates modulo 3.
+    // NES note: In the original, if the page location is > 0x82, it breaks a loop that calculates modulo 3.
+    // This port fixes it. Keeping the old glitchy behavior isn't worth it.
+    // This glitch is impractical if not impossible to execute in unmodified ROMs,
+    // but is still potentially achievable in modified levels.
+    //
+    // In practice, CurrentPageLoc only goes up to 24 in unmodified ROMs without jumping over the flagpole.
+    // It takes between 4 to 5 time units to travel 1 page location by running.
+    // To get from page 24 to 0x82, the player would travel 106 pages.
+    // If the player ran nonstop from page 24 to 0x82, it would take between 424 to 530 time units.
 
-#ifdef BUG_FIX_PAGELOC
-    const byte bVar44 = CurrentPageLoc % 3;
-
-    const byte tmp2 = BSceneDataOffsets[BackgroundScenery - 1] + bVar44 * 16;
-    const byte back_scenery_data = BackSceneryData[tmp2 + CurrentColumnPos];
-#else
-    const byte bVar44 = CurrentPageLoc <= 0x82 ? CurrentPageLoc % 3 : CurrentPageLoc;
-
-    const byte v1 = bVar44 * 0x10;
-    const byte v2 = BSceneDataOffsets[BackgroundScenery - 1];
-    const bool bVar7 = (bVar44 & 0x10) != 0;
-
-    const byte tmp2 = (v1 + v2 + bVar7) + ((u16)v1 + (u16)v2 + (u16)bVar7 >= 0x100);
-    const byte back_scenery_data = BackSceneryData[tmp2 + CurrentColumnPos];
-#endif
+    const u8 back_scenery_data = backscenery_lookup[BackgroundScenery - 1][CurrentPageLoc % 3][CurrentColumnPos];
 
     if (back_scenery_data != 0) {
       const byte type = back_scenery_data & 0xf;
       const byte mt_y = back_scenery_data >> 4;
 
-      byte metatile_offset = (type - 1) * 3;
-      if (type == 0) {
-        // NES note: This shouldn't normally happen.
-        // This is 0xfe instead of 0xfd, because of the carry bit from ASL.
-        metatile_offset = 0xfe;
-      }
+      assert_eq_assumption(type >= 1, true);
+      assert_eq_assumption(type <= 12, true);
 
       for (int i = 0; i < 3; i++) {
         if (mt_y+i == 11) {
           break;
         }
-        MetatileBuffer[mt_y + i] = BackSceneryMetatiles[(byte)(metatile_offset + i)];
+        MetatileBuffer[mt_y + i] = backscenery_metatiles[type-1][i];
       }
     }
   }
 
+  static const u8 forescenery_metatiles[3][13] = {
+    // in water
+    { MT_WATER_TOP,
+      MT_WATER_BLANK, MT_WATER_BLANK, MT_WATER_BLANK, MT_WATER_BLANK, MT_WATER_BLANK, MT_WATER_BLANK, MT_WATER_BLANK, MT_WATER_BLANK, MT_WATER_BLANK, MT_WATER_BLANK,
+      MT_UNDERWATER_GROUND,
+      MT_UNDERWATER_GROUND, },
+
+    // wall
+    { MT_0, MT_0, MT_0, MT_0, MT_0, MT_CASTLE_TOP, MT_CASTLE_BRICK, MT_CASTLE_BRICK, MT_CASTLE_BRICK, MT_CASTLE_BRICK, MT_CASTLE_BRICK,
+      MT_0, MT_0, },
+
+    // over water. also lava.
+    { MT_0, MT_0, MT_0, MT_0, MT_0, MT_0, MT_0, MT_0, MT_0, MT_0, MT_0, MT_WATER_TOP, MT_WATER_BLANK, },
+  };
+
   if (ForegroundScenery != 0) {
-    byte bVar44 = FSceneDataOffsets[ForegroundScenery - 1];
     for (int i = 0; i < 13; i++) {
-      if (ForeSceneryData[bVar44] != 0) {
-        MetatileBuffer[i] = ForeSceneryData[bVar44];
+      const u8 metatile = forescenery_metatiles[ForegroundScenery - 1][i];
+      if (metatile != 0) {
+        MetatileBuffer[i] = metatile;
       }
-      bVar44 += 1;
     }
   }
+
+  static const u8 terrain_metatiles[4] = {
+    MT_UNDERWATER_GROUND, MT_STONE, MT_BRICK, MT_CASTLE_INSIDE_WALL
+  };
+
+  assert_eq_assumption(AreaType < 4, true);
 
   // RendTerr
   {
-    byte mt = TerrainMetatiles[AreaType];
+    byte mt = terrain_metatiles[AreaType];
 
     if (CloudTypeOverride != 0) {
-      mt = 0x88;
+      mt = MT_CLOUD_BLOCK;
     }
 
     // Special exception for water levels in world 8
     if ((AreaType == 0) && (WorldNumber == 7)) {
-      mt = ssw(0x62, 0x63);
+      mt = MT_CASTLE_INSIDE_WALL;
     }
 
-    const byte bitidx = (byte)(TerrainControl << 1);
+    assert_eq_assumption(TerrainControl < 16, true);
+
+    static const u16 terrain_renderbits[16] = {
+      0b0000000000000000,
+      0b0001100000000000,
+      0b0001100000000001,
+      0b0001100000000111,
+      0b0001100000001111,
+      0b0001100011111111,
+      0b0001111100000001,
+      0b0001111100000111,
+      0b0001111100001111,
+      0b0001111110000001,
+      0b0000000000000001,
+      0b0001111110001111,
+      0b0001111111110001,
+      0b0001100011111001,
+      0b0001100011110001,
+      0b0001111111111111,
+    };
 
     // a 13-bit bitfield
-    u16 bits = LOAD_16(TerrainRenderBits[bitidx+1], TerrainRenderBits[bitidx]);
+    u16 bits = terrain_renderbits[TerrainControl];
 
     if (CloudTypeOverride != 0) {
       // Render 0-7, and 11
@@ -408,7 +492,8 @@ void AreaParserCore(void) {
 
     for (int j = 0; j < 13; j++) {
       if ((AreaType == 2) && (j >= 11)) {
-        mt = ssw(0x54, 0x6b);
+        // For underground levels, replace the ground
+        mt = MT_STONE;
       }
 
       if ((bits & (1 << j)) != 0) {
@@ -427,9 +512,14 @@ void AreaParserCore(void) {
 
   for (int i = 0; i < 13; i++) {
     const byte mt = MetatileBuffer[i];
-    const bool cond = mt >= BlockBuffLowBounds[mt >> 6];
 
-    set_metatile(mt_x, i, cond ? mt : 0);
+    // Note: simplified lookup of BlockBuffLowBounds
+
+    if (mt < 0x10 || (mt >= 0x40 && mt < ssw(0x51, 0x4f)) || (mt >= 0x80 && mt < 0x88)) {
+      set_metatile(mt_x, i, MT_0);
+    } else {
+      set_metatile(mt_x, i, mt);
+    }
   }
 }
 
@@ -849,7 +939,15 @@ void ScrollLockObject(void) {
 // SM2MAIN:7582
 // Signature: [r00] -> []
 void AreaFrenzy(const byte param_1) {
-  const byte enemy_id = FrenzyIDData[param_1 - 8];
+  assert_eq_assumption(param_1 >= 8 && param_1 <= 10, true);
+
+  u8 enemy_id;
+  switch (param_1) {
+  case 8:  enemy_id = A_FLYING_CHEEPCHEEP; break;
+  case 9:  enemy_id = A_BULLET_BILL_OR_CHEEPCHEEP_FRENZY; break;
+  case 10: enemy_id = A_STOP_FRENZY; break;
+  default: assert_unreachable();
+  }
 
   for (int i = 0; i < 5; i++) {
     if (Enemy_ID[i] == enemy_id) {
@@ -902,11 +1000,11 @@ void NoUnder(const byte param_1, const byte param_2) {
 void PulleyRopeObject(const byte param_1) {
   const struct_ycr07 sVar2 = ChkLrgObjLength(param_1);
   if (sVar2.c) {
-    MetatileBuffer[0] = PulleyRopeMetatiles[0];
+    MetatileBuffer[0] = MT_PULLEY_ROPE_TL;
   } else if (AreaObjectLength[param_1] != 0) {
-    MetatileBuffer[0] = PulleyRopeMetatiles[1];
+    MetatileBuffer[0] = MT_PULLEY_ROPE_HORZ;
   } else {
-    MetatileBuffer[0] = PulleyRopeMetatiles[2];
+    MetatileBuffer[0] = MT_PULLEY_ROPE_TR;
   }
 }
 
@@ -930,20 +1028,29 @@ void CastleObject(const byte objoff) {
   // shorter castles (in X-1 and X-2 levels) don't draw the bottom
   assert_eq_assumption(sVar5.y < 11, true);
 
+  static const u8 _ = MT_0;
+  static const u8 T = MT_CASTLE_TOP;
+  static const u8 N = MT_CASTLE_NOTCH;
+  static const u8 x = MT_CASTLE_BRICK;
+  static const u8 D = MT_CASTLE_DOOR_T;
+  static const u8 E = MT_CASTLE_DOOR_B;
+  static const u8 L = MT_CASTLE_WINDOW_L;
+  static const u8 R = MT_CASTLE_WINDOW_R;
+
   // Tiles are right-to-left
   static const u8 castle_metatiles[11][5] = {
-    { 0x00, 0x45, 0x45, 0x45, 0x00 },
-    { 0x00, 0x48, 0x47, 0x46, 0x00 },
-    { 0x45, 0x49, 0x49, 0x49, 0x45 },
-    { 0x47, 0x47, 0x4a, 0x47, 0x47 },
-    { 0x47, 0x47, 0x4b, 0x47, 0x47 },
+    { _, T, T, T, _ },
+    { _, R, x, L, _ },
+    { T, N, N, N, T },
+    { x, x, D, x, x },
+    { x, x, E, x, x },
 
-    { 0x49, 0x49, 0x49, 0x49, 0x49 },
-    { 0x47, 0x4a, 0x47, 0x4a, 0x47 },
-    { 0x47, 0x4b, 0x47, 0x4b, 0x47 },
-    { 0x47, 0x47, 0x47, 0x47, 0x47 },
-    { 0x4a, 0x47, 0x4a, 0x47, 0x4a },
-    { 0x4b, 0x47, 0x4b, 0x47, 0x4b },
+    { N, N, N, N, N },
+    { x, D, x, D, x },
+    { x, E, x, E, x },
+    { x, x, x, x, x },
+    { D, x, D, x, D },
+    { E, x, E, x, E },
   };
 
   for (int i = start_at_y; i < 11; i++) {
@@ -1245,9 +1352,9 @@ void BalancePlatRope(const byte param_1) {
 // SM2MAIN:7839
 // Signature: [X] -> []
 void RowOfCoins(const byte param_1) {
-  const byte bStack0000 = CoinMetatileData[AreaType];
+  const u8 metatile = AreaType != 0 ? MT_COIN : MT_COIN_UNDERWATER;
   const struct_ycr07 sVar1 = ChkLrgObjLength(param_1);
-  RenderUnderPart(bStack0000, sVar1.r07, 0);
+  RenderUnderPart(metatile, sVar1.r07, 0);
 }
 
 
@@ -1273,7 +1380,14 @@ void AxeObj(const byte param_1) {
 // SM2MAIN:7855
 // Signature: [r00] -> []
 void ChainObj(const byte param_1) {
-  RenderUnderPart(C_ObjectMetatile[param_1 - 2], C_ObjectRow[param_1 - 2], 0);
+  assert_eq_assumption(param_1 >= 2 && param_1 < 5, true);
+
+  const int i = param_1 - 2;
+
+  static const u8 mt_y[3] = { 6, 7, 8 };
+  static const u8 metatiles[3] = { MT_AXE, MT_BRIDGE_CHAIN, MT_BRIDGE_BLOCK };
+
+  RenderUnderPart(metatiles[i], mt_y[i], 0);
 }
 
 
@@ -1290,13 +1404,15 @@ void EmptyBlock(const byte param_1) {
 // SM2MAIN:7875
 // Signature: [X] -> []
 void RowOfBricks(const byte param_1) {
+  assert_eq_assumption(AreaType < 4, true);
   byte bVar1 = AreaType;
   if (CloudTypeOverride != 0) {
     bVar1 = 4;
   }
-  const byte bStack0000 = BrickMetatiles[bVar1];
+  static const u8 metatiles[5] = { MT_CORAL, MT_BRICK_2, MT_BRICK, MT_BRICK, MT_CLOUD_BLOCK };
+  const u8 mt = metatiles[bVar1];
   const struct_ycr07 sVar2 = ChkLrgObjLength(param_1);
-  RenderUnderPart(bStack0000, sVar2.r07, 0);
+  RenderUnderPart(mt, sVar2.r07, 0);
 }
 
 
@@ -1304,9 +1420,11 @@ void RowOfBricks(const byte param_1) {
 // SM2MAIN:7885
 // Signature: [X] -> []
 void RowOfSolidBlocks(const byte param_1) {
-  const byte bStack0000 = SolidBlockMetatiles[AreaType];
+  assert_eq_assumption(AreaType < 4, true);
+  static const u8 metatiles[4] = { MT_UNDERWATER_GROUND, MT_STAIR_BLOCK, MT_STAIR_BLOCK, MT_CASTLE_INSIDE_WALL };
+  const u8 mt = metatiles[AreaType];
   const struct_ycr07 sVar1 = ChkLrgObjLength(param_1);
-  RenderUnderPart(bStack0000, sVar1.r07, 0);
+  RenderUnderPart(mt, sVar1.r07, 0);
 }
 
 
@@ -1314,9 +1432,10 @@ void RowOfSolidBlocks(const byte param_1) {
 // SM2MAIN:7897
 // Signature: [X] -> []
 void ColumnOfBricks(const byte param_1) {
-  const byte bStack0000 = BrickMetatiles[AreaType];
+  assert_eq_assumption(AreaType < 4, true);
+  static const u8 metatiles[4] = { MT_CORAL, MT_BRICK_2, MT_BRICK, MT_BRICK };
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
-  RenderUnderPart(bStack0000, sVar1.r07, sVar1.y);
+  RenderUnderPart(metatiles[AreaType], sVar1.r07, sVar1.y);
 }
 
 
@@ -1324,9 +1443,11 @@ void ColumnOfBricks(const byte param_1) {
 // SM2MAIN:78a0
 // Signature: [X] -> []
 void ColumnOfSolidBlocks(const byte param_1) {
-  const byte bStack0000 = SolidBlockMetatiles[AreaType];
+  assert_eq_assumption(AreaType < 4, true);
+  static const u8 metatiles[4] = { MT_UNDERWATER_GROUND, MT_STAIR_BLOCK, MT_STAIR_BLOCK, MT_CASTLE_INSIDE_WALL };
+  const u8 mt = metatiles[AreaType];
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
-  RenderUnderPart(bStack0000, sVar1.r07, sVar1.y);
+  RenderUnderPart(mt, sVar1.r07, sVar1.y);
 }
 
 
@@ -1336,12 +1457,12 @@ void ColumnOfSolidBlocks(const byte param_1) {
 void BulletBillCannon(const byte param_1) {
   const struct_yr07 sVar3 = GetLrgObjAttrib(param_1);
   byte bVar1 = sVar3.r07;
-  MetatileBuffer[bVar1] = ssw(0x64, 0x65);
+  MetatileBuffer[bVar1] = MT_BULLETBILL_CANNON_T;
   if ((byte)(sVar3.y - 1) < 0x80) {
-    MetatileBuffer[(byte)(bVar1 + 1)] = ssw(0x65, 0x66);
+    MetatileBuffer[(byte)(bVar1 + 1)] = MT_BULLETBILL_CANNON_BODY;
     const byte bVar2 = sVar3.y - 2;
     if (bVar2 < 0x80) {
-      RenderUnderPart(ssw(0x66, 0x67), bVar1 + 2, bVar2);
+      RenderUnderPart(MT_BULLETBILL_CANNON_B, bVar1 + 2, bVar2);
     }
   }
 
@@ -1367,7 +1488,7 @@ void StaircaseObject(const byte param_1) {
     StaircaseControl = 9;
   }
   StaircaseControl -= 1;
-  RenderUnderPart(ssw(0x61, 0x62), StaircaseRowData[StaircaseControl], StaircaseHeightData[StaircaseControl]);
+  RenderUnderPart(MT_STAIR_BLOCK, StaircaseRowData[StaircaseControl], StaircaseHeightData[StaircaseControl]);
 }
 
 
@@ -1391,8 +1512,8 @@ void Jumpspring(const byte param_1) {
   Enemy_ID[i] = A_JUMPSPRING;
   Enemy_Y_HighPos[i] = 1;
   Enemy_Flag[i] += 1;
-  MetatileBuffer[bVar1] = ssw(0x67, 0x68);
-  MetatileBuffer[bVar1 + 1] = ssw(0x68, 0x69);
+  MetatileBuffer[bVar1] = MT_JUMPSPRING_T;
+  MetatileBuffer[bVar1 + 1] = MT_JUMPSPRING_B;
 }
 
 
@@ -1458,7 +1579,10 @@ void Hole_Empty(const byte param_1) {
       Cannon_Or_Whirlpool_Offset = 0;
     }
   }
-  RenderUnderPart(HoleMetatiles[AreaType], 8, 0xf);
+
+  const u8 metatile = AreaType != 0 ? MT_0 : MT_WATER_BLANK;
+
+  RenderUnderPart(metatile, 8, 0xf);
 }
 
 
