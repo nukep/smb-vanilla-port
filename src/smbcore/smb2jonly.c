@@ -1033,7 +1033,7 @@ void RunMushroomRetainers(void) {
   const u16 mt_x = 16 + 8;
   const u16 mt_y = 3;
 
-  if (get_metatile(mt_x, mt_y) != 0) {
+  if (get_metatile(mt_x, mt_y) != MT_0) {
     return;
   }
 

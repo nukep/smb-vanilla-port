@@ -324,7 +324,7 @@ void AreaParserCore(void) {
   }
 
   for (int i = 0; i < 13; i++) {
-    MetatileBuffer[i] = 0;
+    MetatileBuffer[i] = MT_0;
   }
 
   static const u8 backscenery_lookup[3][3][16] = {
@@ -515,7 +515,7 @@ void AreaParserCore(void) {
 
     // Note: simplified lookup of BlockBuffLowBounds
 
-    if (mt < 0x10 || (mt >= 0x40 && mt < ssw(0x51, 0x4f)) || (mt >= 0x80 && mt < 0x88)) {
+    if (mt < MT_PIPE_VERT_WARP_TL || (mt >= MT_ROPE_VERT && mt < MT_BRICK_2) || (mt >= MT_CLOUD_TL && mt < MT_CLOUD_BLOCK)) {
       set_metatile(mt_x, i, MT_0);
     } else {
       set_metatile(mt_x, i, mt);
@@ -969,20 +969,20 @@ void TreeLedge(const byte param_1) {
 
   const u8 areaobjlen = AreaObjectLength[param_1];
   if (areaobjlen == 0) {
-    NoUnder(0x18, bVar1);
+    NoUnder(MT_TREELEDGE_R, bVar1);
     return;
   }
 
   if (areaobjlen >= 0x80) {
     AreaObjectLength[param_1] = sVar2.y;
     if ((CurrentPageLoc | CurrentColumnPos) != 0) {
-      NoUnder(0x16, bVar1);
+      NoUnder(MT_TREELEDGE_L, bVar1);
       return;
     }
   }
 
-  MetatileBuffer[bVar1] = 0x17;
-  RenderUnderPart(0x4c, bVar1 + 1, 0xf);
+  MetatileBuffer[bVar1] = MT_TREELEDGE_M;
+  RenderUnderPart(MT_TREELEDGE_TRUNK, bVar1 + 1, 0xf);
 }
 
 
@@ -1062,7 +1062,7 @@ void CastleObject(const byte objoff) {
       // Put stopper block after the door
       // If it's a tall castle, ensure it's the first door
 
-      MetatileBuffer[10] = ssw(0x52, 0x50);
+      MetatileBuffer[10] = MT_BRICK;
     } else if (j == 2) {
       const byte bStack0000 = GetAreaObjXPosition();
       const byte i = FindEmptyEnemySlot();
@@ -1085,8 +1085,8 @@ void CastleObject(const byte objoff) {
 // Signature: [X] -> []
 void WaterPipe(const byte param_1) {
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
-  MetatileBuffer[sVar1.r07] = ssw(0x6b, 0x6d);
-  MetatileBuffer[sVar1.r07 + 1] = ssw(0x6c, 0x6e);
+  MetatileBuffer[sVar1.r07] = MT_WATERPIPE_T;
+  MetatileBuffer[sVar1.r07 + 1] = MT_WATERPIPE_B;
 }
 
 
@@ -1113,7 +1113,7 @@ void IntroPipe(const byte objoff) {
 
     RenderUnderPart(under_metatile, 0, 8);
     for (int i = 0; i < 7; i++) {
-      MetatileBuffer[i] = 0;
+      MetatileBuffer[i] = MT_0;
     }
     MetatileBuffer[7] = top_metatile;
     MetatileBuffer[9] = left_side ? MT_PIPE_CONNECTED_T : MT_PIPE_VERT_UNDER_R;
@@ -1251,8 +1251,8 @@ byte FindEmptyEnemySlot(void) {
 // Signature: [X] -> []
 void Hole_Water(const byte param_1) {
   ChkLrgObjLength(param_1);
-  MetatileBuffer[10] = 0x86;
-  RenderUnderPart(0x87, 0xb, 1);
+  MetatileBuffer[10] = MT_WATER_TOP;
+  RenderUnderPart(MT_WATER_BLANK, 0xb, 1);
 }
 
 
@@ -1261,7 +1261,7 @@ void Hole_Water(const byte param_1) {
 // Signature: [X] -> []
 void QuestionBlockRow_High(const byte param_1) {
   ChkLrgObjLength(param_1);
-  MetatileBuffer[3] = 0xc0;
+  MetatileBuffer[3] = MT_QUESTIONBLOCK_ROW;
 }
 
 
@@ -1270,7 +1270,7 @@ void QuestionBlockRow_High(const byte param_1) {
 // Signature: [X] -> []
 void QuestionBlockRow_Low(const byte param_1) {
   ChkLrgObjLength(param_1);
-  MetatileBuffer[7] = 0xc0;
+  MetatileBuffer[7] = MT_QUESTIONBLOCK_ROW;
 }
 
 
@@ -1279,8 +1279,8 @@ void QuestionBlockRow_Low(const byte param_1) {
 // Signature: [X] -> []
 void Bridge_High(const byte param_1) {
   ChkLrgObjLength(param_1);
-  MetatileBuffer[6] = 0xb;
-  RenderUnderPart(ssw(0x63, 0x64), 7, 0);
+  MetatileBuffer[6] = MT_BRIDGE_RAILING;
+  RenderUnderPart(MT_BRIDGE_BLOCK, 7, 0);
 }
 
 
@@ -1289,8 +1289,8 @@ void Bridge_High(const byte param_1) {
 // Signature: [X] -> []
 void Bridge_Middle(const byte param_1) {
   ChkLrgObjLength(param_1);
-  MetatileBuffer[7] = 0xb;
-  RenderUnderPart(ssw(0x63, 0x64), 8, 0);
+  MetatileBuffer[7] = MT_BRIDGE_RAILING;
+  RenderUnderPart(MT_BRIDGE_BLOCK, 8, 0);
 }
 
 
@@ -1299,8 +1299,8 @@ void Bridge_Middle(const byte param_1) {
 // Signature: [X] -> []
 void Bridge_Low(const byte param_1) {
   ChkLrgObjLength(param_1);
-  MetatileBuffer[9] = 0xb;
-  RenderUnderPart(ssw(0x63, 0x64), 10, 0);
+  MetatileBuffer[9] = MT_BRIDGE_RAILING;
+  RenderUnderPart(MT_BRIDGE_BLOCK, 10, 0);
 }
 
 
@@ -1309,7 +1309,7 @@ void Bridge_Low(const byte param_1) {
 // Signature: [X] -> []
 void FlagBalls_Residual(const byte param_1) {
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
-  RenderUnderPart(ssw(0x6d, 0x6f), 2, sVar1.y);
+  RenderUnderPart(MT_FLAGBALL, 2, sVar1.y);
 }
 
 
@@ -1317,9 +1317,9 @@ void FlagBalls_Residual(const byte param_1) {
 // SM2MAIN:77e5
 // Signature: [] -> []
 void FlagpoleObject(void) {
-  MetatileBuffer[0] = ssw(0x24, 0x21);
-  RenderUnderPart(ssw(0x25, 0x22), 1, 8);
-  MetatileBuffer[10] = ssw(0x61, 0x62);
+  MetatileBuffer[0] = MT_FLAGPOLE_T;
+  RenderUnderPart(MT_FLAGPOLE_M, 1, 8);
+  MetatileBuffer[10] = MT_STAIR_BLOCK;
   const byte bVar1 = GetAreaObjXPosition();
   Enemy_X_Position[5] = bVar1 - 8;
   Enemy_PageLoc[5] = CurrentPageLoc - (bVar1 < 8);
@@ -1334,7 +1334,7 @@ void FlagpoleObject(void) {
 // SM2MAIN:7817
 // Signature: [] -> []
 void EndlessRope(void) {
-  RenderUnderPart(0x40, 0, 0xf);
+  RenderUnderPart(MT_ROPE_VERT, 0, 0xf);
 }
 
 
@@ -1342,9 +1342,9 @@ void EndlessRope(void) {
 // SM2MAIN:781e
 // Signature: [X] -> []
 void BalancePlatRope(const byte param_1) {
-  RenderUnderPart(0x44, 1, 0xf);
+  RenderUnderPart(MT_ROPE_NONE, 1, 0xf);
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
-  RenderUnderPart(0x40, 1, sVar1.y);
+  RenderUnderPart(MT_ROPE_VERT, 1, sVar1.y);
 }
 
 
@@ -1385,7 +1385,7 @@ void ChainObj(const byte param_1) {
   const int i = param_1 - 2;
 
   static const u8 mt_y[3] = { 6, 7, 8 };
-  static const u8 metatiles[3] = { MT_AXE, MT_BRIDGE_CHAIN, MT_BRIDGE_BLOCK };
+  static const u8 metatiles[3] = { MT_AXE, MT_BOWSERBRIDGE_CHAIN, MT_BOWSERBRIDGE_BLOCK };
 
   RenderUnderPart(metatiles[i], mt_y[i], 0);
 }
@@ -1396,7 +1396,7 @@ void ChainObj(const byte param_1) {
 // Signature: [X] -> []
 void EmptyBlock(const byte param_1) {
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
-  RenderUnderPart(ssw(0xc4, 0xc5), sVar1.r07, 0);
+  RenderUnderPart(MT_BLOCK_EMPTY, sVar1.r07, 0);
 }
 
 
@@ -1434,8 +1434,9 @@ void RowOfSolidBlocks(const byte param_1) {
 void ColumnOfBricks(const byte param_1) {
   assert_eq_assumption(AreaType < 4, true);
   static const u8 metatiles[4] = { MT_CORAL, MT_BRICK_2, MT_BRICK, MT_BRICK };
+  const u8 mt = metatiles[AreaType];
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
-  RenderUnderPart(metatiles[AreaType], sVar1.r07, sVar1.y);
+  RenderUnderPart(mt, sVar1.r07, sVar1.y);
 }
 
 
@@ -1610,11 +1611,27 @@ void RenderUnderPart(const byte mt, const byte mt_y, const byte param_3) {
 
     bool draw_metatile = true;
 
-    if (existing_mt == 0x17 || existing_mt == ssw(0x1a, 0x8b) || existing_mt > 0xc0) {
+    if (existing_mt == MT_TREELEDGE_M) {
         draw_metatile = false;
     }
 
-    if (SMB1_ONLY && mt == 0x50 && existing_mt == 0x54) {
+#ifdef SMB1_MODE
+    if (existing_mt == MT_MUSHROOMLEDGE_M) {
+        draw_metatile = false;
+    }
+
+    if (mt == MT_MUSHROOMLEDGE_STEM_UNDER && existing_mt == MT_STONE) {
+        draw_metatile = false;
+    }
+#endif
+
+#ifdef SMB2J_MODE
+    if (existing_mt == MT_CLOUDLEDGE_M) {
+        draw_metatile = false;
+    }
+#endif
+
+    if (existing_mt > 0xc0) {
         draw_metatile = false;
     }
 
@@ -1927,27 +1944,27 @@ void MushroomLedge(const byte param_1) {
   const byte bVar3 = sVar4.r07;
   if (sVar4.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
-    NoUnder(0x19, bVar3);
+    NoUnder(MT_MUSHROOMLEDGE_L, bVar3);
     return;
   }
 
   const u8 areaobjlen = AreaObjectLength[param_1];
   if (areaobjlen == 0) {
-    NoUnder(0x1b, bVar3);
+    NoUnder(MT_MUSHROOMLEDGE_R, bVar3);
     return;
   }
 
-  MetatileBuffer[bVar3] = 0x1a;
+  MetatileBuffer[bVar3] = MT_MUSHROOMLEDGE_M;
 
   // Draw the stem under the mushroom ledge
 
   const u8 bVar1 = MushroomLedgeHalfLen[param_1];
   if (areaobjlen == bVar1) {
     // Right under the mushroom
-    MetatileBuffer[(byte)(bVar3 + 1)] = 0x4f;
+    MetatileBuffer[(byte)(bVar3 + 1)] = MT_MUSHROOMLEDGE_STEM_T;
 
     // The rest of the stem
-    RenderUnderPart(0x50, bVar3 + 2, 0xf);
+    RenderUnderPart(MT_MUSHROOMLEDGE_STEM_UNDER, bVar3 + 2, 0xf);
   }
 }
 #endif
@@ -1964,17 +1981,17 @@ void CloudLedge(const byte param_1) {
   const byte bVar3 = sVar4.r07;
   if (sVar4.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
-    NoUnder(0x8a, bVar3);
+    NoUnder(MT_CLOUDLEDGE_L, bVar3);
     return;
   }
 
   const byte areaobjlen = AreaObjectLength[param_1];
   if (areaobjlen == 0) {
-    NoUnder(0x8c, bVar3);
+    NoUnder(MT_CLOUDLEDGE_R, bVar3);
     return;
   }
 
-  MetatileBuffer[bVar3] = 0x8b;
+  MetatileBuffer[bVar3] = MT_CLOUDLEDGE_M;
 }
 #endif
 

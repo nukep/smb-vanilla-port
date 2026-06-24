@@ -15,11 +15,14 @@ enum metatiles {
   MT_MOUNTAIN_DOTS_2,
   MT_MOUNTAIN_GREEN,
 
-  MT_BRIDGE_CHAIN = 0x0c,
+  MT_BRIDGE_RAILING,
+
+  MT_BOWSERBRIDGE_CHAIN,
   MT_TREE_TALL_1,
   MT_TREE_SHORT,
   MT_TREE_TALL_2,
 
+  // 10
   MT_PIPE_VERT_WARP_TL,
   MT_PIPE_VERT_WARP_TR,
   MT_PIPE_VERT_DECO_TL,
@@ -27,11 +30,15 @@ enum metatiles {
   MT_PIPE_VERT_UNDER_L,
   MT_PIPE_VERT_UNDER_R,
 
-  MT_unk=0x18,
+  // 16
+  MT_TREELEDGE_L,
+  MT_TREELEDGE_M,
+  MT_TREELEDGE_R,
+
 #ifdef SMB1_MODE
-  MT_unk1,
-  MT_unk2,
-  MT_unk3,
+  MT_MUSHROOMLEDGE_L,
+  MT_MUSHROOMLEDGE_M,
+  MT_MUSHROOMLEDGE_R,
 #endif
 
   // 1c/19
@@ -45,13 +52,22 @@ enum metatiles {
   MT_PIPE_SIDEWAYS_MIDDLE_B,
   MT_PIPE_CONNECTED_B,
 
+  // 22/1f
   MT_CORAL,
+  MT_unk15,
 
-  MT_PULLEY_ROPE_HORZ=0x41,   // --
+  MT_FLAGPOLE_T,
+  MT_FLAGPOLE_M,
+
+  MT_unk19,
+
+  MT_ROPE_VERT = 0x40,        // |
+  MT_PULLEY_ROPE_HORZ,        // --
   MT_PULLEY_ROPE_TL,          // |-
   MT_PULLEY_ROPE_TR,          // -|
+  MT_ROPE_NONE,
 
-  MT_CASTLE_TOP=0x45,
+  MT_CASTLE_TOP,
   MT_CASTLE_WINDOW_L,
   MT_CASTLE_BRICK,
   MT_CASTLE_WINDOW_R,
@@ -59,21 +75,36 @@ enum metatiles {
   MT_CASTLE_DOOR_T,
   MT_CASTLE_DOOR_B,
 
-  MT_FENCE = 0x4d,
+  MT_TREELEDGE_TRUNK = 0x4c,
+
+  MT_FENCE,
   MT_TREE_TRUNK,
 
-  // MT_BRICK_2 has a white outline on the top
-
-#ifdef SMB2J_MODE
-  MT_BRICK_2 = 0x4f,
-#endif
 #ifdef SMB1_MODE
-  MT_BRICK_2 = 0x51,
+  MT_MUSHROOMLEDGE_STEM_T,
+  MT_MUSHROOMLEDGE_STEM_UNDER,
 #endif
+
+  // MT_BRICK_2 has a white outline on the top
+  MT_BRICK_2,
   MT_BRICK,
 
 #ifdef SMB1_MODE
   MT_STONE = 0x54,
+#endif
+
+#ifdef SMB2J_MODE
+  MT_unk16 = 0x56,
+#endif
+#ifdef SMB1_MODE
+  MT_unk16 = 0x58,
+#endif
+
+#ifdef SMB2J_MODE
+  MT_unk17 = 0x5c,
+#endif
+#ifdef SMB1_MODE
+  MT_unk17 = 0x5d,
 #endif
 
   MT_unk4=0x60,
@@ -86,7 +117,7 @@ enum metatiles {
 
   // 62/63
   MT_CASTLE_INSIDE_WALL,
-  MT_unk7,
+  MT_BRIDGE_BLOCK,
 
   MT_BULLETBILL_CANNON_T,
   MT_BULLETBILL_CANNON_BODY,
@@ -101,6 +132,20 @@ enum metatiles {
   MT_STONE,
 #endif
 
+#ifdef SMB1_MODE
+  MT_unk18 = 0x6a,
+#endif
+#ifdef SMB2J_MODE
+  MT_unk18 = 0x6c,
+#endif
+
+  // 6b/6d
+  MT_WATERPIPE_T,
+  MT_WATERPIPE_B,
+
+  // 6d/6f. Might be residual code
+  MT_FLAGBALL,
+
   MT_CLOUD_TL=0x80,
   MT_CLOUD_TM,
   MT_CLOUD_TR,
@@ -112,17 +157,30 @@ enum metatiles {
   MT_WATER_BLANK,
 
   MT_CLOUD_BLOCK,
-  MT_BRIDGE_BLOCK,
+  MT_BOWSERBRIDGE_BLOCK,
 
-  MT_unk13=0xc1,
+#ifdef SMB2J_MODE
+  MT_CLOUDLEDGE_L,
+  MT_CLOUDLEDGE_M,
+  MT_CLOUDLEDGE_R,
+#endif
+
+  // 8a/8d
+  MT_unk21,
+
+  MT_QUESTIONBLOCK_ROW = 0xc0,
+
+  MT_unk13,
 #ifdef SMB2J_MODE
   MT_unk14,
 #endif
 
+  // c2/c3
   MT_COIN,
   MT_COIN_UNDERWATER,
-  MT_unk15,
+  MT_BLOCK_EMPTY,   // appears as a used coin block
   MT_AXE,
+  MT_unk20
 };
 
 

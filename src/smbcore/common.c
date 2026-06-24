@@ -1116,13 +1116,13 @@ void WriteBlockMetatile(const byte param_1, const u16 mt_x, const u16 mt_y) {
   byte blockgfxidx;
   if (param_1 == 0) {
     blockgfxidx = 3;
-  } else if (param_1 == ssw(0x51, 0x4f)) {
+  } else if (param_1 == MT_BRICK_2) {
     blockgfxidx = 0;
-  } else if (param_1 == ssw(0x52, 0x50)) {
+  } else if (param_1 == MT_BRICK) {
     blockgfxidx = 1;
-  } else if (param_1 == ssw(0x58, 0x56)) {
+  } else if (param_1 == MT_unk16) {
     blockgfxidx = 0;
-  } else if (param_1 == ssw(0x5d, 0x5c)) {
+  } else if (param_1 == MT_unk17) {
     blockgfxidx = 1;
   } else {
     blockgfxidx = 2;
@@ -2040,7 +2040,7 @@ void PlayerEntrance(void) {
       if (DisableCollisionDet != 0) {
         Player_State = 3;
         bVar1 = 8;
-        set_metatile(4, 11, 8);
+        set_metatile(4, 11, MT_MOUNTAIN_R);
       }
       AutoControlPlayer(bVar1);
       if (Player_X_Position < 0x48) {
@@ -3216,8 +3216,8 @@ void VineObjectHandler(const byte objoff) {
       const u16 mt_y = sVar6.mt_y;
 
       if (mt_y < 13) {
-        if (get_metatile(mt_x, mt_y) == 0) {
-          set_metatile(mt_x, mt_y, ssw(0x26, 0x23));
+        if (get_metatile(mt_x, mt_y) == MT_0) {
+          set_metatile(mt_x, mt_y, MT_unk19);
         }
       }
     }
@@ -3235,8 +3235,8 @@ void VineObjectHandler(const byte objoff) {
     const u16 mt_x = xpos >> 4;
 
     for (int i = 0; i < 13; i++) {
-      if (get_metatile(mt_x, i) == 0x23) {
-        set_metatile(mt_x, i, 0);
+      if (get_metatile(mt_x, i) == MT_unk19) {
+        set_metatile(mt_x, i, MT_0);
       }
     }
   }
@@ -3661,20 +3661,20 @@ void PlayerHeadCollision(const byte param_1, const u16 mt_x, const u16 mt_y) {
   byte bVar2 = (PlayerSize == 0) ? 0 : bVar4;
   if (sVar5.c) {
     Block_State[sprdataoff] = 0x11;
-    if ((bVar4 == ssw(0x58, 0x56)) || (bVar4 == ssw(0x5d, 0x5c))) {
+    if ((bVar4 == MT_unk16) || (bVar4 == MT_unk17)) {
       if (BrickCoinTimerFlag == 0) {
         BrickCoinTimer = 0xb;
         BrickCoinTimerFlag = 1;
       }
-      bVar2 = (BrickCoinTimer == 0) ? ssw(0xc4, 0xc5) : bVar4;
+      bVar2 = (BrickCoinTimer == 0) ? MT_BLOCK_EMPTY : bVar4;
     } else {
-      bVar2 = ssw(0xc4, 0xc5);
+      bVar2 = MT_BLOCK_EMPTY;
     }
   }
   Block_Metatile[sprdataoff] = bVar2;
   InitBlock_XY_Pos(sprdataoff);
 
-  set_metatile(mt_x, mt_y, ssw(0x23, 0x20));
+  set_metatile(mt_x, mt_y, MT_unk15);
 
   BlockBounceTimer = 0x10;
   const byte yadderdata = ((CrouchingFlag == 0) && (PlayerSize == 0)) ? 0x4 : 0x12;
@@ -3753,7 +3753,7 @@ void BumpBlock(const u16 mt_x, const u16 mt_y, const byte param_2) {
   // -> CheckTopOfBlock
   if (mt_y > 0) {
     const u16 mt_y_above = mt_y - 1;
-    if (get_metatile(mt_x, mt_y_above) == ssw(0xc2, 0xc3)) {
+    if (get_metatile(mt_x, mt_y_above) == MT_COIN) {
       // -> RemoveCoin_Axe
       //   -> PutBlockMetatile
 
@@ -3919,11 +3919,11 @@ byte CheckTopOfBlock(const u16 mt_x, const u16 mt_y) {
 
   const u16 mt_y_above = mt_y - 1;
 
-  if (get_metatile(mt_x, mt_y_above) != ssw(0xc2, 0xc3)) {
+  if (get_metatile(mt_x, mt_y_above) != MT_COIN) {
     return BlockOffsetToggle;
   }
 
-  set_metatile(mt_x, mt_y_above, 0);
+  set_metatile(mt_x, mt_y_above, MT_0);
 
   RemoveCoin_Axe(mt_x, mt_y_above);
 
@@ -8235,7 +8235,7 @@ static void HandleCoinMetatile(const u16 mt_x, const u16 mt_y) {
   // Note: Old signature was [r02, r06, r07] -> []
   // Reworked to use metatile coordinates instead of pointer
 
-  set_metatile(mt_x, mt_y, 0);
+  set_metatile(mt_x, mt_y, MT_0);
 
   RemoveCoin_Axe(mt_x, mt_y);
 
@@ -8257,7 +8257,7 @@ static void HandleAxeMetatile(const u16 mt_x, const u16 mt_y) {
 #endif
   Player_X_Speed = 0x18;
 
-  set_metatile(mt_x, mt_y, 0);
+  set_metatile(mt_x, mt_y, MT_0);
 
   RemoveCoin_Axe(mt_x, mt_y);
 }
@@ -8337,7 +8337,7 @@ void PlayerBGCollision(void) {
         bool myspd = true;
 
         if (bVar8) {
-          if (bVar7 != ssw(0x26, 0x23)) {
+          if (bVar7 != MT_unk19) {
             Square1SoundQueue = 2;
           }
         } else if ((AreaType != 0) && (BlockBounceTimer == 0)) {
@@ -8382,7 +8382,7 @@ void PlayerBGCollision(void) {
       }
       bVar8 = CheckForClimbMTiles(bVar7);
       if ((!bVar8) && (Player_Y_Speed < 0x80)) {
-        if (bVar7 == ssw(0xc5, 0xc6)) {
+        if (bVar7 == MT_AXE) {
           HandleAxeMetatile(sVar11.mt_x, sVar11.mt_y);
           return;
         }
@@ -8414,7 +8414,7 @@ void PlayerBGCollision(void) {
       // side check 1
       const struct blockbuffer_colli_result sVar9 = BlockBufferCollision(1, 0, tmp1 + 3);
       bVar5 = sVar9.a;
-      const bool cond = (sVar9.a == 0) || (bVar5 == ssw(0x1c, 0x19)) || (bVar5 == ssw(0x6b, 0x6d)) || CheckForClimbMTiles(bVar5);
+      const bool cond = (bVar5 == MT_0) || (bVar5 == MT_PIPE_SIDEWAYS_TL) || (bVar5 == MT_WATERPIPE_T) || CheckForClimbMTiles(bVar5);
       if (!cond) {
         CheckSideMTiles(2, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
         return;
@@ -8426,7 +8426,7 @@ void PlayerBGCollision(void) {
       // side check 2
       const struct blockbuffer_colli_result sVar9 = BlockBufferCollision(1, 0, tmp1 + 4);
       bVar5 = sVar9.a;
-      const bool cond = sVar9.a == 0;
+      const bool cond = sVar9.a == MT_0;
       if (!cond) {
         CheckSideMTiles(2, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
         return;
@@ -8438,7 +8438,7 @@ void PlayerBGCollision(void) {
       // side check 1
       const struct blockbuffer_colli_result sVar9 = BlockBufferCollision(1, 0, tmp1 + 5);
       bVar5 = sVar9.a;
-      const bool cond = (bVar5 == 0) || (bVar5 == ssw(0x1c, 0x19)) || (bVar5 == ssw(0x6b, 0x6d)) || CheckForClimbMTiles(bVar5);
+      const bool cond = (bVar5 == MT_0) || (bVar5 == MT_PIPE_SIDEWAYS_TL) || (bVar5 == MT_WATERPIPE_T) || CheckForClimbMTiles(bVar5);
       if (!cond) {
         CheckSideMTiles(1, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
         return;
@@ -8450,7 +8450,7 @@ void PlayerBGCollision(void) {
       // side check 2
       const struct blockbuffer_colli_result sVar9 = BlockBufferCollision(1, 0, tmp1 + 6);
       bVar5 = sVar9.a;
-      const bool cond = sVar9.a == 0;
+      const bool cond = sVar9.a == MT_0;
       if (!cond) {
         CheckSideMTiles(1, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
         return;
@@ -8481,7 +8481,7 @@ static void CheckSideMTiles(const byte dir, const byte bVar5, const byte bVar2, 
     if (JumpspringAnimCtrl != 0) {
       return;
     }
-  } else if ((Player_State == 0) && (PlayerFacingDir == 1) && ((bVar5 == ssw(0x6c, 0x6e) || (bVar5 == ssw(0x1f, 0x1c))))) {
+  } else if ((Player_State == 0) && (PlayerFacingDir == 1) && ((bVar5 == MT_WATERPIPE_B || (bVar5 == MT_PIPE_SIDEWAYS_BL)))) {
     if (Player_SprAttrib == 0) {
       Square1SoundQueue = 0x10;
     }
@@ -8515,7 +8515,7 @@ void HandleClimbing(const byte param_1, const byte param_2, const u16 mt_x) {
     return;
   }
 
-  if ((param_1 == ssw(0x24, 0x21)) || (param_1 == ssw(0x25, 0x22))) {
+  if ((param_1 == MT_FLAGPOLE_T) || (param_1 == MT_FLAGPOLE_M)) {
     if (GameEngineSubroutine != 5) {
       PlayerFacingDir = 1;
       ScrollLock += 1;
@@ -8545,7 +8545,7 @@ void HandleClimbing(const byte param_1, const byte param_2, const u16 mt_x) {
       }
       GameEngineSubroutine = 4;
     }
-  } else if ((param_1 == ssw(0x26, 0x23)) && (Player_Y_Position < 0x20)) {
+  } else if ((param_1 == MT_unk19) && (Player_Y_Position < 0x20)) {
     GameEngineSubroutine = 1;
   }
   Player_State = 3;
@@ -8615,11 +8615,11 @@ void ChkForLandJumpSpring(const byte param_1) {
 // SM2MAIN:ab6b
 // Signature: [A] -> [C]
 bool ChkJumpspringMetatiles(const byte param_1) {
-  if (param_1 == ssw(0x67, 0x68)) {
+  if (param_1 == MT_JUMPSPRING_T) {
     return true;
   }
 
-  if (param_1 == ssw(0x68, 0x69)) {
+  if (param_1 == MT_JUMPSPRING_B) {
     return true;
   }
 
@@ -8706,32 +8706,38 @@ void ImpedePlayerMove(const byte param_1) {
 // SMB:df8f
 // SM2MAIN:ac18
 // Signature: [A] -> [C]
-bool CheckForSolidMTiles(const byte param_1) {
-#ifdef SMB1_MODE
-  static const u8 solid_mtile_upper_ext_lookup[4] = { 0x10, 0x61, 0x88, 0xc4 };
-#endif
-#ifdef SMB2J_MODE
-  static const u8 solid_mtile_upper_ext_lookup[4] = { 0x10, 0x62, 0x88, 0xc5 };
-#endif
+bool CheckForSolidMTiles(const byte mt) {
+  // Note: expanded to explicit comparisons.
+  // TODO: identify the classses of metatiles below
 
-  const byte bVar1 = GetMTileAttrib(param_1);
-  return solid_mtile_upper_ext_lookup[bVar1] <= param_1;
+  if (mt >= MT_PIPE_VERT_WARP_TL && mt < 0x40) { return true; }
+
+  if (mt >= MT_STAIR_BLOCK && mt < 0x80) { return true; }
+
+  if (mt >= MT_CLOUD_BLOCK && mt < 0xc0) { return true; }
+
+  if (mt >= MT_BLOCK_EMPTY) { return true; }
+
+  return false;
 }
 
 
 // SMB:df9a
 // SM2MAIN:ac23
 // Signature: [A] -> [C]
-bool CheckForClimbMTiles(const byte param_1) {
-#ifdef SMB1_MODE
-  static const u8 climb_mtile_upper_ext_lookup[4] = { 0x24, 0x6d, 0x8a, 0xc6 };
-#endif
-#ifdef SMB2J_MODE
-  static const u8 climb_mtile_upper_ext_lookup[4] = { 0x21, 0x6f, 0x8d, 0xc7 };
-#endif
+bool CheckForClimbMTiles(const byte mt) {
+  // Note: expanded to explicit comparisons.
+  // TODO: identify the classses of metatiles below
 
-  const byte bVar1 = GetMTileAttrib(param_1);
-  return climb_mtile_upper_ext_lookup[bVar1] <= param_1;
+  if (mt >= MT_FLAGPOLE_T && mt < 0x40) { return true; }
+
+  if (mt >= MT_FLAGBALL && mt < 0x80) { return true; }
+
+  if (mt >= MT_unk21 && mt < 0xc0) { return true; }
+
+  if (mt >= MT_unk20) { return true; }
+
+  return false;
 }
 
 
@@ -8739,28 +8745,12 @@ bool CheckForClimbMTiles(const byte param_1) {
 // SM2MAIN:ac2a
 // Signature: [A] -> [C]
 bool CheckForCoinMTiles(const byte param_1) {
-  const byte regular_coin_mtile = ssw(0xc2, 0xc3);
-  const byte underwater_coin_mtile = ssw(0xc3, 0xc4);
-
-  if (param_1 == regular_coin_mtile) {
-    Square2SoundQueue = 1;
-    return true;
-  }
-
-  if (param_1 == underwater_coin_mtile) {
+  if (param_1 == MT_COIN || param_1 == MT_COIN_UNDERWATER) {
     Square2SoundQueue = 1;
     return true;
   }
 
   return false;
-}
-
-
-// SMB:dfb0
-// SM2MAIN:ac39
-// Signature: [A] -> [X]
-byte GetMTileAttrib(const byte x) {
-  return x >> 6;
 }
 
 
@@ -8820,9 +8810,9 @@ void EnemyToBGCollisionDet(const byte objoff) {
     return;
   }
 
-  if (sVar6.a == ssw(0x23, 0x20)) {
+  if (sVar6.a == MT_unk15) {
 #ifdef SMB1_MODE
-    set_metatile(sVar6.mt_x, sVar6.mt_y, 0);
+    set_metatile(sVar6.mt_x, sVar6.mt_y, MT_0);
 #endif
 
     if (is_actor_enemy(enemy_id)) {
@@ -9055,7 +9045,7 @@ void HammerBroBGColl(const byte objoff) {
   const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, objoff + 1, 21);
 
   if (sVar2.a != 0) {
-    if (sVar2.a == ssw(0x23, 0x20)) {
+    if (sVar2.a == MT_unk15) {
       KillEnemyAboveBlock(objoff);
       return;
     }
@@ -10521,7 +10511,7 @@ void DrawBlock(const byte objoff) {
     SPRITE_TILE(sproff, 0) = 0x86;
     SPRITE_TILE(sproff, 1) = 0x86;
   }
-  if (Block_Metatile[objoff] == ssw(0xc4, 0xc5)) {
+  if (Block_Metatile[objoff] == MT_BLOCK_EMPTY) {
     // Inlined: DumpFourSpr
     // NES note: If the offset is 255, this wraparounds the sprite page
     // because it's incremented before passing to DumpFourSpr.

@@ -920,9 +920,6 @@ bool smb2j_CheckForClimbMTiles(byte param_1);
 bool smb2j_CheckForCoinMTiles(byte param_1);
 #define CheckForCoinMTiles smb2j_CheckForCoinMTiles
 
-byte smb2j_GetMTileAttrib(byte param_1);
-#define GetMTileAttrib smb2j_GetMTileAttrib
-
 void smb2j_EnemyToBGCollisionDet(byte param_1);
 #define EnemyToBGCollisionDet smb2j_EnemyToBGCollisionDet
 
