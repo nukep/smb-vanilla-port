@@ -50,10 +50,6 @@ static void ColumnOfSolidBlocks(byte param_1);
 static void BulletBillCannon(byte param_1);
 static void StaircaseObject(byte param_1);
 static void Jumpspring(byte param_1);
-static void Hidden1UpBlock(byte param_1, byte param_2);
-static void QuestionBlock(byte param_1, byte param_2);
-static void BrickWithCoins(byte param_1, byte param_2);
-static void BrickWithItem(byte param_1, byte param_2);
 static void Hole_Empty(byte param_1);
 static void RenderUnderPart(byte param_1, byte param_2, byte param_3);
 static struct_ycr07 ChkLrgObjLength(byte param_1);
@@ -115,7 +111,7 @@ enum DecodeAreaData_jumptable_item {
   DECODEAREADATA_UPSIDEDOWNPIPE_HIGH,
   DECODEAREADATA_UPSIDEDOWNPIPE_LOW,
 #endif
-  DECODEAREADATA_QUESTIONBLOCK_1,
+  DECODEAREADATA_QUESTIONBLOCK_POWERUP,
   DECODEAREADATA_QUESTIONBLOCK_2,
   DECODEAREADATA_QUESTIONBLOCK_3,
 #ifdef SMB2J_MODE
@@ -795,25 +791,115 @@ bool DecodeAreaData(const byte objoff, const byte param_2) {
     FlagBalls_Residual(objoff);
     return true;
 
-  case DECODEAREADATA_QUESTIONBLOCK_1:
+  case DECODEAREADATA_QUESTIONBLOCK_POWERUP:
+    {
+      const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(MT_QUESTIONBLOCK_POWERUP, sVar2.r07, 0);
+    }
+    return true;
+
+#ifdef SMB1_MODE
   case DECODEAREADATA_QUESTIONBLOCK_2:
+#endif
+#ifdef SMB2J_MODE
   case DECODEAREADATA_QUESTIONBLOCK_3:
-    QuestionBlock(objoff, bVar1);
+#endif
+    {
+      const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(MT_QUESTIONBLOCK_COIN, sVar2.r07, 0);
+    }
+    return true;
+
+#ifdef SMB2J_MODE
+  case DECODEAREADATA_QUESTIONBLOCK_2:
+    {
+      const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(MT_QUESTIONBLOCK_POISONSHROOM, sVar2.r07, 0);
+    }
+    return true;
+#endif
+
+#ifdef SMB1_MODE
+  case DECODEAREADATA_QUESTIONBLOCK_3:
+#endif
+#ifdef SMB2J_MODE
+  case DECODEAREADATA_QUESTIONBLOCK_4:
+#endif
+    {
+      const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(MT_HIDDEN_1COIN, sVar2.r07, 0);
+    }
     return true;
 
   case DECODEAREADATA_HIDDEN1UPBLOCK:
-    Hidden1UpBlock(objoff, bVar1);
+    if (Hidden1UpFlag != 0) {
+      Hidden1UpFlag = 0;
+      // NES note: SMB2J indeed selects a star block for non-ground areas. Likely an oversight. Ultimately unused in official ROMs, though.
+      const u8 mt = AreaType == 1 ? MT_HIDDEN_1UP : ssw(MT_BRICK_2_1UP, MT_BRICK_2_STAR);
+      const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(mt, sVar3.r07, 0);
+    }
     return true;
 
   case DECODEAREADATA_BRICKWITHITEM_1:
+    {
+      const u8 mt = AreaType == 1 ? MT_BRICK_2_POWERUP : MT_BRICK_POWERUP;
+      const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(mt, sVar3.r07, 0);
+    }
+    return true;
+
+#ifdef SMB1_MODE
   case DECODEAREADATA_BRICKWITHITEM_2:
+#endif
+#ifdef SMB2J_MODE
   case DECODEAREADATA_BRICKWITHITEM_3:
+#endif
+    {
+      const u8 mt = AreaType == 1 ? MT_BRICK_2_VINE : MT_BRICK_VINE;
+      const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(mt, sVar3.r07, 0);
+    }
+    return true;
+
+#ifdef SMB2J_MODE
+  case DECODEAREADATA_BRICKWITHITEM_2:
+    {
+      const u8 mt = AreaType == 1 ? MT_BRICK_2_POISONSHROOM : MT_BRICK_POISONSHROOM;
+      const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(mt, sVar3.r07, 0);
+    }
+    return true;
+#endif
+
+#ifdef SMB1_MODE
+  case DECODEAREADATA_BRICKWITHITEM_3:
+#endif
+#ifdef SMB2J_MODE
+  case DECODEAREADATA_BRICKWITHITEM_5:
+#endif
+    {
+      const u8 mt = AreaType == 1 ? MT_BRICK_2_STAR : MT_BRICK_STAR;
+      const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(mt, sVar3.r07, 0);
+    }
+    return true;
+
   case DECODEAREADATA_BRICKWITHITEM_4:
-    BrickWithItem(objoff, bVar1);
+    {
+      const u8 mt = AreaType == 1 ? MT_BRICK_2_1UP : MT_BRICK_1UP;
+      const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(mt, sVar3.r07, 0);
+    }
     return true;
 
   case DECODEAREADATA_BRICKWITHCOINS:
-    BrickWithCoins(objoff, bVar1);
+    {
+      BrickCoinTimerFlag = 0;
+      const u8 mt = AreaType == 1 ? MT_BRICK_2_COINS : MT_BRICK_COINS;
+      const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(mt, sVar3.r07, 0);
+    }
     return true;
 
   case DECODEAREADATA_WATERPIPE:
@@ -872,14 +958,18 @@ bool DecodeAreaData(const byte objoff, const byte param_2) {
     return true;
 
 #ifdef SMB2J_MODE
-  case DECODEAREADATA_QUESTIONBLOCK_4:
   case DECODEAREADATA_QUESTIONBLOCK_5:
-  case DECODEAREADATA_QUESTIONBLOCK_6:
-    QuestionBlock(objoff, bVar1);
+    {
+      const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(MT_HIDDEN_POISONSHROOM, sVar2.r07, 0);
+    }
     return true;
 
-  case DECODEAREADATA_BRICKWITHITEM_5:
-    BrickWithItem(objoff, bVar1);
+  case DECODEAREADATA_QUESTIONBLOCK_6:
+    {
+      const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
+      RenderUnderPart(MT_HIDDEN_POWERUP, sVar2.r07, 0);
+    }
     return true;
 
   case DECODEAREADATA_UPSIDEDOWNPIPE_HIGH:
@@ -1512,50 +1602,6 @@ void Jumpspring(const byte param_1) {
   Enemy_Flag[i] += 1;
   MetatileBuffer[bVar1] = MT_JUMPSPRING_T;
   MetatileBuffer[bVar1 + 1] = MT_JUMPSPRING_B;
-}
-
-
-// SMB:9b01
-// SM2MAIN:794a
-// Signature: [X, r00] -> []
-void Hidden1UpBlock(const byte param_1, const byte param_2) {
-  if (Hidden1UpFlag != 0) {
-    Hidden1UpFlag = 0;
-    BrickWithItem(param_1, param_2);
-  }
-}
-
-
-// SMB:9b0e
-// SM2MAIN:7957
-// Signature: [X, r00] -> []
-void QuestionBlock(const byte param_1, const byte param_2) {
-  const byte bStack0000 = BrickQBlockMetatiles[param_2];
-  const struct_yr07 sVar2 = GetLrgObjAttrib(param_1);
-  RenderUnderPart(bStack0000, sVar2.r07, 0);
-}
-
-
-// SMB:9b14
-// SM2MAIN:795d
-// Signature: [X, r00] -> []
-void BrickWithCoins(const byte param_1, const byte param_2) {
-  BrickCoinTimerFlag = 0;
-  BrickWithItem(param_1, param_2);
-}
-
-
-// SMB:9b19
-// SM2MAIN:7962
-// Signature: [X, r00] -> []
-void BrickWithItem(const byte param_1, const byte param_2) {
-  char cVar1 = 0;
-  if (AreaType != 1) {
-    cVar1 = ssw(5, 6);
-  }
-  const byte bStack0000 = BrickQBlockMetatiles[(byte)(cVar1 + param_2)];
-  const struct_yr07 sVar3 = GetLrgObjAttrib(param_1);
-  RenderUnderPart(bStack0000, sVar3.r07, 0);
 }
 
 

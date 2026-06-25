@@ -3655,23 +3655,25 @@ void PlayerHeadCollision(const byte param_1, const u16 mt_x, const u16 mt_y) {
   Block_Orig_YPos[sprdataoff] = mt_y * 16;
   Block_BBuf_Low[sprdataoff] = MTX_TO_R06(mt_x);
 
-  byte bVar4 = get_metatile(mt_x, mt_y);
+  const u8 mt = get_metatile(mt_x, mt_y);
 
-  const struct_yc sVar5 = BlockBumpedChk(bVar4);
-  byte bVar2 = (PlayerSize == 0) ? 0 : bVar4;
-  if (sVar5.c) {
+  // Inlined: BlockBumpedChk
+
+  if (metatile_is_itemblock(mt)) {
     Block_State[sprdataoff] = 0x11;
-    if ((bVar4 == MT_BRICK_2_COINS) || (bVar4 == MT_BRICK_COINS)) {
+    if ((mt == MT_BRICK_2_COINS) || (mt == MT_BRICK_COINS)) {
       if (BrickCoinTimerFlag == 0) {
         BrickCoinTimer = 0xb;
         BrickCoinTimerFlag = 1;
       }
-      bVar2 = (BrickCoinTimer == 0) ? MT_BLOCK_EMPTY : bVar4;
+      Block_Metatile[sprdataoff] = (BrickCoinTimer == 0) ? MT_BLOCK_EMPTY : mt;
     } else {
-      bVar2 = MT_BLOCK_EMPTY;
+      Block_Metatile[sprdataoff] = MT_BLOCK_EMPTY;
     }
+  } else {
+    Block_Metatile[sprdataoff] = (PlayerSize == 0) ? MT_0 : mt;
   }
-  Block_Metatile[sprdataoff] = bVar2;
+
   InitBlock_XY_Pos(sprdataoff);
 
   set_metatile(mt_x, mt_y, MT_SPECIAL_BLOCKHIT);
@@ -3704,36 +3706,9 @@ void InitBlock_XY_Pos(const byte param_1) {
 }
 
 
-enum BumpBlock_jumptable_item {
-  BUMPBLOCK_MUSHFLOWERBLOCK_1,
-#ifdef SMB2J_MODE
-  BUMPBLOCK_POISONMUSHBLOCK_1,
-#endif
-  BUMPBLOCK_COINBLOCK_1,
-  BUMPBLOCK_COINBLOCK_2,
-  BUMPBLOCK_EXTRALIFEMUSHBLOCK_1,
-#ifdef SMB2J_MODE
-  BUMPBLOCK_POISONMUSHBLOCK_2,
-#endif
-#ifdef SMB2J_MODE
-  BUMPBLOCK_MUSHFLOWERBLOCK_3,
-#endif
-  BUMPBLOCK_MUSHFLOWERBLOCK_2,
-#ifdef SMB2J_MODE
-  BUMPBLOCK_POISONMUSHBLOCK_3,
-#endif
-  BUMPBLOCK_VINEBLOCK,
-  BUMPBLOCK_STARBLOCK,
-  BUMPBLOCK_COINBLOCK_3,
-  BUMPBLOCK_EXTRALIFEMUSHBLOCK_2,
-
-  BUMPBLOCK_COUNT
-};
-
-
 // SMB:bd9b
 // SM2MAIN:895c
-void BumpBlock(const u16 mt_x, const u16 mt_y, const byte param_2) {
+void BumpBlock(const u16 mt_x, const u16 mt_y, const byte mt) {
   // Note: Old signature was [r02, r05, r06, r07] -> []
   // Reworked to use metatile coordinates instead of pointer
 
@@ -3771,64 +3746,56 @@ void BumpBlock(const u16 mt_x, const u16 mt_y, const byte param_2) {
   Player_Y_Speed = 0;
   Block_Y_Speed[bVar2] = 0xfe;
 
-  struct_yc sVar4;
-
   if (bug) {
     return;
   }
 
-  sVar4 = BlockBumpedChk(param_2);
+  // NES note: the original remapped the metatiles to indices in the jumptable list.
+  // Instead, we'll just switch on the metatile itself.
+  // The original lookup comes from the index in BlockBumpedChk() -> BrickQBlockMetatiles, which is optimized away in this port.
 
-  byte bVar1 = sVar4.y;
-  if (!sVar4.c) {
-    return;
-  }
-
-  // If the block goes over the block count in the lookup, wrap around back to a previous item
-  if (bVar1 >= BUMPBLOCK_COUNT) {
-    bVar1 -= BUMPBLOCK_COUNT;
-    bVar1 += BUMPBLOCK_MUSHFLOWERBLOCK_2;
-  }
-
-  switch (bVar1) {
-  case BUMPBLOCK_MUSHFLOWERBLOCK_1:
-  case BUMPBLOCK_MUSHFLOWERBLOCK_2:
+  switch (mt) {
+  case MT_QUESTIONBLOCK_POWERUP:
+  case MT_BRICK_2_POWERUP:
+  case MT_BRICK_POWERUP:
     MushFlowerBlock(bVar2);
-    return;
+    break;
 
-  case BUMPBLOCK_COINBLOCK_1:
-  case BUMPBLOCK_COINBLOCK_2:
-  case BUMPBLOCK_COINBLOCK_3:
+  case MT_QUESTIONBLOCK_COIN:
+  case MT_HIDDEN_1COIN:
+  case MT_BRICK_2_COINS:
+  case MT_BRICK_COINS:
     CoinBlock(bVar2);
-    return;
+    break;
 
-  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_1:
-  case BUMPBLOCK_EXTRALIFEMUSHBLOCK_2:
+  case MT_HIDDEN_1UP:
+  case MT_BRICK_2_1UP:
+  case MT_BRICK_1UP:
     ExtraLifeMushBlock(bVar2);
-    return;
+    break;
 
-  case BUMPBLOCK_VINEBLOCK:
+  case MT_BRICK_2_VINE:
+  case MT_BRICK_VINE:
     VineBlock();
-    return;
+    break;
 
-  case BUMPBLOCK_STARBLOCK:
+  case MT_BRICK_2_STAR:
+  case MT_BRICK_STAR:
     StarBlock(bVar2);
-    return;
+    break;
 
 #ifdef SMB2J_MODE
-  case BUMPBLOCK_MUSHFLOWERBLOCK_3:
+  case MT_HIDDEN_POWERUP:
     MushFlowerBlock(bVar2);
-    return;
+    break;
 
-  case BUMPBLOCK_POISONMUSHBLOCK_1:
-  case BUMPBLOCK_POISONMUSHBLOCK_2:
-  case BUMPBLOCK_POISONMUSHBLOCK_3:
+  case MT_QUESTIONBLOCK_POISONSHROOM:
+  case MT_HIDDEN_POISONSHROOM:
+  case MT_BRICK_2_POISONSHROOM:
+  case MT_BRICK_POISONSHROOM:
     PoisonMushBlock(bVar2);
-    return;
+    break;
 #endif
-
-  default:
-    jmpengine_overflow(bVar1);
   }
 }
 
@@ -3865,29 +3832,6 @@ void ExtraLifeMushBlock(const byte param_1) {
 // Signature: [] -> []
 void VineBlock(void) {
   Setup_Vine(5, BlockOffsetToggle);
-}
-
-
-// SMB:bdf6
-// SM2MAIN:89c7
-// Signature: [A] -> [Y, C]
-struct_yc BlockBumpedChk(const byte param_1) {
-  struct_yc sVar3;
-
-  static const int num_metatiles = sizeof(BrickQBlockMetatiles)/sizeof(BrickQBlockMetatiles[0]);
-
-  for (int i = num_metatiles-1; i >= 0; i--) {
-    if (param_1 == BrickQBlockMetatiles[i]) {
-      sVar3.c = true;
-      sVar3.y = i;
-      return sVar3;
-    }
-  }
-
-  // NES Note: "y" value is unused if c = false
-  sVar3.c = false;
-  sVar3.y = -1;
-  return sVar3;
 }
 
 

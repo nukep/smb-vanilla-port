@@ -416,9 +416,6 @@ void smb2j_ExtraLifeMushBlock(byte param_1);
 void smb2j_VineBlock(void);
 #define VineBlock smb2j_VineBlock
 
-struct_yc smb2j_BlockBumpedChk(byte param_1);
-#define BlockBumpedChk smb2j_BlockBumpedChk
-
 void smb2j_BrickShatter(u16 mt_x, u16 mt_y);
 #define BrickShatter smb2j_BrickShatter
 

@@ -197,40 +197,37 @@ enum metatiles {
   MT_unk20
 };
 
-static const byte BrickQBlockMetatiles[] = {
-  // used by question blocks
-  MT_QUESTIONBLOCK_POWERUP,
+static inline bool metatile_is_itemblock(const u8 mt) {
+  switch (mt) {
+  case MT_QUESTIONBLOCK_POWERUP:
+  case MT_QUESTIONBLOCK_COIN:
+  case MT_HIDDEN_1COIN:
+  case MT_HIDDEN_1UP:
+  case MT_BRICK_2_POWERUP:
+  case MT_BRICK_2_VINE:
+  case MT_BRICK_2_STAR:
+  case MT_BRICK_2_COINS:
+  case MT_BRICK_2_1UP:
+  case MT_BRICK_POWERUP:
+  case MT_BRICK_VINE:
+  case MT_BRICK_STAR:
+  case MT_BRICK_COINS:
+  case MT_BRICK_1UP:
+    return true;
+
 #ifdef SMB2J_MODE
-  MT_QUESTIONBLOCK_POISONSHROOM,
-#endif
-  MT_QUESTIONBLOCK_COIN,
-  MT_HIDDEN_1COIN,
-  MT_HIDDEN_1UP,
-#ifdef SMB2J_MODE
-  MT_HIDDEN_POISONSHROOM,
-  MT_HIDDEN_POWERUP,
+  case MT_QUESTIONBLOCK_POISONSHROOM:
+  case MT_HIDDEN_POISONSHROOM:
+  case MT_HIDDEN_POWERUP:
+  case MT_BRICK_2_POISONSHROOM:
+  case MT_BRICK_POISONSHROOM:
+    return true;
 #endif
 
-  // used by ground level types
-  MT_BRICK_2_POWERUP,
-#ifdef SMB2J_MODE
-  MT_BRICK_2_POISONSHROOM,
-#endif
-  MT_BRICK_2_VINE,
-  MT_BRICK_2_STAR,
-  MT_BRICK_2_COINS,
-  MT_BRICK_2_1UP,
-
-  // used by other level types
-  MT_BRICK_POWERUP,
-#ifdef SMB2J_MODE
-  MT_BRICK_POISONSHROOM,
-#endif
-  MT_BRICK_VINE,
-  MT_BRICK_STAR,
-  MT_BRICK_COINS,
-  MT_BRICK_1UP,
-};
+  default:
+    return false;
+  }
+}
 
 #endif
 

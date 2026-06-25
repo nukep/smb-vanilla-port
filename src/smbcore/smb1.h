@@ -419,9 +419,6 @@ void smb1_ExtraLifeMushBlock(byte param_1);
 void smb1_VineBlock(void);
 #define VineBlock smb1_VineBlock
 
-struct_yc smb1_BlockBumpedChk(byte param_1);
-#define BlockBumpedChk smb1_BlockBumpedChk
-
 void smb1_BrickShatter(u16 mt_x, u16 mt_y);
 #define BrickShatter smb1_BrickShatter
 
