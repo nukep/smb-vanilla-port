@@ -5,9 +5,6 @@
 
 #include "area.h"
 
-
-
-
 #define NO_AVAIL_ENEMY_SLOT 5
 
 static void RenderAreaGraphics(void);
@@ -1261,7 +1258,7 @@ void Hole_Water(const byte param_1) {
 // Signature: [X] -> []
 void QuestionBlockRow_High(const byte param_1) {
   ChkLrgObjLength(param_1);
-  MetatileBuffer[3] = MT_QUESTIONBLOCK_ROW;
+  MetatileBuffer[3] = MT_QUESTIONBLOCK_COIN;
 }
 
 
@@ -1270,7 +1267,7 @@ void QuestionBlockRow_High(const byte param_1) {
 // Signature: [X] -> []
 void QuestionBlockRow_Low(const byte param_1) {
   ChkLrgObjLength(param_1);
-  MetatileBuffer[7] = MT_QUESTIONBLOCK_ROW;
+  MetatileBuffer[7] = MT_QUESTIONBLOCK_COIN;
 }
 
 

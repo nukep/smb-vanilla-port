@@ -3,8 +3,9 @@
 
 enum metatiles {
   MT_0 = 0,
+  MT_BLACK,
 
-  MT_BUSH_L = 0x02,
+  MT_BUSH_L,
   MT_BUSH_M,
   MT_BUSH_R,
 
@@ -54,12 +55,15 @@ enum metatiles {
 
   // 22/1f
   MT_CORAL,
-  MT_unk15,
+
+  MT_SPECIAL_BLOCKHIT,
 
   MT_FLAGPOLE_T,
   MT_FLAGPOLE_M,
 
-  MT_unk19,
+  MT_SPECIAL_VINE,
+
+  // no metatiles from here until 0x40
 
   MT_ROPE_VERT = 0x40,        // |
   MT_PULLEY_ROPE_HORZ,        // --
@@ -75,7 +79,7 @@ enum metatiles {
   MT_CASTLE_DOOR_T,
   MT_CASTLE_DOOR_B,
 
-  MT_TREELEDGE_TRUNK = 0x4c,
+  MT_TREELEDGE_TRUNK,
 
   MT_FENCE,
   MT_TREE_TRUNK,
@@ -86,30 +90,41 @@ enum metatiles {
 #endif
 
   // MT_BRICK_2 has a white outline on the top
+  // 51/4f
   MT_BRICK_2,
   MT_BRICK,
+  MT_BRICK_UNUSED,
 
 #ifdef SMB1_MODE
-  MT_STONE = 0x54,
+  MT_STONE,
 #endif
 
+  // 55/52
+  MT_BRICK_2_POWERUP,
 #ifdef SMB2J_MODE
-  MT_unk16 = 0x56,
+  MT_BRICK_2_POISONSHROOM,
 #endif
-#ifdef SMB1_MODE
-  MT_unk16 = 0x58,
-#endif
+  MT_BRICK_2_VINE,
+  MT_BRICK_2_STAR,
+  MT_BRICK_2_COINS,
+  MT_BRICK_2_1UP,
 
+  // 5a/58
+  MT_BRICK_POWERUP,
 #ifdef SMB2J_MODE
-  MT_unk17 = 0x5c,
+  MT_BRICK_POISONSHROOM,
 #endif
-#ifdef SMB1_MODE
-  MT_unk17 = 0x5d,
-#endif
+  MT_BRICK_VINE,
+  MT_BRICK_STAR,
+  MT_BRICK_COINS,
+  MT_BRICK_1UP,
 
-  MT_unk4=0x60,
+  // 5f/5e
+  MT_HIDDEN_1COIN,
+  MT_HIDDEN_1UP,
 #ifdef SMB2J_MODE
-  MT_unk5,
+  MT_HIDDEN_POISONSHROOM,
+  MT_HIDDEN_POWERUP,
 #endif
 
   // 61/62
@@ -132,12 +147,7 @@ enum metatiles {
   MT_STONE,
 #endif
 
-#ifdef SMB1_MODE
-  MT_unk18 = 0x6a,
-#endif
-#ifdef SMB2J_MODE
-  MT_unk18 = 0x6c,
-#endif
+  MT_unk18,
 
   // 6b/6d
   MT_WATERPIPE_T,
@@ -145,6 +155,8 @@ enum metatiles {
 
   // 6d/6f. Might be residual code
   MT_FLAGBALL,
+
+  // no metatiles from here until 0x80
 
   MT_CLOUD_TL=0x80,
   MT_CLOUD_TM,
@@ -168,11 +180,13 @@ enum metatiles {
   // 8a/8d
   MT_unk21,
 
-  MT_QUESTIONBLOCK_ROW = 0xc0,
+  // no metatiles from here until 0xc0
 
-  MT_unk13,
+  MT_QUESTIONBLOCK_COIN = 0xc0,
+
+  MT_QUESTIONBLOCK_POWERUP,
 #ifdef SMB2J_MODE
-  MT_unk14,
+  MT_QUESTIONBLOCK_POISONSHROOM,
 #endif
 
   // c2/c3
@@ -183,22 +197,40 @@ enum metatiles {
   MT_unk20
 };
 
-
-#ifdef SMB1_MODE
 static const byte BrickQBlockMetatiles[] = {
-  0xc1, 0xc0, 0x5f, 0x60,                   // used by question blocks
-  0x55, 0x56, 0x57, 0x58, 0x59,             // used by ground level types
-  0x5a, 0x5b, 0x5c, 0x5d, 0x5e,             // used by other level types
-};
-#endif
-
+  // used by question blocks
+  MT_QUESTIONBLOCK_POWERUP,
 #ifdef SMB2J_MODE
-static const byte BrickQBlockMetatiles[] = {
-  0xc1, 0xc2, 0xc0, 0x5e, 0x5f, 0x60, 0x61, // used by question blocks
-  0x52, 0x53, 0x54, 0x55, 0x56, 0x57,       // used by ground level bricks
-  0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d,       // used by other level bricks
-};
+  MT_QUESTIONBLOCK_POISONSHROOM,
 #endif
+  MT_QUESTIONBLOCK_COIN,
+  MT_HIDDEN_1COIN,
+  MT_HIDDEN_1UP,
+#ifdef SMB2J_MODE
+  MT_HIDDEN_POISONSHROOM,
+  MT_HIDDEN_POWERUP,
+#endif
+
+  // used by ground level types
+  MT_BRICK_2_POWERUP,
+#ifdef SMB2J_MODE
+  MT_BRICK_2_POISONSHROOM,
+#endif
+  MT_BRICK_2_VINE,
+  MT_BRICK_2_STAR,
+  MT_BRICK_2_COINS,
+  MT_BRICK_2_1UP,
+
+  // used by other level types
+  MT_BRICK_POWERUP,
+#ifdef SMB2J_MODE
+  MT_BRICK_POISONSHROOM,
+#endif
+  MT_BRICK_VINE,
+  MT_BRICK_STAR,
+  MT_BRICK_COINS,
+  MT_BRICK_1UP,
+};
 
 #endif
 
