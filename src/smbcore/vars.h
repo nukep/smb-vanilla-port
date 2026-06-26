@@ -375,7 +375,6 @@
 #define CurrentColumnPos                 RAM(0x0726)
 #define TerrainControl                   RAM(0x0727)
 #define BackloadingFlag                  RAM(0x0728)
-#define BehindAreaParserFlag             RAM(0x0729)
 #define AreaObjectPageLoc                RAM(0x072A)
 #define AreaObjectPageSel                RAM(0x072B)
 #define AreaDataOffset                   RAM(0x072C)

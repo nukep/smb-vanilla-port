@@ -87,6 +87,7 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
       // $109 is a temporary variable
       // $160-$1FF is the stack (this port doesn't use this)
       // $3C4-$3CA is SprObject_Attrib. It's mostly unused except for power-ups, and has some glitchy values from cheep-cheeps that are best not compared
+      // $729 is a temporary variable
       // $735 is a temporary variable
 
       if (SMB_which_game(userdata->smb_state) == GAME_SMB1) {
@@ -96,14 +97,16 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
         mem_eq_range(0x0100, 0x0108);
         mem_eq_range(0x010a, 0x015F);
         mem_eq_range(0x0200, 0x03C3);
-        mem_eq_range(0x03CB, 0x0734);
+        mem_eq_range(0x03CB, 0x0728);
+        mem_eq_range(0x072A, 0x0734);
         mem_eq_range(0x0736, 0x07FF);
       } else if (SMB_which_game(userdata->smb_state) == GAME_SMB2J) {
         // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
         mem_eq_range(0x0010, 0x00E6);
         mem_eq_range(0x010a, 0x015F);
         mem_eq_range(0x0200, 0x03C3);
-        mem_eq_range(0x03CB, 0x0734);
+        mem_eq_range(0x03CB, 0x0728);
+        mem_eq_range(0x072A, 0x0734);
         mem_eq_range(0x0736, 0x07FF);
       }
 

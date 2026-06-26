@@ -12,7 +12,8 @@ static void RenderAttributeTables(void);
 static void IncrementColumnPos(void);
 static void AreaParserCore(void);
 static void ProcessAreaData(void);
-static bool DecodeAreaData(byte param_1);
+static u8 decode_area_data_to_idx(const u8 data0, const u8 data1);
+static void decode_area_data_dispatch(const u8 objoff, const u8 idx);
 static void AlterAreaAttributes(byte param_1);
 static void ScrollLockObject_Warp(void);
 static void TreeLedge(byte param_1);
@@ -48,7 +49,7 @@ static void Jumpspring(byte param_1);
 static void Hole_Empty(byte param_1);
 static void RenderUnderPart(byte param_1, byte param_2, byte param_3);
 static struct_ycr07 ChkLrgObjLength(byte param_1);
-static bool ChkLrgObjFixedLength(byte param_1, byte param_2);
+static void ChkLrgObjFixedLength(byte param_1, byte param_2);
 static struct_yr07 GetLrgObjAttrib(byte param_1);
 static byte GetAreaObjXPosition(void);
 static byte GetAreaObjYPosition(byte param_1);
@@ -142,7 +143,7 @@ enum DecodeAreaData_jumptable_item {
   DECODEAREADATA_FLYING_CHEEPCHEEP,
   DECODEAREADATA_BULLET_BILL_OR_CHEEPCHEEP_FRENZY,
   DECODEAREADATA_STOP_FRENZY,
-  DECODEAREADATA_NOOP,
+  DECODEAREADATA_LOOP_COMMAND,
 #ifdef SMB2J_MODE
   DECODEAREADATA_WINDON,
   DECODEAREADATA_WINDOFF,
@@ -520,56 +521,86 @@ void AreaParserCore(void) {
 // Signature: [] -> []
 void ProcessAreaData(void) {
   while (true) {
+    bool behind_area_parser_flag;
     for (int objoff = 2; objoff >= 0; objoff--) {
-      BehindAreaParserFlag = 0;
+      // Note: BehindAreaParserFlag is optimized away. It's only used in this function and DecodeAreaData
+      behind_area_parser_flag = false;
 
       bool decode = true;
 
-      if (AreaData[AreaDataOffset] == 0xfd) {
-        decode = true;
-      } else if (AreaObjectLength[objoff] < 0x80) {
-        decode = true;
-      } else {
-        const byte second_byte = AreaData[AreaDataOffset + 1];
-        const byte first_nibble = AreaData[AreaDataOffset] & 0xf;
+      if (AreaObjectLength[objoff] >= 0x80) {
+        if (AreaData[AreaDataOffset] != 0xfd) {
+          const byte data1 = AreaData[AreaDataOffset + 1];
+          const byte first_nibble = AreaData[AreaDataOffset] & 0xf;
 
-        if (second_byte & 0x80) {
           if (AreaObjectPageSel == 0) {
-            AreaObjectPageSel = 1;
-            AreaObjectPageLoc += 1;
+            if (data1 & 0x80) {
+              AreaObjectPageSel = 1;
+              AreaObjectPageLoc += 1;
+            } else if ((first_nibble == 0xd) && ((data1 & 0x40) == 0)) {
+              AreaObjectPageSel = 1;
+              AreaObjectPageLoc = data1 & 0x1f;
+              decode = false;
+            }
           }
-        }
 
-        if ((first_nibble == 0xd) && ((second_byte & 0x40) == 0) && (AreaObjectPageSel == 0)) {
-          AreaObjectPageLoc = second_byte & 0x1f;
-          AreaObjectPageSel = 1;
-          decode = false;
-        } else if ((first_nibble == 0xe) && (BackloadingFlag != 0)) {
-          decode = true;
-        } else {
-          // CheckRear
-          if (CurrentPageLoc <= AreaObjectPageLoc) {
-            decode = true;
-          } else {
-            // SetBehind
-            BehindAreaParserFlag = 1;
-            decode = false;
+          if (first_nibble != 0xe || BackloadingFlag == 0) {
+            if (CurrentPageLoc > AreaObjectPageLoc) {
+              // SetBehind
+              behind_area_parser_flag = true;
+              decode = false;
+            }
           }
         }
       }
 
       if (decode) {
         // RdyDecode
-        if (!DecodeAreaData(objoff)) {
-          BackloadingFlag = 0;
-          BehindAreaParserFlag = 0;
 
-          // ChkLength
-          if (AreaObjectLength[0] < 0x80) {
-            AreaObjectLength[0] -= 1;
+        const u8 off = AreaObjectLength[objoff] >= 0x80 ? AreaDataOffset : AreaObjOffsetBuffer[objoff];
+
+        const u8 data0 = AreaData[off];
+
+        if (data0 != 0xfd) {
+          // Bit 7 is never used
+          const u8 data1 = AreaData[(byte)(off + 1)] & 0x7f;
+
+          if ((data0 & 0xf) == 0xd && (data1 & 0x40) == 0) {
+
+          } else {
+            // Inlined: DecodeAreaData
+
+            const u8 idx = decode_area_data_to_idx(data0 & 0xf, data1);
+
+            if (idx == DECODEAREADATA_LOOP_COMMAND) {
+              LoopCommand += 1;
+            }
+
+            if (AreaObjectLength[objoff] < 0x80) {
+              decode_area_data_dispatch(objoff, idx);
+            } else if (AreaObjectPageLoc == CurrentPageLoc) {
+              if (BackloadingFlag != 0) {
+                BackloadingFlag = 0;
+
+                // ChkLength
+                if (AreaObjectLength[0] < 0x80) {
+                  AreaObjectLength[0] -= 1;
+                }
+
+                return;
+              } else if ((data0 >> 4) == CurrentColumnPos) {
+                AreaObjOffsetBuffer[objoff] = AreaDataOffset;
+                decode_area_data_dispatch(objoff, idx);
+                AreaDataOffset += 2;
+                AreaObjectPageSel = 0;
+              }
+            } else if ((data0 & 0xf) == 0xe && BackloadingFlag != 0) {
+              AreaObjOffsetBuffer[objoff] = AreaDataOffset;
+              decode_area_data_dispatch(objoff, idx);
+              AreaDataOffset += 2;
+              AreaObjectPageSel = 0;
+            }
           }
-
-          return;
         }
       } else {
         // NextAObj
@@ -584,35 +615,16 @@ void ProcessAreaData(void) {
       }
     }
 
-    if ((BehindAreaParserFlag == 0) && (BackloadingFlag == 0)) {
+    if ((!behind_area_parser_flag) && (BackloadingFlag == 0)) {
       return;
     }
   }
 }
 
-
-// SMB:9595
-// SM2MAIN:73a6
-bool DecodeAreaData(const byte objoff) {
-  // Highly coupled to ProcessAreaData
-  // Note: reworked to return false if r08 is set to 0. Unmodified otherwise.
-  // X = r08 on call.
-  // Original signature: [X, Y, r08] -> [r08]
-
-  const u8 off = AreaObjectLength[objoff] >= 0x80 ? AreaDataOffset : AreaObjOffsetBuffer[objoff];
-
-  const u8 data0 = AreaData[off];
-
-  if (data0 == 0xfd) {
-    return true;
-  }
-
-  // Bit 7 is never used
-  const u8 data1 = AreaData[(byte)(off + 1)] & 0x7f;
-
+u8 decode_area_data_to_idx(const u8 data0, const u8 data1) {
   byte idx;
 
-  switch (data0 & 0xf) {
+  switch (data0) {
   case 0xc:
     switch ((data1 >> 4) & 7) {
     case 0: idx = DECODEAREADATA_HOLE_EMPTY; break;
@@ -627,10 +639,6 @@ bool DecodeAreaData(const byte objoff) {
     break;
 
   case 0xd:
-    if ((data1 & 0x40) == 0) {
-      return true;
-    }
-
     switch (data1 & 0x3f) {
     case 0x00: idx = DECODEAREADATA_INTROPIPE; break;
     case 0x01: idx = DECODEAREADATA_FLAGPOLEOBJECT; break;
@@ -643,10 +651,7 @@ bool DecodeAreaData(const byte objoff) {
     case 0x08: idx = DECODEAREADATA_FLYING_CHEEPCHEEP; break;
     case 0x09: idx = DECODEAREADATA_BULLET_BILL_OR_CHEEPCHEEP_FRENZY; break;
     case 0x0a: idx = DECODEAREADATA_STOP_FRENZY; break;
-    case 0x0b:
-      LoopCommand += 1;
-      idx = DECODEAREADATA_NOOP;
-      break;
+    case 0x0b: idx = DECODEAREADATA_LOOP_COMMAND; break;
 
 #ifdef SMB1_MODE
     // not encountered normally, but here as an edge case
@@ -754,48 +759,24 @@ bool DecodeAreaData(const byte objoff) {
     break;
   }
 
-  if (AreaObjectLength[objoff] >= 0x80) {
-    if (AreaObjectPageLoc != CurrentPageLoc) {
-      if ((data0 & 0xf) != 0xe) {
-        return true;
-      }
-      if (BackloadingFlag == 0) {
-        return true;
-      }
-    } else {
-      // InitRear
-      if (BackloadingFlag != 0) {
-        // Note: moved BackloadingFlag and BehindAreaParserFlag clear to caller instead
-        return false;
-      }
+  return idx;
+}
 
-      // BackColC
-      if ((data0 >> 4) != CurrentColumnPos) {
-        return true;
-      }
-    }
-    // StarAObj
-    AreaObjOffsetBuffer[objoff] = AreaDataOffset;
-
-    // inlined: IncAreaObjOffset
-    AreaDataOffset += 2;
-    AreaObjectPageSel = 0;
-  }
-
+void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
   switch (idx) {
   case DECODEAREADATA_VERTICALPIPE_1:
     VerticalPipe(objoff, false);
-    return true;
+    return;
 
   case DECODEAREADATA_VERTICALPIPE_2:
     VerticalPipe(objoff, true);
-    return true;
+    return;
 
   case DECODEAREADATA_AREASTYLEOBJECT:
     switch (AreaStyle) {
     case AREASTYLEOBJECT_TREELEDGE:
       TreeLedge(objoff);
-      return true;
+      return;
 
     case AREASTYLEOBJECT_MUSHROOMLEDGE:
 #ifdef SMB1_MODE
@@ -804,99 +785,99 @@ bool DecodeAreaData(const byte objoff) {
 #ifdef SMB2J_MODE
       CloudLedge(objoff);
 #endif
-      return true;
+      return;
 
     case AREASTYLEOBJECT_BULLETBILLCANNON:
       BulletBillCannon(objoff);
-      return true;
+      return;
 
     default:
       jmpengine_overflow(AreaStyle);
-      return true;
+      return;
     }
 
   case DECODEAREADATA_ROWOFBRICKS:
     RowOfBricks(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_ROWOFSOLIDBLOCKS:
     RowOfSolidBlocks(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_ROWOFCOINS:
     RowOfCoins(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_COLUMNOFBRICKS:
     ColumnOfBricks(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_COLUMNOFSOLIDBLOCKS:
     ColumnOfSolidBlocks(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_HOLE_EMPTY:
     Hole_Empty(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_PULLEYROPEOBJECT:
     PulleyRopeObject(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_BRIDGE_HIGH:
     Bridge_High(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_BRIDGE_MIDDLE:
     Bridge_Middle(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_BRIDGE_LOW:
     Bridge_Low(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_HOLE_WATER:
     Hole_Water(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_QUESTIONBLOCKROW_HIGH:
     QuestionBlockRow_High(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_QUESTIONBLOCKROW_LOW:
     QuestionBlockRow_Low(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_ENDLESSROPE:
     EndlessRope();
-    return true;
+    return;
 
   case DECODEAREADATA_BALANCEPLATROPE:
     BalancePlatRope(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_CASTLEOBJECT:
     CastleObject(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_STAIRCASEOBJECT:
     StaircaseObject(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_EXITPIPE:
     ExitPipe(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_FLAGBALLS_RESIDUAL:
     FlagBalls_Residual(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_QUESTIONBLOCK_POWERUP:
     {
       const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
       RenderUnderPart(MT_QUESTIONBLOCK_POWERUP, sVar2.r07, 0);
     }
-    return true;
+    return;
 
 #ifdef SMB2J_MODE
   case DECODEAREADATA_QUESTIONBLOCK_POISONSHROOM:
@@ -904,7 +885,7 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
       RenderUnderPart(MT_QUESTIONBLOCK_POISONSHROOM, sVar2.r07, 0);
     }
-    return true;
+    return;
 #endif
 
   case DECODEAREADATA_QUESTIONBLOCK_COIN:
@@ -912,14 +893,14 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
       RenderUnderPart(MT_QUESTIONBLOCK_COIN, sVar2.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_QUESTIONBLOCK_1COIN:
     {
       const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
       RenderUnderPart(MT_HIDDEN_1COIN, sVar2.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_HIDDEN1UPBLOCK:
     if (Hidden1UpFlag != 0) {
@@ -929,7 +910,7 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_BRICK_POWERUP:
     {
@@ -937,7 +918,7 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
-    return true;
+    return;
 
 #ifdef SMB2J_MODE
   case DECODEAREADATA_BRICK_POISONSHROOM:
@@ -946,7 +927,7 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
-    return true;
+    return;
 #endif
 
   case DECODEAREADATA_BRICK_VINE:
@@ -955,7 +936,7 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_BRICK_STAR:
     {
@@ -963,7 +944,7 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_BRICK_1UP:
     {
@@ -971,7 +952,7 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_BRICKWITHCOINS:
     {
@@ -980,53 +961,53 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_WATERPIPE:
     WaterPipe(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_EMPTYBLOCK:
     EmptyBlock(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_JUMPSPRING:
     Jumpspring(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_INTROPIPE:
     IntroPipe(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_FLAGPOLEOBJECT:
     FlagpoleObject();
-    return true;
+    return;
 
   case DECODEAREADATA_AXEOBJ:
     // Inlined: AxeObj
     VRAM_Buffer_AddrCtrl = ADDRCTRL_BOWSERPALETTEDATA;
     RenderUnderPart(MT_AXE, 6, 0);
-    return true;
+    return;
 
   case DECODEAREADATA_CHAINOBJ:
     // Inlined: ChainObj
     RenderUnderPart(MT_BOWSERBRIDGE_CHAIN, 7, 0);
-    return true;
+    return;
 
   case DECODEAREADATA_CASTLEBRIDGEOBJ:
     // Inlined: CastleBridgeObj
     ChkLrgObjFixedLength(objoff, 0xc);
     RenderUnderPart(MT_BOWSERBRIDGE_BLOCK, 8, 0);
-    return true;
+    return;
 
   case DECODEAREADATA_SCROLLLOCKOBJECT_WARP:
     ScrollLockObject_Warp();
-    return true;
+    return;
 
   case DECODEAREADATA_SCROLLLOCKOBJECT_1:
   case DECODEAREADATA_SCROLLLOCKOBJECT_2:
     ScrollLock ^= 1;
-    return true;
+    return;
 
   case DECODEAREADATA_FLYING_CHEEPCHEEP:
     // Inlined: AreaFrenzy
@@ -1034,12 +1015,12 @@ bool DecodeAreaData(const byte objoff) {
     for (int i = 0; i < 5; i++) {
       if (Enemy_ID[i] == A_FLYING_CHEEPCHEEP) {
         EnemyFrenzyQueue = 0;
-        return true;
+        return;
       }
     }
 
     EnemyFrenzyQueue = A_FLYING_CHEEPCHEEP;
-    return true;
+    return;
 
   case DECODEAREADATA_BULLET_BILL_OR_CHEEPCHEEP_FRENZY:
     // Inlined: AreaFrenzy
@@ -1047,12 +1028,12 @@ bool DecodeAreaData(const byte objoff) {
     for (int i = 0; i < 5; i++) {
       if (Enemy_ID[i] == A_BULLET_BILL_OR_CHEEPCHEEP_FRENZY) {
         EnemyFrenzyQueue = 0;
-        return true;
+        return;
       }
     }
 
     EnemyFrenzyQueue = A_BULLET_BILL_OR_CHEEPCHEEP_FRENZY;
-    return true;
+    return;
 
   case DECODEAREADATA_STOP_FRENZY:
     // Inlined: AreaFrenzy
@@ -1060,20 +1041,20 @@ bool DecodeAreaData(const byte objoff) {
     for (int i = 0; i < 5; i++) {
       if (Enemy_ID[i] == A_STOP_FRENZY) {
         EnemyFrenzyQueue = 0;
-        return true;
+        return;
       }
     }
 
     EnemyFrenzyQueue = A_STOP_FRENZY;
-    return true;
+    return;
 
-  case DECODEAREADATA_NOOP:
+  case DECODEAREADATA_LOOP_COMMAND:
     // NES note: goes to "LoopCmdE" (a no-op)
-    return true;
+    return;
 
   case DECODEAREADATA_ALTERAREAATTRIBUTES:
     AlterAreaAttributes(objoff);
-    return true;
+    return;
 
 #ifdef SMB2J_MODE
   case DECODEAREADATA_QUESTIONBLOCK_5:
@@ -1081,30 +1062,30 @@ bool DecodeAreaData(const byte objoff) {
       const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
       RenderUnderPart(MT_HIDDEN_POISONSHROOM, sVar2.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_QUESTIONBLOCK_6:
     {
       const struct_yr07 sVar2 = GetLrgObjAttrib(objoff);
       RenderUnderPart(MT_HIDDEN_POWERUP, sVar2.r07, 0);
     }
-    return true;
+    return;
 
   case DECODEAREADATA_UPSIDEDOWNPIPE_HIGH:
     UpsideDownPipe_High(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_UPSIDEDOWNPIPE_LOW:
     UpsideDownPipe_Low(objoff);
-    return true;
+    return;
 
   case DECODEAREADATA_WINDON:
     WindOn();
-    return true;
+    return;
 
   case DECODEAREADATA_WINDOFF:
     WindOff();
-    return true;
+    return;
 #endif
 
   default:
@@ -1752,22 +1733,23 @@ struct_ycr07 ChkLrgObjLength(const byte param_1) {
   const struct_yr07 sVar4 = GetLrgObjAttrib(param_1);
   const byte bVar1 = sVar4.r07;
   const byte bVar2 = sVar4.y;
-  sVar3.c = ChkLrgObjFixedLength(param_1, bVar2);
+  sVar3.c = AreaObjectLength[param_1] >= 0x80;
   sVar3.y = bVar2;
   sVar3.r07 = bVar1;
+
+  ChkLrgObjFixedLength(param_1, bVar2);
+
   return sVar3;
 }
 
 
 // SMB:9baf
 // SM2MAIN:79f0
-// Signature: [X, Y] -> [C]
-bool ChkLrgObjFixedLength(const byte param_1, const byte param_2) {
-  const byte bVar1 = AreaObjectLength[param_1];
-  if (bVar1 >= 0x80) {
+// Signature: [X, Y] -> []
+void ChkLrgObjFixedLength(const byte param_1, const byte param_2) {
+  if (AreaObjectLength[param_1] >= 0x80) {
     AreaObjectLength[param_1] = param_2;
   }
-  return bVar1 >= 0x80;
 }
 
 
