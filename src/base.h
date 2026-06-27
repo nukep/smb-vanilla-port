@@ -54,7 +54,7 @@ static inline NORETURN void jmpengine_overflow(byte index) {
 // Implementation of Ghidra decompiler functions.
 
 static inline bool CARRY1(byte a, byte b) {
-  ushort r = (ushort)a + (ushort)b;
+  u16 r = (u16)a + (u16)b;
   return r >= 256;
 }
 

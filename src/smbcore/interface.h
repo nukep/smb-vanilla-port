@@ -11,7 +11,7 @@ union ppureg {
     byte lo : 8;
     byte hi : 7;
   };
-  ushort value;
+  u16 value;
 };
 
 struct ppu_state {
@@ -101,14 +101,14 @@ static inline const byte * rom_ptr(const u16 addr) {
 // Represents a byte array at a specific address.
 class RamByteArray {
 private:
-  ushort addr;
-  ushort length;
+  u16 addr;
+  u16 length;
   int offset;
 
 public:
-  RamByteArray(ushort addr) : addr(addr), length(0), offset(0) {}
-  RamByteArray(ushort addr, ushort length) : addr(addr), length(length), offset(0) {}
-  RamByteArray(ushort addr, ushort length, int offset) : addr(addr), length(length), offset(offset) {}
+  RamByteArray(u16 addr) : addr(addr), length(0), offset(0) {}
+  RamByteArray(u16 addr, u16 length) : addr(addr), length(length), offset(0) {}
+  RamByteArray(u16 addr, u16 length, int offset) : addr(addr), length(length), offset(offset) {}
   byte &operator*() const {
     return RAM(addr + offset);
   }
@@ -148,12 +148,12 @@ public:
 // Read-only, can't write to these
 class ConstRamByteArray {
 private:
-  ushort addr;
-  ushort length;
+  u16 addr;
+  u16 length;
 
 public:
-  ConstRamByteArray(ushort addr) : addr(addr), length(0) {}
-  ConstRamByteArray(ushort addr, ushort length) : addr(addr), length(length) {}
+  ConstRamByteArray(u16 addr) : addr(addr), length(0) {}
+  ConstRamByteArray(u16 addr, u16 length) : addr(addr), length(length) {}
   const byte &operator*() const {
     return RAM(addr);
   }
@@ -223,7 +223,7 @@ static inline void draw_tile(const struct SMB_tile tile) {
   }
 }
 
-static inline void apu_write_register(ushort addr, byte data) {
+static inline void apu_write_register(u16 addr, byte data) {
   if (SMB_STATE->callbacks.apu_write_register) {
     SMB_STATE->callbacks.apu_write_register(SMB_STATE->callbacks.userdata, addr, data);
   }
@@ -318,7 +318,7 @@ static inline void ppuaddr(byte x) {
 
 // Write to $2007
 static inline void ppudata(byte x) {
-  ushort addr = PPU_STATE.v.value & 0x3FFF;
+  u16 addr = PPU_STATE.v.value & 0x3FFF;
 
   if (addr == 0x3F10) {
     addr = 0x3F00;

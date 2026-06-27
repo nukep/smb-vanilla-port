@@ -287,7 +287,7 @@ bool seek_rom(void *userdata, size_t offset) {
   return true;
 }
 
-void apu_write_register(void *userdata, ushort addr, byte data) {
+void apu_write_register(void *userdata, u16 addr, byte data) {
   struct frontend_userdata *fe = userdata;
   if (fe->audio) {
     SMB_audio_write_register(fe->audio, addr, data);

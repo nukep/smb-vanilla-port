@@ -32,8 +32,8 @@ static bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_off
 struct FdsFile {
   const char *name;
   size_t file_offset;
-  ushort size;
-  ushort org;
+  u16 size;
+  u16 org;
   int type;
 };
 
@@ -194,7 +194,7 @@ void SMB_tick(struct SMB_state *state) {
   }
 }
 
-static inline void draw_nametable_tile(int x, int y, ushort ppu_offset, int tilex,
+static inline void draw_nametable_tile(int x, int y, u16 ppu_offset, int tilex,
                                        int tiley) {
   int j = tilex;
   int i = tiley;
@@ -223,7 +223,7 @@ static inline void draw_nametable_tile(int x, int y, ushort ppu_offset, int tile
   draw_tile(tile);
 }
 
-static inline void draw_nametable_rect(int x, int y, ushort ppu_offset, int fromx,
+static inline void draw_nametable_rect(int x, int y, u16 ppu_offset, int fromx,
                                        int fromy, int tox, int toy) {
   for (int i = fromy; i < toy; i++) {
     for (int j = fromx; j < tox; j++) {

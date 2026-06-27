@@ -9,7 +9,6 @@
 #endif
 
 typedef uint8_t byte;
-typedef uint16_t ushort;
 
 // Use Rust/Zig style typedefs for integers
 

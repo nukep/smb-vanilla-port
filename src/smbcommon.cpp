@@ -21,8 +21,8 @@ void set_world_and_level(byte world, byte level) {
   WorldNumber = world;
   LevelNumber = level;
 
-  ushort WorldAddrOffsets = SMB1_ONLY ? 0x9CB4 : 0xC357;
-  ushort AreaAddrOffsetsPtr = SMB1_ONLY ? 0x9CBC : 0xC360;
+  u16 WorldAddrOffsets = SMB1_ONLY ? 0x9CB4 : 0xC357;
+  u16 AreaAddrOffsetsPtr = SMB1_ONLY ? 0x9CBC : 0xC360;
 
   byte off = 0;
   for (int i = 0; i < level; i++) {

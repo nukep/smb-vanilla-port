@@ -36,8 +36,8 @@ struct SMB_tile {
   union {
   byte extra_spriteidx;
   struct {
-    ushort x;
-    ushort y;
+    u16 x;
+    u16 y;
   } extra_bg;
   };
 };
@@ -53,7 +53,7 @@ struct SMB_callbacks {
   void (*update_palette)(void *userdata, const byte *palette_indices);
   void (*draw_tile)(void *userdata, const struct SMB_tile tile);
 
-  void (*apu_write_register)(void *userdata, ushort addr, byte data);
+  void (*apu_write_register)(void *userdata, u16 addr, byte data);
   void (*apu_end_frame)(void *userdata);
 
   void (*joy1)(void *userdata, struct SMB_buttons *buttons);
