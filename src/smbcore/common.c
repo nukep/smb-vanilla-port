@@ -42,7 +42,7 @@ static inline void GameMenuRoutine_ResetTitle() {
 #ifdef SMB2J_MODE
   IRQUpdateFlag = 0;
 #endif
-  DisableScreenFlag = DisableScreenFlag + 1;
+  DisableScreenFlag += 1;
 }
 
 #ifdef SMB1_MODE
@@ -207,7 +207,7 @@ void GameMenuRoutine(void) {
 void PauseRoutine(void) {
   if ((OperMode == 2) || ((OperMode == 1 && (OperMode_Task == ssw(3, 4))))) {
     if (GamePauseTimer != 0) {
-      GamePauseTimer = GamePauseTimer - 1;
+      GamePauseTimer -= 1;
       return;
     }
     if ((SavedJoypadBits[0] & BUTTON_START) == 0) {
@@ -370,7 +370,7 @@ bool DemoEngine(void) {
       return true;
     }
   }
-  DemoActionTimer = DemoActionTimer - 1;
+  DemoActionTimer -= 1;
   SavedJoypadBits[0] = DemoActionData[DemoAction - 1];
   return false;
 }
@@ -459,7 +459,7 @@ void SetupVictoryMode(void) {
     }
   #endif
   EventMusicQueue = 8;
-  OperMode_Task = OperMode_Task + 1;
+  OperMode_Task += 1;
 }
 
 
@@ -479,13 +479,13 @@ void PlayerVictoryWalk(void) {
 
   if (ScreenLeft_PageLoc != VictoryDestPageLoc) {
     const bool bVar1 = ScrollFractional >= 0x80;
-    ScrollFractional = ScrollFractional + 0x80;
+    ScrollFractional += 0x80;
     ScrollScreen(bVar1 + 1);
     UpdScrollVar();
     VictoryWalkControl += 1;
   }
   if (VictoryWalkControl == 0) {
-    OperMode_Task = OperMode_Task + 1;
+    OperMode_Task += 1;
   }
 }
 
@@ -727,7 +727,7 @@ void InitScreen(void) {
   if (OperMode != 0) {
     VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA;
   }
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -742,7 +742,7 @@ void SetupIntermediate(void) {
   GetPlayerColors();
   PlayerStatus = bVar1;
   BackgroundColorCtrl = bStack0000;
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -763,7 +763,7 @@ void GetAreaPalette(void) {
 
   VRAM_Buffer_AddrCtrl = addrctrl;
 
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -854,7 +854,7 @@ void GetAlternatePalette1(void) {
   if (AreaStyle == 1) {
     VRAM_Buffer_AddrCtrl = ADDRCTRL_MUSHROOMPALETTEDATA;
   }
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -863,7 +863,7 @@ void GetAlternatePalette1(void) {
 // Signature: [] -> []
 void WriteTopStatusLine(void) {
   WriteGameText(0);
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -888,7 +888,7 @@ void WriteBottomStatusLine(void) {
              0x28,
              level_number_display);
 
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -902,7 +902,7 @@ void DisplayTimeUp(void) {
     ResetScreenTimer();
     DisableScreenFlag = 0;
   } else {
-    ScreenRoutineTask = ScreenRoutineTask + 2;
+    ScreenRoutineTask += 2;
   }
 }
 
@@ -971,7 +971,7 @@ void ClearBuffersDrawIcon(void) {
 // Signature: [] -> []
 void WriteTopScore(void) {
   WriteDigits(0xfa);
-  OperMode_Task = OperMode_Task + 1;
+  OperMode_Task += 1;
 }
 
 
@@ -991,7 +991,7 @@ void ResetSpritesAndScreenTimer(void) {
 // Signature: [] -> []
 void ResetScreenTimer(void) {
   ScreenTimer = 7;
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -1382,7 +1382,7 @@ void InitializeArea(void) {
 #ifdef SMB2J_MODE
   LoadPhysicsData();
 #endif
-  OperMode_Task = OperMode_Task + 1;
+  OperMode_Task += 1;
 }
 
 
@@ -1443,10 +1443,10 @@ void SecondaryGameSetup(void) {
 
   // NES note: there was a call here to "DoNothing2", which, well, does nothing
 
-  Sprite0HitDetectFlag = Sprite0HitDetectFlag + 1;
+  Sprite0HitDetectFlag += 1;
 #endif
 #ifdef SMB2J_MODE
-  IRQUpdateFlag = IRQUpdateFlag + 1;
+  IRQUpdateFlag += 1;
 #endif
 
   // NES note: there was a call here to "DoNothing1" ("DoNothing" in SMB2J), which appears to set an unused variable
@@ -1454,7 +1454,7 @@ void SecondaryGameSetup(void) {
   // We'll inline it here
   Misc_Collision_Flag[11] = 0xff;
 
-  OperMode_Task = OperMode_Task + 1;
+  OperMode_Task += 1;
 }
 
 #define MUSIC_QUEUE_GROUND (1 << 0)
@@ -1666,8 +1666,8 @@ void SetupGameOver(void) {
   ContinueMenuSelect = 0;
 #endif
   EventMusicQueue = 2;
-  DisableScreenFlag = DisableScreenFlag + 1;
-  OperMode_Task = OperMode_Task + 1;
+  DisableScreenFlag += 1;
+  OperMode_Task += 1;
 }
 
 
@@ -1718,7 +1718,7 @@ void TerminateGame(void) {
 void ContinueGame(void) {
   LoadAreaPointer();
   PlayerSize = 1;
-  FetchNewGameTimerFlag = FetchNewGameTimerFlag + 1;
+  FetchNewGameTimerFlag += 1;
   TimerControl = 0;
   PlayerStatus = 0;
   GameEngineSubroutine = 0;
@@ -2141,7 +2141,7 @@ void PlayerCtrlRoutine(void) {
       if (0x7f < (u8)(cVar2 - 1U)) {
         JoypadOverride = 0;
         SetEntr();
-        AltEntranceControl = AltEntranceControl + 1;
+        AltEntranceControl += 1;
         return;
       }
       if (EventMusicBuffer == 0) {
@@ -2220,7 +2220,7 @@ void SideExitPipeEntry(void) {
 // SM2MAIN:7d6b
 // Signature: [] -> [A]
 u8 ChgAreaMode(void) {
-  DisableScreenFlag = DisableScreenFlag + 1;
+  DisableScreenFlag += 1;
   OperMode_Task = 0;
 #ifdef SMB1_MODE
   Sprite0HitDetectFlag = 0;
@@ -2329,7 +2329,7 @@ void CyclePlayerPalette(const u8 param_1) {
 // SM2MAIN:7df2
 // Signature: [] -> []
 void ResetPalStar(void) {
-  Player_SprAttrib = Player_SprAttrib & 0xfc;
+  Player_SprAttrib &= 0xfc;
 }
 
 
@@ -2348,7 +2348,7 @@ void FlagpoleSlide(void) {
     }
     AutoControlPlayer(bVar1);
   } else {
-    GameEngineSubroutine = GameEngineSubroutine + 1;
+    GameEngineSubroutine += 1;
   }
 }
 
@@ -2954,7 +2954,7 @@ void RunGameTimer(void) {
   u8 bVar1;
 
   bool cond = Player_Y_HighPos < 2;
-  cond = cond || ssw(false, Player_Y_HighPos >= 0x82);
+  cond |= ssw(false, Player_Y_HighPos >= 0x82);
 
   if ((((OperMode != 0) && (GameEngineSubroutine >= 8)) && (GameEngineSubroutine != 0xb))
       && ((cond && (GameTimerCtrlTimer == 0)))) {
@@ -3079,7 +3079,7 @@ void FlagpoleRoutine(void) {
       const u8 bVar1 = (Enemy_YMF_Dummy[5] - 1) + bVar3;
       Enemy_Y_Position[5] = Enemy_Y_Position[5] + 1 + ((Enemy_YMF_Dummy[5] != 0) || (bVar3 && bVar1 == 0));
       FlagpoleFNum_Y_Pos = (FlagpoleFNum_Y_Pos - 1) - (FlagpoleFNum_YMFDummy != 0xff);
-      FlagpoleFNum_YMFDummy = FlagpoleFNum_YMFDummy + 1;
+      FlagpoleFNum_YMFDummy += 1;
       Enemy_YMF_Dummy[5] = bVar1;
     }
   }
@@ -3403,7 +3403,7 @@ void JCoinC(const u8 param_1, const u8 param_2) {
   Misc_State[param_2] = 1;
   Square2SoundQueue = 1;
   GiveOneCoin();
-  CoinTallyFor1Ups = CoinTallyFor1Ups + 1;
+  CoinTallyFor1Ups += 1;
 }
 
 
@@ -3687,7 +3687,7 @@ void PlayerHeadCollision(const u8 param_1, const u16 mt_x, const u16 mt_y) {
   } else {
     BrickShatter(mt_x, mt_y);
   }
-  BlockOffsetToggle = BlockOffsetToggle ^ 1;
+  BlockOffsetToggle ^= 1;
 }
 
 
@@ -4209,11 +4209,11 @@ void EnemiesAndLoopsCore(const u8 objoff) {
 // SM2MAIN:8c77
 // Signature: [Y] -> []
 void ExecGameLoopback(const u8 param_1) {
-  Player_PageLoc = Player_PageLoc - 4;
-  CurrentPageLoc = CurrentPageLoc - 4;
-  ScreenLeft_PageLoc = ScreenLeft_PageLoc - 4;
-  ScreenRight_PageLoc = ScreenRight_PageLoc - 4;
-  AreaObjectPageLoc = AreaObjectPageLoc - 4;
+  Player_PageLoc -= 4;
+  CurrentPageLoc -= 4;
+  ScreenLeft_PageLoc -= 4;
+  ScreenRight_PageLoc -= 4;
+  AreaObjectPageLoc -= 4;
   EnemyObjectPageSel = 0;
   AreaObjectPageSel = 0;
   EnemyDataOffset = 0;
@@ -4333,7 +4333,7 @@ void ProcLoopCommand(const u8 objoff) {
         Enemy_Y_Position[objoff] = bVar1 * 0x10;
         if ((u8)(bVar1 * 0x10) != 0xe0) {
           if (((EnemyData[bVar5] & 0x40) != 0) && (SecondaryHardMode == 0)) {
-            EnemyDataOffset = EnemyDataOffset + 2;
+            EnemyDataOffset += 2;
             EnemyObjectPageSel = 0;
             return;
           }
@@ -4351,7 +4351,7 @@ void ProcLoopCommand(const u8 objoff) {
           if (Enemy_Flag[objoff] == 0) {
             return;
           }
-          EnemyDataOffset = EnemyDataOffset + 2;
+          EnemyDataOffset += 2;
           EnemyObjectPageSel = 0;
           return;
         }
@@ -4364,7 +4364,7 @@ void ProcLoopCommand(const u8 objoff) {
         EntrancePage = EnemyData[(u8)(bVar4 + 2)] & 0x1f;
       }
       EnemyDataOffset += 1;
-      EnemyDataOffset = EnemyDataOffset + 2;
+      EnemyDataOffset += 2;
       EnemyObjectPageSel = 0;
       return;
     }
@@ -4392,7 +4392,7 @@ void CheckThreeBytes(void) {
   if ((EnemyData[EnemyDataOffset] & 0xf) == 0xe) {
     EnemyDataOffset += 1;
   }
-  EnemyDataOffset = EnemyDataOffset + 2;
+  EnemyDataOffset += 2;
   EnemyObjectPageSel = 0;
 }
 
@@ -5187,7 +5187,7 @@ void HandleGroupEnemies(const u8 param_1) {
     for (k = 0; ; k++) {
       if (k == 5) {
         // exit
-        EnemyDataOffset = EnemyDataOffset + 2;
+        EnemyDataOffset += 2;
         EnemyObjectPageSel = 0;
         return;
       }
@@ -5210,7 +5210,7 @@ void HandleGroupEnemies(const u8 param_1) {
     xpos += 0x18;
   } while (NumberofGroupEnemies -= 1, NumberofGroupEnemies != 0);
 
-  EnemyDataOffset = EnemyDataOffset + 2;
+  EnemyDataOffset += 2;
   EnemyObjectPageSel = 0;
 }
 
@@ -5345,14 +5345,14 @@ void InitHoriPlatform(const u8 objoff) {
 // SM2MAIN:9447
 // Signature: [X] -> []
 void InitVertPlatform(const u8 objoff) {
-  char cVar2 = 0x40;
-  u8 bVar1 = Enemy_Y_Position[objoff];
-  if (bVar1 >= 0x80) {
-    bVar1 = NEGATE(bVar1);
-    cVar2 = -0x40;
+  i8 bVar1 = Enemy_Y_Position[objoff];
+  if (bVar1 >= 0) {
+    YPlatformTopYPos[objoff] = bVar1;
+    YPlatformCenterYPos[objoff] = Enemy_Y_Position[objoff] + 0x40;
+  } else {
+    YPlatformTopYPos[objoff] = -bVar1;
+    YPlatformCenterYPos[objoff] = Enemy_Y_Position[objoff] - 0x40;
   }
-  YPlatformTopYPos[objoff] = bVar1;
-  YPlatformCenterYPos[objoff] = cVar2 + Enemy_Y_Position[objoff];
   InitVStf(objoff);
   SPBBox(objoff);
 }
@@ -5977,12 +5977,14 @@ void XMoveCntr_Platform(const u8 param_1, const u8 objoff) {
 // Signature: [X] -> [r00]
 u8 MoveWithXMCntrs(const u8 objoff) {
   const u8 bStack0000 = XMoveSecondaryCounter[objoff];
-  u8 bVar1 = 1;
-  if ((Enemy_Y_Speed[objoff] & 2) == 0) {
-    XMoveSecondaryCounter[objoff] = NEGATE(XMoveSecondaryCounter[objoff]);
-    bVar1 = 2;
+
+  if ((Enemy_Y_Speed[objoff] & 2) != 0) {
+    Enemy_MovingDir[objoff] = 1;
+  } else {
+    XMoveSecondaryCounter[objoff] *= -1;
+    Enemy_MovingDir[objoff] = 2;
   }
-  Enemy_MovingDir[objoff] = bVar1;
+
   const u8 sVar2 = MoveEnemyHorizontally(objoff);
   XMoveSecondaryCounter[objoff] = bStack0000;
   return sVar2;
@@ -6135,7 +6137,7 @@ void ProcFirebar(const u8 objoff) {
       val -= FirebarSpinSpeed[objoff];
     }
 
-    val = val & 0x1fff;
+    val &= 0x1fff;
 
     STORE_16(FirebarSpinState_High[objoff], FirebarSpinState_Low[objoff],
              val);
@@ -6314,7 +6316,7 @@ void MoveFlyingCheepCheep(const u8 objoff) {
   u8 bVar1 = Enemy_Y_Position[objoff] - ypos_sub_lookup[bVar3];
 
   if (bVar1 >= 0x80) {
-    bVar1 = NEGATE(bVar1);
+    bVar1 *= -1;
   }
   if (bVar1 < 8) {
     bVar1 = Enemy_Y_MoveForce[objoff];
@@ -6368,7 +6370,7 @@ u8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u
   u8 bVar1 = sVar4.r00;
   if (sVar4.n) {
     bVar2 = 1;
-    bVar1 = NEGATE(bVar1);
+    bVar1 *= -1;
   }
 
   if (bVar1 >= 0x3c) {
@@ -6534,7 +6536,7 @@ void RunBowser(const u8 objoff) {
         bVar2 = 0xff;
         bVar1 -= BowserOrigXPos;
         if (bVar1 >= 0x80) {
-          bVar1 = NEGATE(bVar1);
+          bVar1 *= -1;
           bVar2 = 1;
         }
         if (MaxRangeFromOrigin <= bVar1) {
@@ -6834,7 +6836,7 @@ void AwardGameTimerPoints(const u8 objoff) {
   if ((GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2]) != 0) {
     AwardTimerCastle();
   } else {
-    StarFlagTaskControl = StarFlagTaskControl + 1;
+    StarFlagTaskControl += 1;
   }
 }
 
@@ -6885,7 +6887,7 @@ void RaiseFlagSetoffFWorks(const u8 objoff) {
   }
   DrawStarFlag(objoff);
   EnemyIntervalTimer[objoff] = 6;
-  StarFlagTaskControl = StarFlagTaskControl + 1;
+  StarFlagTaskControl += 1;
 }
 
 
@@ -6915,7 +6917,7 @@ void DrawStarFlag(const u8 objoff) {
 void DelayToAreaEnd(const u8 objoff) {
   DrawStarFlag(objoff);
   if ((EnemyIntervalTimer[objoff] == 0) && (EventMusicBuffer == 0)) {
-    StarFlagTaskControl = StarFlagTaskControl + 1;
+    StarFlagTaskControl += 1;
   }
 }
 
@@ -7523,7 +7525,7 @@ void PlayerHammerCollision(const u8 objoff) {
     if (bVar2) {
       if (Misc_Collision_Flag[objoff] == 0) {
         Misc_Collision_Flag[objoff] = 1;
-        Misc_X_Speed[objoff] = NEGATE(Misc_X_Speed[objoff]);
+        Misc_X_Speed[objoff] *= -1;
         if (StarInvincibleTimer == 0) {
           InjurePlayer();
           return;

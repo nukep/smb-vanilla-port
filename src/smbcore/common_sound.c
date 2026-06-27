@@ -1246,7 +1246,7 @@ struct_ay ProcessLengthData(const u8 param_1) {
   // NoteLengthTblAdder is either 0 or 8 (8 is when time is running out)
 
   offset = (param_1 & 7) + NoteLenLookupTblOfs + NoteLengthTblAdder;
-  offset += CARRY1(param_1 & 7, NoteLenLookupTblOfs);
+  offset += ((u16)(param_1 & 7) + (u16)NoteLenLookupTblOfs) >= 256;
 
   sVar2.a = MusicLengthLookupTbl[offset];
   sVar2.y = offset;

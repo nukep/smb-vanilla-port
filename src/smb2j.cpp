@@ -328,7 +328,7 @@ void ScrollScreen(u8 scroll_amount) {
 
   int const x_pos = ScreenLeft_X_Pos + scroll_amount;
 
-  ScrollThirtyTwo = ScrollThirtyTwo + scroll_amount;
+  ScrollThirtyTwo += scroll_amount;
   HorizontalScroll = x_pos % 256;
   if (x_pos >= 256) {
     ScreenLeft_PageLoc += 1;
@@ -372,7 +372,7 @@ void UpdateGamesBeaten() {
       WorldNumber = 8;
     }
     LoadAreaPointer();
-    FetchNewGameTimerFlag = FetchNewGameTimerFlag + 1;
+    FetchNewGameTimerFlag += 1;
     OperMode = 1;
   } else {
     CompletedWorlds = 0;

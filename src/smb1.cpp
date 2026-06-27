@@ -178,9 +178,9 @@ void DrawTitleScreen() {
       VRAM_SMB1_TitleScreen[i] = CHRROM(0x1EC0 + i);
     }
     VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB1_VRAM_PAGE;
-    ScreenRoutineTask = ScreenRoutineTask + 1;
+    ScreenRoutineTask += 1;
   } else {
-    OperMode_Task = OperMode_Task + 1;
+    OperMode_Task += 1;
   }
 }
 

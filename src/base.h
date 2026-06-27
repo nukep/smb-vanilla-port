@@ -51,20 +51,6 @@ static inline NORETURN void jmpengine_overflow(u8 index) {
 
 #define assert_unreachable() assert(0)
 
-// Implementation of Ghidra decompiler functions.
-
-static inline bool CARRY1(u8 a, u8 b) {
-  u16 r = (u16)a + (u16)b;
-  return r >= 256;
-}
-
-// Negate the byte, assuming the value is signed two's complement.
-// e.g. 255 => -1  => 1
-//      240 => -16 => 16
-static inline u8 NEGATE(u8 x) {
-  return (x ^ 0xFF) + 1;
-}
-
 
 #define SWAP(a, b) \
   do {             \

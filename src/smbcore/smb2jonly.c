@@ -91,9 +91,9 @@ void jumptable_VictoryModeSubroutines_forW8(const u8 param_1) {
 void DrawTitleScreen(void) {
   if (OperMode == 0) {
     VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_TITLESCREENGFXDATA;
-    ScreenRoutineTask = ScreenRoutineTask + 1;
+    ScreenRoutineTask += 1;
   } else {
-    OperMode_Task = OperMode_Task + 1;
+    OperMode_Task += 1;
   }
 }
 
@@ -147,7 +147,7 @@ void EndCastleAward(void) {
 // Signature: [] -> []
 void InitScreenPalette(void) {
   VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA;
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -312,9 +312,9 @@ NoLoadHW:
   if (HardWorldFlag != 0) {
     ChangeHalfwayPages();
   }
-  Hidden1UpFlag = Hidden1UpFlag + 1;
-  FetchNewGameTimerFlag = FetchNewGameTimerFlag + 1;
-  OperMode = OperMode + 1;
+  Hidden1UpFlag += 1;
+  FetchNewGameTimerFlag += 1;
+  OperMode += 1;
   DiskIOTask = 0;
   OperMode_Task = 0;
   DemoTimer = 0;
@@ -469,7 +469,7 @@ void ResetDiskIOTask(void) {
 // SM2MAIN:c07d
 // Signature: [] -> []
 void VMDelay(void) {
-  OperMode_Task = OperMode_Task + 1;
+  OperMode_Task += 1;
 }
 
 
@@ -565,9 +565,9 @@ bool CheckFileCount(const u8 param_1) { return param_1 == FileCount[FileListNumb
 void DiskScreen(void) {
   Mirror_PPU_CTRL_REG2 = 0;
   ppumask(0);
-  DisableScreenFlag = DisableScreenFlag + 1;
+  DisableScreenFlag += 1;
   VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_DISKSCREENPALETTE;
-  DiskIOTask = DiskIOTask + 1;
+  DiskIOTask += 1;
 }
 
 
@@ -734,7 +734,7 @@ void MoveUpsideDownPiranhaP(const u8 param_1) {
 
   if ((Enemy_State[param_1] == 0) && (EnemyFrameTimer[param_1] == 0)) {
     if (PiranhaPlant_MoveFlag[param_1] == 0) {
-      PiranhaPlant_Y_Speed[param_1] = NEGATE(PiranhaPlant_Y_Speed[param_1]);
+      PiranhaPlant_Y_Speed[param_1] *= -1;
       PiranhaPlant_MoveFlag[param_1] = PiranhaPlant_MoveFlag[param_1] + 1;
     }
     bVar3 = PiranhaPlantUpYPos[param_1];
@@ -762,7 +762,7 @@ void BlowPlayerAround(void) {
     if ((FrameCounter & mask) == 0) {
       Player_PageLoc += Player_X_Position == 0xff;
       Player_X_Scroll += 1;
-      Player_X_Position = Player_X_Position + 1;
+      Player_X_Position += 1;
     }
   }
 }
@@ -805,7 +805,7 @@ void SimulateWind(void) {
     // because the intent is to double the adder for the X axis
     // (The disassembly has two ADC instructions in a row)
     const u8 adder = posadder[i];
-    LeavesXPos[i] += adder + adder + CARRY1(LeavesXPos[i], adder);
+    LeavesXPos[i] += adder + adder + (((u16)LeavesXPos[i] + (u16)adder) >= 256);
     LeavesYPos[i] += adder;
   }
 
@@ -816,7 +816,7 @@ void SimulateWind(void) {
     SPRITE_TILE(sproff, 0) = tile[i];
     SPRITE_ATTR(sproff, 0) = SPRATTR_FLIPHORZ | 1;
     SPRITE_X(sproff, 0) = LeavesXPos[i];
-    sproff = sproff + 4;
+    sproff += 4;
     if (i+1 == 6) {
       sproff = Alt_SprDataOffset[0];
     }
@@ -878,7 +878,7 @@ void ScreenSubsForFinalRoom(void) {
 void DrawFinalRoom(void) {
   VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_PRINCESSPEACHSROOM;
   IRQUpdateFlag = 0x1b;
-  ScreenRoutineTask = ScreenRoutineTask + 1;
+  ScreenRoutineTask += 1;
 }
 
 
@@ -892,7 +892,7 @@ void RevealPrincess(void) {
   NameTableSelect = 0;
   IRQUpdateFlag = 0;
   DisableScreenFlag = 0;
-  OperMode_Task = OperMode_Task + 1;
+  OperMode_Task += 1;
 }
 
 
@@ -1057,7 +1057,7 @@ void RunMushroomRetainers(void) {
       WorldNumber = 8;
     }
     LoadAreaPointer();
-    FetchNewGameTimerFlag = FetchNewGameTimerFlag + 1;
+    FetchNewGameTimerFlag += 1;
     OperMode = 1;
     return;
   }
@@ -1110,7 +1110,7 @@ void EndingDiskRoutines(void) {
 // Signature: [] -> []
 void MushroomRetainersForW8(void) {
   if (MushroomRetDelay != 0) {
-    MushroomRetDelay = MushroomRetDelay - 1;
+    MushroomRetDelay -= 1;
     return;
   }
   MoveSpritesOffscreen();
