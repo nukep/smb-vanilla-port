@@ -32,9 +32,9 @@ struct SMB_tile {
   int x;
   int y;
 
-  byte extra_type;
+  u8 extra_type;
   union {
-  byte extra_spriteidx;
+  u8 extra_spriteidx;
   struct {
     u16 x;
     u16 y;
@@ -44,16 +44,16 @@ struct SMB_tile {
 
 struct SMB_callbacks {
   void *userdata;
-  bool (*read_rom_bytes)(void *userdata, byte *buf, size_t size);
+  bool (*read_rom_bytes)(void *userdata, u8 *buf, size_t size);
   bool (*seek_rom)(void *userdata, size_t offset);
-  byte (*smb2j_load_games_beaten)(void *userdata);
-  bool (*smb2j_save_games_beaten)(void *userdata, byte games_beaten);
+  u8 (*smb2j_load_games_beaten)(void *userdata);
+  bool (*smb2j_save_games_beaten)(void *userdata, u8 games_beaten);
 
-  void (*update_pattern_tables)(void *userdata, const byte *chrrom);
-  void (*update_palette)(void *userdata, const byte *palette_indices);
+  void (*update_pattern_tables)(void *userdata, const u8 *chrrom);
+  void (*update_palette)(void *userdata, const u8 *palette_indices);
   void (*draw_tile)(void *userdata, const struct SMB_tile tile);
 
-  void (*apu_write_register)(void *userdata, u16 addr, byte data);
+  void (*apu_write_register)(void *userdata, u16 addr, u8 data);
   void (*apu_end_frame)(void *userdata);
 
   void (*joy1)(void *userdata, struct SMB_buttons *buttons);
@@ -65,10 +65,10 @@ struct SMB_state;
 size_t SMB_state_size(void);
 bool SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb);
 int SMB_which_game(const struct SMB_state *state);
-void SMB_start_on_level(struct SMB_state *state, byte world, byte level);
+void SMB_start_on_level(struct SMB_state *state, u8 world, u8 level);
 void SMB_tick(struct SMB_state *state);
-byte *SMB_ram(struct SMB_state *state);
-byte *SMB_ppuram(struct SMB_state *state);
+u8 *SMB_ram(struct SMB_state *state);
+u8 *SMB_ppuram(struct SMB_state *state);
 
 // Syncs up internal data structures to match the contents of RAM.
 // Call this after updating the RAM via SMB_ram().

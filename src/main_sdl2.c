@@ -72,7 +72,7 @@ struct frontend_userdata {
   int video_scale;
   struct sdl_key_scancodes sdl_key_scancodes;
 
-  byte smb2j_games_beaten;
+  u8 smb2j_games_beaten;
 
   // OpenGL mode
   struct SMBgl *smb_gl;
@@ -93,7 +93,7 @@ void joy2(void *userdata, struct SMB_buttons *buttons) {
 }
 
 
-void update_pattern_tables(void *userdata, const byte *chrrom) {
+void update_pattern_tables(void *userdata, const u8 *chrrom) {
   struct frontend_userdata *fe = userdata;
 
   if (fe->smb_gl) {
@@ -104,7 +104,7 @@ void update_pattern_tables(void *userdata, const byte *chrrom) {
   }
 }
 
-void update_palette(void *userdata, const byte *palette_indices) {
+void update_palette(void *userdata, const u8 *palette_indices) {
   struct frontend_userdata *fe = userdata;
 
   if (fe->smb_gl) {
@@ -127,7 +127,7 @@ void draw_tile(void *userdata, const struct SMB_tile tile) {
   }
 }
 
-bool load_palette(byte *rgb_palette, const char *filename) {
+bool load_palette(u8 *rgb_palette, const char *filename) {
   return io_readtobuffer(filename, (size_t)0x40*3, rgb_palette);
 }
 
@@ -151,11 +151,11 @@ bool dump_ram(struct SMB_state *state, const char *filename) {
   return io_writefrombuffer(filename, 0x800, SMB_ram(state));
 }
 
-byte smb2j_load_games_beaten(void *userdata) {
+u8 smb2j_load_games_beaten(void *userdata) {
   struct frontend_userdata *fe = userdata;
   return fe->smb2j_games_beaten;
 }
-bool smb2j_save_games_beaten(void *userdata, byte games_beaten) {
+bool smb2j_save_games_beaten(void *userdata, u8 games_beaten) {
   struct frontend_userdata *fe = userdata;
   log_info("Pretending to save game...");
   log_info("Games beaten: %d", games_beaten);
@@ -276,7 +276,7 @@ int sdl_tick(void *userdata) {
   }
 }
 
-bool read_rom_bytes(void *userdata, byte *buf, size_t size) {
+bool read_rom_bytes(void *userdata, u8 *buf, size_t size) {
   struct frontend_userdata *fe = userdata;
   return fread(buf, size, 1, fe->romfile) == 1;
 }
@@ -287,7 +287,7 @@ bool seek_rom(void *userdata, size_t offset) {
   return true;
 }
 
-void apu_write_register(void *userdata, u16 addr, byte data) {
+void apu_write_register(void *userdata, u16 addr, u8 data) {
   struct frontend_userdata *fe = userdata;
   if (fe->audio) {
     SMB_audio_write_register(fe->audio, addr, data);
@@ -359,7 +359,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (cfg.smb2j.override_games_beaten >= 0) {
-    fe->smb2j_games_beaten = (byte)cfg.smb2j.override_games_beaten;
+    fe->smb2j_games_beaten = (u8)cfg.smb2j.override_games_beaten;
   }
 
 
@@ -378,7 +378,7 @@ int main(int argc, char *argv[]) {
 
   /******** Initialize SDL / OpenGL ********/
 
-  byte palette_rgb[0x40][3];
+  u8 palette_rgb[0x40][3];
 
   if (cfg.general.palette_filename) {
     if (!load_palette(&palette_rgb[0][0], cfg.general.palette_filename)) {

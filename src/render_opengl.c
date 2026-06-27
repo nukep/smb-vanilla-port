@@ -17,11 +17,11 @@ static bool gl_initshaders(struct SMBgl *gl);
 
 // The OpenGL texture for the pattern table is 128x256 pixels (16x32 tiles, each tile is 8x8)
 struct pattern_buffer {
-  byte data[256][128];
+  u8 data[256][128];
 };
 
 struct RGB {
-  byte r, g, b;
+  u8 r, g, b;
 };
 
 #define ATTRIB_POS_LOCATION 0
@@ -41,7 +41,7 @@ struct gl_vbo_item {
 
 struct SMBgl {
   struct RGB palette[0x40];
-  byte palette_indices[0x20];
+  u8 palette_indices[0x20];
   GLuint gltexture;
   GLuint glvao;
   GLuint glvbo;
@@ -110,11 +110,11 @@ void SMBgl_update_pattern_tables(struct SMBgl *gl, const unsigned char *chrrom) 
   gl->gl_update_texture = p;
 
   for (int tileidx = 0; tileidx < 512; tileidx++) {
-    const byte *buf = chrrom + tileidx * 0x10;
+    const u8 *buf = chrrom + tileidx * 0x10;
     for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
-        const byte hibit = (buf[i + 8] >> (7 - j)) & 1;
-        const byte lobit = (buf[i + 0] >> (7 - j)) & 1;
+        const u8 hibit = (buf[i + 8] >> (7 - j)) & 1;
+        const u8 lobit = (buf[i + 0] >> (7 - j)) & 1;
 
         int x = (tileidx%16)*8 + j;
         int y = (tileidx/16)*8 + i;
@@ -130,7 +130,7 @@ void SMBgl_provide_palette_lookup(struct SMBgl *gl, const unsigned char *rgb) {
   memcpy(gl->palette, rgb, sizeof(gl->palette));
 }
 
-void SMBgl_update_palette(struct SMBgl *gl, const byte *palette_indices) {
+void SMBgl_update_palette(struct SMBgl *gl, const u8 *palette_indices) {
   memcpy(gl->palette_indices, palette_indices, sizeof(gl->palette_indices));
 }
 
@@ -269,7 +269,7 @@ static void prefix##_##fnname(void *userdata, args) { \
 }
 
 #define makeit(prefix, st, field) \
-static void prefix##_update_pattern_tables(void *userdata, const byte *chrrom) { \
+static void prefix##_update_pattern_tables(void *userdata, const u8 *chrrom) { \
   void **newuserdata_ptr = ((unsigned char*)userdata) + offsetof(st, field); \
   void *newuserdata = *newuserdata_ptr; \
   return gl_update_pattern_tables(newuserdata, chrrom); \

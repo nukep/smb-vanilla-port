@@ -34,7 +34,7 @@ static inline void assert_smb_crashbug(bool condition, const char *message) {
   }
 }
 
-static inline NORETURN void jmpengine_overflow(byte index) {
+static inline NORETURN void jmpengine_overflow(u8 index) {
   error("JMPENGINE overflow! %02X\n", index);
   abort();
 }
@@ -53,7 +53,7 @@ static inline NORETURN void jmpengine_overflow(byte index) {
 
 // Implementation of Ghidra decompiler functions.
 
-static inline bool CARRY1(byte a, byte b) {
+static inline bool CARRY1(u8 a, u8 b) {
   u16 r = (u16)a + (u16)b;
   return r >= 256;
 }
@@ -61,14 +61,14 @@ static inline bool CARRY1(byte a, byte b) {
 // Negate the byte, assuming the value is signed two's complement.
 // e.g. 255 => -1  => 1
 //      240 => -16 => 16
-static inline byte NEGATE(byte x) {
+static inline u8 NEGATE(u8 x) {
   return (x ^ 0xFF) + 1;
 }
 
 
 #define SWAP(a, b) \
   do {             \
-    byte tmp = a;  \
+    u8 tmp = a;  \
     a = b;         \
     b = tmp;       \
   } while (0)
@@ -165,13 +165,13 @@ static inline byte NEGATE(byte x) {
 // Performs `dst = src + addend`.
 #define ADD_UNSIGNED_16_16_8(dst_hi, dst_lo, src_hi, src_lo, addend) { \
   u16 src = ((src_hi) << 8) | (src_lo); \
-  src += (byte)(addend); \
+  src += (u8)(addend); \
   dst_lo = src & 0xff; \
   dst_hi = src >> 8; \
 }
 
 // Calculates the absolute difference between two bytes.
-static inline byte ABS_DIFF(byte a, byte b) {
+static inline u8 ABS_DIFF(u8 a, u8 b) {
   if (a < b) {
     return b - a;
   } else {
@@ -181,8 +181,8 @@ static inline byte ABS_DIFF(byte a, byte b) {
 
 // Calcules the signed absolute difference between two bytes.
 // e.g. (0, 255) -> 1
-static inline byte ABS_DIFF_SIGNED(i8 a, i8 b) {
-  byte d = a - b;
+static inline u8 ABS_DIFF_SIGNED(i8 a, i8 b) {
+  u8 d = a - b;
   if (d >= 0x80) {
     return -d;
   } else {
@@ -200,7 +200,7 @@ static inline byte ABS_DIFF_SIGNED(i8 a, i8 b) {
 // e.g. 64 => 7, because:
 //  64 = 01000000
 //        ^ position 7
-static inline byte find_first_bit_position(byte bits) {
+static inline u8 find_first_bit_position(u8 bits) {
   if (bits == 0) {
     return 0;
   }
@@ -210,7 +210,7 @@ static inline byte find_first_bit_position(byte bits) {
   return __builtin_ctz(bits) + 1;
 #else
   // C impl
-  byte i = 0;
+  u8 i = 0;
   while (1) {
     i += 1;
     if (bits & 1) {

@@ -8,8 +8,6 @@
 #include <stdbool.h>
 #endif
 
-typedef uint8_t byte;
-
 // Use Rust/Zig style typedefs for integers
 
 typedef uint8_t u8;

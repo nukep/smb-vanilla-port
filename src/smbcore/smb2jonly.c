@@ -22,7 +22,7 @@ enum VictoryModeSubroutines_forW8_jumptable_item {
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
-void jumptable_VictoryModeSubroutines_forW8(const byte param_1) {
+void jumptable_VictoryModeSubroutines_forW8(const u8 param_1) {
   switch (param_1) {
   case VICTORYMODESUBROUTINES_FORW8_BRIDGECOLLAPSE:
     BridgeCollapse();
@@ -134,7 +134,7 @@ void PrintVictoryMessages(void) {
 void EndCastleAward(void) {
   if (WorldEndTimer < 6) {
     AwardTimerCastle();
-    if ((byte)(GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2]) == 0) {
+    if ((u8)(GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2]) == 0) {
       SelectTimer = 0x30;
       WorldEndTimer = 6;
       OperMode_Task += 1;
@@ -153,8 +153,8 @@ void InitScreenPalette(void) {
 
 // SM2MAIN:671b
 // Signature: [A] -> []
-void WriteGameText(const byte param_1) {
-  byte offset = GameTextOffsets[param_1];
+void WriteGameText(const u8 param_1) {
+  u8 offset = GameTextOffsets[param_1];
 
   bool terminated = false;
   for (int i = 0; i < 256; i++) {
@@ -197,7 +197,7 @@ void WriteGameText(const byte param_1) {
 
 // SM2MAIN:89a1
 // Signature: [X] -> []
-void PoisonMushBlock(const byte param_1) {
+void PoisonMushBlock(const u8 param_1) {
   PowerUpType = 4;
   SetupPowerUp(param_1);
 }
@@ -205,9 +205,9 @@ void PoisonMushBlock(const byte param_1) {
 
 // SM2MAIN:a64e
 // Signature: [X] -> []
-void SetBounce(const byte param_1) {
+void SetBounce(const u8 param_1) {
   Player_Y_Speed = 0xfa;
-  const byte enemy_id = Enemy_ID[param_1];
+  const u8 enemy_id = Enemy_ID[param_1];
   if ((enemy_id == A_RED_PARATROOPA) || (enemy_id == A_GREEN_PARATROOPA_HORIZONTAL)) {
     Player_Y_Speed = 0xf8;
   }
@@ -216,12 +216,12 @@ void SetBounce(const byte param_1) {
 
 // SM2MAIN:aca3
 // Signature: [X] -> []
-void ChkToStunEnemies(const byte param_1) {
+void ChkToStunEnemies(const u8 param_1) {
   // The port inlines NoDemote, because it more clearly reveals what's actually going on here.
   // The NES implementation did a bunch of compares to hoan in on the object types,
   // but it's more obvious to just do the comparisons directly.
 
-  const byte enemy_id = Enemy_ID[param_1];
+  const u8 enemy_id = Enemy_ID[param_1];
 
   if (enemy_id == A_GOOMBA || enemy_id == A_POWERUP) {
     SetStun2(param_1);
@@ -288,7 +288,7 @@ void HardWorldsCheckpoint(void) {
 // SM2MAIN:bfd2
 // Signature: [] -> []
 void LoadHardWorlds(void) {
-  byte bVar1;
+  u8 bVar1;
   bool bVar2;
   struct_ayz sVar3;
 
@@ -363,7 +363,7 @@ void AttractModeDiskRoutines(void) {
 // SM2MAIN:c016
 // Signature: [] -> []
 void LoadWorlds1Thru4(void) {
-  byte bVar1;
+  u8 bVar1;
   bool bVar2;
   struct_ayz sVar3;
 
@@ -444,7 +444,7 @@ void LoadWorlds5Thru8(void) {
   }
   FileListNumber = 1;
   const struct_ayz sVar3 = LoadFiles();
-  byte bVar1 = sVar3.a;
+  u8 bVar1 = sVar3.a;
   if (sVar3.z) {
     bVar2 = CheckFileCount(sVar3.y);
     if (bVar2) {
@@ -557,7 +557,7 @@ void LoadEnding(void) {
 
 // SM2MAIN:c0ca
 // Signature: [Y] -> [Z]
-bool CheckFileCount(const byte param_1) { return param_1 == FileCount[FileListNumber]; }
+bool CheckFileCount(const u8 param_1) { return param_1 == FileCount[FileListNumber]; }
 
 
 // SM2MAIN:c113
@@ -576,7 +576,7 @@ void DiskScreen(void) {
 void WaitForEject(void) {
   NameTableSelect = 0;
   DisableScreenFlag = 0;
-  const byte bVar1 = FDS_drive_status();
+  const u8 bVar1 = FDS_drive_status();
   if ((bVar1 & 1) != 0) {
     DiskIOTask += 1;
   }
@@ -586,7 +586,7 @@ void WaitForEject(void) {
 // SM2MAIN:c138
 // Signature: [] -> []
 void WaitForReinsert(void) {
-  const byte bVar1 = FDS_drive_status();
+  const u8 bVar1 = FDS_drive_status();
   if ((bVar1 & 1) == 0) {
     DiskIOTask += 1;
   }
@@ -603,11 +603,11 @@ void ResetDiskVars(void) {
 
 // SM2MAIN:c182
 // Signature: [A] -> []
-void DiskErrorHandler(const byte param_1) {
+void DiskErrorHandler(const u8 param_1) {
   DiskErrorMainMsg[19] = param_1 & 0xf;
   DiskErrorMainMsg[18] = param_1 >> 4;
 
-  byte bVar1;
+  u8 bVar1;
   if (param_1 == 7) {
     bVar1 = DiskErrorMsgOffsets[3];
   } else if (param_1 == 2) {
@@ -727,10 +727,10 @@ void PatchPlayerNamePal(void) {
 
 // SM2DATA2+SM2DATA4:c4c0
 // Signature: [X] -> []
-void MoveUpsideDownPiranhaP(const byte param_1) {
-  byte bVar1;
-  byte bVar2;
-  byte bVar3;
+void MoveUpsideDownPiranhaP(const u8 param_1) {
+  u8 bVar1;
+  u8 bVar2;
+  u8 bVar3;
 
   if ((Enemy_State[param_1] == 0) && (EnemyFrameTimer[param_1] == 0)) {
     if (PiranhaPlant_MoveFlag[param_1] == 0) {
@@ -745,7 +745,7 @@ void MoveUpsideDownPiranhaP(const byte param_1) {
       bVar1 = Enemy_Y_Position[param_1];
       bVar2 = PiranhaPlant_Y_Speed[param_1];
       Enemy_Y_Position[param_1] = bVar1 + bVar2;
-      if ((byte)(bVar1 + bVar2) == bVar3) {
+      if ((u8)(bVar1 + bVar2) == bVar3) {
         PiranhaPlant_MoveFlag[param_1] = 0;
         EnemyFrameTimer[param_1] = 0x20;
       }
@@ -758,7 +758,7 @@ void MoveUpsideDownPiranhaP(const byte param_1) {
 // Signature: [] -> []
 void BlowPlayerAround(void) {
   if ((WindFlag != 0) && (AreaType == 1)) {
-    const byte mask = (FrameCounter & 0x80) ? 1 : 3;
+    const u8 mask = (FrameCounter & 0x80) ? 1 : 3;
     if ((FrameCounter & mask) == 0) {
       Player_PageLoc += Player_X_Position == 0xff;
       Player_X_Scroll += 1;
@@ -774,21 +774,21 @@ void SimulateWind(void) {
   // TODO: bring in LeavesXPos/LeavesYPos,
   // figure out a way to accumulate it
 
-  // static const byte xpos[12] = {
+  // static const u8 xpos[12] = {
   //   0x30, 0x30, 0x30, 0x60, 0x60, 0xa0,
   //   0xa0, 0xa0, 0xd0, 0xd0, 0xd0, 0x60,
   // };
-  // static const byte ypos[12] = {
+  // static const u8 ypos[12] = {
   //   0x30, 0x70, 0xb8, 0x50, 0x98, 0x30,
   //   0x70, 0xb8, 0x50, 0x98, 0x30, 0x70,
   // };
 
-  static const byte tile[12] = {
+  static const u8 tile[12] = {
     0x7b, 0x7b, 0x7b, 0x7b, 0x7a, 0x7a,
     0x7b, 0x7b, 0x7b, 0x7a, 0x7b, 0x7a,
   };
 
-  static const byte posadder[12] = {
+  static const u8 posadder[12] = {
     0x57, 0x57, 0x56, 0x56, 0x58, 0x58,
     0x56, 0x56, 0x57, 0x58, 0x57, 0x58,
   };
@@ -804,12 +804,12 @@ void SimulateWind(void) {
     // The carry seems like an oversight in the original game,
     // because the intent is to double the adder for the X axis
     // (The disassembly has two ADC instructions in a row)
-    const byte adder = posadder[i];
+    const u8 adder = posadder[i];
     LeavesXPos[i] += adder + adder + CARRY1(LeavesXPos[i], adder);
     LeavesYPos[i] += adder;
   }
 
-  byte sproff = Enemy_SprDataOffset[6];
+  u8 sproff = Enemy_SprDataOffset[6];
 
   for (int i = 0; i < 12; i++) {
     SPRITE_Y(sproff, 0) = LeavesYPos[i];
@@ -976,11 +976,11 @@ void FadeToBlue(void) {
     return;
   }
 
-  const byte blue_tints[4] = { 0x01, 0x02, 0x11, 0x21 };
+  const u8 blue_tints[4] = { 0x01, 0x02, 0x11, 0x21 };
 
   const u8 val = blue_tints[BlueColorOfs];
 
-  const byte oldoff = VRAM_Buffer1_Offset;
+  const u8 oldoff = VRAM_Buffer1_Offset;
 
   VRAM_Buffer1_Offset = 0;
 
@@ -1125,12 +1125,12 @@ void MushroomRetainersForW8(void) {
     BlueColorOfs += 1;
     Square2SoundQueue = 1;
   }
-  const byte bVar1 = BlueColorOfs;
+  const u8 bVar1 = BlueColorOfs;
   EndControlCntr += 1;
-  const byte bStack0000 = WorldNumber;
+  const u8 bStack0000 = WorldNumber;
   do {
     if ((BlueDelayFlag < 4)
-        || (FlashMRSpriteDataOfs[(byte)((BlueDelayFlag - 4) - (BlueDelayFlag < 4))] != MRSpriteDataOfs[BlueColorOfs])) {
+        || (FlashMRSpriteDataOfs[(u8)((BlueDelayFlag - 4) - (BlueDelayFlag < 4))] != MRSpriteDataOfs[BlueColorOfs])) {
       Enemy_SprDataOffset[0] = MRSpriteDataOfs[BlueColorOfs];
       Enemy_ID[0] = A_RETAINER;
       Enemy_Y_Position[0] = MRetainerYPos[BlueColorOfs];

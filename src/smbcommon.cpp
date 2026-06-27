@@ -17,14 +17,14 @@ void sync_data(void) {
   PatchCurrentPlayer = CurrentPlayer;
 }
 
-void set_world_and_level(byte world, byte level) {
+void set_world_and_level(u8 world, u8 level) {
   WorldNumber = world;
   LevelNumber = level;
 
   u16 WorldAddrOffsets = SMB1_ONLY ? 0x9CB4 : 0xC357;
   u16 AreaAddrOffsetsPtr = SMB1_ONLY ? 0x9CBC : 0xC360;
 
-  byte off = 0;
+  u8 off = 0;
   for (int i = 0; i < level; i++) {
     // skip "intermission" areas
     if (RAM(AreaAddrOffsetsPtr + RAM(WorldAddrOffsets + world) + off) == 0x29) {
@@ -44,22 +44,22 @@ void set_world_and_level(byte world, byte level) {
 
 // SMB:90CC, SM2MAIN:6f08
 // Signature: [Y] -> [A]
-byte InitializeMemory(byte i) {
+u8 InitializeMemory(u8 i) {
   if (SMB1_ONLY) {
     memset(&RAM(0x000), 0, 0x160);
     memset(&RAM(0x200), 0, (size_t)0x700 - 0x200);
-    memset(&RAM(0x700), 0, (byte)(i + 1));
+    memset(&RAM(0x700), 0, (u8)(i + 1));
   }
   if (SMB2J_ONLY) {
     memset(&RAM(0x000), 0, 0x100);
     memset(&RAM(0x109), 0, (size_t)0x160 - 0x109);
     memset(&RAM(0x200), 0, (size_t)0x700 - 0x200);
-    memset(&RAM(0x700), 0, (byte)(i + 1));
+    memset(&RAM(0x700), 0, (u8)(i + 1));
   }
   return 0;
 }
 
-static inline void dectimer(byte &timer) {
+static inline void dectimer(u8 &timer) {
   if (timer != 0) {
     timer--;
   }
@@ -121,7 +121,7 @@ void dectimers() {
 //
 // SMB:8edd
 // SM2MAIN:6d56
-void update_screen(const byte *buf, const u16 buf_length) {
+void update_screen(const u8 *buf, const u16 buf_length) {
   // Original signature: [r00, r01] -> []
   // Added a maximum buffer length parameter, for memory safety
 
@@ -195,7 +195,7 @@ void update_screen(const byte *buf, const u16 buf_length) {
 
 // SMB:8e2d, SM2MAIN:6ca6
 // Signature: [A] -> []
-void WriteNTAddr(byte ppu_page) {
+void WriteNTAddr(u8 ppu_page) {
   ppuaddr(ppu_page);
   ppuaddr(0);
 
@@ -228,8 +228,8 @@ void ReadJoypads() {
 
 // SMB:8e6a, SM2MAIN:6ce3
 // Signature: [X] -> []
-void ReadPortBits(byte joynum) {
-  byte bits = 0;
+void ReadPortBits(u8 joynum) {
+  u8 bits = 0;
 
   struct SMB_buttons buttons = {0};
 
@@ -282,9 +282,9 @@ void ReadPortBits(byte joynum) {
 // After which, it'll generate the same values on loop.
 // 1st iteration (seed):       A5 00 00 00 00 00 00 (10100101000000000000000000000000000000000000000000000000)
 // 40th and 32807th iteration: 33 0F 69 77 A5 4A 00 (00110011000011110110100101110111101001010100101000000000)
-void update_prng(byte *prng) {
-  byte a = prng[0] & 2;
-  byte b = prng[1] & 2;
+void update_prng(u8 *prng) {
+  u8 a = prng[0] & 2;
+  u8 b = prng[1] & 2;
   bool newbit = a != b;
 
   for (int i = 0; i < 7; i++) {

@@ -14,57 +14,57 @@ static void AreaParserCore(void);
 static void ProcessAreaData(void);
 static u8 decode_area_data_to_idx(const u8 data0, const u8 data1);
 static void decode_area_data_dispatch(const u8 objoff, const u8 idx);
-static void AlterAreaAttributes(byte param_1);
+static void AlterAreaAttributes(u8 param_1);
 static void ScrollLockObject_Warp(void);
-static void TreeLedge(byte param_1);
-static void NoUnder(byte param_1, byte param_2);
-static void PulleyRopeObject(byte param_1);
-static void CastleObject(byte param_1);
-static void WaterPipe(byte param_1);
-static void IntroPipe(byte param_1);
-static void ExitPipe(byte param_1);
-static void SetupPiranhaPlant(byte param_1, byte param_2, byte param_3);
-static void VerticalPipe(byte param_1, bool decorative);
-static struct_yr06r07 GetPipeHeight(byte param_1);
-static byte FindEmptyEnemySlot(void);
-static void Hole_Water(byte param_1);
-static void QuestionBlockRow_High(byte param_1);
-static void QuestionBlockRow_Low(byte param_1);
-static void Bridge_High(byte param_1);
-static void Bridge_Middle(byte param_1);
-static void Bridge_Low(byte param_1);
-static void FlagBalls_Residual(byte param_1);
+static void TreeLedge(u8 param_1);
+static void NoUnder(u8 param_1, u8 param_2);
+static void PulleyRopeObject(u8 param_1);
+static void CastleObject(u8 param_1);
+static void WaterPipe(u8 param_1);
+static void IntroPipe(u8 param_1);
+static void ExitPipe(u8 param_1);
+static void SetupPiranhaPlant(u8 param_1, u8 param_2, u8 param_3);
+static void VerticalPipe(u8 param_1, bool decorative);
+static struct_yr06r07 GetPipeHeight(u8 param_1);
+static u8 FindEmptyEnemySlot(void);
+static void Hole_Water(u8 param_1);
+static void QuestionBlockRow_High(u8 param_1);
+static void QuestionBlockRow_Low(u8 param_1);
+static void Bridge_High(u8 param_1);
+static void Bridge_Middle(u8 param_1);
+static void Bridge_Low(u8 param_1);
+static void FlagBalls_Residual(u8 param_1);
 static void FlagpoleObject(void);
 static void EndlessRope(void);
-static void BalancePlatRope(byte param_1);
-static void RowOfCoins(byte param_1);
-static void EmptyBlock(byte param_1);
-static void RowOfBricks(byte param_1);
-static void RowOfSolidBlocks(byte param_1);
-static void ColumnOfBricks(byte param_1);
-static void ColumnOfSolidBlocks(byte param_1);
-static void BulletBillCannon(byte param_1);
-static void StaircaseObject(byte param_1);
-static void Jumpspring(byte param_1);
-static void Hole_Empty(byte param_1);
-static void RenderUnderPart(byte param_1, byte param_2, byte param_3);
-static struct_ycr07 ChkLrgObjLength(byte param_1);
-static void ChkLrgObjFixedLength(byte param_1, byte param_2);
-static struct_yr07 GetLrgObjAttrib(byte param_1);
-static byte GetAreaObjXPosition(void);
-static byte GetAreaObjYPosition(byte param_1);
+static void BalancePlatRope(u8 param_1);
+static void RowOfCoins(u8 param_1);
+static void EmptyBlock(u8 param_1);
+static void RowOfBricks(u8 param_1);
+static void RowOfSolidBlocks(u8 param_1);
+static void ColumnOfBricks(u8 param_1);
+static void ColumnOfSolidBlocks(u8 param_1);
+static void BulletBillCannon(u8 param_1);
+static void StaircaseObject(u8 param_1);
+static void Jumpspring(u8 param_1);
+static void Hole_Empty(u8 param_1);
+static void RenderUnderPart(u8 param_1, u8 param_2, u8 param_3);
+static struct_ycr07 ChkLrgObjLength(u8 param_1);
+static void ChkLrgObjFixedLength(u8 param_1, u8 param_2);
+static struct_yr07 GetLrgObjAttrib(u8 param_1);
+static u8 GetAreaObjXPosition(void);
+static u8 GetAreaObjYPosition(u8 param_1);
 
 #ifdef SMB1_MODE
-static void MushroomLedge(byte param_1);
+static void MushroomLedge(u8 param_1);
 #endif
 #ifdef SMB2J_MODE
-static void CloudLedge(byte param_1);
+static void CloudLedge(u8 param_1);
 #endif
 
 #ifdef SMB2J_MODE
-static void WriteWarpZoneMessage(byte param_1);
-static void UpsideDownPipe_High(byte param_1);
-static void UpsideDownPipe_Low(byte param_1);
+static void WriteWarpZoneMessage(u8 param_1);
+static void UpsideDownPipe_High(u8 param_1);
+static void UpsideDownPipe_Low(u8 param_1);
 static void WindOn(void);
 static void WindOff(void);
 #endif
@@ -185,18 +185,18 @@ void RenderAreaGraphics(void) {
   VRAM_Buffer2[VRAM_Buffer2_Offset + 2] = DRAW_FLAG_VERTICAL | (13*2);
 
   for (int i = 0; i < 13; i++) {
-    const byte mt = MetatileBuffer[i];
-    const byte lo = MetatileGraphics_Low[mt >> 6];
-    const byte hi = MetatileGraphics_High[mt >> 6];
+    const u8 mt = MetatileBuffer[i];
+    const u8 lo = MetatileGraphics_Low[mt >> 6];
+    const u8 hi = MetatileGraphics_High[mt >> 6];
 
     const u8 *data = rom_ptr((hi << 8) | lo);
 
-    const byte bVar2 = (mt << 2) | ((AreaParserTaskNum & 1) ? 0 : 2);
+    const u8 bVar2 = (mt << 2) | ((AreaParserTaskNum & 1) ? 0 : 2);
     VRAM_Buffer2[VRAM_Buffer2_Offset + 3] = data[bVar2];
     VRAM_Buffer2[VRAM_Buffer2_Offset + 4] = data[bVar2 + 1];
 
-    byte bVar8 = mt & 0xc0;
-    const byte tmp1 = i/2;
+    u8 bVar8 = mt & 0xc0;
+    const u8 tmp1 = i/2;
 
     if ((i & 1) == 0) {
       bVar8 >>= 4;
@@ -229,14 +229,14 @@ void RenderAreaGraphics(void) {
 // Signature: [] -> []
 void RenderAttributeTables(void) {
   bool even_page = (CurrentNTAddr_High & 0x04) == 0;
-  const byte nt_lo = (CurrentNTAddr_Low - 4) & 0x1f;
+  const u8 nt_lo = (CurrentNTAddr_Low - 4) & 0x1f;
   if (nt_lo >= 32 - 4) {
     even_page = !even_page;
   }
 
   // NES note: this bit is unlikely to be set, because CurrentNTAddr_Low seems to always be a multiple of 4.
   // But this is what the original game does.
-  const byte carry_bug = CurrentNTAddr_Low & 0x02 ? 1 : 0;
+  const u8 carry_bug = CurrentNTAddr_Low & 0x02 ? 1 : 0;
 
   const u16 attrtable = even_page ? 0x23c0 : 0x27c0;
 
@@ -395,8 +395,8 @@ void AreaParserCore(void) {
     const u8 back_scenery_data = backscenery_lookup[BackgroundScenery - 1][CurrentPageLoc % 3][CurrentColumnPos];
 
     if (back_scenery_data != 0) {
-      const byte type = back_scenery_data & 0xf;
-      const byte mt_y = back_scenery_data >> 4;
+      const u8 type = back_scenery_data & 0xf;
+      const u8 mt_y = back_scenery_data >> 4;
 
       assert_eq_assumption(type >= 1, true);
       assert_eq_assumption(type <= 12, true);
@@ -442,7 +442,7 @@ void AreaParserCore(void) {
 
   // RendTerr
   {
-    byte mt = terrain_metatiles[AreaType];
+    u8 mt = terrain_metatiles[AreaType];
 
     if (CloudTypeOverride != 0) {
       mt = MT_CLOUD_BLOCK;
@@ -503,7 +503,7 @@ void AreaParserCore(void) {
   const u16 mt_x = BlockBufferColumnPos;
 
   for (int i = 0; i < 13; i++) {
-    const byte mt = MetatileBuffer[i];
+    const u8 mt = MetatileBuffer[i];
 
     // Note: simplified lookup of BlockBuffLowBounds
 
@@ -530,8 +530,8 @@ void ProcessAreaData(void) {
 
       if (AreaObjectLength[objoff] >= 0x80) {
         if (AreaData[AreaDataOffset] != 0xfd) {
-          const byte data1 = AreaData[AreaDataOffset + 1];
-          const byte first_nibble = AreaData[AreaDataOffset] & 0xf;
+          const u8 data1 = AreaData[AreaDataOffset + 1];
+          const u8 first_nibble = AreaData[AreaDataOffset] & 0xf;
 
           if (AreaObjectPageSel == 0) {
             if (data1 & 0x80) {
@@ -563,7 +563,7 @@ void ProcessAreaData(void) {
 
         if (data0 != 0xfd) {
           // Bit 7 is never used
-          const u8 data1 = AreaData[(byte)(off + 1)] & 0x7f;
+          const u8 data1 = AreaData[(u8)(off + 1)] & 0x7f;
 
           if ((data0 & 0xf) == 0xd && (data1 & 0x40) == 0) {
 
@@ -622,7 +622,7 @@ void ProcessAreaData(void) {
 }
 
 u8 decode_area_data_to_idx(const u8 data0, const u8 data1) {
-  byte idx;
+  u8 idx;
 
   switch (data0) {
   case 0xc:
@@ -1097,8 +1097,8 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
 // SMB:96c5
 // SM2MAIN:74e6
 // Signature: [X] -> []
-void AlterAreaAttributes(const byte param_1) {
-  byte bVar1 = AreaData[(byte)(AreaObjOffsetBuffer[param_1] + 1)];
+void AlterAreaAttributes(const u8 param_1) {
+  u8 bVar1 = AreaData[(u8)(AreaObjOffsetBuffer[param_1] + 1)];
   if ((bVar1 & 0x40) == 0) {
     TerrainControl = bVar1 & 0xf;
     BackgroundScenery = (bVar1 & 0x30) >> 4;
@@ -1116,9 +1116,9 @@ void AlterAreaAttributes(const byte param_1) {
 // SMB:974c
 // SM2MAIN:75a3
 // Signature: [X] -> []
-void TreeLedge(const byte param_1) {
+void TreeLedge(const u8 param_1) {
   const struct_yr07 sVar2 = GetLrgObjAttrib(param_1);
-  const byte bVar1 = sVar2.r07;
+  const u8 bVar1 = sVar2.r07;
 
   const u8 areaobjlen = AreaObjectLength[param_1];
   if (areaobjlen == 0) {
@@ -1142,7 +1142,7 @@ void TreeLedge(const byte param_1) {
 // SMB:97b0
 // SM2MAIN:75fc
 // Signature: [A, r07] -> []
-void NoUnder(const byte param_1, const byte param_2) {
+void NoUnder(const u8 param_1, const u8 param_2) {
   RenderUnderPart(param_1, param_2, 0);
 }
 
@@ -1150,7 +1150,7 @@ void NoUnder(const byte param_1, const byte param_2) {
 // SMB:97ba
 // SM2MAIN:7606
 // Signature: [X] -> []
-void PulleyRopeObject(const byte param_1) {
+void PulleyRopeObject(const u8 param_1) {
   const struct_ycr07 sVar2 = ChkLrgObjLength(param_1);
   if (sVar2.c) {
     MetatileBuffer[0] = MT_PULLEY_ROPE_TL;
@@ -1165,15 +1165,15 @@ void PulleyRopeObject(const byte param_1) {
 // SMB:9806
 // SM2MAIN:7652
 // Signature: [X] -> []
-void CastleObject(const byte objoff) {
+void CastleObject(const u8 objoff) {
   // objoff is always 0,1,2
   assert_eq_assumption(objoff <= 2, true);
 
   const struct_yr07 sVar5 = GetLrgObjAttrib(objoff);
-  const byte start_at_y = sVar5.y;
+  const u8 start_at_y = sVar5.y;
   ChkLrgObjFixedLength(objoff, 4);
 
-  const byte j = AreaObjectLength[objoff];
+  const u8 j = AreaObjectLength[objoff];
 
   assert_eq_assumption(j < 5, true);
 
@@ -1217,8 +1217,8 @@ void CastleObject(const byte objoff) {
 
       MetatileBuffer[10] = MT_BRICK;
     } else if (j == 2) {
-      const byte bStack0000 = GetAreaObjXPosition();
-      const byte i = FindEmptyEnemySlot();
+      const u8 bStack0000 = GetAreaObjXPosition();
+      const u8 i = FindEmptyEnemySlot();
 
       // Note: If no slot is found, a value of 5 is used.
 
@@ -1236,7 +1236,7 @@ void CastleObject(const byte objoff) {
 // SMB:986f
 // SM2MAIN:76bb
 // Signature: [X] -> []
-void WaterPipe(const byte param_1) {
+void WaterPipe(const u8 param_1) {
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
   MetatileBuffer[sVar1.r07] = MT_WATERPIPE_T;
   MetatileBuffer[sVar1.r07 + 1] = MT_WATERPIPE_B;
@@ -1246,7 +1246,7 @@ void WaterPipe(const byte param_1) {
 // SMB:9882
 // SM2MAIN:76ce
 // Signature: [X] -> []
-void IntroPipe(const byte objoff) {
+void IntroPipe(const u8 objoff) {
   // objoff is always 0,1,2
   assert_eq_assumption(objoff <= 2, true);
 
@@ -1255,7 +1255,7 @@ void IntroPipe(const byte objoff) {
   // Inlined: RenderSidewaysPipe
   // Note: Simplified
 
-  const byte bVar2 = AreaObjectLength[objoff];
+  const u8 bVar2 = AreaObjectLength[objoff];
   assert_eq_assumption(bVar2 <= 3, true);
 
   const bool left_side = (bVar2 % 2) != 0;
@@ -1281,7 +1281,7 @@ void IntroPipe(const byte objoff) {
 // SMB:98ab
 // SM2MAIN:76f7
 // Signature: [X] -> []
-void ExitPipe(const byte objoff) {
+void ExitPipe(const u8 objoff) {
   // objoff is always 0,1,2
   assert_eq_assumption(objoff <= 2, true);
 
@@ -1290,7 +1290,7 @@ void ExitPipe(const byte objoff) {
 
   // Inlined: RenderSidewaysPipe
 
-  const byte bVar2 = AreaObjectLength[objoff];
+  const u8 bVar2 = AreaObjectLength[objoff];
   assert_eq_assumption(bVar2 <= 3, true);
 
   assert_eq_assumption(sVar1.y >= 1, true);
@@ -1313,7 +1313,7 @@ void ExitPipe(const byte objoff) {
 // SMB:N/A (inlined in VerticalPipe)
 // SM2MAIN:7772
 // Signature: [A, X, r07] -> []
-void SetupPiranhaPlant(const byte enemy_id, const byte param_2, const byte param_3) {
+void SetupPiranhaPlant(const u8 enemy_id, const u8 param_2, const u8 param_3) {
   const u16 xpos = (CurrentPageLoc << 8) + GetAreaObjXPosition() + 8;
   Enemy_X_Position[param_2] = xpos & 0xff;
   Enemy_PageLoc[param_2] = xpos >> 8;
@@ -1331,10 +1331,10 @@ void SetupPiranhaPlant(const byte enemy_id, const byte param_2, const byte param
 // SMB:98e5
 // SM2MAIN:7731
 // Signature: [X, r00] -> []
-void VerticalPipe(const byte param_1, const bool decorative) {
+void VerticalPipe(const u8 param_1, const bool decorative) {
   const struct_yr06r07 sVar5 = GetPipeHeight(param_1);
-  const byte bVar2 = sVar5.r07;
-  const byte bVar1 = sVar5.r06;
+  const u8 bVar2 = sVar5.r07;
+  const u8 bVar1 = sVar5.r06;
 
   assert_eq_assumption(sVar5.y < 2, true);
 
@@ -1349,7 +1349,7 @@ void VerticalPipe(const byte param_1, const bool decorative) {
 #endif
 
   if (check) {
-    const byte i = FindEmptyEnemySlot();
+    const u8 i = FindEmptyEnemySlot();
     if (i != NO_AVAIL_ENEMY_SLOT) {
       SetupPiranhaPlant(A_PIRANHA_PLANT, i, bVar2);
     }
@@ -1371,7 +1371,7 @@ void VerticalPipe(const byte param_1, const bool decorative) {
 // SMB:9939
 // SM2MAIN:7761
 // Signature: [X] -> [Y, r06, r07]
-struct_yr06r07 GetPipeHeight(const byte param_1) {
+struct_yr06r07 GetPipeHeight(const u8 param_1) {
   ChkLrgObjFixedLength(param_1, 1);
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
 
@@ -1385,7 +1385,7 @@ struct_yr06r07 GetPipeHeight(const byte param_1) {
 
 // SMB:994a
 // SM2MAIN:7791
-byte FindEmptyEnemySlot(void) {
+u8 FindEmptyEnemySlot(void) {
   // Old signature: [] -> [X, C]
   // Rewritten to return a sentinel value if one is not found
 
@@ -1402,7 +1402,7 @@ byte FindEmptyEnemySlot(void) {
 // SMB:9957
 // SM2MAIN:779e
 // Signature: [X] -> []
-void Hole_Water(const byte param_1) {
+void Hole_Water(const u8 param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[10] = MT_WATER_TOP;
   RenderUnderPart(MT_WATER_BLANK, 0xb, 1);
@@ -1412,7 +1412,7 @@ void Hole_Water(const byte param_1) {
 // SMB:9968
 // SM2MAIN:77af
 // Signature: [X] -> []
-void QuestionBlockRow_High(const byte param_1) {
+void QuestionBlockRow_High(const u8 param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[3] = MT_QUESTIONBLOCK_COIN;
 }
@@ -1421,7 +1421,7 @@ void QuestionBlockRow_High(const byte param_1) {
 // SMB:996b
 // SM2MAIN:77b2
 // Signature: [X] -> []
-void QuestionBlockRow_Low(const byte param_1) {
+void QuestionBlockRow_Low(const u8 param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[7] = MT_QUESTIONBLOCK_COIN;
 }
@@ -1430,7 +1430,7 @@ void QuestionBlockRow_Low(const byte param_1) {
 // SMB:9979
 // SM2MAIN:77c0
 // Signature: [X] -> []
-void Bridge_High(const byte param_1) {
+void Bridge_High(const u8 param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[6] = MT_BRIDGE_RAILING;
   RenderUnderPart(MT_BRIDGE_BLOCK, 7, 0);
@@ -1440,7 +1440,7 @@ void Bridge_High(const byte param_1) {
 // SMB:997c
 // SM2MAIN:77c3
 // Signature: [X] -> []
-void Bridge_Middle(const byte param_1) {
+void Bridge_Middle(const u8 param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[7] = MT_BRIDGE_RAILING;
   RenderUnderPart(MT_BRIDGE_BLOCK, 8, 0);
@@ -1450,7 +1450,7 @@ void Bridge_Middle(const byte param_1) {
 // SMB:997f
 // SM2MAIN:77c6
 // Signature: [X] -> []
-void Bridge_Low(const byte param_1) {
+void Bridge_Low(const u8 param_1) {
   ChkLrgObjLength(param_1);
   MetatileBuffer[9] = MT_BRIDGE_RAILING;
   RenderUnderPart(MT_BRIDGE_BLOCK, 10, 0);
@@ -1460,7 +1460,7 @@ void Bridge_Low(const byte param_1) {
 // SMB:9994
 // SM2MAIN:77db
 // Signature: [X] -> []
-void FlagBalls_Residual(const byte param_1) {
+void FlagBalls_Residual(const u8 param_1) {
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(MT_FLAGBALL, 2, sVar1.y);
 }
@@ -1473,7 +1473,7 @@ void FlagpoleObject(void) {
   MetatileBuffer[0] = MT_FLAGPOLE_T;
   RenderUnderPart(MT_FLAGPOLE_M, 1, 8);
   MetatileBuffer[10] = MT_STAIR_BLOCK;
-  const byte bVar1 = GetAreaObjXPosition();
+  const u8 bVar1 = GetAreaObjXPosition();
   Enemy_X_Position[5] = bVar1 - 8;
   Enemy_PageLoc[5] = CurrentPageLoc - (bVar1 < 8);
   Enemy_Y_Position[5] = 0x30;
@@ -1494,7 +1494,7 @@ void EndlessRope(void) {
 // SMB:99d7
 // SM2MAIN:781e
 // Signature: [X] -> []
-void BalancePlatRope(const byte param_1) {
+void BalancePlatRope(const u8 param_1) {
   RenderUnderPart(MT_ROPE_NONE, 1, 0xf);
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(MT_ROPE_VERT, 1, sVar1.y);
@@ -1504,7 +1504,7 @@ void BalancePlatRope(const byte param_1) {
 // SMB:99f2
 // SM2MAIN:7839
 // Signature: [X] -> []
-void RowOfCoins(const byte param_1) {
+void RowOfCoins(const u8 param_1) {
   const u8 metatile = AreaType != 0 ? MT_COIN : MT_COIN_UNDERWATER;
   const struct_ycr07 sVar1 = ChkLrgObjLength(param_1);
   RenderUnderPart(metatile, sVar1.r07, 0);
@@ -1514,7 +1514,7 @@ void RowOfCoins(const byte param_1) {
 // SMB:9a19
 // SM2MAIN:7860
 // Signature: [X] -> []
-void EmptyBlock(const byte param_1) {
+void EmptyBlock(const u8 param_1) {
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
   RenderUnderPart(MT_BLOCK_EMPTY, sVar1.r07, 0);
 }
@@ -1523,9 +1523,9 @@ void EmptyBlock(const byte param_1) {
 // SMB:9a2e
 // SM2MAIN:7875
 // Signature: [X] -> []
-void RowOfBricks(const byte param_1) {
+void RowOfBricks(const u8 param_1) {
   assert_eq_assumption(AreaType < 4, true);
-  byte bVar1 = AreaType;
+  u8 bVar1 = AreaType;
   if (CloudTypeOverride != 0) {
     bVar1 = 4;
   }
@@ -1539,7 +1539,7 @@ void RowOfBricks(const byte param_1) {
 // SMB:9a3e
 // SM2MAIN:7885
 // Signature: [X] -> []
-void RowOfSolidBlocks(const byte param_1) {
+void RowOfSolidBlocks(const u8 param_1) {
   assert_eq_assumption(AreaType < 4, true);
   static const u8 metatiles[4] = { MT_UNDERWATER_GROUND, MT_STAIR_BLOCK, MT_STAIR_BLOCK, MT_CASTLE_INSIDE_WALL };
   const u8 mt = metatiles[AreaType];
@@ -1551,7 +1551,7 @@ void RowOfSolidBlocks(const byte param_1) {
 // SMB:9a50
 // SM2MAIN:7897
 // Signature: [X] -> []
-void ColumnOfBricks(const byte param_1) {
+void ColumnOfBricks(const u8 param_1) {
   assert_eq_assumption(AreaType < 4, true);
   static const u8 metatiles[4] = { MT_CORAL, MT_BRICK_2, MT_BRICK, MT_BRICK };
   const u8 mt = metatiles[AreaType];
@@ -1563,7 +1563,7 @@ void ColumnOfBricks(const byte param_1) {
 // SMB:9a59
 // SM2MAIN:78a0
 // Signature: [X] -> []
-void ColumnOfSolidBlocks(const byte param_1) {
+void ColumnOfSolidBlocks(const u8 param_1) {
   assert_eq_assumption(AreaType < 4, true);
   static const u8 metatiles[4] = { MT_UNDERWATER_GROUND, MT_STAIR_BLOCK, MT_STAIR_BLOCK, MT_CASTLE_INSIDE_WALL };
   const u8 mt = metatiles[AreaType];
@@ -1575,22 +1575,22 @@ void ColumnOfSolidBlocks(const byte param_1) {
 // SMB:9a69
 // SM2MAIN:78b0
 // Signature: [X] -> []
-void BulletBillCannon(const byte param_1) {
+void BulletBillCannon(const u8 param_1) {
   const struct_yr07 sVar3 = GetLrgObjAttrib(param_1);
-  byte bVar1 = sVar3.r07;
+  u8 bVar1 = sVar3.r07;
   MetatileBuffer[bVar1] = MT_BULLETBILL_CANNON_T;
-  if ((byte)(sVar3.y - 1) < 0x80) {
-    MetatileBuffer[(byte)(bVar1 + 1)] = MT_BULLETBILL_CANNON_BODY;
-    const byte bVar2 = sVar3.y - 2;
+  if ((u8)(sVar3.y - 1) < 0x80) {
+    MetatileBuffer[(u8)(bVar1 + 1)] = MT_BULLETBILL_CANNON_BODY;
+    const u8 bVar2 = sVar3.y - 2;
     if (bVar2 < 0x80) {
       RenderUnderPart(MT_BULLETBILL_CANNON_B, bVar1 + 2, bVar2);
     }
   }
 
-  const byte y = GetAreaObjYPosition(bVar1);
+  const u8 y = GetAreaObjYPosition(bVar1);
   Cannon_Y_Position[Cannon_Or_Whirlpool_Offset] = y;
   Cannon_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc;
-  const byte x = GetAreaObjXPosition();
+  const u8 x = GetAreaObjXPosition();
   Cannon_X_Position[Cannon_Or_Whirlpool_Offset] = x;
 
   Cannon_Or_Whirlpool_Offset += 1;
@@ -1603,7 +1603,7 @@ void BulletBillCannon(const byte param_1) {
 // SMB:9ab7
 // SM2MAIN:78fe
 // Signature: [X] -> []
-void StaircaseObject(const byte param_1) {
+void StaircaseObject(const u8 param_1) {
   const struct_ycr07 sVar1 = ChkLrgObjLength(param_1);
   if (sVar1.c) {
     StaircaseControl = 9;
@@ -1616,10 +1616,10 @@ void StaircaseObject(const byte param_1) {
 // SMB:9ad3
 // SM2MAIN:791a
 // Signature: [X] -> []
-void Jumpspring(const byte param_1) {
+void Jumpspring(const u8 param_1) {
   const struct_yr07 sVar4 = GetLrgObjAttrib(param_1);
-  const byte bVar1 = sVar4.r07;
-  const byte i = FindEmptyEnemySlot();
+  const u8 bVar1 = sVar4.r07;
+  const u8 i = FindEmptyEnemySlot();
 
   if (SMB2J_ONLY && i == NO_AVAIL_ENEMY_SLOT) {
     return;
@@ -1627,7 +1627,7 @@ void Jumpspring(const byte param_1) {
 
   Enemy_X_Position[i] = GetAreaObjXPosition();
   Enemy_PageLoc[i] = CurrentPageLoc;
-  const byte bVar2 = GetAreaObjYPosition(bVar1);
+  const u8 bVar2 = GetAreaObjYPosition(bVar1);
   Enemy_Y_Position[i] = bVar2;
   Jumpspring_FixedYPos[i] = bVar2;
   Enemy_ID[i] = A_JUMPSPRING;
@@ -1641,11 +1641,11 @@ void Jumpspring(const byte param_1) {
 // SMB:9b41
 // SM2MAIN:798a
 // Signature: [X] -> []
-void Hole_Empty(const byte param_1) {
+void Hole_Empty(const u8 param_1) {
   const struct_ycr07 sVar3 = ChkLrgObjLength(param_1);
-  const byte bVar2 = sVar3.y;
+  const u8 bVar2 = sVar3.y;
   if ((sVar3.c) && (AreaType == 0)) {
-    const byte x = GetAreaObjXPosition();
+    const u8 x = GetAreaObjXPosition();
 
     Whirlpool_X_Position[Cannon_Or_Whirlpool_Offset] = x - 0x10;
     Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc - (x < 0x10);
@@ -1666,7 +1666,7 @@ void Hole_Empty(const byte param_1) {
 // SMB:9b7d
 // SM2MAIN:79c6
 // Signature: [A, X, Y] -> []
-void RenderUnderPart(const byte mt, const byte mt_y, const byte param_3) {
+void RenderUnderPart(const u8 mt, const u8 mt_y, const u8 param_3) {
   // Note: Removed AreaObjectHeight global variable ($0735).
   // It's only ever used in this subroutine.
   //
@@ -1674,16 +1674,16 @@ void RenderUnderPart(const byte mt, const byte mt_y, const byte param_3) {
   // if param_3 <= 0x80, it would return (mt_y+param_3+1) or 13, whichever one is smallest
   // if param_3 > 0x80, it would return (mt_y+1) or 13, whichever one is smallest
 
-  byte j = mt_y;
+  u8 j = mt_y;
 
-  byte count = param_3 + 1;
+  u8 count = param_3 + 1;
 
   if (param_3 > 0x80) {
     count = 1;
   }
 
   for (int i = 0; i < count; i++) {
-    const byte existing_mt = MetatileBuffer[j];
+    const u8 existing_mt = MetatileBuffer[j];
 
     bool draw_metatile = true;
 
@@ -1727,12 +1727,12 @@ void RenderUnderPart(const byte mt, const byte mt_y, const byte param_3) {
 // SMB:9bac
 // SM2MAIN:79ed
 // Signature: [X] -> [Y, C, r07]
-struct_ycr07 ChkLrgObjLength(const byte param_1) {
+struct_ycr07 ChkLrgObjLength(const u8 param_1) {
   struct_ycr07 sVar3;
 
   const struct_yr07 sVar4 = GetLrgObjAttrib(param_1);
-  const byte bVar1 = sVar4.r07;
-  const byte bVar2 = sVar4.y;
+  const u8 bVar1 = sVar4.r07;
+  const u8 bVar2 = sVar4.y;
   sVar3.c = AreaObjectLength[param_1] >= 0x80;
   sVar3.y = bVar2;
   sVar3.r07 = bVar1;
@@ -1746,7 +1746,7 @@ struct_ycr07 ChkLrgObjLength(const byte param_1) {
 // SMB:9baf
 // SM2MAIN:79f0
 // Signature: [X, Y] -> []
-void ChkLrgObjFixedLength(const byte param_1, const byte param_2) {
+void ChkLrgObjFixedLength(const u8 param_1, const u8 param_2) {
   if (AreaObjectLength[param_1] >= 0x80) {
     AreaObjectLength[param_1] = param_2;
   }
@@ -1756,9 +1756,9 @@ void ChkLrgObjFixedLength(const byte param_1, const byte param_2) {
 // SMB:9bbb
 // SM2MAIN:79fc
 // Signature: [X] -> [Y, r07]
-struct_yr07 GetLrgObjAttrib(const byte param_1) {
+struct_yr07 GetLrgObjAttrib(const u8 param_1) {
   struct_yr07 res;
-  res.y = AreaData[(byte)(AreaObjOffsetBuffer[param_1] + 1)] & 0xf;
+  res.y = AreaData[(u8)(AreaObjOffsetBuffer[param_1] + 1)] & 0xf;
   res.r07 = AreaData[AreaObjOffsetBuffer[param_1]] & 0xf;
   return res;
 }
@@ -1767,13 +1767,13 @@ struct_yr07 GetLrgObjAttrib(const byte param_1) {
 // SMB:9bcb
 // SM2MAIN:7a0c
 // Signature: [] -> [A]
-byte GetAreaObjXPosition(void) { return CurrentColumnPos << 4; }
+u8 GetAreaObjXPosition(void) { return CurrentColumnPos << 4; }
 
 
 // SMB:9bd3
 // SM2MAIN:7a14
 // Signature: [r07] -> [A]
-byte GetAreaObjYPosition(const byte param_1) { return param_1 * 0x10 + 0x20; }
+u8 GetAreaObjYPosition(const u8 param_1) { return param_1 * 0x10 + 0x20; }
 
 
 // SMB:9c03
@@ -1781,8 +1781,8 @@ byte GetAreaObjYPosition(const byte param_1) { return param_1 * 0x10 + 0x20; }
 // Signature: [] -> []
 void LoadAreaPointer(void) {
   // Inlined: FindAreaPointer
-  const byte area_pointer = AreaAddrOffsets[(byte)(WorldAddrOffsets[WorldNumber] + AreaNumber)];
-  const byte area_type = (area_pointer & 0x60) >> 5;
+  const u8 area_pointer = AreaAddrOffsets[(u8)(WorldAddrOffsets[WorldNumber] + AreaNumber)];
+  const u8 area_type = (area_pointer & 0x60) >> 5;
 
   AreaPointer = area_pointer;
   AreaType = area_type;
@@ -1794,21 +1794,21 @@ void LoadAreaPointer(void) {
 // Signature: [] -> []
 void GetAreaDataAddrs(void) {
   // Inlined: GetAreaType
-  const byte area_type = (AreaPointer & 0x60) >> 5;
-  const byte loffset = AreaPointer & 0x1f;
+  const u8 area_type = (AreaPointer & 0x60) >> 5;
+  const u8 loffset = AreaPointer & 0x1f;
   AreaType = area_type;
   AreaAddrsLOffset = loffset;
 
   {
 #ifdef SMB1_MODE
-    const byte off = EnemyAddrHOffsets[area_type] + loffset;
-    const byte lo = EnemyDataAddrLow[off];
-    const byte hi = EnemyDataAddrHigh[off];
+    const u8 off = EnemyAddrHOffsets[area_type] + loffset;
+    const u8 lo = EnemyDataAddrLow[off];
+    const u8 hi = EnemyDataAddrHigh[off];
 #endif
 #ifdef SMB2J_MODE
-    const byte off = (EnemyAddrHOffsets[area_type] + loffset) * 2;
-    const byte lo = EnemyDataAddrs[off];
-    const byte hi = EnemyDataAddrs[off + 1];
+    const u8 off = (EnemyAddrHOffsets[area_type] + loffset) * 2;
+    const u8 lo = EnemyDataAddrs[off];
+    const u8 hi = EnemyDataAddrs[off + 1];
 #endif
     const u16 addr = (hi << 8) | lo;
     STORE_16(EnemyData_addr_hi, EnemyData_addr_lo, addr);
@@ -1817,29 +1817,29 @@ void GetAreaDataAddrs(void) {
 
   {
 #ifdef SMB1_MODE
-    const byte off = AreaDataHOffsets[area_type] + loffset;
-    const byte lo = AreaDataAddrLow[off];
-    const byte hi = AreaDataAddrHigh[off];
+    const u8 off = AreaDataHOffsets[area_type] + loffset;
+    const u8 lo = AreaDataAddrLow[off];
+    const u8 hi = AreaDataAddrHigh[off];
 #endif
 #ifdef SMB2J_MODE
-    const byte off = (AreaDataHOffsets[area_type] + loffset) * 2;
-    const byte lo = AreaDataAddrs[off];
-    const byte hi = AreaDataAddrs[off + 1];
+    const u8 off = (AreaDataHOffsets[area_type] + loffset) * 2;
+    const u8 lo = AreaDataAddrs[off];
+    const u8 hi = AreaDataAddrs[off + 1];
 #endif
     const u16 addr = (hi << 8) | lo;
     STORE_16(AreaData_addr_hi, AreaData_addr_lo, addr);
     AreaData = rom_ptr(addr);
   }
 
-  const byte area_data_0 = AreaData[0];
+  const u8 area_data_0 = AreaData[0];
   // gg ppp fff
 
-  const byte area_data_1 = AreaData[1];
+  const u8 area_data_1 = AreaData[1];
   // aa bb tttt
 
-  const byte gg = area_data_0 >> 6;
-  const byte ppp = (area_data_0 & 0x38) >> 3;
-  const byte fff = area_data_0 & 7;
+  const u8 gg = area_data_0 >> 6;
+  const u8 ppp = (area_data_0 & 0x38) >> 3;
+  const u8 fff = area_data_0 & 7;
 
   if (fff >= 4) {
     ForegroundScenery = 0;
@@ -1850,9 +1850,9 @@ void GetAreaDataAddrs(void) {
   PlayerEntranceCtrl = ppp;
   GameTimerSetting = gg;
 
-  const byte aa = area_data_1 >> 6;
-  const byte bb = (area_data_1 & 0x30) >> 4;
-  const byte tttt = area_data_1 & 0xf;
+  const u8 aa = area_data_1 >> 6;
+  const u8 bb = (area_data_1 & 0x30) >> 4;
+  const u8 tttt = area_data_1 & 0xf;
 
   TerrainControl = tttt;
   BackgroundScenery = bb;
@@ -1876,38 +1876,38 @@ void GetAreaDataAddrs(void) {
 // Signature: [] -> []
 void AltHard_GetAreaDataAddrs(void) {
   // Inlined: GetAreaType
-  const byte area_type = (AreaPointer & 0x60) >> 5;
-  const byte loffset = AreaPointer & 0x1f;
+  const u8 area_type = (AreaPointer & 0x60) >> 5;
+  const u8 loffset = AreaPointer & 0x1f;
   AreaType = area_type;
   AreaAddrsLOffset = loffset;
 
   {
-    const byte off = AltHard_EnemyAddrHOffsets[area_type] + loffset;
-    const byte lo = AltHard_EnemyDataAddrs[(byte)(off * 2)];
-    const byte hi = AltHard_EnemyDataAddrs[(byte)(off * 2) + 1];
+    const u8 off = AltHard_EnemyAddrHOffsets[area_type] + loffset;
+    const u8 lo = AltHard_EnemyDataAddrs[(u8)(off * 2)];
+    const u8 hi = AltHard_EnemyDataAddrs[(u8)(off * 2) + 1];
     const u16 addr = (hi << 8) | lo;
     STORE_16(EnemyData_addr_hi, EnemyData_addr_lo, addr);
     EnemyData = rom_ptr(addr);
   }
 
   {
-    const byte off = (AltHard_AreaDataHOffsets[area_type] + loffset) * 2;
-    const byte lo = AltHard_AreaDataAddrs[off];
-    const byte hi = AltHard_AreaDataAddrs[off + 1];
+    const u8 off = (AltHard_AreaDataHOffsets[area_type] + loffset) * 2;
+    const u8 lo = AltHard_AreaDataAddrs[off];
+    const u8 hi = AltHard_AreaDataAddrs[off + 1];
     const u16 addr = (hi << 8) | lo;
     STORE_16(AreaData_addr_hi, AreaData_addr_lo, addr);
     AreaData = rom_ptr(addr);
   }
 
-  const byte area_data_0 = AreaData[0];
+  const u8 area_data_0 = AreaData[0];
   // gg ppp fff
 
-  const byte area_data_1 = AreaData[1];
+  const u8 area_data_1 = AreaData[1];
   // aa bb tttt
 
-  const byte gg = area_data_0 >> 6;
-  const byte ppp = (area_data_0 & 0x38) >> 3;
-  const byte fff = area_data_0 & 7;
+  const u8 gg = area_data_0 >> 6;
+  const u8 ppp = (area_data_0 & 0x38) >> 3;
+  const u8 fff = area_data_0 & 7;
 
   if (fff >= 4) {
     ForegroundScenery = 0;
@@ -1918,9 +1918,9 @@ void AltHard_GetAreaDataAddrs(void) {
   PlayerEntranceCtrl = ppp;
   GameTimerSetting = gg;
 
-  const byte aa = area_data_1 >> 6;
-  const byte bb = (area_data_1 & 0x30) >> 4;
-  const byte tttt = area_data_1 & 0xf;
+  const u8 aa = area_data_1 >> 6;
+  const u8 bb = (area_data_1 & 0x30) >> 4;
+  const u8 tttt = area_data_1 & 0xf;
 
   TerrainControl = tttt;
   BackgroundScenery = bb;
@@ -1941,7 +1941,7 @@ void AltHard_GetAreaDataAddrs(void) {
 #endif
 
 
-static inline byte ScrollLockObject_Warp_smb2j_impl(void) {
+static inline u8 ScrollLockObject_Warp_smb2j_impl(void) {
   if (HardWorldFlag != 0) {
     // 121 = 0x100 - 0x87
     if (LevelNumber != 121) {
@@ -2016,9 +2016,9 @@ void ScrollLockObject_Warp(void) {
 #ifdef SMB1_MODE
 // SMB:9778
 // Signature: [X] -> []
-void MushroomLedge(const byte param_1) {
+void MushroomLedge(const u8 param_1) {
   const struct_ycr07 sVar4 = ChkLrgObjLength(param_1);
-  const byte bVar3 = sVar4.r07;
+  const u8 bVar3 = sVar4.r07;
   if (sVar4.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
     NoUnder(MT_MUSHROOMLEDGE_L, bVar3);
@@ -2038,7 +2038,7 @@ void MushroomLedge(const byte param_1) {
   const u8 bVar1 = MushroomLedgeHalfLen[param_1];
   if (areaobjlen == bVar1) {
     // Right under the mushroom
-    MetatileBuffer[(byte)(bVar3 + 1)] = MT_MUSHROOMLEDGE_STEM_T;
+    MetatileBuffer[(u8)(bVar3 + 1)] = MT_MUSHROOMLEDGE_STEM_T;
 
     // The rest of the stem
     RenderUnderPart(MT_MUSHROOMLEDGE_STEM_UNDER, bVar3 + 2, 0xf);
@@ -2050,19 +2050,19 @@ void MushroomLedge(const byte param_1) {
 #ifdef SMB2J_MODE
 // SM2MAIN:75cf
 // Signature: [X] -> []
-void CloudLedge(const byte param_1) {
+void CloudLedge(const u8 param_1) {
   // Note: This is mostly the same as SMB1's MushroomLedge, but without the stem.
   // SMB2J replaced it with a cloud ledge.
 
   const struct_ycr07 sVar4 = ChkLrgObjLength(param_1);
-  const byte bVar3 = sVar4.r07;
+  const u8 bVar3 = sVar4.r07;
   if (sVar4.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
     NoUnder(MT_CLOUDLEDGE_L, bVar3);
     return;
   }
 
-  const byte areaobjlen = AreaObjectLength[param_1];
+  const u8 areaobjlen = AreaObjectLength[param_1];
   if (areaobjlen == 0) {
     NoUnder(MT_CLOUDLEDGE_R, bVar3);
     return;
@@ -2077,7 +2077,7 @@ void CloudLedge(const byte param_1) {
 
 // SM2MAIN:675e
 // Signature: [A] -> []
-void WriteWarpZoneMessage(const byte warp_zone_control) {
+void WriteWarpZoneMessage(const u8 warp_zone_control) {
   // "Welcome to warp zone!"
 
   VRAM_Buffer1_Offset = 0;
@@ -2102,16 +2102,16 @@ void WriteWarpZoneMessage(const byte warp_zone_control) {
   VRAM_Buffer1[27] = WarpZoneNumbers[idx];
 }
 
-static inline void UpsideDownPipe_impl(const byte objoff, const byte val) {
+static inline void UpsideDownPipe_impl(const u8 objoff, const u8 val) {
   const struct_yr06r07 sVar6 = GetPipeHeight(objoff);
-  const byte bVar3 = sVar6.r06;
+  const u8 bVar3 = sVar6.r06;
 
   if (AreaObjectLength[objoff] != 0) {
-    const byte bVar4 = FindEmptyEnemySlot();
+    const u8 bVar4 = FindEmptyEnemySlot();
     if (bVar4 != NO_AVAIL_ENEMY_SLOT) {
       SetupPiranhaPlant(A_PIRANHA_PLANT_SMB2J, bVar4, val);
-      const byte cVar1 = bVar3 * 0x10 + Enemy_Y_Position[bVar4];
-      const byte bVar2 = cVar1 - 10;
+      const u8 cVar1 = bVar3 * 0x10 + Enemy_Y_Position[bVar4];
+      const u8 bVar2 = cVar1 - 10;
       Enemy_Y_Position[bVar4] = bVar2;
       PiranhaPlantDownYPos[bVar4] = bVar2;
       PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
@@ -2138,14 +2138,14 @@ static inline void UpsideDownPipe_impl(const byte objoff, const byte val) {
 
 // SM2DATA2+SM2DATA4:c470
 // Signature: [X] -> []
-void UpsideDownPipe_High(const byte objoff) {
+void UpsideDownPipe_High(const u8 objoff) {
   UpsideDownPipe_impl(objoff, 1);
 }
 
 
 // SM2DATA2+SM2DATA4:c475
 // Signature: [X] -> []
-void UpsideDownPipe_Low(const byte objoff) {
+void UpsideDownPipe_Low(const u8 objoff) {
   UpsideDownPipe_impl(objoff, 4);
 }
 

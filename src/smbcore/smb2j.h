@@ -2,52 +2,52 @@
 
 #include "structs.h"
 
-void smb2j_jumptable_VictoryModeSubroutines_forW8(byte param_1);
+void smb2j_jumptable_VictoryModeSubroutines_forW8(u8 param_1);
 #define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
 
-void smb2j_jumptable_GameOverMode(byte param_1);
+void smb2j_jumptable_GameOverMode(u8 param_1);
 #define jumptable_GameOverMode smb2j_jumptable_GameOverMode
 
-void smb2j_jumptable_AreaParserTasks(byte param_1);
+void smb2j_jumptable_AreaParserTasks(u8 param_1);
 #define jumptable_AreaParserTasks smb2j_jumptable_AreaParserTasks
 
-void smb2j_jumptable_AreaStyleObject(byte param_1,byte param_2);
+void smb2j_jumptable_AreaStyleObject(u8 param_1,u8 param_2);
 #define jumptable_AreaStyleObject smb2j_jumptable_AreaStyleObject
 
-void smb2j_jumptable_GameRoutines(byte param_1);
+void smb2j_jumptable_GameRoutines(u8 param_1);
 #define jumptable_GameRoutines smb2j_jumptable_GameRoutines
 
-void smb2j_jumptable_PlayerMovementSubs(byte param_1);
+void smb2j_jumptable_PlayerMovementSubs(u8 param_1);
 #define jumptable_PlayerMovementSubs smb2j_jumptable_PlayerMovementSubs
 
-void smb2j_jumptable_CheckpointEnemyID(byte param_1,byte param_2);
+void smb2j_jumptable_CheckpointEnemyID(u8 param_1,u8 param_2);
 #define jumptable_CheckpointEnemyID smb2j_jumptable_CheckpointEnemyID
 
-void smb2j_jumptable_InitEnemyFrenzy(byte param_1,byte param_2);
+void smb2j_jumptable_InitEnemyFrenzy(u8 param_1,u8 param_2);
 #define jumptable_InitEnemyFrenzy smb2j_jumptable_InitEnemyFrenzy
 
-byte smb2j_jumptable_RunEnemyObjectsCore(byte param_1,byte param_2);
+u8 smb2j_jumptable_RunEnemyObjectsCore(u8 param_1,u8 param_2);
 #define jumptable_RunEnemyObjectsCore smb2j_jumptable_RunEnemyObjectsCore
 
-byte smb2j_jumptable_EnemyMovementSubs(byte param_1,byte param_2);
+u8 smb2j_jumptable_EnemyMovementSubs(u8 param_1,u8 param_2);
 #define jumptable_EnemyMovementSubs smb2j_jumptable_EnemyMovementSubs
 
-byte smb2j_jumptable_LargePlatformSubroutines(byte param_1,byte param_2);
+u8 smb2j_jumptable_LargePlatformSubroutines(u8 param_1,u8 param_2);
 #define jumptable_LargePlatformSubroutines smb2j_jumptable_LargePlatformSubroutines
 
-byte smb2j_jumptable_RunStarFlagObj(byte param_1,byte param_2);
+u8 smb2j_jumptable_RunStarFlagObj(u8 param_1,u8 param_2);
 #define jumptable_RunStarFlagObj smb2j_jumptable_RunStarFlagObj
 
-void smb2j_jumptable_HardWorldsCheckpoint(byte param_1);
+void smb2j_jumptable_HardWorldsCheckpoint(u8 param_1);
 #define jumptable_HardWorldsCheckpoint smb2j_jumptable_HardWorldsCheckpoint
 
-void smb2j_jumptable_AttractModeDiskRoutines(byte param_1);
+void smb2j_jumptable_AttractModeDiskRoutines(u8 param_1);
 #define jumptable_AttractModeDiskRoutines smb2j_jumptable_AttractModeDiskRoutines
 
-void smb2j_jumptable_GameModeDiskRoutines(byte param_1);
+void smb2j_jumptable_GameModeDiskRoutines(u8 param_1);
 #define jumptable_GameModeDiskRoutines smb2j_jumptable_GameModeDiskRoutines
 
-void smb2j_jumptable_VictoryModeDiskRoutines(byte param_1);
+void smb2j_jumptable_VictoryModeDiskRoutines(u8 param_1);
 #define jumptable_VictoryModeDiskRoutines smb2j_jumptable_VictoryModeDiskRoutines
 
 void smb2j_PauseRoutine(void);
@@ -89,7 +89,7 @@ void smb2j_EndCastleAward(void);
 void smb2j_PlayerEndWorld(void);
 #define PlayerEndWorld smb2j_PlayerEndWorld
 
-void smb2j_FloateyNumbersRoutine(byte param_1);
+void smb2j_FloateyNumbersRoutine(u8 param_1);
 #define FloateyNumbersRoutine smb2j_FloateyNumbersRoutine
 
 void smb2j_ScreenRoutines(void);
@@ -128,7 +128,7 @@ void smb2j_DisplayTimeUp(void);
 void smb2j_DisplayIntermediate(void);
 #define DisplayIntermediate smb2j_DisplayIntermediate
 
-void smb2j_WriteGameText(byte param_1);
+void smb2j_WriteGameText(u8 param_1);
 #define WriteGameText smb2j_WriteGameText
 
 void smb2j_ResetSpritesAndScreenTimer(void);
@@ -143,34 +143,34 @@ void smb2j_ColorRotation(void);
 void smb2j_RemoveCoin_Axe(u16 mt_x, u16 mt_y);
 #define RemoveCoin_Axe smb2j_RemoveCoin_Axe
 
-void smb2j_ReplaceBlockMetatile(byte param_1,byte param_2,u16 mt_x, u16 mt_y);
+void smb2j_ReplaceBlockMetatile(u8 param_1,u8 param_2,u16 mt_x, u16 mt_y);
 #define ReplaceBlockMetatile smb2j_ReplaceBlockMetatile
 
 void smb2j_DestroyBlockMetatile(u16 mt_x, u16 mt_y);
 #define DestroyBlockMetatile smb2j_DestroyBlockMetatile
 
-void smb2j_WriteBlockMetatile(byte param_1,u16 mt_x, u16 mt_y);
+void smb2j_WriteBlockMetatile(u8 param_1,u16 mt_x, u16 mt_y);
 #define WriteBlockMetatile smb2j_WriteBlockMetatile
 
 void smb2j_InitializeNameTables(void);
 #define InitializeNameTables smb2j_InitializeNameTables
 
-void smb2j_WritePPUReg1(byte param_1);
+void smb2j_WritePPUReg1(u8 param_1);
 #define WritePPUReg1 smb2j_WritePPUReg1
 
-void smb2j_PrintStatusBarNumbers(byte param_1);
+void smb2j_PrintStatusBarNumbers(u8 param_1);
 #define PrintStatusBarNumbers smb2j_PrintStatusBarNumbers
 
-void smb2j_OutputNumbers(byte param_1);
+void smb2j_OutputNumbers(u8 param_1);
 #define OutputNumbers smb2j_OutputNumbers
 
-void smb2j_DigitsMathRoutine(byte param_1);
+void smb2j_DigitsMathRoutine(u8 param_1);
 #define DigitsMathRoutine smb2j_DigitsMathRoutine
 
 void smb2j_UpdateTopScore(void);
 #define UpdateTopScore smb2j_UpdateTopScore
 
-void smb2j_TopScoreCheck(byte param_1);
+void smb2j_TopScoreCheck(u8 param_1);
 #define TopScoreCheck smb2j_TopScoreCheck
 
 void smb2j_InitializeArea(void);
@@ -203,7 +203,7 @@ void smb2j_TerminateGame(void);
 void smb2j_ContinueGame(void);
 #define ContinueGame smb2j_ContinueGame
 
-void smb2j_KillEnemies(byte param_1);
+void smb2j_KillEnemies(u8 param_1);
 #define KillEnemies smb2j_KillEnemies
 
 void smb2j_GameMode(void);
@@ -221,7 +221,7 @@ void smb2j_ScrollHandler(void);
 void smb2j_ChkPOffscr(void);
 #define ChkPOffscr smb2j_ChkPOffscr
 
-byte smb2j_GetScreenPosition(void);
+u8 smb2j_GetScreenPosition(void);
 #define GetScreenPosition smb2j_GetScreenPosition
 
 void smb2j_GameRoutines(void);
@@ -230,7 +230,7 @@ void smb2j_GameRoutines(void);
 void smb2j_PlayerEntrance(void);
 #define PlayerEntrance smb2j_PlayerEntrance
 
-void smb2j_AutoControlPlayer(byte param_1);
+void smb2j_AutoControlPlayer(u8 param_1);
 #define AutoControlPlayer smb2j_AutoControlPlayer
 
 void smb2j_PlayerCtrlRoutine(void);
@@ -245,13 +245,13 @@ void smb2j_SetEntr(void);
 void smb2j_VerticalPipeEntry(void);
 #define VerticalPipeEntry smb2j_VerticalPipeEntry
 
-void smb2j_MovePlayerYAxis(byte param_1);
+void smb2j_MovePlayerYAxis(u8 param_1);
 #define MovePlayerYAxis smb2j_MovePlayerYAxis
 
 void smb2j_SideExitPipeEntry(void);
 #define SideExitPipeEntry smb2j_SideExitPipeEntry
 
-byte smb2j_ChgAreaMode(void);
+u8 smb2j_ChgAreaMode(void);
 #define ChgAreaMode smb2j_ChgAreaMode
 
 void smb2j_EnterSidePipe(void);
@@ -275,7 +275,7 @@ void smb2j_DonePlayerTask(void);
 void smb2j_PlayerFireFlower(void);
 #define PlayerFireFlower smb2j_PlayerFireFlower
 
-void smb2j_CyclePlayerPalette(byte param_1);
+void smb2j_CyclePlayerPalette(u8 param_1);
 #define CyclePlayerPalette smb2j_CyclePlayerPalette
 
 void smb2j_ResetPalStar(void);
@@ -314,28 +314,28 @@ void smb2j_PlayerPhysicsSub(void);
 void smb2j_GetPlayerAnimSpeed(void);
 #define GetPlayerAnimSpeed smb2j_GetPlayerAnimSpeed
 
-void smb2j_ImposeFriction(byte param_1);
+void smb2j_ImposeFriction(u8 param_1);
 #define ImposeFriction smb2j_ImposeFriction
 
 void smb2j_ProcFireball_Bubble(void);
 #define ProcFireball_Bubble smb2j_ProcFireball_Bubble
 
-void smb2j_FireballObjCore(byte param_1);
+void smb2j_FireballObjCore(u8 param_1);
 #define FireballObjCore smb2j_FireballObjCore
 
-void smb2j_BubbleCheck(byte param_1);
+void smb2j_BubbleCheck(u8 param_1);
 #define BubbleCheck smb2j_BubbleCheck
 
-void smb2j_SetupBubble_buggy(byte param_1,byte param_2);
+void smb2j_SetupBubble_buggy(u8 param_1,u8 param_2);
 #define SetupBubble_buggy smb2j_SetupBubble_buggy
 
-void smb2j_MoveBubl(byte param_1,byte param_2);
+void smb2j_MoveBubl(u8 param_1,u8 param_2);
 #define MoveBubl smb2j_MoveBubl
 
 void smb2j_RunGameTimer(void);
 #define RunGameTimer smb2j_RunGameTimer
 
-void smb2j_WarpZoneObject(byte param_1);
+void smb2j_WarpZoneObject(u8 param_1);
 #define WarpZoneObject smb2j_WarpZoneObject
 
 void smb2j_ProcessWhirlpools(void);
@@ -344,28 +344,28 @@ void smb2j_ProcessWhirlpools(void);
 void smb2j_FlagpoleRoutine(void);
 #define FlagpoleRoutine smb2j_FlagpoleRoutine
 
-void smb2j_JumpspringHandler(byte param_1);
+void smb2j_JumpspringHandler(u8 param_1);
 #define JumpspringHandler smb2j_JumpspringHandler
 
-void smb2j_Setup_Vine(byte param_1,byte param_2);
+void smb2j_Setup_Vine(u8 param_1,u8 param_2);
 #define Setup_Vine smb2j_Setup_Vine
 
-void smb2j_VineObjectHandler(byte param_1);
+void smb2j_VineObjectHandler(u8 param_1);
 #define VineObjectHandler smb2j_VineObjectHandler
 
 void smb2j_ProcessCannons(void);
 #define ProcessCannons smb2j_ProcessCannons
 
-void smb2j_BulletBillHandler(byte param_1);
+void smb2j_BulletBillHandler(u8 param_1);
 #define BulletBillHandler smb2j_BulletBillHandler
 
-bool smb2j_SpawnHammerObj(byte objoff);
+bool smb2j_SpawnHammerObj(u8 objoff);
 #define SpawnHammerObj smb2j_SpawnHammerObj
 
-void smb2j_CoinBlock(byte param_1);
+void smb2j_CoinBlock(u8 param_1);
 #define CoinBlock smb2j_CoinBlock
 
-void smb2j_JCoinC(byte param_1,byte param_2);
+void smb2j_JCoinC(u8 param_1,u8 param_2);
 #define JCoinC smb2j_JCoinC
 
 void smb2j_MiscObjectsCore(void);
@@ -380,10 +380,10 @@ void smb2j_AddToScore(void);
 void smb2j_WriteScoreAndCoinTally(void);
 #define WriteScoreAndCoinTally smb2j_WriteScoreAndCoinTally
 
-void smb2j_WriteDigits(byte param_1);
+void smb2j_WriteDigits(u8 param_1);
 #define WriteDigits smb2j_WriteDigits
 
-void smb2j_SetupPowerUp(byte param_1);
+void smb2j_SetupPowerUp(u8 param_1);
 #define SetupPowerUp smb2j_SetupPowerUp
 
 void smb2j_PwrUpJmp(void);
@@ -392,25 +392,25 @@ void smb2j_PwrUpJmp(void);
 void smb2j_PowerUpObjHandler(void);
 #define PowerUpObjHandler smb2j_PowerUpObjHandler
 
-void smb2j_PlayerHeadCollision(byte param_1,u16 mt_x, u16 mt_y);
+void smb2j_PlayerHeadCollision(u8 param_1,u16 mt_x, u16 mt_y);
 #define PlayerHeadCollision smb2j_PlayerHeadCollision
 
-void smb2j_InitBlock_XY_Pos(byte param_1);
+void smb2j_InitBlock_XY_Pos(u8 param_1);
 #define InitBlock_XY_Pos smb2j_InitBlock_XY_Pos
 
-void smb2j_BumpBlock(u16 mt_x,u16 mt_y,byte param_2);
+void smb2j_BumpBlock(u16 mt_x,u16 mt_y,u8 param_2);
 #define BumpBlock smb2j_BumpBlock
 
-void smb2j_MushFlowerBlock(byte param_1);
+void smb2j_MushFlowerBlock(u8 param_1);
 #define MushFlowerBlock smb2j_MushFlowerBlock
 
-void smb2j_StarBlock(byte param_1);
+void smb2j_StarBlock(u8 param_1);
 #define StarBlock smb2j_StarBlock
 
-void smb2j_PoisonMushBlock(byte param_1);
+void smb2j_PoisonMushBlock(u8 param_1);
 #define PoisonMushBlock smb2j_PoisonMushBlock
 
-void smb2j_ExtraLifeMushBlock(byte param_1);
+void smb2j_ExtraLifeMushBlock(u8 param_1);
 #define ExtraLifeMushBlock smb2j_ExtraLifeMushBlock
 
 void smb2j_VineBlock(void);
@@ -419,337 +419,337 @@ void smb2j_VineBlock(void);
 void smb2j_BrickShatter(u16 mt_x, u16 mt_y);
 #define BrickShatter smb2j_BrickShatter
 
-byte smb2j_CheckTopOfBlock(u16 mt_x, u16 mt_y);
+u8 smb2j_CheckTopOfBlock(u16 mt_x, u16 mt_y);
 #define CheckTopOfBlock smb2j_CheckTopOfBlock
 
-void smb2j_SpawnBrickChunks(byte param_1);
+void smb2j_SpawnBrickChunks(u8 param_1);
 #define SpawnBrickChunks smb2j_SpawnBrickChunks
 
-void smb2j_BlockObjectsCore(byte param_1);
+void smb2j_BlockObjectsCore(u8 param_1);
 #define BlockObjectsCore smb2j_BlockObjectsCore
 
 void smb2j_BlockObjMT_Updater(void);
 #define BlockObjMT_Updater smb2j_BlockObjMT_Updater
 
-byte smb2j_MoveEnemyHorizontally(byte param_1);
+u8 smb2j_MoveEnemyHorizontally(u8 param_1);
 #define MoveEnemyHorizontally smb2j_MoveEnemyHorizontally
 
-byte smb2j_MovePlayerHorizontally(void);
+u8 smb2j_MovePlayerHorizontally(void);
 #define MovePlayerHorizontally smb2j_MovePlayerHorizontally
 
-byte smb2j_MoveObjectHorizontally(byte param_1);
+u8 smb2j_MoveObjectHorizontally(u8 param_1);
 #define MoveObjectHorizontally smb2j_MoveObjectHorizontally
 
 void smb2j_MovePlayerVertically(void);
 #define MovePlayerVertically smb2j_MovePlayerVertically
 
-void smb2j_MoveD_EnemyVertically(byte param_1);
+void smb2j_MoveD_EnemyVertically(u8 param_1);
 #define MoveD_EnemyVertically smb2j_MoveD_EnemyVertically
 
-void smb2j_MoveFallingPlatform(byte param_1);
+void smb2j_MoveFallingPlatform(u8 param_1);
 #define MoveFallingPlatform smb2j_MoveFallingPlatform
 
-void smb2j_MoveRedPTroopaDown(byte param_1);
+void smb2j_MoveRedPTroopaDown(u8 param_1);
 #define MoveRedPTroopaDown smb2j_MoveRedPTroopaDown
 
-void smb2j_MoveRedPTroopaUp(byte param_1);
+void smb2j_MoveRedPTroopaUp(u8 param_1);
 #define MoveRedPTroopaUp smb2j_MoveRedPTroopaUp
 
-void smb2j_MoveDropPlatform(byte param_1);
+void smb2j_MoveDropPlatform(u8 param_1);
 #define MoveDropPlatform smb2j_MoveDropPlatform
 
-void smb2j_MoveEnemySlowVert(byte param_1);
+void smb2j_MoveEnemySlowVert(u8 param_1);
 #define MoveEnemySlowVert smb2j_MoveEnemySlowVert
 
-void smb2j_MoveJ_EnemyVertically(byte param_1);
+void smb2j_MoveJ_EnemyVertically(u8 param_1);
 #define MoveJ_EnemyVertically smb2j_MoveJ_EnemyVertically
 
-void smb2j_SetXMoveAmt(byte param_1,byte param_2,byte param_3);
+void smb2j_SetXMoveAmt(u8 param_1,u8 param_2,u8 param_3);
 #define SetXMoveAmt smb2j_SetXMoveAmt
 
-void smb2j_ImposeGravityBlock(byte param_1);
+void smb2j_ImposeGravityBlock(u8 param_1);
 #define ImposeGravityBlock smb2j_ImposeGravityBlock
 
-void smb2j_ImposeGravitySprObj(byte param_1,byte param_2,byte param_3);
+void smb2j_ImposeGravitySprObj(u8 param_1,u8 param_2,u8 param_3);
 #define ImposeGravitySprObj smb2j_ImposeGravitySprObj
 
-void smb2j_MovePlatformDown(byte param_1);
+void smb2j_MovePlatformDown(u8 param_1);
 #define MovePlatformDown smb2j_MovePlatformDown
 
-void smb2j_MovePlatformUp(byte param_1);
+void smb2j_MovePlatformUp(u8 param_1);
 #define MovePlatformUp smb2j_MovePlatformUp
 
-void smb2j_ImposeGravity(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5);
+void smb2j_ImposeGravity(u8 param_1,u8 param_2,u8 param_3,u8 param_4,u8 param_5);
 #define ImposeGravity smb2j_ImposeGravity
 
-void smb2j_EnemiesAndLoopsCore(byte param_1);
+void smb2j_EnemiesAndLoopsCore(u8 param_1);
 #define EnemiesAndLoopsCore smb2j_EnemiesAndLoopsCore
 
-void smb2j_ExecGameLoopback(byte param_1);
+void smb2j_ExecGameLoopback(u8 param_1);
 #define ExecGameLoopback smb2j_ExecGameLoopback
 
-void smb2j_ProcLoopCommand(byte param_1);
+void smb2j_ProcLoopCommand(u8 param_1);
 #define ProcLoopCommand smb2j_ProcLoopCommand
 
-void smb2j_InitEnemyObject(byte param_1);
+void smb2j_InitEnemyObject(u8 param_1);
 #define InitEnemyObject smb2j_InitEnemyObject
 
 void smb2j_CheckThreeBytes(void);
 #define CheckThreeBytes smb2j_CheckThreeBytes
 
-void smb2j_CheckpointEnemyID(byte param_1);
+void smb2j_CheckpointEnemyID(u8 param_1);
 #define CheckpointEnemyID smb2j_CheckpointEnemyID
 
-void smb2j_InitGoomba(byte param_1);
+void smb2j_InitGoomba(u8 param_1);
 #define InitGoomba smb2j_InitGoomba
 
-void smb2j_InitPodoboo(byte param_1);
+void smb2j_InitPodoboo(u8 param_1);
 #define InitPodoboo smb2j_InitPodoboo
 
-void smb2j_InitRetainerObj(byte param_1);
+void smb2j_InitRetainerObj(u8 param_1);
 #define InitRetainerObj smb2j_InitRetainerObj
 
-void smb2j_InitNormalEnemy(byte param_1);
+void smb2j_InitNormalEnemy(u8 param_1);
 #define InitNormalEnemy smb2j_InitNormalEnemy
 
-void smb2j_InitRedKoopa(byte param_1);
+void smb2j_InitRedKoopa(u8 param_1);
 #define InitRedKoopa smb2j_InitRedKoopa
 
-void smb2j_InitHammerBro(byte param_1);
+void smb2j_InitHammerBro(u8 param_1);
 #define InitHammerBro smb2j_InitHammerBro
 
-void smb2j_InitHorizFlySwimEnemy(byte param_1);
+void smb2j_InitHorizFlySwimEnemy(u8 param_1);
 #define InitHorizFlySwimEnemy smb2j_InitHorizFlySwimEnemy
 
-void smb2j_InitBloober(byte param_1);
+void smb2j_InitBloober(u8 param_1);
 #define InitBloober smb2j_InitBloober
 
-byte smb2j_SmallBBox(byte param_1);
+u8 smb2j_SmallBBox(u8 param_1);
 #define SmallBBox smb2j_SmallBBox
 
-void smb2j_InitRedPTroopa(byte param_1);
+void smb2j_InitRedPTroopa(u8 param_1);
 #define InitRedPTroopa smb2j_InitRedPTroopa
 
-void smb2j_InitVStf(byte param_1);
+void smb2j_InitVStf(u8 param_1);
 #define InitVStf smb2j_InitVStf
 
-void smb2j_InitBulletBill(byte param_1);
+void smb2j_InitBulletBill(u8 param_1);
 #define InitBulletBill smb2j_InitBulletBill
 
-void smb2j_InitCheepCheep(byte param_1);
+void smb2j_InitCheepCheep(u8 param_1);
 #define InitCheepCheep smb2j_InitCheepCheep
 
-void smb2j_InitLakitu(byte param_1);
+void smb2j_InitLakitu(u8 param_1);
 #define InitLakitu smb2j_InitLakitu
 
-void smb2j_SetupLakitu(byte param_1);
+void smb2j_SetupLakitu(u8 param_1);
 #define SetupLakitu smb2j_SetupLakitu
 
-void smb2j_LakituAndSpinyHandler(byte param_1);
+void smb2j_LakituAndSpinyHandler(u8 param_1);
 #define LakituAndSpinyHandler smb2j_LakituAndSpinyHandler
 
-void smb2j_InitLongFirebar(byte param_1);
+void smb2j_InitLongFirebar(u8 param_1);
 #define InitLongFirebar smb2j_InitLongFirebar
 
-void smb2j_InitShortFirebar(byte param_1);
+void smb2j_InitShortFirebar(u8 param_1);
 #define InitShortFirebar smb2j_InitShortFirebar
 
-void smb2j_InitFlyingCheepCheep(byte param_1);
+void smb2j_InitFlyingCheepCheep(u8 param_1);
 #define InitFlyingCheepCheep smb2j_InitFlyingCheepCheep
 
-void smb2j_InitBowser(byte param_1);
+void smb2j_InitBowser(u8 param_1);
 #define InitBowser smb2j_InitBowser
 
-void smb2j_DuplicateEnemyObj(byte param_1);
+void smb2j_DuplicateEnemyObj(u8 param_1);
 #define DuplicateEnemyObj smb2j_DuplicateEnemyObj
 
-void smb2j_InitBowserFlame(byte param_1);
+void smb2j_InitBowserFlame(u8 param_1);
 #define InitBowserFlame smb2j_InitBowserFlame
 
-void smb2j_PutAtRightExtent(byte param_1,byte param_2);
+void smb2j_PutAtRightExtent(u8 param_1,u8 param_2);
 #define PutAtRightExtent smb2j_PutAtRightExtent
 
-void smb2j_InitFireworks(byte param_1);
+void smb2j_InitFireworks(u8 param_1);
 #define InitFireworks smb2j_InitFireworks
 
-void smb2j_BulletBillCheepCheep(byte param_1);
+void smb2j_BulletBillCheepCheep(u8 param_1);
 #define BulletBillCheepCheep smb2j_BulletBillCheepCheep
 
-void smb2j_HandleGroupEnemies(byte param_1);
+void smb2j_HandleGroupEnemies(u8 param_1);
 #define HandleGroupEnemies smb2j_HandleGroupEnemies
 
-void smb2j_InitPiranhaPlant(byte param_1);
+void smb2j_InitPiranhaPlant(u8 param_1);
 #define InitPiranhaPlant smb2j_InitPiranhaPlant
 
-void smb2j_InitEnemyFrenzy(byte param_1);
+void smb2j_InitEnemyFrenzy(u8 param_1);
 #define InitEnemyFrenzy smb2j_InitEnemyFrenzy
 
-void smb2j_EndFrenzy(byte param_1);
+void smb2j_EndFrenzy(u8 param_1);
 #define EndFrenzy smb2j_EndFrenzy
 
-void smb2j_InitJumpGPTroopa(byte param_1);
+void smb2j_InitJumpGPTroopa(u8 param_1);
 #define InitJumpGPTroopa smb2j_InitJumpGPTroopa
 
-void smb2j_InitBalPlatform(byte param_1);
+void smb2j_InitBalPlatform(u8 param_1);
 #define InitBalPlatform smb2j_InitBalPlatform
 
-void smb2j_InitDropPlatform(byte param_1);
+void smb2j_InitDropPlatform(u8 param_1);
 #define InitDropPlatform smb2j_InitDropPlatform
 
-void smb2j_InitHoriPlatform(byte param_1);
+void smb2j_InitHoriPlatform(u8 param_1);
 #define InitHoriPlatform smb2j_InitHoriPlatform
 
-void smb2j_InitVertPlatform(byte param_1);
+void smb2j_InitVertPlatform(u8 param_1);
 #define InitVertPlatform smb2j_InitVertPlatform
 
-void smb2j_SPBBox(byte param_1);
+void smb2j_SPBBox(u8 param_1);
 #define SPBBox smb2j_SPBBox
 
-void smb2j_LargeLiftUp(byte param_1);
+void smb2j_LargeLiftUp(u8 param_1);
 #define LargeLiftUp smb2j_LargeLiftUp
 
-void smb2j_LargeLiftDown(byte param_1);
+void smb2j_LargeLiftDown(u8 param_1);
 #define LargeLiftDown smb2j_LargeLiftDown
 
-void smb2j_PlatLiftUp(byte param_1);
+void smb2j_PlatLiftUp(u8 param_1);
 #define PlatLiftUp smb2j_PlatLiftUp
 
-void smb2j_PlatLiftDown(byte param_1);
+void smb2j_PlatLiftDown(u8 param_1);
 #define PlatLiftDown smb2j_PlatLiftDown
 
-void smb2j_PosPlatform(byte param_1,byte param_2);
+void smb2j_PosPlatform(u8 param_1,u8 param_2);
 #define PosPlatform smb2j_PosPlatform
 
-void smb2j_RunEnemyObjectsCore(byte objoff);
+void smb2j_RunEnemyObjectsCore(u8 objoff);
 #define RunEnemyObjectsCore smb2j_RunEnemyObjectsCore
 
-void smb2j_RunRetainerObj(byte param_1);
+void smb2j_RunRetainerObj(u8 param_1);
 #define RunRetainerObj smb2j_RunRetainerObj
 
-void smb2j_RunNormalEnemies(byte param_1);
+void smb2j_RunNormalEnemies(u8 param_1);
 #define RunNormalEnemies smb2j_RunNormalEnemies
 
-void smb2j_EnemyMovementSubs(byte param_1);
+void smb2j_EnemyMovementSubs(u8 param_1);
 #define EnemyMovementSubs smb2j_EnemyMovementSubs
 
-void smb2j_RunBowserFlame(byte param_1);
+void smb2j_RunBowserFlame(u8 param_1);
 #define RunBowserFlame smb2j_RunBowserFlame
 
-void smb2j_RunFirebarObj(byte param_1);
+void smb2j_RunFirebarObj(u8 param_1);
 #define RunFirebarObj smb2j_RunFirebarObj
 
-void smb2j_RunSmallPlatform(byte param_1);
+void smb2j_RunSmallPlatform(u8 param_1);
 #define RunSmallPlatform smb2j_RunSmallPlatform
 
-void smb2j_RunLargePlatform(byte param_1);
+void smb2j_RunLargePlatform(u8 param_1);
 #define RunLargePlatform smb2j_RunLargePlatform
 
-void smb2j_LargePlatformSubroutines(byte param_1);
+void smb2j_LargePlatformSubroutines(u8 param_1);
 #define LargePlatformSubroutines smb2j_LargePlatformSubroutines
 
-void smb2j_EraseEnemyObject(byte param_1);
+void smb2j_EraseEnemyObject(u8 param_1);
 #define EraseEnemyObject smb2j_EraseEnemyObject
 
-void smb2j_MovePodoboo(byte param_1);
+void smb2j_MovePodoboo(u8 param_1);
 #define MovePodoboo smb2j_MovePodoboo
 
-void smb2j_ProcHammerBro(byte param_1);
+void smb2j_ProcHammerBro(u8 param_1);
 #define ProcHammerBro smb2j_ProcHammerBro
 
-void smb2j_SetHJ(byte param_1,byte param_2,byte param_3);
+void smb2j_SetHJ(u8 param_1,u8 param_2,u8 param_3);
 #define SetHJ smb2j_SetHJ
 
-void smb2j_MoveHammerBroXDir(byte param_1);
+void smb2j_MoveHammerBroXDir(u8 param_1);
 #define MoveHammerBroXDir smb2j_MoveHammerBroXDir
 
-void smb2j_MoveNormalEnemy(byte param_1);
+void smb2j_MoveNormalEnemy(u8 param_1);
 #define MoveNormalEnemy smb2j_MoveNormalEnemy
 
-void smb2j_MoveDefeatedEnemy(byte param_1);
+void smb2j_MoveDefeatedEnemy(u8 param_1);
 #define MoveDefeatedEnemy smb2j_MoveDefeatedEnemy
 
-void smb2j_MoveJumpingEnemy(byte param_1);
+void smb2j_MoveJumpingEnemy(u8 param_1);
 #define MoveJumpingEnemy smb2j_MoveJumpingEnemy
 
-void smb2j_ProcMoveRedPTroopa(byte param_1);
+void smb2j_ProcMoveRedPTroopa(u8 param_1);
 #define ProcMoveRedPTroopa smb2j_ProcMoveRedPTroopa
 
-void smb2j_MoveFlyGreenPTroopa(byte param_1);
+void smb2j_MoveFlyGreenPTroopa(u8 param_1);
 #define MoveFlyGreenPTroopa smb2j_MoveFlyGreenPTroopa
 
-void smb2j_XMoveCntr_GreenPTroopa(byte param_1);
+void smb2j_XMoveCntr_GreenPTroopa(u8 param_1);
 #define XMoveCntr_GreenPTroopa smb2j_XMoveCntr_GreenPTroopa
 
-void smb2j_XMoveCntr_Platform(byte param_1,byte param_2);
+void smb2j_XMoveCntr_Platform(u8 param_1,u8 param_2);
 #define XMoveCntr_Platform smb2j_XMoveCntr_Platform
 
-byte smb2j_MoveWithXMCntrs(byte objoff);
+u8 smb2j_MoveWithXMCntrs(u8 objoff);
 #define MoveWithXMCntrs smb2j_MoveWithXMCntrs
 
-void smb2j_MoveBloober(byte param_1,bool param_2);
+void smb2j_MoveBloober(u8 param_1,bool param_2);
 #define MoveBloober smb2j_MoveBloober
 
-void smb2j_ProcSwimmingB(byte param_1,bool param_2);
+void smb2j_ProcSwimmingB(u8 param_1,bool param_2);
 #define ProcSwimmingB smb2j_ProcSwimmingB
 
-void smb2j_MoveBulletBill(byte param_1);
+void smb2j_MoveBulletBill(u8 param_1);
 #define MoveBulletBill smb2j_MoveBulletBill
 
-void smb2j_MoveSwimmingCheepCheep(byte param_1);
+void smb2j_MoveSwimmingCheepCheep(u8 param_1);
 #define MoveSwimmingCheepCheep smb2j_MoveSwimmingCheepCheep
 
-void smb2j_ProcFirebar(byte param_1);
+void smb2j_ProcFirebar(u8 param_1);
 #define ProcFirebar smb2j_ProcFirebar
 
-byte smb2j_DrawFirebar_Collision(byte param_2,byte param_3,byte param_4,byte param_5);
+u8 smb2j_DrawFirebar_Collision(u8 param_2,u8 param_3,u8 param_4,u8 param_5);
 #define DrawFirebar_Collision smb2j_DrawFirebar_Collision
 
-byte smb2j_FirebarCollision(byte param_1,byte param_3,byte param_4);
+u8 smb2j_FirebarCollision(u8 param_1,u8 param_3,u8 param_4);
 #define FirebarCollision smb2j_FirebarCollision
 
-struct_r01r02r03 smb2j_GetFirebarPosition(byte param_1,byte param_2);
+struct_r01r02r03 smb2j_GetFirebarPosition(u8 param_1,u8 param_2);
 #define GetFirebarPosition smb2j_GetFirebarPosition
 
-void smb2j_MoveFlyingCheepCheep(byte param_1);
+void smb2j_MoveFlyingCheepCheep(u8 param_1);
 #define MoveFlyingCheepCheep smb2j_MoveFlyingCheepCheep
 
-void smb2j_MoveLakitu(byte param_1);
+void smb2j_MoveLakitu(u8 param_1);
 #define MoveLakitu smb2j_MoveLakitu
 
-byte smb2j_PlayerLakituDiff(byte param_1,byte param_2,byte param_3,byte param_4);
+u8 smb2j_PlayerLakituDiff(u8 param_1,u8 param_2,u8 param_3,u8 param_4);
 #define PlayerLakituDiff smb2j_PlayerLakituDiff
 
 void smb2j_BridgeCollapse(void);
 #define BridgeCollapse smb2j_BridgeCollapse
 
-void smb2j_MoveD_Bowser(byte param_1);
+void smb2j_MoveD_Bowser(u8 param_1);
 #define MoveD_Bowser smb2j_MoveD_Bowser
 
-void smb2j_RunBowser(byte param_1);
+void smb2j_RunBowser(u8 param_1);
 #define RunBowser smb2j_RunBowser
 
 void smb2j_KillAllEnemies(void);
 #define KillAllEnemies smb2j_KillAllEnemies
 
-void smb2j_BowserGfxHandler(byte param_1);
+void smb2j_BowserGfxHandler(u8 param_1);
 #define BowserGfxHandler smb2j_BowserGfxHandler
 
-byte smb2j_SetFlameTimer(void);
+u8 smb2j_SetFlameTimer(void);
 #define SetFlameTimer smb2j_SetFlameTimer
 
-void smb2j_ProcBowserFlame(byte param_1);
+void smb2j_ProcBowserFlame(u8 param_1);
 #define ProcBowserFlame smb2j_ProcBowserFlame
 
-void smb2j_RunFireworks(byte param_1);
+void smb2j_RunFireworks(u8 param_1);
 #define RunFireworks smb2j_RunFireworks
 
-void smb2j_RunStarFlagObj(byte param_1);
+void smb2j_RunStarFlagObj(u8 param_1);
 #define RunStarFlagObj smb2j_RunStarFlagObj
 
-void smb2j_GameTimerFireworks(byte param_1);
+void smb2j_GameTimerFireworks(u8 param_1);
 #define GameTimerFireworks smb2j_GameTimerFireworks
 
-void smb2j_AwardGameTimerPoints(byte param_1);
+void smb2j_AwardGameTimerPoints(u8 param_1);
 #define AwardGameTimerPoints smb2j_AwardGameTimerPoints
 
 void smb2j_AwardTimerCastle(void);
@@ -758,130 +758,130 @@ void smb2j_AwardTimerCastle(void);
 void smb2j_EndAreaPoints(void);
 #define EndAreaPoints smb2j_EndAreaPoints
 
-void smb2j_RaiseFlagSetoffFWorks(byte param_1);
+void smb2j_RaiseFlagSetoffFWorks(u8 param_1);
 #define RaiseFlagSetoffFWorks smb2j_RaiseFlagSetoffFWorks
 
-void smb2j_DrawStarFlag(byte param_1);
+void smb2j_DrawStarFlag(u8 param_1);
 #define DrawStarFlag smb2j_DrawStarFlag
 
-void smb2j_DelayToAreaEnd(byte param_1);
+void smb2j_DelayToAreaEnd(u8 param_1);
 #define DelayToAreaEnd smb2j_DelayToAreaEnd
 
-void smb2j_MovePiranhaPlant(byte param_1);
+void smb2j_MovePiranhaPlant(u8 param_1);
 #define MovePiranhaPlant smb2j_MovePiranhaPlant
 
-void smb2j_BalancePlatform(byte param_1);
+void smb2j_BalancePlatform(u8 param_1);
 #define BalancePlatform smb2j_BalancePlatform
 
-void smb2j_InitPlatformFall(byte param_1, byte objoff);
+void smb2j_InitPlatformFall(u8 param_1, u8 objoff);
 #define InitPlatformFall smb2j_InitPlatformFall
 
-void smb2j_StopPlatforms(byte param_1,byte param_2);
+void smb2j_StopPlatforms(u8 param_1,u8 param_2);
 #define StopPlatforms smb2j_StopPlatforms
 
-void smb2j_PlatformFall(byte param_1,byte param_2);
+void smb2j_PlatformFall(u8 param_1,u8 param_2);
 #define PlatformFall smb2j_PlatformFall
 
-void smb2j_YMovingPlatform(byte param_1);
+void smb2j_YMovingPlatform(u8 param_1);
 #define YMovingPlatform smb2j_YMovingPlatform
 
-void smb2j_ChkYPCollision(byte param_1);
+void smb2j_ChkYPCollision(u8 param_1);
 #define ChkYPCollision smb2j_ChkYPCollision
 
-void smb2j_XMovingPlatform(byte objoff);
+void smb2j_XMovingPlatform(u8 objoff);
 #define XMovingPlatform smb2j_XMovingPlatform
 
-void smb2j_PositionPlayerOnHPlat(byte param_1,byte param_2);
+void smb2j_PositionPlayerOnHPlat(u8 param_1,u8 param_2);
 #define PositionPlayerOnHPlat smb2j_PositionPlayerOnHPlat
 
-void smb2j_DropPlatform(byte param_1);
+void smb2j_DropPlatform(u8 param_1);
 #define DropPlatform smb2j_DropPlatform
 
-void smb2j_RightPlatform(byte objoff);
+void smb2j_RightPlatform(u8 objoff);
 #define RightPlatform smb2j_RightPlatform
 
-void smb2j_MoveLargeLiftPlat(byte param_1);
+void smb2j_MoveLargeLiftPlat(u8 param_1);
 #define MoveLargeLiftPlat smb2j_MoveLargeLiftPlat
 
-void smb2j_MoveSmallPlatform(byte param_1);
+void smb2j_MoveSmallPlatform(u8 param_1);
 #define MoveSmallPlatform smb2j_MoveSmallPlatform
 
-void smb2j_MoveLiftPlatforms(byte param_1);
+void smb2j_MoveLiftPlatforms(u8 param_1);
 #define MoveLiftPlatforms smb2j_MoveLiftPlatforms
 
-void smb2j_ChkSmallPlatCollision(byte param_1);
+void smb2j_ChkSmallPlatCollision(u8 param_1);
 #define ChkSmallPlatCollision smb2j_ChkSmallPlatCollision
 
-void smb2j_OffscreenBoundsCheck(byte param_1);
+void smb2j_OffscreenBoundsCheck(u8 param_1);
 #define OffscreenBoundsCheck smb2j_OffscreenBoundsCheck
 
-void smb2j_FireballEnemyCollision(byte param_1);
+void smb2j_FireballEnemyCollision(u8 param_1);
 #define FireballEnemyCollision smb2j_FireballEnemyCollision
 
-void smb2j_HandleEnemyFBallCol(byte param_1);
+void smb2j_HandleEnemyFBallCol(u8 param_1);
 #define HandleEnemyFBallCol smb2j_HandleEnemyFBallCol
 
-void smb2j_ShellOrBlockDefeat(byte param_1);
+void smb2j_ShellOrBlockDefeat(u8 param_1);
 #define ShellOrBlockDefeat smb2j_ShellOrBlockDefeat
 
-void smb2j_EnemySmackScore(byte param_1,byte param_2);
+void smb2j_EnemySmackScore(u8 param_1,u8 param_2);
 #define EnemySmackScore smb2j_EnemySmackScore
 
-void smb2j_PlayerHammerCollision(byte param_1);
+void smb2j_PlayerHammerCollision(u8 param_1);
 #define PlayerHammerCollision smb2j_PlayerHammerCollision
 
-void smb2j_HandlePowerUpCollision(byte param_1);
+void smb2j_HandlePowerUpCollision(u8 param_1);
 #define HandlePowerUpCollision smb2j_HandlePowerUpCollision
 
-void smb2j_PlayerEnemyCollision(byte param_1);
+void smb2j_PlayerEnemyCollision(u8 param_1);
 #define PlayerEnemyCollision smb2j_PlayerEnemyCollision
 
 void smb2j_InjurePlayer(void);
 #define InjurePlayer smb2j_InjurePlayer
 
-void smb2j_ForceInjury(byte param_1);
+void smb2j_ForceInjury(u8 param_1);
 #define ForceInjury smb2j_ForceInjury
 
-void smb2j_SetPRout(byte param_1,byte param_2);
+void smb2j_SetPRout(u8 param_1,u8 param_2);
 #define SetPRout smb2j_SetPRout
 
-void smb2j_SetBounce(byte param_1);
+void smb2j_SetBounce(u8 param_1);
 #define SetBounce smb2j_SetBounce
 
-void smb2j_ChkEnemyFaceRight(byte param_1);
+void smb2j_ChkEnemyFaceRight(u8 param_1);
 #define ChkEnemyFaceRight smb2j_ChkEnemyFaceRight
 
-void smb2j_LInj(byte param_1);
+void smb2j_LInj(u8 param_1);
 #define LInj smb2j_LInj
 
-bool smb2j_EnemyFacePlayer(byte param_1);
+bool smb2j_EnemyFacePlayer(u8 param_1);
 #define EnemyFacePlayer smb2j_EnemyFacePlayer
 
-void smb2j_SetupFloateyNumber(byte param_1,byte param_2);
+void smb2j_SetupFloateyNumber(u8 param_1,u8 param_2);
 #define SetupFloateyNumber smb2j_SetupFloateyNumber
 
-void smb2j_EnemiesCollision(byte param_1);
+void smb2j_EnemiesCollision(u8 param_1);
 #define EnemiesCollision smb2j_EnemiesCollision
 
-void smb2j_ProcEnemyCollisions(byte param_1,byte param_2);
+void smb2j_ProcEnemyCollisions(u8 param_1,u8 param_2);
 #define ProcEnemyCollisions smb2j_ProcEnemyCollisions
 
-void smb2j_EnemyTurnAround(byte param_1);
+void smb2j_EnemyTurnAround(u8 param_1);
 #define EnemyTurnAround smb2j_EnemyTurnAround
 
-void smb2j_LargePlatformCollision(byte param_1);
+void smb2j_LargePlatformCollision(u8 param_1);
 #define LargePlatformCollision smb2j_LargePlatformCollision
 
-void smb2j_SmallPlatformCollision(byte param_1);
+void smb2j_SmallPlatformCollision(u8 param_1);
 #define SmallPlatformCollision smb2j_SmallPlatformCollision
 
-void smb2j_ProcLPlatCollisions(byte param_1,byte param_2,byte param_3, byte objoff);
+void smb2j_ProcLPlatCollisions(u8 param_1,u8 param_2,u8 param_3, u8 objoff);
 #define ProcLPlatCollisions smb2j_ProcLPlatCollisions
 
-void smb2j_PositionPlayerOnS_Plat(byte param_1,byte param_2);
+void smb2j_PositionPlayerOnS_Plat(u8 param_1,u8 param_2);
 #define PositionPlayerOnS_Plat smb2j_PositionPlayerOnS_Plat
 
-void smb2j_PositionPlayerOnVPlat(byte param_1);
+void smb2j_PositionPlayerOnVPlat(u8 param_1);
 #define PositionPlayerOnVPlat smb2j_PositionPlayerOnVPlat
 
 bool smb2j_CheckPlayerVertical(void);
@@ -890,163 +890,163 @@ bool smb2j_CheckPlayerVertical(void);
 void smb2j_PlayerBGCollision(void);
 #define PlayerBGCollision smb2j_PlayerBGCollision
 
-void smb2j_HandleClimbing(byte param_1,byte param_2,u16 mt_x);
+void smb2j_HandleClimbing(u8 param_1,u8 param_2,u16 mt_x);
 #define HandleClimbing smb2j_HandleClimbing
 
-bool smb2j_ChkInvisibleMTiles(byte param_1);
+bool smb2j_ChkInvisibleMTiles(u8 param_1);
 #define ChkInvisibleMTiles smb2j_ChkInvisibleMTiles
 
-void smb2j_ChkForLandJumpSpring(byte param_1);
+void smb2j_ChkForLandJumpSpring(u8 param_1);
 #define ChkForLandJumpSpring smb2j_ChkForLandJumpSpring
 
-bool smb2j_ChkJumpspringMetatiles(byte param_1);
+bool smb2j_ChkJumpspringMetatiles(u8 param_1);
 #define ChkJumpspringMetatiles smb2j_ChkJumpspringMetatiles
 
-void smb2j_HandlePipeEntry(byte param_1,byte param_2);
+void smb2j_HandlePipeEntry(u8 param_1,u8 param_2);
 #define HandlePipeEntry smb2j_HandlePipeEntry
 
-void smb2j_ImpedePlayerMove(byte param_1);
+void smb2j_ImpedePlayerMove(u8 param_1);
 #define ImpedePlayerMove smb2j_ImpedePlayerMove
 
-bool smb2j_CheckForSolidMTiles(byte param_1);
+bool smb2j_CheckForSolidMTiles(u8 param_1);
 #define CheckForSolidMTiles smb2j_CheckForSolidMTiles
 
-bool smb2j_CheckForClimbMTiles(byte param_1);
+bool smb2j_CheckForClimbMTiles(u8 param_1);
 #define CheckForClimbMTiles smb2j_CheckForClimbMTiles
 
-bool smb2j_CheckForCoinMTiles(byte param_1);
+bool smb2j_CheckForCoinMTiles(u8 param_1);
 #define CheckForCoinMTiles smb2j_CheckForCoinMTiles
 
-void smb2j_EnemyToBGCollisionDet(byte param_1);
+void smb2j_EnemyToBGCollisionDet(u8 param_1);
 #define EnemyToBGCollisionDet smb2j_EnemyToBGCollisionDet
 
-void smb2j_ChkToStunEnemies(byte param_1);
+void smb2j_ChkToStunEnemies(u8 param_1);
 #define ChkToStunEnemies smb2j_ChkToStunEnemies
 
-void smb2j_SetStun2(byte param_1);
+void smb2j_SetStun2(u8 param_1);
 #define SetStun2 smb2j_SetStun2
 
-void smb2j_ChkForRedKoopa(byte param_1);
+void smb2j_ChkForRedKoopa(u8 param_1);
 #define ChkForRedKoopa smb2j_ChkForRedKoopa
 
-void smb2j_DoEnemySideCheck(byte param_1);
+void smb2j_DoEnemySideCheck(u8 param_1);
 #define DoEnemySideCheck smb2j_DoEnemySideCheck
 
-void smb2j_ChkForBump_HammerBroJ(byte param_1);
+void smb2j_ChkForBump_HammerBroJ(u8 param_1);
 #define ChkForBump_HammerBroJ smb2j_ChkForBump_HammerBroJ
 
-struct_ncr00 smb2j_PlayerEnemyDiff(byte param_1);
+struct_ncr00 smb2j_PlayerEnemyDiff(u8 param_1);
 #define PlayerEnemyDiff smb2j_PlayerEnemyDiff
 
-void smb2j_EnemyLanding(byte param_1);
+void smb2j_EnemyLanding(u8 param_1);
 #define EnemyLanding smb2j_EnemyLanding
 
-bool smb2j_SubtEnemyYPos(byte param_1);
+bool smb2j_SubtEnemyYPos(u8 param_1);
 #define SubtEnemyYPos smb2j_SubtEnemyYPos
 
-void smb2j_EnemyJump(byte param_1);
+void smb2j_EnemyJump(u8 param_1);
 #define EnemyJump smb2j_EnemyJump
 
-void smb2j_HammerBroBGColl(byte param_1);
+void smb2j_HammerBroBGColl(u8 param_1);
 #define HammerBroBGColl smb2j_HammerBroBGColl
 
-void smb2j_KillEnemyAboveBlock(byte param_1);
+void smb2j_KillEnemyAboveBlock(u8 param_1);
 #define KillEnemyAboveBlock smb2j_KillEnemyAboveBlock
 
-bool smb2j_ChkForNonSolids(byte param_1);
+bool smb2j_ChkForNonSolids(u8 param_1);
 #define ChkForNonSolids smb2j_ChkForNonSolids
 
-void smb2j_FireballBGCollision(byte param_1);
+void smb2j_FireballBGCollision(u8 param_1);
 #define FireballBGCollision smb2j_FireballBGCollision
 
-void smb2j_GetFireballBoundBox(byte param_1);
+void smb2j_GetFireballBoundBox(u8 param_1);
 #define GetFireballBoundBox smb2j_GetFireballBoundBox
 
-void smb2j_GetMiscBoundBox(byte param_1);
+void smb2j_GetMiscBoundBox(u8 param_1);
 #define GetMiscBoundBox smb2j_GetMiscBoundBox
 
-void smb2j_GetEnemyBoundBox(byte param_1);
+void smb2j_GetEnemyBoundBox(u8 param_1);
 #define GetEnemyBoundBox smb2j_GetEnemyBoundBox
 
-void smb2j_SmallPlatformBoundBox(byte param_1);
+void smb2j_SmallPlatformBoundBox(u8 param_1);
 #define SmallPlatformBoundBox smb2j_SmallPlatformBoundBox
 
-void smb2j_GetMaskedOffScrBits(byte param_1,byte param_2,byte param_3);
+void smb2j_GetMaskedOffScrBits(u8 param_1,u8 param_2,u8 param_3);
 #define GetMaskedOffScrBits smb2j_GetMaskedOffScrBits
 
-void smb2j_LargePlatformBoundBox(byte param_1);
+void smb2j_LargePlatformBoundBox(u8 param_1);
 #define LargePlatformBoundBox smb2j_LargePlatformBoundBox
 
-void smb2j_SetupEOffsetFBBox(byte param_1);
+void smb2j_SetupEOffsetFBBox(u8 param_1);
 #define SetupEOffsetFBBox smb2j_SetupEOffsetFBBox
 
-void smb2j_MoveBoundBoxOffscreen(byte param_1);
+void smb2j_MoveBoundBoxOffscreen(u8 param_1);
 #define MoveBoundBoxOffscreen smb2j_MoveBoundBoxOffscreen
 
-void smb2j_BoundingBoxCore(byte param_1,byte param_2);
+void smb2j_BoundingBoxCore(u8 param_1,u8 param_2);
 #define BoundingBoxCore smb2j_BoundingBoxCore
 
-void smb2j_CheckRightScreenBBox(byte param_1);
+void smb2j_CheckRightScreenBBox(u8 param_1);
 #define CheckRightScreenBBox smb2j_CheckRightScreenBBox
 
-bool smb2j_PlayerCollisionCore(byte param_1);
+bool smb2j_PlayerCollisionCore(u8 param_1);
 #define PlayerCollisionCore smb2j_PlayerCollisionCore
 
-bool smb2j_SprObjectCollisionCore(byte param_1,byte param_2);
+bool smb2j_SprObjectCollisionCore(u8 param_1,u8 param_2);
 #define SprObjectCollisionCore smb2j_SprObjectCollisionCore
 
-struct blockbuffer_colli_result smb2j_BlockBufferCollision(byte param_1,byte param_2,byte param_3);
+struct blockbuffer_colli_result smb2j_BlockBufferCollision(u8 param_1,u8 param_2,u8 param_3);
 #define BlockBufferCollision smb2j_BlockBufferCollision
 
-struct blockbuffer_colli_result smb2j_BlockBufferCollision_coords(byte param_1,byte param_2,byte param_3);
+struct blockbuffer_colli_result smb2j_BlockBufferCollision_coords(u8 param_1,u8 param_2,u8 param_3);
 #define BlockBufferCollision_coords smb2j_BlockBufferCollision_coords
 
-void smb2j_DrawVine(byte param_1);
+void smb2j_DrawVine(u8 param_1);
 #define DrawVine smb2j_DrawVine
 
-void smb2j_DrawHammer(byte objoff);
+void smb2j_DrawHammer(u8 objoff);
 #define DrawHammer smb2j_DrawHammer
 
-void smb2j_FlagpoleGfxHandler(byte param_1);
+void smb2j_FlagpoleGfxHandler(u8 param_1);
 #define FlagpoleGfxHandler smb2j_FlagpoleGfxHandler
 
-void smb2j_DrawLargePlatform(byte param_1);
+void smb2j_DrawLargePlatform(u8 param_1);
 #define DrawLargePlatform smb2j_DrawLargePlatform
 
-void smb2j_JCoinGfxHandler(byte param_1);
+void smb2j_JCoinGfxHandler(u8 param_1);
 #define JCoinGfxHandler smb2j_JCoinGfxHandler
 
-void smb2j_DrawPowerUp(byte objoff);
+void smb2j_DrawPowerUp(u8 objoff);
 #define DrawPowerUp smb2j_DrawPowerUp
 
-void smb2j_EnemyGfxHandler(byte param_1);
+void smb2j_EnemyGfxHandler(u8 param_1);
 #define EnemyGfxHandler smb2j_EnemyGfxHandler
 
-void smb2j_SprObjectOffscrChk(byte objoff);
+void smb2j_SprObjectOffscrChk(u8 objoff);
 #define SprObjectOffscrChk smb2j_SprObjectOffscrChk
 
-void smb2j_DrawBlock(byte param_1);
+void smb2j_DrawBlock(u8 param_1);
 #define DrawBlock smb2j_DrawBlock
 
-void smb2j_DrawBrickChunks(byte param_1);
+void smb2j_DrawBrickChunks(u8 param_1);
 #define DrawBrickChunks smb2j_DrawBrickChunks
 
-void smb2j_DrawFireball(byte param_1);
+void smb2j_DrawFireball(u8 param_1);
 #define DrawFireball smb2j_DrawFireball
 
-void smb2j_DrawFirebar(byte param_1);
+void smb2j_DrawFirebar(u8 param_1);
 #define DrawFirebar smb2j_DrawFirebar
 
-void smb2j_DrawExplosion_Fireball(byte param_1);
+void smb2j_DrawExplosion_Fireball(u8 param_1);
 #define DrawExplosion_Fireball smb2j_DrawExplosion_Fireball
 
-void smb2j_DrawExplosion_Fireworks(byte param_1,byte param_2);
+void smb2j_DrawExplosion_Fireworks(u8 param_1,u8 param_2);
 #define DrawExplosion_Fireworks smb2j_DrawExplosion_Fireworks
 
-void smb2j_DrawSmallPlatform(byte param_1);
+void smb2j_DrawSmallPlatform(u8 param_1);
 #define DrawSmallPlatform smb2j_DrawSmallPlatform
 
-void smb2j_DrawBubble(byte param_1);
+void smb2j_DrawBubble(u8 param_1);
 #define DrawBubble smb2j_DrawBubble
 
 void smb2j_PlayerGfxHandler(void);
@@ -1055,94 +1055,94 @@ void smb2j_PlayerGfxHandler(void);
 void smb2j_FindPlayerAction(void);
 #define FindPlayerAction smb2j_FindPlayerAction
 
-void smb2j_PlayerGfxProcessing(byte param_1);
+void smb2j_PlayerGfxProcessing(u8 param_1);
 #define PlayerGfxProcessing smb2j_PlayerGfxProcessing
 
 void smb2j_DrawPlayer_Intermediate(void);
 #define DrawPlayer_Intermediate smb2j_DrawPlayer_Intermediate
 
-void smb2j_RenderPlayerSub(byte param_1);
+void smb2j_RenderPlayerSub(u8 param_1);
 #define RenderPlayerSub smb2j_RenderPlayerSub
 
-void smb2j_DrawPlayerLoop(byte param_1,byte param_2,byte param_3,byte param_4,byte param_5,byte param_6,byte param_7);
+void smb2j_DrawPlayerLoop(u8 param_1,u8 param_2,u8 param_3,u8 param_4,u8 param_5,u8 param_6,u8 param_7);
 #define DrawPlayerLoop smb2j_DrawPlayerLoop
 
-byte smb2j_ProcessPlayerAction(void);
+u8 smb2j_ProcessPlayerAction(void);
 #define ProcessPlayerAction smb2j_ProcessPlayerAction
 
-byte smb2j_GetCurrentAnimOffset(byte param_1);
+u8 smb2j_GetCurrentAnimOffset(u8 param_1);
 #define GetCurrentAnimOffset smb2j_GetCurrentAnimOffset
 
-byte smb2j_FourFrameExtent(byte param_1);
+u8 smb2j_FourFrameExtent(u8 param_1);
 #define FourFrameExtent smb2j_FourFrameExtent
 
-byte smb2j_ThreeFrameExtent(byte param_1);
+u8 smb2j_ThreeFrameExtent(u8 param_1);
 #define ThreeFrameExtent smb2j_ThreeFrameExtent
 
-byte smb2j_AnimationControl(byte param_1,byte param_2);
+u8 smb2j_AnimationControl(u8 param_1,u8 param_2);
 #define AnimationControl smb2j_AnimationControl
 
-byte smb2j_GetGfxOffsetAdder(byte param_1);
+u8 smb2j_GetGfxOffsetAdder(u8 param_1);
 #define GetGfxOffsetAdder smb2j_GetGfxOffsetAdder
 
-byte smb2j_HandleChangeSize(void);
+u8 smb2j_HandleChangeSize(void);
 #define HandleChangeSize smb2j_HandleChangeSize
 
-byte smb2j_GetOffsetFromAnimCtrl(byte param_1,byte param_2);
+u8 smb2j_GetOffsetFromAnimCtrl(u8 param_1,u8 param_2);
 #define GetOffsetFromAnimCtrl smb2j_GetOffsetFromAnimCtrl
 
 void smb2j_ChkForPlayerAttrib(void);
 #define ChkForPlayerAttrib smb2j_ChkForPlayerAttrib
 
-byte smb2j_RelativePlayerPosition(void);
+u8 smb2j_RelativePlayerPosition(void);
 #define RelativePlayerPosition smb2j_RelativePlayerPosition
 
-void smb2j_RelativeBubblePosition(byte param_1);
+void smb2j_RelativeBubblePosition(u8 param_1);
 #define RelativeBubblePosition smb2j_RelativeBubblePosition
 
-void smb2j_RelativeFireballPosition(byte param_1);
+void smb2j_RelativeFireballPosition(u8 param_1);
 #define RelativeFireballPosition smb2j_RelativeFireballPosition
 
-void smb2j_RelativeMiscPosition(byte param_1);
+void smb2j_RelativeMiscPosition(u8 param_1);
 #define RelativeMiscPosition smb2j_RelativeMiscPosition
 
-void smb2j_RelativeEnemyPosition(byte param_1);
+void smb2j_RelativeEnemyPosition(u8 param_1);
 #define RelativeEnemyPosition smb2j_RelativeEnemyPosition
 
-void smb2j_RelativeBlockPosition(byte param_1);
+void smb2j_RelativeBlockPosition(u8 param_1);
 #define RelativeBlockPosition smb2j_RelativeBlockPosition
 
-void smb2j_GetObjRelativePosition(byte param_1,byte param_2);
+void smb2j_GetObjRelativePosition(u8 param_1,u8 param_2);
 #define GetObjRelativePosition smb2j_GetObjRelativePosition
 
 void smb2j_GetPlayerOffscreenBits(void);
 #define GetPlayerOffscreenBits smb2j_GetPlayerOffscreenBits
 
-void smb2j_GetFireballOffscreenBits(byte param_1);
+void smb2j_GetFireballOffscreenBits(u8 param_1);
 #define GetFireballOffscreenBits smb2j_GetFireballOffscreenBits
 
-void smb2j_GetBubbleOffscreenBits(byte param_1);
+void smb2j_GetBubbleOffscreenBits(u8 param_1);
 #define GetBubbleOffscreenBits smb2j_GetBubbleOffscreenBits
 
-void smb2j_GetMiscOffscreenBits(byte param_1);
+void smb2j_GetMiscOffscreenBits(u8 param_1);
 #define GetMiscOffscreenBits smb2j_GetMiscOffscreenBits
 
-void smb2j_GetEnemyOffscreenBits(byte param_1);
+void smb2j_GetEnemyOffscreenBits(u8 param_1);
 #define GetEnemyOffscreenBits smb2j_GetEnemyOffscreenBits
 
-void smb2j_GetBlockOffscreenBits(byte param_1);
+void smb2j_GetBlockOffscreenBits(u8 param_1);
 #define GetBlockOffscreenBits smb2j_GetBlockOffscreenBits
 
-void smb2j_GetOffScreenBitsSet(byte param_1,byte param_2);
+void smb2j_GetOffScreenBitsSet(u8 param_1,u8 param_2);
 #define GetOffScreenBitsSet smb2j_GetOffScreenBitsSet
 
-byte smb2j_GetXOffscreenBits(byte param_1);
+u8 smb2j_GetXOffscreenBits(u8 param_1);
 #define GetXOffscreenBits smb2j_GetXOffscreenBits
 
-byte smb2j_GetYOffscreenBits(byte param_1);
+u8 smb2j_GetYOffscreenBits(u8 param_1);
 #define GetYOffscreenBits smb2j_GetYOffscreenBits
 
-byte smb2j_DividePDiff(byte param_1,byte param_2,bool param_3,byte param_4,byte param_5);
+u8 smb2j_DividePDiff(u8 param_1,u8 param_2,bool param_3,u8 param_4,u8 param_5);
 #define DividePDiff smb2j_DividePDiff
 
 void smb2j_TitleScreenMode(void);
@@ -1184,7 +1184,7 @@ void smb2j_VictoryModeDiskRoutines(void);
 void smb2j_LoadEnding(void);
 #define LoadEnding smb2j_LoadEnding
 
-bool smb2j_CheckFileCount(byte param_1);
+bool smb2j_CheckFileCount(u8 param_1);
 #define CheckFileCount smb2j_CheckFileCount
 
 void smb2j_DiskScreen(void);
@@ -1199,7 +1199,7 @@ void smb2j_WaitForReinsert(void);
 void smb2j_ResetDiskVars(void);
 #define ResetDiskVars smb2j_ResetDiskVars
 
-void smb2j_DiskErrorHandler(byte param_1);
+void smb2j_DiskErrorHandler(u8 param_1);
 #define DiskErrorHandler smb2j_DiskErrorHandler
 
 void smb2j_GameOverMenu(void);
@@ -1241,7 +1241,7 @@ void smb2j_PrimaryGameSetup(void);
 void smb2j_PatchPlayerNamePal(void);
 #define PatchPlayerNamePal smb2j_PatchPlayerNamePal
 
-void smb2j_MoveUpsideDownPiranhaP(byte param_1);
+void smb2j_MoveUpsideDownPiranhaP(u8 param_1);
 #define MoveUpsideDownPiranhaP smb2j_MoveUpsideDownPiranhaP
 
 void smb2j_BlowPlayerAround(void);

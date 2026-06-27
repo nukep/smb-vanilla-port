@@ -15,10 +15,10 @@ void SMB2J_NMI();
 #define AreaAddrOffsets RAMARRAY_CONST(0xC360, 0x28)
 
 // read $4032
-byte FDS_drive_status() { return 0; }
+u8 FDS_drive_status() { return 0; }
 
 
-void ScrollScreen(byte);
+void ScrollScreen(u8);
 struct_ayz LoadFiles();
 void UpdateGamesBeaten();
 
@@ -48,11 +48,11 @@ void trigger_scroll_irq_if_havent_yet() {
 void disable_interrupt() {}
 void enable_interrupt() {}
 
-byte FDS_AcknowledgeIrq() {
+u8 FDS_AcknowledgeIrq() {
   return 0x01;
 }
-void FDSBIOS_Delay132(byte _) {}
-void FDS_IrqTimer_Ctrl(byte _) {}
+void FDSBIOS_Delay132(u8 _) {}
+void FDS_IrqTimer_Ctrl(u8 _) {}
 
 // SM2MAIN:c0f4
 // Signature: [] -> [A, Y, Z]
@@ -60,7 +60,7 @@ struct_ayz LoadFiles() {
   // The FDS version calls FDS BIOS subroutines to read the files from disk, but in the port, we're just gonna load from a buffer.
   // The BIOS call is responsible for a lot of lag frames on the original hardware! Fortunately we don't deal with those here.
 
-  byte files = 0;
+  u8 files = 0;
   bool success = false;
 
   switch (FileListNumber) {
@@ -126,7 +126,7 @@ end:
   return res;
 }
 
-void FDS_Ctrl(byte ctrl) {
+void FDS_Ctrl(u8 ctrl) {
   // $4025
 }
 
@@ -139,9 +139,9 @@ void SMB2J_Reset() {
   // assuming a hard reset:
   WorldNumber = 0xFF;
 
-  byte const last_worldnumber = WorldNumber;
+  u8 const last_worldnumber = WorldNumber;
 
-  byte initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
+  u8 initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
 
   for (int i = 0; i < 6; i++) {
     if (DisplayDigits[i] > 9) {
@@ -299,7 +299,7 @@ void SMB2J_NMI() {
 // Signature: [] -> []
 void IRQHandler() {
   disable_interrupt();
-  byte const status = FDS_AcknowledgeIrq();
+  u8 const status = FDS_AcknowledgeIrq();
 
   if ((status & 0x02) == 0) {
     if ((status & 0x01) != 0) {
@@ -322,7 +322,7 @@ void IRQHandler() {
 
 // SM2MAIN:7b20
 // Signature: [Y] -> []
-void ScrollScreen(byte scroll_amount) {
+void ScrollScreen(u8 scroll_amount) {
   // The FDS version loops here until IRQAckFlag is 0.
   trigger_scroll_irq_if_havent_yet();
 
@@ -346,7 +346,7 @@ void ScrollScreen(byte scroll_amount) {
 void UpdateGamesBeaten() {
   // The FDS version would use an FDS BIOS subroutine
   bool const success = smb2j_save_games_beaten(GamesBeatenCount);
-  byte const error_code = 0;
+  u8 const error_code = 0;
 
   if (!success) {
     DiskIOTask += 1;

@@ -58,7 +58,7 @@ void PrintVictoryMessages(void) {
 
 // SMB:8808
 // Signature: [A] -> []
-void WriteGameText(const byte param_1) {
+void WriteGameText(const u8 param_1) {
   // param_1 is 0,1,2,3, 4,5,6
 
   // param_1=0: 0: Top status bar line
@@ -73,10 +73,10 @@ void WriteGameText(const byte param_1) {
 
   // param_1=4,5,6: 9 and 8: Warp zone message: "WELCOME TO WARP ZONE!"
 
-  static byte const p1_l[7] = {0,2,5,7,9,9,9};
-  static byte const p2_l[7] = {0,2,4,6,8,8,8};
+  static u8 const p1_l[7] = {0,2,5,7,9,9,9};
+  static u8 const p2_l[7] = {0,2,4,6,8,8,8};
 
-  byte offset;
+  u8 offset;
   if (NumberOfPlayers == 0) {
     offset = GameTextOffsets[p1_l[param_1]];
   } else {
@@ -151,7 +151,7 @@ void WriteGameText(const byte param_1) {
 
 // SMB:afc4
 // Signature: [Y] -> []
-void ScrollScreen(const byte param_1) {
+void ScrollScreen(const u8 param_1) {
   ScrollAmount = param_1;
   ScrollThirtyTwo += param_1;
   ADD_UNSIGNED_16_8(ScreenLeft_PageLoc, ScreenLeft_X_Pos,
@@ -167,7 +167,7 @@ void ScrollScreen(const byte param_1) {
 
 // SMB:e01b
 // Signature: [A, X] -> []
-void ChkToStunEnemies(const byte enemy_id, const byte param_2) {
+void ChkToStunEnemies(const u8 enemy_id, const u8 param_2) {
   // Turn these enemies into koopas
   switch (enemy_id) {
   case A_GREEN_PARATROOPA_INPLACE:

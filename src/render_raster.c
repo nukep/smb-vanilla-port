@@ -6,20 +6,18 @@
 
 #include <string.h>
 
-typedef unsigned char byte;
-
 struct Pixel {
-  byte r,g,b;
+  u8 r,g,b;
 };
 
 struct Tile {
-  byte val[8][8];
+  u8 val[8][8];
 };
 
 struct SMBraster {
   struct Pixel *pixels;
   size_t pixels_stride;
-  byte palette_indices[32];
+  u8 palette_indices[32];
   struct Pixel palette[0x40];
   struct Tile tiles[0x200];
 };
@@ -48,11 +46,11 @@ void SMBraster_update_palette(struct SMBraster *r, const unsigned char *palette_
 void SMBraster_update_pattern_tables(struct SMBraster *r, const unsigned char *chrrom) {
   for (int tileidx = 0; tileidx < 512; tileidx++) {
     struct Tile *t = r->tiles + tileidx;
-    const byte *buf = chrrom + tileidx * 0x10;
+    const u8 *buf = chrrom + tileidx * 0x10;
     for (int i = 0; i < 8; i++) {
       for (int j = 0; j < 8; j++) {
-        const byte hibit = (buf[i + 8] >> (7 - j)) & 1;
-        const byte lobit = (buf[i + 0] >> (7 - j)) & 1;
+        const u8 hibit = (buf[i + 8] >> (7 - j)) & 1;
+        const u8 lobit = (buf[i + 0] >> (7 - j)) & 1;
         t->val[i][j] = (hibit << 1) | lobit;
       }
     }
@@ -84,7 +82,7 @@ void SMBraster_draw_tile(struct SMBraster *r, const struct SMB_tile tile) {
       }
 
       struct Pixel *p = r->pixels + jj + ii * r->pixels_stride;
-      byte v = r->tiles[tile.tileidx].val[i][j];
+      u8 v = r->tiles[tile.tileidx].val[i][j];
       if (v == 0) {
         continue;
       }

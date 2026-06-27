@@ -2,14 +2,14 @@
 union ppureg {
   struct {
     // least to most significant order
-    byte XXXXX : 5;
-    byte YYYYY : 5;
-    byte NN : 2;
-    byte yyy : 3;
+    u8 XXXXX : 5;
+    u8 YYYYY : 5;
+    u8 NN : 2;
+    u8 yyy : 3;
   };
   struct {
-    byte lo : 8;
-    byte hi : 7;
+    u8 lo : 8;
+    u8 hi : 7;
   };
   u16 value;
 };
@@ -18,21 +18,21 @@ struct ppu_state {
   // internal regs
   ppureg v;
   ppureg t;
-  byte x;
-  byte w;
-  byte increment_mode;
+  u8 x;
+  u8 w;
+  u8 increment_mode;
   bool screen_on;
 };
 
 
 struct SMB_state {
-  byte rammem[0x10000];
-  byte chrrom[0x2000];
-  byte ppuram[0x4000];
+  u8 rammem[0x10000];
+  u8 chrrom[0x2000];
+  u8 ppuram[0x4000];
   int which_game;
   bool reset_occurred;
-  byte start_on_world;
-  byte start_on_level;
+  u8 start_on_world;
+  u8 start_on_level;
 
   struct SMB_callbacks callbacks;
   size_t smb2j_disk_offset;
@@ -41,12 +41,12 @@ struct SMB_state {
   // Native pointers to ROM
   // (right now these are either null or point to somewhere in rammmem)
 
-  const byte *area_data;
-  const byte *enemy_data;
-  const byte *music_data;
+  const u8 *area_data;
+  const u8 *enemy_data;
+  const u8 *music_data;
 
   // For SMB2J
-  byte patch_current_player;
+  u8 patch_current_player;
 };
 
 // The singleton SMB_state used during the SMB_tick() invocation. This is considered internal and should not be used by callers of the library.
@@ -55,7 +55,7 @@ extern thread_local struct SMB_state *SMB_STATE;
 #define RAM(offset) (SMB_STATE->rammem[offset])
 #define PPURAM(offset) (SMB_STATE->ppuram[offset])
 #define CHRROM(offset) (SMB_STATE->chrrom[offset])
-#define RAM_CONST(offset) ((const byte)SMB_STATE->rammem[offset])
+#define RAM_CONST(offset) ((const u8)SMB_STATE->rammem[offset])
 
 #define AreaData (SMB_STATE->area_data)
 #define EnemyData (SMB_STATE->enemy_data)
@@ -70,7 +70,7 @@ extern thread_local struct SMB_state *SMB_STATE;
 
 #define PPU_STATE (SMB_STATE->ppu)
 
-static inline const byte * rom_ptr(const u16 addr) {
+static inline const u8 * rom_ptr(const u16 addr) {
   if (unlikely(addr == 0)) {
     // Null pointer
     // We might get this on startup if RAM is uninitialized
@@ -94,7 +94,7 @@ static inline const byte * rom_ptr(const u16 addr) {
 // Access the RAM buffer directly, as pointers
 
 #  define RAMARRAY(addr, length) (&RAM(addr))
-#  define RAMARRAY_CONST(addr, length) ((const byte*)(&RAM(addr)))
+#  define RAMARRAY_CONST(addr, length) ((const u8*)(&RAM(addr)))
 
 #else
 
@@ -109,17 +109,17 @@ public:
   RamByteArray(u16 addr) : addr(addr), length(0), offset(0) {}
   RamByteArray(u16 addr, u16 length) : addr(addr), length(length), offset(0) {}
   RamByteArray(u16 addr, u16 length, int offset) : addr(addr), length(length), offset(offset) {}
-  byte &operator*() const {
+  u8 &operator*() const {
     return RAM(addr + offset);
   }
-  byte *operator&() const {
+  u8 *operator&() const {
     return &RAM(addr + offset);
   }
   RamByteArray operator+(int i) const {
     // Adding an array by a constant gives another array.
     return RamByteArray(addr, length, offset + i);
   }
-  byte &operator[](int i) const {
+  u8 &operator[](int i) const {
     const int idx = offset + i;
     // equivalent to LDA addr,X
     u16 eff = addr + idx;
@@ -154,13 +154,13 @@ private:
 public:
   ConstRamByteArray(u16 addr) : addr(addr), length(0) {}
   ConstRamByteArray(u16 addr, u16 length) : addr(addr), length(length) {}
-  const byte &operator*() const {
+  const u8 &operator*() const {
     return RAM(addr);
   }
-  const byte *operator&() const {
+  const u8 *operator&() const {
     return &RAM(addr);
   }
-  const byte &operator[](int i) const {
+  const u8 &operator[](int i) const {
     // equivalent to LDA addr,X
     u16 eff = addr + i;
 
@@ -180,20 +180,20 @@ public:
 #endif
 
 
-static inline bool read_rom_bytes(struct SMB_state *state, byte *buf, size_t size) {
+static inline bool read_rom_bytes(struct SMB_state *state, u8 *buf, size_t size) {
   return state->callbacks.read_rom_bytes(state->callbacks.userdata, buf, size);
 }
 static inline bool seek_rom(struct SMB_state *state, size_t offset) {
   return state->callbacks.seek_rom(state->callbacks.userdata, offset);
 }
-static inline byte smb2j_load_games_beaten() {
+static inline u8 smb2j_load_games_beaten() {
   if (SMB_STATE->callbacks.smb2j_load_games_beaten) {
     return SMB_STATE->callbacks.smb2j_load_games_beaten(SMB_STATE->callbacks.userdata);
   } else {
     return 0;
   }
 }
-static inline bool smb2j_save_games_beaten(byte games_beaten) {
+static inline bool smb2j_save_games_beaten(u8 games_beaten) {
   if (SMB_STATE->callbacks.smb2j_save_games_beaten) {
     return SMB_STATE->callbacks.smb2j_save_games_beaten(SMB_STATE->callbacks.userdata, games_beaten);
   } else {
@@ -223,7 +223,7 @@ static inline void draw_tile(const struct SMB_tile tile) {
   }
 }
 
-static inline void apu_write_register(u16 addr, byte data) {
+static inline void apu_write_register(u16 addr, u8 data) {
   if (SMB_STATE->callbacks.apu_write_register) {
     SMB_STATE->callbacks.apu_write_register(SMB_STATE->callbacks.userdata, addr, data);
   }
@@ -249,7 +249,7 @@ static inline void joy2(struct SMB_buttons *buttons) {
 }
 
 #define APU_REG(name, addr) \
-  static inline void name(byte x) { apu_write_register(addr, x); }
+  static inline void name(u8 x) { apu_write_register(addr, x); }
 
 APU_REG(apu_sq1_vol, 0x4000)
 APU_REG(apu_sq1_sweep, 0x4001)
@@ -275,13 +275,13 @@ APU_REG(apu_framecounter_ctrl, 0x4017)
 #undef APU_REG
 
 // Write to $2000
-static inline void ppuctrl(byte x) {
+static inline void ppuctrl(u8 x) {
   PPU_STATE.t.NN = x & 0x03;
   PPU_STATE.increment_mode = (x & 0x04) ? 1 : 0;
 }
 
 // Write to $2001
-static inline void ppumask(byte x) {
+static inline void ppumask(u8 x) {
   // in smb1 and smb2j, it's only ever:
   // 0x06     (e.g. background and sprites disabled, leftmost column turned on)
   // 0x00     (e.g. everything disabled)
@@ -294,7 +294,7 @@ static inline void ppumask(byte x) {
 }
 
 // Write to $2005
-static inline void ppuscroll(byte x) {
+static inline void ppuscroll(u8 x) {
   if (PPU_STATE.w == 0) {
     PPU_STATE.t.XXXXX = x >> 3;
     PPU_STATE.x = x & 0x07;
@@ -306,7 +306,7 @@ static inline void ppuscroll(byte x) {
 }
 
 // Write to $2006
-static inline void ppuaddr(byte x) {
+static inline void ppuaddr(u8 x) {
   if (PPU_STATE.w == 0) {
     PPU_STATE.t.hi = x & 0x3F;
   } else {
@@ -317,7 +317,7 @@ static inline void ppuaddr(byte x) {
 }
 
 // Write to $2007
-static inline void ppudata(byte x) {
+static inline void ppudata(u8 x) {
   u16 addr = PPU_STATE.v.value & 0x3FFF;
 
   if (addr == 0x3F10) {
@@ -334,7 +334,7 @@ static inline void ppudata(byte x) {
 }
 
 // Read from $2002
-static inline byte ppustatus() {
+static inline u8 ppustatus() {
   PPU_STATE.w = 0;
   return 0x80;
 }

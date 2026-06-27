@@ -20,7 +20,7 @@ bool open_rom(struct testrunner_userdata *userdata, const char *filename) {
   return f != 0;
 }
 
-bool read_rom_bytes(void *userdata, byte *buf, size_t size) {
+bool read_rom_bytes(void *userdata, u8 *buf, size_t size) {
   struct testrunner_userdata *ud = userdata;
   return fread(buf, size, 1, ud->romfile) == 1;
 }
@@ -36,18 +36,18 @@ void joy1(void *userdata, struct SMB_buttons *buttons) {
   *buttons = ud->joy1_buttons;
 }
 
-byte smb2j_load_games_beaten(void *userdata) {
+u8 smb2j_load_games_beaten(void *userdata) {
   // A decent test value - lets us test Worlds A-D
   return 8;
 }
-bool smb2j_save_games_beaten(void *userdata, byte games_beaten) {
+bool smb2j_save_games_beaten(void *userdata, u8 games_beaten) {
   printf("Pretending to save game...");
   printf("Games beaten: %d\n", games_beaten);
   return true;
 }
 
 bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32_t upto_frame) {
-  byte ram[0x800];
+  u8 ram[0x800];
   struct MovieButtons movie_buttons;
   uint32_t framecounter = 0;
   bool success = true;
@@ -64,7 +64,7 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
       // NMI. SMB_tick calls Reset if it hasn't been called before. If we're here, then Reset has never been called.
       // Additionally, we can go without comparing it, as memory before the first NMI is not very interesting.
 
-      byte *compareto = SMB_ram(userdata->smb_state);
+      u8 *compareto = SMB_ram(userdata->smb_state);
 
 #define RANGE_N 64
 
@@ -111,8 +111,8 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
       }
 
       for (int j = 0; j < range_curidx; j++) {
-        const byte *a = ram;
-        const byte *b = compareto;
+        const u8 *a = ram;
+        const u8 *b = compareto;
         const int from = range_from[j];
         const int upto = range_upto[j];
 

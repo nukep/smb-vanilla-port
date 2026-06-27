@@ -15,14 +15,14 @@ static void ContinueWindSfx(void);
 
 static void SoundEngine(void);
 static void SkipSoundSubroutines(void);
-static void Dump_Squ1_Regs(byte param_1,byte param_2);
-static bool PlaySqu1Sfx(byte param_1,byte param_2,byte param_3);
-static struct_axyz SetFreq_Squ1(byte param_1);
-static struct_ayz Dump_Freq_Regs(byte param_1, byte channel);
-static void Dump_Sq2_Regs(byte param_1,byte param_2);
-static void PlaySqu2Sfx(byte param_1,byte param_2,byte param_3);
-static struct_axyz SetFreq_Squ2(byte param_1);
-static void SetFreq_Tri(byte param_1);
+static void Dump_Squ1_Regs(u8 param_1,u8 param_2);
+static bool PlaySqu1Sfx(u8 param_1,u8 param_2,u8 param_3);
+static struct_axyz SetFreq_Squ1(u8 param_1);
+static struct_ayz Dump_Freq_Regs(u8 param_1, u8 channel);
+static void Dump_Sq2_Regs(u8 param_1,u8 param_2);
+static void PlaySqu2Sfx(u8 param_1,u8 param_2,u8 param_3);
+static struct_axyz SetFreq_Squ2(u8 param_1);
+static void SetFreq_Tri(u8 param_1);
 static void PlayFlagpoleSlide(void);
 static void PlaySmallJump(void);
 static void PlayBigJump(void);
@@ -58,7 +58,7 @@ static void ContinueGrowItems(void);
 
 static void PlayBrickShatter(void);
 static void ContinueBrickShatter(void);
-static void PlayNoiseSfx(byte vol, byte noise_period);
+static void PlayNoiseSfx(u8 vol, u8 noise_period);
 static void DecrementSfx3Length(void);
 static void NoiseSfxHandler(void);
 static void PlayBowserFlame(void);
@@ -66,21 +66,21 @@ static void ContinueBowserFlame(void);
 
 static void ContinueMusic(void);
 static void MusicHandler(void);
-static void LoadEventMusic(byte param_1);
-static void LoadAreaMusic(byte param_1);
-static void HandleAreaMusicLoopB(byte param_1);
-static void FindAreaMusicHeader(byte param_1);
-static void FindEventMusicHeader(byte param_1,byte param_2);
-static void LoadHeader(byte param_1);
+static void LoadEventMusic(u8 param_1);
+static void LoadAreaMusic(u8 param_1);
+static void HandleAreaMusicLoopB(u8 param_1);
+static void FindAreaMusicHeader(u8 param_1);
+static void FindEventMusicHeader(u8 param_1,u8 param_2);
+static void LoadHeader(u8 param_1);
 static void HandleSquare2Music(void);
 static void HandleSquare1Music(void);
 static void HandleTriangleMusic(void);
 static void HandleNoiseMusic(void);
-static void PlayBeat(byte param_1,byte param_2,byte param_3);
-static struct_axy AlternateLengthHandler(byte param_1);
-static struct_ay ProcessLengthData(byte param_1);
+static void PlayBeat(u8 param_1,u8 param_2,u8 param_3);
+static struct_axy AlternateLengthHandler(u8 param_1);
+static struct_ay ProcessLengthData(u8 param_1);
 static struct_axy LoadControlRegs(void);
-static byte LoadEnvelopeData(byte param_1);
+static u8 LoadEnvelopeData(u8 param_1);
 
 
 #define BIT(v, n) (((v) & (1 << n)) != 0)
@@ -88,7 +88,7 @@ static byte LoadEnvelopeData(byte param_1);
 // SMB:f38d, SM2MAIN:d35d
 // Signature: [A, X] -> [A, Y, Z]
 
-struct_ayz Dump_Freq_Regs(const byte param_1, const byte channel) {
+struct_ayz Dump_Freq_Regs(const u8 param_1, const u8 channel) {
   // channel is always 0, 4, or 8
 
   struct_ayz ret;
@@ -98,8 +98,8 @@ struct_ayz Dump_Freq_Regs(const byte param_1, const byte channel) {
   // apu_tri_lo, apu_tri_hi
 
   if (FreqRegLookupTbl[param_1 + 1] != 0) {
-    const byte a = FreqRegLookupTbl[param_1 + 1];
-    const byte b = FreqRegLookupTbl[param_1] | 8;
+    const u8 a = FreqRegLookupTbl[param_1 + 1];
+    const u8 b = FreqRegLookupTbl[param_1] | 8;
 
     switch (channel) {
     case 0: apu_sq1_lo(a); apu_sq1_hi(b); break;
@@ -142,7 +142,7 @@ void ContinueBrickShatter(void) {
 
 // SMB:f64d, SM2MAIN:d658
 // Signature: [A, X] -> []
-void PlayNoiseSfx(const byte vol, const byte noise_period) {
+void PlayNoiseSfx(const u8 vol, const u8 noise_period) {
   apu_noise_vol(vol);
   apu_noise_lo(noise_period);
   apu_noise_hi(0x18);
@@ -173,10 +173,10 @@ void PlayBowserFlame(void) {
 // SMB:f685, SM2MAIN:d69c
 // Signature: [] -> []
 void ContinueBowserFlame(void) {
-  const byte idx = Noise_SfxLenCounter >> 1;
+  const u8 idx = Noise_SfxLenCounter >> 1;
 
   // NES note: The index is regularly 0, which underflows BowserFlameEnvData-1.
-  const byte vol = BowserFlameEnvData_Minus1[idx];
+  const u8 vol = BowserFlameEnvData_Minus1[idx];
 
   if (SMB1_ONLY && vol == 0) {
     ContinueMusic();
@@ -224,8 +224,8 @@ void ContinueWindSfx(void) {
   // We moved these checks to the callers
 
   // There's an off-by-1 bug where the index may be the likely intended length of the envelope table (24).
-  const byte idx = Noise_SfxLenCounter >> 3;
-  const byte env = WindFreqEnvData[idx];
+  const u8 idx = Noise_SfxLenCounter >> 3;
+  const u8 env = WindFreqEnvData[idx];
 
   PlayNoiseSfx((env >> 4) | 0x10, (env & 0xf) | 0x10);
 }
@@ -236,7 +236,7 @@ void ContinueWindSfx(void) {
 // SMB:f667
 // Signature: [] -> []
 void NoiseSfxHandler(void) {
-  const byte nsq = NoiseSoundQueue;
+  const u8 nsq = NoiseSoundQueue;
 
   // The original game modified (bit-shifted) NoiseSoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
 
@@ -245,7 +245,7 @@ void NoiseSfxHandler(void) {
     if (BIT(nsq, 0)) { return PlayBrickShatter(); }
     if (BIT(nsq, 1)) { return PlayBowserFlame(); }
   }
-  const byte nsb = NoiseSoundBuffer;
+  const u8 nsb = NoiseSoundBuffer;
   if (nsb != 0) {
     if (BIT(nsb, 0)) { return ContinueBrickShatter(); }
     if (BIT(nsb, 1)) { return ContinueBowserFlame(); }
@@ -257,8 +257,8 @@ void NoiseSfxHandler(void) {
 // SM2MAIN:d677
 // Signature: [] -> []
 void NoiseSfxHandler(void) {
-  const byte nsb = NoiseSoundBuffer;
-  const byte nsq = NoiseSoundQueue;
+  const u8 nsb = NoiseSoundBuffer;
+  const u8 nsq = NoiseSoundQueue;
 
   if (BIT(nsb, 7)) { return ContinueSkidSfx(); }
   if (BIT(nsq, 7)) {
@@ -360,7 +360,7 @@ void SkipSoundSubroutines(void) {
   NoiseSoundQueue = 0;
   PauseSoundQueue = 0;
 
-  const byte prev_counter = DAC_Counter;
+  const u8 prev_counter = DAC_Counter;
 
   if ((AreaMusicBuffer & 3) != 0 && DAC_Counter < 0x30) {
     DAC_Counter += 1;
@@ -374,7 +374,7 @@ void SkipSoundSubroutines(void) {
 // SMB:f381
 // SM2MAIN:d351
 // Signature: [X, Y] -> []
-void Dump_Squ1_Regs(const byte param_1, const byte param_2) {
+void Dump_Squ1_Regs(const u8 param_1, const u8 param_2) {
   apu_sq1_sweep(param_2);
   apu_sq1_vol(param_1);
 }
@@ -382,7 +382,7 @@ void Dump_Squ1_Regs(const byte param_1, const byte param_2) {
 // SMB:f388
 // SM2MAIN:d358
 // Signature: [A, X, Y] -> [Z]
-bool PlaySqu1Sfx(const byte param_1, const byte param_2, const byte param_3) {
+bool PlaySqu1Sfx(const u8 param_1, const u8 param_2, const u8 param_3) {
   struct_axyz sVar1;
 
   Dump_Squ1_Regs(param_2, param_3);
@@ -393,7 +393,7 @@ bool PlaySqu1Sfx(const byte param_1, const byte param_2, const byte param_3) {
 // SMB:f38b
 // SM2MAIN:d35b
 // Signature: [A] -> [A, X, Y, Z]
-struct_axyz SetFreq_Squ1(const byte param_1) {
+struct_axyz SetFreq_Squ1(const u8 param_1) {
   struct_axyz sVar2;
   struct_ayz sVar3;
 
@@ -408,7 +408,7 @@ struct_axyz SetFreq_Squ1(const byte param_1) {
 // SMB:f39f
 // SM2MAIN:d36f
 // Signature: [X, Y] -> []
-void Dump_Sq2_Regs(const byte param_1, const byte param_2) {
+void Dump_Sq2_Regs(const u8 param_1, const u8 param_2) {
   apu_sq2_vol(param_1);
   apu_sq2_sweep(param_2);
 }
@@ -416,7 +416,7 @@ void Dump_Sq2_Regs(const byte param_1, const byte param_2) {
 // SMB:f3a6
 // SM2MAIN:d376
 // Signature: [A, X, Y] -> []
-void PlaySqu2Sfx(const byte param_1, const byte param_2, const byte param_3) {
+void PlaySqu2Sfx(const u8 param_1, const u8 param_2, const u8 param_3) {
   Dump_Sq2_Regs(param_2, param_3);
   SetFreq_Squ2(param_1);
 }
@@ -424,7 +424,7 @@ void PlaySqu2Sfx(const byte param_1, const byte param_2, const byte param_3) {
 // SMB:f3a9
 // SM2MAIN:d379
 // Signature: [A] -> [A, X, Y, Z]
-struct_axyz SetFreq_Squ2(const byte param_1) {
+struct_axyz SetFreq_Squ2(const u8 param_1) {
   struct_axyz sVar2;
   struct_ayz sVar3;
 
@@ -439,7 +439,7 @@ struct_axyz SetFreq_Squ2(const byte param_1) {
 // SMB:f3ad
 // SM2MAIN:d37d
 // Signature: [A] -> []
-void SetFreq_Tri(const byte param_1) {
+void SetFreq_Tri(const u8 param_1) {
   Dump_Freq_Regs(param_1, 8);
 }
 
@@ -485,8 +485,8 @@ void PlayBigJump(void) {
 // SM2MAIN:d3af
 // Signature: [] -> []
 void ContinueSndJump(void) {
-  byte bVar1;
-  byte bVar2;
+  u8 bVar1;
+  u8 bVar2;
   char cVar3;
 
   if (Squ1_SfxLenCounter == 0x25) {
@@ -547,7 +547,7 @@ void ContinueBumpThrow(void) {
 // SM2MAIN:d3eb
 // Signature: [] -> []
 void Square1SfxHandler(void) {
-  const byte ssq = Square1SoundQueue;
+  const u8 ssq = Square1SoundQueue;
 
   // The original game modified (bit-shifted) Square1SoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
 
@@ -567,7 +567,7 @@ void Square1SfxHandler(void) {
   // Square1SoundQueue is 0
   // Continuing to play previous sfx
 
-  const byte ssb = Square1SoundBuffer;
+  const u8 ssb = Square1SoundBuffer;
   if (ssb != 0) {
     if (BIT(ssb, 7)) { return ContinueSndJump(); }
     if (BIT(ssb, 0)) { return ContinueSndJump(); }
@@ -735,7 +735,7 @@ void PlayPowerUpGrab(void) {
 // Signature: [] -> []
 void ContinuePowerUpGrab(void) {
   if ((Squ2_SfxLenCounter & 1) == 0) {
-    const byte idx = Squ2_SfxLenCounter >> 1;
+    const u8 idx = Squ2_SfxLenCounter >> 1;
     PlaySqu2Sfx(PowerUpGrabFreqData[idx - 1], 0x5d, 0x7f);
   }
 
@@ -769,7 +769,7 @@ void Square2SfxHandler(void) {
 
   // The original game modified (bit-shifted) Square2SoundQueue to test the bits, but the caller resets the value to 0 anyway, so we ignore changing it here
 
-  const byte ssq = Square2SoundQueue;
+  const u8 ssq = Square2SoundQueue;
 
   if (ssq != 0) {
     Square2SoundBuffer = ssq;
@@ -783,7 +783,7 @@ void Square2SfxHandler(void) {
     if (BIT(ssq, 6)) { return PlayExtraLife(); }
   }
 
-  const byte ssb = Square2SoundBuffer;
+  const u8 ssb = Square2SoundBuffer;
 
   if (ssb == 0) {
     return;
@@ -832,7 +832,7 @@ void PlayExtraLife(void) {
 // Signature: [] -> []
 void ContinueExtraLife(void) {
   if ((Squ2_SfxLenCounter & 7) == 0) {
-    const byte bVar1 = Squ2_SfxLenCounter >> 3;
+    const u8 bVar1 = Squ2_SfxLenCounter >> 3;
     PlaySqu2Sfx(ExtraLifeFreqData[bVar1 - 1], 0x82, 0x7f);
   }
 
@@ -900,7 +900,7 @@ void MusicHandler(void) {
 // SMB:f6a4
 // SM2MAIN:d6e0
 // Signature: [A] -> []
-void LoadEventMusic(const byte param_1) {
+void LoadEventMusic(const u8 param_1) {
   EventMusicBuffer = param_1;
   if (param_1 == 1) {
     StopSquare1Sfx();
@@ -920,7 +920,7 @@ void LoadEventMusic(const byte param_1) {
 // SMB:f6c8
 // SM2MAIN:d704
 // Signature: [A] -> []
-void LoadAreaMusic(const byte param_1) {
+void LoadAreaMusic(const u8 param_1) {
   if (param_1 == 4) {
     StopSquare1Sfx();
   }
@@ -931,7 +931,7 @@ void LoadAreaMusic(const byte param_1) {
 // SMB:f6d4
 // SM2MAIN:d710
 // Signature: [A] -> []
-void HandleAreaMusicLoopB(const byte param_1) {
+void HandleAreaMusicLoopB(const u8 param_1) {
   EventMusicBuffer = 0;
   AreaMusicBuffer = param_1;
   if (param_1 != 1) {
@@ -950,7 +950,7 @@ void HandleAreaMusicLoopB(const byte param_1) {
 // SMB:f6ed
 // SM2MAIN:d729
 // Signature: [A] -> []
-void FindAreaMusicHeader(const byte param_1) {
+void FindAreaMusicHeader(const u8 param_1) {
   MusicOffset_Square2 = 8;
   FindEventMusicHeader(param_1, 8);
 }
@@ -958,7 +958,7 @@ void FindAreaMusicHeader(const byte param_1) {
 // SMB:f6f1
 // SM2MAIN:d72d
 // Signature: [A, Y] -> []
-void FindEventMusicHeader(const byte param_1, const byte param_2) {
+void FindEventMusicHeader(const u8 param_1, const u8 param_2) {
   // The second argument is either 0 or 8 in practice.
 
   assert_smb_crashbug(param_1 != 0, "An infinite loop would've occurred in the original game");
@@ -971,14 +971,14 @@ void FindEventMusicHeader(const byte param_1, const byte param_2) {
 // SMB:f6f5
 // SM2MAIN:d731
 // Signature: [Y] -> []
-void LoadHeader(const byte param_1) {
+void LoadHeader(const u8 param_1) {
   // Get the offset of the header within the data
 
-  const byte off = MusicHeaderData[param_1 - 1];
+  const u8 off = MusicHeaderData[param_1 - 1];
 
   NoteLenLookupTblOfs  = MusicHeaderData[off];
-  const byte lo        = MusicHeaderData[off + 1];
-  const byte hi        = MusicHeaderData[off + 2];
+  const u8 lo        = MusicHeaderData[off + 1];
+  const u8 hi        = MusicHeaderData[off + 2];
   MusicOffset_Triangle = MusicHeaderData[off + 3];
   MusicOffset_Square1  = MusicHeaderData[off + 4];
   MusicOffset_Noise    = MusicHeaderData[off + 5];
@@ -1003,7 +1003,7 @@ void LoadHeader(const byte param_1) {
 // SM2MAIN:d776
 // Signature: [] -> []
 void HandleSquare2Music(void) {
-  byte bVar1;
+  u8 bVar1;
   struct_ay sVar4;
   struct_axyz sVar5;
   struct_axy sVar6;
@@ -1043,9 +1043,9 @@ void HandleSquare2Music(void) {
     }
     if (Square2SoundBuffer == 0) {
       sVar5 = SetFreq_Squ2(bVar1);
-      byte a = sVar5.a;
-      byte x = sVar5.x;
-      byte y = sVar5.y;
+      u8 a = sVar5.a;
+      u8 x = sVar5.x;
+      u8 y = sVar5.y;
       if (!sVar5.z) {
         sVar6 = LoadControlRegs();
         a = sVar6.a;
@@ -1097,9 +1097,9 @@ void HandleSquare1Music(void) {
     }
 
     sVar5 = SetFreq_Squ1(sVar6.x & 0x3e);
-    byte a = sVar5.a;
-    byte x = sVar5.x;
-    byte y = sVar5.y;
+    u8 a = sVar5.a;
+    u8 x = sVar5.x;
+    u8 y = sVar5.y;
     if (!sVar5.z) {
       sVar6 = LoadControlRegs();
       a = sVar6.a;
@@ -1130,7 +1130,7 @@ void HandleSquare1Music(void) {
 // SM2MAIN:d856
 // Signature: [] -> []
 void HandleTriangleMusic(void) {
-  byte bVar2;
+  u8 bVar2;
   struct_ay sVar3;
 
   Tri_NoteLenCounter -= 1;
@@ -1210,7 +1210,7 @@ void HandleNoiseMusic(void) {
 // SMB:f8bb
 // SM2MAIN:d8f7
 // Signature: [A, X, Y] -> []
-void PlayBeat(const byte param_1, const byte param_2, const byte param_3) {
+void PlayBeat(const u8 param_1, const u8 param_2, const u8 param_3) {
   apu_noise_vol(param_1);
   apu_noise_lo(param_2);
   apu_noise_hi(param_3);
@@ -1219,7 +1219,7 @@ void PlayBeat(const byte param_1, const byte param_2, const byte param_3) {
 // SMB:f8c5
 // SM2MAIN:d901
 // Signature: [A] -> [A, X, Y]
-struct_axy AlternateLengthHandler(const byte param_1) {
+struct_axy AlternateLengthHandler(const u8 param_1) {
   struct_ay sVar1;
   struct_axy sVar2;
 
@@ -1236,8 +1236,8 @@ struct_axy AlternateLengthHandler(const byte param_1) {
 // SMB:f8cb
 // SM2MAIN:d907
 // Signature: [A] -> [A, Y]
-struct_ay ProcessLengthData(const byte param_1) {
-  byte offset;
+struct_ay ProcessLengthData(const u8 param_1) {
+  u8 offset;
 
   struct_ay sVar2;
 
@@ -1257,7 +1257,7 @@ struct_ay ProcessLengthData(const byte param_1) {
 // SM2MAIN:d914
 // Signature: [] -> [A, X, Y]
 struct_axy LoadControlRegs(void) {
-  byte a;
+  u8 a;
 
   if ((EventMusicBuffer & 8) != 0) {
     a = EndOfCastleMusicEnvData_IntendedLength;
@@ -1278,7 +1278,7 @@ struct_axy LoadControlRegs(void) {
 // SMB:f8f4
 // SM2MAIN:d930
 // Signature: [Y] -> [A]
-byte LoadEnvelopeData(byte idx) {
+u8 LoadEnvelopeData(u8 idx) {
   // NES note: The array index regularly goes beyond what's likely their intended bounds.
   // Usually one item beyond.
   // When a square note starts, the envelope index is initialized by LoadControlRegs, which sets it to the array's length.

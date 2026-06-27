@@ -30,7 +30,7 @@ void SMB1_Reset() {
   // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
   // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
 
-  byte initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
+  u8 initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
 
   for (int i = 0; i < 6; i++) {
     if (DisplayDigits[i] > 9) {
@@ -156,7 +156,7 @@ void SMB1_NMI() {
   ppuscroll(HorizontalScroll);
   ppuscroll(VerticalScroll);
 
-  byte const prev_mirror_ppu_ctrl = Mirror_PPU_CTRL_REG1;
+  u8 const prev_mirror_ppu_ctrl = Mirror_PPU_CTRL_REG1;
   ppuctrl(Mirror_PPU_CTRL_REG1);
   if ((GamePauseStatus & 1) == 0) {
     OperModeExecutionTree();

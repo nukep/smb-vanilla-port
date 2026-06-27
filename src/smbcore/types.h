@@ -13,12 +13,12 @@
 #define BLOCK_BUFFER_1_OFFSET 0x00
 #define BLOCK_BUFFER_2_OFFSET 0xd0
 
-// Note that `i` is modulo 64 for bounding boxes, hence the `(byte)` cast.
+// Note that `i` is modulo 64 for bounding boxes, hence the `(u8)` cast.
 
-#define BBOX_TOPLEFT_X(i)  BoundingBoxCoords[(byte)((i)*4) + 0]
-#define BBOX_TOPLEFT_Y(i)  BoundingBoxCoords[(byte)((i)*4) + 1]
-#define BBOX_BOTRIGHT_X(i) BoundingBoxCoords[(byte)((i)*4) + 2]
-#define BBOX_BOTRIGHT_Y(i) BoundingBoxCoords[(byte)((i)*4) + 3]
+#define BBOX_TOPLEFT_X(i)  BoundingBoxCoords[(u8)((i)*4) + 0]
+#define BBOX_TOPLEFT_Y(i)  BoundingBoxCoords[(u8)((i)*4) + 1]
+#define BBOX_BOTRIGHT_X(i) BoundingBoxCoords[(u8)((i)*4) + 2]
+#define BBOX_BOTRIGHT_Y(i) BoundingBoxCoords[(u8)((i)*4) + 3]
 
 #define NOWRAP_BBOX_TOPLEFT_X(i)  BoundingBoxCoords[(i)*4 + 0]
 #define NOWRAP_BBOX_TOPLEFT_Y(i)  BoundingBoxCoords[(i)*4 + 1]
@@ -44,23 +44,23 @@
 // But if Y is sufficiently large, it can cross into page $0300, which contains the VRAM buffer.
 //
 // Because of that, we're careful about wrapping the value whenever the NES does.
-#define SPRITE_calculate_wrap(offset, n) ((byte)((offset) + (n)*4))
+#define SPRITE_calculate_wrap(offset, n) ((u8)((offset) + (n)*4))
 
-#define SPRITE_Y(offset, n)    (_sprite_offset_assert(offset) Sprite_Data[(byte)(offset) + (n)*4 + 0])
-#define SPRITE_TILE(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(byte)(offset) + (n)*4 + 1])
-#define SPRITE_ATTR(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(byte)(offset) + (n)*4 + 2])
-#define SPRITE_X(offset, n)    (_sprite_offset_assert(offset) Sprite_Data[(byte)(offset) + (n)*4 + 3])
+#define SPRITE_Y(offset, n)    (_sprite_offset_assert(offset) Sprite_Data[(u8)(offset) + (n)*4 + 0])
+#define SPRITE_TILE(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(u8)(offset) + (n)*4 + 1])
+#define SPRITE_ATTR(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(u8)(offset) + (n)*4 + 2])
+#define SPRITE_X(offset, n)    (_sprite_offset_assert(offset) Sprite_Data[(u8)(offset) + (n)*4 + 3])
 
 // Keeps in the $0200 page and never leaves.
 
-#define SPRITE_Y_strict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(byte)((offset) + (n)*4 + 0)])
-#define SPRITE_X_strict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(byte)((offset) + (n)*4 + 3)])
+#define SPRITE_Y_strict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(u8)((offset) + (n)*4 + 0)])
+#define SPRITE_X_strict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(u8)((offset) + (n)*4 + 3)])
 
 // semistrict is like strict, but the component part may be out of bounds.
 
-#define SPRITE_TILE_semistrict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(byte)((offset) + (n)*4) + 1])
-#define SPRITE_ATTR_semistrict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(byte)((offset) + (n)*4) + 2])
-#define SPRITE_X_semistrict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(byte)((offset) + (n)*4) + 3])
+#define SPRITE_TILE_semistrict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(u8)((offset) + (n)*4) + 1])
+#define SPRITE_ATTR_semistrict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(u8)((offset) + (n)*4) + 2])
+#define SPRITE_X_semistrict(offset, n) (_sprite_offset_assert(offset) Sprite_Data[(u8)((offset) + (n)*4) + 3])
 
 #define SPRITE_Y_OFFSCREEN 0xf8
 

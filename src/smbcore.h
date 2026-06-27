@@ -9,11 +9,11 @@ struct sprite {
   bool draw_behind;
 };
 
-static inline void transfer_sprite_data(struct sprite sprites[64], const byte *data) {
+static inline void transfer_sprite_data(struct sprite sprites[64], const u8 *data) {
   for (int i = 0; i < 64; i++) {
     sprites[i].tile.y = data[i * 4 + 0] + 1;
     sprites[i].tile.tileidx = data[i * 4 + 1];
-    byte attr = data[i * 4 + 2];
+    u8 attr = data[i * 4 + 2];
     sprites[i].tile.x = data[i * 4 + 3];
 
     sprites[i].tile.paletteidx = (attr & 0x03) + 4;

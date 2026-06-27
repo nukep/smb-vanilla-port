@@ -67,7 +67,7 @@ bool smb2j_load_file(struct SMB_state *state, const char *name) {
     bool eq = strncmp(name, a.name, 8) == 0;
     if (eq) {
       // Found it!
-      byte *copy_to;
+      u8 *copy_to;
       if (a.type == TYPE_CHRRAM) {
         // Copy the bytes over to CHRRAM
         copy_to = state->chrrom + a.org;
@@ -91,7 +91,7 @@ bool smb2j_load_file(struct SMB_state *state, const char *name) {
 bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
   // In this case, the 16 bit header is this:
   static char fds_disk_verification[16] = {0x01, '*', 'N', 'I', 'N', 'T', 'E', 'N', 'D', 'O', '-', 'H', 'V', 'C', '*', 0x01};
-  byte headerbuf[16];
+  u8 headerbuf[16];
   if (!seek_rom(state, disk_offset)) { return false; }
   if (!read_rom_bytes(state, headerbuf, 16)) { return false; }
 
@@ -109,7 +109,7 @@ bool load_smb2j(struct SMB_state *state, size_t disk_offset) {
 
 
 static bool detect_and_load_rom(struct SMB_state *state) {
-  byte headerbuf[16];
+  u8 headerbuf[16];
   if (!read_rom_bytes(state, headerbuf, 16)) {
     return false;
   }
@@ -150,16 +150,16 @@ bool SMB_state_init(struct SMB_state *state, const struct SMB_callbacks *cb) {
   return detect_and_load_rom(state);
 }
 
-void SMB_start_on_level(struct SMB_state *state, byte world, byte level) {
+void SMB_start_on_level(struct SMB_state *state, u8 world, u8 level) {
   state->start_on_world = world;
   state->start_on_level = level;
 }
 
 int SMB_which_game(const struct SMB_state *state) { return state->which_game; }
 
-byte *SMB_ram(struct SMB_state *state) { return state->rammem; }
+u8 *SMB_ram(struct SMB_state *state) { return state->rammem; }
 
-byte *SMB_ppuram(struct SMB_state *state) { return state->ppuram; }
+u8 *SMB_ppuram(struct SMB_state *state) { return state->ppuram; }
 
 void SMB_ram_finishwrite(struct SMB_state *state) {
   // Set a global variable while accessing the RAM values
@@ -203,7 +203,7 @@ static inline void draw_nametable_tile(int x, int y, u16 ppu_offset, int tilex,
   // Find which part of the pallete to use
   // Look it up in the attribute table
 
-  byte a = PPURAM(ppu_offset + 0x03c0 + (i / 4) * 8 + (j / 4));
+  u8 a = PPURAM(ppu_offset + 0x03c0 + (i / 4) * 8 + (j / 4));
   a >>= ((j / 2) % 2) * 2;
   a >>= ((i / 2) % 2) * 4;
   a &= 0x03;
