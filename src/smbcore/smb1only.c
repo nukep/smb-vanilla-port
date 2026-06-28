@@ -135,8 +135,8 @@ void WriteGameText(const u8 param_1) {
   if (NumberOfPlayers != 0) {
     bool set_name_to_luigi = (CurrentPlayer & 1) != 0;
 
-    if ((param_1 == 2) && (OperMode != 3)) {
-      // Time up message, and if not in the game over opermode
+    if ((param_1 == 2) && (OperMode != OM_GAMEOVER)) {
+      // Time up message
       set_name_to_luigi = !set_name_to_luigi;
     }
 

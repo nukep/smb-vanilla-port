@@ -1,3 +1,5 @@
+#include "consts.h"
+
 // The sound engine for SMB1 for SMB2J are nearly identical, with the exception of SMB2J's Wind and Skid sfxs.
 // There's also the FDS alternate sound engine, but that's only used for SMB2J's ending (not included here).
 
@@ -295,7 +297,7 @@ void NoiseSfxHandler(void) {
 // SM2MAIN:d2a0
 // Signature: [] -> []
 void SoundEngine(void) {
-  if (OperMode == 0) {
+  if (OperMode == OM_TITLESCREEN) {
     apu_snd_chn(0);
     return;
   }

@@ -151,7 +151,7 @@ void SMB2J_Reset() {
   }
 
   InitializeMemory(initialize_upto);
-  OperMode = 0;
+  OperMode = OM_TITLESCREEN;
   apu_dmc_raw(0);
   WorldNumber = last_worldnumber;
   WarmBootValidation = 0xa5;
@@ -373,10 +373,10 @@ void UpdateGamesBeaten() {
     }
     LoadAreaPointer();
     FetchNewGameTimerFlag += 1;
-    OperMode = 1;
+    OperMode = OM_GAME;
   } else {
     CompletedWorlds = 0;
-    OperMode = 0;
+    OperMode = OM_TITLESCREEN;
     TitleScreenMode();
   }
 }

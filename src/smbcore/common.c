@@ -34,7 +34,7 @@ void DrawMushroomIcon(void) {
 
 
 static inline void GameMenuRoutine_ResetTitle() {
-  OperMode = 0;
+  OperMode = OM_TITLESCREEN;
   OperMode_Task = 0;
 #ifdef SMB1_MODE
   Sprite0HitDetectFlag = 0;
@@ -133,7 +133,8 @@ void GameMenuRoutine(void) {
     Hidden1UpFlag += 1;
     OffScr_Hidden1UpFlag += 1;
     FetchNewGameTimerFlag += 1;
-    OperMode += 1;
+    expect(OperMode == OM_TITLESCREEN);
+    OperMode = OM_GAME;
     PrimaryHardMode = WorldSelectEnableFlag;
     OperMode_Task = 0;
     DemoTimer = 0;
@@ -205,7 +206,7 @@ void GameMenuRoutine(void) {
 // SM2MAIN:61e9
 // Signature: [] -> []
 void PauseRoutine(void) {
-  if ((OperMode == 2) || ((OperMode == 1 && (OperMode_Task == ssw(3, 4))))) {
+  if ((OperMode == OM_VICTORY) || ((OperMode == OM_GAME && (OperMode_Task == ssw(3, 4))))) {
     if (GamePauseTimer != 0) {
       GamePauseTimer -= 1;
       return;
@@ -249,32 +250,24 @@ void SpriteShuffler(void) {
 }
 
 
-enum OperModeExecutionTree_jumptable_item {
-  OPERMODEEXECUTIONTREE_TITLESCREENMODE,
-  OPERMODEEXECUTIONTREE_GAMEMODE,
-  OPERMODEEXECUTIONTREE_VICTORYMODE,
-  OPERMODEEXECUTIONTREE_GAMEOVERMODE,
-};
-
-
 // SMB:8212
 // SM2MAIN:6279
 // Signature: [] -> []
 void OperModeExecutionTree(void) {
   switch (OperMode) {
-  case OPERMODEEXECUTIONTREE_TITLESCREENMODE:
+  case OM_TITLESCREEN:
     TitleScreenMode();
     return;
 
-  case OPERMODEEXECUTIONTREE_GAMEMODE:
+  case OM_GAME:
     GameMode();
     return;
 
-  case OPERMODEEXECUTIONTREE_VICTORYMODE:
+  case OM_VICTORY:
     VictoryMode();
     return;
 
-  case OPERMODEEXECUTIONTREE_GAMEOVERMODE:
+  case OM_GAMEOVER:
     GameOverMode();
     return;
 
@@ -305,20 +298,6 @@ void MoveSpritesOffscreen(void) {
 }
 
 
-enum TitleScreenMode_jumptable_item {
-#ifdef SMB2J_MODE
-  TITLESCREENMODE_ATTRACTMODEDISKROUTINES,
-#endif
-  TITLESCREENMODE_INITIALIZEGAME,
-  TITLESCREENMODE_SCREENROUTINES,
-  TITLESCREENMODE_PRIMARYGAMESETUP,
-  TITLESCREENMODE_GAMEMENUROUTINE,
-#ifdef SMB2J_MODE
-  TITLESCREENMODE_HARDWORLDSCHECKPOINT,
-#endif
-};
-
-
 // SMB:8231
 // SM2MAIN:bfb0
 // Signature: [] -> []
@@ -327,28 +306,28 @@ void TitleScreenMode(void) {
   // We consolidated it into SMB1's "TitleScreenMode" for clarity.
 
   switch (OperMode_Task) {
-  case TITLESCREENMODE_INITIALIZEGAME:
+  case OMT_TITLESCREEN_INITIALIZEGAME:
     InitializeGame();
     return;
 
-  case TITLESCREENMODE_SCREENROUTINES:
+  case OMT_TITLESCREEN_SCREENROUTINES:
     ScreenRoutines();
     return;
 
-  case TITLESCREENMODE_PRIMARYGAMESETUP:
+  case OMT_TITLESCREEN_PRIMARYGAMESETUP:
     PrimaryGameSetup();
     return;
 
-  case TITLESCREENMODE_GAMEMENUROUTINE:
+  case OMT_TITLESCREEN_GAMEMENUROUTINE:
     GameMenuRoutine();
     return;
 
 #ifdef SMB2J_MODE
-  case TITLESCREENMODE_ATTRACTMODEDISKROUTINES:
+  case OMT_TITLESCREEN_ATTRACTMODEDISKROUTINES:
     AttractModeDiskRoutines();
     return;
 
-  case TITLESCREENMODE_HARDWORLDSCHECKPOINT:
+  case OMT_TITLESCREEN_HARDWORLDSCHECKPOINT:
     HardWorldsCheckpoint();
     return;
 #endif
@@ -391,18 +370,6 @@ void VictoryMode(void) {
 }
 
 
-enum VictoryModeSubroutines_jumptable_item {
-  VICTORYMODESUBROUTINES_BRIDGECOLLAPSE,
-  VICTORYMODESUBROUTINES_SETUPVICTORYMODE,
-  VICTORYMODESUBROUTINES_PLAYERVICTORYWALK,
-  VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES,
-#ifdef SMB2J_MODE
-  VICTORYMODESUBROUTINES_ENDCASTLEAWARD,
-#endif
-  VICTORYMODESUBROUTINES_PLAYERENDWORLD,
-};
-
-
 // SMB:83a0
 // SM2MAIN:62bc
 // Signature: [] -> []
@@ -415,28 +382,28 @@ void VictoryModeSubroutines(void) {
 #endif
 
   switch (OperMode_Task) {
-  case VICTORYMODESUBROUTINES_BRIDGECOLLAPSE:
+  case OMT_VICTORY_BRIDGECOLLAPSE:
     BridgeCollapse();
     return;
 
-  case VICTORYMODESUBROUTINES_SETUPVICTORYMODE:
+  case OMT_VICTORY_SETUPVICTORYMODE:
     SetupVictoryMode();
     return;
 
-  case VICTORYMODESUBROUTINES_PLAYERVICTORYWALK:
+  case OMT_VICTORY_PLAYERVICTORYWALK:
     PlayerVictoryWalk();
     return;
 
-  case VICTORYMODESUBROUTINES_PRINTVICTORYMESSAGES:
+  case OMT_VICTORY_PRINTVICTORYMESSAGES:
     PrintVictoryMessages();
     return;
 
-  case VICTORYMODESUBROUTINES_PLAYERENDWORLD:
+  case OMT_VICTORY_PLAYERENDWORLD:
     PlayerEndWorld();
     return;
 
 #ifdef SMB2J_MODE
-  case VICTORYMODESUBROUTINES_ENDCASTLEAWARD:
+  case OMT_VICTORY_ENDCASTLEAWARD:
     EndCastleAward();
     return;
 #endif
@@ -513,7 +480,7 @@ void PlayerEndWorld(void) {
     }
     LoadAreaPointer();
     FetchNewGameTimerFlag += 1;
-    OperMode = 1;
+    OperMode = OM_GAME;
   }
 }
 
@@ -724,7 +691,7 @@ void ScreenRoutines(void) {
 void InitScreen(void) {
   MoveAllSpritesOffscreen();
   InitializeNameTables();
-  if (OperMode != 0) {
+  if (OperMode != OM_TITLESCREEN) {
     VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA;
   }
   ScreenRoutineTask += 1;
@@ -911,7 +878,7 @@ void DisplayTimeUp(void) {
 // SM2MAIN:6617
 // Signature: [] -> []
 void DisplayIntermediate(void) {
-  if (OperMode == 3) {
+  if (OperMode == OM_GAMEOVER) {
 #ifdef SMB1_MODE
     ScreenTimer = 0x12;
     WriteGameText(3);
@@ -928,7 +895,7 @@ void DisplayIntermediate(void) {
     return;
   }
 
-  if (OperMode == 0 || AltEntranceControl != 0 || (AreaType != 3 && DisableIntermediate != 0)) {
+  if (OperMode == OM_TITLESCREEN || AltEntranceControl != 0 || (AreaType != 3 && DisableIntermediate != 0)) {
     ScreenRoutineTask = ssw(8, 9);
     return;
   }
@@ -952,7 +919,7 @@ void DisplayIntermediate(void) {
 // SM2MAIN:c573
 // Signature: [] -> []
 void ClearBuffersDrawIcon(void) {
-  if (OperMode == 0) {
+  if (OperMode == OM_TITLESCREEN) {
     // NES note: Zeros out pages $0300 and $0400
     for (int i = 0; i < 256; i++) {
       VRAM_Page[i] = 0;
@@ -1231,7 +1198,7 @@ void OutputNumbers(const u8 param_1) {
 void DigitsMathRoutine(const u8 param_1) {
   // In SMB1 and SMB2J, DigitModifier is often accessed as DigitModifier-1.
 
-  if (OperMode != 0) {
+  if (OperMode != OM_TITLESCREEN) {
     for (int i = 6; i >= 1; i--) {
       u8 bVar1 = DigitModifier_Minus1[i] + DisplayDigits[param_1 + i - 6];
       if (bVar1 < 0x80) {
@@ -1468,7 +1435,7 @@ void SecondaryGameSetup(void) {
 // SM2MAIN:6f2d
 // Signature: [] -> []
 void GetAreaMusic(void) {
-  if (OperMode == 0) {
+  if (OperMode == OM_TITLESCREEN) {
     return;
   }
 
@@ -1601,7 +1568,7 @@ void PlayerLoseLife(void) {
   NumberofLives -= 1;
   if (NumberofLives >= 0x80) {
     OperMode_Task = 0;
-    OperMode = 3;
+    OperMode = OM_GAMEOVER;
     return;
   }
   u8 bVar1 = WorldNumber * 2;
@@ -1623,27 +1590,20 @@ void PlayerLoseLife(void) {
 }
 
 
-enum GameOverMode_jumptable_item {
-  GAMEOVERMODE_SETUPGAMEOVER,
-  GAMEOVERMODE_SCREENROUTINES,
-  GAMEOVERMODE_RUNGAMEOVER,
-};
-
-
 // SMB:9218
 // SM2MAIN:7057
 // Signature: [] -> []
 void GameOverMode(void) {
   switch (OperMode_Task) {
-  case GAMEOVERMODE_SETUPGAMEOVER:
+  case OMT_GAMEOVER_SETUPGAMEOVER:
     SetupGameOver();
     return;
 
-  case GAMEOVERMODE_SCREENROUTINES:
+  case OMT_GAMEOVER_SCREENROUTINES:
     ScreenRoutines();
     return;
 
-  case GAMEOVERMODE_RUNGAMEOVER:
+  case OMT_GAMEOVER_RUNGAMEOVER:
     RunGameOver();
     return;
 
@@ -1708,7 +1668,7 @@ void TerminateGame(void) {
 #endif
   OperMode_Task = 0;
   ScreenTimer = 0;
-  OperMode = 0;
+  OperMode = OM_TITLESCREEN;
 }
 
 
@@ -1723,7 +1683,7 @@ void ContinueGame(void) {
   PlayerStatus = 0;
   GameEngineSubroutine = 0;
   OperMode_Task = 0;
-  OperMode = 1;
+  OperMode = OM_GAME;
 }
 
 
@@ -1739,40 +1699,29 @@ void KillEnemies(const u8 param_1) {
 }
 
 
-enum GameMode_jumptable_item {
-#ifdef SMB2J_MODE
-  GAMEMODE_GAMEMODEDISKROUTINES,
-#endif
-  GAMEMODE_INITIALIZEAREA,
-  GAMEMODE_SCREENROUTINES,
-  GAMEMODE_SECONDARYGAMESETUP,
-  GAMEMODE_GAMECOREROUTINE,
-};
-
-
 // SMB:aedc
 // SM2MAIN:7a37
 // Signature: [] -> []
 void GameMode(void) {
   switch (OperMode_Task) {
-  case GAMEMODE_INITIALIZEAREA:
+  case OMT_GAME_INITIALIZEAREA:
     InitializeArea();
     return;
 
-  case GAMEMODE_SCREENROUTINES:
+  case OMT_GAME_SCREENROUTINES:
     ScreenRoutines();
     return;
 
-  case GAMEMODE_SECONDARYGAMESETUP:
+  case OMT_GAME_SECONDARYGAMESETUP:
     SecondaryGameSetup();
     return;
 
-  case GAMEMODE_GAMECOREROUTINE:
+  case OMT_GAME_GAMECOREROUTINE:
     GameCoreRoutine();
     return;
 
 #ifdef SMB2J_MODE
-  case GAMEMODE_GAMEMODEDISKROUTINES:
+  case OMT_GAME_GAMEMODEDISKROUTINES:
     GameModeDiskRoutines();
     return;
 #endif
@@ -2956,7 +2905,7 @@ void RunGameTimer(void) {
   bool cond = Player_Y_HighPos < 2;
   cond |= ssw(false, Player_Y_HighPos >= 0x82);
 
-  if ((((OperMode != 0) && (GameEngineSubroutine >= 8)) && (GameEngineSubroutine != 0xb))
+  if ((((OperMode != OM_TITLESCREEN) && (GameEngineSubroutine >= 8)) && (GameEngineSubroutine != 0xb))
       && ((cond && (GameTimerCtrlTimer == 0)))) {
     bVar1 = GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2];
     if (bVar1 != 0) {
@@ -8197,7 +8146,7 @@ static void HandleAxeMetatile(const u16 mt_x, const u16 mt_y) {
   // Reworked to use metatile coordinates instead of pointer
 
   OperMode_Task = 0;
-  OperMode = 2;
+  OperMode = OM_VICTORY;
 #ifdef SMB2J_MODE
   LoadMarioPhysics();
 #endif

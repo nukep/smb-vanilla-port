@@ -40,7 +40,7 @@ void SMB1_Reset() {
   }
 
   InitializeMemory(initialize_upto);
-  OperMode = 0;
+  OperMode = OM_TITLESCREEN;
   apu_dmc_raw(0);
   WarmBootValidation = 0xa5;
   PseudoRandomBitReg[0] = 0xa5;
@@ -172,7 +172,7 @@ void SMB1_NMI() {
 // SMB:86ff
 // Signature: [] -> []
 void DrawTitleScreen() {
-  if (OperMode == 0) {
+  if (OperMode == OM_TITLESCREEN) {
     // The drawing data for the title screen is stored in CHR ROM!
     for (int i = 0; i < 0x13A; i++) {
       VRAM_SMB1_TitleScreen[i] = CHRROM(0x1EC0 + i);
