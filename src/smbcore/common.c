@@ -1480,7 +1480,7 @@ void Entrance_GameTimerSetup(void) {
   VerticalForceDown = 0x28;
   PlayerFacingDir = 1;
   Player_Y_HighPos = 1;
-  Player_State = 0;
+  Player_State = PLAYERSTATE_ONGROUND;
   Player_CollisionBits -= 1;
   HalfwayPage = 0;
   SwimmingFlag = AreaType == 0;
@@ -1542,7 +1542,7 @@ void Entrance_GameTimerSetup(void) {
   }
 
   if (JoypadOverride != 0) {
-    Player_State = 3;
+    Player_State = PLAYERSTATE_CLIMBING;
     InitBlock_XY_Pos(0);
     Block_Y_Position[0] = 0xf0;
     Setup_Vine(5, 0);
@@ -1985,7 +1985,7 @@ void PlayerEntrance(void) {
       DisableCollisionDet = Player_Y_Position > 0x98;
       bVar1 = 1;
       if (DisableCollisionDet != 0) {
-        Player_State = 3;
+        Player_State = PLAYERSTATE_CLIMBING;
         bVar1 = 8;
         set_metatile(4, 11, MT_MOUNTAIN_R);
       }
@@ -2045,7 +2045,7 @@ void PlayerCtrlRoutine(void) {
     A_B_Buttons = SavedJoypadBits[0] & (BUTTON_A | BUTTON_B);
     Up_Down_Buttons = SavedJoypadBits[0] & (BUTTON_U | BUTTON_D);
     Left_Right_Buttons = SavedJoypadBits[0] & (BUTTON_L | BUTTON_R);
-    if ((((SavedJoypadBits[0] & BUTTON_D) != 0) && (Player_State == 0)) && (Left_Right_Buttons != 0)) {
+    if ((((SavedJoypadBits[0] & BUTTON_D) != 0) && (Player_State == PLAYERSTATE_ONGROUND)) && (Left_Right_Buttons != 0)) {
       Left_Right_Buttons = 0;
       Up_Down_Buttons = 0;
     }
@@ -2118,7 +2118,7 @@ void Vine_AutoClimb(void) {
     SetEntr();
   } else {
     JoypadOverride = 8;
-    Player_State = 3;
+    Player_State = PLAYERSTATE_CLIMBING;
     AutoControlPlayer(8);
   }
 }
@@ -2373,14 +2373,6 @@ void NextArea(void) {
 }
 
 
-enum PlayerMovementSubs_jumptable_item {
-  PLAYERMOVEMENTSUBS_ONGROUNDSTATESUB,
-  PLAYERMOVEMENTSUBS_JUMPSWIMSUB,
-  PLAYERMOVEMENTSUBS_FALLINGSUB,
-  PLAYERMOVEMENTSUBS_CLIMBINGSUB,
-};
-
-
 // SMB:b329
 // SM2MAIN:7e90
 // Signature: [] -> []
@@ -2388,7 +2380,7 @@ void PlayerMovementSubs(void) {
   u8 bVar1 = 0;
   if (PlayerSize == 0) {
     bVar1 = CrouchingFlag;
-    if (Player_State == 0) {
+    if (Player_State == PLAYERSTATE_ONGROUND) {
       bVar1 = Up_Down_Buttons & BUTTON_D;
     }
   }
@@ -2397,24 +2389,24 @@ void PlayerMovementSubs(void) {
   if (PlayerChangeSizeFlag != 0) {
     return;
   }
-  if (Player_State != 3) {
+  if (Player_State != PLAYERSTATE_CLIMBING) {
     ClimbSideTimer = 0x18;
   }
 
   switch (Player_State) {
-  case PLAYERMOVEMENTSUBS_ONGROUNDSTATESUB:
+  case PLAYERSTATE_ONGROUND:
     OnGroundStateSub();
     return;
 
-  case PLAYERMOVEMENTSUBS_JUMPSWIMSUB:
+  case PLAYERSTATE_JUMPSWIM:
     JumpSwimSub();
     return;
 
-  case PLAYERMOVEMENTSUBS_FALLINGSUB:
+  case PLAYERSTATE_FALLING:
     FallingSub();
     return;
 
-  case PLAYERMOVEMENTSUBS_CLIMBINGSUB:
+  case PLAYERSTATE_CLIMBING:
     ClimbingSub();
     return;
 
@@ -2523,7 +2515,7 @@ void ClimbingSub(void) {
 // SM2MAIN:7fbc
 // Signature: [] -> []
 void PlayerPhysicsSub(void) {
-  if (Player_State == 3) {
+  if (Player_State == PLAYERSTATE_CLIMBING) {
     if (((Up_Down_Buttons & Player_CollisionBits) == 0)) {
       Player_Y_MoveForce = 0;
       Player_Y_Speed = 0;
@@ -2543,12 +2535,12 @@ void PlayerPhysicsSub(void) {
 
   const bool button_a_newly_pressed = ((A_B_Buttons & BUTTON_A) != 0) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0);
   if ((JumpspringAnimCtrl == 0) && button_a_newly_pressed) {
-    if (Player_State == 0 || (SwimmingFlag != 0 && (JumpSwimTimer != 0 || (Player_Y_Speed < 0x80)))) {
+    if (Player_State == PLAYERSTATE_ONGROUND || (SwimmingFlag != 0 && (JumpSwimTimer != 0 || (Player_Y_Speed < 0x80)))) {
       JumpSwimTimer = 0x20;
       Player_YMF_Dummy = 0;
       JumpOrigin_Y_HighPos = Player_Y_HighPos;
       JumpOrigin_Y_Position = Player_Y_Position;
-      Player_State = 1;
+      Player_State = PLAYERSTATE_JUMPSWIM;
 
       u8 bVar1;
       if (SwimmingFlag == 0) {
@@ -2612,7 +2604,7 @@ void PlayerPhysicsSub(void) {
   const bool holding_b = (A_B_Buttons & BUTTON_B) != 0;
   const bool running = same_direction && holding_b;
 
-  if (Player_State == 0) {
+  if (Player_State == PLAYERSTATE_ONGROUND) {
     // ProcPRun
     if ((AreaType != 0)) {
       if (running) {
@@ -2628,7 +2620,7 @@ void PlayerPhysicsSub(void) {
     bVar1 = 0;
   }
 
-  bVar2 = (Player_State == 0 && AreaType == 0) ? 1 : 0;
+  bVar2 = (Player_State == PLAYERSTATE_ONGROUND && AreaType == 0) ? 1 : 0;
 
   if (bVar1) {
     bVar2 += 1;
@@ -2753,7 +2745,7 @@ void ProcFireball_Bubble(void) {
         if (Fireball_State[FireballCounter & 1] == 0) {
           if (Player_Y_HighPos == 1) {
             if (CrouchingFlag == 0) {
-              if (Player_State != 3) {
+              if (Player_State != PLAYERSTATE_CLIMBING) {
                 Square1SoundQueue = 0x20;
                 Fireball_State[FireballCounter & 1] = 2;
                 FireballThrowingTimer = PlayerAnimTimerSet;
@@ -3045,7 +3037,7 @@ void FlagpoleRoutine(void) {
   static const u8 score_digits[5] = { 3, 3, 4, 4, 4 };
   static const u8 score_mods[5]   = { 5, 2, 8, 4, 1 };
 
-  if ((GameEngineSubroutine == GR_FLAGPOLESLIDE) && (Player_State == 3)) {
+  if ((GameEngineSubroutine == GR_FLAGPOLESLIDE) && (Player_State == PLAYERSTATE_CLIMBING)) {
     if ((Enemy_Y_Position[5] >= 0xaa) || (Player_Y_Position >= 0xa2)) {
       if (SMB2J_ONLY && FlagpoleScore == 5) {
         NumberofLives += 1;
@@ -4218,12 +4210,12 @@ void ProcLoopCommand(const u8 objoff) {
           continue;
         }
 
-        if (Player_Y_Position == LoopCmdYPosition[idx] && Player_State == 0) {
+        if (Player_Y_Position == LoopCmdYPosition[idx] && Player_State == PLAYERSTATE_ONGROUND) {
           MultiLoopCorrectCntr += 1;
         }
 
         if (SMB1_ONLY && WorldNumber != 6) {
-          if (Player_Y_Position != LoopCmdYPosition[idx] || Player_State != 0) {
+          if (Player_Y_Position != LoopCmdYPosition[idx] || Player_State != PLAYERSTATE_ONGROUND) {
             ExecGameLoopback(idx);
             KillAllEnemies();
           }
@@ -7545,7 +7537,7 @@ void HandlePowerUpCollision(const u8 objoff) {
   } else if (PlayerStatus == 0) {
     PlayerStatus = 1;
     GameEngineSubroutine = GR_PLAYERCHANGESIZE;
-    Player_State = 0;
+    Player_State = PLAYERSTATE_ONGROUND;
     TimerControl = 0xff;
     ScrollAmount = 0;
   } else if (PlayerStatus != 1) {
@@ -7554,7 +7546,7 @@ void HandlePowerUpCollision(const u8 objoff) {
     PlayerStatus = 2;
     GetPlayerColors();
     GameEngineSubroutine = GR_PLAYERFIREFLOWER;
-    Player_State = 0;
+    Player_State = PLAYERSTATE_ONGROUND;
     TimerControl = 0xff;
     ScrollAmount = 0;
   }
@@ -7838,7 +7830,7 @@ void ForceInjury(const u8 param_1) {
     GetPlayerColors();
     GameEngineSubroutine = GR_PLAYERINJURYBLINK;
   }
-  Player_State = 1;
+  Player_State = PLAYERSTATE_JUMPSWIM;
   TimerControl = 0xff;
   ScrollAmount = 0;
 }
@@ -8095,7 +8087,7 @@ void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, c
       tmp3 = param_1;
     }
     PlatformCollisionFlag[objoff] = tmp3;
-    Player_State = 0;
+    Player_State = PLAYERSTATE_ONGROUND;
     return;
   }
 
@@ -8214,11 +8206,11 @@ void PlayerBGCollision(void) {
   }
 
   if (SwimmingFlag == 0) {
-    if ((Player_State == 0) || (Player_State == 3)) {
-      Player_State = 2;
+    if ((Player_State == PLAYERSTATE_ONGROUND) || (Player_State == PLAYERSTATE_CLIMBING)) {
+      Player_State = PLAYERSTATE_FALLING;
     }
   } else {
-    Player_State = 1;
+    Player_State = PLAYERSTATE_JUMPSWIM;
   }
 
   if (Player_Y_HighPos != 1) {
@@ -8329,7 +8321,7 @@ void PlayerBGCollision(void) {
             Player_Y_MoveForce = 0;
             StompChainCounter = 0;
           }
-          Player_State = 0;
+          Player_State = PLAYERSTATE_ONGROUND;
         }
       }
     }
@@ -8410,7 +8402,7 @@ static void CheckSideMTiles(const u8 dir, const u8 bVar5, const u8 bVar2, const 
     if (JumpspringAnimCtrl != 0) {
       return;
     }
-  } else if ((Player_State == 0) && (PlayerFacingDir == 1) && ((bVar5 == MT_WATERPIPE_B || (bVar5 == MT_PIPE_SIDEWAYS_BL)))) {
+  } else if ((Player_State == PLAYERSTATE_ONGROUND) && (PlayerFacingDir == 1) && ((bVar5 == MT_WATERPIPE_B || (bVar5 == MT_PIPE_SIDEWAYS_BL)))) {
     if (Player_SprAttrib == 0) {
       Square1SoundQueue = 0x10;
     }
@@ -8477,7 +8469,7 @@ void HandleClimbing(const u8 param_1, const u8 param_2, const u16 mt_x) {
   } else if ((param_1 == MT_SPECIAL_VINE) && (Player_Y_Position < 0x20)) {
     GameEngineSubroutine = GR_VINE_AUTOCLIMB;
   }
-  Player_State = 3;
+  Player_State = PLAYERSTATE_CLIMBING;
   Player_X_Speed = 0;
   Player_X_MoveForce = 0;
   if ((u8)(Player_X_Position - ScreenLeft_X_Pos) < 0x10) {
@@ -10716,7 +10708,7 @@ void PlayerGfxHandler(void) {
       FindPlayerAction();
       return;
     }
-    if (Player_State == 0) {
+    if (Player_State == PLAYERSTATE_ONGROUND) {
       FindPlayerAction();
       return;
     }
@@ -10854,16 +10846,16 @@ void DrawPlayerLoop(const u8 param_1, const u8 sproff, const u8 ypos, const u8 f
 u8 ProcessPlayerAction(void) {
   u8 bVar1;
 
-  if (Player_State == 3) {
+  if (Player_State == PLAYERSTATE_CLIMBING) {
     bVar1 = 5;
     if (Player_Y_Speed != 0) {
       return ThreeFrameExtent(GetGfxOffsetAdder(5));
     }
   } else {
-    if (Player_State == 2) {
+    if (Player_State == PLAYERSTATE_FALLING) {
       return GetCurrentAnimOffset(GetGfxOffsetAdder(4));
     }
-    if (Player_State == 1) {
+    if (Player_State == PLAYERSTATE_JUMPSWIM) {
       if (SwimmingFlag != 0) {
         const u8 gfxoffsetadder = GetGfxOffsetAdder(1);
         if ((JumpSwimTimer | PlayerAnimCtrl) != 0) {

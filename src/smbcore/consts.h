@@ -300,6 +300,12 @@ static inline bool is_gameroutine_valid(const u8 gr) {
   return gr <= GR_PLAYERFIREFLOWER;
 }
 
+enum playerstate {
+  PLAYERSTATE_ONGROUND,
+  PLAYERSTATE_JUMPSWIM,
+  PLAYERSTATE_FALLING,
+  PLAYERSTATE_CLIMBING,
+};
 
 
 #endif
