@@ -11,7 +11,6 @@ void SMB1_NMI();
 #include "smbcore/smb1.h"
 #include "smbcore/types.h"
 
-void DrawTitleScreen();
 bool TransposePlayers();
 
 #define GameTimerDisplay GameTimerDisplaySMB1
@@ -40,7 +39,7 @@ void SMB1_Reset() {
   }
 
   InitializeMemory(initialize_upto);
-  OperMode = 0;
+  OperMode = OM_TITLESCREEN;
   apu_dmc_raw(0);
   WarmBootValidation = 0xa5;
   PseudoRandomBitReg[0] = 0xa5;
@@ -169,20 +168,6 @@ void SMB1_NMI() {
   draw_graphics(&sprites[0]);
 }
 
-// SMB:86ff
-// Signature: [] -> []
-void DrawTitleScreen() {
-  if (OperMode == 0) {
-    // The drawing data for the title screen is stored in CHR ROM!
-    for (int i = 0; i < 0x13A; i++) {
-      VRAM_SMB1_TitleScreen[i] = CHRROM(0x1EC0 + i);
-    }
-    VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB1_VRAM_PAGE;
-    ScreenRoutineTask += 1;
-  } else {
-    OperMode_Task += 1;
-  }
-}
 
 // Switch between Mario and Luigi.
 // Save and restore their states.

@@ -151,7 +151,7 @@ void SMB2J_Reset() {
   }
 
   InitializeMemory(initialize_upto);
-  OperMode = 0;
+  OperMode = OM_TITLESCREEN;
   apu_dmc_raw(0);
   WorldNumber = last_worldnumber;
   WarmBootValidation = 0xa5;
@@ -359,24 +359,24 @@ void UpdateGamesBeaten() {
   RAM(0x611d) = 0xa0;
 
   DiskIOTask = 0;
-  OperMode_Task = 0;
   if ((HardWorldFlag == 0) && (CompletedWorlds == 0xff)) {
     CompletedWorlds = 0;
     NumberofLives = 0;
     FantasyW9MsgFlag = 0;
     AreaNumber = 0;
     LevelNumber = 0;
-    OperMode_Task = 0;
     WorldNumber += 1;
     if (WorldNumber > 7) {
       WorldNumber = 8;
     }
     LoadAreaPointer();
     FetchNewGameTimerFlag += 1;
-    OperMode = 1;
+    OperMode = OM_GAME;
+    OperMode_Task = OMT_GAME_START;
   } else {
     CompletedWorlds = 0;
-    OperMode = 0;
+    OperMode = OM_TITLESCREEN;
+    OperMode_Task = OMT_TITLESCREEN_START;
     TitleScreenMode();
   }
 }

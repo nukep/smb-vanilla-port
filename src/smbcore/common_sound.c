@@ -1,3 +1,5 @@
+#include "consts.h"
+
 // The sound engine for SMB1 for SMB2J are nearly identical, with the exception of SMB2J's Wind and Skid sfxs.
 // There's also the FDS alternate sound engine, but that's only used for SMB2J's ending (not included here).
 
@@ -295,7 +297,7 @@ void NoiseSfxHandler(void) {
 // SM2MAIN:d2a0
 // Signature: [] -> []
 void SoundEngine(void) {
-  if (OperMode == 0) {
+  if (OperMode == OM_TITLESCREEN) {
     apu_snd_chn(0);
     return;
   }
@@ -306,8 +308,8 @@ void SoundEngine(void) {
     Square2SfxHandler();
     NoiseSfxHandler();
     MusicHandler();
-    AreaMusicQueue = 0;
-    EventMusicQueue = 0;
+    AreaMusicQueue = MUSIC_AREA_NONE;
+    EventMusicQueue = MUSIC_EVENT_NONE;
     SkipSoundSubroutines();
     return;
   }
@@ -355,9 +357,9 @@ void SoundEngine(void) {
 // SM2MAIN:d32d
 // Signature: [] -> []
 void SkipSoundSubroutines(void) {
-  Square1SoundQueue = 0;
-  Square2SoundQueue = 0;
-  NoiseSoundQueue = 0;
+  Square1SoundQueue = SOUND_SQ1_NONE;
+  Square2SoundQueue = SOUND_SQ2_NONE;
+  NoiseSoundQueue = SOUND_NOISE_NONE;
   PauseSoundQueue = 0;
 
   const u8 prev_counter = DAC_Counter;
@@ -884,11 +886,11 @@ void ContinueMusic(void) {
 // SM2MAIN:d6d0
 // Signature: [] -> []
 void MusicHandler(void) {
-  if (EventMusicQueue != 0) {
+  if (EventMusicQueue != MUSIC_EVENT_NONE) {
     LoadEventMusic(EventMusicQueue);
     return;
   }
-  if (AreaMusicQueue != 0) {
+  if (AreaMusicQueue != MUSIC_AREA_NONE) {
     LoadAreaMusic(AreaMusicQueue);
     return;
   }
@@ -910,8 +912,8 @@ void LoadEventMusic(const u8 param_1) {
   NoteLengthTblAdder = 0;
   AreaMusicBuffer = 0;
 
-  if (param_1 == 0x40) {
-    // The time-running-out music. Make the music play faster!
+  if (param_1 == MUSIC_EVENT_TIMERUNNINGOUT) {
+    // Make the music play faster!
     NoteLengthTblAdder = 8;
   }
   FindEventMusicHeader(param_1, 0);

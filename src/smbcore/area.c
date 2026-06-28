@@ -158,22 +158,6 @@ enum AreaStyleObject_jumptable_item {
 };
 
 
-// SMB:86e6
-// SM2MAIN:6659
-// Signature: [] -> []
-void AreaParserTaskControl(void) {
-  DisableScreenFlag += 1;
-  do {
-    AreaParserTaskHandler();
-  } while (AreaParserTaskNum != 0);
-  ColumnSets -= 1;
-  if (ColumnSets >= 0x80) {
-    ScreenRoutineTask += 1;
-  }
-  VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
-}
-
-
 // SMB:88ae
 // SM2MAIN:678b
 // Signature: [] -> []
@@ -438,7 +422,7 @@ void AreaParserCore(void) {
     MT_UNDERWATER_GROUND, MT_STONE, MT_BRICK, MT_CASTLE_INSIDE_WALL
   };
 
-  expect(AreaType < 4);
+  expect(is_areatype_valid(AreaType));
 
   // RendTerr
   {
@@ -449,7 +433,7 @@ void AreaParserCore(void) {
     }
 
     // Special exception for water levels in world 8
-    if ((AreaType == 0) && (WorldNumber == 7)) {
+    if ((AreaType == AREA_WATER) && (WorldNumber == 7)) {
       mt = MT_CASTLE_INSIDE_WALL;
     }
 
@@ -483,7 +467,7 @@ void AreaParserCore(void) {
     }
 
     for (int j = 0; j < 13; j++) {
-      if ((AreaType == 2) && (j >= 11)) {
+      if ((AreaType == AREA_UNDERGROUND) && (j >= 11)) {
         // For underground levels, replace the ground
         mt = MT_STONE;
       }
@@ -906,7 +890,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
     if (Hidden1UpFlag != 0) {
       Hidden1UpFlag = 0;
       // NES note: SMB2J indeed selects a star block for non-ground areas. Likely an oversight. Ultimately unused in official ROMs, though.
-      const u8 mt = AreaType == 1 ? MT_HIDDEN_1UP : ssw(MT_BRICK_2_1UP, MT_BRICK_2_STAR);
+      const u8 mt = AreaType == AREA_GROUND ? MT_HIDDEN_1UP : ssw(MT_BRICK_2_1UP, MT_BRICK_2_STAR);
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
@@ -914,7 +898,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
 
   case DECODEAREADATA_BRICK_POWERUP:
     {
-      const u8 mt = AreaType == 1 ? MT_BRICK_2_POWERUP : MT_BRICK_POWERUP;
+      const u8 mt = AreaType == AREA_GROUND ? MT_BRICK_2_POWERUP : MT_BRICK_POWERUP;
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
@@ -923,7 +907,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
 #ifdef SMB2J_MODE
   case DECODEAREADATA_BRICK_POISONSHROOM:
     {
-      const u8 mt = AreaType == 1 ? MT_BRICK_2_POISONSHROOM : MT_BRICK_POISONSHROOM;
+      const u8 mt = AreaType == AREA_GROUND ? MT_BRICK_2_POISONSHROOM : MT_BRICK_POISONSHROOM;
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
@@ -932,7 +916,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
 
   case DECODEAREADATA_BRICK_VINE:
     {
-      const u8 mt = AreaType == 1 ? MT_BRICK_2_VINE : MT_BRICK_VINE;
+      const u8 mt = AreaType == AREA_GROUND ? MT_BRICK_2_VINE : MT_BRICK_VINE;
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
@@ -940,7 +924,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
 
   case DECODEAREADATA_BRICK_STAR:
     {
-      const u8 mt = AreaType == 1 ? MT_BRICK_2_STAR : MT_BRICK_STAR;
+      const u8 mt = AreaType == AREA_GROUND ? MT_BRICK_2_STAR : MT_BRICK_STAR;
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
@@ -948,7 +932,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
 
   case DECODEAREADATA_BRICK_1UP:
     {
-      const u8 mt = AreaType == 1 ? MT_BRICK_2_1UP : MT_BRICK_1UP;
+      const u8 mt = AreaType == AREA_GROUND ? MT_BRICK_2_1UP : MT_BRICK_1UP;
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
@@ -957,7 +941,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
   case DECODEAREADATA_BRICKWITHCOINS:
     {
       BrickCoinTimerFlag = 0;
-      const u8 mt = AreaType == 1 ? MT_BRICK_2_COINS : MT_BRICK_COINS;
+      const u8 mt = AreaType == AREA_GROUND ? MT_BRICK_2_COINS : MT_BRICK_COINS;
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
     }
@@ -1505,7 +1489,7 @@ void BalancePlatRope(const u8 param_1) {
 // SM2MAIN:7839
 // Signature: [X] -> []
 void RowOfCoins(const u8 param_1) {
-  const u8 metatile = AreaType != 0 ? MT_COIN : MT_COIN_UNDERWATER;
+  const u8 metatile = AreaType != AREA_WATER ? MT_COIN : MT_COIN_UNDERWATER;
   const struct_ycr07 sVar1 = ChkLrgObjLength(param_1);
   RenderUnderPart(metatile, sVar1.r07, 0);
 }
@@ -1524,7 +1508,7 @@ void EmptyBlock(const u8 param_1) {
 // SM2MAIN:7875
 // Signature: [X] -> []
 void RowOfBricks(const u8 param_1) {
-  expect(AreaType < 4);
+  expect(is_areatype_valid(AreaType));
   u8 bVar1 = AreaType;
   if (CloudTypeOverride != 0) {
     bVar1 = 4;
@@ -1540,7 +1524,7 @@ void RowOfBricks(const u8 param_1) {
 // SM2MAIN:7885
 // Signature: [X] -> []
 void RowOfSolidBlocks(const u8 param_1) {
-  expect(AreaType < 4);
+  expect(is_areatype_valid(AreaType));
   static const u8 metatiles[4] = { MT_UNDERWATER_GROUND, MT_STAIR_BLOCK, MT_STAIR_BLOCK, MT_CASTLE_INSIDE_WALL };
   const u8 mt = metatiles[AreaType];
   const struct_ycr07 sVar1 = ChkLrgObjLength(param_1);
@@ -1552,7 +1536,7 @@ void RowOfSolidBlocks(const u8 param_1) {
 // SM2MAIN:7897
 // Signature: [X] -> []
 void ColumnOfBricks(const u8 param_1) {
-  expect(AreaType < 4);
+  expect(is_areatype_valid(AreaType));
   static const u8 metatiles[4] = { MT_CORAL, MT_BRICK_2, MT_BRICK, MT_BRICK };
   const u8 mt = metatiles[AreaType];
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
@@ -1564,7 +1548,7 @@ void ColumnOfBricks(const u8 param_1) {
 // SM2MAIN:78a0
 // Signature: [X] -> []
 void ColumnOfSolidBlocks(const u8 param_1) {
-  expect(AreaType < 4);
+  expect(is_areatype_valid(AreaType));
   static const u8 metatiles[4] = { MT_UNDERWATER_GROUND, MT_STAIR_BLOCK, MT_STAIR_BLOCK, MT_CASTLE_INSIDE_WALL };
   const u8 mt = metatiles[AreaType];
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
@@ -1644,7 +1628,7 @@ void Jumpspring(const u8 param_1) {
 void Hole_Empty(const u8 param_1) {
   const struct_ycr07 sVar3 = ChkLrgObjLength(param_1);
   const u8 bVar2 = sVar3.y;
-  if ((sVar3.c) && (AreaType == 0)) {
+  if ((sVar3.c) && (AreaType == AREA_WATER)) {
     const u8 x = GetAreaObjXPosition();
 
     Whirlpool_X_Position[Cannon_Or_Whirlpool_Offset] = x - 0x10;
@@ -1657,7 +1641,7 @@ void Hole_Empty(const u8 param_1) {
     }
   }
 
-  const u8 metatile = AreaType != 0 ? MT_0 : MT_WATER_BLANK;
+  const u8 metatile = AreaType != AREA_WATER ? MT_0 : MT_WATER_BLANK;
 
   RenderUnderPart(metatile, 8, 0xf);
 }
@@ -1959,7 +1943,7 @@ static inline u8 ScrollLockObject_Warp_smb2j_impl(void) {
   }
 
   if (HardWorldFlag == 0 && WorldNumber == 0) {
-    if (AreaType == 1) {
+    if (AreaType == AREA_GROUND) {
       return 0x81;
     }
 
@@ -1979,7 +1963,7 @@ static inline u8 ScrollLockObject_Warp_smb2j_impl(void) {
       return 0x84;
     }
 
-    if (AreaType != 1) {
+    if (AreaType != AREA_GROUND) {
       return 0x85;
     }
 
@@ -1997,7 +1981,7 @@ void ScrollLockObject_Warp(void) {
 #ifdef SMB1_MODE
   if (WorldNumber == 0) {
     WarpZoneControl = 4;
-  } else if (AreaType != 1) {
+  } else if (AreaType != AREA_GROUND) {
     WarpZoneControl = 5;
   } else {
     WarpZoneControl = 6;

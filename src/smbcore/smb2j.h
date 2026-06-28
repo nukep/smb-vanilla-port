@@ -74,9 +74,6 @@ void smb2j_VictoryModeSubroutines(void);
 void smb2j_SetupVictoryMode(void);
 #define SetupVictoryMode smb2j_SetupVictoryMode
 
-void smb2j_DrawTitleScreen(void);
-#define DrawTitleScreen smb2j_DrawTitleScreen
-
 void smb2j_PlayerVictoryWalk(void);
 #define PlayerVictoryWalk smb2j_PlayerVictoryWalk
 
@@ -98,9 +95,6 @@ void smb2j_ScreenRoutines(void);
 void smb2j_InitScreen(void);
 #define InitScreen smb2j_InitScreen
 
-void smb2j_InitScreenPalette(void);
-#define InitScreenPalette smb2j_InitScreenPalette
-
 void smb2j_SetupIntermediate(void);
 #define SetupIntermediate smb2j_SetupIntermediate
 
@@ -113,26 +107,14 @@ void smb2j_GetBackgroundColor(void);
 void smb2j_GetPlayerColors(void);
 #define GetPlayerColors smb2j_GetPlayerColors
 
-void smb2j_GetAlternatePalette1(void);
-#define GetAlternatePalette1 smb2j_GetAlternatePalette1
-
-void smb2j_WriteTopStatusLine(void);
-#define WriteTopStatusLine smb2j_WriteTopStatusLine
-
 void smb2j_WriteBottomStatusLine(void);
 #define WriteBottomStatusLine smb2j_WriteBottomStatusLine
-
-void smb2j_DisplayTimeUp(void);
-#define DisplayTimeUp smb2j_DisplayTimeUp
 
 void smb2j_DisplayIntermediate(void);
 #define DisplayIntermediate smb2j_DisplayIntermediate
 
 void smb2j_WriteGameText(u8 param_1);
 #define WriteGameText smb2j_WriteGameText
-
-void smb2j_ResetSpritesAndScreenTimer(void);
-#define ResetSpritesAndScreenTimer smb2j_ResetSpritesAndScreenTimer
 
 void smb2j_ResetScreenTimer(void);
 #define ResetScreenTimer smb2j_ResetScreenTimer
@@ -749,23 +731,14 @@ void smb2j_RunStarFlagObj(u8 param_1);
 void smb2j_GameTimerFireworks(u8 param_1);
 #define GameTimerFireworks smb2j_GameTimerFireworks
 
-void smb2j_AwardGameTimerPoints(u8 param_1);
-#define AwardGameTimerPoints smb2j_AwardGameTimerPoints
-
 void smb2j_AwardTimerCastle(void);
 #define AwardTimerCastle smb2j_AwardTimerCastle
 
 void smb2j_EndAreaPoints(void);
 #define EndAreaPoints smb2j_EndAreaPoints
 
-void smb2j_RaiseFlagSetoffFWorks(u8 param_1);
-#define RaiseFlagSetoffFWorks smb2j_RaiseFlagSetoffFWorks
-
 void smb2j_DrawStarFlag(u8 param_1);
 #define DrawStarFlag smb2j_DrawStarFlag
-
-void smb2j_DelayToAreaEnd(u8 param_1);
-#define DelayToAreaEnd smb2j_DelayToAreaEnd
 
 void smb2j_MovePiranhaPlant(u8 param_1);
 #define MovePiranhaPlant smb2j_MovePiranhaPlant
@@ -839,11 +812,8 @@ void smb2j_PlayerEnemyCollision(u8 param_1);
 void smb2j_InjurePlayer(void);
 #define InjurePlayer smb2j_InjurePlayer
 
-void smb2j_ForceInjury(u8 param_1);
+void smb2j_ForceInjury(void);
 #define ForceInjury smb2j_ForceInjury
-
-void smb2j_SetPRout(u8 param_1,u8 param_2);
-#define SetPRout smb2j_SetPRout
 
 void smb2j_SetBounce(u8 param_1);
 #define SetBounce smb2j_SetBounce
@@ -1166,18 +1136,6 @@ void smb2j_GameModeDiskRoutines(void);
 void smb2j_LoadWorlds5Thru8(void);
 #define LoadWorlds5Thru8 smb2j_LoadWorlds5Thru8
 
-void smb2j_ResetDiskIOTask(void);
-#define ResetDiskIOTask smb2j_ResetDiskIOTask
-
-void smb2j_VMDelay(void);
-#define VMDelay smb2j_VMDelay
-
-void smb2j_StartVMDelay(void);
-#define StartVMDelay smb2j_StartVMDelay
-
-void smb2j_ContinueVMDelay(void);
-#define ContinueVMDelay smb2j_ContinueVMDelay
-
 void smb2j_VictoryModeDiskRoutines(void);
 #define VictoryModeDiskRoutines smb2j_VictoryModeDiskRoutines
 
@@ -1223,17 +1181,8 @@ void smb2j_DrawMushroomIcon(void);
 bool smb2j_DemoEngine(void);
 #define DemoEngine smb2j_DemoEngine
 
-void smb2j_ClearBuffersDrawIcon(void);
-#define ClearBuffersDrawIcon smb2j_ClearBuffersDrawIcon
-
-void smb2j_WriteTopScore(void);
-#define WriteTopScore smb2j_WriteTopScore
-
 void smb2j_InitializeGame(void);
 #define InitializeGame smb2j_InitializeGame
-
-void smb2j_DemoReset(void);
-#define DemoReset smb2j_DemoReset
 
 void smb2j_PrimaryGameSetup(void);
 #define PrimaryGameSetup smb2j_PrimaryGameSetup
@@ -1252,12 +1201,6 @@ void smb2j_SimulateWind(void);
 
 void smb2j_ScreenSubsForFinalRoom(void);
 #define ScreenSubsForFinalRoom smb2j_ScreenSubsForFinalRoom
-
-void smb2j_DrawFinalRoom(void);
-#define DrawFinalRoom smb2j_DrawFinalRoom
-
-void smb2j_RevealPrincess(void);
-#define RevealPrincess smb2j_RevealPrincess
 
 void smb2j_PrintVictoryMsgsForWorld8(void);
 #define PrintVictoryMsgsForWorld8 smb2j_PrintVictoryMsgsForWorld8

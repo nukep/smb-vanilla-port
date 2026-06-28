@@ -101,35 +101,14 @@ void smb1_GetBackgroundColor(void);
 void smb1_GetPlayerColors(void);
 #define GetPlayerColors smb1_GetPlayerColors
 
-void smb1_GetAlternatePalette1(void);
-#define GetAlternatePalette1 smb1_GetAlternatePalette1
-
-void smb1_WriteTopStatusLine(void);
-#define WriteTopStatusLine smb1_WriteTopStatusLine
-
 void smb1_WriteBottomStatusLine(void);
 #define WriteBottomStatusLine smb1_WriteBottomStatusLine
-
-void smb1_DisplayTimeUp(void);
-#define DisplayTimeUp smb1_DisplayTimeUp
 
 void smb1_DisplayIntermediate(void);
 #define DisplayIntermediate smb1_DisplayIntermediate
 
-void smb1_ClearBuffersDrawIcon(void);
-#define ClearBuffersDrawIcon smb1_ClearBuffersDrawIcon
-
-void smb1_WriteTopScore(void);
-#define WriteTopScore smb1_WriteTopScore
-
 void smb1_WriteGameText(u8 param_1);
 #define WriteGameText smb1_WriteGameText
-
-void smb1_ResetSpritesAndScreenTimer(void);
-#define ResetSpritesAndScreenTimer smb1_ResetSpritesAndScreenTimer
-
-void smb1_ResetScreenTimer(void);
-#define ResetScreenTimer smb1_ResetScreenTimer
 
 void smb1_ColorRotation(void);
 #define ColorRotation smb1_ColorRotation
@@ -169,9 +148,6 @@ void smb1_TopScoreCheck(u8 param_1);
 
 void smb1_InitializeGame(void);
 #define InitializeGame smb1_InitializeGame
-
-void smb1_DemoReset(void);
-#define DemoReset smb1_DemoReset
 
 void smb1_InitializeArea(void);
 #define InitializeArea smb1_InitializeArea
@@ -752,23 +728,14 @@ void smb1_RunStarFlagObj(u8 param_1);
 void smb1_GameTimerFireworks(u8 param_1);
 #define GameTimerFireworks smb1_GameTimerFireworks
 
-void smb1_AwardGameTimerPoints(u8 param_1);
-#define AwardGameTimerPoints smb1_AwardGameTimerPoints
-
 void smb1_AwardTimerCastle(void);
 #define AwardTimerCastle smb1_AwardTimerCastle
 
 void smb1_EndAreaPoints(void);
 #define EndAreaPoints smb1_EndAreaPoints
 
-void smb1_RaiseFlagSetoffFWorks(u8 param_1);
-#define RaiseFlagSetoffFWorks smb1_RaiseFlagSetoffFWorks
-
 void smb1_DrawStarFlag(u8 param_1);
 #define DrawStarFlag smb1_DrawStarFlag
-
-void smb1_DelayToAreaEnd(u8 param_1);
-#define DelayToAreaEnd smb1_DelayToAreaEnd
 
 void smb1_MovePiranhaPlant(u8 param_1);
 #define MovePiranhaPlant smb1_MovePiranhaPlant
@@ -842,11 +809,8 @@ void smb1_PlayerEnemyCollision(u8 param_1);
 void smb1_InjurePlayer(void);
 #define InjurePlayer smb1_InjurePlayer
 
-void smb1_ForceInjury(u8 param_1);
+void smb1_ForceInjury(void);
 #define ForceInjury smb1_ForceInjury
-
-void smb1_SetPRout(u8 param_1,u8 param_2);
-#define SetPRout smb1_SetPRout
 
 void smb1_ChkEnemyFaceRight(u8 param_1);
 #define ChkEnemyFaceRight smb1_ChkEnemyFaceRight
