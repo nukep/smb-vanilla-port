@@ -731,23 +731,14 @@ void smb2j_RunStarFlagObj(u8 param_1);
 void smb2j_GameTimerFireworks(u8 param_1);
 #define GameTimerFireworks smb2j_GameTimerFireworks
 
-void smb2j_AwardGameTimerPoints(u8 param_1);
-#define AwardGameTimerPoints smb2j_AwardGameTimerPoints
-
 void smb2j_AwardTimerCastle(void);
 #define AwardTimerCastle smb2j_AwardTimerCastle
 
 void smb2j_EndAreaPoints(void);
 #define EndAreaPoints smb2j_EndAreaPoints
 
-void smb2j_RaiseFlagSetoffFWorks(u8 param_1);
-#define RaiseFlagSetoffFWorks smb2j_RaiseFlagSetoffFWorks
-
 void smb2j_DrawStarFlag(u8 param_1);
 #define DrawStarFlag smb2j_DrawStarFlag
-
-void smb2j_DelayToAreaEnd(u8 param_1);
-#define DelayToAreaEnd smb2j_DelayToAreaEnd
 
 void smb2j_MovePiranhaPlant(u8 param_1);
 #define MovePiranhaPlant smb2j_MovePiranhaPlant

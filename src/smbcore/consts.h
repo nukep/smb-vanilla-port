@@ -318,4 +318,13 @@ static inline bool is_areatype_valid(const u8 areatype) {
   return areatype <= AREA_CASTLE;
 }
 
+enum starflagtaskcontrol {
+  STARFLAGTASK_IDLE,
+  STARFLAGTASK_GAMETIMERFIREWORKS,
+  STARFLAGTASK_AWARDGAMETIMERPOINTS,
+  STARFLAGTASK_RAISEFLAGSETOFFFWORKS,
+  STARFLAGTASK_DELAYTOAREAEND,
+  STARFLAGTASK_DONE
+};
+
 #endif

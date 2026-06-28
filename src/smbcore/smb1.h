@@ -728,23 +728,14 @@ void smb1_RunStarFlagObj(u8 param_1);
 void smb1_GameTimerFireworks(u8 param_1);
 #define GameTimerFireworks smb1_GameTimerFireworks
 
-void smb1_AwardGameTimerPoints(u8 param_1);
-#define AwardGameTimerPoints smb1_AwardGameTimerPoints
-
 void smb1_AwardTimerCastle(void);
 #define AwardTimerCastle smb1_AwardTimerCastle
 
 void smb1_EndAreaPoints(void);
 #define EndAreaPoints smb1_EndAreaPoints
 
-void smb1_RaiseFlagSetoffFWorks(u8 param_1);
-#define RaiseFlagSetoffFWorks smb1_RaiseFlagSetoffFWorks
-
 void smb1_DrawStarFlag(u8 param_1);
 #define DrawStarFlag smb1_DrawStarFlag
-
-void smb1_DelayToAreaEnd(u8 param_1);
-#define DelayToAreaEnd smb1_DelayToAreaEnd
 
 void smb1_MovePiranhaPlant(u8 param_1);
 #define MovePiranhaPlant smb1_MovePiranhaPlant

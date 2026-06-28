@@ -2329,12 +2329,12 @@ void PlayerEndLevel(void) {
   }
 #endif
   if ((Player_CollisionBits & 1) == 0) {
-    if (StarFlagTaskControl == 0) {
-      StarFlagTaskControl = 1;
+    if (StarFlagTaskControl == STARFLAGTASK_IDLE) {
+      StarFlagTaskControl = STARFLAGTASK_GAMETIMERFIREWORKS;
     }
     Player_SprAttrib = 0x20;
   }
-  if (StarFlagTaskControl != 5) {
+  if (StarFlagTaskControl != STARFLAGTASK_DONE) {
     return;
   }
   LevelNumber += 1;
@@ -6715,15 +6715,6 @@ void RunFireworks(const u8 objoff) {
 }
 
 
-enum RunStarFlagObj_jumptable_item {
-  RUNSTARFLAGOBJ_NOOP,
-  RUNSTARFLAGOBJ_GAMETIMERFIREWORKS,
-  RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS,
-  RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS,
-  RUNSTARFLAGOBJ_DELAYTOAREAEND,
-};
-
-
 // SMB:d2d9
 // SM2MAIN:9f0e
 // Signature: [X] -> []
@@ -6731,28 +6722,38 @@ void RunStarFlagObj(const u8 objoff) {
   EnemyFrenzyBuffer = 0;
 
   switch (StarFlagTaskControl) {
-  case RUNSTARFLAGOBJ_NOOP:
-    // NES note: goes to "StarFlagExit" (a no-op)
-    return;
-
-  case RUNSTARFLAGOBJ_GAMETIMERFIREWORKS:
+  case STARFLAGTASK_GAMETIMERFIREWORKS:
     GameTimerFireworks(objoff);
+    StarFlagTaskControl = STARFLAGTASK_AWARDGAMETIMERPOINTS;
     return;
 
-  case RUNSTARFLAGOBJ_AWARDGAMETIMERPOINTS:
-    AwardGameTimerPoints(objoff);
+  case STARFLAGTASK_AWARDGAMETIMERPOINTS:
+    if ((GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2]) != 0) {
+      AwardTimerCastle();
+    } else {
+      StarFlagTaskControl = STARFLAGTASK_RAISEFLAGSETOFFFWORKS;
+    }
     return;
 
-  case RUNSTARFLAGOBJ_RAISEFLAGSETOFFFWORKS:
-    RaiseFlagSetoffFWorks(objoff);
+  case STARFLAGTASK_RAISEFLAGSETOFFFWORKS:
+    if (Enemy_Y_Position[objoff] >= 0x72) {
+      Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
+      DrawStarFlag(objoff);
+    } else if ((FireworksCounter != 0) && (FireworksCounter < 0x80)) {
+      EnemyFrenzyBuffer = A_FIREWORKS;
+      DrawStarFlag(objoff);
+    } else {
+      DrawStarFlag(objoff);
+      EnemyIntervalTimer[objoff] = 6;
+      StarFlagTaskControl = STARFLAGTASK_DELAYTOAREAEND;
+    }
     return;
 
-  case RUNSTARFLAGOBJ_DELAYTOAREAEND:
-    DelayToAreaEnd(objoff);
-    return;
-
-  default:
-    // No jmpengine_overflow() warning here, because the original NES version takes care of it!
+  case STARFLAGTASK_DELAYTOAREAEND:
+    DrawStarFlag(objoff);
+    if ((EnemyIntervalTimer[objoff] == 0) && (EventMusicBuffer == 0)) {
+      StarFlagTaskControl = STARFLAGTASK_DONE;
+    }
     return;
   }
 }
@@ -6796,19 +6797,7 @@ void GameTimerFireworks(const u8 objoff) {
   }
 #endif
 
-  StarFlagTaskControl += 1;
-}
-
-
-// SMB:d312
-// SM2MAIN:9f4c
-// Signature: [X] -> []
-void AwardGameTimerPoints(const u8 objoff) {
-  if ((GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2]) != 0) {
-    AwardTimerCastle();
-  } else {
-    StarFlagTaskControl += 1;
-  }
+  // Note: StarFlagTaskControl increment moved to caller
 }
 
 
@@ -6842,26 +6831,6 @@ void EndAreaPoints(void) {
 }
 
 
-// SMB:d34e
-// SM2MAIN:9f7a
-// Signature: [X] -> []
-void RaiseFlagSetoffFWorks(const u8 objoff) {
-  if (Enemy_Y_Position[objoff] >= 0x72) {
-    Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
-    DrawStarFlag(objoff);
-    return;
-  }
-  if ((FireworksCounter != 0) && (FireworksCounter < 0x80)) {
-    EnemyFrenzyBuffer = A_FIREWORKS;
-    DrawStarFlag(objoff);
-    return;
-  }
-  DrawStarFlag(objoff);
-  EnemyIntervalTimer[objoff] = 6;
-  StarFlagTaskControl += 1;
-}
-
-
 // SMB:d365
 // SM2MAIN:9f91
 // Signature: [X] -> []
@@ -6878,17 +6847,6 @@ void DrawStarFlag(const u8 objoff) {
     SPRITE_Y_strict(bVar2, 3-i)        = Enemy_Rel_YPos + ypos_lookup[i];
     SPRITE_TILE_semistrict(bVar2, 3-i) = tile_lookup[i];
     SPRITE_ATTR_semistrict(bVar2, 3-i) = SPRATTR_DRAWBEHIND | 2;
-  }
-}
-
-
-// SMB:d3a2
-// SM2MAIN:9fce
-// Signature: [X] -> []
-void DelayToAreaEnd(const u8 objoff) {
-  DrawStarFlag(objoff);
-  if ((EnemyIntervalTimer[objoff] == 0) && (EventMusicBuffer == 0)) {
-    StarFlagTaskControl += 1;
   }
 }
 
