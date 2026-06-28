@@ -74,20 +74,6 @@ void jumptable_VictoryModeSubroutines_forW8(const u8 param_1) {
 }
 
 
-// SM2MAIN:632a
-// Signature: [] -> []
-void DrawTitleScreen(void) {
-  if (OperMode == OM_TITLESCREEN) {
-    VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_TITLESCREENGFXDATA;
-    ScreenRoutineTask += 1;
-  } else {
-    expect(OperMode == OM_GAME);
-    expect(OperMode_Task == OMT_GAME_SCREENROUTINES);
-    OperMode_Task = OMT_GAME_SECONDARYGAMESETUP;
-  }
-}
-
-
 // SM2MAIN:636d
 // Signature: [] -> []
 void PrintVictoryMessages(void) {
@@ -139,14 +125,6 @@ void EndCastleAward(void) {
       }
     }
   }
-}
-
-
-// SM2MAIN:64f6
-// Signature: [] -> []
-void InitScreenPalette(void) {
-  VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA;
-  ScreenRoutineTask += 1;
 }
 
 
@@ -809,77 +787,57 @@ void SimulateWind(void) {
 }
 
 
-enum ScreenSubsForFinalRoom_jumptable_item {
-  SCREENSUBSFORFINALROOM_INITSCREENPALETTE,
-  SCREENSUBSFORFINALROOM_WRITETOPSTATUSLINE,
-  SCREENSUBSFORFINALROOM_WRITEBOTTOMSTATUSLINE,
-  SCREENSUBSFORFINALROOM_DRAWFINALROOM,
-  SCREENSUBSFORFINALROOM_GETAREAPALETTE,
-  SCREENSUBSFORFINALROOM_GETBACKGROUNDCOLOR,
-  SCREENSUBSFORFINALROOM_REVEALPRINCESS,
-};
-
-
 // SM2DATA3:c5fe
 // Signature: [] -> []
 void ScreenSubsForFinalRoom(void) {
   switch (ScreenRoutineTask) {
-  case SCREENSUBSFORFINALROOM_INITSCREENPALETTE:
-    InitScreenPalette();
+  case SRT_W8SMB2J_INITSCREENPALETTE:
+    VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA;
+    ScreenRoutineTask = SRT_W8SMB2J_WRITETOPSTATUSLINE;
     return;
 
-  case SCREENSUBSFORFINALROOM_WRITETOPSTATUSLINE:
-    WriteTopStatusLine();
+  case SRT_W8SMB2J_WRITETOPSTATUSLINE:
+    WriteGameText(0);
+    ScreenRoutineTask = SRT_W8SMB2J_WRITEBOTTOMSTATUSLINE;
     return;
 
-  case SCREENSUBSFORFINALROOM_WRITEBOTTOMSTATUSLINE:
+  case SRT_W8SMB2J_WRITEBOTTOMSTATUSLINE:
     WriteBottomStatusLine();
+    ScreenRoutineTask = SRT_W8SMB2J_DRAWFINALROOM;
     return;
 
-  case SCREENSUBSFORFINALROOM_DRAWFINALROOM:
-    DrawFinalRoom();
+  case SRT_W8SMB2J_DRAWFINALROOM:
+    VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_PRINCESSPEACHSROOM;
+    IRQUpdateFlag = 0x1b;
+    ScreenRoutineTask = SRT_W8SMB2J_GETAREAPALETTE;
     return;
 
-  case SCREENSUBSFORFINALROOM_GETAREAPALETTE:
+  case SRT_W8SMB2J_GETAREAPALETTE:
     GetAreaPalette();
+    ScreenRoutineTask = SRT_W8SMB2J_GETBACKGROUNDCOLOR;
     return;
 
-  case SCREENSUBSFORFINALROOM_GETBACKGROUNDCOLOR:
+  case SRT_W8SMB2J_GETBACKGROUNDCOLOR:
     GetBackgroundColor();
+    ScreenRoutineTask = SRT_W8SMB2J_REVEALPRINCESS;
     return;
 
-  case SCREENSUBSFORFINALROOM_REVEALPRINCESS:
-    RevealPrincess();
+  case SRT_W8SMB2J_REVEALPRINCESS:
+    PrintStatusBarNumbers(0xa2);
+    RAM(0x611d) = 0x5f;
+    AreaMusicQueue = 1;
+    Left_Right_Buttons = 0;
+    NameTableSelect = 0;
+    IRQUpdateFlag = 0;
+    DisableScreenFlag = 0;
+    expect(OperMode == OM_VICTORY);
+    expect(OperMode_Task == OMT_VICTORY_W8SMB2J_SCREENSUBSFORFINALROOM);
+    OperMode_Task = OMT_VICTORY_W8SMB2J_PRINTVICTORYMSGSFORWORLD8;
     return;
 
   default:
     jmpengine_overflow(ScreenRoutineTask);
   }
-}
-
-
-// SM2DATA3:c612
-// Signature: [] -> []
-void DrawFinalRoom(void) {
-  VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_PRINCESSPEACHSROOM;
-  IRQUpdateFlag = 0x1b;
-  ScreenRoutineTask += 1;
-}
-
-
-// SM2DATA3:c61e
-// Signature: [] -> []
-void RevealPrincess(void) {
-  PrintStatusBarNumbers(0xa2);
-  RAM(0x611d) = 0x5f;
-  AreaMusicQueue = 1;
-  Left_Right_Buttons = 0;
-  NameTableSelect = 0;
-  IRQUpdateFlag = 0;
-  DisableScreenFlag = 0;
-  expect(OperMode == OM_VICTORY);
-  expect(OperMode_Task == OMT_VICTORY_W8SMB2J_SCREENSUBSFORFINALROOM);
-  OperMode_Task = OMT_VICTORY_W8SMB2J_PRINTVICTORYMSGSFORWORLD8;
 }
 
 
@@ -1139,7 +1097,7 @@ void MushroomRetainersForW8(void) {
 // SM2DATA3:c858
 // Signature: [] -> []
 void WriteNameToVictoryMsg(void) {
-  ScreenRoutineTask = 0;
+  ScreenRoutineTask = SRT_INITSCREEN;
   if (CurrentPlayer == 0) {
     for (int i = 0; i < 5; i++) {
       ThankYouMessageFinal[i + 0xd] = EndPlayerName_Mario[i];

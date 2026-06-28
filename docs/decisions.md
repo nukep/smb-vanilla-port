@@ -85,3 +85,14 @@ This had to be refactored for a few reasons:
 As a bonus, `mt_x` is an area-wide coordinate, and not confined to the wrapping behavior of the buffer. The resolved buffer offset is the same as the original because the calculation takes `mt_x % 32` - but this can be changed. This should make it more amenable to enhancement ports.
 
 
+## State machine increments are made explicit
+
+The original game implements global state machines in integer variables such as
+OperMode, OperMode_Task, and ScreenRoutineTask.
+The game would advance the state machines by incrementing the values for these variables.
+
+This port replaces increments of these variables with explicit assignments, to make searching for states possible.
+
+e.g. Instead of `OperMode_Task += 1`, we might have `OperMode_Task = OMT_GAMEOVER_RUNGAMEOVER`.
+
+To do this, the assignment usually has to happen at the caller or the caller's caller.

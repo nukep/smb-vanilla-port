@@ -10,7 +10,6 @@ static void GetAreaDataAddrs(void);
 static void AltHard_GetAreaDataAddrs(void);
 #endif
 
-static void AreaParserTaskControl(void);
 static void AreaParserTaskHandler(void);
 
 #endif

@@ -613,92 +613,142 @@ void FloateyNumbersRoutine(const u8 objoff) {
 }
 
 
-enum ScreenRoutines_jumptable_item {
-  SCREENROUTINES_INITSCREEN,
-  SCREENROUTINES_SETUPINTERMEDIATE,
-  SCREENROUTINES_WRITETOPSTATUSLINE,
-  SCREENROUTINES_WRITEBOTTOMSTATUSLINE,
-  SCREENROUTINES_DISPLAYTIMEUP,
-  SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1,
-  SCREENROUTINES_DISPLAYINTERMEDIATE,
-#ifdef SMB2J_MODE
-  SCREENROUTINES_DEMORESET,
-#endif
-  SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2,
-  SCREENROUTINES_AREAPARSERTASKCONTROL,
-  SCREENROUTINES_GETAREAPALETTE,
-  SCREENROUTINES_GETBACKGROUNDCOLOR,
-  SCREENROUTINES_GETALTERNATEPALETTE1,
-  SCREENROUTINES_DRAWTITLESCREEN,
-  SCREENROUTINES_CLEARBUFFERSDRAWICON,
-  SCREENROUTINES_WRITETOPSCORE,
-};
-
-
 // SMB:8567
 // SM2MAIN:64c5
 // Signature: [] -> []
 void ScreenRoutines(void) {
   switch (ScreenRoutineTask) {
-  case SCREENROUTINES_INITSCREEN:
+  case SRT_INITSCREEN:
     InitScreen();
+    ScreenRoutineTask = SRT_SETUPINTERMEDIATE;
     return;
 
-  case SCREENROUTINES_SETUPINTERMEDIATE:
+  case SRT_SETUPINTERMEDIATE:
     SetupIntermediate();
+    ScreenRoutineTask = SRT_WRITETOPSTATUSLINE;
     return;
 
-  case SCREENROUTINES_WRITETOPSTATUSLINE:
-    WriteTopStatusLine();
+  case SRT_WRITETOPSTATUSLINE:
+    WriteGameText(0);
+    ScreenRoutineTask = SRT_WRITEBOTTOMSTATUSLINE;
     return;
 
-  case SCREENROUTINES_WRITEBOTTOMSTATUSLINE:
+  case SRT_WRITEBOTTOMSTATUSLINE:
     WriteBottomStatusLine();
+    ScreenRoutineTask = SRT_DISPLAYTIMEUP;
     return;
 
-  case SCREENROUTINES_DISPLAYTIMEUP:
-    DisplayTimeUp();
+  case SRT_DISPLAYTIMEUP:
+    if (GameTimerExpiredFlag != 0) {
+      GameTimerExpiredFlag = 0;
+      WriteGameText(2);
+      // Inlined: ResetScreenTimer
+      ScreenTimer = 7;
+      ScreenRoutineTask = SRT_RESETSPRITESANDSCREENTIMER_1;
+      DisableScreenFlag = 0;
+    } else {
+      ScreenRoutineTask = SRT_DISPLAYINTERMEDIATE;
+    }
     return;
 
-  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_1:
-  case SCREENROUTINES_RESETSPRITESANDSCREENTIMER_2:
-    ResetSpritesAndScreenTimer();
+  case SRT_RESETSPRITESANDSCREENTIMER_1:
+    if (ScreenTimer == 0) {
+      MoveAllSpritesOffscreen();
+      // Inlined: ResetScreenTimer
+      ScreenTimer = 7;
+      ScreenRoutineTask = SRT_DISPLAYINTERMEDIATE;
+    }
     return;
 
-  case SCREENROUTINES_DISPLAYINTERMEDIATE:
+  case SRT_DISPLAYINTERMEDIATE:
     DisplayIntermediate();
     return;
 
-  case SCREENROUTINES_AREAPARSERTASKCONTROL:
-    AreaParserTaskControl();
+  case SRT_RESETSPRITESANDSCREENTIMER_2:
+    if (ScreenTimer == 0) {
+      MoveAllSpritesOffscreen();
+      // Inlined: ResetScreenTimer
+      ScreenTimer = 7;
+      ScreenRoutineTask = SRT_AREAPARSERTASKCONTROL;
+    }
     return;
 
-  case SCREENROUTINES_GETAREAPALETTE:
+  case SRT_AREAPARSERTASKCONTROL:
+    DisableScreenFlag += 1;
+    do {
+      AreaParserTaskHandler();
+    } while (AreaParserTaskNum != 0);
+    ColumnSets -= 1;
+    if (ColumnSets >= 0x80) {
+      ScreenRoutineTask = SRT_GETAREAPALETTE;
+    }
+    VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
+    return;
+
+  case SRT_GETAREAPALETTE:
     GetAreaPalette();
+    ScreenRoutineTask = SRT_GETBACKGROUNDCOLOR;
     return;
 
-  case SCREENROUTINES_GETBACKGROUNDCOLOR:
+  case SRT_GETBACKGROUNDCOLOR:
     GetBackgroundColor();
+    ScreenRoutineTask = SRT_GETALTERNATEPALETTE1;
     return;
 
-  case SCREENROUTINES_GETALTERNATEPALETTE1:
-    GetAlternatePalette1();
+  case SRT_GETALTERNATEPALETTE1:
+    if (AreaStyle == 1) {
+      VRAM_Buffer_AddrCtrl = ADDRCTRL_MUSHROOMPALETTEDATA;
+    }
+    ScreenRoutineTask = SRT_DRAWTITLESCREEN;
     return;
 
-  case SCREENROUTINES_DRAWTITLESCREEN:
-    DrawTitleScreen();
+  case SRT_DRAWTITLESCREEN:
+    if (OperMode == OM_TITLESCREEN) {
+#ifdef SMB1_MODE
+      // The drawing data for the title screen is stored in CHR ROM!
+      for (int i = 0; i < 0x13A; i++) {
+        VRAM_SMB1_TitleScreen[i] = CHRROM(0x1EC0 + i);
+      }
+      VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB1_VRAM_PAGE;
+#endif
+#ifdef SMB2J_MODE
+      VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_TITLESCREENGFXDATA;
+#endif
+      ScreenRoutineTask = SRT_CLEARBUFFERSDRAWICON;
+    } else {
+      expect(OperMode == OM_GAME);
+      expect(OperMode_Task == OMT_GAME_SCREENROUTINES);
+      OperMode_Task = OMT_GAME_SECONDARYGAMESETUP;
+    }
     return;
 
-  case SCREENROUTINES_CLEARBUFFERSDRAWICON:
-    ClearBuffersDrawIcon();
+  case SRT_CLEARBUFFERSDRAWICON:
+    if (OperMode != OM_TITLESCREEN) {
+      unreachable();
+
+      // Note: The original game increments the opermode task on non-titlescreen opermodes.
+      // However, it seems to never be encountered
+      // OperMode_Task += 1;
+    }
+
+    // NES note: Zeros out pages $0300 and $0400
+    for (int i = 0; i < 256; i++) {
+      VRAM_Page[i] = 0;
+      Objects_Page[i] = 0;
+    }
+    DrawMushroomIcon();
+    ScreenRoutineTask = SRT_WRITETOPSCORE;
     return;
 
-  case SCREENROUTINES_WRITETOPSCORE:
-    WriteTopScore();
+  case SRT_WRITETOPSCORE:
+    expect(OperMode == OM_TITLESCREEN);
+    expect(OperMode_Task == OMT_TITLESCREEN_SCREENROUTINES);
+    WriteDigits(0xfa);
+    OperMode_Task = OMT_TITLESCREEN_PRIMARYGAMESETUP;
     return;
 
 #ifdef SMB2J_MODE
-  case SCREENROUTINES_DEMORESET:
+  case SRT_DEMORESET:
     DemoTimer = 0x18;
     LoadAreaPointer();
     InitializeArea();
@@ -728,7 +778,7 @@ void InitScreen(void) {
   if (OperMode != OM_TITLESCREEN) {
     VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA;
   }
-  ScreenRoutineTask += 1;
+  // Note: Moved ScreenRoutineTask increment to caller
 }
 
 
@@ -743,7 +793,7 @@ void SetupIntermediate(void) {
   GetPlayerColors();
   PlayerStatus = bVar1;
   BackgroundColorCtrl = bStack0000;
-  ScreenRoutineTask += 1;
+  // Note: Moved ScreenRoutineTask increment to caller
 }
 
 
@@ -764,7 +814,7 @@ void GetAreaPalette(void) {
 
   VRAM_Buffer_AddrCtrl = addrctrl;
 
-  ScreenRoutineTask += 1;
+  // Note: Moved ScreenRoutineTask increment to caller
 }
 
 
@@ -787,7 +837,7 @@ void GetBackgroundColor(void) {
     VRAM_Buffer_AddrCtrl = addrctrl;
   }
 
-  ScreenRoutineTask += 1;
+  // Note: Moved ScreenRoutineTask increment to caller
   GetPlayerColors();
 }
 
@@ -848,26 +898,6 @@ void GetPlayerColors(void) {
 }
 
 
-// SMB:8643
-// SM2MAIN:6598
-// Signature: [] -> []
-void GetAlternatePalette1(void) {
-  if (AreaStyle == 1) {
-    VRAM_Buffer_AddrCtrl = ADDRCTRL_MUSHROOMPALETTEDATA;
-  }
-  ScreenRoutineTask += 1;
-}
-
-
-// SMB:8652
-// SM2MAIN:65a7
-// Signature: [] -> []
-void WriteTopStatusLine(void) {
-  WriteGameText(0);
-  ScreenRoutineTask += 1;
-}
-
-
 // SMB:865a
 // SM2MAIN:65af
 // Signature: [] -> []
@@ -889,22 +919,7 @@ void WriteBottomStatusLine(void) {
              0x28,
              level_number_display);
 
-  ScreenRoutineTask += 1;
-}
-
-
-// SMB:8693
-// SM2MAIN:65f8
-// Signature: [] -> []
-void DisplayTimeUp(void) {
-  if (GameTimerExpiredFlag != 0) {
-    GameTimerExpiredFlag = 0;
-    WriteGameText(2);
-    ResetScreenTimer();
-    DisableScreenFlag = 0;
-  } else {
-    ScreenRoutineTask += 2;
-  }
+  // Note: Moved ScreenRoutineTask increment to caller
 }
 
 
@@ -913,6 +928,7 @@ void DisplayTimeUp(void) {
 // Signature: [] -> []
 void DisplayIntermediate(void) {
   if (OperMode == OM_GAMEOVER) {
+
     expect(OperMode_Task == OMT_GAMEOVER_SCREENROUTINES);
 #ifdef SMB1_MODE
     ScreenTimer = 0x12;
@@ -924,82 +940,42 @@ void DisplayIntermediate(void) {
     if (WorldNumber != 8) {
       OperMode_Task = OMT_GAMEOVER_RUNGAMEOVER;
     } else {
-      ScreenRoutineTask += 1;
+      ScreenRoutineTask = SRT_DEMORESET;
     }
 #endif
-    return;
-  }
 
-  if (OperMode == OM_TITLESCREEN || AltEntranceControl != 0 || (AreaType != 3 && DisableIntermediate != 0)) {
-    ScreenRoutineTask = ssw(8, 9);
-    return;
-  }
+  } else if (OperMode == OM_TITLESCREEN) {
 
-  DrawPlayer_Intermediate();
-  WriteGameText(1);
-  ResetScreenTimer();
-  DisableScreenFlag = 0;
+    expect(OperMode_Task == OMT_TITLESCREEN_SCREENROUTINES);
+    ScreenRoutineTask = SRT_AREAPARSERTASKCONTROL;
+
+  } else if (OperMode == OM_GAME) {
+
+    expect(OperMode_Task == OMT_GAME_SCREENROUTINES);
+
+    if (AltEntranceControl != 0 || (AreaType != 3 && DisableIntermediate != 0)) {
+      ScreenRoutineTask = SRT_AREAPARSERTASKCONTROL;
+      return;
+    }
+
+    DrawPlayer_Intermediate();
+    WriteGameText(1);
+    // Inlined: ResetScreenTimer
+    ScreenTimer = 7;
+    DisableScreenFlag = 0;
+
+    ScreenRoutineTask = SRT_RESETSPRITESANDSCREENTIMER_2;
 
 #ifdef SMB2J_MODE
-  if (WorldNumber != 8) {
-    ScreenRoutineTask += 1;
-  } else {
-    DisableScreenFlag += 1;
-  }
-#endif
-}
-
-
-// SMB:8732
-// SM2MAIN:c573
-// Signature: [] -> []
-void ClearBuffersDrawIcon(void) {
-  if (OperMode == OM_TITLESCREEN) {
-    // NES note: Zeros out pages $0300 and $0400
-    for (int i = 0; i < 256; i++) {
-      VRAM_Page[i] = 0;
-      Objects_Page[i] = 0;
+    if (WorldNumber == 8) {
+      ScreenRoutineTask = SRT_DEMORESET;
+      DisableScreenFlag += 1;
     }
-    DrawMushroomIcon();
-    ScreenRoutineTask += 1;
+
+#endif
   } else {
     unreachable();
-
-    // Note: The original game increments the opermode task on non-titlescreen opermodes.
-    // However, it seems to never be encountered
-    // OperMode_Task += 1;
   }
-}
-
-
-// SMB:8749
-// SM2MAIN:c58a
-// Signature: [] -> []
-void WriteTopScore(void) {
-  WriteDigits(0xfa);
-  expect(OperMode == OM_TITLESCREEN);
-  expect(OperMode_Task == OMT_TITLESCREEN_SCREENROUTINES);
-  OperMode_Task = OMT_TITLESCREEN_PRIMARYGAMESETUP;
-}
-
-
-// SMB:889d
-// SM2MAIN:677a
-// Signature: [] -> []
-void ResetSpritesAndScreenTimer(void) {
-  if (ScreenTimer == 0) {
-    MoveAllSpritesOffscreen();
-    ResetScreenTimer();
-  }
-}
-
-
-// SMB:88a5
-// SM2MAIN:6782
-// Signature: [] -> []
-void ResetScreenTimer(void) {
-  ScreenTimer = 7;
-  ScreenRoutineTask += 1;
 }
 
 
@@ -1650,7 +1626,7 @@ void GameOverMode(void) {
 // SM2MAIN:7063
 // Signature: [] -> []
 void SetupGameOver(void) {
-  ScreenRoutineTask = 0;
+  ScreenRoutineTask = SRT_INITSCREEN;
 #ifdef SMB1_MODE
   Sprite0HitDetectFlag = 0;
 #endif

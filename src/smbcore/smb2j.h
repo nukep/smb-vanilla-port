@@ -74,9 +74,6 @@ void smb2j_VictoryModeSubroutines(void);
 void smb2j_SetupVictoryMode(void);
 #define SetupVictoryMode smb2j_SetupVictoryMode
 
-void smb2j_DrawTitleScreen(void);
-#define DrawTitleScreen smb2j_DrawTitleScreen
-
 void smb2j_PlayerVictoryWalk(void);
 #define PlayerVictoryWalk smb2j_PlayerVictoryWalk
 
@@ -98,9 +95,6 @@ void smb2j_ScreenRoutines(void);
 void smb2j_InitScreen(void);
 #define InitScreen smb2j_InitScreen
 
-void smb2j_InitScreenPalette(void);
-#define InitScreenPalette smb2j_InitScreenPalette
-
 void smb2j_SetupIntermediate(void);
 #define SetupIntermediate smb2j_SetupIntermediate
 
@@ -113,26 +107,14 @@ void smb2j_GetBackgroundColor(void);
 void smb2j_GetPlayerColors(void);
 #define GetPlayerColors smb2j_GetPlayerColors
 
-void smb2j_GetAlternatePalette1(void);
-#define GetAlternatePalette1 smb2j_GetAlternatePalette1
-
-void smb2j_WriteTopStatusLine(void);
-#define WriteTopStatusLine smb2j_WriteTopStatusLine
-
 void smb2j_WriteBottomStatusLine(void);
 #define WriteBottomStatusLine smb2j_WriteBottomStatusLine
-
-void smb2j_DisplayTimeUp(void);
-#define DisplayTimeUp smb2j_DisplayTimeUp
 
 void smb2j_DisplayIntermediate(void);
 #define DisplayIntermediate smb2j_DisplayIntermediate
 
 void smb2j_WriteGameText(u8 param_1);
 #define WriteGameText smb2j_WriteGameText
-
-void smb2j_ResetSpritesAndScreenTimer(void);
-#define ResetSpritesAndScreenTimer smb2j_ResetSpritesAndScreenTimer
 
 void smb2j_ResetScreenTimer(void);
 #define ResetScreenTimer smb2j_ResetScreenTimer
@@ -1211,12 +1193,6 @@ void smb2j_DrawMushroomIcon(void);
 bool smb2j_DemoEngine(void);
 #define DemoEngine smb2j_DemoEngine
 
-void smb2j_ClearBuffersDrawIcon(void);
-#define ClearBuffersDrawIcon smb2j_ClearBuffersDrawIcon
-
-void smb2j_WriteTopScore(void);
-#define WriteTopScore smb2j_WriteTopScore
-
 void smb2j_InitializeGame(void);
 #define InitializeGame smb2j_InitializeGame
 
@@ -1237,12 +1213,6 @@ void smb2j_SimulateWind(void);
 
 void smb2j_ScreenSubsForFinalRoom(void);
 #define ScreenSubsForFinalRoom smb2j_ScreenSubsForFinalRoom
-
-void smb2j_DrawFinalRoom(void);
-#define DrawFinalRoom smb2j_DrawFinalRoom
-
-void smb2j_RevealPrincess(void);
-#define RevealPrincess smb2j_RevealPrincess
 
 void smb2j_PrintVictoryMsgsForWorld8(void);
 #define PrintVictoryMsgsForWorld8 smb2j_PrintVictoryMsgsForWorld8

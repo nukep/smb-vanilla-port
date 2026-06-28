@@ -101,35 +101,14 @@ void smb1_GetBackgroundColor(void);
 void smb1_GetPlayerColors(void);
 #define GetPlayerColors smb1_GetPlayerColors
 
-void smb1_GetAlternatePalette1(void);
-#define GetAlternatePalette1 smb1_GetAlternatePalette1
-
-void smb1_WriteTopStatusLine(void);
-#define WriteTopStatusLine smb1_WriteTopStatusLine
-
 void smb1_WriteBottomStatusLine(void);
 #define WriteBottomStatusLine smb1_WriteBottomStatusLine
-
-void smb1_DisplayTimeUp(void);
-#define DisplayTimeUp smb1_DisplayTimeUp
 
 void smb1_DisplayIntermediate(void);
 #define DisplayIntermediate smb1_DisplayIntermediate
 
-void smb1_ClearBuffersDrawIcon(void);
-#define ClearBuffersDrawIcon smb1_ClearBuffersDrawIcon
-
-void smb1_WriteTopScore(void);
-#define WriteTopScore smb1_WriteTopScore
-
 void smb1_WriteGameText(u8 param_1);
 #define WriteGameText smb1_WriteGameText
-
-void smb1_ResetSpritesAndScreenTimer(void);
-#define ResetSpritesAndScreenTimer smb1_ResetSpritesAndScreenTimer
-
-void smb1_ResetScreenTimer(void);
-#define ResetScreenTimer smb1_ResetScreenTimer
 
 void smb1_ColorRotation(void);
 #define ColorRotation smb1_ColorRotation

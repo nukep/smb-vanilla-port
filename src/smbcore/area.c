@@ -158,22 +158,6 @@ enum AreaStyleObject_jumptable_item {
 };
 
 
-// SMB:86e6
-// SM2MAIN:6659
-// Signature: [] -> []
-void AreaParserTaskControl(void) {
-  DisableScreenFlag += 1;
-  do {
-    AreaParserTaskHandler();
-  } while (AreaParserTaskNum != 0);
-  ColumnSets -= 1;
-  if (ColumnSets >= 0x80) {
-    ScreenRoutineTask += 1;
-  }
-  VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
-}
-
-
 // SMB:88ae
 // SM2MAIN:678b
 // Signature: [] -> []
