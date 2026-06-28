@@ -824,9 +824,6 @@ void smb2j_InjurePlayer(void);
 void smb2j_ForceInjury(u8 param_1);
 #define ForceInjury smb2j_ForceInjury
 
-void smb2j_SetPRout(u8 param_1,u8 param_2);
-#define SetPRout smb2j_SetPRout
-
 void smb2j_SetBounce(u8 param_1);
 #define SetBounce smb2j_SetBounce
 

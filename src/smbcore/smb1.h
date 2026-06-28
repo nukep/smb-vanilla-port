@@ -821,9 +821,6 @@ void smb1_InjurePlayer(void);
 void smb1_ForceInjury(u8 param_1);
 #define ForceInjury smb1_ForceInjury
 
-void smb1_SetPRout(u8 param_1,u8 param_2);
-#define SetPRout smb1_SetPRout
-
 void smb1_ChkEnemyFaceRight(u8 param_1);
 #define ChkEnemyFaceRight smb1_ChkEnemyFaceRight
 

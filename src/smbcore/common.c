@@ -116,7 +116,7 @@ void GameMenuRoutine(void) {
     }
 
     GameCoreRoutine();
-    if (GameEngineSubroutine == 6) {
+    if (GameEngineSubroutine == GR_PLAYERLOSELIFE) {
       GameMenuRoutine_ResetTitle();
     }
     return;
@@ -204,7 +204,7 @@ void GameMenuRoutine(void) {
   SavedJoypadBits[0] = 0;
 
   GameCoreRoutine();
-  if (GameEngineSubroutine == 6) {
+  if (GameEngineSubroutine == GR_PLAYERLOSELIFE) {
     GameMenuRoutine_ResetTitle();
   }
 }
@@ -1558,7 +1558,7 @@ void Entrance_GameTimerSetup(void) {
     SetupBubble_buggy(buggy_argument_1, buggy_argument_2);
   }
 
-  GameEngineSubroutine = 7;
+  GameEngineSubroutine = GR_PLAYERENTRANCE;
 }
 
 
@@ -1691,7 +1691,7 @@ void ContinueGame(void) {
   FetchNewGameTimerFlag += 1;
   TimerControl = 0;
   PlayerStatus = 0;
-  GameEngineSubroutine = 0;
+  GameEngineSubroutine = GR_ENTRANCE_GAMETIMERSETUP;
   OperMode = OM_GAME;
   OperMode_Task = OMT_GAME_START;
 }
@@ -1902,77 +1902,61 @@ u8 GetScreenPosition(void) {
 }
 
 
-enum GameRoutines_jumptable_item {
-  GAMEROUTINES_ENTRANCE_GAMETIMERSETUP,
-  GAMEROUTINES_VINE_AUTOCLIMB,
-  GAMEROUTINES_SIDEEXITPIPEENTRY,
-  GAMEROUTINES_VERTICALPIPEENTRY,
-  GAMEROUTINES_FLAGPOLESLIDE,
-  GAMEROUTINES_PLAYERENDLEVEL,
-  GAMEROUTINES_PLAYERLOSELIFE,
-  GAMEROUTINES_PLAYERENTRANCE,
-  GAMEROUTINES_PLAYERCTRLROUTINE,
-  GAMEROUTINES_PLAYERCHANGESIZE,
-  GAMEROUTINES_PLAYERINJURYBLINK,
-  GAMEROUTINES_PLAYERDEATH,
-  GAMEROUTINES_PLAYERFIREFLOWER,
-};
-
 
 // SMB:b04a
 // SM2MAIN:7ba2
 // Signature: [] -> []
 void GameRoutines(void) {
   switch (GameEngineSubroutine) {
-  case GAMEROUTINES_ENTRANCE_GAMETIMERSETUP:
+  case GR_ENTRANCE_GAMETIMERSETUP:
     Entrance_GameTimerSetup();
     return;
 
-  case GAMEROUTINES_VINE_AUTOCLIMB:
+  case GR_VINE_AUTOCLIMB:
     Vine_AutoClimb();
     return;
 
-  case GAMEROUTINES_SIDEEXITPIPEENTRY:
+  case GR_SIDEEXITPIPEENTRY:
     SideExitPipeEntry();
     return;
 
-  case GAMEROUTINES_VERTICALPIPEENTRY:
+  case GR_VERTICALPIPEENTRY:
     VerticalPipeEntry();
     return;
 
-  case GAMEROUTINES_FLAGPOLESLIDE:
+  case GR_FLAGPOLESLIDE:
     FlagpoleSlide();
     return;
 
-  case GAMEROUTINES_PLAYERENDLEVEL:
+  case GR_PLAYERENDLEVEL:
     PlayerEndLevel();
     return;
 
-  case GAMEROUTINES_PLAYERLOSELIFE:
+  case GR_PLAYERLOSELIFE:
     PlayerLoseLife();
     return;
 
-  case GAMEROUTINES_PLAYERENTRANCE:
+  case GR_PLAYERENTRANCE:
     PlayerEntrance();
     return;
 
-  case GAMEROUTINES_PLAYERCTRLROUTINE:
+  case GR_PLAYERCTRLROUTINE:
     PlayerCtrlRoutine();
     return;
 
-  case GAMEROUTINES_PLAYERCHANGESIZE:
+  case GR_PLAYERCHANGESIZE:
     PlayerChangeSize();
     return;
 
-  case GAMEROUTINES_PLAYERINJURYBLINK:
+  case GR_PLAYERINJURYBLINK:
     PlayerInjuryBlink();
     return;
 
-  case GAMEROUTINES_PLAYERDEATH:
+  case GR_PLAYERDEATH:
     PlayerDeath();
     return;
 
-  case GAMEROUTINES_PLAYERFIREFLOWER:
+  case GR_PLAYERFIREFLOWER:
     PlayerFireFlower();
     return;
 
@@ -2034,7 +2018,7 @@ void PlayerEntrance(void) {
   AltEntranceControl = 0;
   DisableCollisionDet = 0;
   PlayerFacingDir = 1;
-  GameEngineSubroutine = 8;
+  GameEngineSubroutine = GR_PLAYERCTRLROUTINE;
 }
 
 
@@ -2054,7 +2038,7 @@ void PlayerCtrlRoutine(void) {
   char cVar1;
   char cVar2;
 
-  if (GameEngineSubroutine != 0xb) {
+  if (GameEngineSubroutine != GR_PLAYERDEATH) {
     if ((AreaType == 0) && ((Player_Y_HighPos != 1 || (Player_Y_Position >= 0xd0)))) {
       SavedJoypadBits[0] = 0;
     }
@@ -2082,9 +2066,20 @@ void PlayerCtrlRoutine(void) {
   const u8 bVar3 = RelativePlayerPosition();
   BoundingBoxCore(0, bVar3);
   PlayerBGCollision();
-  if ((((Player_Y_Position >= 0x40) && (GameEngineSubroutine != 5)) && (GameEngineSubroutine != 7))
-      && (GameEngineSubroutine >= 4)) {
-    Player_SprAttrib &= 0xdf;
+  if (Player_Y_Position >= 0x40) {
+    expect(is_gameroutine_valid(GameEngineSubroutine));
+
+    switch (GameEngineSubroutine) {
+    case GR_FLAGPOLESLIDE:
+    case GR_PLAYERLOSELIFE:
+    case GR_PLAYERCTRLROUTINE:
+    case GR_PLAYERCHANGESIZE:
+    case GR_PLAYERINJURYBLINK:
+    case GR_PLAYERDEATH:
+    case GR_PLAYERFIREFLOWER:
+      Player_SprAttrib &= ~SPRATTR_DRAWBEHIND;
+      break;
+    }
   }
   if ((u8)(Player_Y_HighPos - 2) < 0x80) {
     ScrollLock = 1;
@@ -2092,7 +2087,7 @@ void PlayerCtrlRoutine(void) {
     cVar2 = 0;
     if (((GameTimerExpiredFlag != 0) || (CloudTypeOverride == 0))) {
       cVar2 = 1;
-      if (GameEngineSubroutine != 0xb) {
+      if (GameEngineSubroutine != GR_PLAYERDEATH) {
         if (DeathMusicLoaded == 0) {
           EventMusicQueue = 1;
           DeathMusicLoaded = 1;
@@ -2108,7 +2103,7 @@ void PlayerCtrlRoutine(void) {
         return;
       }
       if (EventMusicBuffer == 0) {
-        GameEngineSubroutine = 6;
+        GameEngineSubroutine = GR_PLAYERLOSELIFE;
       }
     }
   }
@@ -2264,7 +2259,7 @@ void PlayerDeath(void) {
 // Signature: [] -> []
 void DonePlayerTask(void) {
   TimerControl = 0;
-  GameEngineSubroutine = 8;
+  GameEngineSubroutine = GR_PLAYERCTRLROUTINE;
 }
 
 
@@ -2312,7 +2307,8 @@ void FlagpoleSlide(void) {
     }
     AutoControlPlayer(bVar1);
   } else {
-    GameEngineSubroutine += 1;
+    expect(GameEngineSubroutine == GR_FLAGPOLESLIDE);
+    GameEngineSubroutine = GR_PLAYERENDLEVEL;
   }
 }
 
@@ -2490,7 +2486,7 @@ void LRAir(void) {
     BlowPlayerAround();
   }
 #endif
-  if (GameEngineSubroutine == 0xb) {
+  if (GameEngineSubroutine == GR_PLAYERDEATH) {
     VerticalForce = 0x28;
   }
   MovePlayerVertically();
@@ -2647,7 +2643,7 @@ void PlayerPhysicsSub(void) {
   // getxphy
   MaximumLeftSpeed  = max_left_xspd_lookup[bVar2];
   MaximumRightSpeed = max_right_xspd_lookup[bVar2];
-  if (GameEngineSubroutine == 7) {
+  if (GameEngineSubroutine == GR_PLAYERENTRANCE) {
     MaximumRightSpeed = 12;
   }
 
@@ -2915,27 +2911,49 @@ void SetupBubble_buggy(const u8 buggy_argument_1, const u8 buggy_argument_2) {
 // SM2MAIN:82bb
 // Signature: [] -> []
 void RunGameTimer(void) {
-  u8 bVar1;
+  if (OperMode == OM_TITLESCREEN) {
+    return;
+  }
 
-  bool cond = Player_Y_HighPos < 2;
-  cond |= ssw(false, Player_Y_HighPos >= 0x82);
+  if (GameTimerCtrlTimer != 0) {
+    return;
+  }
 
-  if ((((OperMode != OM_TITLESCREEN) && (GameEngineSubroutine >= 8)) && (GameEngineSubroutine != 0xb))
-      && ((cond && (GameTimerCtrlTimer == 0)))) {
-    bVar1 = GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2];
-    if (bVar1 != 0) {
-      if ((GameTimerDisplay[0] == 1) && ((GameTimerDisplay[1] | GameTimerDisplay[2]) == 0)) {
+
+#ifdef SMB1_MODE
+  if (Player_Y_HighPos >= 2) {
+    return;
+  }
+#endif
+#ifdef SMB2J_MODE
+  if (Player_Y_HighPos >= 2 && Player_Y_HighPos < 0x82) {
+    return;
+  }
+#endif
+
+  expect(is_gameroutine_valid(GameEngineSubroutine));
+
+  // GameEngineSubroutine >= 8 and GameEngineSubroutine != 11
+  switch (GameEngineSubroutine) {
+  case GR_PLAYERCTRLROUTINE:
+  case GR_PLAYERCHANGESIZE:
+  case GR_PLAYERINJURYBLINK:
+  case GR_PLAYERFIREFLOWER:
+    const bool is_time_up = GameTimerDisplay[0] == 0 && GameTimerDisplay[1] == 0 && GameTimerDisplay[2] == 0;
+    if (is_time_up) {
+      PlayerStatus = 0;
+      ForceInjury(0);
+      GameTimerExpiredFlag += 1;
+    } else {
+      if (GameTimerDisplay[0] == 1 && GameTimerDisplay[1] == 0 && GameTimerDisplay[2] == 0) {
         EventMusicQueue = 0x40;
       }
       GameTimerCtrlTimer = 0x18;
       DigitModifier[5] = 0xff;
       DigitsMathRoutine(ssw(0x23, 0x17));
       PrintStatusBarNumbers(ssw(0xa4, 0xa2));
-      return;
     }
-    PlayerStatus = bVar1;
-    ForceInjury(0);
-    GameTimerExpiredFlag += 1;
+    break;
   }
 }
 
@@ -3027,7 +3045,7 @@ void FlagpoleRoutine(void) {
   static const u8 score_digits[5] = { 3, 3, 4, 4, 4 };
   static const u8 score_mods[5]   = { 5, 2, 8, 4, 1 };
 
-  if ((GameEngineSubroutine == 4) && (Player_State == 3)) {
+  if ((GameEngineSubroutine == GR_FLAGPOLESLIDE) && (Player_State == 3)) {
     if ((Enemy_Y_Position[5] >= 0xaa) || (Player_Y_Position >= 0xa2)) {
       if (SMB2J_ONLY && FlagpoleScore == 5) {
         NumberofLives += 1;
@@ -3037,7 +3055,7 @@ void FlagpoleRoutine(void) {
         DigitModifier[score_digits[FlagpoleScore]] = score_mods[FlagpoleScore];
         AddToScore();
       }
-      GameEngineSubroutine = 5;
+      GameEngineSubroutine = GR_PLAYERENDLEVEL;
     } else {
       const bool bVar3 = Player_Y_Position >= 0xa2;
       const u8 bVar1 = (Enemy_YMF_Dummy[5] - 1) + bVar3;
@@ -7526,13 +7544,19 @@ void HandlePowerUpCollision(const u8 objoff) {
     }
   } else if (PlayerStatus == 0) {
     PlayerStatus = 1;
-    SetPRout(9, 0);
+    GameEngineSubroutine = GR_PLAYERCHANGESIZE;
+    Player_State = 0;
+    TimerControl = 0xff;
+    ScrollAmount = 0;
   } else if (PlayerStatus != 1) {
     Square2SoundQueue = 0x20;
   } else {
     PlayerStatus = 2;
     GetPlayerColors();
-    SetPRout(0xc, 0);
+    GameEngineSubroutine = GR_PLAYERFIREFLOWER;
+    Player_State = 0;
+    TimerControl = 0xff;
+    ScrollAmount = 0;
   }
 }
 
@@ -7552,7 +7576,7 @@ void PlayerEnemyCollision(const u8 objoff) {
   if (EnemyOffscrBitsMasked[objoff] != 0) {
     return;
   }
-  if (GameEngineSubroutine != 8) {
+  if (GameEngineSubroutine != GR_PLAYERCTRLROUTINE) {
     return;
   }
   if ((Enemy_State[objoff] & 0x20) != 0) {
@@ -7802,30 +7826,19 @@ void InjurePlayer(void) {
 // SM2MAIN:a58f
 // Signature: [A] -> []
 void ForceInjury(const u8 param_1) {
-  u8 bVar1;
-
   if (PlayerStatus == 0) {
     EventMusicQueue = 1;
     Player_Y_Speed = 0xfc;
-    bVar1 = 0xb;
     Player_X_Speed = PlayerStatus;
+    GameEngineSubroutine = GR_PLAYERDEATH;
   } else {
     InjuryTimer = 8;
     Square1SoundQueue = 0x10;
     PlayerStatus = param_1;
     GetPlayerColors();
-    bVar1 = 10;
+    GameEngineSubroutine = GR_PLAYERINJURYBLINK;
   }
-  SetPRout(bVar1, 1);
-}
-
-
-// SMB:d948
-// SM2MAIN:a5a6
-// Signature: [A, Y] -> []
-void SetPRout(const u8 param_1, const u8 param_2) {
-  GameEngineSubroutine = param_1;
-  Player_State = param_2;
+  Player_State = 1;
   TimerControl = 0xff;
   ScrollAmount = 0;
 }
@@ -8102,7 +8115,7 @@ void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, c
 void PositionPlayerOnS_Plat(const u8 param_1, const u8 param_2) {
   expect(param_1 == 1 || param_1 == 2);
 
-  if ((GameEngineSubroutine != 0xb) && (Enemy_Y_HighPos[param_2] == 1)) {
+  if ((GameEngineSubroutine != GR_PLAYERDEATH) && (Enemy_Y_HighPos[param_2] == 1)) {
     u16 ypos = LOAD_16(Enemy_Y_HighPos[param_2],
                        Enemy_Y_Position[param_2] + (param_1 == 1 ? 0x80 : 0));
     ypos -= 32;
@@ -8119,7 +8132,7 @@ void PositionPlayerOnS_Plat(const u8 param_1, const u8 param_2) {
 // SM2MAIN:a896
 // Signature: [X] -> []
 void PositionPlayerOnVPlat(const u8 param_1) {
-  if ((GameEngineSubroutine != 0xb) && (Enemy_Y_HighPos[param_1] == 1)) {
+  if ((GameEngineSubroutine != GR_PLAYERDEATH) && (Enemy_Y_HighPos[param_1] == 1)) {
     Player_Y_Position = Enemy_Y_Position[param_1] - 0x20;
     Player_Y_HighPos = 1 - (Enemy_Y_Position[param_1] < 0x20);
     Player_Y_Speed = 0;
@@ -8189,10 +8202,14 @@ void PlayerBGCollision(void) {
   if (DisableCollisionDet != 0) {
     return;
   }
-  if (GameEngineSubroutine == 0xb) {
-    return;
-  }
-  if (GameEngineSubroutine < 4) {
+
+  // GameEngineSubroutine < 4 or GameEngineSubroutine == 11
+  switch (GameEngineSubroutine) {
+  case GR_ENTRANCE_GAMETIMERSETUP:
+  case GR_VINE_AUTOCLIMB:
+  case GR_SIDEEXITPIPEENTRY:
+  case GR_VERTICALPIPEENTRY:
+  case GR_PLAYERDEATH:
     return;
   }
 
@@ -8404,13 +8421,13 @@ static void CheckSideMTiles(const u8 dir, const u8 bVar5, const u8 bVar2, const 
 
     // 7 != 8, so this seems redundant. But it's in the assembly.
     // We'll keep it in in case it's semantically meaningful in later refactor efforts.
-    if (GameEngineSubroutine == 7) {
+    if (GameEngineSubroutine == GR_PLAYERENTRANCE) {
       return;
     }
-    if (GameEngineSubroutine != 8) {
+    if (GameEngineSubroutine != GR_PLAYERCTRLROUTINE) {
       return;
     }
-    GameEngineSubroutine = 2;
+    GameEngineSubroutine = GR_SIDEEXITPIPEENTRY;
     return;
   }
 
@@ -8428,10 +8445,10 @@ void HandleClimbing(const u8 param_1, const u8 param_2, const u16 mt_x) {
   }
 
   if ((param_1 == MT_FLAGPOLE_T) || (param_1 == MT_FLAGPOLE_M)) {
-    if (GameEngineSubroutine != 5) {
+    if (GameEngineSubroutine != GR_PLAYERENDLEVEL) {
       PlayerFacingDir = 1;
       ScrollLock += 1;
-      if (GameEngineSubroutine != 4) {
+      if (GameEngineSubroutine != GR_FLAGPOLESLIDE) {
         KillEnemies(0x33);
         EventMusicQueue = 0x80;
         FlagpoleSoundQueue = 0x40;
@@ -8455,10 +8472,10 @@ void HandleClimbing(const u8 param_1, const u8 param_2, const u16 mt_x) {
           FlagpoleScore = 5;
         }
       }
-      GameEngineSubroutine = 4;
+      GameEngineSubroutine = GR_FLAGPOLESLIDE;
     }
   } else if ((param_1 == MT_SPECIAL_VINE) && (Player_Y_Position < 0x20)) {
-    GameEngineSubroutine = 1;
+    GameEngineSubroutine = GR_VINE_AUTOCLIMB;
   }
   Player_State = 3;
   Player_X_Speed = 0;
@@ -8547,7 +8564,7 @@ void HandlePipeEntry(const u8 param_1, const u8 param_2) {
 
   if ((((Up_Down_Buttons & BUTTON_D) != 0) && (param_1 == 0x11)) && (param_2 == 0x10)) {
     ChangeAreaTimer = 0x30;
-    GameEngineSubroutine = 3;
+    GameEngineSubroutine = GR_VERTICALPIPEENTRY;
     Square1SoundQueue = 0x10;
     Player_SprAttrib = 0x20;
     if (WarpZoneControl != 0) {
@@ -10459,8 +10476,8 @@ void DrawBlock(const u8 objoff) {
 // SM2MAIN:b92e
 // Signature: [X] -> []
 void DrawBrickChunks(const u8 objoff) {
-  const u8 tilepalette = GameEngineSubroutine != 5 ? 3 : 2;
-  const u8 tileidx = GameEngineSubroutine != 5 ? 0x84 : 0x75;
+  const u8 tilepalette = GameEngineSubroutine != GR_PLAYERENDLEVEL ? 3 : 2;
+  const u8 tileidx = GameEngineSubroutine != GR_PLAYERENDLEVEL ? 0x84 : 0x75;
 
   const u8 off = Block_SprDataOffset[objoff];
 
@@ -10686,7 +10703,7 @@ void PlayerGfxHandler(void) {
   u8 abVar2;
 
   if ((InjuryTimer == 0) || ((FrameCounter & 1) == 0)) {
-    if (GameEngineSubroutine == 0xb) {
+    if (GameEngineSubroutine == GR_PLAYERDEATH) {
       PlayerGfxProcessing(PlayerGfxTblOffsets[14]);
       return;
     }
@@ -10866,9 +10883,22 @@ u8 ProcessPlayerAction(void) {
           if ((Player_XSpeedAbsolute < 9) || ((Player_MovingDir & PlayerFacingDir) != 0)) {
             return FourFrameExtent(GetGfxOffsetAdder(4));
           }
-          if (SMB2J_ONLY && GameEngineSubroutine < 9) {
+#ifdef SMB2J_MODE
+          expect(is_gameroutine_valid(GameEngineSubroutine));
+          // GameEngineSubroutine < 9
+          // TODO: is this the right way to express "< 9"?
+          switch (GameEngineSubroutine) {
+          case GR_PLAYERCHANGESIZE:
+          case GR_PLAYERINJURYBLINK:
+          case GR_PLAYERDEATH:
+          case GR_PLAYERFIREFLOWER:
+            break;
+
+          default:
             NoiseSoundQueue = 0x80;
+            break;
           }
+#endif
           bVar1 = 3;
         }
       }
@@ -10979,7 +11009,7 @@ u8 GetOffsetFromAnimCtrl(const u8 param_1, const u8 param_2) {
 // Signature: [] -> []
 void ChkForPlayerAttrib(void) {
   const u8 abVar1 = Player_SprDataOffset;
-  if (GameEngineSubroutine != 0xb) {
+  if (GameEngineSubroutine != GR_PLAYERDEATH) {
     if (((PlayerGfxOffset == 0x50) || (PlayerGfxOffset == 0xb8)) || (PlayerGfxOffset == 0xc0)) {
       goto C_S_IGAtt;
     }
