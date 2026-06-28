@@ -46,8 +46,6 @@
 #define StaircaseHeightData              RAMARRAY_CONST(0x78EC, 9)
 #define StaircaseRowData                 RAMARRAY_CONST(0x78F5, 9)
 
-#define PlayerAnimTmrData                RAMARRAY_CONST(0x80F8, 3)
-
 #define LoopCmdWorldNumber               RAMARRAY_CONST(0x8C47, 12)
 #define LoopCmdPageNumber                RAMARRAY_CONST(0x8C53, 12)
 #define LoopCmdYPosition                 RAMARRAY_CONST(0x8C5F, 12)
@@ -56,14 +54,9 @@
 
 #define BowserIdentities                 RAMARRAY_CONST(0xA376, 9)
 
-#define VineYPosAdder                    RAMARRAY_CONST(0xB0D7, 2)
 #define EnemyGraphicsTable               RAMARRAY_CONST(0xB3ED, 258)
-#define EnemyGfxTableOffsets             RAMARRAY_CONST(0xB4EF, 27)
-#define EnemyAttributeData               RAMARRAY(0xB50A, 27)
 #define PlayerGfxTblOffsets              RAMARRAY_CONST(0xBAE2, 16)
 #define PlayerGraphicsTable              RAMARRAY_CONST(0xBAF2, 208)
-#define DefaultXOnscreenOfs              RAMARRAY_CONST(0xBED8, 3)
-#define DefaultYOnscreenOfs              RAMARRAY_CONST(0xBF19, 3)
 #define FileCount                        RAMARRAY_CONST(0xC0F0, 4)
 #define DiskErrorMainMsg                 RAMARRAY(0xC149, 21)
 #define DiskErrorMsgOffsets              RAMARRAY_CONST(0xC15E, 4)
@@ -81,8 +74,6 @@
 #define DemoTimingData                   RAMARRAY_CONST(0xC541, 18)
 #define PlayerNameMario                  RAMARRAY_CONST(0xC5EB, 5)
 #define PlayerNameLuigi                  RAMARRAY_CONST(0xC5F0, 5)
-#define PlayerPaletteMario               RAMARRAY_CONST(0xC5F5, 4)
-#define PlayerPaletteLuigi               RAMARRAY_CONST(0xC5F9, 4)
 #define TitleScreenGfxData               RAMARRAY(0xC62B, 357)
 #define SwimStompEnvelopeData            RAMARRAY_CONST(0xD381, 14)
 #define ExtraLifeFreqData                RAMARRAY_CONST(0xD4A4, 6)

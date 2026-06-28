@@ -35,7 +35,6 @@
 #define AreaDataAddrLow                  RAMARRAY_CONST(0x9D2C, 34)
 #define AreaDataAddrHigh                 RAMARRAY_CONST(0x9D4E, 34)
 #define Hidden1UpCoinAmts                RAMARRAY_CONST(0xB2C2, 8)
-#define PlayerAnimTmrData                RAMARRAY_CONST(0xB58C, 3)
 
 #define LoopCmdWorldNumber               RAMARRAY_CONST(0xC06B, 11)
 #define LoopCmdPageNumber                RAMARRAY_CONST(0xC076, 11)
@@ -44,14 +43,10 @@
 
 #define BowserIdentities                 RAMARRAY_CONST(0xD736, 8)
 
-#define VineYPosAdder                    RAMARRAY_CONST(0xE433, 2)
 #define EnemyGraphicsTable               RAMARRAY_CONST(0xE73E, 258)
-#define EnemyGfxTableOffsets             RAMARRAY_CONST(0xE840, 27)
 #define EnemyAttributeData               RAMARRAY_CONST(0xE85B, 27)
 #define PlayerGfxTblOffsets              RAMARRAY_CONST(0xEE07, 16)
 #define PlayerGraphicsTable              RAMARRAY_CONST(0xEE17, 208)
-#define DefaultXOnscreenOfs              RAMARRAY_CONST(0xF1F3, 3)
-#define DefaultYOnscreenOfs              RAMARRAY_CONST(0xF234, 3)
 #define SwimStompEnvelopeData            RAMARRAY_CONST(0xF3B1, 14)
 #define ExtraLifeFreqData                RAMARRAY_CONST(0xF4D4, 6)
 #define PowerUpGrabFreqData              RAMARRAY_CONST(0xF4DA, 30)
