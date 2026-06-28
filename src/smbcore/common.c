@@ -788,7 +788,7 @@ void InitScreen(void) {
 void SetupIntermediate(void) {
   const u8 bVar1 = PlayerStatus;
   const u8 bStack0000 = BackgroundColorCtrl;
-  PlayerStatus = 0;
+  PlayerStatus = PLAYERSTATUS_SMALL;
   BackgroundColorCtrl = 2;
   GetPlayerColors();
   PlayerStatus = bVar1;
@@ -883,7 +883,7 @@ void GetPlayerColors(void) {
     pal1 = 0x30; pal2 = 0x27; pal3 = 0x19;
   }
 
-  if (PlayerStatus == 2) {
+  if (PlayerStatus == PLAYERSTATUS_FIREFLOWER) {
     // Fire flower (both Mario and Luigi)
     pal1 = 0x37; pal2 = 0x27; pal3 = 0x16;
   }
@@ -1678,7 +1678,7 @@ void ContinueGame(void) {
   PlayerSize = 1;
   FetchNewGameTimerFlag += 1;
   TimerControl = 0;
-  PlayerStatus = 0;
+  PlayerStatus = PLAYERSTATUS_SMALL;
   GameEngineSubroutine = GR_ENTRANCE_GAMETIMERSETUP;
   OperMode = OM_GAME;
   OperMode_Task = OMT_GAME_START;
@@ -2727,24 +2727,25 @@ void ImposeFriction(const u8 param_1) {
 // SM2MAIN:8190
 // Signature: [] -> []
 void ProcFireball_Bubble(void) {
-  if (PlayerStatus > 1) {
-    if ((A_B_Buttons & BUTTON_B) != 0) {
-      if ((A_B_Buttons & BUTTON_B & PreviousA_B_Buttons) == 0) {
-        if (Fireball_State[FireballCounter & 1] == 0) {
-          if (Player_Y_HighPos == 1) {
-            if (CrouchingFlag == 0) {
-              if (Player_State != PLAYERSTATE_CLIMBING) {
-                Square1SoundQueue = SOUND_SQ1_FIREBALL;
-                Fireball_State[FireballCounter & 1] = 2;
-                FireballThrowingTimer = PlayerAnimTimerSet;
-                PlayerAnimTimer = PlayerAnimTimerSet - 1;
-                FireballCounter += 1;
-              }
-            }
-          }
-        }
-      }
+  expect(is_playerstatus_valid(PlayerStatus));
+
+  if (PlayerStatus == PLAYERSTATUS_FIREFLOWER) {
+    bool cond = true;
+    cond &= (A_B_Buttons & BUTTON_B) != 0;
+    cond &= (A_B_Buttons & BUTTON_B & PreviousA_B_Buttons) == 0;
+    cond &= Fireball_State[FireballCounter & 1] == 0;
+    cond &= Player_Y_HighPos == 1;
+    cond &= CrouchingFlag == 0;
+    cond &= Player_State != PLAYERSTATE_CLIMBING;
+
+    if (cond) {
+      Square1SoundQueue = SOUND_SQ1_FIREBALL;
+      Fireball_State[FireballCounter & 1] = 2;
+      FireballThrowingTimer = PlayerAnimTimerSet;
+      PlayerAnimTimer = PlayerAnimTimerSet - 1;
+      FireballCounter += 1;
     }
+
     FireballObjCore(0);
     FireballObjCore(1);
   }
@@ -2921,8 +2922,8 @@ void RunGameTimer(void) {
   case GR_PLAYERFIREFLOWER:
     const bool is_time_up = GameTimerDisplay[0] == 0 && GameTimerDisplay[1] == 0 && GameTimerDisplay[2] == 0;
     if (is_time_up) {
-      PlayerStatus = 0;
-      ForceInjury(0);
+      PlayerStatus = PLAYERSTATUS_SMALL;
+      ForceInjury();
       GameTimerExpiredFlag += 1;
     } else {
       if (GameTimerDisplay[0] == 1 && GameTimerDisplay[1] == 0 && GameTimerDisplay[2] == 0) {
@@ -3549,8 +3550,9 @@ void PwrUpJmp(void) {
   Enemy_BoundBoxCtrl[5] = 3;
   if ((PowerUpType < 2)) {
     PowerUpType = PlayerStatus;
-    if (PlayerStatus > 1) {
-      PowerUpType = PlayerStatus >> 1;
+    expect(is_playerstatus_valid(PlayerStatus));
+    if (PlayerStatus == PLAYERSTATUS_FIREFLOWER) {
+      PowerUpType = 1;
     }
   }
   Enemy_SprAttrib[5] = 0x20;
@@ -7480,21 +7482,21 @@ void HandlePowerUpCollision(const u8 objoff) {
       StarInvincibleTimer = 0x23;
       AreaMusicQueue = MUSIC_AREA_STAR;
     }
-  } else if (PlayerStatus == 0) {
-    PlayerStatus = 1;
+  } else if (PlayerStatus == PLAYERSTATUS_SMALL) {
+    PlayerStatus = PLAYERSTATUS_BIG;
     GameEngineSubroutine = GR_PLAYERCHANGESIZE;
     Player_State = PLAYERSTATE_ONGROUND;
     TimerControl = 0xff;
     ScrollAmount = 0;
-  } else if (PlayerStatus != 1) {
-    Square2SoundQueue = SOUND_SQ2_POWERUP_GRAB;
-  } else {
-    PlayerStatus = 2;
+  } else if (PlayerStatus == PLAYERSTATUS_BIG) {
+    PlayerStatus = PLAYERSTATUS_FIREFLOWER;
     GetPlayerColors();
     GameEngineSubroutine = GR_PLAYERFIREFLOWER;
     Player_State = PLAYERSTATE_ONGROUND;
     TimerControl = 0xff;
     ScrollAmount = 0;
+  } else {
+    Square2SoundQueue = SOUND_SQ2_POWERUP_GRAB;
   }
 }
 
@@ -7754,7 +7756,7 @@ void PlayerEnemyCollision(const u8 objoff) {
 void InjurePlayer(void) {
   if (InjuryTimer == 0) {
     if (SMB1_ONLY || (SMB2J_ONLY && StarInvincibleTimer == 0)) {
-      ForceInjury(0);
+      ForceInjury();
     }
   }
 }
@@ -7762,17 +7764,19 @@ void InjurePlayer(void) {
 
 // SMB:d931
 // SM2MAIN:a58f
-// Signature: [A] -> []
-void ForceInjury(const u8 param_1) {
-  if (PlayerStatus == 0) {
+// Signature: [] -> []
+void ForceInjury(void) {
+  // NES note: The caller always sets register "A" to 0, so we're omitting a parameter.
+
+  if (PlayerStatus == PLAYERSTATUS_SMALL) {
     EventMusicQueue = MUSIC_EVENT_DEATH;
     Player_Y_Speed = 0xfc;
-    Player_X_Speed = PlayerStatus;
+    Player_X_Speed = 0;
     GameEngineSubroutine = GR_PLAYERDEATH;
   } else {
     InjuryTimer = 8;
     Square1SoundQueue = SOUND_SQ1_PIPE_OR_INJURY;
-    PlayerStatus = param_1;
+    PlayerStatus = PLAYERSTATUS_SMALL;
     GetPlayerColors();
     GameEngineSubroutine = GR_PLAYERINJURYBLINK;
   }

@@ -809,7 +809,7 @@ void smb1_PlayerEnemyCollision(u8 param_1);
 void smb1_InjurePlayer(void);
 #define InjurePlayer smb1_InjurePlayer
 
-void smb1_ForceInjury(u8 param_1);
+void smb1_ForceInjury(void);
 #define ForceInjury smb1_ForceInjury
 
 void smb1_ChkEnemyFaceRight(u8 param_1);

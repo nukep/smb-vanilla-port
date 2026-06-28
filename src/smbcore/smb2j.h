@@ -812,7 +812,7 @@ void smb2j_PlayerEnemyCollision(u8 param_1);
 void smb2j_InjurePlayer(void);
 #define InjurePlayer smb2j_InjurePlayer
 
-void smb2j_ForceInjury(u8 param_1);
+void smb2j_ForceInjury(void);
 #define ForceInjury smb2j_ForceInjury
 
 void smb2j_SetBounce(u8 param_1);

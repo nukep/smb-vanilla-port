@@ -307,6 +307,16 @@ enum playerstate {
   PLAYERSTATE_CLIMBING,
 };
 
+enum playerstatus {
+  PLAYERSTATUS_SMALL,
+  PLAYERSTATUS_BIG,
+  PLAYERSTATUS_FIREFLOWER,
+};
+
+static inline bool is_playerstatus_valid(const u8 playerstatus) {
+  return playerstatus <= PLAYERSTATUS_FIREFLOWER;
+}
+
 enum areatype {
   AREA_WATER,
   AREA_GROUND,
