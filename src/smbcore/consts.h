@@ -327,4 +327,58 @@ enum starflagtaskcontrol {
   STARFLAGTASK_DONE
 };
 
+#define SOUND_SQ1_JUMP_SMALL      0x80
+#define SOUND_SQ1_FLAGPOLE        0x40
+#define SOUND_SQ1_FIREBALL        0x20
+#define SOUND_SQ1_PIPE_OR_INJURY  0x10
+#define SOUND_SQ1_KICK            0x08
+#define SOUND_SQ1_SWIM_OR_SQUISH  0x04
+#define SOUND_SQ1_BUMP            0x02
+#define SOUND_SQ1_JUMP_BIG        0x01
+
+#define SOUND_SQ1_NONE            0
+
+#define SOUND_SQ2_BOWSERFALL      0x80
+#define SOUND_SQ2_1UP             0x40
+#define SOUND_SQ2_POWERUP_GRAB    0x20
+#define SOUND_SQ2_TIMER_TICK      0x10
+#define SOUND_SQ2_KABOOM          0x08
+#define SOUND_SQ2_VINE            0x04
+#define SOUND_SQ2_POWERUP_BLOCK   0x02
+#define SOUND_SQ2_COIN            0x01
+
+#define SOUND_SQ2_NONE            0
+
+// SMB2J only
+#define SOUND_NOISE_SKID          0x80
+// SMB2J only
+#define SOUND_NOISE_WIND          0x04
+
+#define SOUND_NOISE_BOWSERFLAME   0x02
+#define SOUND_NOISE_BRICKSHATTER  0x01
+
+#define SOUND_NOISE_NONE          0
+
+
+#define MUSIC_EVENT_STOP                0x80
+#define MUSIC_EVENT_TIMERUNNINGOUT      0x40
+#define MUSIC_EVENT_LEVELEND            0x20
+#define MUSIC_EVENT_BOWSERVICTORY       0x08
+#define MUSIC_EVENT_PRINCESS            0x04
+#define MUSIC_EVENT_GAMEOVER            0x02
+#define MUSIC_EVENT_DEATH               0x01
+
+#define MUSIC_EVENT_NONE                0
+
+#define MUSIC_AREA_SILENCE              0x80
+#define MUSIC_AREA_STAR                 0x40
+#define MUSIC_AREA_PIPEINTRO            0x20
+#define MUSIC_AREA_CLOUD                0x10
+#define MUSIC_AREA_CASTLE               0x08
+#define MUSIC_AREA_UNDERGROUND          0x04
+#define MUSIC_AREA_WATER                0x02
+#define MUSIC_AREA_GROUND               0x01
+
+#define MUSIC_AREA_NONE                 0
+
 #endif

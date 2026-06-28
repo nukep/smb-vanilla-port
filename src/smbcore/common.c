@@ -445,7 +445,7 @@ void SetupVictoryMode(void) {
       WorldNumber = 7;
     }
   #endif
-  EventMusicQueue = 8;
+  EventMusicQueue = MUSIC_EVENT_BOWSERVICTORY;
 
   expect(OperMode_Task == OMT_VICTORY_SETUPVICTORYMODE);
   OperMode_Task = OMT_VICTORY_PLAYERVICTORYWALK;
@@ -533,7 +533,7 @@ void FloateyNumbersRoutine(const u8 objoff) {
   if (timer == 0x2b) {
     if (bVar2 == 0xb) {
       NumberofLives += 1;
-      Square2SoundQueue = 0x40;
+      Square2SoundQueue = SOUND_SQ2_1UP;
     }
 
     static const u8 digit_to_add_to[12] = { 15,4,4,4,4,4,3,3,3,3,3,0 };
@@ -1347,7 +1347,7 @@ void InitializeArea(void) {
   if (HalfwayPage != 0) {
     PlayerEntranceCtrl = 2;
   }
-  AreaMusicQueue = 0x80;
+  AreaMusicQueue = MUSIC_AREA_SILENCE;
   DisableScreenFlag = 1;
 #ifdef SMB2J_MODE
   LoadPhysicsData();
@@ -1428,13 +1428,6 @@ void SecondaryGameSetup(void) {
   // Note: Moved OperMode_Task assignment to caller
 }
 
-#define MUSIC_QUEUE_GROUND (1 << 0)
-#define MUSIC_QUEUE_WATER (1 << 1)
-#define MUSIC_QUEUE_UNDERGROUND (1 << 2)
-#define MUSIC_QUEUE_CASTLE (1 << 3)
-#define MUSIC_QUEUE_CLOUD (1 << 4)
-#define MUSIC_QUEUE_PIPEINTRO (1 << 5)
-
 // SMB:90ed
 // SM2MAIN:6f2d
 // Signature: [] -> []
@@ -1444,20 +1437,20 @@ void GetAreaMusic(void) {
   }
 
   if ((AltEntranceControl != 2) && ((PlayerEntranceCtrl == 6) || (PlayerEntranceCtrl == 7))) {
-    AreaMusicQueue = MUSIC_QUEUE_PIPEINTRO;
+    AreaMusicQueue = MUSIC_AREA_PIPEINTRO;
     return;
   }
 
   if (CloudTypeOverride != 0) {
-    AreaMusicQueue = MUSIC_QUEUE_CLOUD;
+    AreaMusicQueue = MUSIC_AREA_CLOUD;
     return;
   }
 
   switch (AreaType) {
-  case 0: AreaMusicQueue = MUSIC_QUEUE_WATER; break;
-  case 1: AreaMusicQueue = MUSIC_QUEUE_GROUND; break;
-  case 2: AreaMusicQueue = MUSIC_QUEUE_UNDERGROUND; break;
-  case 3: AreaMusicQueue = MUSIC_QUEUE_CASTLE; break;
+  case 0: AreaMusicQueue = MUSIC_AREA_WATER; break;
+  case 1: AreaMusicQueue = MUSIC_AREA_GROUND; break;
+  case 2: AreaMusicQueue = MUSIC_AREA_UNDERGROUND; break;
+  case 3: AreaMusicQueue = MUSIC_AREA_CASTLE; break;
   default: unreachable(); break;
   }
 }
@@ -1568,7 +1561,7 @@ void PlayerLoseLife(void) {
 #ifdef SMB2J_MODE
   IRQUpdateFlag = 0;
 #endif
-  EventMusicQueue = 0x80;
+  EventMusicQueue = MUSIC_EVENT_STOP;
   NumberofLives -= 1;
   if (NumberofLives >= 0x80) {
     OperMode = OM_GAMEOVER;
@@ -1629,7 +1622,7 @@ void SetupGameOver(void) {
   IRQUpdateFlag = 0;
   ContinueMenuSelect = 0;
 #endif
-  EventMusicQueue = 2;
+  EventMusicQueue = MUSIC_EVENT_GAMEOVER;
   DisableScreenFlag += 1;
   expect(OperMode_Task == OMT_GAMEOVER_SETUPGAMEOVER);
   OperMode_Task = OMT_GAMEOVER_SCREENROUTINES;
@@ -1663,7 +1656,7 @@ void RunGameOver(void) {
 // SM2MAIN:708d
 // Signature: [] -> []
 void TerminateGame(void) {
-  EventMusicQueue = 0x80;
+  EventMusicQueue = MUSIC_EVENT_STOP;
 #ifdef SMB1_MODE
   if (!TransposePlayers()) {
     ContinueGame();
@@ -2084,7 +2077,7 @@ void PlayerCtrlRoutine(void) {
       cVar2 = 1;
       if (GameEngineSubroutine != GR_PLAYERDEATH) {
         if (DeathMusicLoaded == 0) {
-          EventMusicQueue = 1;
+          EventMusicQueue = MUSIC_EVENT_DEATH;
           DeathMusicLoaded = 1;
         }
         cVar1 = 6;
@@ -2296,7 +2289,7 @@ void FlagpoleSlide(void) {
   if (Enemy_ID[5] == A_FLAGPOLE) {
     Square1SoundQueue = FlagpoleSoundQueue;
     bVar1 = 0;
-    FlagpoleSoundQueue = 0;
+    FlagpoleSoundQueue = SOUND_SQ1_NONE;
     if (Player_Y_Position < 0x9e) {
       bVar1 = 4;
     }
@@ -2315,7 +2308,7 @@ void PlayerEndLevel(void) {
   AutoControlPlayer(1);
 #ifdef SMB1_MODE
   if ((Player_Y_Position >= 0xae) && (ScrollLock != 0)) {
-    EventMusicQueue = 0x20;
+    EventMusicQueue = MUSIC_EVENT_LEVELEND;
     ScrollLock = 0;
   }
 #endif
@@ -2323,7 +2316,7 @@ void PlayerEndLevel(void) {
   if ((Player_Y_Position >= 0xae)) {
     ScrollLock = 0;
     if (FlagpoleMusicFlag == 0) {
-      EventMusicQueue = 0x20;
+      EventMusicQueue = MUSIC_EVENT_LEVELEND;
       FlagpoleMusicFlag = 1;
     }
   }
@@ -2364,7 +2357,7 @@ void NextArea(void) {
   LoadAreaPointer();
   FetchNewGameTimerFlag += 1;
   HalfwayPage = ChgAreaMode();
-  EventMusicQueue = 0x80;
+  EventMusicQueue = MUSIC_EVENT_STOP;
 }
 
 
@@ -2582,9 +2575,9 @@ void PlayerPhysicsSub(void) {
       Player_Y_Speed = player_yspd_lookup[bVar1];
 
       if (SwimmingFlag == 0) {
-        Square1SoundQueue = (PlayerSize != 0) ? 0x80 : 1;
+        Square1SoundQueue = (PlayerSize != 0) ? SOUND_SQ1_JUMP_SMALL : SOUND_SQ1_JUMP_BIG;
       } else {
-        Square1SoundQueue = 4;
+        Square1SoundQueue = SOUND_SQ1_SWIM_OR_SQUISH;
         if (Player_Y_Position < 0x14) {
           Player_Y_Speed = 0;
         }
@@ -2741,7 +2734,7 @@ void ProcFireball_Bubble(void) {
           if (Player_Y_HighPos == 1) {
             if (CrouchingFlag == 0) {
               if (Player_State != PLAYERSTATE_CLIMBING) {
-                Square1SoundQueue = 0x20;
+                Square1SoundQueue = SOUND_SQ1_FIREBALL;
                 Fireball_State[FireballCounter & 1] = 2;
                 FireballThrowingTimer = PlayerAnimTimerSet;
                 PlayerAnimTimer = PlayerAnimTimerSet - 1;
@@ -2933,7 +2926,7 @@ void RunGameTimer(void) {
       GameTimerExpiredFlag += 1;
     } else {
       if (GameTimerDisplay[0] == 1 && GameTimerDisplay[1] == 0 && GameTimerDisplay[2] == 0) {
-        EventMusicQueue = 0x40;
+        EventMusicQueue = MUSIC_EVENT_TIMERUNNINGOUT;
       }
       GameTimerCtrlTimer = 0x18;
       DigitModifier[5] = 0xff;
@@ -3036,7 +3029,7 @@ void FlagpoleRoutine(void) {
     if ((Enemy_Y_Position[5] >= 0xaa) || (Player_Y_Position >= 0xa2)) {
       if (SMB2J_ONLY && FlagpoleScore == 5) {
         NumberofLives += 1;
-        Square2SoundQueue = 0x40;
+        Square2SoundQueue = SOUND_SQ2_1UP;
       } else {
         expect(FlagpoleScore < 5);
         DigitModifier[score_digits[FlagpoleScore]] = score_mods[FlagpoleScore];
@@ -3134,7 +3127,7 @@ void Setup_Vine(const u8 param_1, const u8 param_2) {
 
   VineObjOffset[VineFlagOffset] = param_1;
   VineFlagOffset += 1;
-  Square2SoundQueue = 4;
+  Square2SoundQueue = SOUND_SQ2_VINE;
 }
 
 
@@ -3292,7 +3285,7 @@ void BulletBillHandler(const u8 objoff) {
       }
       Enemy_State[objoff] = 1;
       EnemyFrameTimer[objoff] = 10;
-      Square2SoundQueue = 8;
+      Square2SoundQueue = SOUND_SQ2_KABOOM;
     }
     if ((Enemy_State[objoff] & 0x20) != 0) {
       MoveD_EnemyVertically(objoff);
@@ -3370,7 +3363,7 @@ void JCoinC(const u8 param_1, const u8 param_2) {
   Misc_Y_Speed[param_2] = 0xfb;
   Misc_Y_HighPos[param_2] = 1;
   Misc_State[param_2] = 1;
-  Square2SoundQueue = 1;
+  Square2SoundQueue = SOUND_SQ2_COIN;
   GiveOneCoin();
   CoinTallyFor1Ups += 1;
 }
@@ -3484,7 +3477,7 @@ void GiveOneCoin(void) {
   if (CoinTally == 100) {
     CoinTally = 0;
     NumberofLives += 1;
-    Square2SoundQueue = 0x40;
+    Square2SoundQueue = SOUND_SQ2_1UP;
   }
   DigitModifier[4] = 2;
   AddToScore();
@@ -3561,7 +3554,7 @@ void PwrUpJmp(void) {
     }
   }
   Enemy_SprAttrib[5] = 0x20;
-  Square2SoundQueue = 2;
+  Square2SoundQueue = SOUND_SQ2_POWERUP_BLOCK;
 }
 
 
@@ -3709,7 +3702,7 @@ void BumpBlock(const u16 mt_x, const u16 mt_y, const u8 mt) {
 #endif
 
   const u8 bVar2 = CheckTopOfBlock(mt_x, mt_y);
-  Square1SoundQueue = 2;
+  Square1SoundQueue = SOUND_SQ1_BUMP;
   Block_X_Speed[bVar2] = 0;
   Block_Y_MoveForce[bVar2] = 0;
   Player_Y_Speed = 0;
@@ -3812,7 +3805,7 @@ void BrickShatter(const u16 mt_x, const u16 mt_y) {
 
   const u8 sVar1 = CheckTopOfBlock(mt_x, mt_y);
   Block_RepFlag[sVar1] = 1;
-  NoiseSoundQueue = 1;
+  NoiseSoundQueue = SOUND_NOISE_BRICKSHATTER;
   SpawnBrickChunks(sVar1);
   Player_Y_Speed = 0xfe;
   DigitModifier[5] = 5;
@@ -4953,7 +4946,7 @@ void InitBowserFlame(const u8 objoff) {
   }
   Enemy_Y_MoveForce[objoff] = 0;
   u8 bVar1 = BowserFront_Offset;
-  NoiseSoundQueue |= 2;
+  NoiseSoundQueue |= SOUND_NOISE_BOWSERFLAME;
   if (Enemy_ID[BowserFront_Offset] != A_BOWSER) {
     bVar1 = SetFlameTimer();
     FrenzyEnemyTimer = bVar1 + 0x20;
@@ -5106,7 +5099,7 @@ void BulletBillCheepCheep(const u8 objoff) {
     }
 
     // Bullet sound
-    Square2SoundQueue |= 8;
+    Square2SoundQueue |= SOUND_SQ2_KABOOM;
 
     // Spawn a bullet bill
     Enemy_ID[objoff] = A_BULLET_BILL;
@@ -6420,13 +6413,13 @@ void BridgeCollapse(void) {
         // Inlined: MoveVOffset
         VRAM_Buffer1_Offset += 10;
 
-        Square2SoundQueue = 8;
-        NoiseSoundQueue = 1;
+        Square2SoundQueue = SOUND_SQ2_KABOOM;
+        NoiseSoundQueue = SOUND_NOISE_BRICKSHATTER;
         BridgeCollapseOffset += 1;
         if (BridgeCollapseOffset == 0xf) {
           InitVStf(objoff);
           Enemy_State[objoff] = 0x40;
-          Square2SoundQueue = 0x80;
+          Square2SoundQueue = SOUND_SQ2_BOWSERFALL;
         }
       }
       BowserGfxHandler(objoff);
@@ -6437,7 +6430,7 @@ void BridgeCollapse(void) {
       return;
     }
   }
-  EventMusicQueue = 0x80;
+  EventMusicQueue = MUSIC_EVENT_STOP;
   expect(OperMode == OM_VICTORY);
   expect(OperMode_Task == OMT_VICTORY_BRIDGECOLLAPSE);
   OperMode_Task = OMT_VICTORY_SETUPVICTORYMODE;
@@ -6702,7 +6695,7 @@ void RunFireworks(const u8 objoff) {
     ExplosionGfxCounter[objoff] = ExplosionGfxCounter[objoff] + 1;
     if (ExplosionGfxCounter[objoff] > 2) {
       Enemy_Flag[objoff] = 0;
-      Square2SoundQueue = 8;
+      Square2SoundQueue = SOUND_SQ2_KABOOM;
       DigitModifier[4] = 5;
       EndAreaPoints();
       return;
@@ -6806,7 +6799,7 @@ void GameTimerFireworks(const u8 objoff) {
 // Signature: [] -> []
 void AwardTimerCastle(void) {
   if ((FrameCounter & 4) != 0) {
-    Square2SoundQueue = 0x10;
+    Square2SoundQueue = SOUND_SQ2_TIMER_TICK;
   }
   DigitModifier[5] = 0xff;
   DigitsMathRoutine(ssw(0x23, 0x17));
@@ -7386,7 +7379,7 @@ void HandleEnemyFBallCol(const u8 param_1) {
   Enemy_Y_Speed[bVar2] = 0xfe;
   Enemy_ID[bVar2] = BowserIdentities[WorldNumber];
   Enemy_State[bVar2] = (WorldNumber < 3) ? 0x23 : 0x20;
-  Square2SoundQueue = 0x80;
+  Square2SoundQueue = SOUND_SQ2_BOWSERFALL;
   EnemySmackScore(9, param_1);
 }
 
@@ -7439,7 +7432,7 @@ void ShellOrBlockDefeat(const u8 param_1) {
 // Signature: [A, X] -> []
 void EnemySmackScore(const u8 param_1, const u8 param_2) {
   SetupFloateyNumber(param_1, param_2);
-  Square1SoundQueue = 8;
+  Square1SoundQueue = SOUND_SQ1_KICK;
 }
 
 
@@ -7479,13 +7472,13 @@ void HandlePowerUpCollision(const u8 objoff) {
     return;
   }
   SetupFloateyNumber(6, objoff);
-  Square2SoundQueue = 0x20;
+  Square2SoundQueue = SOUND_SQ2_POWERUP_GRAB;
   if (PowerUpType >= 2) {
     if (PowerUpType == 3) {
       FloateyNum_Control[objoff] = 0xb;
     } else {
       StarInvincibleTimer = 0x23;
-      AreaMusicQueue = 0x40;
+      AreaMusicQueue = MUSIC_AREA_STAR;
     }
   } else if (PlayerStatus == 0) {
     PlayerStatus = 1;
@@ -7494,7 +7487,7 @@ void HandlePowerUpCollision(const u8 objoff) {
     TimerControl = 0xff;
     ScrollAmount = 0;
   } else if (PlayerStatus != 1) {
-    Square2SoundQueue = 0x20;
+    Square2SoundQueue = SOUND_SQ2_POWERUP_GRAB;
   } else {
     PlayerStatus = 2;
     GetPlayerColors();
@@ -7580,7 +7573,7 @@ void PlayerEnemyCollision(const u8 objoff) {
       if (enemy_id == A_GOOMBA) {
         return;
       }
-      Square1SoundQueue = 8;
+      Square1SoundQueue = SOUND_SQ1_KICK;
       Enemy_State[objoff] |= 0x80;
       Enemy_X_Speed[objoff] = EnemyFacePlayer(objoff) ? -0x30 : 0x30;
 
@@ -7649,7 +7642,7 @@ void PlayerEnemyCollision(const u8 objoff) {
     InjurePlayer();
     return;
   }
-  Square1SoundQueue = 4;
+  Square1SoundQueue = SOUND_SQ1_SWIM_OR_SQUISH;
 
   bool cond3 = true;
 
@@ -7772,13 +7765,13 @@ void InjurePlayer(void) {
 // Signature: [A] -> []
 void ForceInjury(const u8 param_1) {
   if (PlayerStatus == 0) {
-    EventMusicQueue = 1;
+    EventMusicQueue = MUSIC_EVENT_DEATH;
     Player_Y_Speed = 0xfc;
     Player_X_Speed = PlayerStatus;
     GameEngineSubroutine = GR_PLAYERDEATH;
   } else {
     InjuryTimer = 8;
-    Square1SoundQueue = 0x10;
+    Square1SoundQueue = SOUND_SQ1_PIPE_OR_INJURY;
     PlayerStatus = param_1;
     GetPlayerColors();
     GameEngineSubroutine = GR_PLAYERINJURYBLINK;
@@ -8212,7 +8205,7 @@ void PlayerBGCollision(void) {
 
         if (bVar8) {
           if (bVar7 != MT_SPECIAL_VINE) {
-            Square1SoundQueue = 2;
+            Square1SoundQueue = SOUND_SQ1_BUMP;
           }
         } else if ((AreaType != AREA_WATER) && (BlockBounceTimer == 0)) {
           const u16 mt_x = sVar9.mt_x;
@@ -8357,7 +8350,7 @@ static void CheckSideMTiles(const u8 dir, const u8 bVar5, const u8 bVar2, const 
     }
   } else if ((Player_State == PLAYERSTATE_ONGROUND) && (PlayerFacingDir == 1) && ((bVar5 == MT_WATERPIPE_B || (bVar5 == MT_PIPE_SIDEWAYS_BL)))) {
     if (Player_SprAttrib == 0) {
-      Square1SoundQueue = 0x10;
+      Square1SoundQueue = SOUND_SQ1_PIPE_OR_INJURY;
     }
     Player_SprAttrib |= 0x20;
     if ((Player_X_Position & 0xf) != 0) {
@@ -8395,8 +8388,8 @@ void HandleClimbing(const u8 param_1, const u8 param_2, const u16 mt_x) {
       ScrollLock += 1;
       if (GameEngineSubroutine != GR_FLAGPOLESLIDE) {
         KillEnemies(0x33);
-        EventMusicQueue = 0x80;
-        FlagpoleSoundQueue = 0x40;
+        EventMusicQueue = MUSIC_EVENT_STOP;
+        FlagpoleSoundQueue = SOUND_SQ1_FLAGPOLE;
         FlagpoleCollisionYPos = Player_Y_Position;
 
         FlagpoleScore = 0;
@@ -8510,7 +8503,7 @@ void HandlePipeEntry(const u8 param_1, const u8 param_2) {
   if ((((Up_Down_Buttons & BUTTON_D) != 0) && (param_1 == 0x11)) && (param_2 == 0x10)) {
     ChangeAreaTimer = 0x30;
     GameEngineSubroutine = GR_VERTICALPIPEENTRY;
-    Square1SoundQueue = 0x10;
+    Square1SoundQueue = SOUND_SQ1_PIPE_OR_INJURY;
     Player_SprAttrib = 0x20;
     if (WarpZoneControl != 0) {
       if (SMB1_ONLY) {
@@ -8532,7 +8525,7 @@ void HandlePipeEntry(const u8 param_1, const u8 param_2) {
         WorldNumber = bVar1 - 1;
       }
       AreaPointer = AreaAddrOffsets[WorldAddrOffsets[WorldNumber]];
-      EventMusicQueue = 0x80;
+      EventMusicQueue = MUSIC_EVENT_STOP;
       EntrancePage = 0;
       AreaNumber = 0;
       LevelNumber = 0;
@@ -8620,7 +8613,7 @@ bool CheckForClimbMTiles(const u8 mt) {
 // Signature: [A] -> [C]
 bool CheckForCoinMTiles(const u8 param_1) {
   if (param_1 == MT_COIN || param_1 == MT_COIN_UNDERWATER) {
-    Square2SoundQueue = 1;
+    Square2SoundQueue = SOUND_SQ2_COIN;
     return true;
   }
 
@@ -8842,7 +8835,7 @@ void DoEnemySideCheck(const u8 objoff) {
 // Signature: [X] -> []
 void ChkForBump_HammerBroJ(const u8 objoff) {
   if ((objoff != 5) && ((char)Enemy_State[objoff] < 0)) {
-    Square1SoundQueue = 2;
+    Square1SoundQueue = SOUND_SQ1_BUMP;
   }
   if (Enemy_ID[objoff] == A_HAMMER_BRO) {
     SetHJ(objoff, 0xfa, 0);
@@ -8978,7 +8971,7 @@ void FireballBGCollision(const u8 objoff) {
           return;
         }
         Fireball_State[objoff] = 0x80;
-        Square1SoundQueue = 2;
+        Square1SoundQueue = SOUND_SQ1_BUMP;
         return;
       }
     }
@@ -10840,7 +10833,7 @@ u8 ProcessPlayerAction(void) {
             break;
 
           default:
-            NoiseSoundQueue = 0x80;
+            NoiseSoundQueue = SOUND_NOISE_SKID;
             break;
           }
 #endif

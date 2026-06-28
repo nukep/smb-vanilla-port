@@ -30,7 +30,7 @@ void PrintVictoryMessages(void) {
       } else {
         if (PrimaryMsgCounter >= 3) {
             if (PrimaryMsgCounter == 3) {
-              EventMusicQueue = 4;
+              EventMusicQueue = MUSIC_EVENT_PRINCESS;
             }
 
             // Anything over 6 would overflow the address control lookup

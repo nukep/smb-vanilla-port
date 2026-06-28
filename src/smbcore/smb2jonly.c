@@ -760,7 +760,7 @@ void SimulateWind(void) {
     return;
   }
 
-  NoiseSoundQueue = 4;
+  NoiseSoundQueue = SOUND_NOISE_WIND;
 
   // Inlined: ModifyLeavesPos
   for (int i = 0; i < 12; i++) {
@@ -825,6 +825,7 @@ void ScreenSubsForFinalRoom(void) {
   case SRT_W8SMB2J_REVEALPRINCESS:
     PrintStatusBarNumbers(0xa2);
     RAM(0x611d) = 0x5f;
+    // TODO: replace with named constant once fds sound engine code is implemented
     AreaMusicQueue = 1;
     Left_Right_Buttons = 0;
     NameTableSelect = 0;
@@ -853,7 +854,7 @@ void PrintVictoryMsgsForWorld8(void) {
     }
 
     if (PrimaryMsgCounter == 2) {
-      EventMusicQueue = 4;
+      EventMusicQueue = MUSIC_EVENT_PRINCESS;
     }
 
     static const u8 addrctrl_lookup[10] = {
@@ -897,7 +898,7 @@ void AwardExtraLives(void) {
     }
     if (SelectTimer == 0) {
       SelectTimer = 0x30;
-      Square2SoundQueue = 0x40;
+      Square2SoundQueue = SOUND_SQ2_1UP;
       NumberofLives -= 1;
       DigitModifier[1] = 1;
       EndAreaPoints();
@@ -1071,7 +1072,7 @@ void MushroomRetainersForW8(void) {
     }
   } else if ((EndControlCntr & 0x1f) == 0) {
     BlueColorOfs += 1;
-    Square2SoundQueue = 1;
+    Square2SoundQueue = SOUND_SQ2_COIN;
   }
   const u8 bVar1 = BlueColorOfs;
   EndControlCntr += 1;
