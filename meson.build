@@ -22,10 +22,17 @@ opengl_args = glew.found() ? ['-DOPENGL_ENABLED'] : []
 
 smbcore_args = []
 
-smbcore_args += ['-DPRINT_WARNINGS_AND_ERRORS']
+if get_option('optimize_aggressively')
+  smbcore_args += ['-DASSUME_EXPECTS']
+else
+  smbcore_args += ['-DPRINT_WARNINGS_AND_ERRORS']
+  if get_option('buildtype') == 'debug'
+    smbcore_args += ['-DCHECK_ARRAY_BOUNDS']
+  endif
+endif
 
-if get_option('buildtype') == 'debug'
-  smbcore_args += ['-DCHECK_ARRAY_BOUNDS']
+if get_option('thread_local_smbstate')
+  smbcore_args += ['-DTHREAD_LOCAL_SMBSTATE']
 endif
 
 cdata = configuration_data()

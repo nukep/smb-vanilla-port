@@ -50,7 +50,11 @@ struct SMB_state {
 };
 
 // The singleton SMB_state used during the SMB_tick() invocation. This is considered internal and should not be used by callers of the library.
+#ifdef THREAD_LOCAL_SMBSTATE
 extern thread_local struct SMB_state *SMB_STATE;
+#else
+extern struct SMB_state *SMB_STATE;
+#endif
 
 #define RAM(offset) (SMB_STATE->rammem[offset])
 #define PPURAM(offset) (SMB_STATE->ppuram[offset])

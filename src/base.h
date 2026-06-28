@@ -19,6 +19,16 @@
 #  define unlikely(x) (__builtin_expect(!!(x), 0))
 #endif
 
+// Make the compiler assume the condition is true.
+// Should always work as an expression. Value is unimportant.
+#if defined(__GNUC__)
+  #define assume(cond) ((void)((cond) ? (void)0 : __builtin_unreachable()))
+#elif defined(_MSC_VER)
+  #define assume(cond) __assume(cond)
+#else
+  #define assume(cond) ((void)0)
+#endif
+
 #ifdef PRINT_WARNINGS_AND_ERRORS
 #  define error(fmt, ...) fprintf(stderr, "ERROR: " fmt, ##__VA_ARGS__)
 #  define warning(fmt, ...) fprintf(stdout, "WARN: " fmt, ##__VA_ARGS__)
@@ -39,17 +49,22 @@ static inline NORETURN void jmpengine_overflow(u8 index) {
   abort();
 }
 
-#define assert_eq_assumption(expected, actual) assert((expected) == (actual))
-#define assert_eq_regressiontest(expected, actual) assert((expected) == (actual))
+// Declare expected behavior in the original. May break the game if it's false.
+// This could be optimized by the compiler if we're daring enough (by default, we're not).
+#ifdef ASSUME_EXPECTS
+#  define expect(truthy) assume(truthy)
+#else
+#  define expect(truthy) assert(truthy)
+#endif
 
 // Expected behavior in the original. Won't fatally break the game if it's false. Mostly there to give a heads-up to anyone modifying the code.
-// Code may rely on the assumption.
+// Code may rely on the expectation.
 // These are conditions that could be relaxed for things like enhancements to the game.
-#define assume_weak_original(truthy) { \
-  if (unlikely(!(truthy))) { warning("Behavior differs from expectation. %s:%d:%s: assume_weak_original(%s)\n", __FILE__, __LINE__, __func__, #truthy); } \
+#define expect_weak(truthy) { \
+  if (unlikely(!(truthy))) { warning("Behavior differs from expectation. %s:%d:%s: expect_weak(%s)\n", __FILE__, __LINE__, __func__, #truthy); } \
 }
 
-#define assert_unreachable() assert(0)
+#define unreachable() expect(false)
 
 
 #define SWAP(a, b) \

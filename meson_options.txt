@@ -4,3 +4,8 @@ option('opengl', type: 'feature', value: 'auto',
 option('sdl2', type: 'boolean', value: false,
        description: 'Use SDL2 instead of SDL3')
 
+option('optimize_aggressively', type: 'boolean', value: false,
+       description: 'Enable aggressive optimizations. Not recommended.')
+
+option('thread_local_smbstate', type: 'boolean', value: false,
+       description: 'Use a thread-local singleton for SMB_STATE. Note: setting to true does not make API thread-safe!')

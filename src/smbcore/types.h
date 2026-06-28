@@ -25,7 +25,7 @@
 #define NOWRAP_BBOX_BOTRIGHT_X(i) BoundingBoxCoords[(i)*4 + 2]
 #define NOWRAP_BBOX_BOTRIGHT_Y(i) BoundingBoxCoords[(i)*4 + 3]
 
-#define _sprite_offset_assert(offset) assert_eq_assumption((offset) % 4, 0),
+#define _sprite_offset_assert(offset) expect(((offset) % 4) == 0),
 // #define _sprite_offset_assert(offset)
 
 // Calculate a sprite offset that wraparounds: offset + n*4, modulo 256.
@@ -237,7 +237,7 @@ static inline u8 get_metatile(const u16 mt_x, const u16 mt_y) {
     // Read whichever variable would be read in the original memory layout
 
     // cannot be >= 0x1d0
-    assert_eq_assumption(blockoff < 0x1d0, true);
+    expect(blockoff < 0x1d0);
 
 #define X(addr, var) if (blockoff == (addr)-0x500) { return var; }
 #define XARRAY(addr, var) if (blockoff >= (addr)-0x500) { return var[blockoff - ((addr) - 0x500)]; }

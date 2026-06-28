@@ -15,8 +15,11 @@ void SMB2J_NMI();
 
 #include "smbcommon.h"
 
+#ifdef THREAD_LOCAL_SMBSTATE
 thread_local struct SMB_state *SMB_STATE;
-
+#else
+struct SMB_state *SMB_STATE;
+#endif
 
 static bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_offset) {
   if (!seek_rom(state, prg_offset)) { return false; }

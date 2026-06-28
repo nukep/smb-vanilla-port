@@ -34,7 +34,7 @@ void PrintVictoryMessages(void) {
             }
 
             // Anything over 6 would overflow the address control lookup
-            assert_eq_assumption(PrimaryMsgCounter <= 6, true);
+            expect(PrimaryMsgCounter <= 6);
 
             VRAM_Buffer_AddrCtrl = addrctrl_world8_lookup[PrimaryMsgCounter - 3];
         }

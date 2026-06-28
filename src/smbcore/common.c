@@ -750,7 +750,7 @@ void SetupIntermediate(void) {
 // SM2MAIN:651f
 // Signature: [] -> []
 void GetAreaPalette(void) {
-  assert_eq_assumption(AreaType < 4, true);
+  expect(AreaType < 4);
 
   u8 addrctrl;
 
@@ -772,7 +772,7 @@ void GetAreaPalette(void) {
 // Signature: [] -> []
 void GetBackgroundColor(void) {
   if (BackgroundColorCtrl != 0) {
-    assert_eq_assumption(BackgroundColorCtrl >= 4 && BackgroundColorCtrl < 8, true);
+    expect(BackgroundColorCtrl >= 4 && BackgroundColorCtrl < 8);
 
     u8 addrctrl;
 
@@ -1015,8 +1015,8 @@ void ColorRotation(void) {
   static const u8 palette_2[16] = { 0x12, 0x17, 0x17, 0x17, };
   static const u8 palette_3[16] = { 0x0f, 0x0f, 0x1c, 0x00, };
 
-  assert_eq_assumption(ColorRotateOffset < 6, true);
-  assert_eq_assumption(AreaType < 4, true);
+  expect(ColorRotateOffset < 6);
+  expect(AreaType < 4);
 
   // Rotate the second palette color in particular. This is the coin/block color.
   VRAM1_DRAW(PPU_ADDR_PALETTE_BG(3, 0),
@@ -1183,7 +1183,7 @@ void OutputNumbers(const u8 param_1) {
 
   // NES note: SMB2J bounds-checks for sbtype < 6, even though the lookups aren't that long anymore.
 #ifdef SMB2J_MODE
-  assert_eq_assumption(sbtype < 4, true);
+  expect(sbtype < 4);
 #endif
 
   //        SMB1  SMB2J
@@ -1487,7 +1487,7 @@ void GetAreaMusic(void) {
   case 1: AreaMusicQueue = MUSIC_QUEUE_GROUND; break;
   case 2: AreaMusicQueue = MUSIC_QUEUE_UNDERGROUND; break;
   case 3: AreaMusicQueue = MUSIC_QUEUE_CASTLE; break;
-  default: assert_unreachable(); break;
+  default: unreachable(); break;
   }
 }
 
@@ -1509,8 +1509,8 @@ void Entrance_GameTimerSetup(void) {
   HalfwayPage = 0;
   SwimmingFlag = AreaType == 0;
 
-  assert_eq_assumption(PlayerEntranceCtrl < 8, true);
-  assert_eq_assumption(AltEntranceControl < 4, true);
+  expect(PlayerEntranceCtrl < 8);
+  expect(AltEntranceControl < 4);
 
   switch (AltEntranceControl) {
   case 0:
@@ -1553,7 +1553,7 @@ void Entrance_GameTimerSetup(void) {
     // NES note: inlined from GameTimerData
     static const u16 times[] = {0, 401, 301, 201};
 
-    assert_eq_assumption(GameTimerSetting <= sizeof(times)/sizeof(times[0]), true);
+    expect(GameTimerSetting <= sizeof(times)/sizeof(times[0]));
 
     const u16 time = times[GameTimerSetting];
 
@@ -2845,7 +2845,7 @@ void FireballObjCore(const u8 objoff) {
       // PlayerFacingDir may = 0 or 3 sometimes, so this goes out of bounds in the original.
       // The original lookup is FireballXSpdData[(u8)(PlayerFacingDir - 1)].
       const i8 xspd_lookup[4] = { -87, 64, -64, -122 };
-      assert_eq_assumption(PlayerFacingDir < 4, true);
+      expect(PlayerFacingDir < 4);
 
       Fireball_X_Speed[objoff] = xspd_lookup[PlayerFacingDir];
       Fireball_Y_Speed[objoff] = 4;
@@ -3069,7 +3069,7 @@ void FlagpoleRoutine(void) {
         NumberofLives += 1;
         Square2SoundQueue = 0x40;
       } else {
-        assert_eq_assumption(FlagpoleScore < 5, true);
+        expect(FlagpoleScore < 5);
         DigitModifier[score_digits[FlagpoleScore]] = score_mods[FlagpoleScore];
         AddToScore();
       }
@@ -3098,7 +3098,7 @@ void JumpspringHandler(const u8 objoff) {
   const u8 animctrl = JumpspringAnimCtrl;
 
   if ((TimerControl == 0) && (animctrl != 0)) {
-    assert_eq_assumption(animctrl < 5, true);
+    expect(animctrl < 5);
 
     if (animctrl <= 2) {
       Player_Y_Position += 2;
@@ -3140,7 +3140,7 @@ void Setup_Vine(const u8 param_1, const u8 param_2) {
   // NES note: Y=0x60 is passed by CheckpointEnemyID. This is a bug.
   const bool bug = param_2 == 0x60;
 
-  assert_eq_assumption(param_2 == 0 || param_2 == 1 || param_2 == 0x60, true);
+  expect(param_2 == 0 || param_2 == 1 || param_2 == 0x60);
 
   Enemy_ID[param_1] = A_VINE;
   Enemy_Flag[param_1] = 1;
@@ -3179,7 +3179,7 @@ void VineObjectHandler(const u8 objoff) {
 
   // It's easier to assume these are the only two values.
   // It simplifies loops and lookups.
-  assert_eq_assumption(VineFlagOffset == 1 || VineFlagOffset == 2, true);
+  expect(VineFlagOffset == 1 || VineFlagOffset == 2);
 
   const u8 checkheight = VineFlagOffset == 1 ? 0x30 : 0x60;
 
@@ -3427,7 +3427,7 @@ static inline void ProcHammerObj(const u8 objoff) {
         Misc_Y_Speed[objoff] = 0xfe;
         Enemy_State[bVar2] = Enemy_State[bVar2] & 0xf7;
 
-        assert_eq_assumption(Enemy_MovingDir[bVar2] == 1 || Enemy_MovingDir[bVar2] == 2, true);
+        expect(Enemy_MovingDir[bVar2] == 1 || Enemy_MovingDir[bVar2] == 2);
 
         Misc_X_Speed[objoff] = Enemy_MovingDir[bVar2] == 1 ? 16 : -16;
       }
@@ -4403,8 +4403,8 @@ void CheckThreeBytes(void) {
 void CheckpointEnemyID(const u8 param_1) {
   const u8 enemy_id = Enemy_ID[param_1];
 
-  assert_eq_assumption(is_actor_valid(enemy_id), true);
-  assert_eq_assumption(is_actor_groupenemy(enemy_id), false);
+  expect(is_actor_valid(enemy_id));
+  expect(!is_actor_groupenemy(enemy_id));
 
   if (is_actor_enemy(enemy_id)) {
     Enemy_Y_Position[param_1] += 8;
@@ -4608,7 +4608,7 @@ void InitRedKoopa(const u8 objoff) {
 // SM2MAIN:8f0c
 // Signature: [X] -> []
 void InitHammerBro(const u8 objoff) {
-  assert_eq_assumption(SecondaryHardMode <= 1, true);
+  expect(SecondaryHardMode <= 1);
 
   HammerThrowingTimer[objoff] = 0;
   Enemy_X_Speed[objoff] = 0;
@@ -4824,7 +4824,7 @@ void InitShortFirebar(const u8 objoff) {
   case A_FIREBAR_3: speed = 0x28; dir = 16; break;
   case A_FIREBAR_4: speed = 0x38; dir = 16; break;
   case A_FIREBAR_5: speed = 0x28; dir = 0; break;
-  default: assert_unreachable(); break;
+  default: unreachable(); break;
   }
 
   FirebarSpinState_Low[objoff] = 0;
@@ -4864,7 +4864,7 @@ void InitFlyingCheepCheep(const u8 objoff) {
     return;
   }
 
-  assert_eq_assumption(objoff <= 5, true);
+  expect(objoff <= 5);
 
   const u8 rng0 = PseudoRandomBitReg[objoff];
   const u8 rng1 = PseudoRandomBitReg[objoff + 1];
@@ -5059,7 +5059,7 @@ void InitFireworks(const u8 objoff) {
   static const u8 xpos_lookup[6] = { 0x00, 0x30, 0x60, 0x60, 0x00, 0x20 };
   static const u8 ypos_lookup[6] = { 0x60, 0x40, 0x70, 0x40, 0x60, 0x30 };
 
-  assert_eq_assumption(bVar3 < 6, true);
+  expect(bVar3 < 6);
 
   x -= 0x30;
   x += xpos_lookup[bVar3];
@@ -5466,7 +5466,7 @@ void RunEnemyObjectsCore(const u8 objoff) {
   case A_POWERUP:
     // NES note: Power ups are always set to index 5.
     // The original makes this assumption in PowerUpObjHandler
-    assert_eq_assumption(objoff, 5);
+    expect(objoff == 5);
     PowerUpObjHandler(objoff);
     return;
 
@@ -5744,7 +5744,7 @@ void ProcHammerBro(const u8 objoff) {
       return;
     }
     if (HammerThrowingTimer[objoff] == 0) {
-      assert_eq_assumption(SecondaryHardMode <= 1, true);
+      expect(SecondaryHardMode <= 1);
       HammerThrowingTimer[objoff] = SecondaryHardMode == 0 ? 0x30 : 0x1c;
       const bool sVar2 = SpawnHammerObj(objoff);
       if (sVar2) {
@@ -5861,7 +5861,7 @@ void MoveNormalEnemy(const u8 objoff) {
   if (fall_e) {
     MoveD_EnemyVertically(objoff);
     const u8 tmp1 = objoff;
-    assert_eq_assumption(tmp1, objoff);
+    expect(tmp1 == objoff);
 
     if (Enemy_State[objoff] == 2) {
       // MEHor
@@ -6146,7 +6146,7 @@ void ProcFirebar(const u8 objoff) {
 
   u8 tmp1 = FirebarSpinState_High[objoff];
 
-  assert_eq_assumption(is_actor_firebar(Enemy_ID[objoff]), true);
+  expect(is_actor_firebar(Enemy_ID[objoff]));
 
   if (is_actor_firebar_long(Enemy_ID[objoff])) {
     if (tmp1 == 8 || tmp1 == 0x18) {
@@ -6167,7 +6167,7 @@ void ProcFirebar(const u8 objoff) {
 
   u8 bVar2 = FirebarCollision(sproff, Enemy_Rel_XPos, bVar4);
 
-  assert_eq_assumption(is_actor_firebar(Enemy_ID[objoff]), true);
+  expect(is_actor_firebar(Enemy_ID[objoff]));
 
   const u8 tmpred = is_actor_firebar_long(Enemy_ID[objoff]) ? 11 : 5;
 
@@ -6266,8 +6266,8 @@ struct_r01r02r03 GetFirebarPosition(const u8 param_1, const u8 param_2) {
     bVar2 = 16 - bVar2;
   }
 
-  assert_eq_assumption(param_1 <= 0x1f, true);
-  assert_eq_assumption(param_2 < 11, true);
+  expect(param_1 <= 0x1f);
+  expect(param_2 < 11);
 
   static const u8 mirror_lookup[4] = { 1, 3, 2, 0 };
 
@@ -6434,14 +6434,14 @@ void BridgeCollapse(void) {
         static const u8 x_lookup[15] = { 26,   24, 24, 22, 20, 18, 16, 14, 12, 10,  8,  6,  4,  2,  0};
         static const u8 y_lookup[15] = {  0,    2,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4,  4};
 
-        assert_eq_assumption(BridgeCollapseOffset < 15, true);
+        expect(BridgeCollapseOffset < 15);
 
         const u8 x = x_lookup[BridgeCollapseOffset];
         const u8 y = y_lookup[BridgeCollapseOffset];
 
         // x and y should be multiples of 2
-        assert_eq_assumption(x % 2, 0);
-        assert_eq_assumption(y % 2, 0);
+        expect((x % 2) == 0);
+        expect((y % 2) == 0);
 
         const u8 vramoff = VRAM_Buffer1_Offset + 1;
 
@@ -6606,7 +6606,7 @@ static void EnemyGfxHandler_bowser(const u8 objoff, const u8 bowser_gfx_flag);
 // SM2MAIN:9db0
 // Signature: [X] -> []
 void BowserGfxHandler(const u8 objoff) {
-  assert_eq_assumption(BowserGfxFlag, 0);
+  expect(BowserGfxFlag == 0);
 
   // NES note: BowserGfxFlag ($036a) is only used here and the EnemyGfxHandler tree.
   // It's been optimized away.
@@ -6646,7 +6646,7 @@ void BowserGfxHandler(const u8 objoff) {
     PlayerEnemyCollision(dup_objoff);
   }
 
-  assert_eq_assumption(BowserGfxFlag, 0);
+  expect(BowserGfxFlag == 0);
 }
 
 
@@ -6656,7 +6656,7 @@ void BowserGfxHandler(const u8 objoff) {
 u8 SetFlameTimer(void) {
   static const u8 timer_lookup[8] = { 0xbf, 0x40, 0xbf, 0xbf, 0xbf, 0x40, 0x40, 0xbf };
 
-  assert_eq_assumption(BowserFlameTimerCtrl < 8, true);
+  expect(BowserFlameTimerCtrl < 8);
 
   const u8 bVar1 = BowserFlameTimerCtrl;
   BowserFlameTimerCtrl = (BowserFlameTimerCtrl + 1) & 7;
@@ -7665,7 +7665,7 @@ void PlayerEnemyCollision(const u8 objoff) {
     }
   }
 
-  assert_eq_assumption(is_actor_enemy(enemy_id) || enemy_id == A_BULLET_BILL_CANNON, true);
+  expect(is_actor_enemy(enemy_id) || enemy_id == A_BULLET_BILL_CANNON);
 
   if (StompTimer == 0) {
     bool cond1 = false;
@@ -7768,7 +7768,7 @@ void PlayerEnemyCollision(const u8 objoff) {
       SetupFloateyNumber(StompChainCounter + StompTimer, objoff);
       StompTimer += 1;
 
-      assert_eq_assumption(PrimaryHardMode <= 1, true);
+      expect(PrimaryHardMode <= 1);
 
       EnemyIntervalTimer[objoff] = PrimaryHardMode == 0 ? 16 : 11;
 
@@ -7782,7 +7782,7 @@ void PlayerEnemyCollision(const u8 objoff) {
 #ifdef SMB2J_MODE
       // NES note: SetBounce could overwrite the enemy id if it misbehaves
       // I'm not sure if this is achievable
-      assert_eq_assumption(objoff != 0x9f - 0x16, true);
+      expect(objoff != 0x9f - 0x16);
 
       SetBounce(objoff);
 #endif
@@ -7935,7 +7935,7 @@ void EnemiesCollision(const u8 objoff) {
     return;
   }
 
-  assert_eq_assumption(objoff < 0x80, true);
+  expect(objoff < 0x80);
 
   if (EnemiesCollision_condition(objoff)) {
     return;
@@ -7957,7 +7957,7 @@ void EnemiesCollision(const u8 objoff) {
 
     // objectoffset must be between 0 and 6 inclusive
 
-    assert_eq_assumption(objoff >= 0 && objoff <= 6, true);
+    expect(objoff >= 0 && objoff <= 6);
 
     const u8 bitsmask = 1 << (7 - objoff);
 
@@ -8104,7 +8104,7 @@ void SmallPlatformCollision(const u8 objoff) {
 void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, const u8 objoff) {
   // This is always the case in the original
   // TODO: check if any other values would make sense and if param_2 should be eliminated
-  assert_eq_assumption(param_2, (param_1+1)*4);
+  expect(param_2 == (param_1+1)*4);
   const u8 param_2_div4 = param_2 / 4;
 
   if (((u8)(BBOX_BOTRIGHT_Y(param_2_div4) - BBOX_TOPLEFT_Y(0)) < 4) && (Player_Y_Speed >= 0x80)) {
@@ -8134,7 +8134,7 @@ void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, c
 // SM2MAIN:a88e
 // Signature: [A, X] -> []
 void PositionPlayerOnS_Plat(const u8 param_1, const u8 param_2) {
-  assert_eq_assumption(param_1 == 1 || param_1 == 2, true);
+  expect(param_1 == 1 || param_1 == 2);
 
   if ((GameEngineSubroutine != 0xb) && (Enemy_Y_HighPos[param_2] == 1)) {
     u16 ypos = LOAD_16(Enemy_Y_HighPos[param_2],
@@ -8261,8 +8261,8 @@ void PlayerBGCollision(void) {
   }
 
   // Note: assuming these both cannot be non-zero. it simplifies a lookup.
-  assert_eq_assumption(PlayerSize == 0 || CrouchingFlag == 0, true);
-  assert_eq_assumption(PlayerSize <= 1, true);
+  expect(PlayerSize == 0 || CrouchingFlag == 0);
+  expect(PlayerSize <= 1);
 
   const u8 upperextent = (PlayerSize != 0 || CrouchingFlag != 0) ? 0x10 : 0x20;
 
@@ -8872,7 +8872,7 @@ void ChkForRedKoopa(const u8 objoff) {
   if ((Enemy_State[objoff] & 0x80) != 0) {
     Enemy_State[objoff] |= 0x40;
   } else {
-    assert_eq_assumption(Enemy_State[objoff] < 6, true);
+    expect(Enemy_State[objoff] < 6);
 
     static const u8 new_state_lookup[] = { 1, 1, 2, 2, 2, 5 };
 
@@ -9146,7 +9146,7 @@ void SetupEOffsetFBBox(const u8 objoff) {
 void MoveBoundBoxOffscreen(const u8 objoff) {
   // This condition being false would create wraparound behavior with the bounding box arrays,
   // so assume it never happens
-  assert_eq_assumption(objoff % 64 != 63, true);
+  expect(objoff % 64 != 63);
 
   BBOX_TOPLEFT_X(objoff + 1)  = 0xff;
   BBOX_TOPLEFT_Y(objoff + 1)  = 0xff;
@@ -9183,7 +9183,7 @@ void BoundingBoxCore(const u8 param_1, const u8 param_2) {
   const u8 ypos = SprObject_Rel_YPos[param_2];
   const u8 xpos = SprObject_Rel_XPos[param_2];
 
-  assert_eq_assumption(ctrl < 12, true);
+  expect(ctrl < 12);
 
   BBOX_TOPLEFT_X(param_1)  = xpos + lookup[ctrl][0];
   BBOX_TOPLEFT_Y(param_1)  = ypos + lookup[ctrl][1];
@@ -9239,8 +9239,8 @@ bool PlayerCollisionCore(const u8 param_1) {
 // SM2MAIN:afc5
 // Signature: [X, Y] -> [C]
 bool SprObjectCollisionCore(const u8 param_1, const u8 param_2) {
-  assert_eq_assumption(param_1 % 4, 0);
-  assert_eq_assumption(param_2 % 4, 0);
+  expect(param_1 % 4 == 0);
+  expect(param_2 % 4 == 0);
 
   // Iterate on both the X and Y axes
   for (int i = 0; i < 2; i++) {
@@ -9477,10 +9477,10 @@ void FlagpoleGfxHandler(const u8 objoff) {
     // Inlined: DrawOneSpriteRow
 
 #ifdef SMB1_MODE
-    assert_eq_assumption(FlagpoleScore < 5, true);
+    expect(FlagpoleScore < 5);
 #endif
 #ifdef SMB2J_MODE
-    assert_eq_assumption(FlagpoleScore < 6, true);
+    expect(FlagpoleScore < 6);
 #endif
 
     const u8 left_tileidx  = score_tiles[FlagpoleScore][0];
@@ -9531,7 +9531,7 @@ void DrawLargePlatform(const u8 objoff) {
   // NES note: If the offset is 254 or 255, this wraparounds the sprite page
   // because it's incremented before passing to DumpSixSpr.
   // This port assumes it can't happen.
-  assert_eq_assumption(bVar3 <= 253, true);
+  expect(bVar3 <= 253);
 
   SPRITE_Y(bVar3, 4) = bVar11;
   SPRITE_Y(bVar3, 5) = bVar11;
@@ -9584,7 +9584,7 @@ void JCoinGfxHandler(const u8 objoff) {
     // NES note: If the offset is 255, this wraparounds the sprite page
     // because it's incremented before passing to DumpTwoSpr.
     // This port assumes it can't happen.
-    assert_eq_assumption(bVar2 != 255, true);
+    expect(bVar2 != 255);
     const u8 tile = jumping_coin_tiles[(FrameCounter >> 1) & 3];
     SPRITE_TILE(bVar2, 0) = tile;
     SPRITE_TILE(bVar2, 1) = tile;
@@ -9638,7 +9638,7 @@ void DrawPowerUp(const u8 objoff) {
 
   const u8 sproff = Enemy_SprDataOffset[objoff];
 
-  assert_eq_assumption(PowerUpType < (sizeof(tiles)/sizeof(tiles[0])), true);
+  expect(PowerUpType < (sizeof(tiles)/sizeof(tiles[0])));
 
   {
     // Inlined: DrawOneSpriteRow
@@ -9713,7 +9713,7 @@ static inline void draw_enemy_object_2x3(const u8 tableoff, const u8 sproff,
     // NES note: If the offset is 254 or 255, this wraparounds the sprite page
     // because it's incremented before passing to DumpSixSpr.
     // This port assumes it can't happen.
-    assert_eq_assumption(sproff <= 253, true);
+    expect(sproff <= 253);
 
     // Flip all tiles vertically
     // Inlined: DumpSixSpr
@@ -9769,20 +9769,20 @@ void EnemyGfxHandler(const u8 objoff) {
   //   *                         -> * (otherwise, keep the same)
 
   // Note that all Bowser paths have been extracted out to EnemyGfxHandler_bowser.
-  assert_eq_assumption(BowserGfxFlag, 0);
+  expect(BowserGfxFlag == 0);
 
   // right before any array reads could access writes we optimized away
-  assert_eq_assumption(objoff < 0xeb - 0xcf, true);
+  expect(objoff < 0xeb - 0xcf);
 
   const u8 enemy_id = Enemy_ID[objoff];
 
-  assert_eq_assumption(is_actor_enemy(enemy_id) || enemy_id == A_JUMPSPRING || enemy_id == A_BULLET_BILL_CANNON || enemy_id == A_RETAINER, true);
+  expect(is_actor_enemy(enemy_id) || enemy_id == A_JUMPSPRING || enemy_id == A_BULLET_BILL_CANNON || enemy_id == A_RETAINER);
 
   // Note: Enemy_SprAttrib[objoff] is always 0 for EnemyGfxHandler.
   // RunNormalEnemies sets this to 0 right before calling EnemyGfxHandler. The other non-enemy actor types never assign it to non-zero.
   // The intent of this variable is to draw sprites behind nametable tiles (with an attribute value of 0x20).
   // The use of this array is mostly residual, and is only meaningfully used in DrawPowerUp.
-  assume_weak_original(Enemy_SprAttrib[objoff] == 0);
+  expect_weak(Enemy_SprAttrib[objoff] == 0);
 
   if (enemy_id == A_PIRANHA_PLANT) {
     if ((PiranhaPlant_Y_Speed[objoff] < 0x80) && (EnemyFrameTimer[objoff] != 0)) {
@@ -9856,7 +9856,7 @@ void EnemyGfxHandler(const u8 objoff) {
       mirror_horz = true;
     }
 
-    assume_weak_original(interval_timer == 0);
+    expect_weak(interval_timer == 0);
 
     if (cond1) {
       if ((FrameCounter & 0x8) == 0) {
@@ -10041,7 +10041,7 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_HAMMER_BRO_1;
     next_tableoff = TOFF_HAMMER_BRO_2;
 
-    assume_weak_original(st != 4);
+    expect_weak(st != 4);
 
     if ((enemy_state & 8) != 0) {
         tableoff = TOFF_HAMMER_BRO_3;
@@ -10072,8 +10072,8 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_CHEEPCHEEP_1;
     next_tableoff = TOFF_CHEEPCHEEP_2;
 
-    assume_weak_original(st <= 2);
-    assume_weak_original(st != 2 || flip_vert);  // if st == 2 then flip_vert
+    expect_weak(st <= 2);
+    expect_weak(st != 2 || flip_vert);  // if st == 2 then flip_vert
 
     if (cond1) {
       if ((FrameCounter & 0x8) == 0) {
@@ -10090,7 +10090,7 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_BLOOBER_1;
     next_tableoff = TOFF_BLOOBER_2;
 
-    assume_weak_original(st <= 2);
+    expect_weak(st <= 2);
 
     if (interval_timer != 1 && interval_timer < 5) {
       ypos += 3;
@@ -10127,7 +10127,7 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_BULLET_BILL;
 
     draw_behind = false;
-    assume_weak_original(st != 4);
+    expect_weak(st != 4);
 
     flip_vert = false;
 
@@ -10139,7 +10139,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     tableoff = TOFF_PODOBOO;
 
-    assume_weak_original(st != 4);
+    expect_weak(st != 4);
 
     mirror_horz = true;
 
@@ -10162,7 +10162,7 @@ void EnemyGfxHandler(const u8 objoff) {
       0x18, 0x19, 0x1a, 0x19, 0x18
     };
 
-    assert_eq_assumption(JumpspringAnimCtrl < 5, true);
+    expect(JumpspringAnimCtrl < 5);
     tableoff = jumpspring_offsets[JumpspringAnimCtrl];
 
     palette = 2;
@@ -10196,8 +10196,8 @@ void EnemyGfxHandler(const u8 objoff) {
     palette = 2;
     tall = true;
 
-    assume_weak_original(interval_timer == 0);
-    assume_weak_original(!flip_vert);
+    expect_weak(interval_timer == 0);
+    expect_weak(!flip_vert);
 
     if (WorldNumber < 7) {
       tableoff = TOFF_MUSHROOM_RETAINER;
@@ -10239,11 +10239,11 @@ void EnemyGfxHandler(const u8 objoff) {
     }
 #endif
 
-    assume_weak_original(st != 4);
+    expect_weak(st != 4);
 
     mirror_horz = true;
 
-    assume_weak_original(interval_timer == 0);
+    expect_weak(interval_timer == 0);
 
     if (cond1) {
       if ((FrameCounter & 0x8) == 0) {
@@ -10266,7 +10266,7 @@ void EnemyGfxHandler(const u8 objoff) {
       palette = 2;
     }
 
-    assume_weak_original(st != 4);
+    expect_weak(st != 4);
 
     if (st == 4) {
       tableoff = TOFF_KOOPA_SHELL_1;
@@ -10276,8 +10276,8 @@ void EnemyGfxHandler(const u8 objoff) {
 
     if (st > 1) { mirror_horz = true; }
 
-    assume_weak_original(!flip_vert);
-    assume_weak_original(interval_timer == 0);
+    expect_weak(!flip_vert);
+    expect_weak(interval_timer == 0);
 
     if (cond1) {
       if ((FrameCounter & 0x8) == 0) {
@@ -10318,7 +10318,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
   default:
     // Any remaining actors should be unreachable
-    assert_eq_assumption(false, true);
+    expect(false);
 
     break;
   }
@@ -10328,11 +10328,11 @@ void EnemyGfxHandler(const u8 objoff) {
 
 static void EnemyGfxHandler_bowser(const u8 objoff, const u8 bowser_gfx_flag) {
   // right before any array reads could access writes we optimized away
-  assert_eq_assumption(objoff < 0xeb - 0xcf, true);
+  expect(objoff < 0xeb - 0xcf);
 
-  assert_eq_assumption(Enemy_ID[objoff] == A_BOWSER, true);
+  expect(Enemy_ID[objoff] == A_BOWSER);
 
-  assume_weak_original(Enemy_SprAttrib[objoff] == 0);
+  expect_weak(Enemy_SprAttrib[objoff] == 0);
 
   const u8 xpos = Enemy_Rel_XPos;
   const bool tall = true;
@@ -10462,7 +10462,7 @@ void DrawBlock(const u8 objoff) {
     // NES note: If the offset is 255, this wraparounds the sprite page
     // because it's incremented before passing to DumpFourSpr.
     // This port assumes it can't happen.
-    assert_eq_assumption(sproff != 255, true);
+    expect(sproff != 255);
     SPRITE_TILE(sproff, 0) = 0x87;
     SPRITE_TILE(sproff, 1) = 0x87;
     SPRITE_TILE(sproff, 2) = 0x87;
@@ -10501,7 +10501,7 @@ void DrawBrickChunks(const u8 objoff) {
   // NES note: If the sprite offset is 254 or 255, this wraparounds the sprite page
   // because it's incremented before passing to DumpFourSpr.
   // This port assumes it can't happen.
-  assert_eq_assumption(off <= 253, true);
+  expect(off <= 253);
 
   // Set tile indices for all 4 sprites
   // Inlined: DumpFourSpr
@@ -10609,9 +10609,9 @@ void DrawExplosion_Fireworks(const u8 param_1, const u8 param_2) {
   // NES note: If the offset is 255, this wraparounds the sprite page
   // because it's incremented before passing to DumpFourSpr.
   // This port assumes it can't happen.
-  assert_eq_assumption(param_2 != 255, true);
+  expect(param_2 != 255);
 
-  assert_eq_assumption(param_1 < 3, true);
+  expect(param_1 < 3);
 
   static const u8 tiles[3] = { 0x68, 0x67, 0x66 };
 
@@ -10647,7 +10647,7 @@ void DrawSmallPlatform(const u8 objoff) {
   // NES note: If the offset is 254 or 255, this wraparounds the sprite page
   // because it's incremented before passing to DumpSixSpr.
   // This port assumes it can't happen.
-  assert_eq_assumption(bVar2 <= 253, true);
+  expect(bVar2 <= 253);
 
   // Inlined: DumpSixSpr
   for (int i = 0; i < 6; i++) {
@@ -10984,7 +10984,7 @@ u8 HandleChangeSize(void) {
     { 2, 0, 2, 0, 2, 0, 2, 0, 2, 0 }
   };
 
-  assert_eq_assumption(PlayerAnimCtrl < 10, true);
+  expect(PlayerAnimCtrl < 10);
 
   if (PlayerSize != 0) {
     const u8 idx = (lookup[1][PlayerAnimCtrl] == 0) ? 1 : 9;
@@ -11204,12 +11204,12 @@ u8 GetXOffscreenBits(const u8 param_1) {
   };
 
   u8 i = xoff_f(param_1, 1);
-  assert_eq_assumption(i < 16, true);
+  expect(i < 16);
   if (lookup[i] != 0) {
     return lookup[i];
   }
   i = xoff_f(param_1, 0);
-  assert_eq_assumption(i < 16, true);
+  expect(i < 16);
   return lookup[i];
 }
 
@@ -11266,11 +11266,11 @@ u8 GetYOffscreenBits(const u8 param_1) {
   };
 
   u8 i = yoff_f(param_1, 1);
-  assert_eq_assumption(i < 9, true);
+  expect(i < 9);
   if (lookup[i] != 0) {
     return lookup[i];
   }
   i = yoff_f(param_1, 0);
-  assert_eq_assumption(i < 9, true);
+  expect(i < 9);
   return lookup[i];
 }

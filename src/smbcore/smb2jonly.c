@@ -641,7 +641,7 @@ void GameOverMenu(void) {
       ContinueMenuSelect ^= 1;
     }
 
-    assert_eq_assumption(ContinueMenuSelect <= 1, true);
+    expect(ContinueMenuSelect <= 1);
 
     SPRITE_TILE(0, 0) = 0x5b;
     SPRITE_ATTR(0, 0) = 2;
@@ -700,7 +700,7 @@ static void LoadLuigiPhysics(void) {
 // SM2MAIN:c5ff
 // Signature: [] -> []
 void PatchPlayerNamePal(void) {
-  assert_eq_assumption(CurrentPlayer <= 1, true);
+  expect(CurrentPlayer <= 1);
 
   // Note: Inlined the offsets. The code assumes a length of 5 for both names, anyway.
 

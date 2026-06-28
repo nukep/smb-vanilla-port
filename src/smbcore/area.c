@@ -377,9 +377,9 @@ void AreaParserCore(void) {
     { MT_TREE_SHORT, MT_TREE_TRUNK, MT_TREE_TRUNK },
   };
 
-  assert_eq_assumption(BackgroundScenery <= 3, true);
-  assert_eq_assumption(ForegroundScenery <= 3, true);
-  assert_eq_assumption(CurrentColumnPos < 16, true);
+  expect(BackgroundScenery <= 3);
+  expect(ForegroundScenery <= 3);
+  expect(CurrentColumnPos < 16);
 
   if (BackgroundScenery != 0) {
     // NES note: In the original, if the page location is > 0x82, it breaks a loop that calculates modulo 3.
@@ -398,8 +398,8 @@ void AreaParserCore(void) {
       const u8 type = back_scenery_data & 0xf;
       const u8 mt_y = back_scenery_data >> 4;
 
-      assert_eq_assumption(type >= 1, true);
-      assert_eq_assumption(type <= 12, true);
+      expect(type >= 1);
+      expect(type <= 12);
 
       for (int i = 0; i < 3; i++) {
         if (mt_y+i == 11) {
@@ -438,7 +438,7 @@ void AreaParserCore(void) {
     MT_UNDERWATER_GROUND, MT_STONE, MT_BRICK, MT_CASTLE_INSIDE_WALL
   };
 
-  assert_eq_assumption(AreaType < 4, true);
+  expect(AreaType < 4);
 
   // RendTerr
   {
@@ -453,7 +453,7 @@ void AreaParserCore(void) {
       mt = MT_CASTLE_INSIDE_WALL;
     }
 
-    assert_eq_assumption(TerrainControl < 16, true);
+    expect(TerrainControl < 16);
 
     static const u16 terrain_renderbits[16] = {
       0b0000000000000000,
@@ -744,7 +744,7 @@ u8 decode_area_data_to_idx(const u8 data0, const u8 data1) {
 #endif
     } else {
       switch ((data1 >> 4) & 7) {
-      case 0: assert_unreachable(); break;
+      case 0: unreachable(); break;
       case 1: idx = DECODEAREADATA_AREASTYLEOBJECT; break;
       case 2: idx = DECODEAREADATA_ROWOFBRICKS; break;
       case 3: idx = DECODEAREADATA_ROWOFSOLIDBLOCKS; break;
@@ -1167,7 +1167,7 @@ void PulleyRopeObject(const u8 param_1) {
 // Signature: [X] -> []
 void CastleObject(const u8 objoff) {
   // objoff is always 0,1,2
-  assert_eq_assumption(objoff <= 2, true);
+  expect(objoff <= 2);
 
   const struct_yr07 sVar5 = GetLrgObjAttrib(objoff);
   const u8 start_at_y = sVar5.y;
@@ -1175,11 +1175,11 @@ void CastleObject(const u8 objoff) {
 
   const u8 j = AreaObjectLength[objoff];
 
-  assert_eq_assumption(j < 5, true);
+  expect(j < 5);
 
   // sVar5.y is which y to start drawing the castle. it's 0 or 6.
   // shorter castles (in X-1 and X-2 levels) don't draw the bottom
-  assert_eq_assumption(sVar5.y < 11, true);
+  expect(sVar5.y < 11);
 
   static const u8 _ = MT_0;
   static const u8 T = MT_CASTLE_TOP;
@@ -1248,7 +1248,7 @@ void WaterPipe(const u8 param_1) {
 // Signature: [X] -> []
 void IntroPipe(const u8 objoff) {
   // objoff is always 0,1,2
-  assert_eq_assumption(objoff <= 2, true);
+  expect(objoff <= 2);
 
   ChkLrgObjFixedLength(objoff, 3);
 
@@ -1256,7 +1256,7 @@ void IntroPipe(const u8 objoff) {
   // Note: Simplified
 
   const u8 bVar2 = AreaObjectLength[objoff];
-  assert_eq_assumption(bVar2 <= 3, true);
+  expect(bVar2 <= 3);
 
   const bool left_side = (bVar2 % 2) != 0;
 
@@ -1283,7 +1283,7 @@ void IntroPipe(const u8 objoff) {
 // Signature: [X] -> []
 void ExitPipe(const u8 objoff) {
   // objoff is always 0,1,2
-  assert_eq_assumption(objoff <= 2, true);
+  expect(objoff <= 2);
 
   ChkLrgObjFixedLength(objoff, 3);
   const struct_yr07 sVar1 = GetLrgObjAttrib(objoff);
@@ -1291,10 +1291,10 @@ void ExitPipe(const u8 objoff) {
   // Inlined: RenderSidewaysPipe
 
   const u8 bVar2 = AreaObjectLength[objoff];
-  assert_eq_assumption(bVar2 <= 3, true);
+  expect(bVar2 <= 3);
 
-  assert_eq_assumption(sVar1.y >= 1, true);
-  assert_eq_assumption(sVar1.y < 13, true);
+  expect(sVar1.y >= 1);
+  expect(sVar1.y < 13);
 
   const bool left_side = (bVar2 % 2) != 0;
 
@@ -1336,7 +1336,7 @@ void VerticalPipe(const u8 param_1, const bool decorative) {
   const u8 bVar2 = sVar5.r07;
   const u8 bVar1 = sVar5.r06;
 
-  assert_eq_assumption(sVar5.y < 2, true);
+  expect(sVar5.y < 2);
 
   const bool left_side = sVar5.y != 0;
 
@@ -1524,7 +1524,7 @@ void EmptyBlock(const u8 param_1) {
 // SM2MAIN:7875
 // Signature: [X] -> []
 void RowOfBricks(const u8 param_1) {
-  assert_eq_assumption(AreaType < 4, true);
+  expect(AreaType < 4);
   u8 bVar1 = AreaType;
   if (CloudTypeOverride != 0) {
     bVar1 = 4;
@@ -1540,7 +1540,7 @@ void RowOfBricks(const u8 param_1) {
 // SM2MAIN:7885
 // Signature: [X] -> []
 void RowOfSolidBlocks(const u8 param_1) {
-  assert_eq_assumption(AreaType < 4, true);
+  expect(AreaType < 4);
   static const u8 metatiles[4] = { MT_UNDERWATER_GROUND, MT_STAIR_BLOCK, MT_STAIR_BLOCK, MT_CASTLE_INSIDE_WALL };
   const u8 mt = metatiles[AreaType];
   const struct_ycr07 sVar1 = ChkLrgObjLength(param_1);
@@ -1552,7 +1552,7 @@ void RowOfSolidBlocks(const u8 param_1) {
 // SM2MAIN:7897
 // Signature: [X] -> []
 void ColumnOfBricks(const u8 param_1) {
-  assert_eq_assumption(AreaType < 4, true);
+  expect(AreaType < 4);
   static const u8 metatiles[4] = { MT_CORAL, MT_BRICK_2, MT_BRICK, MT_BRICK };
   const u8 mt = metatiles[AreaType];
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
@@ -1564,7 +1564,7 @@ void ColumnOfBricks(const u8 param_1) {
 // SM2MAIN:78a0
 // Signature: [X] -> []
 void ColumnOfSolidBlocks(const u8 param_1) {
-  assert_eq_assumption(AreaType < 4, true);
+  expect(AreaType < 4);
   static const u8 metatiles[4] = { MT_UNDERWATER_GROUND, MT_STAIR_BLOCK, MT_STAIR_BLOCK, MT_CASTLE_INSIDE_WALL };
   const u8 mt = metatiles[AreaType];
   const struct_yr07 sVar1 = GetLrgObjAttrib(param_1);
@@ -2121,7 +2121,7 @@ static inline void UpsideDownPipe_impl(const u8 objoff, const u8 val) {
 
   // bVar3 is 0..7, and val is 1 or 4
 
-  assert_eq_assumption(sVar6.y < 2, true);
+  expect(sVar6.y < 2);
 
   const bool left_side = sVar6.y % 2 != 0;
 
