@@ -720,7 +720,7 @@ void MoveUpsideDownPiranhaP(const u8 param_1) {
 // SM2DATA2+SM2DATA4:c4fe
 // Signature: [] -> []
 void BlowPlayerAround(void) {
-  if ((WindFlag != 0) && (AreaType == 1)) {
+  if ((WindFlag != 0) && (AreaType == AREA_GROUND)) {
     const u8 mask = (FrameCounter & 0x80) ? 1 : 3;
     if ((FrameCounter & mask) == 0) {
       Player_PageLoc += Player_X_Position == 0xff;

@@ -801,18 +801,13 @@ void SetupIntermediate(void) {
 // SM2MAIN:651f
 // Signature: [] -> []
 void GetAreaPalette(void) {
-  expect(AreaType < 4);
-
-  u8 addrctrl;
-
   switch (AreaType) {
-  case 0: addrctrl = ADDRCTRL_WATERPALETTEDATA; break;
-  case 1: addrctrl = ADDRCTRL_GROUNDPALETTEDATA; break;
-  case 2: addrctrl = ADDRCTRL_UNDERGROUNDPALETTEDATA; break;
-  case 3: addrctrl = ADDRCTRL_CASTLEPALETTEDATA; break;
+  case AREA_WATER:       VRAM_Buffer_AddrCtrl = ADDRCTRL_WATERPALETTEDATA; break;
+  case AREA_GROUND:      VRAM_Buffer_AddrCtrl = ADDRCTRL_GROUNDPALETTEDATA; break;
+  case AREA_UNDERGROUND: VRAM_Buffer_AddrCtrl = ADDRCTRL_UNDERGROUNDPALETTEDATA; break;
+  case AREA_CASTLE:      VRAM_Buffer_AddrCtrl = ADDRCTRL_CASTLEPALETTEDATA; break;
+  default: unreachable(); break;
   }
-
-  VRAM_Buffer_AddrCtrl = addrctrl;
 
   // Note: Moved ScreenRoutineTask increment to caller
 }
@@ -953,7 +948,7 @@ void DisplayIntermediate(void) {
 
     expect(OperMode_Task == OMT_GAME_SCREENROUTINES);
 
-    if (AltEntranceControl != 0 || (AreaType != 3 && DisableIntermediate != 0)) {
+    if (AltEntranceControl != 0 || (AreaType != AREA_CASTLE && DisableIntermediate != 0)) {
       ScreenRoutineTask = SRT_AREAPARSERTASKCONTROL;
       return;
     }
@@ -1000,7 +995,7 @@ void ColorRotation(void) {
   static const u8 palette_3[16] = { 0x0f, 0x0f, 0x1c, 0x00, };
 
   expect(ColorRotateOffset < 6);
-  expect(AreaType < 4);
+  expect(is_areatype_valid(AreaType));
 
   // Rotate the second palette color in particular. This is the coin/block color.
   VRAM1_DRAW(PPU_ADDR_PALETTE_BG(3, 0),
@@ -1055,7 +1050,7 @@ void RemoveCoin_Axe(const u16 mt_x, const u16 mt_y) {
   //
   // Replaces the coin or axe metatile with a blank one
   // The blank one is different if underwater
-  const u8 blockgfxidx = AreaType != 0 ? 3 : 4;
+  const u8 blockgfxidx = AreaType != AREA_WATER ? 3 : 4;
   const u8 vramoff = 0x41;
 
   const u8 x  = mt_x % 16;
@@ -1483,7 +1478,7 @@ void Entrance_GameTimerSetup(void) {
   Player_State = PLAYERSTATE_ONGROUND;
   Player_CollisionBits -= 1;
   HalfwayPage = 0;
-  SwimmingFlag = AreaType == 0;
+  SwimmingFlag = AreaType == AREA_WATER;
 
   expect(PlayerEntranceCtrl < 8);
   expect(AltEntranceControl < 4);
@@ -1552,7 +1547,7 @@ void Entrance_GameTimerSetup(void) {
     buggy_argument_1 = 5;
   }
 
-  if (AreaType == 0) {
+  if (AreaType == AREA_WATER) {
     // $07 is passed here.
     const u8 buggy_argument_2 = ssw(0x91, 0x6f);
     SetupBubble_buggy(buggy_argument_1, buggy_argument_2);
@@ -2039,7 +2034,7 @@ void PlayerCtrlRoutine(void) {
   char cVar2;
 
   if (GameEngineSubroutine != GR_PLAYERDEATH) {
-    if ((AreaType == 0) && ((Player_Y_HighPos != 1 || (Player_Y_Position >= 0xd0)))) {
+    if ((AreaType == AREA_WATER) && ((Player_Y_HighPos != 1 || (Player_Y_Position >= 0xd0)))) {
       SavedJoypadBits[0] = 0;
     }
     A_B_Buttons = SavedJoypadBits[0] & (BUTTON_A | BUTTON_B);
@@ -2143,7 +2138,7 @@ void VerticalPipeEntry(void) {
   if (ChangeAreaTimer == 0) {
     if (WarpZoneControl != 0) {
       AltEntranceControl = 0;
-    } else if (AreaType != 3) {
+    } else if (AreaType != AREA_CASTLE) {
       AltEntranceControl = 1;
     } else {
       AltEntranceControl = 2;
@@ -2606,7 +2601,7 @@ void PlayerPhysicsSub(void) {
 
   if (Player_State == PLAYERSTATE_ONGROUND) {
     // ProcPRun
-    if ((AreaType != 0)) {
+    if ((AreaType != AREA_WATER)) {
       if (running) {
         RunningTimer = 10;
       }
@@ -2620,7 +2615,7 @@ void PlayerPhysicsSub(void) {
     bVar1 = 0;
   }
 
-  bVar2 = (Player_State == PLAYERSTATE_ONGROUND && AreaType == 0) ? 1 : 0;
+  bVar2 = (Player_State == PLAYERSTATE_ONGROUND && AreaType == AREA_WATER) ? 1 : 0;
 
   if (bVar1) {
     bVar2 += 1;
@@ -2761,7 +2756,7 @@ void ProcFireball_Bubble(void) {
     FireballObjCore(1);
   }
 
-  if (AreaType == 0) {
+  if (AreaType == AREA_WATER) {
     for (int i = 2; i >= 0; i--) {
       BubbleCheck(i);
       RelativeBubblePosition(i);
@@ -2968,7 +2963,7 @@ void WarpZoneObject(const u8 objoff) {
 // SM2MAIN:8321
 // Signature: [] -> []
 void ProcessWhirlpools(void) {
-  if (AreaType != 0) {
+  if (AreaType != AREA_WATER) {
     return;
   }
 
@@ -3222,7 +3217,7 @@ void VineObjectHandler(const u8 objoff) {
 // SM2MAIN:8587
 // Signature: [] -> []
 void ProcessCannons(void) {
-  if (AreaType == 0) {
+  if (AreaType == AREA_WATER) {
     return;
   }
 
@@ -5084,7 +5079,7 @@ void BulletBillCheepCheep(const u8 objoff) {
     return;
   }
 
-  if (AreaType == 0) {
+  if (AreaType == AREA_WATER) {
     // Auto-appearing cheep cheeps (in SMB1 2-2 and 7-2)
 
     if (objoff >= 3) {
@@ -5336,7 +5331,7 @@ void InitVertPlatform(const u8 objoff) {
 // SM2MAIN:9460
 // Signature: [X] -> []
 void SPBBox(const u8 objoff) {
-  Enemy_BoundBoxCtrl[objoff] = ((AreaType != 3) && (SecondaryHardMode == 0)) ? 6 : 5;
+  Enemy_BoundBoxCtrl[objoff] = ((AreaType != AREA_CASTLE) && (SecondaryHardMode == 0)) ? 6 : 5;
 }
 
 
@@ -7618,7 +7613,7 @@ void PlayerEnemyCollision(const u8 objoff) {
       return;
     }
 
-    if (AreaType == 0) {
+    if (AreaType == AREA_WATER) {
       InjurePlayer();
       return;
     }
@@ -7902,7 +7897,7 @@ void EnemiesCollision(const u8 objoff) {
     return;
   }
 
-  if (AreaType == 0) {
+  if (AreaType == AREA_WATER) {
     return;
   }
 
@@ -8261,7 +8256,7 @@ void PlayerBGCollision(void) {
           if (bVar7 != MT_SPECIAL_VINE) {
             Square1SoundQueue = 2;
           }
-        } else if ((AreaType != 0) && (BlockBounceTimer == 0)) {
+        } else if ((AreaType != AREA_WATER) && (BlockBounceTimer == 0)) {
           const u16 mt_x = sVar9.mt_x;
           const u16 mt_y = sVar9.mt_y;
           PlayerHeadCollision(bVar7, mt_x, mt_y);
@@ -8820,7 +8815,7 @@ void SetStun2(const u8 param_1) {
   Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
   Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
 
-  if ((Enemy_ID[param_1] == A_BLOOBER) || (AreaType == 0)) {
+  if ((Enemy_ID[param_1] == A_BLOOBER) || (AreaType == AREA_WATER)) {
     Enemy_Y_Speed[param_1] = 0xff;
   } else {
     Enemy_Y_Speed[param_1] = 0xfd;
@@ -9497,7 +9492,7 @@ void DrawLargePlatform(const u8 objoff) {
   SPRITE_Y(sproff1, 3) = ypos;
 
   u8 bVar11 = ypos;
-  if ((AreaType == 3) || (SecondaryHardMode != 0)) {
+  if ((AreaType == AREA_CASTLE) || (SecondaryHardMode != 0)) {
     bVar11 = SPRITE_Y_OFFSCREEN;
   }
 
@@ -10428,7 +10423,7 @@ void DrawBlock(const u8 objoff) {
     draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
   }
 
-  if (AreaType != 1) {
+  if (AreaType != AREA_GROUND) {
     SPRITE_TILE(sproff, 0) = 0x86;
     SPRITE_TILE(sproff, 1) = 0x86;
   }
@@ -10444,7 +10439,7 @@ void DrawBlock(const u8 objoff) {
     SPRITE_TILE(sproff, 3) = 0x87;
 
 
-    const u8 bVar4 = (AreaType != 1) ? 1 : 3;
+    const u8 bVar4 = (AreaType != AREA_GROUND) ? 1 : 3;
     SPRITE_ATTR(sproff, 0) = bVar4;
     SPRITE_ATTR(sproff, 1) = bVar4 | 0x40;
     SPRITE_ATTR(sproff, 2) = bVar4 | 0x80;

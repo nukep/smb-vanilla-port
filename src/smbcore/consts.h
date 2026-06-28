@@ -307,5 +307,15 @@ enum playerstate {
   PLAYERSTATE_CLIMBING,
 };
 
+enum areatype {
+  AREA_WATER,
+  AREA_GROUND,
+  AREA_UNDERGROUND,
+  AREA_CASTLE
+};
+
+static inline bool is_areatype_valid(const u8 areatype) {
+  return areatype <= AREA_CASTLE;
+}
 
 #endif
