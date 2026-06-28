@@ -1166,18 +1166,6 @@ void smb2j_GameModeDiskRoutines(void);
 void smb2j_LoadWorlds5Thru8(void);
 #define LoadWorlds5Thru8 smb2j_LoadWorlds5Thru8
 
-void smb2j_ResetDiskIOTask(void);
-#define ResetDiskIOTask smb2j_ResetDiskIOTask
-
-void smb2j_VMDelay(void);
-#define VMDelay smb2j_VMDelay
-
-void smb2j_StartVMDelay(void);
-#define StartVMDelay smb2j_StartVMDelay
-
-void smb2j_ContinueVMDelay(void);
-#define ContinueVMDelay smb2j_ContinueVMDelay
-
 void smb2j_VictoryModeDiskRoutines(void);
 #define VictoryModeDiskRoutines smb2j_VictoryModeDiskRoutines
 
@@ -1231,9 +1219,6 @@ void smb2j_WriteTopScore(void);
 
 void smb2j_InitializeGame(void);
 #define InitializeGame smb2j_InitializeGame
-
-void smb2j_DemoReset(void);
-#define DemoReset smb2j_DemoReset
 
 void smb2j_PrimaryGameSetup(void);
 #define PrimaryGameSetup smb2j_PrimaryGameSetup

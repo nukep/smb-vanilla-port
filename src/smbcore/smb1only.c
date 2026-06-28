@@ -52,7 +52,9 @@ void PrintVictoryMessages(void) {
   }
 
   WorldEndTimer = 6;
-  OperMode_Task += 1;
+
+  expect(OperMode_Task == OMT_VICTORY_PRINTVICTORYMESSAGES);
+  OperMode_Task = OMT_VICTORY_PLAYERENDWORLD;
 }
 
 

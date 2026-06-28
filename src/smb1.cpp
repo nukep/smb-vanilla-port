@@ -180,7 +180,9 @@ void DrawTitleScreen() {
     VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB1_VRAM_PAGE;
     ScreenRoutineTask += 1;
   } else {
-    OperMode_Task += 1;
+    expect(OperMode == OM_GAME);
+    expect(OperMode_Task == OMT_GAME_SCREENROUTINES);
+    OperMode_Task = OMT_GAME_SECONDARYGAMESETUP;
   }
 }
 

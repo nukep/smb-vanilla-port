@@ -1,3 +1,4 @@
+#include "src/base.h"
 #include "types.h"
 #include "vars.h"
 #include "consts.h"
@@ -35,13 +36,15 @@ void DrawMushroomIcon(void) {
 
 static inline void GameMenuRoutine_ResetTitle() {
   OperMode = OM_TITLESCREEN;
-  OperMode_Task = 0;
+  OperMode_Task = OMT_TITLESCREEN_START;
+
 #ifdef SMB1_MODE
   Sprite0HitDetectFlag = 0;
 #endif
 #ifdef SMB2J_MODE
   IRQUpdateFlag = 0;
 #endif
+
   DisableScreenFlag += 1;
 }
 
@@ -133,10 +136,12 @@ void GameMenuRoutine(void) {
     Hidden1UpFlag += 1;
     OffScr_Hidden1UpFlag += 1;
     FetchNewGameTimerFlag += 1;
+
     expect(OperMode == OM_TITLESCREEN);
     OperMode = OM_GAME;
+    OperMode_Task = OMT_GAME_INITIALIZEAREA;
+
     PrimaryHardMode = WorldSelectEnableFlag;
-    OperMode_Task = 0;
     DemoTimer = 0;
     for (int i = 0; i < 12*2; i++) {
       DisplayDigits[i + 6] = 0;
@@ -147,7 +152,10 @@ void GameMenuRoutine(void) {
     DiskIOTask = 0;
     HardWorldFlag = ((GamesBeatenCount >= 8) && button_a_pushed) ? 1 : 0;
 
-    OperMode_Task += 1;
+    expect(OperMode == OM_TITLESCREEN);
+    expect(OperMode_Task == OMT_TITLESCREEN_GAMEMENUROUTINE);
+    OperMode_Task = OMT_TITLESCREEN_HARDWORLDSCHECKPOINT;
+
     PatchPlayerNamePal();
     WorldNumber = 0;
     LevelNumber = 0;
@@ -206,7 +214,7 @@ void GameMenuRoutine(void) {
 // SM2MAIN:61e9
 // Signature: [] -> []
 void PauseRoutine(void) {
-  if ((OperMode == OM_VICTORY) || ((OperMode == OM_GAME && (OperMode_Task == ssw(3, 4))))) {
+  if ((OperMode == OM_VICTORY) || ((OperMode == OM_GAME && (OperMode_Task == OMT_GAME_GAMECOREROUTINE)))) {
     if (GamePauseTimer != 0) {
       GamePauseTimer -= 1;
       return;
@@ -308,6 +316,8 @@ void TitleScreenMode(void) {
   switch (OperMode_Task) {
   case OMT_TITLESCREEN_INITIALIZEGAME:
     InitializeGame();
+    expect(OperMode == OM_TITLESCREEN);
+    OperMode_Task = OMT_TITLESCREEN_SCREENROUTINES;
     return;
 
   case OMT_TITLESCREEN_SCREENROUTINES:
@@ -316,6 +326,8 @@ void TitleScreenMode(void) {
 
   case OMT_TITLESCREEN_PRIMARYGAMESETUP:
     PrimaryGameSetup();
+    expect(OperMode == OM_TITLESCREEN);
+    OperMode_Task = OMT_TITLESCREEN_GAMEMENUROUTINE;
     return;
 
   case OMT_TITLESCREEN_GAMEMENUROUTINE:
@@ -358,11 +370,19 @@ bool DemoEngine(void) {
 // SM2MAIN:6298
 // Signature: [] -> []
 void VictoryMode(void) {
+  expect(OperMode == OM_VICTORY);
   VictoryModeSubroutines();
-  if (OperMode_Task != 0) {
-    if (SMB2J_ONLY && (WorldNumber == 7) && (OperMode_Task == 5 || OperMode_Task == 0xd)) {
-      return;
+  if (OperMode_Task != OMT_VICTORY_BRIDGECOLLAPSE) {
+#ifdef SMB2J_MODE
+    if (WorldNumber == 7) {
+      if (OperMode_Task == OMT_VICTORY_W8SMB2J_VICTORYMODEDISKROUTINES) {
+        return;
+      }
+      if (OperMode_Task == OMT_VICTORY_W8SMB2J_ENDINGDISKROUTINES) {
+        return;
+      }
     }
+#endif
     EnemiesAndLoopsCore(0);
   }
   RelativePlayerPosition();
@@ -426,7 +446,9 @@ void SetupVictoryMode(void) {
     }
   #endif
   EventMusicQueue = 8;
-  OperMode_Task += 1;
+
+  expect(OperMode_Task == OMT_VICTORY_SETUPVICTORYMODE);
+  OperMode_Task = OMT_VICTORY_PLAYERVICTORYWALK;
 }
 
 
@@ -452,7 +474,9 @@ void PlayerVictoryWalk(void) {
     VictoryWalkControl += 1;
   }
   if (VictoryWalkControl == 0) {
-    OperMode_Task += 1;
+    expect(OperMode == OM_VICTORY);
+    expect(OperMode_Task == OMT_VICTORY_PLAYERVICTORYWALK);
+    OperMode_Task = OMT_VICTORY_PRINTVICTORYMESSAGES;
   }
 }
 
@@ -473,7 +497,6 @@ void PlayerEndWorld(void) {
     }
     AreaNumber = 0;
     LevelNumber = 0;
-    OperMode_Task = 0;
     WorldNumber += 1;
     if (SMB2J_ONLY && WorldNumber >= 8) {
       WorldNumber = 8;
@@ -481,6 +504,7 @@ void PlayerEndWorld(void) {
     LoadAreaPointer();
     FetchNewGameTimerFlag += 1;
     OperMode = OM_GAME;
+    OperMode_Task = OMT_GAME_START;
   }
 }
 
@@ -675,7 +699,17 @@ void ScreenRoutines(void) {
 
 #ifdef SMB2J_MODE
   case SCREENROUTINES_DEMORESET:
-    DemoReset();
+    DemoTimer = 0x18;
+    LoadAreaPointer();
+    InitializeArea();
+
+    // TODO: figure out for sure which opermode this is in
+    switch (OperMode) {
+    case OM_TITLESCREEN: OperMode_Task = OMT_TITLESCREEN_PRIMARYGAMESETUP; break;
+    case OM_GAME: OperMode_Task = OMT_GAME_SECONDARYGAMESETUP; break;
+    case OM_GAMEOVER: OperMode_Task = OMT_GAMEOVER_RUNGAMEOVER; break;
+    default: unreachable(); break;
+    }
     return;
 #endif
 
@@ -879,15 +913,16 @@ void DisplayTimeUp(void) {
 // Signature: [] -> []
 void DisplayIntermediate(void) {
   if (OperMode == OM_GAMEOVER) {
+    expect(OperMode_Task == OMT_GAMEOVER_SCREENROUTINES);
 #ifdef SMB1_MODE
     ScreenTimer = 0x12;
     WriteGameText(3);
-    OperMode_Task += 1;
+    OperMode_Task = OMT_GAMEOVER_RUNGAMEOVER;
 #endif
 #ifdef SMB2J_MODE
     WriteGameText(3);
     if (WorldNumber != 8) {
-      OperMode_Task += 1;
+      OperMode_Task = OMT_GAMEOVER_RUNGAMEOVER;
     } else {
       ScreenRoutineTask += 1;
     }
@@ -928,7 +963,11 @@ void ClearBuffersDrawIcon(void) {
     DrawMushroomIcon();
     ScreenRoutineTask += 1;
   } else {
-    OperMode_Task += 1;
+    unreachable();
+
+    // Note: The original game increments the opermode task on non-titlescreen opermodes.
+    // However, it seems to never be encountered
+    // OperMode_Task += 1;
   }
 }
 
@@ -938,7 +977,9 @@ void ClearBuffersDrawIcon(void) {
 // Signature: [] -> []
 void WriteTopScore(void) {
   WriteDigits(0xfa);
-  OperMode_Task += 1;
+  expect(OperMode == OM_TITLESCREEN);
+  expect(OperMode_Task == OMT_TITLESCREEN_SCREENROUTINES);
+  OperMode_Task = OMT_TITLESCREEN_PRIMARYGAMESETUP;
 }
 
 
@@ -1260,17 +1301,6 @@ void TopScoreCheck(const u8 last_digit_offset) {
 }
 
 
-// SMB:8fdc
-// SM2MAIN:c5d0
-// Signature: [] -> []
-void DemoReset(void) {
-  // Note: The SMB disassembly doesn't label this
-  DemoTimer = 0x18;
-  LoadAreaPointer();
-  InitializeArea();
-}
-
-
 // SMB:8fcf
 // SM2MAIN:c592
 // Signature: [] -> []
@@ -1299,7 +1329,9 @@ void InitializeGame(void) {
   for (int i = 0; i < 0x20; i++) {
     SoundMemory[i] = 0;
   }
-  DemoReset();
+  DemoTimer = 0x18;
+  LoadAreaPointer();
+  InitializeArea();
 }
 
 
@@ -1349,7 +1381,8 @@ void InitializeArea(void) {
 #ifdef SMB2J_MODE
   LoadPhysicsData();
 #endif
-  OperMode_Task += 1;
+
+  // Note: Moved OperMode_Task assignment to caller
 }
 
 
@@ -1421,7 +1454,7 @@ void SecondaryGameSetup(void) {
   // We'll inline it here
   Misc_Collision_Flag[11] = 0xff;
 
-  OperMode_Task += 1;
+  // Note: Moved OperMode_Task assignment to caller
 }
 
 #define MUSIC_QUEUE_GROUND (1 << 0)
@@ -1567,8 +1600,8 @@ void PlayerLoseLife(void) {
   EventMusicQueue = 0x80;
   NumberofLives -= 1;
   if (NumberofLives >= 0x80) {
-    OperMode_Task = 0;
     OperMode = OM_GAMEOVER;
+    OperMode_Task = OMT_GAMEOVER_SETUPGAMEOVER;
     return;
   }
   u8 bVar1 = WorldNumber * 2;
@@ -1627,7 +1660,8 @@ void SetupGameOver(void) {
 #endif
   EventMusicQueue = 2;
   DisableScreenFlag += 1;
-  OperMode_Task += 1;
+  expect(OperMode_Task == OMT_GAMEOVER_SETUPGAMEOVER);
+  OperMode_Task = OMT_GAMEOVER_SCREENROUTINES;
 }
 
 
@@ -1666,9 +1700,9 @@ void TerminateGame(void) {
   }
   ContinueWorld = WorldNumber;
 #endif
-  OperMode_Task = 0;
   ScreenTimer = 0;
   OperMode = OM_TITLESCREEN;
+  OperMode_Task = OMT_TITLESCREEN_START;
 }
 
 
@@ -1682,8 +1716,8 @@ void ContinueGame(void) {
   TimerControl = 0;
   PlayerStatus = 0;
   GameEngineSubroutine = 0;
-  OperMode_Task = 0;
   OperMode = OM_GAME;
+  OperMode_Task = OMT_GAME_START;
 }
 
 
@@ -1706,6 +1740,8 @@ void GameMode(void) {
   switch (OperMode_Task) {
   case OMT_GAME_INITIALIZEAREA:
     InitializeArea();
+    expect(OperMode == OM_GAME);
+    OperMode_Task = OMT_GAME_SCREENROUTINES;
     return;
 
   case OMT_GAME_SCREENROUTINES:
@@ -1714,6 +1750,8 @@ void GameMode(void) {
 
   case OMT_GAME_SECONDARYGAMESETUP:
     SecondaryGameSetup();
+    expect(OperMode == OM_GAME);
+    OperMode_Task = OMT_GAME_GAMECOREROUTINE;
     return;
 
   case OMT_GAME_GAMECOREROUTINE:
@@ -2170,7 +2208,8 @@ void SideExitPipeEntry(void) {
 // Signature: [] -> [A]
 u8 ChgAreaMode(void) {
   DisableScreenFlag += 1;
-  OperMode_Task = 0;
+  expect(OperMode == OM_GAME);
+  OperMode_Task = OMT_GAME_START;
 #ifdef SMB1_MODE
   Sprite0HitDetectFlag = 0;
 #endif
@@ -6418,7 +6457,9 @@ void BridgeCollapse(void) {
     }
   }
   EventMusicQueue = 0x80;
-  OperMode_Task += 1;
+  expect(OperMode == OM_VICTORY);
+  expect(OperMode_Task == OMT_VICTORY_BRIDGECOLLAPSE);
+  OperMode_Task = OMT_VICTORY_SETUPVICTORYMODE;
   KillAllEnemies();
 }
 
@@ -8145,8 +8186,8 @@ static void HandleAxeMetatile(const u16 mt_x, const u16 mt_y) {
   // Note: Old signature was [r02, r06, r07] -> []
   // Reworked to use metatile coordinates instead of pointer
 
-  OperMode_Task = 0;
   OperMode = OM_VICTORY;
+  OperMode_Task = OMT_VICTORY_BRIDGECOLLAPSE;
 #ifdef SMB2J_MODE
   LoadMarioPhysics();
 #endif

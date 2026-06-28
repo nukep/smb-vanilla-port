@@ -2,81 +2,69 @@
 #include "vars.h"
 #include "consts.h"
 
-enum VictoryModeSubroutines_forW8_jumptable_item {
-  OMT_VICTORY_FORW8_BRIDGECOLLAPSE,
-  OMT_VICTORY_FORW8_SETUPVICTORYMODE,
-  OMT_VICTORY_FORW8_PLAYERVICTORYWALK,
-  OMT_VICTORY_FORW8_STARTVMDELAY,
-  OMT_VICTORY_FORW8_CONTINUEVMDELAY,
-  OMT_VICTORY_FORW8_VICTORYMODEDISKROUTINES,
-  OMT_VICTORY_FORW8_SCREENSUBSFORFINALROOM,
-  OMT_VICTORY_FORW8_PRINTVICTORYMSGSFORWORLD8,
-  OMT_VICTORY_FORW8_ENDCASTLEAWARD,
-  OMT_VICTORY_FORW8_AWARDEXTRALIVES,
-  OMT_VICTORY_FORW8_FADETOBLUE,
-  OMT_VICTORY_FORW8_ERASELIVESLINES,
-  OMT_VICTORY_FORW8_RUNMUSHROOMRETAINERS,
-  OMT_VICTORY_FORW8_ENDINGDISKROUTINES,
-};
-
 
 // SM2MAIN:n/a
 // Signature: [A] -> []
 void jumptable_VictoryModeSubroutines_forW8(const u8 param_1) {
   switch (param_1) {
-  case OMT_VICTORY_FORW8_BRIDGECOLLAPSE:
+  case OMT_VICTORY_BRIDGECOLLAPSE:
     BridgeCollapse();
     return;
 
-  case OMT_VICTORY_FORW8_SETUPVICTORYMODE:
+  case OMT_VICTORY_SETUPVICTORYMODE:
     SetupVictoryMode();
     return;
 
-  case OMT_VICTORY_FORW8_PLAYERVICTORYWALK:
+  case OMT_VICTORY_PLAYERVICTORYWALK:
     PlayerVictoryWalk();
     return;
 
-  case OMT_VICTORY_FORW8_STARTVMDELAY:
-    StartVMDelay();
+  case OMT_VICTORY_W8SMB2J_STARTVMDELAY:
+    WorldEndTimer = 0x10;
+    expect(OperMode == OM_VICTORY);
+    OperMode_Task = OMT_VICTORY_W8SMB2J_CONTINUEVMDELAY;
     return;
 
-  case OMT_VICTORY_FORW8_CONTINUEVMDELAY:
-    ContinueVMDelay();
+  case OMT_VICTORY_W8SMB2J_CONTINUEVMDELAY:
+    if (WorldEndTimer == 0) {
+      expect(OperMode == OM_VICTORY);
+      OperMode_Task = OMT_VICTORY_W8SMB2J_VICTORYMODEDISKROUTINES;
+    }
     return;
 
-  case OMT_VICTORY_FORW8_VICTORYMODEDISKROUTINES:
+  case OMT_VICTORY_W8SMB2J_VICTORYMODEDISKROUTINES:
     VictoryModeDiskRoutines();
     return;
 
-  case OMT_VICTORY_FORW8_SCREENSUBSFORFINALROOM:
+  case OMT_VICTORY_W8SMB2J_SCREENSUBSFORFINALROOM:
     ScreenSubsForFinalRoom();
     return;
 
-  case OMT_VICTORY_FORW8_PRINTVICTORYMSGSFORWORLD8:
+  case OMT_VICTORY_W8SMB2J_PRINTVICTORYMSGSFORWORLD8:
     PrintVictoryMsgsForWorld8();
     return;
 
-  case OMT_VICTORY_FORW8_ENDCASTLEAWARD:
+  case OMT_VICTORY_W8SMB2J_ENDCASTLEAWARD:
     EndCastleAward();
     return;
 
-  case OMT_VICTORY_FORW8_AWARDEXTRALIVES:
+  case OMT_VICTORY_W8SMB2J_AWARDEXTRALIVES:
     AwardExtraLives();
     return;
 
-  case OMT_VICTORY_FORW8_FADETOBLUE:
+  case OMT_VICTORY_W8SMB2J_FADETOBLUE:
     FadeToBlue();
     return;
 
-  case OMT_VICTORY_FORW8_ERASELIVESLINES:
+  case OMT_VICTORY_W8SMB2J_ERASELIVESLINES:
     EraseLivesLines();
     return;
 
-  case OMT_VICTORY_FORW8_RUNMUSHROOMRETAINERS:
+  case OMT_VICTORY_W8SMB2J_RUNMUSHROOMRETAINERS:
     RunMushroomRetainers();
     return;
 
-  case OMT_VICTORY_FORW8_ENDINGDISKROUTINES:
+  case OMT_VICTORY_W8SMB2J_ENDINGDISKROUTINES:
     EndingDiskRoutines();
     return;
 
@@ -93,7 +81,9 @@ void DrawTitleScreen(void) {
     VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_TITLESCREENGFXDATA;
     ScreenRoutineTask += 1;
   } else {
-    OperMode_Task += 1;
+    expect(OperMode == OM_GAME);
+    expect(OperMode_Task == OMT_GAME_SCREENROUTINES);
+    OperMode_Task = OMT_GAME_SECONDARYGAMESETUP;
   }
 }
 
@@ -125,7 +115,9 @@ void PrintVictoryMessages(void) {
   }
 
   WorldEndTimer = 8;
-  OperMode_Task += 1;
+  expect(OperMode == OM_VICTORY);
+  expect(OperMode_Task == OMT_VICTORY_PRINTVICTORYMESSAGES);
+  OperMode_Task = OMT_VICTORY_ENDCASTLEAWARD;
 }
 
 
@@ -137,7 +129,14 @@ void EndCastleAward(void) {
     if ((u8)(GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2]) == 0) {
       SelectTimer = 0x30;
       WorldEndTimer = 6;
-      OperMode_Task += 1;
+      expect(OperMode == OM_VICTORY);
+      if (WorldNumber == 7) {
+        expect(OperMode_Task == OMT_VICTORY_W8SMB2J_ENDCASTLEAWARD);
+        OperMode_Task = OMT_VICTORY_W8SMB2J_AWARDEXTRALIVES;
+      } else {
+        expect(OperMode_Task == OMT_VICTORY_ENDCASTLEAWARD);
+        OperMode_Task = OMT_VICTORY_PLAYERENDWORLD;
+      }
     }
   }
 }
@@ -316,8 +315,9 @@ NoLoadHW:
   FetchNewGameTimerFlag += 1;
   expect(OperMode == OM_TITLESCREEN);
   OperMode = OM_GAME;
+  // Inlined: ResetDiskIOTask
   DiskIOTask = 0;
-  OperMode_Task = 0;
+  OperMode_Task = OMT_GAME_START;
   DemoTimer = 0;
 }
 
@@ -387,7 +387,11 @@ InitWorldPos:
   NotColdFlag = 1;
   WorldNumber = 0;
   HardWorldFlag = 0;
-  ResetDiskIOTask();
+  // Inlined: ResetDiskIOTask
+  DiskIOTask = 0;
+  expect(OperMode == OM_TITLESCREEN);
+  expect(OperMode_Task == OMT_TITLESCREEN_START);
+  OperMode_Task = OMT_TITLESCREEN_INITIALIZEGAME;
 }
 
 
@@ -434,13 +438,19 @@ void GameModeDiskRoutines(void) {
 // Signature: [] -> []
 void LoadWorlds5Thru8(void) {
   bool bVar2;
+  expect(OperMode == OM_GAME);
+  expect(OperMode_Task == OMT_GAME_START);
 
   if (WorldNumber < 4) {
-    ResetDiskIOTask();
+    // Inlined: ResetDiskIOTask
+    DiskIOTask = 0;
+    OperMode_Task = OMT_GAME_INITIALIZEAREA;
     return;
   }
   if (FileListNumber != 0) {
-    ResetDiskIOTask();
+    // Inlined: ResetDiskIOTask
+    DiskIOTask = 0;
+    OperMode_Task = OMT_GAME_INITIALIZEAREA;
     return;
   }
   FileListNumber = 1;
@@ -449,45 +459,15 @@ void LoadWorlds5Thru8(void) {
   if (sVar3.z) {
     bVar2 = CheckFileCount(sVar3.y);
     if (bVar2) {
-      ResetDiskIOTask();
+      // Inlined: ResetDiskIOTask
+      DiskIOTask = 0;
+      OperMode_Task = OMT_GAME_INITIALIZEAREA;
       return;
     }
     bVar1 = 0x40;
   }
   DiskIOTask += 1;
   DiskErrorHandler(bVar1);
-}
-
-
-// SM2MAIN:c078
-// Signature: [] -> []
-void ResetDiskIOTask(void) {
-  DiskIOTask = 0;
-  VMDelay();
-}
-
-
-// SM2MAIN:c07d
-// Signature: [] -> []
-void VMDelay(void) {
-  OperMode_Task += 1;
-}
-
-
-// SM2MAIN:c081
-// Signature: [] -> []
-void StartVMDelay(void) {
-  WorldEndTimer = 0x10;
-  VMDelay();
-}
-
-
-// SM2MAIN:c088
-// Signature: [] -> []
-void ContinueVMDelay(void) {
-  if (WorldEndTimer == 0) {
-    VMDelay();
-  }
 }
 
 
@@ -547,7 +527,11 @@ void LoadEnding(void) {
       GamesBeatenCount = 0x18;
     }
     InitializeNameTables();
-    ResetDiskIOTask();
+    // Inlined: ResetDiskIOTask
+    DiskIOTask = 0;
+    expect(OperMode == OM_VICTORY);
+    expect(OperMode_Task == OMT_VICTORY_W8SMB2J_VICTORYMODEDISKROUTINES);
+    OperMode_Task = OMT_VICTORY_W8SMB2J_SCREENSUBSFORFINALROOM;
     WriteNameToVictoryMsg();
   } else {
     DiskIOTask += 1;
@@ -893,7 +877,9 @@ void RevealPrincess(void) {
   NameTableSelect = 0;
   IRQUpdateFlag = 0;
   DisableScreenFlag = 0;
-  OperMode_Task += 1;
+  expect(OperMode == OM_VICTORY);
+  expect(OperMode_Task == OMT_VICTORY_W8SMB2J_SCREENSUBSFORFINALROOM);
+  OperMode_Task = OMT_VICTORY_W8SMB2J_PRINTVICTORYMSGSFORWORLD8;
 }
 
 
@@ -1039,20 +1025,21 @@ void RunMushroomRetainers(void) {
   }
 
   if (HardWorldFlag == 0) {
-    OperMode_Task += 1;
+    expect(OperMode == OM_VICTORY);
+    expect(OperMode_Task == OMT_VICTORY_W8SMB2J_RUNMUSHROOMRETAINERS);
+    OperMode_Task = OMT_VICTORY_W8SMB2J_ENDINGDISKROUTINES;
     return;
   }
 
   RAM(0x611d) = 0xa0;
   DiskIOTask = 0;
-  OperMode_Task = 0;
+
   if ((HardWorldFlag == 0) && (CompletedWorlds == 0xff)) {
     CompletedWorlds = 0;
     NumberofLives = 0;
     FantasyW9MsgFlag = 0;
     AreaNumber = 0;
     LevelNumber = 0;
-    OperMode_Task = 0;
     WorldNumber += 1;
     if (WorldNumber >= 8) {
       WorldNumber = 8;
@@ -1060,11 +1047,13 @@ void RunMushroomRetainers(void) {
     LoadAreaPointer();
     FetchNewGameTimerFlag += 1;
     OperMode = OM_GAME;
-    return;
+    OperMode_Task = OMT_GAME_START;
+  } else {
+    CompletedWorlds = 0;
+    OperMode = OM_TITLESCREEN;
+    OperMode_Task = OMT_TITLESCREEN_START;
+    TitleScreenMode();
   }
-  CompletedWorlds = 0;
-  OperMode = OM_TITLESCREEN;
-  TitleScreenMode();
 }
 
 
