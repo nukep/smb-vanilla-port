@@ -7,20 +7,19 @@
 
 #include <string.h>
 
-extern "C" {
-void smb1_Reset();
-void smb1_NMI();
+void smb1_Reset(void);
+void smb1_NMI(void);
 
 bool smb2j_load_file(struct SMB_state *state, const char *name);
-void smb2j_Reset();
-void smb2j_NMI();
+void smb2j_Reset(void);
+void smb2j_NMI(void);
 
 void smb1_sync_data(void);
 void smb2j_sync_data(void);
 
 void smb1_set_world_and_level(u8 world, u8 level);
 void smb2j_set_world_and_level(u8 world, u8 level);
-}
+
 
 struct sprite {
   struct SMB_tile tile;
@@ -64,7 +63,7 @@ static bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_off
 }
 
 
-struct FdsFile {
+struct fds_file {
   const char *name;
   size_t file_offset;
   u16 size;
@@ -79,7 +78,7 @@ struct FdsFile {
 
 // hard-code some offsets for now
 // the offsets are relative to after the 16-byte FDS header
-static FdsFile SMB2J_FDS_FILES[SMB2J_FDS_FILES_COUNT] = {
+static struct fds_file SMB2J_FDS_FILES[SMB2J_FDS_FILES_COUNT] = {
   {"SM2CHAR1", 0x013C, 0x2000, 0x0000, TYPE_CHRRAM},
   {"SM2CHAR2", 0x214D, 0x0040, 0x0760, TYPE_CHRRAM},
   {"SM2MAIN ", 0x219E, 0x8000, 0x6000, TYPE_PRGRAM},
@@ -98,22 +97,22 @@ bool smb2j_load_file(struct SMB_state *state, const char *name) {
   }
 
   for (int i = 0; i < SMB2J_FDS_FILES_COUNT; i++) {
-    const FdsFile &a = SMB2J_FDS_FILES[i];
-    bool eq = strncmp(name, a.name, 8) == 0;
+    const struct fds_file *a = &SMB2J_FDS_FILES[i];
+    bool eq = strncmp(name, a->name, 8) == 0;
     if (eq) {
       // Found it!
       u8 *copy_to;
-      if (a.type == TYPE_CHRRAM) {
+      if (a->type == TYPE_CHRRAM) {
         // Copy the bytes over to CHRRAM
-        copy_to = state->chrrom + a.org;
-      } else if (a.type == TYPE_PRGRAM) {
+        copy_to = state->chrrom + a->org;
+      } else if (a->type == TYPE_PRGRAM) {
         // Copy the bytes over to RAM
-        copy_to = state->rammem + a.org;
+        copy_to = state->rammem + a->org;
       }
-      if (!seek_rom(state, state->smb2j_disk_offset + a.file_offset)) { return false; }
-      if (!read_rom_bytes(state, copy_to, a.size)) { return false; }
+      if (!seek_rom(state, state->smb2j_disk_offset + a->file_offset)) { return false; }
+      if (!read_rom_bytes(state, copy_to, a->size)) { return false; }
 
-      if (a.type == TYPE_CHRRAM) {
+      if (a->type == TYPE_CHRRAM) {
         update_pattern_tables(state);
       }
 
