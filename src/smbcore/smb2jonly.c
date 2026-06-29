@@ -175,7 +175,7 @@ void WriteGameText(const u8 param_1) {
 // SM2MAIN:89a1
 // Signature: [X] -> []
 void PoisonMushBlock(const u8 param_1) {
-  PowerUpType = 4;
+  PowerUpType = POWERUP_POISONSHROOM;
   SetupPowerUp(param_1);
 }
 

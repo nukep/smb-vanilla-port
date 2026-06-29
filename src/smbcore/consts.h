@@ -336,6 +336,21 @@ static inline bool is_playerstatus_valid(const u8 playerstatus) {
   return playerstatus <= PLAYERSTATUS_FIREFLOWER;
 }
 
+enum powerup {
+  POWERUP_MUSHROOM,
+  POWERUP_FIREFLOWER,
+  POWERUP_STAR,
+  POWERUP_1UP,
+#ifdef SMB2J_MODE
+  POWERUP_POISONSHROOM,
+#endif
+  _POWERUP_NUM,
+};
+
+static inline bool is_powerup_valid(const u8 powerup) {
+  return powerup < _POWERUP_NUM;
+}
+
 enum areatype {
   AREA_WATER,
   AREA_GROUND,

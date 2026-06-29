@@ -3573,11 +3573,13 @@ void PwrUpJmp(void) {
   Enemy_State[5] = 1;
   Enemy_Flag[5] = 1;
   Enemy_BoundBoxCtrl[5] = 3;
-  if ((PowerUpType < 2)) {
-    PowerUpType = PlayerStatus;
+  if (PowerUpType == POWERUP_MUSHROOM || PowerUpType == POWERUP_FIREFLOWER) {
     expect(is_playerstatus_valid(PlayerStatus));
-    if (PlayerStatus == PLAYERSTATUS_FIREFLOWER) {
-      PowerUpType = 1;
+
+    switch (PlayerStatus) {
+    case PLAYERSTATUS_SMALL:      PowerUpType = POWERUP_MUSHROOM; break;
+    case PLAYERSTATUS_BIG:        PowerUpType = POWERUP_FIREFLOWER; break;
+    case PLAYERSTATUS_FIREFLOWER: PowerUpType = POWERUP_FIREFLOWER; break;
     }
   }
   Enemy_SprAttrib[5] = 0x20;
@@ -3594,13 +3596,27 @@ void PowerUpObjHandler(const u8 objoff) {
   if (Enemy_State[objoff] != 0) {
     if ((char)Enemy_State[objoff] < 0) {
       if (TimerControl == 0) {
-        const bool smb2j_powerups = SMB2J_ONLY && (PowerUpType == 4 || PowerUpType == 5);
-        if (PowerUpType == 0 || PowerUpType == 3 || smb2j_powerups) {
+
+        // NES note: The original SMB2J checks for PowerUpType == 5,
+        // but it doesn't exist.
+        // This port ignores it.
+
+        expect(is_powerup_valid(PowerUpType));
+
+        switch (PowerUpType) {
+        case POWERUP_MUSHROOM:
+        case POWERUP_1UP:
+#ifdef SMB2J_MODE
+        case POWERUP_POISONSHROOM:
+#endif
           MoveNormalEnemy(objoff);
           EnemyToBGCollisionDet(objoff);
-        } else if (PowerUpType == 2) {
+          break;
+
+        case POWERUP_STAR:
           MoveJumpingEnemy(objoff);
           EnemyJump(objoff);
+          break;
         }
       }
     } else {
@@ -3793,7 +3809,7 @@ void BumpBlock(const u16 mt_x, const u16 mt_y, const u8 mt) {
 // SM2MAIN:899b
 // Signature: [X] -> []
 void MushFlowerBlock(const u8 param_1) {
-  PowerUpType = 0;
+  PowerUpType = POWERUP_MUSHROOM;
   SetupPowerUp(param_1);
 }
 
@@ -3802,7 +3818,7 @@ void MushFlowerBlock(const u8 param_1) {
 // SM2MAIN:899e
 // Signature: [X] -> []
 void StarBlock(const u8 param_1) {
-  PowerUpType = 2;
+  PowerUpType = POWERUP_STAR;
   SetupPowerUp(param_1);
 }
 
@@ -3811,7 +3827,7 @@ void StarBlock(const u8 param_1) {
 // SM2MAIN:89a4
 // Signature: [X] -> []
 void ExtraLifeMushBlock(const u8 param_1) {
-  PowerUpType = 3;
+  PowerUpType = POWERUP_1UP;
   SetupPowerUp(param_1);
 }
 
@@ -7494,19 +7510,25 @@ void HandlePowerUpCollision(const u8 objoff) {
   // note: the caller always set X to r08
 
   EraseEnemyObject(objoff);
-  if (SMB2J_ONLY && PowerUpType == 4) {
+
+  expect(is_powerup_valid(PowerUpType));
+
+#ifdef SMB2J_MODE
+  if (PowerUpType == POWERUP_POISONSHROOM) {
     InjurePlayer();
     return;
   }
+#endif
+
   SetupFloateyNumber(6, objoff);
+
   Square2SoundQueue = SOUND_SQ2_POWERUP_GRAB;
-  if (PowerUpType >= 2) {
-    if (PowerUpType == 3) {
-      FloateyNum_Control[objoff] = 0xb;
-    } else {
-      StarInvincibleTimer = 0x23;
-      AreaMusicQueue = MUSIC_AREA_STAR;
-    }
+
+  if (PowerUpType == POWERUP_1UP) {
+    FloateyNum_Control[objoff] = 0xb;
+  } else if (PowerUpType == POWERUP_STAR) {
+    StarInvincibleTimer = 0x23;
+    AreaMusicQueue = MUSIC_AREA_STAR;
   } else if (PlayerStatus == PLAYERSTATUS_SMALL) {
     PlayerStatus = PLAYERSTATUS_BIG;
     GameEngineSubroutine = GR_PLAYERCHANGESIZE;
@@ -7520,8 +7542,6 @@ void HandlePowerUpCollision(const u8 objoff) {
     Player_State = PLAYERSTATE_ONGROUND;
     TimerControl = 0xff;
     ScrollAmount = 0;
-  } else {
-    Square2SoundQueue = SOUND_SQ2_POWERUP_GRAB;
   }
 }
 
@@ -9567,7 +9587,7 @@ void DrawPowerUp(const u8 objoff) {
   // Original signature: [] -> []
   // Note: This port accepts an objoff argument. The original hard-coded "5".
 
-  static const u8 tiles[][4] = {
+  static const u8 tiles[_POWERUP_NUM][4] = {
 #ifdef SMB1_MODE
     { 0x76, 0x77, 0x78, 0x79 }, // regular mushroom
     { 0xd6, 0xd6, 0xd9, 0xd9 }, // fire flower
@@ -9588,8 +9608,6 @@ void DrawPowerUp(const u8 objoff) {
 
   const u8 sproff = Enemy_SprDataOffset[objoff];
 
-  expect(PowerUpType < (sizeof(tiles)/sizeof(tiles[0])));
-
   {
     // Inlined: DrawOneSpriteRow
 
@@ -9608,23 +9626,35 @@ void DrawPowerUp(const u8 objoff) {
     draw_sprite_row(1, sproff, left_tileidx_2, right_tileidx_2, xpos, ypos, attrs, flip_horz);
   }
 
-  if ((PowerUpType != 0) && (PowerUpType != 3) && ssw(true, PowerUpType != 4)) {
+  expect(is_powerup_valid(PowerUpType));
+
+  if (PowerUpType == POWERUP_FIREFLOWER) {
+    // Flicker the powerup by cycling its palette
+
+    const u8 attrs = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[objoff];
+
+    // Only flicker the top half of the fire flower
+    SPRITE_ATTR(sproff, 0) = attrs;
+    SPRITE_ATTR(sproff, 1) = attrs;
+
+    // Flip the right half horizontally
+    SPRITE_ATTR(sproff, 1) |= SPRATTR_FLIPHORZ;
+    SPRITE_ATTR(sproff, 3) |= SPRATTR_FLIPHORZ;
+  }
+
+  if (PowerUpType == POWERUP_STAR) {
     // Flicker the powerup by cycling its palette
 
     const u8 attrs = ((FrameCounter >> 1) & 3) | Enemy_SprAttrib[objoff];
 
     SPRITE_ATTR(sproff, 0) = attrs;
     SPRITE_ATTR(sproff, 1) = attrs;
-
-    // If it's a fire flower, only flicker the top half
-    if (PowerUpType != 1) {
-      SPRITE_ATTR(sproff, 2) = attrs;
-      SPRITE_ATTR(sproff, 3) = attrs;
-    }
+    SPRITE_ATTR(sproff, 2) = attrs;
+    SPRITE_ATTR(sproff, 3) = attrs;
 
     // Flip the right half horizontally
-    SPRITE_ATTR(sproff, 1) |= 0x40;
-    SPRITE_ATTR(sproff, 3) |= 0x40;
+    SPRITE_ATTR(sproff, 1) |= SPRATTR_FLIPHORZ;
+    SPRITE_ATTR(sproff, 3) |= SPRATTR_FLIPHORZ;
   }
 
   SprObjectOffscrChk(objoff);
