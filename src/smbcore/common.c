@@ -1742,9 +1742,34 @@ void GameCoreRoutine(void) {
   SavedJoypadBits[0] = SavedJoypadBits[CurrentPlayer];
 #endif
   GameRoutines();
-  if (OperMode_Task < ssw(3, 4)) {
+
+  expect(is_opermodetask_valid());
+
+  // NES note: this would compare OperMode_Task < 3, or OperMode_Task < 4 for SMB2J.
+  // This is changed to be more explicit.
+  // TODO: trim this down to eliminate needless checks.
+
+#define CONTINUE_ON(opermode, opermodetask) \
+    if (OperMode == (opermode) && OperMode_Task == (opermodetask)) { doreturn = false; }
+
+  bool doreturn = true;
+
+  CONTINUE_ON(OM_TITLESCREEN, OMT_TITLESCREEN_GAMEMENUROUTINE);
+  CONTINUE_ON(OM_GAME, OMT_GAME_GAMECOREROUTINE);
+  CONTINUE_ON(OM_VICTORY, OMT_VICTORY_PRINTVICTORYMESSAGES);
+  CONTINUE_ON(OM_VICTORY, OMT_VICTORY_PLAYERENDWORLD);
+
+#ifdef SMB2J_MODE
+  CONTINUE_ON(OM_TITLESCREEN, OMT_TITLESCREEN_HARDWORLDSCHECKPOINT);
+  CONTINUE_ON(OM_VICTORY, OMT_VICTORY_ENDCASTLEAWARD);
+#endif
+
+  if (doreturn) {
     return;
   }
+
+#undef CONTINUE_ON
+
   ProcFireball_Bubble();
 
   for (int i = 0; i < 6; i++) {

@@ -196,6 +196,7 @@ enum opermodetask_titlescreen {
 #ifdef SMB2J_MODE
   OMT_TITLESCREEN_HARDWORLDSCHECKPOINT,
 #endif
+  _OMT_TITLESCREEN_NUM,
 };
 
 enum opermodetask_game {
@@ -210,6 +211,7 @@ enum opermodetask_game {
   OMT_GAME_SCREENROUTINES,
   OMT_GAME_SECONDARYGAMESETUP,
   OMT_GAME_GAMECOREROUTINE,
+  _OMT_GAME_NUM,
 };
 
 enum opermodetask_victory {
@@ -221,6 +223,7 @@ enum opermodetask_victory {
   OMT_VICTORY_ENDCASTLEAWARD,
 #endif
   OMT_VICTORY_PLAYERENDWORLD,
+  _OMT_VICTORY_NUM,
 };
 
 enum opermodetask_victory_world8_smb2j {
@@ -239,13 +242,29 @@ enum opermodetask_victory_world8_smb2j {
   OMT_VICTORY_W8SMB2J_ERASELIVESLINES,
   OMT_VICTORY_W8SMB2J_RUNMUSHROOMRETAINERS,
   OMT_VICTORY_W8SMB2J_ENDINGDISKROUTINES,
+  _OMT_VICTORY_W8SMB2J_NUM,
 };
 
 enum opermodetask_gameover {
   OMT_GAMEOVER_SETUPGAMEOVER,
   OMT_GAMEOVER_SCREENROUTINES,
   OMT_GAMEOVER_RUNGAMEOVER,
+  _OMT_GAMEOVER_NUM,
 };
+
+static inline bool is_opermodetask_valid(void) {
+  switch (OperMode) {
+  case OM_TITLESCREEN: return OperMode_Task < _OMT_TITLESCREEN_NUM;
+  case OM_GAME: return OperMode_Task < _OMT_GAME_NUM;
+  case OM_VICTORY:
+#ifdef SMB2J_MODE
+    if (WorldNumber == 7) { return OperMode_Task < _OMT_VICTORY_W8SMB2J_NUM; }
+#endif
+    return OperMode_Task < _OMT_VICTORY_NUM;
+  case OM_GAMEOVER: return OperMode_Task < _OMT_GAMEOVER_NUM;
+  default: return false;
+  }
+}
 
 enum screenroutinetask {
   SRT_INITSCREEN,
