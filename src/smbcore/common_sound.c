@@ -85,6 +85,13 @@ static struct_axy LoadControlRegs(void);
 static u8 LoadEnvelopeData(u8 param_1);
 
 
+// Alternate Sound Engine (smb2j)
+
+#ifdef SMB2J_MODE
+static void AlternateSoundEngine(void);
+#endif
+
+
 #define BIT(v, n) (((v) & (1 << n)) != 0)
 
 // SMB:f38d, SM2MAIN:d35d
@@ -1318,3 +1325,18 @@ u8 LoadEnvelopeData(u8 idx) {
 }
 
 #undef BIT
+
+
+#ifdef SMB2J_MODE
+// SM2DATA3:cc5f
+// Signature: [] -> []
+void AlternateSoundEngine(void) {
+  // TODO - implement this
+  static bool visited = false;
+  if (!visited) {
+    warning("AlternateSoundEngine is unimplemented. There'd normally be FDS music playing, but the chip's not supported right now. The ending sequence is broken, too. Sorry!\n");
+    visited = true;
+  }
+  // SoundEngine();
+}
+#endif

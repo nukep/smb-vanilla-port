@@ -259,7 +259,14 @@ void SMB2J_NMI() {
 
   ppumask(Mirror_PPU_CTRL_REG2);
   enable_interrupt();
-  SoundEngine();
+
+  // NES note: SMB2J patches the JSR instruction here when saving the princess
+  if (AlternateSoundEngineEnabled) {
+    AlternateSoundEngine();
+  } else {
+    SoundEngine();
+  }
+
   apu_end_frame();
   ReadJoypads();
   PauseRoutine();
@@ -354,29 +361,5 @@ void UpdateGamesBeaten() {
     return;
   }
 
-  // Revert "JSR SoundEngine" in the NMI back to the original address
-  RAM(0x611e) = 0xd2;
-  RAM(0x611d) = 0xa0;
-
-  DiskIOTask = 0;
-  if ((HardWorldFlag == 0) && (CompletedWorlds == 0xff)) {
-    CompletedWorlds = 0;
-    NumberofLives = 0;
-    FantasyW9MsgFlag = 0;
-    AreaNumber = 0;
-    LevelNumber = 0;
-    WorldNumber += 1;
-    if (WorldNumber > 7) {
-      WorldNumber = 8;
-    }
-    LoadAreaPointer();
-    FetchNewGameTimerFlag += 1;
-    OperMode = OM_GAME;
-    OperMode_Task = OMT_GAME_START;
-  } else {
-    CompletedWorlds = 0;
-    OperMode = OM_TITLESCREEN;
-    OperMode_Task = OMT_TITLESCREEN_START;
-    TitleScreenMode();
-  }
+  BackToNormal();
 }

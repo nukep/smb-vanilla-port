@@ -18,6 +18,12 @@
 // If using Mario's physics
 #define MarioPhysics (PhysicsInstructionOpcode != 0x60)
 
+// The original game modifies an instruction operand
+#define SoundEngineJsrOperandLo       RAM(0x611d)
+#define SoundEngineJsrOperandHi       RAM(0x611e)
+
+#define AlternateSoundEngineEnabled (SoundEngineJsrOperandLo == 0x5f)
+
 #define GamesBeatenCount                 RAM(0xD29F)
 
 #define VRAM_AddrTable                   RAMARRAY_CONST(0x6060, 62)

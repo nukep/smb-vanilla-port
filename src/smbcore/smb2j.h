@@ -1220,6 +1220,9 @@ void smb2j_EraseLivesLines(void);
 void smb2j_RunMushroomRetainers(void);
 #define RunMushroomRetainers smb2j_RunMushroomRetainers
 
+void smb2j_BackToNormal(void);
+#define BackToNormal smb2j_BackToNormal
+
 void smb2j_EndingDiskRoutines(void);
 #define EndingDiskRoutines smb2j_EndingDiskRoutines
 

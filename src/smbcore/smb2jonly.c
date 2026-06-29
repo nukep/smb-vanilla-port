@@ -824,7 +824,8 @@ void ScreenSubsForFinalRoom(void) {
 
   case SRT_W8SMB2J_REVEALPRINCESS:
     PrintStatusBarNumbers(0xa2);
-    RAM(0x611d) = 0x5f;
+    SoundEngineJsrOperandHi = 0xcc;
+    SoundEngineJsrOperandLo = 0x5f;
     // TODO: replace with named constant once fds sound engine code is implemented
     AreaMusicQueue = 1;
     Left_Right_Buttons = 0;
@@ -990,9 +991,18 @@ void RunMushroomRetainers(void) {
     return;
   }
 
-  RAM(0x611d) = 0xa0;
-  DiskIOTask = 0;
+  BackToNormal();
+}
 
+
+// SM2DATA3:c76a
+// Signature: [] -> []
+void BackToNormal(void) {
+  // Revert "JSR SoundEngine" in the NMI back to the original address
+  SoundEngineJsrOperandHi = 0xd2;
+  SoundEngineJsrOperandLo = 0xa0;
+
+  DiskIOTask = 0;
   if ((HardWorldFlag == 0) && (CompletedWorlds == 0xff)) {
     CompletedWorlds = 0;
     NumberofLives = 0;
