@@ -4312,7 +4312,7 @@ u8 MovePlayerHorizontally(void) {
 // Signature: [X] -> [A]
 u8 MoveObjectHorizontally(const u8 param_1) {
   // NES note: the original sign-extends the high nibble (ORA #$F0), but we just cast it to signed here.
-  const i16 b = ((i16)(i8)SprObject_X_Speed[param_1]) << 4;
+  const i16 b = ((i16)(i8)SprObject_X_Speed[param_1]) * 16;
 
   const u8 old_x = SprObject_X_Position[param_1];
 
