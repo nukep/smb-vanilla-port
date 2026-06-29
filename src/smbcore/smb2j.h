@@ -5,51 +5,6 @@
 void smb2j_jumptable_VictoryModeSubroutines_forW8(u8 param_1);
 #define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
 
-void smb2j_jumptable_GameOverMode(u8 param_1);
-#define jumptable_GameOverMode smb2j_jumptable_GameOverMode
-
-void smb2j_jumptable_AreaParserTasks(u8 param_1);
-#define jumptable_AreaParserTasks smb2j_jumptable_AreaParserTasks
-
-void smb2j_jumptable_AreaStyleObject(u8 param_1,u8 param_2);
-#define jumptable_AreaStyleObject smb2j_jumptable_AreaStyleObject
-
-void smb2j_jumptable_GameRoutines(u8 param_1);
-#define jumptable_GameRoutines smb2j_jumptable_GameRoutines
-
-void smb2j_jumptable_PlayerMovementSubs(u8 param_1);
-#define jumptable_PlayerMovementSubs smb2j_jumptable_PlayerMovementSubs
-
-void smb2j_jumptable_CheckpointEnemyID(u8 param_1,u8 param_2);
-#define jumptable_CheckpointEnemyID smb2j_jumptable_CheckpointEnemyID
-
-void smb2j_jumptable_InitEnemyFrenzy(u8 param_1,u8 param_2);
-#define jumptable_InitEnemyFrenzy smb2j_jumptable_InitEnemyFrenzy
-
-u8 smb2j_jumptable_RunEnemyObjectsCore(u8 param_1,u8 param_2);
-#define jumptable_RunEnemyObjectsCore smb2j_jumptable_RunEnemyObjectsCore
-
-u8 smb2j_jumptable_EnemyMovementSubs(u8 param_1,u8 param_2);
-#define jumptable_EnemyMovementSubs smb2j_jumptable_EnemyMovementSubs
-
-u8 smb2j_jumptable_LargePlatformSubroutines(u8 param_1,u8 param_2);
-#define jumptable_LargePlatformSubroutines smb2j_jumptable_LargePlatformSubroutines
-
-u8 smb2j_jumptable_RunStarFlagObj(u8 param_1,u8 param_2);
-#define jumptable_RunStarFlagObj smb2j_jumptable_RunStarFlagObj
-
-void smb2j_jumptable_HardWorldsCheckpoint(u8 param_1);
-#define jumptable_HardWorldsCheckpoint smb2j_jumptable_HardWorldsCheckpoint
-
-void smb2j_jumptable_AttractModeDiskRoutines(u8 param_1);
-#define jumptable_AttractModeDiskRoutines smb2j_jumptable_AttractModeDiskRoutines
-
-void smb2j_jumptable_GameModeDiskRoutines(u8 param_1);
-#define jumptable_GameModeDiskRoutines smb2j_jumptable_GameModeDiskRoutines
-
-void smb2j_jumptable_VictoryModeDiskRoutines(u8 param_1);
-#define jumptable_VictoryModeDiskRoutines smb2j_jumptable_VictoryModeDiskRoutines
-
 void smb2j_PauseRoutine(void);
 #define PauseRoutine smb2j_PauseRoutine
 
@@ -115,9 +70,6 @@ void smb2j_DisplayIntermediate(void);
 
 void smb2j_WriteGameText(u8 param_1);
 #define WriteGameText smb2j_WriteGameText
-
-void smb2j_ResetScreenTimer(void);
-#define ResetScreenTimer smb2j_ResetScreenTimer
 
 void smb2j_ColorRotation(void);
 #define ColorRotation smb2j_ColorRotation
@@ -310,9 +262,6 @@ void smb2j_BubbleCheck(u8 param_1);
 
 void smb2j_SetupBubble_buggy(u8 param_1,u8 param_2);
 #define SetupBubble_buggy smb2j_SetupBubble_buggy
-
-void smb2j_MoveBubl(u8 param_1,u8 param_2);
-#define MoveBubl smb2j_MoveBubl
 
 void smb2j_RunGameTimer(void);
 #define RunGameTimer smb2j_RunGameTimer
@@ -1111,9 +1060,6 @@ u8 smb2j_GetXOffscreenBits(u8 param_1);
 
 u8 smb2j_GetYOffscreenBits(u8 param_1);
 #define GetYOffscreenBits smb2j_GetYOffscreenBits
-
-u8 smb2j_DividePDiff(u8 param_1,u8 param_2,bool param_3,u8 param_4,u8 param_5);
-#define DividePDiff smb2j_DividePDiff
 
 void smb2j_TitleScreenMode(void);
 #define TitleScreenMode smb2j_TitleScreenMode
