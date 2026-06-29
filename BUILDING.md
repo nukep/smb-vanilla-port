@@ -30,6 +30,6 @@ meson compile -C build/
 Run:
 
 ```sh
-./build/smbvanilla
+./build/src/platform/smbvanilla
 ```
 
