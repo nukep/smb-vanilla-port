@@ -371,7 +371,7 @@ void smb1_SetupPowerUp(u8 param_1);
 void smb1_PwrUpJmp(void);
 #define PwrUpJmp smb1_PwrUpJmp
 
-void smb1_PowerUpObjHandler(void);
+void smb1_PowerUpObjHandler(u8 objoff);
 #define PowerUpObjHandler smb1_PowerUpObjHandler
 
 void smb1_PlayerHeadCollision(u8 param_1,u16 mt_x, u16 mt_y);

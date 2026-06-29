@@ -1,4 +1,5 @@
-#include "consts.h"
+#include "ctx.h"
+
 
 // The sound engine for SMB1 for SMB2J are nearly identical, with the exception of SMB2J's Wind and Skid sfxs.
 // There's also the FDS alternate sound engine, but that's only used for SMB2J's ending (not included here).

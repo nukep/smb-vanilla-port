@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "mario.h"
 
 #include "base.h"
@@ -29,3 +33,6 @@ static inline void transfer_sprite_data(struct sprite sprites[64], const u8 *dat
 
 void draw_graphics(const struct sprite sprites[64]);
 
+#ifdef __cplusplus
+}
+#endif

@@ -1,6 +1,5 @@
-#include "types.h"
-#include "vars.h"
-#include "consts.h"
+#include "ctx.h"
+
 
 static bool RUN_IRQ = false;
 

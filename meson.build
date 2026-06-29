@@ -38,12 +38,27 @@ endif
 cdata = configuration_data()
 configure_file(output: 'smbvanilla_config.h', configuration: cdata)
 
+smb1core = library('smb1core',
+  'src/smbcore/common.c',
+  'src/smbcore/common_sound.c',
+  'src/smbcore/area.c',
+  'src/smbcore/smb1only.c',
+  c_args:   smbcore_args + ['-DSMB1_MODE'],
+)
+
+smb2jcore = library('smb2jcore',
+  'src/smbcore/common.c',
+  'src/smbcore/common_sound.c',
+  'src/smbcore/area.c',
+  'src/smbcore/smb2jonly.c',
+  c_args:   smbcore_args + ['-DSMB2J_MODE'],
+)
+
 smbcore = library('smbcore',
-        'src/smbcore.cpp',
-        'src/smb1.cpp',
-        'src/smb2j.cpp',
-        c_args:   smbcore_args,
-        cpp_args: smbcore_args
+  'src/smbcore.cpp',
+  c_args:   smbcore_args,
+  cpp_args: smbcore_args,
+  link_with: [smb1core, smb2jcore],
 )
 
 nessndemu = library('nessndemu',
