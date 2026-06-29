@@ -10,3 +10,6 @@
 archive
 *.nes
 *.fds
+
+.zig-cache/
+zig-out/

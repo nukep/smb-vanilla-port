@@ -1,0 +1,13 @@
+.{
+    .name = .smbvanilla,
+    .fingerprint = 0x5f1a98b247df614c,
+    .version = "0.0.0",
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{},
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "Nes_Snd_Emu",
+    },
+}
