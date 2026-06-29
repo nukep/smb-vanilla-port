@@ -63,6 +63,7 @@
 #define DiskErrorMsgs                    RAMARRAY_CONST(0xC162, 32)
 
 #define WorldAddrOffsets                 RAMARRAY_CONST(0xC357, 9)
+#define AreaAddrOffsets                  RAMARRAY_CONST(0xC360, 0x28)
 #define AreaDataOfsLoopback              RAMARRAY_CONST(0xC388, 12)
 #define EnemyAddrHOffsets                RAMARRAY_CONST(0xC394, 4)
 #define EnemyDataAddrs                   RAMARRAY_CONST(0xC398, 104)

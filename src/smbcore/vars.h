@@ -501,7 +501,9 @@
 #define OffScr_WorldNumber               RAM(0x0766)
 #define OffScr_AreaNumber                RAM(0x0767)
 #define NumberOfPlayers                  RAM(0x077A)
-#define GameTimerDisplaySMB1             (DisplayDigits + 33)
+#ifdef SMB1_MODE
+#define GameTimerDisplay                 (DisplayDigits + 33)
+#endif
 #define WorldSelectEnableFlag            RAM(0x07FC)
 #define ContinueWorld                    RAM(0x07FD)
 /* smb2j ----------------------- */
@@ -515,7 +517,9 @@
 #define NameTableSelect                  RAM(0x077A)
 #define IRQAckFlag                       RAM(0x077B)
 #define CoinDisplay                      (DisplayDigits + 16)
-#define GameTimerDisplaySMB2J            (DisplayDigits + 21)
+#ifdef SMB2J_MODE
+#define GameTimerDisplay                 (DisplayDigits + 21)
+#endif
 #define FantasyW9MsgFlag                 RAM(0x07F5)
 #define FlagpoleMusicFlag                RAM(0x07F6)
 #define FileListNumber                   RAM(0x07F7)

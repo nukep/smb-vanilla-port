@@ -2,6 +2,26 @@
 
 #include "structs.h"
 
+bool smb2j_load_file(struct SMB_state *state, const char *name);
+
+struct_ayz smb2j_LoadFiles(void);
+#define LoadFiles smb2j_LoadFiles
+
+void smb2j_IRQHandler(void);
+#define IRQHandler smb2j_IRQHandler
+
+void smb2j_ScrollScreen(u8 scroll_amount);
+#define ScrollScreen smb2j_ScrollScreen
+
+void smb2j_UpdateGamesBeaten(void);
+#define UpdateGamesBeaten smb2j_UpdateGamesBeaten
+
+void smb2j_Reset(void);
+#define Reset smb2j_Reset
+
+void smb2j_NMI(void);
+#define NMI smb2j_NMI
+
 void smb2j_sync_data(void);
 #define sync_data smb2j_sync_data
 
@@ -1204,3 +1224,27 @@ void smb2j_MushroomRetainersForW8(void);
 
 void smb2j_WriteNameToVictoryMsg(void);
 #define WriteNameToVictoryMsg smb2j_WriteNameToVictoryMsg
+
+
+// area
+
+void smb2j_AreaParserTaskHandler(void);
+#define AreaParserTaskHandler smb2j_AreaParserTaskHandler
+
+void smb2j_LoadAreaPointer(void);
+#define LoadAreaPointer smb2j_LoadAreaPointer
+
+void smb2j_GetAreaDataAddrs(void);
+#define GetAreaDataAddrs smb2j_GetAreaDataAddrs
+
+void smb2j_AltHard_GetAreaDataAddrs(void);
+#define AltHard_GetAreaDataAddrs smb2j_AltHard_GetAreaDataAddrs
+
+
+// sound
+
+void smb2j_SoundEngine(void);
+#define SoundEngine smb2j_SoundEngine
+
+void smb2j_AlternateSoundEngine(void);
+#define AlternateSoundEngine smb2j_AlternateSoundEngine

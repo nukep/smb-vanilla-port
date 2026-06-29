@@ -15,7 +15,6 @@ static void PlayWindSfx(void);
 static void ContinueWindSfx(void);
 #endif
 
-static void SoundEngine(void);
 static void SkipSoundSubroutines(void);
 static void Dump_Squ1_Regs(u8 param_1,u8 param_2);
 static bool PlaySqu1Sfx(u8 param_1,u8 param_2,u8 param_3);
@@ -83,13 +82,6 @@ static struct_axy AlternateLengthHandler(u8 param_1);
 static struct_ay ProcessLengthData(u8 param_1);
 static struct_axy LoadControlRegs(void);
 static u8 LoadEnvelopeData(u8 param_1);
-
-
-// Alternate Sound Engine (smb2j)
-
-#ifdef SMB2J_MODE
-static void AlternateSoundEngine(void);
-#endif
 
 
 #define BIT(v, n) (((v) & (1 << n)) != 0)

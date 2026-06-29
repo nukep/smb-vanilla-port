@@ -5,12 +5,12 @@
 #include <string.h>
 
 extern "C" {
-void SMB1_Reset();
-void SMB1_NMI();
+void smb1_Reset();
+void smb1_NMI();
 
 bool smb2j_load_file(struct SMB_state *state, const char *name);
-void SMB2J_Reset();
-void SMB2J_NMI();
+void smb2j_Reset();
+void smb2j_NMI();
 
 void smb1_sync_data(void);
 void smb2j_sync_data(void);
@@ -185,22 +185,22 @@ void SMB_tick(struct SMB_state *state) {
   SMB_STATE = state;
   if (state->which_game == GAME_SMB1) {
     if (!state->reset_occurred) {
-      SMB1_Reset();
-      SMB1_NMI();
+      smb1_Reset();
+      smb1_NMI();
       smb1_set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
     } else {
-      SMB1_NMI();
+      smb1_NMI();
     }
   }
   if (state->which_game == GAME_SMB2J) {
     if (!state->reset_occurred) {
-      SMB2J_Reset();
-      SMB2J_NMI();
+      smb2j_Reset();
+      smb2j_NMI();
       smb2j_set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
     } else {
-      SMB2J_NMI();
+      smb2j_NMI();
     }
   }
 }

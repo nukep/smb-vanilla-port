@@ -2,6 +2,15 @@
 
 #include "structs.h"
 
+void smb1_Reset(void);
+#define Reset smb1_Reset
+
+void smb1_NMI(void);
+#define NMI smb1_NMI
+
+bool smb1_TransposePlayers(void);
+#define TransposePlayers smb1_TransposePlayers
+
 void smb1_sync_data(void);
 #define sync_data smb1_sync_data
 
@@ -1096,3 +1105,21 @@ u8 smb1_GetXOffscreenBits(u8 param_1);
 
 u8 smb1_GetYOffscreenBits(u8 param_1);
 #define GetYOffscreenBits smb1_GetYOffscreenBits
+
+
+// area
+
+void smb1_AreaParserTaskHandler(void);
+#define AreaParserTaskHandler smb1_AreaParserTaskHandler
+
+void smb1_LoadAreaPointer(void);
+#define LoadAreaPointer smb1_LoadAreaPointer
+
+void smb1_GetAreaDataAddrs(void);
+#define GetAreaDataAddrs smb1_GetAreaDataAddrs
+
+
+// sound
+
+void smb1_SoundEngine(void);
+#define SoundEngine smb1_SoundEngine

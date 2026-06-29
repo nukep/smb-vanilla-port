@@ -3,8 +3,6 @@
 #include "types.h"
 #include "vars.h"
 
-#include "area.h"
-
 #define NO_AVAIL_ENEMY_SLOT 5
 
 static void RenderAreaGraphics(void);
