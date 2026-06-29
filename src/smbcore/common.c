@@ -3,6 +3,305 @@
 #include "vars.h"
 #include "consts.h"
 
+#include <string.h>
+
+
+void sync_data(void) {
+  // The engine defines some internal data structures
+  // Synchronize them by reading the game RAM
+
+  AreaData  = rom_ptr(LOAD_16(AreaData_addr_hi, AreaData_addr_lo));
+  EnemyData = rom_ptr(LOAD_16(EnemyData_addr_hi, EnemyData_addr_lo));
+  MusicData = rom_ptr(LOAD_16(MusicData_addr_hi, MusicData_addr_lo));
+  PatchCurrentPlayer = CurrentPlayer;
+}
+
+
+// Custom feature for this port :)
+void set_world_and_level(u8 world, u8 level) {
+  // This hack only works in SMB1 right now
+  // TODO: implement for SMB2J
+
+#ifdef SMB1_MODE
+  WorldNumber = world;
+  LevelNumber = level;
+
+  u8 off = 0;
+  for (int i = 0; i < level; i++) {
+    // skip "intermission" areas
+    if (AreaAddrOffsets[WorldAddrOffsets[world] + off] == 0x29) {
+      off += 1;
+    }
+    off += 1;
+  }
+  AreaNumber = off;
+#endif
+}
+
+
+
+// Set 0's in memory.
+// The provided number is up to which address in the $0700 page to set to zero.
+// e.g. if i=0x14, then clear up to $0714 inclusive.
+// Doesn't set the stack, between $0160 and $01FF inclusive.
+// On SMB2J, doesn't set $0100 to $0108 inclusive.
+// Note that this port, which doesn't target the 6502, doesn't use the stack at $0160-$1FFF at all.
+//
+// SMB:90cc
+// SM2MAIN:6f08
+// Signature: [Y] -> []
+void InitializeMemory(u8 i) {
+#ifdef SMB1_MODE
+    memset(&RAM(0x000), 0, 0x160);
+    memset(&RAM(0x200), 0, (usize)0x700 - 0x200);
+    memset(&RAM(0x700), 0, (u8)(i + 1));
+#endif
+#ifdef SMB2J_MODE
+    memset(&RAM(0x000), 0, 0x100);
+    memset(&RAM(0x109), 0, (usize)0x160 - 0x109);
+    memset(&RAM(0x200), 0, (usize)0x700 - 0x200);
+    memset(&RAM(0x700), 0, (u8)(i + 1));
+#endif
+
+  // Note: the original sets register "A" to 0. some callers use it.
+}
+
+void dectimers(void) {
+
+#define DECTIMER(x) if ((x) != 0) { (x)--; }
+
+  if (TimerControl >= 2) {
+    TimerControl -= 1;
+  } else {
+    // If TimerControl is 0 or 1...
+    // decrement the timers.
+
+    TimerControl = 0;
+
+    // We unrolled a loop on the timers here
+    // The NES version decrements in reverse order as listed here, but the order doesn't really matter
+
+
+    DECTIMER(SelectTimer);
+    DECTIMER(PlayerAnimTimer);
+    DECTIMER(JumpSwimTimer);
+    DECTIMER(RunningTimer);
+    DECTIMER(BlockBounceTimer);
+    DECTIMER(SideCollisionTimer);
+    DECTIMER(JumpspringTimer);
+    DECTIMER(GameTimerCtrlTimer);
+    DECTIMER(ClimbSideTimer);
+    for (int i = 0; i < 5; i++) {
+      DECTIMER(EnemyFrameTimer[i]);
+    }
+    DECTIMER(FrenzyEnemyTimer);
+    DECTIMER(BowserFireBreathTimer);
+    DECTIMER(StompTimer);
+    DECTIMER(AirBubbleTimer);
+    DECTIMER(UnusedTimer1);
+    DECTIMER(UnusedTimer2);
+    // up to and including the timer at $0794
+
+    IntervalTimerControl -= 1;
+    if (IntervalTimerControl >= 0x80) {
+      IntervalTimerControl = 20;
+      DECTIMER(ScrollIntervalTimer);
+      for (int i = 0; i < 7; i++) {
+        DECTIMER(EnemyIntervalTimer[i]);
+      }
+      DECTIMER(BrickCoinTimer);
+      DECTIMER(InjuryTimer);
+      DECTIMER(StarInvincibleTimer);
+      DECTIMER(ScreenTimer);
+      DECTIMER(WorldEndTimer);
+      DECTIMER(DemoTimer);
+      DECTIMER(UnusedTimer3);
+      // up to and including the timer at $07A3
+    }
+  }
+
+#undef DECTIMER
+
+}
+
+// This is the only subroutine in all of SMB that writes to the PPU! (aside from WriteNTAddr, which blanks a nametable)
+// Each draw buffer item has the format: <ppu_hi> <ppu_lo> <count> <data...>
+//
+// SMB:8edd
+// SM2MAIN:6d56
+void update_screen(const u8 *buf, const u16 buf_length) {
+  // Original signature: [r00, r01] -> []
+  // Added a maximum buffer length parameter, for memory safety
+
+  u16 vram_idx = 0;
+
+#define READ(var) { if (vram_idx >= buf_length) { return; } var = buf[vram_idx++]; }
+
+  while (vram_idx < buf_length) {
+    u8 ppuhi;
+    u8 ppulo;
+    u8 data_header;
+
+    READ(ppuhi);
+    READ(ppulo);
+    READ(data_header);
+
+    if (ppuhi == 0) {
+      return;
+    }
+
+    // Start writing to the PPU address
+    ppustatus();
+    ppuaddr(ppuhi);
+    ppuaddr(ppulo);
+
+    if (data_header & DRAW_FLAG_VERTICAL) {
+      // Draw vertically
+      Mirror_PPU_CTRL_REG1 |= 0x04;
+    } else {
+      // Draw horizontally
+      Mirror_PPU_CTRL_REG1 &= ~0x04;
+    }
+    ppuctrl(Mirror_PPU_CTRL_REG1);
+
+    int count = data_header & 0x3F;
+    if (count == 0) {
+      // The original SMB does a do-while loop, and so a count of 0 is actually 256
+      count = 256;
+    }
+
+    if (data_header & DRAW_FLAG_RLE) {
+      // Run-length encoding
+
+      u8 val;
+      READ(val);
+      for (int i = 0; i < count; i++) {
+        ppudata(val);
+      }
+    } else {
+      // Variable-length
+      for (int i = 0; i < count; i++) {
+        u8 val;
+        READ(val);
+        ppudata(val);
+      }
+    }
+
+    // The original SMB does these extra, seemingly pointless assignments to the ppuaddr register
+    ppuaddr(0x3f);
+    ppuaddr(0);
+    ppuaddr(0);
+    ppuaddr(0);
+  }
+
+  ppustatus();
+  ppuscroll(0);
+  ppuscroll(0);
+
+#undef READ
+}
+
+// SMB:8e2d, SM2MAIN:6ca6
+// Signature: [A] -> []
+void WriteNTAddr(u8 ppu_page) {
+  ppuaddr(ppu_page);
+  ppuaddr(0);
+
+  // Fill the nametable with blank tiles
+  for (int i = 0; i < 0x3C0; i++) {
+    ppudata(0x24);
+  }
+  // ... and clear the colors of all metatiles to the first palette
+  for (int i = 0; i < 0x40; i++) {
+    ppudata(0x00);
+  }
+
+  VRAM_Buffer1_Offset = 0;
+  VRAM_Buffer1[0] = 0;
+  HorizontalScroll = 0;
+  VerticalScroll = 0;
+  ppuscroll(0);
+  ppuscroll(0);
+  return;
+}
+
+// SMB:8e5c, SM2MAIN:6cd5
+// Signature: [] -> []
+void ReadJoypads(void) {
+  // joystick_strobe(1);
+  // joystick_strobe(0);
+  ReadPortBits(0);
+  ReadPortBits(1);
+}
+
+// SMB:8e6a, SM2MAIN:6ce3
+// Signature: [X] -> []
+void ReadPortBits(u8 joynum) {
+  u8 bits = 0;
+
+  struct SMB_buttons buttons = {0};
+
+  if (joynum == 0) {
+    joy1(&buttons);
+  } else {
+    joy2(&buttons);
+  }
+
+  bits |= buttons.a      ? BUTTON_A : 0;
+  bits |= buttons.b      ? BUTTON_B : 0;
+  bits |= buttons.select ? BUTTON_SELECT : 0;
+  bits |= buttons.start  ? BUTTON_START : 0;
+  bits |= buttons.u      ? BUTTON_U : 0;
+  bits |= buttons.d      ? BUTTON_D : 0;
+  bits |= buttons.l      ? BUTTON_L : 0;
+  bits |= buttons.r      ? BUTTON_R : 0;
+
+  SavedJoypadBits[joynum] = bits;
+
+  // If Select or Start were pressed last time this was called, then "unpress" them.
+  if ((bits & (BUTTON_SELECT | BUTTON_START) & JoypadBitMask[joynum]) != 0) {
+    SavedJoypadBits[joynum] = bits & ~(BUTTON_SELECT | BUTTON_START);
+  } else {
+    JoypadBitMask[joynum] = bits;
+  }
+}
+
+// SMB1 and SMB2J's Pseudo-Random Number Generator
+//
+// How it works, in plain language:
+// The PRNG is a 56-bit string (7 * 8 bits) that's shifted to the right each iteration.
+// A new bit is fed in from the left depending on the following:
+//     If two specific bits in the string are equal, then the new bit is 0. Otherwise the new bit is 1.
+//     (you can also interpret this as XORing the two bits to get the new bit).
+//
+// The seed value is A5 00 00 00 00 00 00.
+//
+// Example iterations:
+//       >     a       b
+// 61st: 00100010101101001111000110011000011110110100101110111101  (a=1, b=0. new bit for 62 is 1)
+// 62nd: 10010001010110100111100011001100001111011010010111011110  (a=0, b=1. new bit for 63 is 1)
+// 63rd: 11001000101011010011110001100110000111101101001011101111  (a=0, b=0. new bit for 64 is 0)
+// 64th: 01100100010101101001111000110011000011110110100101110111  (a=0, b=1. new bit for 65 is 1)
+//
+// For iteration 61, a=1 and b=0, which are not equal, so the new bit to be used for iteration 62 is 1.
+//
+// Fun fact: This PRNG has a period of 32767 iterations. The cycle starts at the 40th iteration.
+// That's about 546.1 seconds or 9.1 minutes at 60fps!
+// After which, it'll generate the same values on loop.
+// 1st iteration (seed):       A5 00 00 00 00 00 00 (10100101000000000000000000000000000000000000000000000000)
+// 40th and 32807th iteration: 33 0F 69 77 A5 4A 00 (00110011000011110110100101110111101001010100101000000000)
+void update_prng(u8 *prng) {
+  u8 a = prng[0] & 2;
+  u8 b = prng[1] & 2;
+  bool newbit = a != b;
+
+  for (int i = 0; i < 7; i++) {
+    bool next = (prng[i] & 1) != 0;
+    prng[i] = (newbit ? 0x80 : 0x00) | (prng[i] >> 1);
+    newbit = next;
+  }
+}
+
 
 // SMB:8325
 // SM2MAIN:c51b

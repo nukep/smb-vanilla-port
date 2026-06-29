@@ -4,18 +4,17 @@
 extern "C" {
 void SMB1_Reset();
 void SMB1_NMI();
-}
 
 #include "smbcore/smb_romarrays.h"
 #include "smbcore/vars.h"
 #include "smbcore/smb1.h"
 #include "smbcore/types.h"
+}
 
 bool TransposePlayers();
 
 #define GameTimerDisplay GameTimerDisplaySMB1
 
-#include "smbcommon.h"
 #include "smbcore/common_sound.c"
 #include "smbcore/area.h"
 #include "smbcore/common.c"

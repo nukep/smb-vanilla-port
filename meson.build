@@ -40,7 +40,6 @@ configure_file(output: 'smbvanilla_config.h', configuration: cdata)
 
 smbcore = library('smbcore',
         'src/smbcore.cpp',
-        'src/smbcommon.cpp',
         'src/smb1.cpp',
         'src/smb2j.cpp',
         c_args:   smbcore_args,

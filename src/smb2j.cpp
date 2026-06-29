@@ -5,12 +5,12 @@ extern "C" {
 bool smb2j_load_file(struct SMB_state *state, const char *name);
 void SMB2J_Reset();
 void SMB2J_NMI();
-}
 
 #include "smbcore/smb2j_romarrays.h"
 #include "smbcore/vars.h"
 #include "smbcore/smb2j.h"
 #include "smbcore/types.h"
+}
 
 #define AreaAddrOffsets RAMARRAY_CONST(0xC360, 0x28)
 
@@ -24,7 +24,6 @@ void UpdateGamesBeaten();
 
 #define GameTimerDisplay GameTimerDisplaySMB2J
 
-#include "smbcommon.h"
 #include "smbcore/common_sound.c"
 #include "smbcore/area.h"
 #include "smbcore/common.c"

@@ -2,6 +2,33 @@
 
 #include "structs.h"
 
+void smb1_sync_data(void);
+#define sync_data smb1_sync_data
+
+void smb1_set_world_and_level(u8 world, u8 level);
+#define set_world_and_level smb1_set_world_and_level
+
+void smb1_InitializeMemory(u8 i);
+#define InitializeMemory smb1_InitializeMemory
+
+void smb1_dectimers(void);
+#define dectimers smb1_dectimers
+
+void smb1_update_screen(const u8 *buf, const u16 buf_length);
+#define update_screen smb1_update_screen
+
+void smb1_WriteNTAddr(u8 ppu_page);
+#define WriteNTAddr smb1_WriteNTAddr
+
+void smb1_ReadJoypads(void);
+#define ReadJoypads smb1_ReadJoypads
+
+void smb1_ReadPortBits(u8 joynum);
+#define ReadPortBits smb1_ReadPortBits
+
+void smb1_update_prng(u8 *prng);
+#define update_prng smb1_update_prng
+
 void smb1_PauseRoutine(void);
 #define PauseRoutine smb1_PauseRoutine
 

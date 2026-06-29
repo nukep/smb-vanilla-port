@@ -2,6 +2,33 @@
 
 #include "structs.h"
 
+void smb2j_sync_data(void);
+#define sync_data smb2j_sync_data
+
+void smb2j_set_world_and_level(u8 world, u8 level);
+#define set_world_and_level smb2j_set_world_and_level
+
+void smb2j_InitializeMemory(u8 i);
+#define InitializeMemory smb2j_InitializeMemory
+
+void smb2j_dectimers(void);
+#define dectimers smb2j_dectimers
+
+void smb2j_update_screen(const u8 *buf, const u16 buf_length);
+#define update_screen smb2j_update_screen
+
+void smb2j_WriteNTAddr(u8 ppu_page);
+#define WriteNTAddr smb2j_WriteNTAddr
+
+void smb2j_ReadJoypads(void);
+#define ReadJoypads smb2j_ReadJoypads
+
+void smb2j_ReadPortBits(u8 joynum);
+#define ReadPortBits smb2j_ReadPortBits
+
+void smb2j_update_prng(u8 *prng);
+#define update_prng smb2j_update_prng
+
 void smb2j_jumptable_VictoryModeSubroutines_forW8(u8 param_1);
 #define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
 

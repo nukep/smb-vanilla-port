@@ -11,9 +11,13 @@ void SMB1_NMI();
 bool smb2j_load_file(struct SMB_state *state, const char *name);
 void SMB2J_Reset();
 void SMB2J_NMI();
-}
 
-#include "smbcommon.h"
+void smb1_sync_data(void);
+void smb2j_sync_data(void);
+
+void smb1_set_world_and_level(u8 world, u8 level);
+void smb2j_set_world_and_level(u8 world, u8 level);
+}
 
 #ifdef THREAD_LOCAL_SMBSTATE
 thread_local struct SMB_state *SMB_STATE;
@@ -168,7 +172,12 @@ void SMB_ram_finishwrite(struct SMB_state *state) {
   // Set a global variable while accessing the RAM values
   SMB_STATE = state;
 
-  sync_data();
+  if (state->which_game == GAME_SMB1) {
+    smb1_sync_data();
+  }
+  if (state->which_game == GAME_SMB2J) {
+    smb2j_sync_data();
+  }
 }
 
 void SMB_tick(struct SMB_state *state) {
@@ -178,7 +187,7 @@ void SMB_tick(struct SMB_state *state) {
     if (!state->reset_occurred) {
       SMB1_Reset();
       SMB1_NMI();
-      set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
+      smb1_set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
     } else {
       SMB1_NMI();
@@ -188,8 +197,7 @@ void SMB_tick(struct SMB_state *state) {
     if (!state->reset_occurred) {
       SMB2J_Reset();
       SMB2J_NMI();
-      // this hack doesn't work for smb2j
-      //set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
+      smb2j_set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
     } else {
       SMB2J_NMI();
