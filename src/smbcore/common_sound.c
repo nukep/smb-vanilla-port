@@ -409,7 +409,7 @@ struct_axyz SetFreq_Squ1(const u8 param_1) {
   sVar3 = Dump_Freq_Regs(param_1, 0);
   sVar2.a = sVar3.a;
   sVar2.x = 0;
-  sVar2.y = sVar2.y;
+  sVar2.y = sVar3.y;
   sVar2.z = sVar3.z;
   return sVar2;
 }
