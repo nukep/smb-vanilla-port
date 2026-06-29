@@ -1,6 +1,9 @@
 // The start of something magical! ✨
 
-#include "smbcore.h"
+#include "mario.h"
+#include "base.h"
+#include "smbcore/interface.h"
+#include "smbcore/vars.h"
 
 #include <string.h>
 
@@ -18,6 +21,31 @@ void smb2j_sync_data(void);
 void smb1_set_world_and_level(u8 world, u8 level);
 void smb2j_set_world_and_level(u8 world, u8 level);
 }
+
+struct sprite {
+  struct SMB_tile tile;
+  bool draw_behind;
+};
+
+static inline void transfer_sprite_data(struct sprite sprites[64], const u8 *data) {
+  for (int i = 0; i < 64; i++) {
+    sprites[i].tile.y = data[i * 4 + 0] + 1;
+    sprites[i].tile.tileidx = data[i * 4 + 1];
+    u8 attr = data[i * 4 + 2];
+    sprites[i].tile.x = data[i * 4 + 3];
+
+    sprites[i].tile.paletteidx = (attr & 0x03) + 4;
+    sprites[i].tile.flip_horz = (attr & 0x40) != 0;
+    sprites[i].tile.flip_vert = (attr & 0x80) != 0;
+
+    sprites[i].tile.extra_type = TILE_TYPE_SPRITE;
+    sprites[i].tile.extra_spriteidx = i;
+
+    sprites[i].draw_behind = (attr & 0x20) != 0;
+  }
+}
+
+static void draw_graphics(const struct sprite sprites[64]);
 
 #ifdef THREAD_LOCAL_SMBSTATE
 thread_local struct SMB_state *SMB_STATE;
@@ -183,26 +211,44 @@ void SMB_ram_finishwrite(struct SMB_state *state) {
 void SMB_tick(struct SMB_state *state) {
   // Set a global variable while it's being ticked
   SMB_STATE = state;
+
+  struct sprite sprites[64];
+
   if (state->which_game == GAME_SMB1) {
     if (!state->reset_occurred) {
       smb1_Reset();
-      smb1_NMI();
+    }
+
+    // The NES wrote to OAM registers to initiate copying sprites
+    // $2003 = 0
+    // $4014 = 2
+    transfer_sprite_data(&sprites[0], &Sprite_Data[0]);
+    smb1_NMI();
+
+    if (!state->reset_occurred) {
       smb1_set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
-    } else {
-      smb1_NMI();
     }
   }
+
   if (state->which_game == GAME_SMB2J) {
     if (!state->reset_occurred) {
       smb2j_Reset();
-      smb2j_NMI();
+    }
+
+    // The NES wrote to OAM registers to initiate copying sprites
+    // $2003 = 0
+    // $4014 = 2
+    transfer_sprite_data(&sprites[0], &Sprite_Data[0]);
+    smb2j_NMI();
+
+    if (!state->reset_occurred) {
       smb2j_set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
-    } else {
-      smb2j_NMI();
     }
   }
+
+  draw_graphics(&sprites[0]);
 }
 
 static inline void draw_nametable_tile(int x, int y, u16 ppu_offset, int tilex,

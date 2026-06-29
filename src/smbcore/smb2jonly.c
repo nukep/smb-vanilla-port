@@ -212,13 +212,6 @@ void NMI(void) {
   ppuscroll(0);
   ppuscroll(0);
 
-  struct sprite sprites[64];
-
-  // The NES wrote to OAM registers to initiate copying sprites
-  // $2003 = 0
-  // $4014 = 2
-  transfer_sprite_data(&sprites[0], &Sprite_Data[0]);
-
   u16 vram_length = 0;
   const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
   update_screen(buf, vram_length);
@@ -268,8 +261,6 @@ void NMI(void) {
 
   // The FDS version loops here until IRQAckFlag is 0.
   trigger_scroll_irq_if_havent_yet();
-
-  draw_graphics(&sprites[0]);
 
   ppustatus();
 

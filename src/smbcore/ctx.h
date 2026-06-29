@@ -1,7 +1,10 @@
 #ifndef SMBCORE_CTX_H
 #define SMBCORE_CTX_H
 
-#include "../smbcore.h"
+#include "../mario.h"
+#include "../base.h"
+
+#include "interface.h"
 
 #ifdef SMB1_MODE
 #include "smb1.h"

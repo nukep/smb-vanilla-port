@@ -88,13 +88,6 @@ void NMI(void) {
   ppuscroll(0);
   ppuscroll(0);
 
-  struct sprite sprites[64];
-
-  // The NES wrote to OAM registers to initiate copying sprites
-  // $2003 = 0
-  // $4014 = 2
-  transfer_sprite_data(&sprites[0], &Sprite_Data[0]);
-
   u16 vram_length = 0;
   const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
   update_screen(buf, vram_length);
@@ -143,8 +136,6 @@ void NMI(void) {
 
   // Enable NMI (our port ignores this)
   ppuctrl(prev_mirror_ppu_ctrl | 0x80);
-
-  draw_graphics(&sprites[0]);
 }
 
 
