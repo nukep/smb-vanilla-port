@@ -5,8 +5,8 @@
 extern "C" {
 #endif
 
-#include "../mario.h"
-#include "../base.h"
+#include "mario.h"
+#include "base.h"
 
 #include "interface.h"
 

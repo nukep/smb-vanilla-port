@@ -2,7 +2,7 @@
 // This implements all the `SMBgl_` functions, but does nothing with them.
 // I do it this way to avoid #ifdef'ing for OpenGL support (easier for now).
 
-#include "mario.h"
+#include "smbcore/mario.h"
 #include "render_opengl.h"
 
 

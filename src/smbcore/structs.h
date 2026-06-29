@@ -1,7 +1,7 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-#include "../base.h"
+#include "base.h"
 
 // AREA
 

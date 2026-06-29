@@ -1,11 +1,11 @@
 #include "audio.h"
-#include "mario.h"
+#include "smbcore/mario.h"
 #include "movie.h"
 #include "render_opengl.h"
 #include "render_raster.h"
 #include "time.h"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -194,10 +194,10 @@ int sdl_tick(void *userdata) {
   SDL_Event eventData;
   while (SDL_PollEvent(&eventData)) {
     switch (eventData.type) {
-    case SDL_KEYDOWN:
-    case SDL_KEYUP: {
-      bool isdown = eventData.key.state == SDL_PRESSED;
-      SDL_Scancode sc = eventData.key.keysym.scancode;
+    case SDL_EVENT_KEY_DOWN:
+    case SDL_EVENT_KEY_UP: {
+      bool isdown = eventData.type == SDL_EVENT_KEY_DOWN;
+      SDL_Scancode sc = eventData.key.scancode;
       if (isdown && !eventData.key.repeat) {
         switch (sc) {
         case SDL_SCANCODE_1:
@@ -238,7 +238,7 @@ int sdl_tick(void *userdata) {
 #undef KEY
       }
     } break;
-    case SDL_QUIT:
+    case SDL_EVENT_QUIT:
       return 1;
     }
   }
@@ -269,7 +269,7 @@ int sdl_tick(void *userdata) {
 
     const SDL_Rect srcrect = {0, 0, 256, 240};
     SDL_Rect dstrect = {0, 0, 256 * fe->video_scale, 240 * fe->video_scale};
-    SDL_BlitScaled(surf, &srcrect, SDL_GetWindowSurface(fe->window), &dstrect);
+    SDL_BlitSurfaceScaled(surf, &srcrect, SDL_GetWindowSurface(fe->window), &dstrect, SDL_SCALEMODE_NEAREST);
 
     SDL_UpdateWindowSurface(fe->window);
     return 0;
@@ -393,12 +393,13 @@ int main(int argc, char *argv[]) {
     fe->video_scale = cfg.graphics.video_scale;
   }
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    log_error("Could not initialize SDL2 video: %s", SDL_GetError());
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
+    log_error("Could not initialize SDL video: %s", SDL_GetError());
     goto exit;
   }
 
-  SDL_WindowFlags window_flags = SDL_WINDOW_SHOWN;
+  // No flags set
+  SDL_WindowFlags window_flags = 0;
 
 #ifdef OPENGL_ENABLED
   if (cfg.graphics.opengl) {
@@ -410,7 +411,7 @@ int main(int argc, char *argv[]) {
   }
 #endif
 
-  fe->window = SDL_CreateWindow("SMB Vanilla", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256 * fe->video_scale, 240 * fe->video_scale, window_flags);
+  fe->window = SDL_CreateWindow("SMB Vanilla", 256 * fe->video_scale, 240 * fe->video_scale, window_flags);
   if (!fe->window) {
     log_error("Could not create SDL window: %s", SDL_GetError());
     goto exit;
@@ -431,7 +432,7 @@ int main(int argc, char *argv[]) {
         log_error("Could not initialize OpenGL");
         free(fe->smb_gl);
         fe->smb_gl = 0;
-        SDL_GL_DeleteContext(glcontext);
+        SDL_GL_DestroyContext(glcontext);
         glcontext = 0;
       }
     }
@@ -461,7 +462,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (fe->smb_raster) {
-    fe->surf = SDL_CreateRGBSurface(0, 256, 240, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
+    fe->surf = SDL_CreateSurface(256, 240, SDL_PIXELFORMAT_RGB24);
     if (!fe->surf) {
       log_error("Could not create SDL surface: %s", SDL_GetError());
       goto exit;
@@ -608,7 +609,7 @@ exit:
     free(fe);
   }
   if (glcontext) {
-    SDL_GL_DeleteContext(glcontext);
+    SDL_GL_DestroyContext(glcontext);
   }
   SDL_Quit();
 

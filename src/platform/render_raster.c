@@ -1,7 +1,7 @@
 // Functions to render SMB to a 256x240 RGB buffer in software.
 // About as simple as it gets.
 
-#include "mario.h"
+#include "smbcore/mario.h"
 #include "render_raster.h"
 
 #include <string.h>

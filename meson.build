@@ -17,7 +17,7 @@ endif
 
 glew = dependency('glew', required: get_option('opengl'))
 
-opengl_sources = glew.found() ? ['src/render_opengl.c'] : ['src/render_opengl_noop.c']
+opengl_sources = glew.found() ? ['src/platform/render_opengl.c'] : ['src/platform/render_opengl_noop.c']
 opengl_args = glew.found() ? ['-DOPENGL_ENABLED'] : []
 
 smbcore_args = []
@@ -67,7 +67,8 @@ smb2jcore = library('smb2jcore',
 )
 
 smbcore = library('smbcore',
-  'src/smbcore.c',
+  'src/smbcore/smbcore.c',
+  include_directories: ['src'],
   c_args: smbcore_args,
   link_with: [smb1core, smb2jcore],
 )
@@ -88,33 +89,34 @@ nessndemu = library('nessndemu',
 )
 
 executable('smb_testrunner',
-           ['src/main_testrunner.c', 'src/movie.c'],
+           ['src/platform/main_testrunner.c', 'src/platform/movie.c'],
+           include_directories: ['src'],
            link_with: smbcore)
 
 if use_sdl3
   executable('smbvanilla',
-             ['src/main_sdl3.c',
-              'src/audio_sdl3.cpp',
-              'src/time.c',
-              'src/movie.c',
-              'src/render_raster.c',
-              'src/thirdparty/ini.c'] + opengl_sources,
+             ['src/platform/main_sdl3.c',
+              'src/platform/audio_sdl3.cpp',
+              'src/platform/time.c',
+              'src/platform/movie.c',
+              'src/platform/render_raster.c',
+              'src/platform/thirdparty/ini.c'] + opengl_sources,
 
-             include_directories: ['Nes_Snd_Emu'],
+             include_directories: ['Nes_Snd_Emu', 'src'],
              link_with: [smbcore, nessndemu],
              dependencies: [sdl, glew],
              c_args:   opengl_args,
              cpp_args: opengl_args)
 else
   executable('smbvanilla',
-             ['src/main_sdl2.c',
-              'src/audio_sdl2.cpp',
-              'src/time.c',
-              'src/movie.c',
-              'src/render_raster.c',
-              'src/thirdparty/ini.c'] + opengl_sources,
+             ['src/platform/main_sdl2.c',
+              'src/platform/audio_sdl2.cpp',
+              'src/platform/time.c',
+              'src/platform/movie.c',
+              'src/platform/render_raster.c',
+              'src/platform/thirdparty/ini.c'] + opengl_sources,
 
-             include_directories: ['Nes_Snd_Emu'],
+             include_directories: ['Nes_Snd_Emu', 'src'],
              link_with: [smbcore, nessndemu],
              dependencies: [sdl, glew],
              c_args:   ['-DUSE_SDL2'] + opengl_args,

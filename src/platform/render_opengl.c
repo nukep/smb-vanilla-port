@@ -3,7 +3,7 @@
 // Requires at least OpenGL 3.3.
 // Uses GLEW. Avoids platform-specific libraries such as SDL, by design.
 
-#include "mario.h"
+#include "smbcore/mario.h"
 #include "render_opengl.h"
 
 #include <stdio.h>

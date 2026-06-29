@@ -1,4 +1,4 @@
-#include "mario.h"
+#include "smbcore/mario.h"
 #include "movie.h"
 #include <inttypes.h>
 #include <stdint.h>

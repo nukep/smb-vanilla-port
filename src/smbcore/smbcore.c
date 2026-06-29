@@ -2,8 +2,8 @@
 
 #include "mario.h"
 #include "base.h"
-#include "smbcore/interface.h"
-#include "smbcore/vars.h"
+#include "interface.h"
+#include "vars.h"
 
 #include <string.h>
 
