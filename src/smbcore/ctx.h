@@ -12,7 +12,7 @@ extern "C" {
 
 #ifdef SMB1_MODE
 #include "smb1.h"
-#include "smb_romarrays.h"
+#include "smb1_romarrays.h"
 #endif
 
 #ifdef SMB2J_MODE
