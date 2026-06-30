@@ -1998,30 +1998,38 @@ void ScrollLockObject_Warp(void) {
 // Signature: [X] -> []
 void MushroomLedge(const u8 param_1) {
   const struct_ycr07 sVar4 = ChkLrgObjLength(param_1);
-  const u8 bVar3 = sVar4.r07;
+  const u8 mt_y = sVar4.r07;
   if (sVar4.c) {
     MushroomLedgeHalfLen[param_1] = AreaObjectLength[param_1] >> 1;
-    NoUnder(MT_MUSHROOMLEDGE_L, bVar3);
+    NoUnder(MT_MUSHROOMLEDGE_L, mt_y);
     return;
   }
 
   const u8 areaobjlen = AreaObjectLength[param_1];
   if (areaobjlen == 0) {
-    NoUnder(MT_MUSHROOMLEDGE_R, bVar3);
+    NoUnder(MT_MUSHROOMLEDGE_R, mt_y);
     return;
   }
 
-  MetatileBuffer[bVar3] = MT_MUSHROOMLEDGE_M;
+  MetatileBuffer[mt_y] = MT_MUSHROOMLEDGE_M;
 
   // Draw the stem under the mushroom ledge
 
   const u8 bVar1 = MushroomLedgeHalfLen[param_1];
   if (areaobjlen == bVar1) {
     // Right under the mushroom
-    MetatileBuffer[(u8)(bVar3 + 1)] = MT_MUSHROOMLEDGE_STEM_T;
+    MetatileBuffer[(u8)(mt_y + 1)] = MT_MUSHROOMLEDGE_STEM_T;
+
+    // Bug workaround: In SMB1 World 4-3, the mushroom ledges attempt to draw the stems at y = 13 and beyond.
+    // This would access HammerEnemyOffset[0], which in this level is always either 0 or the stem metatile.
+    // There are no hammer bros in that level, but setting this ensures RAM tests pass.
+    if (mt_y + 2 == 13) {
+      HammerEnemyOffset[0] = MT_MUSHROOMLEDGE_STEM_UNDER;
+      return;
+    }
 
     // The rest of the stem
-    RenderUnderPart(MT_MUSHROOMLEDGE_STEM_UNDER, bVar3 + 2, 0xf);
+    RenderUnderPart(MT_MUSHROOMLEDGE_STEM_UNDER, mt_y + 2, 0xf);
   }
 }
 #endif
