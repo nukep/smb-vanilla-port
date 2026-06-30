@@ -1,5 +1,9 @@
 #include "audio.h"
-#include <SDL.h>
+#ifdef USE_SDL2
+#  include <SDL.h>
+#else
+#  include <SDL3/SDL.h>
+#endif
 #include <stdio.h>
 
 #include "nes_apu/Nes_Apu.h"
@@ -9,7 +13,11 @@ struct SMB_audio {
   Nes_Apu *apu;
   blip_time_t clock;
   int frame;
+#ifdef USE_SDL2
   SDL_AudioDeviceID audio_device_id;
+#else
+  SDL_AudioStream *audio_stream;
+#endif
   uint64_t max_samples_to_be_queued;
   blip_sample_t *readsamples_tmpbuf;
   size_t readsamples_tmpbuf_count;
@@ -35,6 +43,7 @@ bool SMB_audio_init(struct SMB_audio *audio, int32_t samplerate, int32_t maxlate
   audio->readsamples_tmpbuf_count = (samplerate / 30);
   audio->readsamples_tmpbuf = (blip_sample_t*)malloc(audio->readsamples_tmpbuf_count * sizeof(blip_sample_t));
 
+#ifdef USE_SDL2
   if (SDL_InitSubSystem(SDL_INIT_AUDIO) != 0) {
     printf("ERROR: %s\n", SDL_GetError());
     return false;
@@ -60,10 +69,36 @@ bool SMB_audio_init(struct SMB_audio *audio, int32_t samplerate, int32_t maxlate
     delete audio->buf;
   }
   return success;
+#else
+  if (!SDL_InitSubSystem(SDL_INIT_AUDIO)) {
+    printf("ERROR: %s\n", SDL_GetError());
+    return false;
+  }
+
+  SDL_AudioSpec spec;
+  SDL_zero(spec);
+  spec.freq = samplerate;
+  spec.format = SDL_AUDIO_S16;
+  spec.channels = 1;
+
+  audio->audio_stream = SDL_OpenAudioDeviceStream(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &spec, NULL, NULL);
+  if (!audio->audio_stream) {
+    printf("ERROR: %s\n", SDL_GetError());
+    delete audio->apu;
+    delete audio->buf;
+    return false;
+  }
+  SDL_ResumeAudioDevice(SDL_GetAudioStreamDevice(audio->audio_stream));
+  return true;
+#endif
 }
 void SMB_audio_fini(struct SMB_audio *audio) {
   free(audio->readsamples_tmpbuf);
+#ifdef USE_SDL2
   SDL_CloseAudioDevice(audio->audio_device_id);
+#else
+  SDL_DestroyAudioStream(audio->audio_stream);
+#endif
   delete audio->apu;
   delete audio->buf;
 }
@@ -97,6 +132,7 @@ void SMB_audio_end_frame(struct SMB_audio *audio) {
   // Only queue audio if too much isn't queued already.
   // If too much audio is queued, we have an audio overrun. Or informally: "audio lag".
 
+#ifdef USE_SDL2
   uint32_t queued_bytes = SDL_GetQueuedAudioSize(audio->audio_device_id);
   bool too_much_queued = queued_bytes > (audio->max_samples_to_be_queued * sizeof(buf[0]));
 
@@ -105,4 +141,14 @@ void SMB_audio_end_frame(struct SMB_audio *audio) {
       printf("ERROR: %s\n", SDL_GetError());
     }
   }
+#else
+  int queued_bytes = SDL_GetAudioStreamQueued(audio->audio_stream);
+  bool too_much_queued = queued_bytes > (int)(audio->max_samples_to_be_queued * sizeof(buf[0]));
+
+  if (!too_much_queued) {
+    if (!SDL_PutAudioStreamData(audio->audio_stream, buf, count * sizeof(buf[0]))) {
+      printf("ERROR: %s\n", SDL_GetError());
+    }
+  }
+#endif
 }

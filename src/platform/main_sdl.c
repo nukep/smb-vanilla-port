@@ -5,7 +5,12 @@
 #include "render_raster.h"
 #include "time.h"
 
-#include <SDL.h>
+#ifdef USE_SDL2
+#  include <SDL.h>
+#else
+#  include <SDL3/SDL.h>
+#endif
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -184,64 +189,108 @@ bool advance_movie(struct frontend_userdata *fe) {
   return use_movie_buttons;
 }
 
+// Called whenvere a key is newly pressed, or newly released
+// Does not send repeat keys from holding it down
+static int on_keypress_change(struct frontend_userdata *fe, SDL_Scancode sc, bool isdown) {
+  struct SMB_state *smb_state = fe->smb_state;
+
+  if (isdown) {
+    switch (sc) {
+    case SDL_SCANCODE_1:
+      if (load_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename)) {
+        if (!load_ram(smb_state, fe->cfg->debug.dump_ram_filename)) {
+          // Couldn't load RAM - exit
+          return 1;
+        }
+      }
+      break;
+
+    case SDL_SCANCODE_0:
+      // dump the RAM and PPU
+      dump_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename);
+      dump_ram(smb_state, fe->cfg->debug.dump_ram_filename);
+      break;
+
+    case SDL_SCANCODE_ESCAPE:
+      // Stop the movie and let the player take control
+      if (fe->movie) {
+        movie_fini(fe->movie);
+        free(fe->movie);
+        fe->movie = 0;
+      }
+      break;
+
+    default:
+      break;
+    }
+  }
+
+#define KEY(key)  if (sc == fe->sdl_key_scancodes.key) { fe->player1_buttons.key = isdown; }
+  KEY(u);
+  KEY(d);
+  KEY(l);
+  KEY(r);
+  KEY(select);
+  KEY(start);
+  KEY(b);
+  KEY(a);
+#undef KEY
+
+  return 0;
+}
+
 int sdl_tick(void *userdata) {
   struct frontend_userdata *fe = userdata;
   struct SMB_state *smb_state = fe->smb_state;
-  bool use_movie_buttons = false;
 
-  use_movie_buttons = advance_movie(fe);
-
+#ifdef USE_SDL2
   SDL_Event eventData;
   while (SDL_PollEvent(&eventData)) {
     switch (eventData.type) {
     case SDL_KEYDOWN:
-    case SDL_KEYUP: {
-      bool isdown = eventData.key.state == SDL_PRESSED;
-      SDL_Scancode sc = eventData.key.keysym.scancode;
-      if (isdown && !eventData.key.repeat) {
-        switch (sc) {
-        case SDL_SCANCODE_1:
-          if (load_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename)) {
-            if (!load_ram(smb_state, fe->cfg->debug.dump_ram_filename)) {
-              // Couldn't load RAM - exit
-              return 1;
-            }
+    case SDL_KEYUP:
+      {
+        bool isdown = eventData.key.state == SDL_PRESSED;
+        SDL_Scancode sc = eventData.key.keysym.scancode;
+        if (!eventData.key.repeat) {
+          int res = on_keypress_change(fe, sc, isdown);
+          if (res) {
+            return res;
           }
-          break;
-        case SDL_SCANCODE_0:
-          // dump the RAM and PPU
-          dump_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename);
-          dump_ram(smb_state, fe->cfg->debug.dump_ram_filename);
-          break;
-        case SDL_SCANCODE_ESCAPE:
-          // Stop the movie and let the player take control
-          if (fe->movie) {
-            movie_fini(fe->movie);
-            free(fe->movie);
-            fe->movie = 0;
-          }
-          break;
-        default:
-          break;
         }
       }
-      if (!use_movie_buttons) {
-#define KEY(key)  if (sc == fe->sdl_key_scancodes.key) { fe->player1_buttons.key = isdown; }
-        KEY(u);
-        KEY(d);
-        KEY(l);
-        KEY(r);
-        KEY(select);
-        KEY(start);
-        KEY(b);
-        KEY(a);
-#undef KEY
-      }
-    } break;
+    break;
+
     case SDL_QUIT:
       return 1;
     }
   }
+#else
+  SDL_Event eventData;
+  while (SDL_PollEvent(&eventData)) {
+    switch (eventData.type) {
+    case SDL_EVENT_KEY_DOWN:
+    case SDL_EVENT_KEY_UP:
+      {
+        bool isdown = eventData.type == SDL_EVENT_KEY_DOWN;
+        SDL_Scancode sc = eventData.key.scancode;
+        if (!eventData.key.repeat) {
+          int res = on_keypress_change(fe, sc, isdown);
+          if (res) {
+            return res;
+          }
+        }
+      }
+    break;
+
+    case SDL_EVENT_QUIT:
+      return 1;
+    }
+  }
+#endif
+
+  // Overwrite the player buttons if a movie exists with remaining frames
+  advance_movie(fe);
 
   if (fe->smb_gl) {
     SMB_tick(smb_state);
@@ -269,7 +318,11 @@ int sdl_tick(void *userdata) {
 
     const SDL_Rect srcrect = {0, 0, 256, 240};
     SDL_Rect dstrect = {0, 0, 256 * fe->video_scale, 240 * fe->video_scale};
+#ifdef USE_SDL2
     SDL_BlitScaled(surf, &srcrect, SDL_GetWindowSurface(fe->window), &dstrect);
+#else
+    SDL_BlitSurfaceScaled(surf, &srcrect, SDL_GetWindowSurface(fe->window), &dstrect, SDL_SCALEMODE_NEAREST);
+#endif
 
     SDL_UpdateWindowSurface(fe->window);
     return 0;
@@ -393,12 +446,24 @@ int main(int argc, char *argv[]) {
     fe->video_scale = cfg.graphics.video_scale;
   }
 
+#ifdef USE_SDL2
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    log_error("Could not initialize SDL2 video: %s", SDL_GetError());
+    log_error("Could not initialize SDL video: %s", SDL_GetError());
     goto exit;
   }
+#else
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
+    log_error("Could not initialize SDL video: %s", SDL_GetError());
+    goto exit;
+  }
+#endif
 
+#ifdef USE_SDL2
   SDL_WindowFlags window_flags = SDL_WINDOW_SHOWN;
+#else
+  // No flags set
+  SDL_WindowFlags window_flags = 0;
+#endif
 
 #ifdef OPENGL_ENABLED
   if (cfg.graphics.opengl) {
@@ -410,7 +475,11 @@ int main(int argc, char *argv[]) {
   }
 #endif
 
+#ifdef USE_SDL2
   fe->window = SDL_CreateWindow("SMB Vanilla", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 256 * fe->video_scale, 240 * fe->video_scale, window_flags);
+#else
+  fe->window = SDL_CreateWindow("SMB Vanilla", 256 * fe->video_scale, 240 * fe->video_scale, window_flags);
+#endif
   if (!fe->window) {
     log_error("Could not create SDL window: %s", SDL_GetError());
     goto exit;
@@ -431,7 +500,11 @@ int main(int argc, char *argv[]) {
         log_error("Could not initialize OpenGL");
         free(fe->smb_gl);
         fe->smb_gl = 0;
+#ifdef USE_SDL2
         SDL_GL_DeleteContext(glcontext);
+#else
+        SDL_GL_DestroyContext(glcontext);
+#endif
         glcontext = 0;
       }
     }
@@ -461,7 +534,11 @@ int main(int argc, char *argv[]) {
   }
 
   if (fe->smb_raster) {
+#ifdef USE_SDL2
     fe->surf = SDL_CreateRGBSurface(0, 256, 240, 24, 0x0000FF, 0x00FF00, 0xFF0000, 0);
+#else
+    fe->surf = SDL_CreateSurface(256, 240, SDL_PIXELFORMAT_RGB24);
+#endif
     if (!fe->surf) {
       log_error("Could not create SDL surface: %s", SDL_GetError());
       goto exit;
@@ -608,7 +685,11 @@ exit:
     free(fe);
   }
   if (glcontext) {
+#ifdef USE_SDL2
     SDL_GL_DeleteContext(glcontext);
+#else
+    SDL_GL_DestroyContext(glcontext);
+#endif
   }
   SDL_Quit();
 
