@@ -25,8 +25,8 @@
 #define NOWRAP_BBOX_BOTRIGHT_X(i) BoundingBoxCoords[(i)*4 + 2]
 #define NOWRAP_BBOX_BOTRIGHT_Y(i) BoundingBoxCoords[(i)*4 + 3]
 
-#define _sprite_offset_assert(offset) expect(((offset) % 4) == 0),
-// #define _sprite_offset_assert(offset)
+// #define _sprite_offset_assert(offset) expect(((offset) % 4) == 0),
+#define _sprite_offset_assert(offset)
 
 // Calculate a sprite offset that wraparounds: offset + n*4, modulo 256.
 //

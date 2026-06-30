@@ -9,3 +9,6 @@ option('optimize_aggressively', type: 'boolean', value: false,
 
 option('thread_local_smbstate', type: 'boolean', value: false,
        description: 'Use a thread-local singleton for SMB_STATE. Note: setting to true does not make API thread-safe!')
+
+option('check_array_bounds', type: 'boolean', value: false,
+       description: 'Perform run-time bounds checking on arrays. Requires C++.')

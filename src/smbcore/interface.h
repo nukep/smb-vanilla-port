@@ -16,8 +16,8 @@ union ppureg {
 
 struct ppu_state {
   // internal regs
-  ppureg v;
-  ppureg t;
+  union ppureg v;
+  union ppureg t;
   u8 x;
   u8 w;
   u8 increment_mode;
@@ -36,7 +36,7 @@ struct SMB_state {
 
   struct SMB_callbacks callbacks;
   size_t smb2j_disk_offset;
-  ppu_state ppu;
+  struct ppu_state ppu;
 
   // Native pointers to ROM
   // (right now these are either null or point to somewhere in rammmem)
@@ -67,9 +67,18 @@ extern struct SMB_state *SMB_STATE;
 
 #define PatchCurrentPlayer (SMB_STATE->patch_current_player)
 
-#define SMB1_ONLY (SMB_STATE->which_game == GAME_SMB1)
-#define SMB2J_ONLY (SMB_STATE->which_game == GAME_SMB2J)
-#define SMB1_2J_SWITCH(smb1, smb2j) (SMB1_ONLY ? (smb1) : (smb2j))
+#ifdef SMB1_MODE
+#  define SMB1_ONLY (true)
+#  define SMB2J_ONLY (false)
+#  define SMB1_2J_SWITCH(smb1, smb2j) (smb1)
+#endif
+
+#ifdef SMB2J_MODE
+#  define SMB1_ONLY (false)
+#  define SMB2J_ONLY (true)
+#  define SMB1_2J_SWITCH(smb1, smb2j) (smb2j)
+#endif
+
 #define ssw SMB1_2J_SWITCH
 
 #define PPU_STATE (SMB_STATE->ppu)
@@ -241,14 +250,14 @@ static inline void joy1(struct SMB_buttons *buttons) {
   if (SMB_STATE->callbacks.joy1) {
     return SMB_STATE->callbacks.joy1(SMB_STATE->callbacks.userdata, buttons);
   } else {
-    *buttons = {0};
+    *buttons = (struct SMB_buttons){0};
   }
 }
 static inline void joy2(struct SMB_buttons *buttons) {
   if (SMB_STATE->callbacks.joy2) {
     return SMB_STATE->callbacks.joy2(SMB_STATE->callbacks.userdata, buttons);
   } else {
-    *buttons = {0};
+    *buttons = (struct SMB_buttons){0};
   }
 }
 

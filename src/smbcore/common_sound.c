@@ -1,4 +1,5 @@
-#include "consts.h"
+#include "ctx.h"
+
 
 // The sound engine for SMB1 for SMB2J are nearly identical, with the exception of SMB2J's Wind and Skid sfxs.
 // There's also the FDS alternate sound engine, but that's only used for SMB2J's ending (not included here).
@@ -15,7 +16,6 @@ static void PlayWindSfx(void);
 static void ContinueWindSfx(void);
 #endif
 
-static void SoundEngine(void);
 static void SkipSoundSubroutines(void);
 static void Dump_Squ1_Regs(u8 param_1,u8 param_2);
 static bool PlaySqu1Sfx(u8 param_1,u8 param_2,u8 param_3);
@@ -83,13 +83,6 @@ static struct_axy AlternateLengthHandler(u8 param_1);
 static struct_ay ProcessLengthData(u8 param_1);
 static struct_axy LoadControlRegs(void);
 static u8 LoadEnvelopeData(u8 param_1);
-
-
-// Alternate Sound Engine (smb2j)
-
-#ifdef SMB2J_MODE
-static void AlternateSoundEngine(void);
-#endif
 
 
 #define BIT(v, n) (((v) & (1 << n)) != 0)

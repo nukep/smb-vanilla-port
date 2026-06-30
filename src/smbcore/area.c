@@ -1,9 +1,5 @@
-#include "src/base.h"
-#include "src/smbcore/tiles.h"
-#include "types.h"
-#include "vars.h"
+#include "ctx.h"
 
-#include "area.h"
 
 #define NO_AVAIL_ENEMY_SLOT 5
 

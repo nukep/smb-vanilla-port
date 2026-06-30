@@ -1,19 +1,50 @@
 // The start of something magical! ✨
 
-#include "smbcore.h"
+#include "mario.h"
+#include "base.h"
+#include "interface.h"
+#include "vars.h"
 
 #include <string.h>
 
-extern "C" {
-void SMB1_Reset();
-void SMB1_NMI();
+void smb1_Reset(void);
+void smb1_NMI(void);
 
 bool smb2j_load_file(struct SMB_state *state, const char *name);
-void SMB2J_Reset();
-void SMB2J_NMI();
+void smb2j_Reset(void);
+void smb2j_NMI(void);
+
+void smb1_sync_data(void);
+void smb2j_sync_data(void);
+
+void smb1_set_world_and_level(u8 world, u8 level);
+void smb2j_set_world_and_level(u8 world, u8 level);
+
+
+struct sprite {
+  struct SMB_tile tile;
+  bool draw_behind;
+};
+
+static inline void transfer_sprite_data(struct sprite sprites[64], const u8 *data) {
+  for (int i = 0; i < 64; i++) {
+    sprites[i].tile.y = data[i * 4 + 0] + 1;
+    sprites[i].tile.tileidx = data[i * 4 + 1];
+    u8 attr = data[i * 4 + 2];
+    sprites[i].tile.x = data[i * 4 + 3];
+
+    sprites[i].tile.paletteidx = (attr & 0x03) + 4;
+    sprites[i].tile.flip_horz = (attr & 0x40) != 0;
+    sprites[i].tile.flip_vert = (attr & 0x80) != 0;
+
+    sprites[i].tile.extra_type = TILE_TYPE_SPRITE;
+    sprites[i].tile.extra_spriteidx = i;
+
+    sprites[i].draw_behind = (attr & 0x20) != 0;
+  }
 }
 
-#include "smbcommon.h"
+static void draw_graphics(const struct sprite sprites[64]);
 
 #ifdef THREAD_LOCAL_SMBSTATE
 thread_local struct SMB_state *SMB_STATE;
@@ -32,7 +63,7 @@ static bool load_smb1(struct SMB_state *state, size_t prg_offset, size_t chr_off
 }
 
 
-struct FdsFile {
+struct fds_file {
   const char *name;
   size_t file_offset;
   u16 size;
@@ -47,7 +78,7 @@ struct FdsFile {
 
 // hard-code some offsets for now
 // the offsets are relative to after the 16-byte FDS header
-static FdsFile SMB2J_FDS_FILES[SMB2J_FDS_FILES_COUNT] = {
+static struct fds_file SMB2J_FDS_FILES[SMB2J_FDS_FILES_COUNT] = {
   {"SM2CHAR1", 0x013C, 0x2000, 0x0000, TYPE_CHRRAM},
   {"SM2CHAR2", 0x214D, 0x0040, 0x0760, TYPE_CHRRAM},
   {"SM2MAIN ", 0x219E, 0x8000, 0x6000, TYPE_PRGRAM},
@@ -66,22 +97,22 @@ bool smb2j_load_file(struct SMB_state *state, const char *name) {
   }
 
   for (int i = 0; i < SMB2J_FDS_FILES_COUNT; i++) {
-    const FdsFile &a = SMB2J_FDS_FILES[i];
-    bool eq = strncmp(name, a.name, 8) == 0;
+    const struct fds_file *a = &SMB2J_FDS_FILES[i];
+    bool eq = strncmp(name, a->name, 8) == 0;
     if (eq) {
       // Found it!
       u8 *copy_to;
-      if (a.type == TYPE_CHRRAM) {
+      if (a->type == TYPE_CHRRAM) {
         // Copy the bytes over to CHRRAM
-        copy_to = state->chrrom + a.org;
-      } else if (a.type == TYPE_PRGRAM) {
+        copy_to = state->chrrom + a->org;
+      } else if (a->type == TYPE_PRGRAM) {
         // Copy the bytes over to RAM
-        copy_to = state->rammem + a.org;
+        copy_to = state->rammem + a->org;
       }
-      if (!seek_rom(state, state->smb2j_disk_offset + a.file_offset)) { return false; }
-      if (!read_rom_bytes(state, copy_to, a.size)) { return false; }
+      if (!seek_rom(state, state->smb2j_disk_offset + a->file_offset)) { return false; }
+      if (!read_rom_bytes(state, copy_to, a->size)) { return false; }
 
-      if (a.type == TYPE_CHRRAM) {
+      if (a->type == TYPE_CHRRAM) {
         update_pattern_tables(state);
       }
 
@@ -168,33 +199,55 @@ void SMB_ram_finishwrite(struct SMB_state *state) {
   // Set a global variable while accessing the RAM values
   SMB_STATE = state;
 
-  sync_data();
+  if (state->which_game == GAME_SMB1) {
+    smb1_sync_data();
+  }
+  if (state->which_game == GAME_SMB2J) {
+    smb2j_sync_data();
+  }
 }
 
 void SMB_tick(struct SMB_state *state) {
   // Set a global variable while it's being ticked
   SMB_STATE = state;
+
+  struct sprite sprites[64];
+
   if (state->which_game == GAME_SMB1) {
     if (!state->reset_occurred) {
-      SMB1_Reset();
-      SMB1_NMI();
-      set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
+      smb1_Reset();
+    }
+
+    // The NES wrote to OAM registers to initiate copying sprites
+    // $2003 = 0
+    // $4014 = 2
+    transfer_sprite_data(&sprites[0], &Sprite_Data[0]);
+    smb1_NMI();
+
+    if (!state->reset_occurred) {
+      smb1_set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
-    } else {
-      SMB1_NMI();
     }
   }
+
   if (state->which_game == GAME_SMB2J) {
     if (!state->reset_occurred) {
-      SMB2J_Reset();
-      SMB2J_NMI();
-      // this hack doesn't work for smb2j
-      //set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
+      smb2j_Reset();
+    }
+
+    // The NES wrote to OAM registers to initiate copying sprites
+    // $2003 = 0
+    // $4014 = 2
+    transfer_sprite_data(&sprites[0], &Sprite_Data[0]);
+    smb2j_NMI();
+
+    if (!state->reset_occurred) {
+      smb2j_set_world_and_level(state->start_on_world - 1, state->start_on_level - 1);
       state->reset_occurred = true;
-    } else {
-      SMB2J_NMI();
     }
   }
+
+  draw_graphics(&sprites[0]);
 }
 
 static inline void draw_nametable_tile(int x, int y, u16 ppu_offset, int tilex,

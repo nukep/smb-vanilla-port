@@ -2,38 +2,41 @@
 
 #include "structs.h"
 
-void smb1_jumptable_GameOverMode(u8 param_1);
-#define jumptable_GameOverMode smb1_jumptable_GameOverMode
+void smb1_Reset(void);
+#define Reset smb1_Reset
 
-void smb1_jumptable_AreaParserTasks(u8 param_1);
-#define jumptable_AreaParserTasks smb1_jumptable_AreaParserTasks
+void smb1_NMI(void);
+#define NMI smb1_NMI
 
-void smb1_jumptable_AreaStyleObject(u8 param_1,u8 param_2);
-#define jumptable_AreaStyleObject smb1_jumptable_AreaStyleObject
+bool smb1_TransposePlayers(void);
+#define TransposePlayers smb1_TransposePlayers
 
-void smb1_jumptable_GameRoutines(u8 param_1);
-#define jumptable_GameRoutines smb1_jumptable_GameRoutines
+void smb1_sync_data(void);
+#define sync_data smb1_sync_data
 
-void smb1_jumptable_PlayerMovementSubs(u8 param_1);
-#define jumptable_PlayerMovementSubs smb1_jumptable_PlayerMovementSubs
+void smb1_set_world_and_level(u8 world, u8 level);
+#define set_world_and_level smb1_set_world_and_level
 
-void smb1_jumptable_CheckpointEnemyID(u8 param_1,u8 param_2);
-#define jumptable_CheckpointEnemyID smb1_jumptable_CheckpointEnemyID
+void smb1_InitializeMemory(u8 i);
+#define InitializeMemory smb1_InitializeMemory
 
-void smb1_jumptable_InitEnemyFrenzy(u8 param_1,u8 param_2);
-#define jumptable_InitEnemyFrenzy smb1_jumptable_InitEnemyFrenzy
+void smb1_dectimers(void);
+#define dectimers smb1_dectimers
 
-u8 smb1_jumptable_RunEnemyObjectsCore(u8 param_1,u8 param_2);
-#define jumptable_RunEnemyObjectsCore smb1_jumptable_RunEnemyObjectsCore
+void smb1_update_screen(const u8 *buf, const u16 buf_length);
+#define update_screen smb1_update_screen
 
-u8 smb1_jumptable_EnemyMovementSubs(u8 param_1,u8 param_2);
-#define jumptable_EnemyMovementSubs smb1_jumptable_EnemyMovementSubs
+void smb1_WriteNTAddr(u8 ppu_page);
+#define WriteNTAddr smb1_WriteNTAddr
 
-u8 smb1_jumptable_LargePlatformSubroutines(u8 param_1,u8 param_2);
-#define jumptable_LargePlatformSubroutines smb1_jumptable_LargePlatformSubroutines
+void smb1_ReadJoypads(void);
+#define ReadJoypads smb1_ReadJoypads
 
-u8 smb1_jumptable_RunStarFlagObj(u8 param_1,u8 param_2);
-#define jumptable_RunStarFlagObj smb1_jumptable_RunStarFlagObj
+void smb1_ReadPortBits(u8 joynum);
+#define ReadPortBits smb1_ReadPortBits
+
+void smb1_update_prng(u8 *prng);
+#define update_prng smb1_update_prng
 
 void smb1_PauseRoutine(void);
 #define PauseRoutine smb1_PauseRoutine
@@ -311,9 +314,6 @@ void smb1_BubbleCheck(u8 param_1);
 void smb1_SetupBubble_buggy(u8 param_1,u8 param_2);
 #define SetupBubble_buggy smb1_SetupBubble_buggy
 
-void smb1_MoveBubl(u8 param_1,u8 param_2);
-#define MoveBubl smb1_MoveBubl
-
 void smb1_RunGameTimer(void);
 #define RunGameTimer smb1_RunGameTimer
 
@@ -371,7 +371,7 @@ void smb1_SetupPowerUp(u8 param_1);
 void smb1_PwrUpJmp(void);
 #define PwrUpJmp smb1_PwrUpJmp
 
-void smb1_PowerUpObjHandler(void);
+void smb1_PowerUpObjHandler(u8 objoff);
 #define PowerUpObjHandler smb1_PowerUpObjHandler
 
 void smb1_PlayerHeadCollision(u8 param_1,u16 mt_x, u16 mt_y);
@@ -1106,5 +1106,20 @@ u8 smb1_GetXOffscreenBits(u8 param_1);
 u8 smb1_GetYOffscreenBits(u8 param_1);
 #define GetYOffscreenBits smb1_GetYOffscreenBits
 
-u8 smb1_DividePDiff(u8 param_1,u8 param_2,bool param_3,u8 param_4,u8 param_5);
-#define DividePDiff smb1_DividePDiff
+
+// area
+
+void smb1_AreaParserTaskHandler(void);
+#define AreaParserTaskHandler smb1_AreaParserTaskHandler
+
+void smb1_LoadAreaPointer(void);
+#define LoadAreaPointer smb1_LoadAreaPointer
+
+void smb1_GetAreaDataAddrs(void);
+#define GetAreaDataAddrs smb1_GetAreaDataAddrs
+
+
+// sound
+
+void smb1_SoundEngine(void);
+#define SoundEngine smb1_SoundEngine

@@ -34,7 +34,7 @@ TODO: Expand on this section.
 Right now, contributers are NOT expected to perform regression testing. This will change in the future.
 All changes will be regression-tested by the maintainer.
 
-This project builds a `smb_testrunner` executable. As of writing, the project maintainer has a bespoke setup for this, so it's not fully documented yet. He currently validates by testing against several TAS and non-TAS gameplays. Movies (per-frame button and RAM dumps) are created with FCEUX using the `fceux_movie_dump.lua` script. The movie files are rather large, so they're not committed to this repo.
+This project builds a `smbvanilla_testrunner` executable. As of writing, the project maintainer has a bespoke setup for this, so it's not fully documented yet. He currently validates by testing against several TAS and non-TAS gameplays. Movies (per-frame button and RAM dumps) are created with FCEUX using the `fceux_movie_dump.lua` script. The movie files are rather large, so they're not committed to this repo.
 
 
 ## Refactoring

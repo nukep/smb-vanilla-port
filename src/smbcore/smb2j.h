@@ -2,53 +2,55 @@
 
 #include "structs.h"
 
+bool smb2j_load_file(struct SMB_state *state, const char *name);
+
+struct_ayz smb2j_LoadFiles(void);
+#define LoadFiles smb2j_LoadFiles
+
+void smb2j_IRQHandler(void);
+#define IRQHandler smb2j_IRQHandler
+
+void smb2j_ScrollScreen(u8 scroll_amount);
+#define ScrollScreen smb2j_ScrollScreen
+
+void smb2j_UpdateGamesBeaten(void);
+#define UpdateGamesBeaten smb2j_UpdateGamesBeaten
+
+void smb2j_Reset(void);
+#define Reset smb2j_Reset
+
+void smb2j_NMI(void);
+#define NMI smb2j_NMI
+
+void smb2j_sync_data(void);
+#define sync_data smb2j_sync_data
+
+void smb2j_set_world_and_level(u8 world, u8 level);
+#define set_world_and_level smb2j_set_world_and_level
+
+void smb2j_InitializeMemory(u8 i);
+#define InitializeMemory smb2j_InitializeMemory
+
+void smb2j_dectimers(void);
+#define dectimers smb2j_dectimers
+
+void smb2j_update_screen(const u8 *buf, const u16 buf_length);
+#define update_screen smb2j_update_screen
+
+void smb2j_WriteNTAddr(u8 ppu_page);
+#define WriteNTAddr smb2j_WriteNTAddr
+
+void smb2j_ReadJoypads(void);
+#define ReadJoypads smb2j_ReadJoypads
+
+void smb2j_ReadPortBits(u8 joynum);
+#define ReadPortBits smb2j_ReadPortBits
+
+void smb2j_update_prng(u8 *prng);
+#define update_prng smb2j_update_prng
+
 void smb2j_jumptable_VictoryModeSubroutines_forW8(u8 param_1);
 #define jumptable_VictoryModeSubroutines_forW8 smb2j_jumptable_VictoryModeSubroutines_forW8
-
-void smb2j_jumptable_GameOverMode(u8 param_1);
-#define jumptable_GameOverMode smb2j_jumptable_GameOverMode
-
-void smb2j_jumptable_AreaParserTasks(u8 param_1);
-#define jumptable_AreaParserTasks smb2j_jumptable_AreaParserTasks
-
-void smb2j_jumptable_AreaStyleObject(u8 param_1,u8 param_2);
-#define jumptable_AreaStyleObject smb2j_jumptable_AreaStyleObject
-
-void smb2j_jumptable_GameRoutines(u8 param_1);
-#define jumptable_GameRoutines smb2j_jumptable_GameRoutines
-
-void smb2j_jumptable_PlayerMovementSubs(u8 param_1);
-#define jumptable_PlayerMovementSubs smb2j_jumptable_PlayerMovementSubs
-
-void smb2j_jumptable_CheckpointEnemyID(u8 param_1,u8 param_2);
-#define jumptable_CheckpointEnemyID smb2j_jumptable_CheckpointEnemyID
-
-void smb2j_jumptable_InitEnemyFrenzy(u8 param_1,u8 param_2);
-#define jumptable_InitEnemyFrenzy smb2j_jumptable_InitEnemyFrenzy
-
-u8 smb2j_jumptable_RunEnemyObjectsCore(u8 param_1,u8 param_2);
-#define jumptable_RunEnemyObjectsCore smb2j_jumptable_RunEnemyObjectsCore
-
-u8 smb2j_jumptable_EnemyMovementSubs(u8 param_1,u8 param_2);
-#define jumptable_EnemyMovementSubs smb2j_jumptable_EnemyMovementSubs
-
-u8 smb2j_jumptable_LargePlatformSubroutines(u8 param_1,u8 param_2);
-#define jumptable_LargePlatformSubroutines smb2j_jumptable_LargePlatformSubroutines
-
-u8 smb2j_jumptable_RunStarFlagObj(u8 param_1,u8 param_2);
-#define jumptable_RunStarFlagObj smb2j_jumptable_RunStarFlagObj
-
-void smb2j_jumptable_HardWorldsCheckpoint(u8 param_1);
-#define jumptable_HardWorldsCheckpoint smb2j_jumptable_HardWorldsCheckpoint
-
-void smb2j_jumptable_AttractModeDiskRoutines(u8 param_1);
-#define jumptable_AttractModeDiskRoutines smb2j_jumptable_AttractModeDiskRoutines
-
-void smb2j_jumptable_GameModeDiskRoutines(u8 param_1);
-#define jumptable_GameModeDiskRoutines smb2j_jumptable_GameModeDiskRoutines
-
-void smb2j_jumptable_VictoryModeDiskRoutines(u8 param_1);
-#define jumptable_VictoryModeDiskRoutines smb2j_jumptable_VictoryModeDiskRoutines
 
 void smb2j_PauseRoutine(void);
 #define PauseRoutine smb2j_PauseRoutine
@@ -115,9 +117,6 @@ void smb2j_DisplayIntermediate(void);
 
 void smb2j_WriteGameText(u8 param_1);
 #define WriteGameText smb2j_WriteGameText
-
-void smb2j_ResetScreenTimer(void);
-#define ResetScreenTimer smb2j_ResetScreenTimer
 
 void smb2j_ColorRotation(void);
 #define ColorRotation smb2j_ColorRotation
@@ -311,9 +310,6 @@ void smb2j_BubbleCheck(u8 param_1);
 void smb2j_SetupBubble_buggy(u8 param_1,u8 param_2);
 #define SetupBubble_buggy smb2j_SetupBubble_buggy
 
-void smb2j_MoveBubl(u8 param_1,u8 param_2);
-#define MoveBubl smb2j_MoveBubl
-
 void smb2j_RunGameTimer(void);
 #define RunGameTimer smb2j_RunGameTimer
 
@@ -371,7 +367,7 @@ void smb2j_SetupPowerUp(u8 param_1);
 void smb2j_PwrUpJmp(void);
 #define PwrUpJmp smb2j_PwrUpJmp
 
-void smb2j_PowerUpObjHandler(void);
+void smb2j_PowerUpObjHandler(u8 objoff);
 #define PowerUpObjHandler smb2j_PowerUpObjHandler
 
 void smb2j_PlayerHeadCollision(u8 param_1,u16 mt_x, u16 mt_y);
@@ -1112,9 +1108,6 @@ u8 smb2j_GetXOffscreenBits(u8 param_1);
 u8 smb2j_GetYOffscreenBits(u8 param_1);
 #define GetYOffscreenBits smb2j_GetYOffscreenBits
 
-u8 smb2j_DividePDiff(u8 param_1,u8 param_2,bool param_3,u8 param_4,u8 param_5);
-#define DividePDiff smb2j_DividePDiff
-
 void smb2j_TitleScreenMode(void);
 #define TitleScreenMode smb2j_TitleScreenMode
 
@@ -1231,3 +1224,27 @@ void smb2j_MushroomRetainersForW8(void);
 
 void smb2j_WriteNameToVictoryMsg(void);
 #define WriteNameToVictoryMsg smb2j_WriteNameToVictoryMsg
+
+
+// area
+
+void smb2j_AreaParserTaskHandler(void);
+#define AreaParserTaskHandler smb2j_AreaParserTaskHandler
+
+void smb2j_LoadAreaPointer(void);
+#define LoadAreaPointer smb2j_LoadAreaPointer
+
+void smb2j_GetAreaDataAddrs(void);
+#define GetAreaDataAddrs smb2j_GetAreaDataAddrs
+
+void smb2j_AltHard_GetAreaDataAddrs(void);
+#define AltHard_GetAreaDataAddrs smb2j_AltHard_GetAreaDataAddrs
+
+
+// sound
+
+void smb2j_SoundEngine(void);
+#define SoundEngine smb2j_SoundEngine
+
+void smb2j_AlternateSoundEngine(void);
+#define AlternateSoundEngine smb2j_AlternateSoundEngine
