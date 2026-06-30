@@ -96,3 +96,17 @@ This port replaces increments of these variables with explicit assignments, to m
 e.g. Instead of `OperMode_Task += 1`, we might have `OperMode_Task = OMT_GAMEOVER_RUNGAMEOVER`.
 
 To do this, the assignment usually has to happen at the caller or the caller's caller.
+
+
+## Compile-time modes for SMB1 and SMB2J
+
+Early on, I had hoped that differences in behavior between SMB1 and SMB2J could be configured at runtime.
+Later on, as the complexity became evident, I settled on compile-time with `#ifdef SMB1_MODE` and `#ifdef SMB2J_MODE`.
+
+There are jumptables and enumerations that have different values for SMB1 and SMB2J (e.g. area parsing).
+As these are tied into the functions that use them, it makes less sense to have a mix of both
+run-time and compile-time switches for SMB1 and SMB2J.
+
+Right now I want to keep the literal enumation values equivalent to the original respective games,
+and to not abstract them or create indirection to the "real" values.
+

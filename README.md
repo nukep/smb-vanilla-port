@@ -11,11 +11,11 @@ Progress made:
 - [x] Super Mario Bros runs, is beatable
 - [x] Super Mario Bros 2J (Lost Levels) runs, is beatable
 - [x] Audio for SMB1 and (excluding the ending) SMB2J
+- [x] Get the core games compiling in C only (to make sure it's portable to older and embedded systems)
 - [ ] Refactor of Ghidra-produced code (in progress)
 - [ ] Audio for SMB2J ending (uses 2C33 audio chip)
 - [ ] Unit and regression tests
 - [ ] A decent UI/UX, customizable controls
-- [ ] Get the core games compiling in C only (to make sure it's portable to older and embedded systems)
 
 
 ## Running the game

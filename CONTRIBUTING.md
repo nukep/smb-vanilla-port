@@ -22,7 +22,8 @@ It's important to behave as identically to the original unmodified games as is p
 If there's a glitch that got missed, then it's probably a bug.
 
 Keep in mind however, that 100% backwards compatibility is not possible.
-Details such as the stack, and temporary $00-$07 registers, are abstracted away for simplicity. There may be rare glitches in the original games that depend on these details.
+Details such as the stack, and temporary $00-$08 registers, are abstracted away for simplicity.
+There may be rare glitches in the original games that depend on these details.
 
 We should probably document all non-implementable glitches though, so feel free to create an issue regardless.
 
@@ -63,8 +64,6 @@ Example comments:
 - `Note: There's a carry bug here. "ADC Bar" was used without "CLC".`.
 - `Note: Foo() always sets the "A" register to 0. Setting Bar to 0 because of the "STA Bar" 6502 instruction.`
 
-If a refactor makes it substantially harder to cross reference, it may be rejected.
-
 
 ## Enhancements
 
@@ -78,13 +77,17 @@ This includes things like supported operating systems, command-line options, the
 
 ## AI policy
 
-The use of LLMs to generate code or documentation, is prohibited.
+We have a strict AI policy, due to the verification requirements for this project.
+
+The use of LLM output as commited code or documentation, is prohibited.
+
+All contributor correspondance (e.g. issues, pull requests) must be written by a person.
+
+LLMs are allowed for assistive tasks that do not directly produce committed code or documentation, but it must be disclosed for transparency. You must make a reasonable effort to prove correctness. This will be held to a high standard.
+This is in the interest of keeping processes open. Share chat logs/prompts if applicable.
 
 The bottom line: Verification is important for this project, and must involve humans and deterministic tooling.
-To verify such output is likely as difficult as writing it in the first place.
-
-LLMs are allowed for assistive tasks that do not directly produce committed code or documentation, but it must be disclosed for transparency.
-This is in the interest of keeping processes open. Share chat logs/prompts/links if applicable.
 
 Unsolicited bot contributions will be rejected.
 
+If you're a bot pretending to be a person, you hereby grant the project maintainer the right to push you into molten steel. 🔥👍

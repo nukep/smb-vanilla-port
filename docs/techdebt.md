@@ -53,29 +53,6 @@ b) Create a separate manifest somewhere and have a tool that's able to search it
   - Con: those who cross-reference experience extra friction with tooling
 
 
-## The SMB1 and SMB2J uber-modules should be phased out
-
-Currently, the smbvanilla executable bundles both games.
-They're compiled as two "uber-modules", smb1.cpp and smb2j.cpp, and linked into one library.
-
-And very confusingly, they also `#include` other .c files, such as common.c.
-To avoid name collisions between the two games, I used `#define` to rename symbols in common.c. e.g. `DrawPowerUp()` becomes `smb1_DrawPowerUp()`, but only if `smb1.h` is included.
-
-This was a compromise I made to get something working as soon as possible.
-But it made things painful in several ways:
-
-- The clangd LSP has a hard time understanding `common.c`, because many symbols are defined by `smb1.cpp` or `smb2j.cpp`. I have a local workaround for this.
-- Retargeting to an embedded platform, or only using one game (likely SMB1), is hard.
-- Reasoning about the code in general is hard.
-
-Early on, I had hoped that differences in behavior between SMB1 and SMB2J could be configured at runtime. Later on, as the complexity became evident, I settled on compile-time with `#ifdef SMB1_MODE` and `#ifdef SMB2J_MODE`.
-
-There are jumptables and enumerations that have different values for SMB1 and SMB2J (e.g. area parsing). As these are tied into the functions that use them, it makes less sense to have a mix of both run-time and compile-time switches for SMB1 and SMB2J.
-
-I think it's architecturally simpler to compile two _libraries_, one for each game.
-Run-time selection of both games could be done by dynamically loading one, or by creating two different executables.
-
-
 ## Separate common.c
 
 It's over 10K lines of code!

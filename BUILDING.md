@@ -8,6 +8,16 @@ SDL3 is preferred. If SDL3 is missing, then SDL2 will be used.
 
 If GLEW is missing, the project will be built without OpenGL support.
 
+## Check out this project, submodules
+
+Using git:
+
+```
+git clone https://github.com/nukep/smb-vanilla-port.git
+git submodule update --init --recursive
+```
+
+
 ## Rocky Linux 10
 
 Install Meson, using `pip install meson` or `sudo dnf install meson`.
