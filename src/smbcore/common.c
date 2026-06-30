@@ -42,7 +42,7 @@ void set_world_and_level(u8 world, u8 level) {
 // e.g. if i=0x14, then clear up to $0714 inclusive.
 // Doesn't set the stack, between $0160 and $01FF inclusive.
 // On SMB2J, doesn't set $0100 to $0108 inclusive.
-// Note that this port, which doesn't target the 6502, doesn't use the stack at $0160-$1FFF at all.
+// Note that this port, which doesn't target the 6502, doesn't use the stack at $0160-$01FF at all.
 //
 // SMB:90cc
 // SM2MAIN:6f08
@@ -62,6 +62,78 @@ void InitializeMemory(u8 i) {
 
   // Note: the original sets register "A" to 0. some callers use it.
 }
+
+
+static inline void initialize_sound_memory(void) {
+  // Original is this, where SoundMemory = $07B0:
+  // for (int i = 0; i < 0x20; i++) {
+  //   SoundMemory[i] = 0;
+  // }
+  //
+  // This doesn't assign zero to the gaps, but those gap addresses are unused anyway
+
+  MusicOffset_Noise     = 0;
+  EventMusicBuffer      = 0;
+  PauseSoundBuffer      = 0;
+  Squ2_NoteLenBuffer    = 0;
+  Squ2_NoteLenCounter   = 0;
+  Squ2_EnvelopeDataCtrl = 0;
+  Squ1_NoteLenCounter   = 0;
+  Squ1_EnvelopeDataCtrl = 0;
+  Tri_NoteLenBuffer     = 0;
+  Tri_NoteLenCounter    = 0;
+  Noise_BeatLenCounter  = 0;
+  Squ1_SfxLenCounter    = 0;
+  Squ2_SfxLenCounter    = 0;
+  Sfx_SecondaryCounter  = 0;
+  Noise_SfxLenCounter   = 0;
+  DAC_Counter           = 0;
+  NoiseDataLoopbackOfs  = 0;
+  NoteLengthTblAdder    = 0;
+  AreaMusicBuffer_Alt   = 0;
+  PauseModeFlag         = 0;
+  GroundMusicHeaderOfs  = 0;
+  AltRegContentFlag     = 0;
+}
+
+
+static inline void initialize_timers(void) {
+  // Original is this, where Timers = $0780:
+  // for (int i = 0; i < 34; i++) {
+  //   Timers[i] = 0;
+  // }
+  //
+  // This doesn't assign zero to the gaps, but those gap addresses are unused anyway
+
+  SelectTimer                      = 0;
+  PlayerAnimTimer                  = 0;
+  JumpSwimTimer                    = 0;
+  RunningTimer                     = 0;
+  BlockBounceTimer                 = 0;
+  SideCollisionTimer               = 0;
+  JumpspringTimer                  = 0;
+  GameTimerCtrlTimer               = 0;
+  ClimbSideTimer                   = 0;
+  for (int i = 0; i < 5; i++) {
+    EnemyFrameTimer[i] = 0;
+  }
+  FrenzyEnemyTimer                 = 0;
+  BowserFireBreathTimer            = 0;
+  StompTimer                       = 0;
+  AirBubbleTimer                   = 0;
+  UnusedTimer1                     = 0;
+  UnusedTimer2                     = 0;
+  ScrollIntervalTimer              = 0;
+  for (int i = 0; i < 7; i++) {
+    EnemyIntervalTimer[i] = 0;
+  }
+  BrickCoinTimer                   = 0;
+  InjuryTimer                      = 0;
+  StarInvincibleTimer              = 0;
+  ScreenTimer                      = 0;
+  WorldEndTimer                    = 0;
+}
+
 
 void dectimers(void) {
 
@@ -1593,9 +1665,7 @@ void InitializeGame(void) {
 #endif
 
   InitializeMemory(0x6f);
-  for (int i = 0; i < 0x20; i++) {
-    SoundMemory[i] = 0;
-  }
+  initialize_sound_memory();
   DemoTimer = 0x18;
   LoadAreaPointer();
   InitializeArea();
@@ -1607,9 +1677,7 @@ void InitializeGame(void) {
 // Signature: [] -> []
 void InitializeArea(void) {
   InitializeMemory(0x4b);
-  for (int i = 0; i < 34; i++) {
-    Timers[i] = 0;
-  }
+  initialize_timers();
   ScreenLeft_PageLoc = HalfwayPage;
   if (AltEntranceControl != 0) {
     ScreenLeft_PageLoc = EntrancePage;

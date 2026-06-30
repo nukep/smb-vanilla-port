@@ -26,7 +26,6 @@
 
 
 /* common ----------------------- */
-// #define ObjectOffset                     RAM(0x0008)
 #define FrameCounter                     RAM(0x0009)
 #define A_B_Buttons                      RAM(0x000A)
 #define Up_Down_Buttons                  RAM(0x000B)
@@ -117,11 +116,7 @@
 #define Misc_Y_Position                  (SprObject_Y_Position + 13)
 #define Bubble_Y_Position                (SprObject_Y_Position + 22)
 
-// $EB to $EF are treated as temporary registers.
-// $EE is never used, but it's in that range.
-// #define rEB                              RAM(0x00EB)
-// #define rEC                              RAM(0x00EC)
-// #define rED                              RAM(0x00ED)
+// rEF is a temporary variable, but is used in Setup_Vine due to a glitch
 #define rEF                              RAM(0x00EF)
 
 #define NoteLenLookupTblOfs              RAM(0x00F0)
@@ -151,8 +146,6 @@
 
 #define DigitModifier_Minus1             RAMARRAY(0x0133, 7)
 #define DigitModifier                    (DigitModifier_Minus1 + 1)
-
-//#define TheStack                         RAMARRAY(0x0160, (0x200 - 0x160))
 
 #define Sprite_Data                      RAMARRAY(0x0200, 0x100)
 
@@ -234,7 +227,6 @@
 #define Block_PageLoc2                   RAMARRAY(0x03EA, 2)
 #define Block_RepFlag                    RAMARRAY(0x03EC, 2)
 #define BlockOffsetToggle                RAM(0x03EE) // Called SprDataOffset_Ctrl in doppelganger disasm
-#define BLockOffsetToggle2               dd
 #define Block_ResidualCounter            RAM(0x03F0)
 #define Block_Orig_XPos                  RAMARRAY(0x03F1, 2)
 #define AttributeBuffer                  RAMARRAY(0x03F9, 7)
@@ -293,8 +285,6 @@
 #define BoundingBoxCoords                RAMARRAY(0x04AC, 21*4)
 
 #define Block_Buffers                    RAMARRAY(0x0500, 0x1A0)
-// #define Block_Buffer_1                   RAMARRAY(0x0500, 0xD0)
-// #define Block_Buffer_2                   RAMARRAY(0x05D0, 0xD0)
 
 #define BlockBufferColumnPos             RAM(0x06A0)
 #define MetatileBuffer                   RAMARRAY(0x06A1, 13)       // note: this overflows rarely. but MetatileBuffer[13] is accessed in World 4-3 in this TAS: https://tasvideos.org/6913S
@@ -382,7 +372,6 @@
 #define AreaObjectLength                 RAMARRAY(0x0730, 3)
 #define AreaStyle                        RAM(0x0733)
 #define StaircaseControl                 RAM(0x0734)
-// #define AreaObjectHeight                 RAM(0x0735)
 #define MushroomLedgeHalfLen             RAMARRAY(0x0736, 3)
 #define EnemyDataOffset                  RAM(0x0739)
 #define EnemyObjectPageLoc               RAM(0x073A)
@@ -435,58 +424,56 @@
 #define Mirror_PPU_CTRL_REG2             RAM(0x0779)
 #define IntervalTimerControl             RAM(0x077F)
 
-#define Timers                           RAMARRAY(0x0780, 36)
-#define SelectTimer                      Timers[0]
-#define PlayerAnimTimer                  Timers[1]
-#define JumpSwimTimer                    Timers[2]
-#define RunningTimer                     Timers[3]
-#define BlockBounceTimer                 Timers[4]
-#define SideCollisionTimer               Timers[5]
-#define JumpspringTimer                  Timers[6]
-#define GameTimerCtrlTimer               Timers[7]
-#define ClimbSideTimer                   Timers[9]
-#define EnemyFrameTimer                  (Timers + 10)      // note: this subarray has a length of 6
+#define SelectTimer                      RAM(0x780)
+#define PlayerAnimTimer                  RAM(0x781)
+#define JumpSwimTimer                    RAM(0x782)
+#define RunningTimer                     RAM(0x783)
+#define BlockBounceTimer                 RAM(0x784)
+#define SideCollisionTimer               RAM(0x785)
+#define JumpspringTimer                  RAM(0x786)
+#define GameTimerCtrlTimer               RAM(0x787)
+#define ClimbSideTimer                   RAM(0x789)
+#define EnemyFrameTimer                  RAMARRAY(0x78A, 6)
 #define FrenzyEnemyTimer                 EnemyFrameTimer[5]
-#define BowserFireBreathTimer            Timers[16]
-#define StompTimer                       Timers[17]
-#define AirBubbleTimer                   Timers[18]
-#define UnusedTimer1                     Timers[19]
-#define UnusedTimer2                     Timers[20]
-#define ScrollIntervalTimer              Timers[21]
-#define EnemyIntervalTimer               (Timers + 22)      // note: this subarray has a length of 7
-#define BrickCoinTimer                   Timers[29]
-#define InjuryTimer                      Timers[30]
-#define StarInvincibleTimer              Timers[31]
-#define ScreenTimer                      Timers[32]
-#define WorldEndTimer                    Timers[33]
-#define DemoTimer                        Timers[34]
-#define UnusedTimer3                     Timers[35]
+#define BowserFireBreathTimer            RAM(0x790)
+#define StompTimer                       RAM(0x791)
+#define AirBubbleTimer                   RAM(0x792)
+#define UnusedTimer1                     RAM(0x793)
+#define UnusedTimer2                     RAM(0x794)
+#define ScrollIntervalTimer              RAM(0x795)
+#define EnemyIntervalTimer               RAMARRAY(0x796, 7)
+#define BrickCoinTimer                   RAM(0x79D)
+#define InjuryTimer                      RAM(0x79E)
+#define StarInvincibleTimer              RAM(0x79F)
+#define ScreenTimer                      RAM(0x7A0)
+#define WorldEndTimer                    RAM(0x7A1)
+#define DemoTimer                        RAM(0x7A2)
+#define UnusedTimer3                     RAM(0x7A3)
 
 #define PseudoRandomBitReg               RAMARRAY(0x07A7, 7)
 
-#define SoundMemory                      RAMARRAY(0x07B0, 0x20)
-#define MusicOffset_Noise                SoundMemory[0x00]
-#define EventMusicBuffer                 SoundMemory[0x01]
-#define PauseSoundBuffer                 SoundMemory[0x02]
-#define Squ2_NoteLenBuffer               SoundMemory[0x03]
-#define Squ2_NoteLenCounter              SoundMemory[0x04]
-#define Squ2_EnvelopeDataCtrl            SoundMemory[0x05]
-#define Squ1_NoteLenCounter              SoundMemory[0x06]
-#define Squ1_EnvelopeDataCtrl            SoundMemory[0x07]
-#define Tri_NoteLenBuffer                SoundMemory[0x08]
-#define Tri_NoteLenCounter               SoundMemory[0x09]
-#define Noise_BeatLenCounter             SoundMemory[0x0A]
-#define Squ1_SfxLenCounter               SoundMemory[0x0B]
-#define Squ2_SfxLenCounter               SoundMemory[0x0D]
-#define Sfx_SecondaryCounter             SoundMemory[0x0E]
-#define Noise_SfxLenCounter              SoundMemory[0x0F]
-#define DAC_Counter                      SoundMemory[0x10]
-#define NoiseDataLoopbackOfs             SoundMemory[0x11]
-#define NoteLengthTblAdder               SoundMemory[0x14]
-#define AreaMusicBuffer_Alt              SoundMemory[0x15]
-#define PauseModeFlag                    SoundMemory[0x16]
-#define GroundMusicHeaderOfs             SoundMemory[0x17]
-#define AltRegContentFlag                SoundMemory[0x1A]
+#define MusicOffset_Noise                RAM(0x7B0)
+#define EventMusicBuffer                 RAM(0x7B1)
+#define PauseSoundBuffer                 RAM(0x7B2)
+#define Squ2_NoteLenBuffer               RAM(0x7B3)
+#define Squ2_NoteLenCounter              RAM(0x7B4)
+#define Squ2_EnvelopeDataCtrl            RAM(0x7B5)
+#define Squ1_NoteLenCounter              RAM(0x7B6)
+#define Squ1_EnvelopeDataCtrl            RAM(0x7B7)
+#define Tri_NoteLenBuffer                RAM(0x7B8)
+#define Tri_NoteLenCounter               RAM(0x7B9)
+#define Noise_BeatLenCounter             RAM(0x7BA)
+#define Squ1_SfxLenCounter               RAM(0x7BB)
+#define Squ2_SfxLenCounter               RAM(0x7BD)
+#define Sfx_SecondaryCounter             RAM(0x7BE)
+#define Noise_SfxLenCounter              RAM(0x7BF)
+#define DAC_Counter                      RAM(0x7C0)
+#define NoiseDataLoopbackOfs             RAM(0x7C1)
+#define NoteLengthTblAdder               RAM(0x7C4)
+#define AreaMusicBuffer_Alt              RAM(0x7C5)
+#define PauseModeFlag                    RAM(0x7C6)
+#define GroundMusicHeaderOfs             RAM(0x7C7)
+#define AltRegContentFlag                RAM(0x7CA)
 
 #define DisplayDigits                    RAMARRAY(0x07D7, 36)
 
