@@ -7291,15 +7291,15 @@ void BalancePlatform(const u8 objoff) {
 
   const u8 enemy_state = Enemy_State[objoff];
 
+  if (enemy_state >= 0x80) {
+    return;
+  }
+
 #ifdef SMB2J_MODE
   if (Enemy_ID[enemy_state] != A_LARGEPLATFORM_BALANCE) {
     return;
   }
 #endif
-
-  if (enemy_state >= 0x80) {
-    return;
-  }
 
   if (Enemy_MovingDir[objoff] != 0) {
     PlatformFall(objoff, enemy_state);
