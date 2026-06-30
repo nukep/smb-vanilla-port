@@ -3,7 +3,7 @@
 #include "movie.h"
 #include "render_opengl.h"
 #include "render_raster.h"
-#include "time.h"
+#include "timer.h"
 
 #ifdef USE_SDL2
 #  include <SDL.h>
@@ -648,7 +648,7 @@ int main(int argc, char *argv[]) {
       }
     }
   } else {
-    time_run_at_frequency(fps, fe, sdl_tick);
+    timer_run_at_frequency(fps, fe, sdl_tick);
   }
 
 

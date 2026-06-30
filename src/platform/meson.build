@@ -25,7 +25,7 @@ endif
 executable('smbvanilla',
            ['main_sdl.c',
             'audio_sdl.cpp',
-            'time_sdl.c',
+            'timer_sdl.c',
             'movie.c',
             'render_raster.c',
             'thirdparty/ini.c'] + opengl_sources,
