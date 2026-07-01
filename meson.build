@@ -19,5 +19,16 @@ nessndemu = library('nessndemu',
         include_directories: ['Nes_Snd_Emu/emu2413']
 )
 
+imgui = library('imgui',
+        'imgui/imgui.cpp',
+        'imgui/imgui_demo.cpp',
+        'imgui/imgui_draw.cpp',
+        'imgui/imgui_tables.cpp',
+        'imgui/imgui_widgets.cpp',
+        'imgui/backends/imgui_impl_sdl3.cpp',
+        'imgui/backends/imgui_impl_sdlrenderer3.cpp',
+        include_directories: ['imgui/', 'imgui/backends/']
+)
+
 subdir('src/smbcore')
 subdir('src/platform')

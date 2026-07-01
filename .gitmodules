@@ -1,3 +1,6 @@
 [submodule "Nes_Snd_Emu"]
 	path = Nes_Snd_Emu
 	url = git@github.com:jamesathey/Nes_Snd_Emu.git
+[submodule "imgui"]
+	path = imgui
+	url = https://github.com/ocornut/imgui.git

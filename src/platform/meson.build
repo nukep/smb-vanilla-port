@@ -35,7 +35,17 @@ executable('smbvanilla',
            link_with: [smbcore, nessndemu],
            dependencies: [sdl, glew],
            c_args:   use_sdl_args + opengl_args,
-           cpp_args: use_sdl_args + opengl_args)
+           cpp_args: use_sdl_args + opengl_args,
+)
+
+executable('smbvanilla_imgui',
+           ['main_imgui.cpp'],
+           include_directories: ['../../Nes_Snd_Emu', '../../imgui', '../../imgui/backends', '..'],
+           link_with: [smbcore, nessndemu, imgui],
+           dependencies: [sdl, glew],
+           c_args:   use_sdl_args + opengl_args,
+           cpp_args: use_sdl_args + opengl_args,
+)
 
 
 executable('smbvanilla_testrunner',
