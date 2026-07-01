@@ -39,7 +39,12 @@ executable('smbvanilla',
 )
 
 executable('smbvanilla_imgui',
-           ['main_imgui.cpp'],
+           ['main_imgui.cpp',
+            'audio_sdl.cpp',
+            'timer_sdl.c',
+            'movie.c',
+            'render_raster.c',
+            'thirdparty/ini.c'] + opengl_sources,
            include_directories: ['../../Nes_Snd_Emu', '../../imgui', '../../imgui/backends', '..'],
            link_with: [smbcore, nessndemu, imgui],
            dependencies: [sdl, glew],

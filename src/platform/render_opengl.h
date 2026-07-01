@@ -6,6 +6,10 @@
 
 struct SMBgl;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 size_t SMBgl_size(void);
 
 bool SMBgl_init(struct SMBgl *gl);
@@ -19,5 +23,9 @@ void SMBgl_update_pattern_tables(struct SMBgl *gl, const unsigned char *chrrom);
 void SMBgl_draw_tile(struct SMBgl *gl, const struct SMB_tile tile);
 
 bool SMBgl_render_frame(struct SMBgl *gl);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

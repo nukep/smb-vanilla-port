@@ -1,0 +1,1582 @@
+ ▐▛███▜▌   Claude Code v2.1.197
+▝▜█████▛▘  Sonnet 5 · API Usage Billing
+  ▘▘ ▝▝    ~/repos/smb-vanilla-port
+
+
+❯ modify main_imgui.cpp to match the features in main_sdl.c                     
+
+  Thought for 20s, searched for 1 pattern, read 2 files (ctrl+o to expand)
+
+● This is a substantial task — main_imgui.cpp is currently just a bare ImGui
+  demo skeleton, while main_sdl.c is the full emulator frontend (ROM loading,
+  config, audio, movie playback, keybindings, rendering via OpenGL/raster, game
+  loop timing). Let me look at the build setup and rendering modules before
+  proposing an approach.
+
+  Thought for 1m 56s, searched for 3 patterns, read 8 files, listed 2 directories, ran 1 shell command (ctrl+o to expand)
+
+● This is a large architectural task — main_imgui.cpp is currently just an ImGui
+  demo skeleton, while main_sdl.c is the full emulator frontend (config/CLI
+  parsing, ROM loading, audio, movie playback, debug RAM dump keys, configurable
+  keybindings, OpenGL/raster rendering, frame timing). Before planning the
+  implementation, I need to resolve a couple of design choices that affect the
+  whole structure.
+
+● User answered Claude's questions:
+  ⎿  · main_imgui.cpp currently uses SDL_Renderer + imgui_impl_sdlrenderer3 (not
+     raw OpenGL). main_sdl.c supports both an OpenGL renderer (SMBgl, raw GL 
+     calls via glew) and a software raster renderer (SMBraster) blitted to a 
+     surface. Mixing raw GL draws with SDL_Renderer's own GL backend is fragile.
+     How should the imgui frontend render the emulator picture? → Support both 
+     OpenGL and raster
+     · How should the emulator picture be displayed relative to the ImGui UI 
+     (menu bar, future debug windows)? → Fullscreen background behind menu bar 
+     (Recommended)
+     · main_sdl.c's config/CLI system (config.h, config.inc, smbvanilla.ini) 
+     drives ROM path, keybindings, audio settings, movie playback, world/level 
+     start, debug RAM/PPU dump hotkeys (0/1 keys), and maxspeed mode. Should the
+     imgui frontend reuse this exact config system for full feature parity, or 
+     trim scope? → Full parity (Recommended)
+
+  Thought for 2m 43s, read 5 files, listed 1 directory (ctrl+o to expand)
+
+● This is a large, multi-decision rewrite of main_imgui.cpp with real
+  architectural work (offscreen GL rendering combined with SDL_Renderer, full
+  config/audio/movie/keybinding parity). Let me draft a concrete plan before
+  writing code.
+
+● Entered plan mode
+  Claude is now exploring and designing an implementation approach.
+
+  Thought for 20m 34s, searched for 17 patterns, read 7 files, listed 2 directories, ran 2 shell commands (ctrl+o to expand)
+● Background command "find / -iname "SDL_render.h" 2&gt;/dev/null | grep -v
+imgui" completed (exit code 0)
+
+● Updated plan
+  ⎿  /plan to preview
+  ⎿  Read ../../../../tmp/claude-1000/-home-dan-repos-smb-vanilla-port/c6e2e988-
+     14c1-4fbc-8c5f-8986f5a8d95c/tasks/ba2zj9fmn.output (17 lines)
+  ⎿  Read src/platform/main_imgui.cpp (123 lines)
+  ⎿  Read src/platform/meson.build (55 lines)
+  ⎿  Read meson.build (35 lines)
+  ⎿  Read src/platform/main_sdl.c (698 lines)
+  ⎿  Plan file referenced (~/.claude/plans/humble-purring-lantern.md)
+
+  Thought for 5s (ctrl+o to expand)
+
+● The plan is already fully written and matches the current state of the
+  codebase (verified main_imgui.cpp, both meson.build files, and main_sdl.c just
+  now — all consistent with what's described). Ready for approval.
+
+● User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/humble-purring-lantern.md · /plan to edit
+     Give main_imgui.cpp full feature parity with main_sdl.c
+
+     Context
+
+     main_imgui.cpp is currently just the unmodified Dear ImGui
+     SDL3+SDL_Renderer example (a demo window toggle and empty menu stubs).
+     main_sdl.c is the real emulator frontend: it parses config/CLI args, loads
+     a ROM, wires up audio, movie playback, configurable keybindings, debug
+     RAM/PPU dump hotkeys, an OpenGL tile renderer (SMBgl) or a software raster
+     renderer (SMBraster), and runs the game loop at NES framerate (or uncapped
+     in "maxspeed" mode). The goal is to make main_imgui.cpp do everything
+     main_sdl.c does, but with the Dear ImGui menu bar overlaid on top of the
+     running game, per user decisions:
+     - Support both the OpenGL (SMBgl) and software raster (SMBraster) emulator
+     renderers, selected the same way as today (cfg.graphics.opengl /
+     cfg.graphics.software).
+     - The game picture fills the whole window as a background, letterboxed to
+     preserve the 256:240 aspect ratio, with the ImGui menu bar drawn on top.
+     - Full feature parity: same config/ini parsing, CLI args, keybindings,
+     audio, movie playback, debug dump hotkeys, smb2j games-beaten persistence,
+     and maxspeed mode.
+
+     Key architectural change: swap SDL_Renderer for OpenGL
+
+     main_imgui.cpp currently uses imgui_impl_sdlrenderer3 (SDL's own 2D
+     renderer). To draw the SMBgl renderer's raw GL calls into the same window
+     Dear ImGui draws into, the frontend needs an actual OpenGL context. Switch
+     to imgui_impl_opengl3 (already vendored in imgui/backends/), following the
+     pattern in imgui/examples/example_sdl3_opengl3/main.cpp:
+     - SDL_GL_SetAttribute for a 3.3 core profile context (matches
+     render_opengl.c's #version 330 shaders), depth buffer 24-bit (used for
+     BG/sprite ordering).
+     - ImGui_ImplSDL3_InitForOpenGL(window, gl_context) +
+     ImGui_ImplOpenGL3_Init().
+
+     For raster mode, upload the SMBraster RGB buffer into a plain GLuint
+     texture each frame (glTexSubImage2D) and draw it via
+     ImGui::GetBackgroundDrawList()->AddImage(...) — no flip needed; feeding the
+     texture uv range (0,0)-(1,1) directly maps row 0 (top of the NES picture)
+     to the top of the destination rect, matching how render_opengl.c's own
+     pattern-table texture is sampled (no flip there either).
+
+     Letterboxing math
+
+     Add a small helper compute_letterbox(avail_w, avail_h, &x, &y, &w, &h) that
+     fits a 256:240 rect centered within the available area. Use it twice per
+     frame, in two different coordinate spaces:
+     - Framebuffer pixels (SDL_GetWindowSizeInPixels) — for the raw
+     glViewport/glScissor calls that constrain the SMBgl GL renderer to the
+     letterboxed region. GL's viewport/scissor origin is bottom-left, so
+     convert: gl_y = fb_h - (ly + lh).
+     - ImGui logical/display coordinates (io.DisplaySize) — for the AddImage
+     destination rect in raster mode (ImGui's draw list is already top-left
+     origin, no conversion needed).
+
+     Each frame: clear the entire window to black first (so letterbox bars are
+     consistent for both renderer paths), then draw the letterboxed content:
+     - GL mode: glEnable(GL_SCISSOR_TEST), glScissor+glViewport to the letterbox
+     rect, call SMB_tick + SMBgl_render_frame (its internal glClear/draw stays
+     confined to the scissor rect), then glDisable(GL_SCISSOR_TEST).
+     - Raster mode: SMBraster_set_buffer/SMBraster_clear into a heap-allocated
+     256*240*3 RGB buffer owned by frontend_userdata, SMB_tick, upload via
+     glTexSubImage2D, then ImGui::GetBackgroundDrawList()->AddImage into the
+     letterboxed rect (drawn before ImGui::Render() so it lands behind the menu
+     bar).
+
+     This intentionally does not touch render_opengl.c/render_raster.c — both
+     are reused unmodified via their existing SMBgl_*/SMBraster_* APIs.
+
+     main_imgui.cpp rewrite
+
+     Mirror main_sdl.c's structure closely (per its own "one unashamedly-long
+     main, keep it simple" convention) — duplicate rather than extract shared
+     helpers, matching the project's existing single-file-per-frontend style:
+
+     - Copy over verbatim: io_readtobuffer/io_writefrombuffer, joy1/joy2,
+     update_pattern_tables/update_palette/draw_tile,
+     load_palette/load_ppuram/dump_ppuram/load_ram/dump_ram,
+     smb2j_load_games_beaten/smb2j_save_games_beaten, advance_movie,
+     on_keypress_change, read_rom_bytes/seek_rom,
+     apu_write_register/apu_end_frame, and #include "config.h" (config.h is
+     plain C, compiles fine as C++; already used this way conceptually since
+     audio.h/movie.h/timer.h all have extern "C" guards for that purpose).
+     - frontend_userdata gains: GLuint raster_texture, unsigned char 
+     *raster_pixels (in place of the SDL_Surface *surf/pixels_stride used for
+     the SDL_Renderer path).
+     - Replace sdl_tick with imgui_tick(void *userdata), used identically by
+     both timer_run_at_frequency (capped fps) and the maxspeed while(1) loop —
+     same as main_sdl.c. It does, in order:
+       a. Poll SDL events: forward every event to ImGui_ImplSDL3_ProcessEvent;
+     keep the existing SDL_EVENT_KEY_DOWN/UP → on_keypress_change handling and
+     SDL_EVENT_QUIT/SDL_EVENT_WINDOW_CLOSE_REQUESTED → return 1 (no
+     WantCaptureKeyboard gating — matches main_sdl.c, which always routes keys
+     to the game).
+       b. advance_movie(fe).
+       c. If minimized, SDL_Delay(10) and return 0 (skip rendering), matching
+     the original demo's behavior.
+       d. ImGui_ImplOpenGL3_NewFrame() / ImGui_ImplSDL3_NewFrame() /
+     ImGui::NewFrame().
+       e. Full-window black clear, then the letterboxed GL-or-raster draw
+     described above.
+       f. Build the menu bar (kept from the existing stub: File > Load ROM stays
+     a no-op placeholder — main_sdl.c has no runtime ROM-switching either, so
+     this isn't a feature gap; Debug > Show ImGui demo window).
+       g. ImGui::Render(), ImGui_ImplOpenGL3_RenderDrawData, SDL_GL_SwapWindow.
+     - main() follows main_sdl.c's structure (config init → defaults →
+     parse_options("smbvanilla.ini", ...) → validate ROM arg → keybindings from
+     cfg.bindings.keys → audio init → palette load → window/GL-context creation
+     (always, since ImGui itself needs a GL context) → SMBgl_init if
+     cfg.graphics.opengl else SMBraster_init if cfg.graphics.software → allocate
+     raster_texture/raster_pixels if raster → ROM
+     open/SMB_state_init/SMB_start_on_level → movie load + skip-to-frame →
+     fe->rendering_enabled = true → run loop (imgui_tick via
+     timer_run_at_frequency or uncapped) → cleanup (mirrors main_sdl.c's exit:
+     label, plus
+     ImGui_ImplOpenGL3_Shutdown/ImGui_ImplSDL3_Shutdown/ImGui::DestroyContext,
+     freeing raster_pixels/deleting raster_texture, guarded by an
+     imgui_initialized bool since backend init happens after window creation
+     which can fail).
+     - Window title becomes "SMB Vanilla"; initial size
+     256*video_scale*main_scale x 240*video_scale*main_scale; keep
+     SDL_WINDOW_RESIZABLE.
+     - Respect cfg.general.maxspeed for both the uncapped loop and
+     SDL_GL_SetSwapInterval(0).
+
+     Build system changes
+
+     - meson.build (root): the shared imgui library currently compiles
+     imgui/backends/imgui_impl_sdlrenderer3.cpp; swap it for
+     imgui/backends/imgui_impl_opengl3.cpp (SDL3 platform backend stays as-is).
+     - src/platform/meson.build: the smbvanilla_imgui target currently only
+     builds main_imgui.cpp. Add the sources it now needs, matching the
+     smbvanilla target: audio_sdl.cpp, timer_sdl.c, movie.c, render_raster.c,
+     thirdparty/ini.c, plus opengl_sources (render_opengl.c or the noop stub
+     depending on glew.found()), and add opengl_args (-DOPENGL_ENABLED) to its
+     c_args/cpp_args.
+     - No changes to smbvanilla.ini — the imgui frontend reads the same config
+     file, matching parity intent.
+     - Note (not fixed, pre-existing/out of scope): the shared imgui library
+     hardcodes SDL3 backends regardless of the sdl2 meson option, so
+     smbvanilla_imgui only really supports SDL3 today — same limitation that
+     exists before this change.
+
+     Verification
+
+     - meson compile -C build/ and confirm smbvanilla_imgui links.
+     - Run ./build/src/platform/smbvanilla_imgui with the default smbvanilla.ini
+     (OpenGL enabled) — game should render full-window, letterboxed, with the
+     menu bar on top; verify keyboard controls work, audio plays, window
+     resizing keeps the aspect ratio.
+     - Re-run with graphics.opengl = false in the ini to exercise the
+     raster/texture path, and with --maxspeed to check the uncapped loop and
+     vsync-disable path.
+     - Spot check debug hotkeys (0/1 dump/load RAM+PPU) and --movie/-m playback
+     still work identically to smbvanilla.
+
+● The plan is approved. Let me set up a task list and start implementing.
+
+  Thought for 3s (ctrl+o to expand)
+
+● Update(meson.build)
+  ⎿  Added 1 line, removed 1 line
+      26          'imgui/imgui_tables.cpp',
+      27          'imgui/imgui_widgets.cpp',
+      28          'imgui/backends/imgui_impl_sdl3.cpp',
+      29 -        'imgui/backends/imgui_impl_sdlrenderer3.cpp',          
+      29 +        'imgui/backends/imgui_impl_opengl3.cpp',               
+      30          include_directories: ['imgui/', 'imgui/backends/']
+      31  )
+      32  
+● Update(src/platform/meson.build)
+  ⎿  Added 6 lines, removed 1 line
+      39  )
+      40  
+      41  executable('smbvanilla_imgui',
+      42 -           ['main_imgui.cpp'],                                 
+      42 +           ['main_imgui.cpp',                                  
+      43 +            'audio_sdl.cpp',                                   
+      44 +            'timer_sdl.c',                                     
+      45 +            'movie.c',                                         
+      46 +            'render_raster.c',                                 
+      47 +            'thirdparty/ini.c'] + opengl_sources,              
+      48             include_directories: ['../../Nes_Snd_Emu', '../../im
+          gui', '../../imgui/backends', '..'],
+      49             link_with: [smbcore, nessndemu, imgui],
+      50             dependencies: [sdl, glew],
+
+  Thought for 12s (ctrl+o to expand)
+
+  Thought for 5s, read 1 file (ctrl+o to expand)
+
+● Explore(Check ImGui 1.92.8 texture API for AddImage with raw GLuint)
+  ⎿  Done (12 tool uses · 27.5k tokens · 36s)
+  (ctrl+o to expand)
+
+● Now I have what I need. Let me write the new main_imgui.cpp.
+
+● Write(src/platform/main_imgui.cpp)
+  ⎿  Added 733 lines, removed 94 lines
+        1  #include "imgui.h"
+        2  #include "imgui_impl_sdl3.h"
+        3 -#include "imgui_impl_sdlrenderer3.h"                          
+        3 +#include "imgui_impl_opengl3.h"                               
+        4  
+        5 +#include "audio.h"                                            
+        6 +#include "smbcore/mario.h"                                    
+        7 +#include "movie.h"                                            
+        8 +#include "render_opengl.h"                                    
+        9 +#include "render_raster.h"                                    
+       10 +#include "timer.h"                                            
+       11 +                                                              
+       12 +#ifdef USE_SDL2                                               
+       13 +#  include <SDL.h>                                            
+       14 +#  include <SDL_opengl.h>                                     
+       15 +#else                                                         
+       16 +#  include <SDL3/SDL.h>                                       
+       17 +#  include <SDL3/SDL_opengl.h>                                
+       18 +#endif                                                        
+       19 +                                                              
+       20 +#include <errno.h>                                            
+       21  #include <stdio.h>
+        6 -#include <SDL3/SDL.h>                                         
+       22 +#include <stdlib.h>                                           
+       23 +#include <string.h>                                           
+       24  
+        8 -int main(int argc, char *argv[]) {                            
+        9 -    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {       
+       10 -        printf("Error: SDL_Init(): %s\n", SDL_GetError());    
+       11 -        return 1;                                             
+       25 +#define log_error(msg, ...) fprintf(stderr, "ERROR: " msg "\n"
+          +, ##__VA_ARGS__)                                              
+       26 +#define log_info(msg, ...)  fprintf(stdout, "INFO: " msg "\n",
+          + ##__VA_ARGS__)                                               
+       27 +                                                              
+       28 +#include "config.h"                                           
+       29 +                                                              
+       30 +static bool io_readtobuffer(const char *filename, size_t size,
+          + void *buf) {                                                 
+       31 +  FILE *f = fopen(filename, "rb");                            
+       32 +  if (!f) {                                                   
+       33 +    log_error("%s", strerror(errno));                         
+       34 +    return false;                                             
+       35 +  }                                                           
+       36 +  if (fread(buf, size, 1, f) != 1) {                          
+       37 +    log_error("Could not read bytes in file");                
+       38 +    return false;                                             
+       39 +  }                                                           
+       40 +  if (fclose(f) != 0) {                                       
+       41 +    log_error("Could not close file");                        
+       42 +    return false;                                             
+       43 +  }                                                           
+       44 +  return true;                                                
+       45 +}                                                             
+       46 +                                                              
+       47 +static bool io_writefrombuffer(const char *filename, size_t si
+          +ze, void *buf) {                                              
+       48 +  FILE *f = fopen(filename, "wb");                            
+       49 +  if (!f) {                                                   
+       50 +    log_error("%s", strerror(errno));                         
+       51 +    return false;                                             
+       52 +  }                                                           
+       53 +  if (fwrite(buf, size, 1, f) != 1) {                         
+       54 +    log_error("Could not write bytes in file");               
+       55 +    return false;                                             
+       56 +  }                                                           
+       57 +  if (fclose(f) != 0) {                                       
+       58 +    log_error("Could not close file");                        
+       59 +    return false;                                             
+       60 +  }                                                           
+       61 +  return true;                                                
+       62 +}                                                             
+       63 +                                                              
+       64 +struct sdl_key_scancodes {                                    
+       65 +  SDL_Scancode u,d,l,r,select,start,b,a;                      
+       66 +};                                                            
+       67 +                                                              
+       68 +struct frontend_userdata {                                    
+       69 +  FILE *romfile;                                              
+       70 +  struct SMB_state *smb_state;                                
+       71 +  struct SMB_audio *audio;                                    
+       72 +  struct Movie *movie;                                        
+       73 +  struct SMB_buttons player1_buttons;                         
+       74 +  struct SMB_buttons player2_buttons;                         
+       75 +  bool rendering_enabled;                                     
+       76 +  struct config *cfg;                                         
+       77 +                                                              
+       78 +  SDL_Window *window;                                         
+       79 +  int video_scale;                                            
+       80 +  struct sdl_key_scancodes sdl_key_scancodes;                 
+       81 +                                                              
+       82 +  u8 smb2j_games_beaten;                                      
+       83 +                                                              
+       84 +  // OpenGL mode                                              
+       85 +  struct SMBgl *smb_gl;                                       
+       86 +                                                              
+       87 +  // Raster mode                                              
+       88 +  struct SMBraster *smb_raster;                               
+       89 +  unsigned char *raster_pixels;                               
+       90 +  GLuint raster_texture;                                      
+       91 +};                                                            
+       92 +                                                              
+       93 +static void joy1(void *userdata, struct SMB_buttons *buttons) 
+          +{                                                             
+       94 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+       95 +  *buttons = fe->player1_buttons;                             
+       96 +}                                                             
+       97 +static void joy2(void *userdata, struct SMB_buttons *buttons) 
+          +{                                                             
+       98 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+       99 +  *buttons = fe->player2_buttons;                             
+      100 +}                                                             
+      101 +                                                              
+      102 +static void update_pattern_tables(void *userdata, const u8 *ch
+          +rrom) {                                                       
+      103 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      104 +                                                              
+      105 +  if (fe->smb_gl) {                                           
+      106 +    SMBgl_update_pattern_tables(fe->smb_gl, chrrom);          
+      107 +    return;                                                   
+      108 +  } else if (fe->smb_raster) {                                
+      109 +    SMBraster_update_pattern_tables(fe->smb_raster, chrrom);  
+      110 +  }                                                           
+      111 +}                                                             
+      112 +                                                              
+      113 +static void update_palette(void *userdata, const u8 *palette_i
+          +ndices) {                                                     
+      114 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      115 +                                                              
+      116 +  if (fe->smb_gl) {                                           
+      117 +    SMBgl_update_palette(fe->smb_gl, palette_indices);        
+      118 +  } else if (fe->smb_raster) {                                
+      119 +    SMBraster_update_palette(fe->smb_raster, palette_indices);
+      120 +  }                                                           
+      121 +}                                                             
+      122 +static void draw_tile(void *userdata, const struct SMB_tile ti
+          +le) {                                                         
+      123 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      124 +                                                              
+      125 +  if (!fe->rendering_enabled) {                               
+      126 +    return;                                                   
+      127 +  }                                                           
+      128 +                                                              
+      129 +  if (fe->smb_gl) {                                           
+      130 +    SMBgl_draw_tile(fe->smb_gl, tile);                        
+      131 +  } else if (fe->smb_raster) {                                
+      132 +    SMBraster_draw_tile(fe->smb_raster, tile);                
+      133 +  }                                                           
+      134 +}                                                             
+      135 +                                                              
+      136 +static bool load_palette(u8 *rgb_palette, const char *filename
+          +) {                                                           
+      137 +  return io_readtobuffer(filename, (size_t)0x40*3, rgb_palette
+          +);                                                            
+      138 +}                                                             
+      139 +                                                              
+      140 +static bool load_ppuram(struct SMB_state *state, const char *f
+          +ilename) {                                                    
+      141 +  return io_readtobuffer(filename, 0x4000, SMB_ppuram(state));
+      142 +}                                                             
+      143 +                                                              
+      144 +static bool dump_ppuram(struct SMB_state *state, const char *f
+          +ilename) {                                                    
+      145 +  return io_writefrombuffer(filename, 0x4000, SMB_ppuram(state
+          +));                                                           
+      146 +}                                                             
+      147 +                                                              
+      148 +static bool load_ram(struct SMB_state *state, const char *file
+          +name) {                                                       
+      149 +  if (!io_readtobuffer(filename, 0x800, SMB_ram(state))) {    
+      150 +    return false;                                             
+      151 +  }                                                           
+      152 +  SMB_ram_finishwrite(state);                                 
+      153 +  return true;                                                
+      154 +}                                                             
+      155 +                                                              
+      156 +static bool dump_ram(struct SMB_state *state, const char *file
+          +name) {                                                       
+      157 +  return io_writefrombuffer(filename, 0x800, SMB_ram(state)); 
+      158 +}                                                             
+      159 +                                                              
+      160 +static u8 smb2j_load_games_beaten(void *userdata) {           
+      161 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      162 +  return fe->smb2j_games_beaten;                              
+      163 +}                                                             
+      164 +static bool smb2j_save_games_beaten(void *userdata, u8 games_b
+          +eaten) {                                                      
+      165 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      166 +  log_info("Pretending to save game...");                     
+      167 +  log_info("Games beaten: %d", games_beaten);                 
+      168 +  fe->smb2j_games_beaten = games_beaten;                      
+      169 +  return true;                                                
+      170 +}                                                             
+      171 +                                                              
+      172 +static bool advance_movie(struct frontend_userdata *fe) {     
+      173 +  if (!fe->movie) {                                           
+      174 +    return false;                                             
+      175 +  }                                                           
+      176 +                                                              
+      177 +  struct MovieButtons movie_buttons;                          
+      178 +                                                              
+      179 +  bool use_movie_buttons = movie_next(fe->movie, &movie_button
+          +s, 0);                                                        
+      180 +  if (use_movie_buttons) {                                    
+      181 +    fe->player1_buttons.u = movie_buttons.u;                  
+      182 +    fe->player1_buttons.d = movie_buttons.d;                  
+      183 +    fe->player1_buttons.l = movie_buttons.l;                  
+      184 +    fe->player1_buttons.r = movie_buttons.r;                  
+      185 +    fe->player1_buttons.b = movie_buttons.b;                  
+      186 +    fe->player1_buttons.a = movie_buttons.a;                  
+      187 +    fe->player1_buttons.select = movie_buttons.select;        
+      188 +    fe->player1_buttons.start = movie_buttons.start;          
+      189 +  }                                                           
+      190 +  return use_movie_buttons;                                   
+      191 +}                                                             
+      192 +                                                              
+      193 +// Called whenever a key is newly pressed, or newly released  
+      194 +// Does not send repeat keys from holding it down             
+      195 +static int on_keypress_change(struct frontend_userdata *fe, SD
+          +L_Scancode sc, bool isdown) {                                 
+      196 +  struct SMB_state *smb_state = fe->smb_state;                
+      197 +                                                              
+      198 +  if (isdown) {                                               
+      199 +    switch (sc) {                                             
+      200 +    case SDL_SCANCODE_1:                                      
+      201 +      if (load_ppuram(smb_state, fe->cfg->debug.dump_ppu_filen
+          +ame)) {                                                       
+      202 +        if (!load_ram(smb_state, fe->cfg->debug.dump_ram_filen
+          +ame)) {                                                       
+      203 +          // Couldn't load RAM - exit                         
+      204 +          return 1;                                           
+      205 +        }                                                     
+      206 +      }                                                       
+      207 +      break;                                                  
+      208 +                                                              
+      209 +    case SDL_SCANCODE_0:                                      
+      210 +      // dump the RAM and PPU                                 
+      211 +      dump_ppuram(smb_state, fe->cfg->debug.dump_ppu_filename)
+          +;                                                             
+      212 +      dump_ram(smb_state, fe->cfg->debug.dump_ram_filename);  
+      213 +      break;                                                  
+      214 +                                                              
+      215 +    case SDL_SCANCODE_ESCAPE:                                 
+      216 +      // Stop the movie and let the player take control       
+      217 +      if (fe->movie) {                                        
+      218 +        movie_fini(fe->movie);                                
+      219 +        free(fe->movie);                                      
+      220 +        fe->movie = 0;                                        
+      221 +      }                                                       
+      222 +      break;                                                  
+      223 +                                                              
+      224 +    default:                                                  
+      225 +      break;                                                  
+      226      }
+      227 +  }                                                           
+      228  
+       14 -    // Create window with SDL_Renderer graphics context       
+       15 -    float main_scale = SDL_GetDisplayContentScale(SDL_GetPrima
+          -ryDisplay());                                                 
+       16 -    SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_
+          -WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;                
+       17 -    SDL_Window* window = SDL_CreateWindow("Dear ImGui SDL3+SDL
+          -_Renderer example", (int)(1280 * main_scale), (int)(800 * main
+          -_scale), window_flags);                                       
+       18 -    if (window == nullptr)                                    
+       19 -    {                                                         
+       20 -        printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError
+          -());                                                          
+      229 +#define KEY(key)  if (sc == fe->sdl_key_scancodes.key) { fe->p
+          +layer1_buttons.key = isdown; }                                
+      230 +  KEY(u);                                                     
+      231 +  KEY(d);                                                     
+      232 +  KEY(l);                                                     
+      233 +  KEY(r);                                                     
+      234 +  KEY(select);                                                
+      235 +  KEY(start);                                                 
+      236 +  KEY(b);                                                     
+      237 +  KEY(a);                                                     
+      238 +#undef KEY                                                    
+      239 +                                                              
+      240 +  return 0;                                                   
+      241 +}                                                             
+      242 +                                                              
+      243 +static bool read_rom_bytes(void *userdata, u8 *buf, size_t siz
+          +e) {                                                          
+      244 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      245 +  return fread(buf, size, 1, fe->romfile) == 1;               
+      246 +}                                                             
+      247 +                                                              
+      248 +static bool seek_rom(void *userdata, size_t offset) {         
+      249 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      250 +  fseek(fe->romfile, offset, SEEK_SET);                       
+      251 +  return true;                                                
+      252 +}                                                             
+      253 +                                                              
+      254 +static void apu_write_register(void *userdata, u16 addr, u8 da
+          +ta) {                                                         
+      255 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      256 +  if (fe->audio) {                                            
+      257 +    SMB_audio_write_register(fe->audio, addr, data);          
+      258 +  }                                                           
+      259 +}                                                             
+      260 +static void apu_end_frame(void *userdata) {                   
+      261 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      262 +  if (fe->audio) {                                            
+      263 +    SMB_audio_end_frame(fe->audio);                           
+      264 +  }                                                           
+      265 +}                                                             
+      266 +                                                              
+      267 +// Fit a 256x240 rect, centered, into an avail_w x avail_h are
+          +a, preserving aspect ratio.                                   
+      268 +static void compute_letterbox(float avail_w, float avail_h, fl
+          +oat *x, float *y, float *w, float *h) {                       
+      269 +  const float aspect = 256.0f / 240.0f;                       
+      270 +  float box_w = avail_w;                                      
+      271 +  float box_h = box_w / aspect;                               
+      272 +  if (box_h > avail_h) {                                      
+      273 +    box_h = avail_h;                                          
+      274 +    box_w = box_h * aspect;                                   
+      275 +  }                                                           
+      276 +  *w = box_w;                                                 
+      277 +  *h = box_h;                                                 
+      278 +  *x = (avail_w - box_w) * 0.5f;                              
+      279 +  *y = (avail_h - box_h) * 0.5f;                              
+      280 +}                                                             
+      281 +                                                              
+      282 +// Go with one unashamedly-long tick function + main. (keep it
+          + simple!)                                                     
+      283 +                                                              
+      284 +static int imgui_tick(void *userdata) {                       
+      285 +  struct frontend_userdata *fe = (struct frontend_userdata *)u
+          +serdata;                                                      
+      286 +  struct SMB_state *smb_state = fe->smb_state;                
+      287 +                                                              
+      288 +  SDL_Event eventData;                                        
+      289 +  while (SDL_PollEvent(&eventData)) {                         
+      290 +    ImGui_ImplSDL3_ProcessEvent(&eventData);                  
+      291 +                                                              
+      292 +    switch (eventData.type) {                                 
+      293 +    case SDL_EVENT_KEY_DOWN:                                  
+      294 +    case SDL_EVENT_KEY_UP:                                    
+      295 +      {                                                       
+      296 +        bool isdown = eventData.type == SDL_EVENT_KEY_DOWN;   
+      297 +        SDL_Scancode sc = eventData.key.scancode;             
+      298 +        if (!eventData.key.repeat) {                          
+      299 +          int res = on_keypress_change(fe, sc, isdown);       
+      300 +          if (res) {                                          
+      301 +            return res;                                       
+      302 +          }                                                   
+      303 +        }                                                     
+      304 +      }                                                       
+      305 +      break;                                                  
+      306 +                                                              
+      307 +    case SDL_EVENT_QUIT:                                      
+      308 +      return 1;                                               
+      309 +                                                              
+      310 +    case SDL_EVENT_WINDOW_CLOSE_REQUESTED:                    
+      311 +      if (eventData.window.windowID == SDL_GetWindowID(fe->win
+          +dow)) {                                                       
+      312          return 1;
+      313 +      }                                                       
+      314 +      break;                                                  
+      315      }
+       23 -    SDL_Renderer* renderer = SDL_CreateRenderer(window, nullpt
+          -r);                                                           
+       24 -    SDL_SetRenderVSync(renderer, 1);                          
+       25 -    if (renderer == nullptr)                                  
+       26 -    {                                                         
+       27 -        SDL_Log("Error: SDL_CreateRenderer(): %s\n", SDL_GetEr
+          -ror());                                                       
+       28 -        return 1;                                             
+      316 +  }                                                           
+      317 +                                                              
+      318 +  // Overwrite the player buttons if a movie exists with remai
+          +ning frames                                                   
+      319 +  advance_movie(fe);                                          
+      320 +                                                              
+      321 +  if (SDL_GetWindowFlags(fe->window) & SDL_WINDOW_MINIMIZED) {
+      322 +    SDL_Delay(10);                                            
+      323 +    return 0;                                                 
+      324 +  }                                                           
+      325 +                                                              
+      326 +  ImGui_ImplOpenGL3_NewFrame();                               
+      327 +  ImGui_ImplSDL3_NewFrame();                                  
+      328 +  ImGui::NewFrame();                                          
+      329 +                                                              
+      330 +  ImGuiIO &io = ImGui::GetIO();                               
+      331 +  int fb_w, fb_h;                                             
+      332 +  SDL_GetWindowSizeInPixels(fe->window, &fb_w, &fb_h);        
+      333 +                                                              
+      334 +  glViewport(0, 0, fb_w, fb_h);                               
+      335 +  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);                       
+      336 +  glClear(GL_COLOR_BUFFER_BIT);                               
+      337 +                                                              
+      338 +  if (fe->smb_gl) {                                           
+      339 +    float lx, ly, lw, lh;                                     
+      340 +    compute_letterbox((float)fb_w, (float)fb_h, &lx, &ly, &lw,
+          + &lh);                                                        
+      341 +                                                              
+      342 +    int gl_x = (int)lx;                                       
+      343 +    int gl_y = fb_h - (int)(ly + lh);                         
+      344 +    int gl_w = (int)lw;                                       
+      345 +    int gl_h = (int)lh;                                       
+      346 +                                                              
+      347 +    glEnable(GL_SCISSOR_TEST);                                
+      348 +    glScissor(gl_x, gl_y, gl_w, gl_h);                        
+      349 +    glViewport(gl_x, gl_y, gl_w, gl_h);                       
+      350 +                                                              
+      351 +    SMB_tick(smb_state);                                      
+      352 +                                                              
+      353 +    if (!SMBgl_render_frame(fe->smb_gl)) {                    
+      354 +      log_error("Error rendering GL frame");                  
+      355      }
+       30 -    SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_
+          -WINDOWPOS_CENTERED);                                          
+       31 -    SDL_ShowWindow(window);                                   
+      356  
+       33 -    IMGUI_CHECKVERSION();                                     
+       34 -    ImGui::CreateContext();                                   
+       35 -    ImGuiIO& io = ImGui::GetIO(); (void)io;                   
+       36 -    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     
+          -// Enable Keyboard Controls                                   
+       37 -    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      
+          -// Enable Gamepad Controls                                    
+      357 +    glDisable(GL_SCISSOR_TEST);                               
+      358 +    glViewport(0, 0, fb_w, fb_h);                             
+      359 +  } else {                                                    
+      360 +    SMBraster_set_buffer(fe->smb_raster, fe->raster_pixels, 25
+          +6);                                                           
+      361 +    SMBraster_clear(fe->smb_raster);                          
+      362 +    SMB_tick(smb_state);                                      
+      363  
+       39 -    // Setup Dear ImGui style                                 
+      364 +    glBindTexture(GL_TEXTURE_2D, fe->raster_texture);         
+      365 +    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 240, GL_RGB, 
+          +GL_UNSIGNED_BYTE, fe->raster_pixels);                         
+      366 +                                                              
+      367 +    float lx, ly, lw, lh;                                     
+      368 +    compute_letterbox(io.DisplaySize.x, io.DisplaySize.y, &lx,
+          + &ly, &lw, &lh);                                              
+      369 +                                                              
+      370 +    ImGui::GetBackgroundDrawList()->AddImage(                 
+      371 +        ImTextureRef((ImTextureID)(intptr_t)fe->raster_texture
+          +),                                                            
+      372 +        ImVec2(lx, ly), ImVec2(lx + lw, ly + lh));            
+      373 +  }                                                           
+      374 +                                                              
+      375 +  ImGui::BeginMainMenuBar();                                  
+      376 +  if (ImGui::BeginMenu("File")) {                             
+      377 +    if (ImGui::MenuItem("Load ROM")) {                        
+      378 +    }                                                         
+      379 +    ImGui::Separator();                                       
+      380 +    if (ImGui::MenuItem("Quit")) {                            
+      381 +      ImGui::EndMenu();                                       
+      382 +      ImGui::EndMainMenuBar();                                
+      383 +      return 1;                                               
+      384 +    }                                                         
+      385 +    ImGui::EndMenu();                                         
+      386 +  }                                                           
+      387 +  static bool show_demo_window = false;                       
+      388 +  if (ImGui::BeginMenu("Debug")) {                            
+      389 +    if (ImGui::MenuItem("Show ImGui demo window", nullptr, sho
+          +w_demo_window)) {                                             
+      390 +      show_demo_window = !show_demo_window;                   
+      391 +    }                                                         
+      392 +    ImGui::EndMenu();                                         
+      393 +  }                                                           
+      394 +  ImGui::EndMainMenuBar();                                    
+      395 +                                                              
+      396 +  if (show_demo_window) {                                     
+      397 +    ImGui::ShowDemoWindow(&show_demo_window);                 
+      398 +  }                                                           
+      399 +                                                              
+      400 +  ImGui::Render();                                            
+      401 +  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());     
+      402 +  SDL_GL_SwapWindow(fe->window);                              
+      403 +                                                              
+      404 +  return 0;                                                   
+      405 +}                                                             
+      406 +                                                              
+      407 +int main(int argc, char *argv[]) {                            
+      408 +  /******** Declare/allocate some memory ********/            
+      409 +                                                              
+      410 +  struct SMB_state *smb_state = (struct SMB_state *)malloc(SMB
+          +_state_size());                                               
+      411 +  struct frontend_userdata *fe = (struct frontend_userdata *)m
+          +alloc(sizeof(struct frontend_userdata));                      
+      412 +  struct config cfg = {0};                                    
+      413 +  SDL_GLContext glcontext = 0;                                
+      414 +  struct SMB_callbacks callbacks = {0};                       
+      415 +  bool imgui_initialized = false;                             
+      416 +                                                              
+      417 +  if (!smb_state || !fe) {                                    
+      418 +    goto exit;                                                
+      419 +  }                                                           
+      420 +  memset(fe, 0, sizeof(struct frontend_userdata));            
+      421 +                                                              
+      422 +  if (!config_init(&cfg)) {                                   
+      423 +    goto exit;                                                
+      424 +  }                                                           
+      425 +                                                              
+      426 +  fe->cfg = &cfg;                                             
+      427 +                                                              
+      428 +                                                              
+      429 +  /******** Config defaults ********/                         
+      430 +                                                              
+      431 +  cfg.audio.enabled = true;                                   
+      432 +  cfg.audio.samplerate = 44100;                               
+      433 +  cfg.audio.maxlatency_ms = 100;                              
+      434 +  cfg.smb2j.override_games_beaten = -1;                       
+      435 +                                                              
+      436 +                                                              
+      437 +  /******** Parse config, arguments ********/                 
+      438 +                                                              
+      439 +  if (!parse_options("smbvanilla.ini", argc, argv, &cfg)) {   
+      440 +    log_error("Could not parse options");                     
+      441 +    goto exit;                                                
+      442 +  }                                                           
+      443 +                                                              
+      444 +                                                              
+      445 +  /******** Validate arguments ********/                      
+      446 +                                                              
+      447 +  if (!cfg.general.rom_filename) {                            
+      448 +    log_error("Please provide a SMB1 or SMB2J (Lost Levels) ro
+          +m!");                                                         
+      449 +    goto exit;                                                
+      450 +  }                                                           
+      451 +                                                              
+      452 +  if (1) {                                                    
+      453 +    SDL_Scancode *key_scancodes = &cfg.bindings.keys[0];      
+      454 +    fe->sdl_key_scancodes.u      = key_scancodes[0];          
+      455 +    fe->sdl_key_scancodes.d      = key_scancodes[1];          
+      456 +    fe->sdl_key_scancodes.l      = key_scancodes[2];          
+      457 +    fe->sdl_key_scancodes.r      = key_scancodes[3];          
+      458 +    fe->sdl_key_scancodes.select = key_scancodes[4];          
+      459 +    fe->sdl_key_scancodes.start  = key_scancodes[5];          
+      460 +    fe->sdl_key_scancodes.b      = key_scancodes[6];          
+      461 +    fe->sdl_key_scancodes.a      = key_scancodes[7];          
+      462 +  }                                                           
+      463 +                                                              
+      464 +  if (cfg.smb2j.override_games_beaten >= 0) {                 
+      465 +    fe->smb2j_games_beaten = (u8)cfg.smb2j.override_games_beat
+          +en;                                                           
+      466 +  }                                                           
+      467 +                                                              
+      468 +                                                              
+      469 +  /******** Initialize audio ********/                        
+      470 +                                                              
+      471 +  if (cfg.audio.enabled) {                                    
+      472 +    fe->audio = (struct SMB_audio *)malloc(SMB_audio_size()); 
+      473 +  }                                                           
+      474 +                                                              
+      475 +  if (fe->audio && !SMB_audio_init(fe->audio, cfg.audio.sample
+          +rate, cfg.audio.maxlatency_ms)) {                             
+      476 +    log_error("Could not initialize audio!");                 
+      477 +    free(fe->audio);                                          
+      478 +    fe->audio = 0;                                            
+      479 +  }                                                           
+      480 +                                                              
+      481 +                                                              
+      482 +  /******** Initialize SDL / OpenGL ********/                 
+      483 +                                                              
+      484 +  u8 palette_rgb[0x40][3];                                    
+      485 +                                                              
+      486 +  if (cfg.general.palette_filename) {                         
+      487 +    if (!load_palette(&palette_rgb[0][0], cfg.general.palette_
+          +filename)) {                                                  
+      488 +      log_error("Could not load palette from file %s", cfg.gen
+          +eral.palette_filename);                                       
+      489 +      goto exit;                                              
+      490 +    }                                                         
+      491 +  }                                                           
+      492 +                                                              
+      493 +  fe->video_scale = 3;                                        
+      494 +                                                              
+      495 +  if (cfg.graphics.video_scale != 0) {                        
+      496 +    fe->video_scale = cfg.graphics.video_scale;               
+      497 +  }                                                           
+      498 +                                                              
+      499 +  if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {         
+      500 +    log_error("Could not initialize SDL video: %s", SDL_GetErr
+          +or());                                                        
+      501 +    goto exit;                                                
+      502 +  }                                                           
+      503 +                                                              
+      504 +  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);       
+      505 +  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);       
+      506 +  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONT
+          +EXT_PROFILE_CORE);                                            
+      507 +  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);                
+      508 +  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);                 
+      509 +                                                              
+      510 +  float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimary
+          +Display());                                                   
+      511 +  SDL_WindowFlags window_flags = SDL_WINDOW_OPENGL | SDL_WINDO
+          +W_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSIT
+          +Y;                                                            
+      512 +                                                              
+      513 +  fe->window = SDL_CreateWindow("SMB Vanilla",                
+      514 +                                 (int)(256 * fe->video_scale *
+          + main_scale),                                                 
+      515 +                                 (int)(240 * fe->video_scale *
+          + main_scale),                                                 
+      516 +                                 window_flags);               
+      517 +  if (!fe->window) {                                          
+      518 +    log_error("Could not create SDL window: %s", SDL_GetError(
+          +));                                                           
+      519 +    goto exit;                                                
+      520 +  }                                                           
+      521 +                                                              
+      522 +  glcontext = SDL_GL_CreateContext(fe->window);               
+      523 +  if (!glcontext) {                                           
+      524 +    log_error("Could not create OpenGL context: %s", SDL_GetEr
+          +ror());                                                       
+      525 +    goto exit;                                                
+      526 +  }                                                           
+      527 +  SDL_GL_MakeCurrent(fe->window, glcontext);                  
+      528 +                                                              
+      529 +  if (cfg.general.maxspeed) {                                 
+      530 +    // We want to play as fast as possible, so disable any vsy
+          +nc                                                            
+      531 +    SDL_GL_SetSwapInterval(0);                                
+      532 +  } else {                                                    
+      533 +    SDL_GL_SetSwapInterval(1);                                
+      534 +  }                                                           
+      535 +                                                              
+      536 +#ifdef OPENGL_ENABLED                                         
+      537 +  if (cfg.graphics.opengl) {                                  
+      538 +    fe->smb_gl = (struct SMBgl *)malloc(SMBgl_size());        
+      539 +    if (!SMBgl_init(fe->smb_gl)) {                            
+      540 +      log_error("Could not initialize OpenGL renderer");      
+      541 +      free(fe->smb_gl);                                       
+      542 +      fe->smb_gl = 0;                                         
+      543 +    }                                                         
+      544 +  }                                                           
+      545 +#endif                                                        
+      546 +                                                              
+      547 +  if (cfg.graphics.software && !fe->smb_gl) {                 
+      548 +    // Fallback to raster                                     
+      549 +    fe->smb_raster = (struct SMBraster *)malloc(SMBraster_size
+          +());                                                          
+      550 +    if (!SMBraster_init(fe->smb_raster)) {                    
+      551 +      log_error("Could not initialize software renderer");    
+      552 +      free(fe->smb_raster);                                   
+      553 +      fe->smb_raster = 0;                                     
+      554 +    }                                                         
+      555 +  }                                                           
+      556 +                                                              
+      557 +  if (fe->smb_gl) {                                           
+      558 +    log_info("Using OpenGL renderer");                        
+      559 +                                                              
+      560 +    SMBgl_provide_palette_lookup(fe->smb_gl, &palette_rgb[0][0
+          +]);                                                           
+      561 +  } else if (fe->smb_raster) {                                
+      562 +    log_info("Using software renderer");                      
+      563 +    SMBraster_provide_palette_lookup(fe->smb_raster, &palette_
+          +rgb[0][0]);                                                   
+      564 +  } else {                                                    
+      565 +    log_error("No renderer available");                       
+      566 +    goto exit;                                                
+      567 +  }                                                           
+      568 +                                                              
+      569 +  if (fe->smb_raster) {                                       
+      570 +    fe->raster_pixels = (unsigned char *)malloc(256 * 240 * 3)
+          +;                                                             
+      571 +                                                              
+      572 +    glGenTextures(1, &fe->raster_texture);                    
+      573 +    glBindTexture(GL_TEXTURE_2D, fe->raster_texture);         
+      574 +    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_N
+          +EAREST);                                                      
+      575 +    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_N
+          +EAREST);                                                      
+      576 +    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP
+          +_TO_EDGE);                                                    
+      577 +    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP
+          +_TO_EDGE);                                                    
+      578 +    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 256, 240, 0, GL_RGB
+          +, GL_UNSIGNED_BYTE, nullptr);                                 
+      579 +  }                                                           
+      580 +                                                              
+      581 +  SDL_SetWindowPosition(fe->window, SDL_WINDOWPOS_CENTERED, SD
+          +L_WINDOWPOS_CENTERED);                                        
+      582 +  SDL_ShowWindow(fe->window);                                 
+      583 +                                                              
+      584 +  /******** Initialize Dear ImGui ********/                   
+      585 +                                                              
+      586 +  IMGUI_CHECKVERSION();                                       
+      587 +  ImGui::CreateContext();                                     
+      588 +  {                                                           
+      589 +    ImGuiIO &io = ImGui::GetIO();                             
+      590 +    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     
+      591 +    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      
+      592 +                                                              
+      593      ImGui::StyleColorsDark();
+       41 -    //ImGui::StyleColorsLight();                              
+      594  
+       43 -    // Setup scaling                                          
+       44 -    ImGuiStyle& style = ImGui::GetStyle();                    
+       45 -    style.ScaleAllSizes(main_scale);        // Bake a fixed st
+          -yle scale. (until we have a solution for dynamic style scaling
+          -, changing this requires resetting Style + calling this again)
+       46 -    style.FontScaleDpi = main_scale;        // Set initial fon
+          -t scale. (in docking branch: using io.ConfigDpiScaleFonts=true
+          - automatically overrides this for every window depending on th
+          -e current monitor)                                            
+      595 +    ImGuiStyle &style = ImGui::GetStyle();                    
+      596 +    style.ScaleAllSizes(main_scale);                          
+      597 +    style.FontScaleDpi = main_scale;                          
+      598 +  }                                                           
+      599  
+       48 -    // Setup Platform/Renderer backends                       
+       49 -    ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);      
+       50 -    ImGui_ImplSDLRenderer3_Init(renderer);                    
+      600 +  ImGui_ImplSDL3_InitForOpenGL(fe->window, glcontext);        
+      601 +  ImGui_ImplOpenGL3_Init();                                   
+      602 +  imgui_initialized = true;                                   
+      603  
+       52 -    // Our state                                              
+       53 -    bool show_demo_window = false;                            
+       54 -    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);  
+      604  
+       56 -    // Main loop                                              
+       57 -    bool done = false;                                        
+       58 -    while (!done) {                                           
+       59 -        SDL_Event event;                                      
+       60 -        while (SDL_PollEvent(&event))                         
+       61 -        {                                                     
+       62 -            ImGui_ImplSDL3_ProcessEvent(&event);              
+       63 -            if (event.type == SDL_EVENT_QUIT)                 
+       64 -                done = true;                                  
+       65 -            if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED
+          - && event.window.windowID == SDL_GetWindowID(window))         
+       66 -                done = true;                                  
+       67 -        }                                                     
+      605 +  /******** Load ROM, initialize SMB state ********/          
+      606  
+       69 -        // [If using SDL_MAIN_USE_CALLBACKS: all code below wo
+          -uld likely be your SDL_AppIterate() function]                 
+       70 -        if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED)
+       71 -        {                                                     
+       72 -            SDL_Delay(10);                                    
+       73 -            continue;                                         
+       74 -        }                                                     
+      607 +  fe->romfile = fopen(cfg.general.rom_filename, "rb");        
+      608 +  if (!fe->romfile) {                                         
+      609 +    log_error("Could not open ROM %s: %s", cfg.general.rom_fil
+          +ename, strerror(errno));                                      
+      610 +    goto exit;                                                
+      611 +  }                                                           
+      612  
+       76 -        // Start the Dear ImGui frame                         
+       77 -        ImGui_ImplSDLRenderer3_NewFrame();                    
+       78 -        ImGui_ImplSDL3_NewFrame();                            
+       79 -        ImGui::NewFrame();                                    
+      613 +  callbacks.userdata = fe;                                    
+      614  
+       81 -        ImGui::BeginMainMenuBar();                            
+       82 -        if (ImGui::BeginMenu("File")) {                       
+       83 -          if (ImGui::MenuItem("Load ROM")) {                  
+       84 -          }                                                   
+       85 -          ImGui::Separator();                                 
+       86 -          if (ImGui::MenuItem("Quit")) {                      
+       87 -            done = true;                                      
+       88 -          }                                                   
+       89 -          ImGui::EndMenu();                                   
+       90 -        }                                                     
+       91 -        if (ImGui::BeginMenu("Debug")) {                      
+       92 -          if (ImGui::MenuItem("Show ImGui demo window", nullpt
+          -r, show_demo_window)) {                                       
+       93 -            show_demo_window = !show_demo_window;             
+       94 -          }                                                   
+       95 -          ImGui::EndMenu();                                   
+       96 -        }                                                     
+       97 -        ImGui::EndMainMenuBar();                              
+      615 +  callbacks.read_rom_bytes = read_rom_bytes;                  
+      616 +  callbacks.seek_rom = seek_rom;                              
+      617 +  callbacks.smb2j_load_games_beaten = smb2j_load_games_beaten;
+      618 +  callbacks.smb2j_save_games_beaten = smb2j_save_games_beaten;
+      619  
+       99 -        if (show_demo_window) {                               
+      100 -          ImGui::ShowDemoWindow(&show_demo_window);           
+      620 +  callbacks.apu_write_register = apu_write_register;          
+      621 +  callbacks.apu_end_frame = apu_end_frame;                    
+      622 +                                                              
+      623 +  callbacks.update_pattern_tables = update_pattern_tables;    
+      624 +  callbacks.update_palette = update_palette;                  
+      625 +  callbacks.draw_tile = draw_tile;                            
+      626 +                                                              
+      627 +  callbacks.joy1 = joy1;                                      
+      628 +  callbacks.joy2 = joy2;                                      
+      629 +                                                              
+      630 +  if (!SMB_state_init(smb_state, &callbacks)) {               
+      631 +    log_error("Could not initialize game");                   
+      632 +    goto exit;                                                
+      633 +  }                                                           
+      634 +  SMB_start_on_level(smb_state, cfg.world, cfg.level);        
+      635 +  fe->smb_state = smb_state;                                  
+      636 +                                                              
+      637 +  log_info("Started!");                                       
+      638 +                                                              
+      639 +                                                              
+      640 +  /******** Step through the movie, if one is provided *******
+          +*/                                                            
+      641 +                                                              
+      642 +  if (cfg.movie_prefix) {                                     
+      643 +    static const size_t filename_size = 1024;                 
+      644 +    char *buttons_filename = 0;                               
+      645 +    char *ram_filename = 0;                                   
+      646 +                                                              
+      647 +    buttons_filename = (char *)malloc(filename_size);         
+      648 +    snprintf(buttons_filename, filename_size, "%smovie-buttons
+          +.txt", cfg.movie_prefix);                                     
+      649 +                                                              
+      650 +    if (cfg.movie_readram) {                                  
+      651 +      ram_filename = (char *)malloc(filename_size);           
+      652 +      snprintf(ram_filename, filename_size, "%smovie-ram.bin",
+          + cfg.movie_prefix);                                           
+      653 +    }                                                         
+      654 +                                                              
+      655 +    fe->movie = (struct Movie *)malloc(sizeof(struct Movie)); 
+      656 +                                                              
+      657 +    if (!movie_init(fe->movie, buttons_filename, ram_filename)
+          +) {                                                           
+      658 +      log_error("Could not load movie");                      
+      659 +      free(fe->movie);                                        
+      660 +      fe->movie = 0;                                          
+      661 +    }                                                         
+      662 +    if (ram_filename) {                                       
+      663 +      free(ram_filename);                                     
+      664 +    }                                                         
+      665 +    if (buttons_filename) {                                   
+      666 +      free(buttons_filename);                                 
+      667 +    }                                                         
+      668 +  }                                                           
+      669 +                                                              
+      670 +  int skipto = cfg.movie_skip_to_before_frame;                
+      671 +                                                              
+      672 +  if (skipto > 0) {                                           
+      673 +    bool movie_is_valid = true;                               
+      674 +                                                              
+      675 +    if (fe->movie) {                                          
+      676 +      for (int i = 0; i < skipto; i++) {                      
+      677 +        if (advance_movie(fe)) {                              
+      678 +          SMB_tick(smb_state);                                
+      679 +        } else {                                              
+      680 +          movie_is_valid = false;                             
+      681 +          break;                                              
+      682          }
+      683 +      }                                                       
+      684 +      if (movie_is_valid && cfg.movie_readram) {              
+      685 +        movie_readram(fe->movie, SMB_ram(smb_state));         
+      686 +      }                                                       
+      687 +    }                                                         
+      688 +  }                                                           
+      689  
+      103 -        // Rendering                                          
+      104 -        ImGui::Render();                                      
+      105 -        SDL_SetRenderScale(renderer, io.DisplayFramebufferScal
+          -e.x, io.DisplayFramebufferScale.y);                           
+      106 -        SDL_SetRenderDrawColorFloat(renderer, clear_color.x, c
+          -lear_color.y, clear_color.z, clear_color.w);                  
+      107 -        SDL_RenderClear(renderer);                            
+      108 -        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawDa
+          -ta(), renderer);                                              
+      109 -        SDL_RenderPresent(renderer);                          
+      690 +                                                              
+      691 +  /******** Start game loop ********/                         
+      692 +                                                              
+      693 +  fe->rendering_enabled = true;                               
+      694 +                                                              
+      695 +  // On an NTSC NES: clocks per second, divided by clocks per 
+          +frame                                                         
+      696 +  // (approx 60.0988 fps)                                     
+      697 +  {                                                           
+      698 +    const double fps = 1789773.0 / 29780.5;                   
+      699 +                                                              
+      700 +    if (cfg.general.maxspeed) {                               
+      701 +      while (1) {                                             
+      702 +        if (imgui_tick(fe) != 0) {                            
+      703 +          break;                                              
+      704 +        }                                                     
+      705 +      }                                                       
+      706 +    } else {                                                  
+      707 +      timer_run_at_frequency(fps, fe, imgui_tick);            
+      708      }
+      709 +  }                                                           
+      710  
+      112 -    ImGui_ImplSDLRenderer3_Shutdown();                        
+      113 -    ImGui_ImplSDL3_Shutdown();                                
+      114 -    ImGui::DestroyContext();                                  
+      711  
+      116 -    SDL_DestroyRenderer(renderer);                            
+      117 -    SDL_DestroyWindow(window);                                
+      118 -    SDL_Quit();                                               
+      712 +  /******** Cleanup ********/                                 
+      713  
+      120 -    return 0;                                                 
+      121 -}                                                             
+      714 +  // a successful exit, as well as error conditions, jump here
+          + and finalize/free anything that needs to be                  
+      715 +exit:                                                         
+      716  
+      717 +  if (smb_state) {                                            
+      718 +    free(smb_state);                                          
+      719 +  }                                                           
+      720 +  if (fe) {                                                   
+      721 +    if (fe->smb_gl) {                                         
+      722 +      SMBgl_fini(fe->smb_gl);                                 
+      723 +      free(fe->smb_gl);                                       
+      724 +    }                                                         
+      725 +    if (fe->smb_raster) {                                     
+      726 +      SMBraster_fini(fe->smb_raster);                         
+      727 +      free(fe->smb_raster);                                   
+      728 +    }                                                         
+      729 +    if (fe->raster_texture) {                                 
+      730 +      glDeleteTextures(1, &fe->raster_texture);               
+      731 +    }                                                         
+      732 +    if (fe->raster_pixels) {                                  
+      733 +      free(fe->raster_pixels);                                
+      734 +    }                                                         
+      735 +    if (fe->romfile) {                                        
+      736 +      fclose(fe->romfile);                                    
+      737 +    }                                                         
+      738 +    if (fe->movie) {                                          
+      739 +      movie_fini(fe->movie);                                  
+      740 +      free(fe->movie);                                        
+      741 +    }                                                         
+      742 +    if (imgui_initialized) {                                  
+      743 +      ImGui_ImplOpenGL3_Shutdown();                           
+      744 +      ImGui_ImplSDL3_Shutdown();                              
+      745 +      ImGui::DestroyContext();                                
+      746 +    }                                                         
+      747 +    if (fe->window) {                                         
+      748 +      SDL_DestroyWindow(fe->window);                          
+      749 +    }                                                         
+      750 +    if (fe->audio) {                                          
+      751 +      SMB_audio_fini(fe->audio);                              
+      752 +    }                                                         
+      753 +    free(fe);                                                 
+      754 +  }                                                           
+      755 +  if (glcontext) {                                            
+      756 +    SDL_GL_DestroyContext(glcontext);                         
+      757 +  }                                                           
+      758 +  SDL_Quit();                                                 
+      759 +                                                              
+      760 +  return 0;                                                   
+      761 +}                                                             
+
+  Thought for 10s (ctrl+o to expand)
+
+● I should simplify the includes — this file is SDL3-only in practice (the imgui
+  library only builds SDL3 backends), so I shouldn't have USE_SDL2 branches
+  that would break the build if -DUSE_SDL2 is set.
+
+● Update(src/platform/main_imgui.cpp)
+  ⎿  User rejected update to src/platform/main_imgui.cpp
+
+● Understood, leaving the USE_SDL2 branches as-is for now.
+
+● Now let's build.
+
+  Thought for 6s, listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+● C++ doesn't allow goto to jump over variable initializations like C does. I
+  need to declare all locals up front before any goto.
+
+  Thought for 4s, read 1 file (ctrl+o to expand)
+
+● I need to hoist all variable declarations that cross goto exit to the top of
+  main(), C++ style. Let me fix this.
+
+● Update(src/platform/main_imgui.cpp)
+  ⎿  Added 4 lines
+      413    SDL_GLContext glcontext = 0;
+      414    struct SMB_callbacks callbacks = {0};
+      415    bool imgui_initialized = false;
+      416 +  u8 palette_rgb[0x40][3];                                    
+      417 +  float main_scale = 1.0f;                                    
+      418 +  SDL_WindowFlags window_flags = 0;                           
+      419 +  int skipto = 0;                                             
+      420  
+      421    if (!smb_state || !fe) {
+      422      goto exit;
+
+● Update(src/platform/main_imgui.cpp)
+  ⎿  Removed 2 lines
+      485  
+      486    /******** Initialize SDL / OpenGL ********/
+      487  
+      488 -  u8 palette_rgb[0x40][3];                                    
+      489 -                                                              
+      488    if (cfg.general.palette_filename) {
+      489      if (!load_palette(&palette_rgb[0][0], cfg.general.palette_
+           filename)) {
+      490        log_error("Could not load palette from file %s", cfg.gen
+           eral.palette_filename);
+
+● Update(src/platform/main_imgui.cpp)
+  ⎿  Added 2 lines, removed 2 lines
+      509    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+      510    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+      511  
+      512 -  float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimary
+          -Display());                                                   
+      513 -  SDL_WindowFlags window_flags = SDL_WINDOW_OPENGL | SDL_WINDO
+          -W_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSIT
+          -Y;                                                            
+      512 +  main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDispla
+          +y());                                                         
+      513 +  window_flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SD
+          +L_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;              
+      514  
+      515    fe->window = SDL_CreateWindow("SMB Vanilla",
+      516                                   (int)(256 * fe->video_scale *
+            main_scale),
+● Update(src/platform/main_imgui.cpp)
+  ⎿  Added 1 line, removed 1 line
+      669      }
+      670    }
+      671  
+      672 -  int skipto = cfg.movie_skip_to_before_frame;                
+      672 +  skipto = cfg.movie_skip_to_before_frame;                    
+      673  
+      674    if (skipto > 0) {
+      675      bool movie_is_valid = true;
+
+  Thought for 1m 48s, read 1 file, ran 1 shell command (ctrl+o to expand)
+
+● I found a real C-vs-C++ incompatibility in config.h: the cfgsection_X structs
+  are nested inside struct config's body, which in C gets file-scope tag
+  visibility, but in C++ becomes a nested class (config::cfgsection_X), causing
+  type mismatches in get_ini_entry. Let me fix this by hoisting the struct
+  definitions out to file scope, which is valid in both C and C++.
+
+● Update(src/platform/config.h)
+  ⎿  Added 17 lines, removed 1 line
+      29  }
+      30  
+      31  
+      32 -#define section(section, ...) struct cfgsection_##section { __V
+         -A_ARGS__ } section                                             
+      32 +// Defined at file scope (rather than nested inside struct conf
+         +ig) so that                                                    
+      33 +// C++ translation units see the same type as get_ini_entry() b
+         +elow - a                                                       
+      34 +// struct nested inside another struct's body has file scope in
+         + C, but                                                        
+      35 +// becomes a distinct nested class in C++.                     
+      36 +#define section(sectionname, ...) struct cfgsection_##sectionna
+         +me { __VA_ARGS__ };                                            
+      37  #define cstr(key) const char *key;
+      38  #define cbool(key) bool key;
+      39  #define cint(key) int32_t key;
+      40  #define clist(key, f, dtype, count) dtype key[count]; bool key#
+          #_present;
+      41  
+      42 +#include "config.inc"                                          
+      43 +                                                               
+      44 +#undef clist                                                   
+      45 +#undef cint                                                    
+      46 +#undef cbool                                                   
+      47 +#undef cstr                                                    
+      48 +#undef section                                                 
+      49 +                                                               
+      50 +#define section(sectionname, ...) struct cfgsection_##sectionna
+         +me sectionname;                                                
+      51 +                                                               
+      52  struct config {
+      53    struct strbufs _strbufs;
+      54  
+     ...
+      64  #include "config.inc"
+      65  };
+      66  
+      67 +#undef section                                                 
+      68 +                                                               
+      69  static bool config_init(struct config *cfg) {
+      70    memset(cfg, 0, sizeof(struct config));
+      71    size_t strbufs_limit = 4096;
+
+● Now the second usage of section (in get_ini_entry) redefines section without
+  undef'ing first, which would already error. Let me check that macro isn't
+  already #undef'd before redefinition there.
+
+  Read 1 file (ctrl+o to expand)
+
+● Good — this section already #undef's and redefines
+  section/cstr/cbool/cint/clist right before this point since C's preprocessor
+  allows silently redefining without a prior #undef only if identical; but since
+  these are different, it would error unless already undef'd. Since my edit
+  added #undefs after the first usage, this second definition (line 218) is now
+  fine. Let's rebuild.
+
+  Thought for 6s, ran 1 shell command (ctrl+o to expand)
+
+● These are C-implicit-conversion issues from void*, harmless to fix with
+  explicit casts (valid in both C and C++).
+
+  Read 1 file (ctrl+o to expand)
+
+● Update(src/platform/config.h)
+  ⎿  Added 1 line, removed 1 line
+      69  static bool config_init(struct config *cfg) {
+      70    memset(cfg, 0, sizeof(struct config));
+      71    size_t strbufs_limit = 4096;
+      72 -  cfg->_strbufs.buf = malloc(strbufs_limit);                   
+      72 +  cfg->_strbufs.buf = (char *)malloc(strbufs_limit);           
+      73    cfg->_strbufs.cur = 0;
+      74    cfg->_strbufs.limit = cfg->_strbufs.buf ? strbufs_limit : 0;
+      75    return true;
+
+● Update(src/platform/config.h)
+  ⎿  Added 1 line, removed 1 line
+      210  }
+      211  
+      212  static void *read_key_binding(const char *key, void *buf) {
+      213 -  SDL_Scancode *sc = buf;                                     
+      213 +  SDL_Scancode *sc = (SDL_Scancode *)buf;                     
+      214    *sc = SDL_GetScancodeFromName(key);
+      215    return sc+1;
+      216  }
+
+● Update(src/platform/config.h)
+  ⎿  Added 1 line, removed 1 line
+      247    }
+      248  
+      249  static int get_ini_entry(void *user, const char *section, cons
+           t char *name, const char *value) {
+      250 -  struct config *cfg = user;                                  
+      250 +  struct config *cfg = (struct config *)user;                 
+      251  
+      252  #include "config.inc"
+      253  
+
+  Thought for 13s, ran 1 shell command (ctrl+o to expand)
+
+● This is the extern "C" linkage gap flagged in research —
+  render_opengl.h/render_raster.h lack extern "C" guards, so C++ mangles the
+  calls while the .c files export unmangled names. Let me add guards matching
+  the pattern in movie.h/timer.h.
+
+  Read 3 files (ctrl+o to expand)
+
+● Update(src/platform/render_opengl.h)
+  ⎿  Added 8 lines
+       6  
+       7  struct SMBgl;
+       8  
+       9 +#ifdef __cplusplus                                             
+      10 +extern "C" {                                                   
+      11 +#endif                                                         
+      12 +                                                               
+      13  size_t SMBgl_size(void);
+      14  
+      15  bool SMBgl_init(struct SMBgl *gl);
+     ...
+      24  
+      25  bool SMBgl_render_frame(struct SMBgl *gl);
+      26  
+      27 +#ifdef __cplusplus                                             
+      28 +}                                                              
+      29  #endif
+      30 +                                                               
+      31 +#endif                                                         
+
+● Update(src/platform/render_raster.h)
+  ⎿  Added 8 lines
+       6  
+       7  struct SMBraster;
+       8  
+       9 +#ifdef __cplusplus                                             
+      10 +extern "C" {                                                   
+      11 +#endif                                                         
+      12 +                                                               
+      13  size_t SMBraster_size(void);
+      14  
+      15  bool SMBraster_init(struct SMBraster *r);
+     ...
+      25  void SMBraster_set_buffer(struct SMBraster *r, unsigned char *r
+          gb_pixels, int stride);
+      26  void SMBraster_clear(struct SMBraster *r);
+      27  
+      28 +#ifdef __cplusplus                                             
+      29 +}                                                              
+      30  #endif
+      31 +                                                               
+      32 +#endif                                                         
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Build succeeds. Now let's verify by running it.
+
+  Thought for 16s, listed 1 directory, ran 2 shell commands (ctrl+o to expand)
+
+● It ran for the full 5 seconds without crashing (killed by timeout, not an
+  error). No output was captured, likely due to stdout buffering. Let me check
+  more carefully and test the raster path too.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Good — OpenGL path initializes and runs without crashing for 5 seconds (exit
+  code 124 = timeout, expected since main loop runs forever). Now let's test the
+  raster path.
+
+  Thought for 5s, read 1 file, ran 1 shell command (ctrl+o to expand)
+● Update(smbvanilla.ini)
+  ⎿  Added 1 line, removed 1 line
+      26  
+      27  
+      28  [graphics]
+      29 -opengl = true                                                  
+      29 +opengl = false                                                 
+      30  software = true
+      31  video_scale = 3
+      32  
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Raster path also works without crashing. Now let's test maxspeed mode and
+  restore the ini.
+
+● Update(smbvanilla.ini)
+  ⎿  Added 1 line, removed 1 line
+       9  
+      10  # If set to true, run the game as fast as it can
+      11  # Note this may make it virtually unplayable
+      12 -# maxspeed = true                                              
+      12 +maxspeed = true                                                
+      13  
+      14  
+      15  [debug]
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now let's restore the ini file to its original state.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Good, that's just my own restore reflected back. Now let's confirm smbvanilla
+  (the SDL frontend) still builds/runs fine, since we touched shared headers
+  (config.h, render_opengl.h, render_raster.h).
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Already built cleanly earlier (smbvanilla linked successfully in the log
+  above). Let's quickly sanity check the original SDL frontend still runs
+  correctly too.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Both frontends build and run cleanly. Let's do a final check of meson 
+  test/full clean rebuild to be thorough, then wrap up.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Clean build from scratch succeeds for all targets (smbvanilla,
+  smbvanilla_imgui, smbvanilla_testrunner). Cleaning up the temp build dir.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+  Thought for 13s, recalled 1 memory (ctrl+o to expand)
+
+● All four implementation tasks are done. Summary of what changed:
+
+  Build system:
+  - meson.build (root): swapped imgui_impl_sdlrenderer3.cpp for
+  imgui_impl_opengl3.cpp in the shared imgui library.
+  - src/platform/meson.build: smbvanilla_imgui now also builds audio_sdl.cpp,
+  timer_sdl.c, movie.c, render_raster.c, thirdparty/ini.c, and opengl_sources
+  (real or no-op depending on GLEW), matching smbvanilla.
+
+  main_imgui.cpp: rewritten to mirror main_sdl.c — full config/CLI parsing, ROM
+  loading, audio, movie/TAS playback, keybindings, debug RAM/PPU hotkeys, and
+  dual OpenGL/raster rendering. It now creates a real GL context (via
+  imgui_impl_opengl3 + imgui_impl_sdl3's InitForOpenGL), letterboxes the 256:240
+  picture to fill the window using glScissor/glViewport for the GL path or a
+  glTexSubImage2D-uploaded texture drawn via
+  ImGui::GetBackgroundDrawList()->AddImage() for the raster path, with the menu
+  bar rendered on top.
+
+  Bug fixes found along the way (both also affect/benefit main_sdl.c's shared
+  headers):
+  - render_opengl.h/render_raster.h were missing extern "C" guards, causing
+  linker errors when called from the new C++ frontend — added, matching the
+  existing pattern in movie.h/timer.h.
+  - config.h's X-macro-generated cfgsection_* structs were nested inside struct 
+  config's body — valid file-scope declarations in C, but distinct nested
+  classes in C++, breaking get_ini_entry. Hoisted them to file scope via macro
+  reuse so both C and C++ builds see the same types.
+  - A few implicit void* conversions in config.h needed explicit casts for C++.
+
+  Verified: clean build from scratch succeeds for smbvanilla, smbvanilla_imgui,
+  and smbvanilla_testrunner; ran smbvanilla_imgui under OpenGL, software-raster,
+  and --maxspeed raster configs — all initialize and run without crashing
+  (headless Wayland session, so visual confirmation wasn't possible, but
+  init/render loop, renderer selection logging, and clean shutdown all worked as
+  expected). smbvanilla (original SDL frontend) still builds and runs correctly
+  after the shared-header changes.
+
+✻ Cogitated for 39m 26s

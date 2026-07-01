@@ -29,11 +29,25 @@ static const char *strbufs_alloc(struct strbufs *sb, const char *str) {
 }
 
 
-#define section(section, ...) struct cfgsection_##section { __VA_ARGS__ } section
+// Defined at file scope (rather than nested inside struct config) so that
+// C++ translation units see the same type as get_ini_entry() below - a
+// struct nested inside another struct's body has file scope in C, but
+// becomes a distinct nested class in C++.
+#define section(sectionname, ...) struct cfgsection_##sectionname { __VA_ARGS__ };
 #define cstr(key) const char *key;
 #define cbool(key) bool key;
 #define cint(key) int32_t key;
 #define clist(key, f, dtype, count) dtype key[count]; bool key##_present;
+
+#include "config.inc"
+
+#undef clist
+#undef cint
+#undef cbool
+#undef cstr
+#undef section
+
+#define section(sectionname, ...) struct cfgsection_##sectionname sectionname;
 
 struct config {
   struct strbufs _strbufs;
@@ -50,10 +64,12 @@ struct config {
 #include "config.inc"
 };
 
+#undef section
+
 static bool config_init(struct config *cfg) {
   memset(cfg, 0, sizeof(struct config));
   size_t strbufs_limit = 4096;
-  cfg->_strbufs.buf = malloc(strbufs_limit);
+  cfg->_strbufs.buf = (char *)malloc(strbufs_limit);
   cfg->_strbufs.cur = 0;
   cfg->_strbufs.limit = cfg->_strbufs.buf ? strbufs_limit : 0;
   return true;
@@ -194,7 +210,7 @@ static size_t parse_comma_delimited(const char *input, void* (*map)(const char*,
 }
 
 static void *read_key_binding(const char *key, void *buf) {
-  SDL_Scancode *sc = buf;
+  SDL_Scancode *sc = (SDL_Scancode *)buf;
   *sc = SDL_GetScancodeFromName(key);
   return sc+1;
 }
@@ -231,7 +247,7 @@ static void *read_key_binding(const char *key, void *buf) {
   }
 
 static int get_ini_entry(void *user, const char *section, const char *name, const char *value) {
-  struct config *cfg = user;
+  struct config *cfg = (struct config *)user;
 
 #include "config.inc"
 

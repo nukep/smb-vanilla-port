@@ -6,6 +6,10 @@
 
 struct SMBraster;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 size_t SMBraster_size(void);
 
 bool SMBraster_init(struct SMBraster *r);
@@ -20,5 +24,9 @@ void SMBraster_draw_tile(struct SMBraster *r, const struct SMB_tile tile);
 
 void SMBraster_set_buffer(struct SMBraster *r, unsigned char *rgb_pixels, int stride);
 void SMBraster_clear(struct SMBraster *r);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
