@@ -20,8 +20,16 @@ extern "C" {
 #else
 #  include <SDL3/SDL.h>
 #  include <SDL3/SDL_opengl.h>
+#  include <SDL3/SDL_dialog.h>
 #endif
 }
+
+#include "ui.hpp"
+
+#include <stdio.h>
+
+#define log_error(msg, ...) fprintf(stderr, "ERROR: " msg "\n", ##__VA_ARGS__)
+#define log_info(msg, ...)  fprintf(stdout, "INFO: " msg "\n", ##__VA_ARGS__)
 
 void preprocess_event(void *userdata, SDL_Event *e) {
 #ifdef USE_SDL2
@@ -32,11 +40,28 @@ void preprocess_event(void *userdata, SDL_Event *e) {
 }
 
 void on_keypress_change(void *userdata, SDL_Scancode sc, bool isdown) {
+}
 
+void rom_dialog_callback(void *userdata, const char *const *filelist, int filter) {
+  Ui *ui = (Ui*)userdata;
+
+  if (!filelist) {
+    log_error("Error picking file: %s", SDL_GetError());
+    return;
+  }
+
+  const char *path = filelist[0];
+
+  if (!path) {
+    // User cancelled
+    return;
+  }
+
+  ui->try_open_romfile(path);
 }
 
 bool tick(void *userdata) {
-  static bool show_demo_window = false;
+  Ui *ui = (Ui*)userdata;
 
   windowing_clear();
 
@@ -61,29 +86,7 @@ bool tick(void *userdata) {
 #endif
   ImGui::NewFrame();
 
-  ImGui::BeginMainMenuBar();
-  if (ImGui::BeginMenu("File")) {
-    if (ImGui::MenuItem("Load ROM")) {
-    }
-    ImGui::Separator();
-    if (ImGui::MenuItem("Quit")) {
-      ImGui::EndMenu();
-      ImGui::EndMainMenuBar();
-      return 1;
-    }
-    ImGui::EndMenu();
-  }
-  if (ImGui::BeginMenu("Debug")) {
-    if (ImGui::MenuItem("Show ImGui demo window", nullptr, show_demo_window)) {
-      show_demo_window = !show_demo_window;
-    }
-    ImGui::EndMenu();
-  }
-  ImGui::EndMainMenuBar();
-
-  if (show_demo_window) {
-    ImGui::ShowDemoWindow(&show_demo_window);
-  }
+  ui->tick();
 
   ImGui::Render();
 
@@ -101,15 +104,29 @@ bool tick(void *userdata) {
 #endif
   }
 
+  if (ui->should_load_rom()) {
+    static const SDL_DialogFileFilter filters[] = {
+      { .name = "NES and FDS ROMs", .pattern = "nes;fds" },
+    };
+    SDL_ShowOpenFileDialog(rom_dialog_callback, userdata, windowing_sdl_window(), &filters[0], 1, 0, false);
+  }
+
+  if (ui->should_quit()) {
+    return false;
+  }
+
   return true;
 }
 
 int main(int argc, char *argv[]) {
+  Ui ui;
+
   const struct windowing_sdl_init_settings settings = {
     .opengl = true,
     .renderer_fallback = true,
     .maxspeed = false,
     .video_scale = 2,
+    .userdata = &ui,
     .preprocess_event = preprocess_event,
     .on_keypress_change = on_keypress_change,
     .tick = tick,

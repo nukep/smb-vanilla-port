@@ -66,6 +66,8 @@ executable('smbvanilla',
 
 executable('smbvanilla_imgui',
            ['main_imgui_sdl.cpp',
+            'ui.cpp',
+            'smbsession.cpp',
             'windowing_sdl.c',
             'audio_sdl.cpp',
             'timer_sdl.c',

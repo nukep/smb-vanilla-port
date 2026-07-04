@@ -1,0 +1,51 @@
+#include "ui.hpp"
+#include "imgui.h"
+
+#include <stdio.h>
+
+#define log_error(msg, ...) fprintf(stderr, "ERROR: " msg "\n", ##__VA_ARGS__)
+#define log_info(msg, ...)  fprintf(stdout, "INFO: " msg "\n", ##__VA_ARGS__)
+
+Ui::Ui() {
+
+}
+
+Ui::~Ui() {
+
+}
+
+void Ui::tick() {
+  if (this->_session) {
+    this->_session->tick();
+  }
+
+  ImGui::BeginMainMenuBar();
+  if (ImGui::BeginMenu("File")) {
+    if (ImGui::MenuItem("Load ROM")) {
+      // Tell the windowing system to conjure up a file picker, and to eventually call try_open_romfile().
+      this->_should_load_rom = true;
+    }
+    ImGui::Separator();
+    if (ImGui::MenuItem("Quit")) {
+      // Tell the windowing system to quit
+      this->_should_quit = true;
+    }
+    ImGui::EndMenu();
+  }
+  if (ImGui::BeginMenu("Debug")) {
+    if (ImGui::MenuItem("Show ImGui demo window", nullptr, this->_show_demo_window)) {
+      this->_show_demo_window = !this->_show_demo_window;
+    }
+    ImGui::EndMenu();
+  }
+  ImGui::EndMainMenuBar();
+
+  if (this->_show_demo_window) {
+    ImGui::ShowDemoWindow(&this->_show_demo_window);
+  }
+}
+
+void Ui::try_open_romfile(const char *path) {
+  // TODO
+  log_info("User picked file: %s", path);
+}
