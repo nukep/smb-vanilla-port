@@ -40,6 +40,8 @@ void preprocess_event(void *userdata, SDL_Event *e) {
 }
 
 void on_keypress_change(void *userdata, SDL_Scancode sc, bool isdown) {
+  Ui *ui = (Ui*)userdata;
+  ui->on_keypress_change((int)sc, isdown);
 }
 
 void rom_dialog_callback(void *userdata, const char *const *filelist, int filter) {

@@ -1,6 +1,8 @@
 #include "ui.hpp"
 #include "imgui.h"
+#include "smbsession.hpp"
 
+#include <memory>
 #include <stdio.h>
 
 #define log_error(msg, ...) fprintf(stderr, "ERROR: " msg "\n", ##__VA_ARGS__)
@@ -46,6 +48,16 @@ void Ui::tick() {
 }
 
 void Ui::try_open_romfile(const char *path) {
-  // TODO
-  log_info("User picked file: %s", path);
+  auto session = std::make_unique<SMBSessionCpp>(path);
+  if (!session->valid()) {
+    log_error("Could not load ROM: %s", path);
+    return;
+  }
+  this->_session = std::move(session);
+}
+
+void Ui::on_keypress_change(int sdl_scancode, bool isdown) {
+  if (this->_session) {
+    this->_session->on_keypress_change(sdl_scancode, isdown);
+  }
 }
