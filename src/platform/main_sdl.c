@@ -391,6 +391,7 @@ int main(int argc, char *argv[]) {
 
   struct windowing_sdl_init_settings init_settings = {
     .opengl = cfg.graphics.opengl,
+    .renderer_fallback = false,
     .maxspeed = cfg.general.maxspeed,
     .video_scale = 3,
     .userdata = fe,

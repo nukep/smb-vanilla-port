@@ -11,6 +11,7 @@
 
 struct windowing_sdl_init_settings {
   bool opengl;
+  bool renderer_fallback;
   bool maxspeed;
   int video_scale;
   void *userdata;
@@ -22,8 +23,10 @@ struct windowing_sdl_init_settings {
 bool windowing_init(const struct windowing_sdl_init_settings *s);
 void windowing_fini(void);
 void windowing_loop(void);
+void windowing_clear(void);
 
 SDL_Window *windowing_sdl_window(void);
+SDL_Renderer *windowing_sdl_renderer(void);
 SDL_GLContext windowing_sdl_glcontext(void);
 void windowing_sdl_glcontext_fini(void);
 

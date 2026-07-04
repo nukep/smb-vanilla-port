@@ -4,10 +4,20 @@
 #include "windowing_sdl.h"
 #include "timer.h"
 
+#include <SDL3/SDL_render.h>
 #include <SDL3/SDL_video.h>
 #include <stdio.h>
 
+#ifdef OPENGL_ENABLED
+#ifdef USE_SDL2
+#  include <SDL_opengl.h>
+#else
+#  include <SDL3/SDL_opengl.h>
+#endif
+#endif
+
 SDL_Window *window = 0;
+SDL_Renderer *renderer = 0;
 SDL_GLContext glcontext = 0;
 struct windowing_sdl_init_settings init_settings;
 
@@ -18,6 +28,7 @@ bool windowing_init(const struct windowing_sdl_init_settings *s) {
   init_settings = *s;
 
   const bool opengl = s->opengl;
+  const bool renderer_fallback = s->renderer_fallback;
   const bool maxspeed = s->maxspeed;
   const int video_scale = s->video_scale;
 
@@ -72,7 +83,16 @@ bool windowing_init(const struct windowing_sdl_init_settings *s) {
       SDL_GL_SetSwapInterval(0);
     }
   }
+  else
 #endif
+  if (renderer_fallback)
+  {
+#ifdef USE_SDL2
+    renderer = SDL_CreateRenderer(window, -1, 0);
+#else
+    renderer = SDL_CreateRenderer(window, 0);
+#endif
+  }
 
   return true;
 }
@@ -91,6 +111,9 @@ void windowing_sdl_glcontext_fini(void) {
 
 void windowing_fini(void) {
   windowing_sdl_glcontext_fini();
+  if (renderer) {
+    SDL_DestroyRenderer(renderer);
+  }
   if (window) {
     SDL_DestroyWindow(window);
   }
@@ -150,6 +173,8 @@ int sdl_tick(void *userdata) {
 
   if (glcontext) {
     SDL_GL_SwapWindow(window);
+  } else if (renderer) {
+    SDL_RenderPresent(renderer);
   } else {
     SDL_UpdateWindowSurface(window);
   }
@@ -178,8 +203,29 @@ void windowing_loop(void) {
   }
 }
 
+void windowing_clear(void) {
+#ifdef OPENGL_ENABLED
+  if (glcontext) {
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+  }
+  else
+#endif
+  {
+    if (renderer) {
+      SDL_RenderClear(renderer);
+    } else {
+      SDL_UpdateWindowSurface(window);
+    }
+  }
+}
+
 SDL_Window *windowing_sdl_window(void) {
   return window;
+}
+
+SDL_Renderer *windowing_sdl_renderer(void) {
+  return renderer;
 }
 
 SDL_GLContext windowing_sdl_glcontext(void) {
