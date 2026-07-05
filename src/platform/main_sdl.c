@@ -10,6 +10,7 @@
 #else
 #  include <SDL3/SDL.h>
 #endif
+#include "palette_builtin.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -431,12 +432,13 @@ int main(int argc, char *argv[]) {
 
   /******** Initialize SDL / OpenGL ********/
 
-  u8 palette_rgb[0x40][3];
+  u8 palette_rgb[NUM_PALETTE_ENTRIES][3];
+
+  memcpy(&palette_rgb[0][0], &PALETTE_BUILTIN[0][0], sizeof(palette_rgb));
 
   if (cfg.general.palette_filename) {
     if (!load_palette(&palette_rgb[0][0], cfg.general.palette_filename)) {
-      log_error("Could not load palette from file %s", cfg.general.palette_filename);
-      goto exit;
+      log_info("Could not load palette from file %s. Using built-in palette.", cfg.general.palette_filename);
     }
   }
 
