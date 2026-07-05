@@ -4,6 +4,7 @@
 #include "render_opengl.h"
 #include "render_raster.h"
 #include "windowing_sdl.h"
+#include "palette_builtin.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -199,10 +200,12 @@ bool SMBSession_init(struct SMBSession *s, const char *rompath) {
     goto err;
   }
 
-  // Hardcoded for now
-  u8 palette_rgb[0x40][3] = {0};
+  u8 palette_rgb[NUM_PALETTE_ENTRIES][3] = {0};
+
+  memcpy(&palette_rgb[0][0], &PALETTE_BUILTIN[0][0], sizeof(palette_rgb));
+
   if (!load_palette(&palette_rgb[0][0], "palette.pal")) {
-    log_error("Could not load palette from file %s", "palette.pal");
+    log_info("Could not load palette from file %s. Using built-in palette.", "palette.pal");
   }
 
   if (s->smb_gl) {
