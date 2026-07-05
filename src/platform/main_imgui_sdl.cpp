@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
     .opengl = true,
     .renderer_fallback = true,
     .maxspeed = false,
-    .video_scale = 2,
+    .video_scale = 3,
     .userdata = &ui,
     .preprocess_event = preprocess_event,
     .on_keypress_change = on_keypress_change,
@@ -135,6 +135,8 @@ int main(int argc, char *argv[]) {
   };
 
   windowing_init(&settings);
+
+  ui.try_open_romfile("smb.nes");
 
   float main_scale = 1.0f;
 

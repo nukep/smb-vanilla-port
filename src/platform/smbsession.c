@@ -5,6 +5,15 @@
 #include "render_raster.h"
 #include "windowing_sdl.h"
 #include "palette_builtin.h"
+#include <SDL3/SDL_render.h>
+
+#ifdef OPENGL_ENABLED
+#ifdef USE_SDL2
+#  include <SDL_opengl.h>
+#else
+#  include <SDL3/SDL_opengl.h>
+#endif
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +44,9 @@ struct SMBSession {
   // Raster mode
   struct SMBraster *smb_raster;
   SDL_Texture *texture;
+
+  // Viewport
+  int viewport_x, viewport_y, viewport_w, viewport_h;
 };
 
 size_t SMBSession_size(void) {
@@ -192,6 +204,12 @@ bool SMBSession_init(struct SMBSession *s, const char *rompath) {
         free(s->smb_raster);
         s->smb_raster = 0;
       }
+      if (!SDL_SetTextureScaleMode(s->texture, SDL_SCALEMODE_NEAREST)) {
+        log_error("Could not create SDL texture: %s", SDL_GetError());
+        SMBraster_fini(s->smb_raster);
+        free(s->smb_raster);
+        s->smb_raster = 0;
+      }
     }
   }
 
@@ -275,6 +293,24 @@ void SMBSession_fini(struct SMBSession *s) {
   }
 }
 
+void SMBSession_pre_draw(struct SMBSession *s, int viewport_x, int viewport_y, int viewport_w, int viewport_h) {
+  if (!SMBSession_valid(s)) {
+    return;
+  }
+
+  s->viewport_x = viewport_x;
+  s->viewport_y = viewport_y;
+  s->viewport_w = viewport_w;
+  s->viewport_h = viewport_h;
+
+#ifdef OPENGL_ENABLED
+  if (s->smb_gl) {
+    glViewport(viewport_x, viewport_y, viewport_w, viewport_h);
+    return;
+  }
+#endif
+}
+
 void SMBSession_tick(struct SMBSession *s) {
   if (!SMBSession_valid(s)) {
     return;
@@ -308,20 +344,28 @@ void SMBSession_tick(struct SMBSession *s) {
   SMB_tick(s->smb_state);
 
   SDL_UnlockTexture(s->texture);
+}
 
-  SDL_Renderer *renderer = windowing_sdl_renderer();
+void SMBSession_post_draw(struct SMBSession *s) {
+  if (!SMBSession_valid(s)) {
+    return;
+  }
 
-  int window_width = 0;
-  int window_height = 0;
-  SDL_GetWindowSize(windowing_sdl_window(), &window_width, &window_height);
+  if (s->smb_gl) {
+    return;
+  }
+
+  if (s->texture) {
+    SDL_Renderer *renderer = windowing_sdl_renderer();
 
 #ifdef USE_SDL2
-  const SDL_Rect dstrect = {0, 0, window_width, window_height};
-  SDL_RenderCopy(renderer, s->texture, 0, &dstrect);
+    const SDL_Rect dstrect = {s->viewport_x, s->viewport_y, s->viewport_w, s->viewport_h};
+    SDL_RenderCopy(renderer, s->texture, 0, &dstrect);
 #else
-  const SDL_FRect dstrect = {0, 0, (float)window_width, (float)window_height};
-  SDL_RenderTexture(renderer, s->texture, 0, &dstrect);
+    const SDL_FRect dstrect = {(float)s->viewport_x, (float)s->viewport_y, (float)s->viewport_w, (float)s->viewport_h};
+    SDL_RenderTexture(renderer, s->texture, 0, &dstrect);
 #endif
+  }
 }
 
 // Called whenever a key is newly pressed or newly released (not on repeat).

@@ -18,7 +18,13 @@ Ui::~Ui() {
 
 void Ui::tick() {
   if (this->_session) {
+    auto viewport_size = ImGui::GetMainViewport()->Size;
+    int viewport_width = (int)viewport_size.x;
+    int viewport_height = (int)viewport_size.y;
+
+    this->_session->pre_draw(0, 0, viewport_width, viewport_height);
     this->_session->tick();
+    this->_session->post_draw();
   }
 
   ImGui::BeginMainMenuBar();
@@ -50,7 +56,6 @@ void Ui::tick() {
 void Ui::try_open_romfile(const char *path) {
   auto session = std::make_unique<SMBSessionCpp>(path);
   if (!session->valid()) {
-    log_error("Could not load ROM: %s", path);
     return;
   }
   this->_session = std::move(session);

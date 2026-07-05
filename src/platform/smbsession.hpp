@@ -27,9 +27,9 @@ public:
     free(this->_session);
   }
 
-  inline void tick() {
-    SMBSession_tick(this->_session);
-  }
+  inline void pre_draw(int viewport_x, int viewport_y, int viewport_w, int viewport_h) { SMBSession_pre_draw(this->_session, viewport_x, viewport_y, viewport_w, viewport_h); }
+  inline void tick() { SMBSession_tick(this->_session); }
+  inline void post_draw() { SMBSession_post_draw(this->_session); }
 
   inline void on_keypress_change(int sdl_scancode, bool isdown) {
     SMBSession_on_keypress_change(this->_session, sdl_scancode, isdown);

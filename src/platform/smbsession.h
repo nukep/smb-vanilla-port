@@ -14,7 +14,9 @@ size_t SMBSession_size(void);
 bool SMBSession_init(struct SMBSession *s, const char *rompath);
 void SMBSession_fini(struct SMBSession *s);
 
+void SMBSession_pre_draw(struct SMBSession *s, int viewport_x, int viewport_y, int viewport_w, int viewport_h);
 void SMBSession_tick(struct SMBSession *s);
+void SMBSession_post_draw(struct SMBSession *s);
 
 void SMBSession_on_keypress_change(struct SMBSession *s, int sdl_scancode, bool isdown);
 
