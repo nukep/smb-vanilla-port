@@ -231,3 +231,7 @@ SDL_Renderer *windowing_sdl_renderer(void) {
 SDL_GLContext windowing_sdl_glcontext(void) {
   return glcontext;
 }
+
+float windowing_sdl_display_scale(void) {
+  return SDL_GetWindowDisplayScale(window);
+}

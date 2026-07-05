@@ -44,6 +44,15 @@ void on_keypress_change(void *userdata, SDL_Scancode sc, bool isdown) {
   ui->on_keypress_change((int)sc, isdown);
 }
 
+static void apply_dpi_scale(float scale) {
+  ImGuiStyle &style = ImGui::GetStyle();
+  if (style.FontScaleDpi != scale) {
+    log_info("DPI scale: %.2f", scale);
+    style.ScaleAllSizes(scale);
+    style.FontScaleDpi = scale;
+  }
+}
+
 void rom_dialog_callback(void *userdata, const char *const *filelist, int filter) {
   Ui *ui = (Ui*)userdata;
 
@@ -64,6 +73,8 @@ void rom_dialog_callback(void *userdata, const char *const *filelist, int filter
 
 bool tick(void *userdata) {
   Ui *ui = (Ui*)userdata;
+
+  apply_dpi_scale(windowing_sdl_display_scale());
 
   windowing_clear();
 
@@ -138,8 +149,6 @@ int main(int argc, char *argv[]) {
 
   ui.try_open_romfile("smb.nes");
 
-  float main_scale = 1.0f;
-
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
   {
@@ -148,10 +157,6 @@ int main(int argc, char *argv[]) {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
     ImGui::StyleColorsDark();
-
-    ImGuiStyle &style = ImGui::GetStyle();
-    style.ScaleAllSizes(main_scale);
-    style.FontScaleDpi = main_scale;
   }
 
 #ifdef OPENGL_ENABLED

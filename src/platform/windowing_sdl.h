@@ -29,5 +29,6 @@ SDL_Window *windowing_sdl_window(void);
 SDL_Renderer *windowing_sdl_renderer(void);
 SDL_GLContext windowing_sdl_glcontext(void);
 void windowing_sdl_glcontext_fini(void);
+float windowing_sdl_display_scale(void);
 
 #endif
