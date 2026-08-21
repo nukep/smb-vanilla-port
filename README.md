@@ -17,6 +17,8 @@ Progress made:
 - [ ] Unit and regression tests
 - [ ] A decent UI/UX, customizable controls
 
+*No AI-generated code or assets are included in this project.*
+
 
 ## Running the game
 

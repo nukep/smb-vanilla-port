@@ -77,16 +77,19 @@ This includes things like supported operating systems, command-line options, the
 
 ## AI policy
 
-We have a strict AI policy, due to the verification requirements for this project.
+We have a strict AI policy, due to both educational and verification requirements for this project. We recognize that the original SMB is already available to play through various channels - meaning the value of this project is not _just_ implementing the game. We want to offer a high-quality, curated codebase that enthusiasts can study and use. This requires humans to understand and take ownership of the result.
 
-The use of LLM output as commited code or documentation, is prohibited.
+**The use of generative AI to produce commited code, documentation, and correspondance - is prohibited**. This includes the use of LLMs such as ChatGPT, Claude, Gemini, and so on.
 
-All contributor correspondance (e.g. issues, pull requests) must be written by a person.
+Concretely, the following must be entirely written by humans and/or determinstic tooling:
+- Code and documentation merged into the main branch
+- Commit messages
+- Issues
+- Pull requests
 
-LLMs are allowed for assistive tasks that do not directly produce committed code or documentation, but it must be disclosed for transparency. You must make a reasonable effort to prove correctness. This will be held to a high standard.
-This is in the interest of keeping processes open. Share chat logs/prompts if applicable.
+Where "deterministic tooling" includes linters (clang-tidy), decompilers (Ghidra), rewriters (Coccinelle), scripts (Python and bash scripts), and so on.
 
-The bottom line: Verification is important for this project, and must involve humans and deterministic tooling.
+Generative AI is currently permitted for tasks that do not produce committed code or documentation. Example uses include searching the code or generating throwaway scripts. You must make a reasonable effort to prove correctness. This will be held to a high standard. This is in the interest of keeping processes open. Share the process, including chat logs if applicable.
 
 Unsolicited bot contributions will be rejected.
 
