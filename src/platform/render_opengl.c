@@ -10,8 +10,8 @@
 #include <string.h>
 #include <GL/glew.h>
 
-#define log_error(msg, ...) fprintf(stderr, "ERROR: " msg "\n", ##__VA_ARGS__)
-#define log_info(msg, ...)  fprintf(stdout, "INFO: " msg "\n", ##__VA_ARGS__)
+#define log_error(msg, ...) fprintf(stderr, "ERROR [opengl]: " msg "\n", ##__VA_ARGS__)
+#define log_info(msg, ...)  fprintf(stdout, "INFO [opengl]: " msg "\n", ##__VA_ARGS__)
 
 static bool gl_initshaders(struct SMBgl *gl);
 
@@ -61,7 +61,7 @@ bool SMBgl_init(struct SMBgl *gl) {
 
   GLenum err = glewInit();
   if (err != GLEW_OK) {
-    fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    log_error("Could not run glewInit: %s", glewGetErrorString(err));
     return false;
   }
 
