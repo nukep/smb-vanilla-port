@@ -1382,11 +1382,12 @@ void ColorRotation(void) {
 
 // Draw a 2x2 block at the position at x,y, where x is 0 to 15, and y is 0 to 14.
 // If nt = 0, then draw on the first nametable. Otherwise draw on the second.
-static inline void draw_block_metatile(const u8 vramoff, const u8 blockgfxidx, const u8 x, const u8 y, const u8 nt) {
+static inline void draw_block_metatile(const u8 vramoff, const u8 x, const u8 y, const u8 nt, const enum block_gfx_idx idx) {
   const u16 nametable = nt == 0 ? 0x2000 : 0x2400;
   const u16 addr = nametable + (y*2*32) + x*2;
 
-  static const u8 block_tiles[5][4] = {
+  // BlockGfxData
+  static const u8 block_tiles[_BMT_NUM][4] = {
     { 0x45, 0x45, 0x47, 0x47 },
     { 0x47, 0x47, 0x47, 0x47 },
     { 0x57, 0x58, 0x59, 0x5a },
@@ -1397,14 +1398,14 @@ static inline void draw_block_metatile(const u8 vramoff, const u8 blockgfxidx, c
   VRAM_Page[vramoff + 0] = addr >> 8;
   VRAM_Page[vramoff + 1] = addr & 0xff;
   VRAM_Page[vramoff + 2] = 2;
-  VRAM_Page[vramoff + 3] = block_tiles[blockgfxidx][0];
-  VRAM_Page[vramoff + 4] = block_tiles[blockgfxidx][1];
+  VRAM_Page[vramoff + 3] = block_tiles[idx][0];
+  VRAM_Page[vramoff + 4] = block_tiles[idx][1];
 
   VRAM_Page[vramoff + 5] = addr >> 8;
   VRAM_Page[vramoff + 6] = (addr & 0xff) + 32;
   VRAM_Page[vramoff + 7] = 2;
-  VRAM_Page[vramoff + 8] = block_tiles[blockgfxidx][2];
-  VRAM_Page[vramoff + 9] = block_tiles[blockgfxidx][3];
+  VRAM_Page[vramoff + 8] = block_tiles[idx][2];
+  VRAM_Page[vramoff + 9] = block_tiles[idx][3];
 
   VRAM_Page[vramoff + 10] = 0;
 }
@@ -1415,10 +1416,7 @@ static inline void draw_block_metatile(const u8 vramoff, const u8 blockgfxidx, c
 void RemoveCoin_Axe(const u16 mt_x, const u16 mt_y) {
   // Note: Old signature was [r02, r06] -> []
   // Reworked to use metatile coordinates instead of pointer
-  //
-  // Replaces the coin or axe metatile with a blank one
-  // The blank one is different if underwater
-  const u8 blockgfxidx = AreaType != AREA_WATER ? 3 : 4;
+
   const u8 vramoff = 0x41;
 
   const u8 x  = mt_x % 16;
@@ -1426,7 +1424,13 @@ void RemoveCoin_Axe(const u16 mt_x, const u16 mt_y) {
   const u8 nt = (mt_x & 0x10) == 0 ? 0 : 1;
 
   // Inlined: PutBlockMetatile
-  draw_block_metatile(vramoff, blockgfxidx, x, y, nt);
+  // Replaces the coin or axe metatile with a blank one
+  // The blank one is different if underwater
+  if (AreaType != AREA_WATER) {
+    draw_block_metatile(vramoff, x, y, nt, BMT_VOID);
+  } else {
+    draw_block_metatile(vramoff, x, y, nt, BMT_VOID_UNDERWATER);
+  }
 
   VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
 }
@@ -1460,21 +1464,6 @@ void WriteBlockMetatile(const u8 param_1, const u16 mt_x, const u16 mt_y) {
   // Note: Old signature was [A, r02, r06] -> []
   // Reworked to use metatile coordinates instead of pointer
 
-  u8 blockgfxidx;
-  if (param_1 == 0) {
-    blockgfxidx = 3;
-  } else if (param_1 == MT_BRICK_2) {
-    blockgfxidx = 0;
-  } else if (param_1 == MT_BRICK) {
-    blockgfxidx = 1;
-  } else if (param_1 == MT_BRICK_2_COINS) {
-    blockgfxidx = 0;
-  } else if (param_1 == MT_BRICK_COINS) {
-    blockgfxidx = 1;
-  } else {
-    blockgfxidx = 2;
-  }
-
   const u8 vramoff = VRAM_Buffer1_Offset + 1;
 
   const u8 x  = mt_x % 16;
@@ -1482,7 +1471,26 @@ void WriteBlockMetatile(const u8 param_1, const u16 mt_x, const u16 mt_y) {
   const u8 nt = (mt_x & 0x10) == 0 ? 0 : 1;
 
   // Inlined: PutBlockMetatile
-  draw_block_metatile(vramoff, blockgfxidx, x, y, nt);
+  switch (param_1) {
+  case 0:
+    draw_block_metatile(vramoff, x, y, nt, BMT_VOID);
+    break;
+  case MT_BRICK_2:
+    draw_block_metatile(vramoff, x, y, nt, BMT_BRICK_2);
+    break;
+  case MT_BRICK:
+    draw_block_metatile(vramoff, x, y, nt, BMT_BRICK);
+    break;
+  case MT_BRICK_2_COINS:
+    draw_block_metatile(vramoff, x, y, nt, BMT_BRICK_2);
+    break;
+  case MT_BRICK_COINS:
+    draw_block_metatile(vramoff, x, y, nt, BMT_BRICK);
+    break;
+  default:
+    draw_block_metatile(vramoff, x, y, nt, BMT_BLOCK_EMPTY);
+    break;
+  }
 
   // Inlined: MoveVOffset
   VRAM_Buffer1_Offset += 10;
@@ -6815,7 +6823,7 @@ void BridgeCollapse(void) {
         const u8 vramoff = VRAM_Buffer1_Offset + 1;
 
         // Inlined: RemBridge
-        draw_block_metatile(vramoff, 3, x/2, (y/2)+8, 0);
+        draw_block_metatile(vramoff, x / 2, (y / 2) + 8, 0, BMT_VOID);
 
         // Inlined: MoveVOffset
         VRAM_Buffer1_Offset += 10;

@@ -371,6 +371,18 @@ enum starflagtaskcontrol {
   STARFLAGTASK_DONE
 };
 
+
+// Used by draw_block_metatile()
+enum block_gfx_idx {
+  BMT_BRICK_2 = 0,                // has white line. first used in World 8-3
+  BMT_BRICK,
+  BMT_BLOCK_EMPTY,                // a block with no more coins/powerups
+  BMT_VOID,                       // the empty space that replaces a coin, or replaces a block when it's bumped and turns into a sprite
+  BMT_VOID_UNDERWATER,
+  _BMT_NUM
+};
+
+
 #define SOUND_SQ1_JUMP_SMALL      0x80
 #define SOUND_SQ1_FLAGPOLE        0x40
 #define SOUND_SQ1_FIREBALL        0x20
