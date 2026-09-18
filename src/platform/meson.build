@@ -12,10 +12,11 @@ else
   endif
 endif
 
-glew = dependency('glew', required: get_option('opengl'))
+use_opengl = get_option('opengl')
 
-opengl_sources = glew.found() ? ['render_opengl.c'] : ['render_opengl_noop.c']
-opengl_args = glew.found() ? ['-DOPENGL_ENABLED'] : []
+opengl_sources = use_opengl ? ['render_opengl.c', 'thirdparty/glad/src/gl.c'] : ['render_opengl_noop.c']
+opengl_args = use_opengl ? ['-DOPENGL_ENABLED'] : []
+opengl_include_dirs = use_opengl ? ['thirdparty/glad/include/'] : []
 
 use_sdl_args = []
 if not use_sdl3
@@ -31,9 +32,9 @@ executable('smbvanilla',
             'thirdparty/ini.c'] + opengl_sources,
 
            install: true,
-           include_directories: ['../../Nes_Snd_Emu', '..'],
+           include_directories: ['../../Nes_Snd_Emu', '..'] + opengl_include_dirs,
            link_with: [smbcore, nessndemu],
-           dependencies: [sdl, glew],
+           dependencies: [sdl],
            c_args:   use_sdl_args + opengl_args,
            cpp_args: use_sdl_args + opengl_args)
 

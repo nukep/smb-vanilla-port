@@ -4,6 +4,7 @@
 #include "render_opengl.h"
 #include "render_raster.h"
 #include "timer.h"
+#include <SDL3/SDL_video.h>
 
 #ifdef USE_SDL2
 #  include <SDL.h>
@@ -498,7 +499,8 @@ int main(int argc, char *argv[]) {
 
     if (glcontext) {
       fe->smb_gl = malloc(SMBgl_size());
-      if (!SMBgl_init(fe->smb_gl)) {
+
+      if (!SMBgl_init(fe->smb_gl, SDL_GL_GetProcAddress)) {
         log_error("Could not initialize OpenGL");
         free(fe->smb_gl);
         fe->smb_gl = 0;

@@ -8,7 +8,10 @@ struct SMBgl;
 
 size_t SMBgl_size(void);
 
-bool SMBgl_init(struct SMBgl *gl);
+typedef void (*SMBgl_functionptr_f)(void);
+typedef SMBgl_functionptr_f SMBgl_GetProcAddress_f(const char *name);
+
+bool SMBgl_init(struct SMBgl *gl, SMBgl_GetProcAddress_f get_proc_address);
 void SMBgl_fini(struct SMBgl *gl);
 
 // Upload a list of 64 RGB values. The data is copied.
