@@ -193,7 +193,7 @@ void dectimers(void) {
 
 }
 
-// This is the only subroutine in all of SMB that writes to the PPU! (aside from WriteNTAddr, which blanks a nametable)
+// This is the only subroutine in all of SMB that writes to the PPU! (aside from InitializeNameTables, which blanks a nametable)
 // Each draw buffer item has the format: <ppu_hi> <ppu_lo> <count> <data...>
 //
 // SMB:8edd
@@ -220,9 +220,7 @@ void update_screen(const u8 *buf, const u16 buf_length) {
     }
 
     // Start writing to the PPU address
-    ppustatus();
-    ppuaddr(ppuhi);
-    ppuaddr(ppulo);
+    ppuaddr16((ppuhi << 8) | ppulo);
 
     if (data_header & DRAW_FLAG_VERTICAL) {
       // Draw vertically
@@ -257,41 +255,13 @@ void update_screen(const u8 *buf, const u16 buf_length) {
     }
 
     // The original SMB does these extra, seemingly pointless assignments to the ppuaddr register
-    ppuaddr(0x3f);
-    ppuaddr(0);
-    ppuaddr(0);
-    ppuaddr(0);
+    ppuaddr16(0x3f00);
+    ppuaddr16(0x0000);
   }
 
-  ppustatus();
-  ppuscroll(0);
-  ppuscroll(0);
+  ppuscroll_xy(0, 0);
 
 #undef READ
-}
-
-// SMB:8e2d, SM2MAIN:6ca6
-// Signature: [A] -> []
-void WriteNTAddr(u8 ppu_page) {
-  ppuaddr(ppu_page);
-  ppuaddr(0);
-
-  // Fill the nametable with blank tiles
-  for (int i = 0; i < 0x3C0; i++) {
-    ppudata(0x24);
-  }
-  // ... and clear the colors of all metatiles to the first palette
-  for (int i = 0; i < 0x40; i++) {
-    ppudata(0x00);
-  }
-
-  VRAM_Buffer1_Offset = 0;
-  VRAM_Buffer1[0] = 0;
-  HorizontalScroll = 0;
-  VerticalScroll = 0;
-  ppuscroll(0);
-  ppuscroll(0);
-  return;
 }
 
 // SMB:8e5c, SM2MAIN:6cd5
@@ -1472,7 +1442,7 @@ void WriteBlockMetatile(const u8 param_1, const u16 mt_x, const u16 mt_y) {
 
   // Inlined: PutBlockMetatile
   switch (param_1) {
-  case 0:
+  case MT_0:
     draw_block_metatile(vramoff, x, y, nt, BMT_VOID);
     break;
   case MT_BRICK_2:
@@ -1501,19 +1471,42 @@ void WriteBlockMetatile(const u8 param_1, const u16 mt_x, const u16 mt_y) {
 // SM2MAIN:6c92
 // Signature: [] -> []
 void InitializeNameTables(void) {
-  ppustatus();
-  WritePPUReg1((Mirror_PPU_CTRL_REG1 & 0xf0) | 0x10);
-  WriteNTAddr(0x24);
-  WriteNTAddr(0x20);
-}
+  const u8 v = (Mirror_PPU_CTRL_REG1 & 0xf0) | 0x10;
+  ppuctrl(v);
+  Mirror_PPU_CTRL_REG1 = v;
 
+  // Inlined: WriteNTAddr
 
-// SMB:8eed
-// SM2MAIN:6d66
-// Signature: [A] -> []
-void WritePPUReg1(const u8 param_1) {
-  ppuctrl(param_1);
-  Mirror_PPU_CTRL_REG1 = param_1;
+  ppuaddr16(0x2400);
+
+  // Fill the nametable with blank tiles
+  for (int i = 0; i < 0x3C0; i++) {
+    ppudata(0x24);
+  }
+  // ... and clear the colors of all metatiles to the first palette
+  for (int i = 0; i < 0x40; i++) {
+    ppudata(0x00);
+  }
+
+  // Inlined: WriteNTAddr
+
+  ppuaddr16(0x2000);
+
+  // Fill the nametable with blank tiles
+  for (int i = 0; i < 0x3C0; i++) {
+    ppudata(0x24);
+  }
+  // ... and clear the colors of all metatiles to the first palette
+  for (int i = 0; i < 0x40; i++) {
+    ppudata(0x00);
+  }
+
+  ppuscroll_xy(0, 0);
+
+  VRAM_Buffer1_Offset = 0;
+  VRAM_Buffer1[0] = 0;
+  HorizontalScroll = 0;
+  VerticalScroll = 0;
 }
 
 

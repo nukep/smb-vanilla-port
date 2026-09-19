@@ -37,9 +37,6 @@ void smb2j_dectimers(void);
 void smb2j_update_screen(const u8 *buf, const u16 buf_length);
 #define update_screen smb2j_update_screen
 
-void smb2j_WriteNTAddr(u8 ppu_page);
-#define WriteNTAddr smb2j_WriteNTAddr
-
 void smb2j_ReadJoypads(void);
 #define ReadJoypads smb2j_ReadJoypads
 
@@ -135,9 +132,6 @@ void smb2j_WriteBlockMetatile(u8 param_1,u16 mt_x, u16 mt_y);
 
 void smb2j_InitializeNameTables(void);
 #define InitializeNameTables smb2j_InitializeNameTables
-
-void smb2j_WritePPUReg1(u8 param_1);
-#define WritePPUReg1 smb2j_WritePPUReg1
 
 void smb2j_PrintStatusBarNumbers(u8 param_1);
 #define PrintStatusBarNumbers smb2j_PrintStatusBarNumbers

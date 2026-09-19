@@ -26,9 +26,6 @@ void smb1_dectimers(void);
 void smb1_update_screen(const u8 *buf, const u16 buf_length);
 #define update_screen smb1_update_screen
 
-void smb1_WriteNTAddr(u8 ppu_page);
-#define WriteNTAddr smb1_WriteNTAddr
-
 void smb1_ReadJoypads(void);
 #define ReadJoypads smb1_ReadJoypads
 
@@ -130,9 +127,6 @@ void smb1_WriteBlockMetatile(u8 param_1,u16 mt_x, u16 mt_y);
 
 void smb1_InitializeNameTables(void);
 #define InitializeNameTables smb1_InitializeNameTables
-
-void smb1_WritePPUReg1(u8 param_1);
-#define WritePPUReg1 smb1_WritePPUReg1
 
 void smb1_PrintStatusBarNumbers(u8 param_1);
 #define PrintStatusBarNumbers smb1_PrintStatusBarNumbers

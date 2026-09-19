@@ -421,7 +421,6 @@
 #define GamePauseStatus                  RAM(0x0776)
 #define GamePauseTimer                   RAM(0x0777)
 #define Mirror_PPU_CTRL_REG1             RAM(0x0778)
-#define Mirror_PPU_CTRL_REG2             RAM(0x0779)
 #define IntervalTimerControl             RAM(0x077F)
 
 #define SelectTimer                      RAM(0x780)

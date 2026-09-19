@@ -133,7 +133,7 @@ void Reset(void) {
   WarmBootValidation = 0xa5;
   PseudoRandomBitReg[0] = 0xa5;
   apu_snd_chn(0xf);
-  ppumask(6);
+  ppu_screen_off();
   DiskIOTask = 0;
   MoveAllSpritesOffscreen();
   InitializeNameTables();
@@ -201,16 +201,14 @@ void NMI(void) {
     RUN_IRQ = true;
   }
 
-  if (DisableScreenFlag == 0) {
-    Mirror_PPU_CTRL_REG2 |= 0x1e;
-  } else {
-    Mirror_PPU_CTRL_REG2 &= 0xe6;
-  }
-  ppumask(Mirror_PPU_CTRL_REG2 & 0xe7);
+  const bool turn_screen_on = DisableScreenFlag == 0;
 
-  ppustatus();
-  ppuscroll(0);
-  ppuscroll(0);
+  // NES note: A temporary variable Mirror_PPU_CTRL_REG2 controlled the ppu screen.
+  // It's been optimized away.
+
+  ppu_screen_off();
+
+  ppuscroll_xy(0, 0);
 
   u16 vram_length = 0;
   const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
@@ -226,7 +224,12 @@ void NMI(void) {
 
   VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER1;
 
-  ppumask(Mirror_PPU_CTRL_REG2);
+  if (turn_screen_on) {
+    ppu_screen_on();
+  } else {
+    ppu_screen_off();
+  }
+
   enable_interrupt();
 
   // NES note: SMB2J patches the JSR instruction here when saving the princess
@@ -262,7 +265,6 @@ void NMI(void) {
   // The FDS version loops here until IRQAckFlag is 0.
   trigger_scroll_irq_if_havent_yet();
 
-  ppustatus();
 
   // Enable NMI (our port ignores this)
   Mirror_PPU_CTRL_REG1 |= 0x80;
@@ -283,8 +285,7 @@ void IRQHandler(void) {
       Mirror_PPU_CTRL_REG1 = (Mirror_PPU_CTRL_REG1 & ~0x08) | NameTableSelect;
       ppuctrl(Mirror_PPU_CTRL_REG1);
       FDS_IrqTimer_Ctrl(0x00); // disable IRQ timer for the rest of the frame
-      ppuscroll(HorizontalScroll);
-      ppuscroll(VerticalScroll);
+      ppuscroll_xy(HorizontalScroll, VerticalScroll);
       IRQAckFlag = 0;
     }
   } else {
@@ -854,8 +855,7 @@ bool CheckFileCount(const u8 param_1) { return param_1 == FileCount[FileListNumb
 // SM2MAIN:c113
 // Signature: [] -> []
 void DiskScreen(void) {
-  Mirror_PPU_CTRL_REG2 = 0;
-  ppumask(0);
+  ppu_screen_off();
   DisableScreenFlag += 1;
   VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_DISKSCREENPALETTE;
   DiskIOTask += 1;

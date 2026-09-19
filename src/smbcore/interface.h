@@ -19,7 +19,7 @@ struct ppu_state {
   union ppureg v;
   union ppureg t;
   u8 x;
-  u8 w;
+  // u8 w;  // commented out because we don't need it
   u8 increment_mode;
   bool screen_on;
 };
@@ -293,40 +293,45 @@ static inline void ppuctrl(u8 x) {
   PPU_STATE.increment_mode = (x & 0x04) ? 1 : 0;
 }
 
-// Write to $2001
-static inline void ppumask(u8 x) {
-  // in smb1 and smb2j, it's only ever:
-  // 0x06     (e.g. background and sprites disabled, leftmost column turned on)
-  // 0x00     (e.g. everything disabled)
-  // 0x1E     (e.g. background and sprites enabled, leftmost column turned on)
+// A note about ppu_screen_on() and ppu_screen_off():
+// This implements the behavior of writing to $2001 (aka. PPUMASK).
+//
+// in smb1 and smb2j, it's only ever:
+// 0x06     (e.g. background and sprites disabled, leftmost column turned on)
+// 0x00     (e.g. everything disabled)
+// 0x1E     (e.g. background and sprites enabled, leftmost column turned on)
+//
+// Effectively, we evaluate this as a boolean "screen is on" or "screen is off" state.
+// 0x18 is "enable background and sprites":
+//   screen_on = (PPUMASK & 0x18) != 0
 
-  // Effectively, we evaluate this as a boolean "screen is on" or "screen is off" state.
-  // 0x18 is "enable background and sprites"
-
-  PPU_STATE.screen_on = (x & 0x18) != 0;
+static inline void ppu_screen_on(void) {
+  PPU_STATE.screen_on = true;
 }
 
-// Write to $2005
-static inline void ppuscroll(u8 x) {
-  if (PPU_STATE.w == 0) {
-    PPU_STATE.t.XXXXX = x >> 3;
-    PPU_STATE.x = x & 0x07;
-  } else {
-    PPU_STATE.t.YYYYY = x >> 3;
-    PPU_STATE.t.yyy = x & 0x07;
-  }
-  PPU_STATE.w ^= 1;
+static inline void ppu_screen_off(void) {
+  PPU_STATE.screen_on = false;
 }
 
-// Write to $2006
-static inline void ppuaddr(u8 x) {
-  if (PPU_STATE.w == 0) {
-    PPU_STATE.t.hi = x & 0x3F;
-  } else {
-    PPU_STATE.t.lo = x;
-    PPU_STATE.v = PPU_STATE.t;
-  }
-  PPU_STATE.w ^= 1;
+// Write to $2005 twice
+// Same as LDA #x; STA $2005; LDA #y; STA $2005;
+static inline void ppuscroll_xy(u8 x, u8 y) {
+  // Assume "w" register is 0
+
+  PPU_STATE.t.XXXXX = x >> 3;
+  PPU_STATE.x = x & 0x07;
+  PPU_STATE.t.YYYYY = y >> 3;
+  PPU_STATE.t.yyy = y & 0x07;
+}
+
+// Write to $2006 twice
+// Same as LDA #hi; STA $2006; LDA #lo; STA $2006;
+static inline void ppuaddr16(u16 x) {
+  // Assume "w" register is 0
+
+  PPU_STATE.t.hi = (x >> 8) & 0x3f;
+  PPU_STATE.t.lo = x & 0xff;
+  PPU_STATE.v = PPU_STATE.t;
 }
 
 // Write to $2007
@@ -346,8 +351,3 @@ static inline void ppudata(u8 x) {
   }
 }
 
-// Read from $2002
-static inline u8 ppustatus() {
-  PPU_STATE.w = 0;
-  return 0x80;
-}

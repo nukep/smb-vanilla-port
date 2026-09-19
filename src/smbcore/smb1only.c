@@ -1,12 +1,11 @@
 #include "ctx.h"
+#include "vars.h"
 
 
 // SMB:8000
 // Signature: [] -> []
 void Reset(void) {
   ppuctrl(0x10);
-  // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
-  // ppu_waituntilvblank();   // wait until ppustatus() & 0x80 == 1
 
   u8 initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
 
@@ -23,7 +22,7 @@ void Reset(void) {
   WarmBootValidation = 0xa5;
   PseudoRandomBitReg[0] = 0xa5;
   apu_snd_chn(0xf);
-  ppumask(6);
+  ppu_screen_off();
   MoveAllSpritesOffscreen();
   InitializeNameTables();
   DisableScreenFlag += 1;
@@ -77,16 +76,14 @@ void NMI(void) {
   Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & ~0x80;
   ppuctrl(Mirror_PPU_CTRL_REG1 & ~0x81);
 
-  if (DisableScreenFlag == 0) {
-    Mirror_PPU_CTRL_REG2 |= 0x1e;
-  } else {
-    Mirror_PPU_CTRL_REG2 &= 0xe6;
-  }
-  ppumask(Mirror_PPU_CTRL_REG2 & 0xe7);
+  const bool turn_screen_on = DisableScreenFlag == 0;
 
-  ppustatus();
-  ppuscroll(0);
-  ppuscroll(0);
+  // NES note: A temporary variable Mirror_PPU_CTRL_REG2 controlled the ppu screen.
+  // It's been optimized away.
+
+  ppu_screen_off();
+
+  ppuscroll_xy(0, 0);
 
   u16 vram_length = 0;
   const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
@@ -101,7 +98,13 @@ void NMI(void) {
   }
 
   VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER1;
-  ppumask(Mirror_PPU_CTRL_REG2);
+
+  if (turn_screen_on) {
+    ppu_screen_on();
+  } else {
+    ppu_screen_off();
+  }
+
   SoundEngine();
   apu_end_frame();
   ReadJoypads();
@@ -124,15 +127,13 @@ void NMI(void) {
     // In the NES version, the game waits here until Sprite 0 is no longer being hit.
     // In the NES version, the game wastes 101 CPU cycles here to get the PPU off the bottom of the status bar.
   }
-  ppuscroll(HorizontalScroll);
-  ppuscroll(VerticalScroll);
+  ppuscroll_xy(HorizontalScroll, VerticalScroll);
 
   u8 const prev_mirror_ppu_ctrl = Mirror_PPU_CTRL_REG1;
   ppuctrl(Mirror_PPU_CTRL_REG1);
   if ((GamePauseStatus & 1) == 0) {
     OperModeExecutionTree();
   }
-  ppustatus();
 
   // Enable NMI (our port ignores this)
   ppuctrl(prev_mirror_ppu_ctrl | 0x80);
