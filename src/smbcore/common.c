@@ -266,32 +266,36 @@ void ReadJoypads(void) {
 // SMB:8e6a, SM2MAIN:6ce3
 // Signature: [X] -> []
 void ReadPortBits(u8 joynum) {
-  u8 bits = 0;
-
   struct SMB_buttons buttons = {0};
+
+  u8 *bits;
+  u8 *bitmask;
 
   if (joynum == 0) {
     joy1(&buttons);
+    bits    = &SavedJoypadBits1;
+    bitmask = &JoypadBitMask1;
   } else {
     joy2(&buttons);
+    bits    = &SavedJoypadBits2;
+    bitmask = &JoypadBitMask2;
   }
 
-  bits |= buttons.a      ? BUTTON_A : 0;
-  bits |= buttons.b      ? BUTTON_B : 0;
-  bits |= buttons.select ? BUTTON_SELECT : 0;
-  bits |= buttons.start  ? BUTTON_START : 0;
-  bits |= buttons.u      ? BUTTON_U : 0;
-  bits |= buttons.d      ? BUTTON_D : 0;
-  bits |= buttons.l      ? BUTTON_L : 0;
-  bits |= buttons.r      ? BUTTON_R : 0;
-
-  SavedJoypadBits[joynum] = bits;
+  *bits = BUTTON_NONE;
+  *bits |= buttons.a      ? BUTTON_A : 0;
+  *bits |= buttons.b      ? BUTTON_B : 0;
+  *bits |= buttons.select ? BUTTON_SELECT : 0;
+  *bits |= buttons.start  ? BUTTON_START : 0;
+  *bits |= buttons.u      ? BUTTON_U : 0;
+  *bits |= buttons.d      ? BUTTON_D : 0;
+  *bits |= buttons.l      ? BUTTON_L : 0;
+  *bits |= buttons.r      ? BUTTON_R : 0;
 
   // If Select or Start were pressed last time this was called, then "unpress" them.
-  if ((bits & (BUTTON_SELECT | BUTTON_START) & JoypadBitMask[joynum]) != 0) {
-    SavedJoypadBits[joynum] = bits & ~(BUTTON_SELECT | BUTTON_START);
+  if ((*bits & (BUTTON_SELECT | BUTTON_START) & *bitmask) != 0) {
+    *bits &= ~(BUTTON_SELECT | BUTTON_START);
   } else {
-    JoypadBitMask[joynum] = bits;
+    *bitmask = *bits;
   }
 }
 
@@ -393,10 +397,10 @@ static inline u8 GoContinue(const u8 param_1) {
 // Signature: [] -> []
 void GameMenuRoutine(void) {
 #ifdef SMB1_MODE
-  const u8 buttons = SavedJoypadBits[0] | SavedJoypadBits[1];
+  const u8 buttons = SavedJoypadBits1 | SavedJoypadBits2;
 #endif
 #ifdef SMB2J_MODE
-  const u8 buttons = SavedJoypadBits[0];
+  const u8 buttons = SavedJoypadBits1;
 #endif
 
   const bool button_a_pushed = (buttons & BUTTON_A) != 0;
@@ -529,7 +533,7 @@ void GameMenuRoutine(void) {
   }
 #endif
 
-  SavedJoypadBits[0] = 0;
+  SavedJoypadBits1 = BUTTON_NONE;
 
   GameCoreRoutine();
   if (GameEngineSubroutine == GR_PLAYERLOSELIFE) {
@@ -547,7 +551,7 @@ void PauseRoutine(void) {
       GamePauseTimer -= 1;
       return;
     }
-    if ((SavedJoypadBits[0] & BUTTON_START) == 0) {
+    if ((SavedJoypadBits1 & BUTTON_START) == 0) {
       GamePauseStatus &= 0x7f;
     } else if ((GamePauseStatus & 0x80) == 0) {
       GamePauseTimer = 0x2b;
@@ -690,7 +694,7 @@ bool DemoEngine(void) {
     }
   }
   DemoActionTimer -= 1;
-  SavedJoypadBits[0] = DemoActionData[DemoAction - 1];
+  SavedJoypadBits1 = DemoActionData[DemoAction - 1];
   return false;
 }
 
@@ -816,7 +820,7 @@ void PlayerEndWorld(void) {
   // For SMB2J, only used for worlds 1 thru 7
   if (WorldEndTimer == 0) {
     if (SMB1_ONLY && WorldNumber >= 7) {
-      if (((SavedJoypadBits[0] | SavedJoypadBits[1]) & BUTTON_B) != 0) {
+      if (((SavedJoypadBits1 | SavedJoypadBits2) & BUTTON_B) != 0) {
         WorldSelectEnableFlag = 1;
         NumberofLives = 0xff;
         TerminateGame();
@@ -1984,7 +1988,7 @@ void SetupGameOver(void) {
 void RunGameOver(void) {
   DisableScreenFlag = 0;
 #ifdef SMB1_MODE
-  if ((SavedJoypadBits[0] & BUTTON_START) != 0) {
+  if ((SavedJoypadBits1 & BUTTON_START) != 0) {
     TerminateGame();
     return;
   }
@@ -2088,7 +2092,10 @@ void GameMode(void) {
 // Signature: [] -> []
 void GameCoreRoutine(void) {
 #ifdef SMB1_MODE
-  SavedJoypadBits[0] = SavedJoypadBits[CurrentPlayer];
+  if (CurrentPlayer != 0) {
+    // Assign joypad 2's inputs to joypad 1
+    SavedJoypadBits1 = SavedJoypadBits2;
+  }
 #endif
   GameRoutines();
 
@@ -2388,7 +2395,7 @@ void PlayerEntrance(void) {
 // SM2MAIN:7c3e
 // Signature: [A] -> []
 void AutoControlPlayer(const u8 param_1) {
-  SavedJoypadBits[0] = param_1;
+  SavedJoypadBits1 = param_1;
   PlayerCtrlRoutine();
 }
 
@@ -2402,12 +2409,12 @@ void PlayerCtrlRoutine(void) {
 
   if (GameEngineSubroutine != GR_PLAYERDEATH) {
     if ((AreaType == AREA_WATER) && ((Player_Y_HighPos != 1 || (Player_Y_Position >= 0xd0)))) {
-      SavedJoypadBits[0] = 0;
+      SavedJoypadBits1 = BUTTON_NONE;
     }
-    A_B_Buttons = SavedJoypadBits[0] & (BUTTON_A | BUTTON_B);
-    Up_Down_Buttons = SavedJoypadBits[0] & (BUTTON_U | BUTTON_D);
-    Left_Right_Buttons = SavedJoypadBits[0] & (BUTTON_L | BUTTON_R);
-    if ((((SavedJoypadBits[0] & BUTTON_D) != 0) && (Player_State == PLAYERSTATE_ONGROUND)) && (Left_Right_Buttons != 0)) {
+    A_B_Buttons        = SavedJoypadBits1 & (BUTTON_A | BUTTON_B);
+    Up_Down_Buttons    = SavedJoypadBits1 & (BUTTON_U | BUTTON_D);
+    Left_Right_Buttons = SavedJoypadBits1 & (BUTTON_L | BUTTON_R);
+    if ((((SavedJoypadBits1 & BUTTON_D) != 0) && (Player_State == PLAYERSTATE_ONGROUND)) && (Left_Right_Buttons != 0)) {
       Left_Right_Buttons = 0;
       Up_Down_Buttons = 0;
     }
@@ -3034,8 +3041,8 @@ void GetPlayerAnimSpeed(void) {
   if (Player_XSpeedAbsolute < 28) {
     PlayerAnimTimerSet = Player_XSpeedAbsolute < 14 ? 7 : 4;
 
-    if ((SavedJoypadBits[0] & ~(BUTTON_A)) != 0) {
-      if ((SavedJoypadBits[0] & (BUTTON_L | BUTTON_R)) == Player_MovingDir) {
+    if ((SavedJoypadBits1 & ~(BUTTON_A)) != 0) {
+      if ((SavedJoypadBits1 & (BUTTON_L | BUTTON_R)) == Player_MovingDir) {
         RunningSpeed = 0;
       } else if (Player_XSpeedAbsolute < 0xb) {
         Player_MovingDir = PlayerFacingDir;

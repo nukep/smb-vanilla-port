@@ -9,6 +9,7 @@
 #define BUTTON_D 0x04
 #define BUTTON_L 0x02
 #define BUTTON_R 0x01
+#define BUTTON_NONE 0x00
 
 #define BLOCK_BUFFER_1_OFFSET 0x00
 #define BLOCK_BUFFER_2_OFFSET 0xd0

@@ -847,9 +847,9 @@ void DiskErrorHandler(const u8 param_1) {
 // SM2MAIN:c1c2
 // Signature: [] -> []
 void GameOverMenu(void) {
-  if ((SavedJoypadBits[0] & BUTTON_START) == 0) {
-    if (((SavedJoypadBits[0] & BUTTON_SELECT) != 0) && (SelectTimer == 0)) {
-      if ((SavedJoypadBits[0] & BUTTON_SELECT) != 0) {
+  if ((SavedJoypadBits1 & BUTTON_START) == 0) {
+    if (((SavedJoypadBits1 & BUTTON_SELECT) != 0) && (SelectTimer == 0)) {
+      if ((SavedJoypadBits1 & BUTTON_SELECT) != 0) {
         SelectTimer = 0x10;
       } else {
         SelectTimer = 0;
