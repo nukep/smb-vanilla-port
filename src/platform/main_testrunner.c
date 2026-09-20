@@ -81,6 +81,10 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
 
       // Missing ranges:
       // $00-$08 are temporary registers
+      // $0A is A_B_Buttons
+      // $0B is Up_Down_Buttons
+      // $0C is Left_Right_Buttons
+      // $0D is PreviousA_B_Buttons
       // $E7-$EA are pointers
       // $EB-$EF are temporary registers
       // $F5-F6 is a pointer
@@ -90,26 +94,35 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
       // $729 is a temporary variable
       // $735 is a temporary variable
       // $778-779 are temporary variables
+      // $6FC is SavedJoypadBits1
+      // $6FD is SavedJoypadBits2
+      // $74A is JoypadBitMask1
+      // $74B is JoypadBitMask2
 
       if (SMB_which_game(userdata->smb_state) == GAME_SMB1) {
-        mem_eq_range(0x0009, 0x00E6);
+        mem_eq_range(0x0009, 0x0009);
+        mem_eq_range(0x000E, 0x00E6);
         mem_eq_range(0x00F0, 0x00F4);
         mem_eq_range(0x00F7, 0x00FF);
         mem_eq_range(0x0100, 0x0108);
         mem_eq_range(0x010a, 0x015F);
         mem_eq_range(0x0200, 0x03C3);
-        mem_eq_range(0x03CB, 0x0728);
+        mem_eq_range(0x03CB, 0x06FB);
+        mem_eq_range(0x06FE, 0x0728);
         mem_eq_range(0x072A, 0x0734);
-        mem_eq_range(0x0736, 0x0777);
+        mem_eq_range(0x0736, 0x0749);
+        mem_eq_range(0x074C, 0x0777);
         mem_eq_range(0x077A, 0x07FF);
       } else if (SMB_which_game(userdata->smb_state) == GAME_SMB2J) {
         // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
         mem_eq_range(0x0010, 0x00E6);
         mem_eq_range(0x010a, 0x015F);
         mem_eq_range(0x0200, 0x03C3);
-        mem_eq_range(0x03CB, 0x0728);
+        mem_eq_range(0x03CB, 0x06FB);
+        mem_eq_range(0x06FE, 0x0728);
         mem_eq_range(0x072A, 0x0734);
-        mem_eq_range(0x0736, 0x0777);
+        mem_eq_range(0x0736, 0x0749);
+        mem_eq_range(0x074C, 0x0777);
         mem_eq_range(0x077A, 0x07FF);
       }
 

@@ -66,6 +66,45 @@ static inline NORETURN void jmpengine_overflow(u8 index) {
 
 #define unreachable() expect(false)
 
+#ifdef USE_POISON_DEBUG
+
+#include <stdlib.h>
+#include <time.h>
+
+static inline u8 _poison_u8_random(void) {
+  static bool RAND_INIT = false;
+  if (!RAND_INIT) {
+    // The typical lousy way of initializing a seed
+    srand((unsigned int)time(NULL));
+    RAND_INIT = true;
+  }
+
+  int v = rand();
+
+  // 25% chance that we set to 0 or 1
+  // We want an increased chance of these, because values like 0 and 1 are more likely to be significant
+  const bool as_boolean  = (v & 0x300) == 0;
+
+  if (as_boolean) {
+    return v & 1;
+  } else {
+    return v & 0xff;
+  }
+}
+
+// For debugging: Set the 8-bit variable to a "poisoned" state.
+// A poisoned state means that the value should not be read, and that doing so is an error.
+// A defined write reverts the poisoned state.
+// This is implementation-defined. One idea is to use instrumention or a tool like Valgrind to poison values.
+// The poor-man's approach is to set it to a random value so that tests would likely fail if the poisoned value is read.
+#define poison_u8(var) var = _poison_u8_random();
+
+#else
+
+#define poison_u8(var)
+
+#endif
+
 
 #define SWAP(a, b) \
   do {             \

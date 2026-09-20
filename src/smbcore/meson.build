@@ -18,6 +18,10 @@ if get_option('check_array_bounds')
   smbcore_args += ['-DCHECK_ARRAY_BOUNDS']
 endif
 
+if get_option('use_poison_debug')
+  smbcore_args += ['-DUSE_POISON_DEBUG']
+endif
+
 force_cpp_args = []
 
 if force_cpp

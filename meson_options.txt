@@ -12,3 +12,6 @@ option('thread_local_smbstate', type: 'boolean', value: false,
 
 option('check_array_bounds', type: 'boolean', value: false,
        description: 'Perform run-time bounds checking on arrays. Requires C++.')
+
+option('use_poison_debug', type: 'boolean', value: false,
+       description: 'Set unused values to a poisoned state. Only use for debugging.')

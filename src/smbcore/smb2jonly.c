@@ -1081,7 +1081,7 @@ void ScreenSubsForFinalRoom(void) {
     SoundEngineJsrOperandLo = 0x5f;
     // TODO: replace with named constant once fds sound engine code is implemented
     AreaMusicQueue = 1;
-    Left_Right_Buttons = 0;
+    Left_Right_Buttons = BUTTON_NONE;
     NameTableSelect = 0;
     IRQUpdateFlag = 0;
     DisableScreenFlag = 0;

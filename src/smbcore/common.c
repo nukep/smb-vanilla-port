@@ -2097,7 +2097,11 @@ void GameCoreRoutine(void) {
     SavedJoypadBits1 = SavedJoypadBits2;
   }
 #endif
+  poison_u8(SavedJoypadBits2);
+
   GameRoutines();
+
+  poison_u8(SavedJoypadBits1);
 
   expect(is_opermodetask_valid());
 
@@ -2173,7 +2177,7 @@ void GameCoreRoutine(void) {
   }
 
   PreviousA_B_Buttons = A_B_Buttons;
-  Left_Right_Buttons = 0;
+  Left_Right_Buttons = BUTTON_NONE;
   UpdScrollVar();
 }
 
@@ -2415,8 +2419,8 @@ void PlayerCtrlRoutine(void) {
     Up_Down_Buttons    = SavedJoypadBits1 & (BUTTON_U | BUTTON_D);
     Left_Right_Buttons = SavedJoypadBits1 & (BUTTON_L | BUTTON_R);
     if ((((SavedJoypadBits1 & BUTTON_D) != 0) && (Player_State == PLAYERSTATE_ONGROUND)) && (Left_Right_Buttons != 0)) {
-      Left_Right_Buttons = 0;
-      Up_Down_Buttons = 0;
+      Left_Right_Buttons = BUTTON_NONE;
+      Up_Down_Buttons = BUTTON_NONE;
     }
   }
   PlayerMovementSubs();
@@ -2430,6 +2434,10 @@ void PlayerCtrlRoutine(void) {
   if ((Player_X_Speed != 0)) {
     Player_MovingDir = (Player_X_Speed < 0x80) ? 1 : 2;
   }
+
+  // This shouldn't be used for the rest of the frame
+  poison_u8(SavedJoypadBits1);
+
   ScrollHandler();
   GetPlayerOffscreenBits();
   const u8 bVar3 = RelativePlayerPosition();
