@@ -2,32 +2,11 @@
 #include "vars.h"
 
 
-static bool RUN_IRQ = false;
-
 // read $4032
 static inline u8 FDS_drive_status(void) { return 0; }
 
-static inline void trigger_scroll_irq_if_havent_yet(void) {
-  if (RUN_IRQ) {
-    IRQHandler();
-    RUN_IRQ = false;
-    if (IRQAckFlag != 0) {
-      warning("IRQAckFlag is non-zero after the IRQ handler. This shouldn't happen!\n");
-    }
-  }
-}
-
-static inline void disable_interrupt(void) {}
-static inline void enable_interrupt(void) {}
-
-static inline u8 FDS_AcknowledgeIrq(void) {
-  return 0x01;
-}
 static inline void FDSBIOS_Delay132(u8 val) {
   (void)val;
-}
-static inline void FDS_IrqTimer_Ctrl(u8 ctrl) {
-  (void)ctrl;
 }
 static inline void FDS_Ctrl(u8 ctrl) {
   // $4025
@@ -94,8 +73,6 @@ struct_ayz LoadFiles(void) {
   }
 
 end:
-  // this runs long enough for the scroll code of the irq to trigger
-  trigger_scroll_irq_if_havent_yet();
 
   // A is the error code, should there be an error
   // Y is how many files were read
@@ -141,9 +118,6 @@ void Reset(void) {
   DisableScreenFlag += 1;
 
   FDSBIOS_IRQFlag = 0xc0;
-  enable_interrupt();
-
-  ppu_nametable(0);
 
   // There was an infinite do-nothing loop here for the FDS.
   // At this point, the NMI would interrupt the loop each frame.
@@ -184,28 +158,9 @@ static const u8 * vram_buffer(u8 addr_ctrl, u16 *length) {
 // SM2MAIN:60a0
 // Signature: [] -> []
 void NMI(void) {
-  disable_interrupt();
-
-  RUN_IRQ = false;
-
-  if (IRQUpdateFlag != 0) {
-    // Set IRQ timer to 0x1658 (until the scanline reaches the bottom of the status bar)
-    // $4020 = 0x58
-    // $4021 = 0x16
-    // Enable IRQ timer
-    // $4022 = 0x02
-    IRQAckFlag += 1;
-    RUN_IRQ = true;
-  }
-
   const bool turn_screen_on = DisableScreenFlag == 0;
 
-  // NES note: A temporary variable Mirror_PPU_CTRL_REG2 controlled the ppu screen.
-  // It's been optimized away.
-
   ppu_screen_off();
-
-  ppuscroll_xy(0, 0);
 
   u16 vram_length = 0;
   const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
@@ -227,8 +182,6 @@ void NMI(void) {
     ppu_screen_off();
   }
 
-  enable_interrupt();
-
   // NES note: SMB2J patches the JSR instruction here when saving the princess
   if (AlternateSoundEngineEnabled) {
     AlternateSoundEngine();
@@ -248,6 +201,14 @@ void NMI(void) {
   // Update PRNG (pseudo-random number generator)
   update_prng(&PseudoRandomBitReg[0]);
 
+  // NES note: This doesn't exist here in SMB2J.
+  // This replaces the much more involved and complicated IRQ handler.
+  if (IRQUpdateFlag != 0) {
+    ppuscroll_xy(NameTableSelect * 256 + HorizontalScroll, VerticalScroll);
+  } else {
+    ppuscroll_xy(0, 0);
+  }
+
   if ((GamePauseStatus & 1) == 0) {
     if (IRQUpdateFlag != 0) {
       MoveSpritesOffscreen();
@@ -259,44 +220,12 @@ void NMI(void) {
     OperModeExecutionTree();
   }
 
-  // The FDS version loops here until IRQAckFlag is 0.
-  trigger_scroll_irq_if_havent_yet();
-
-
   // NES note: the original would enable NMI again (our port ignores this)
-}
-
-// SM2MAIN:61a2
-// Signature: [] -> []
-void IRQHandler(void) {
-  disable_interrupt();
-  u8 const status = FDS_AcknowledgeIrq();
-
-  if ((status & 0x02) == 0) {
-    if ((status & 0x01) != 0) {
-      // Scrolling the screen right below the status bar
-      // first 2 bits are 01: not transferring bytes, and an irq occurred
-
-      FDS_IrqTimer_Ctrl(0x00); // disable IRQ timer for the rest of the frame
-
-      ppu_nametable(NameTableSelect);
-      ppuscroll_xy(HorizontalScroll, VerticalScroll);
-
-      IRQAckFlag = 0;
-    }
-  } else {
-    // FDS is transferring bytes
-    FDSBIOS_Delay132(status);
-  }
-  enable_interrupt();
 }
 
 // SM2MAIN:7b20
 // Signature: [Y] -> []
 void ScrollScreen(u8 scroll_amount) {
-  // The FDS version loops here until IRQAckFlag is 0.
-  trigger_scroll_irq_if_havent_yet();
-
   int const x_pos = ScreenLeft_X_Pos + scroll_amount;
 
   ScrollThirtyTwo += scroll_amount;

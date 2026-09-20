@@ -305,7 +305,7 @@ void draw_graphics(const struct sprite sprites[64]) {
     }
   }
 
-  const u16 scroll_x = PPU_STATE.t.NN * 256 + PPU_STATE.t.XXXXX * 8 + PPU_STATE.x;
+  const u16 scroll_x = PPU_STATE.scroll_x;
 
   // Status bar
   draw_nametable_rect(0, 0, 0x2000, 0, 0, 32, 4);

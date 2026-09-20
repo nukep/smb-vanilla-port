@@ -5,8 +5,6 @@
 // SMB:8000
 // Signature: [] -> []
 void Reset(void) {
-  ppu_nametable(0);
-
   u8 initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
 
   for (int i = 0; i < 6; i++) {
@@ -26,8 +24,6 @@ void Reset(void) {
   MoveAllSpritesOffscreen();
   InitializeNameTables();
   DisableScreenFlag += 1;
-
-  ppu_nametable(0);
 
   // There was an infinite do-nothing loop here for the NES.
   // At this point, the NMI would interrupt the loop each frame.
@@ -72,16 +68,9 @@ static const u8 * vram_buffer(u8 addr_ctrl, u16 *length) {
 // SMB:8082
 // Signature: [] -> []
 void NMI(void) {
-  ppu_nametable(0);
-
   const bool turn_screen_on = DisableScreenFlag == 0;
 
-  // NES note: A temporary variable Mirror_PPU_CTRL_REG2 controlled the ppu screen.
-  // It's been optimized away.
-
   ppu_screen_off();
-
-  ppuscroll_xy(0, 0);
 
   u16 vram_length = 0;
   const u8 *buf = vram_buffer(VRAM_Buffer_AddrCtrl, &vram_length);
@@ -126,8 +115,7 @@ void NMI(void) {
     // In the NES version, the game wastes 101 CPU cycles here to get the PPU off the bottom of the status bar.
   }
 
-  ppu_nametable(NameTableSelectSMB1);
-  ppuscroll_xy(HorizontalScroll, VerticalScroll);
+  ppuscroll_xy(NameTableSelectSMB1 * 256 + HorizontalScroll, VerticalScroll);
   // NES note: PPUCTRL was set here, so the increment mode would also normally be assigned.
   // But we can ignore it because no writes to PPUDATA occur for the rest of the NMI.
 

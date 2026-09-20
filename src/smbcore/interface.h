@@ -1,26 +1,6 @@
-// Represents the internal PPU register.
-union ppureg {
-  struct {
-    // least to most significant order
-    u8 XXXXX : 5;
-    u8 YYYYY : 5;
-    u8 NN : 2;
-    u8 yyy : 3;
-  };
-  struct {
-    u8 lo : 8;
-    u8 hi : 7;
-  };
-  u16 value;
-};
-
 struct ppu_state {
-  // internal regs
-  union ppureg v;
-  union ppureg t;
-  u8 x;
-  // u8 w;  // commented out because we don't need it
-  u8 increment_mode;
+  u16 scroll_x;
+  u16 scroll_y;
   bool screen_on;
 };
 
@@ -287,20 +267,6 @@ APU_REG(apu_framecounter_ctrl, 0x4017)
 
 #undef APU_REG
 
-// A note about ppu_nametable(), ppu_increment_horz() and ppu_increment_vert():
-// This implements the behavior of writing to $2000 (aka. PPUCTRL).
-// Effectively, only the lower three bits of PPUCTRL matter.
-// Other details are discarded, such as the NMI enable flag.
-//
-// The original SMB1 and SMB2J would keep track of the value in
-// Mirror_PPU_CTRL_REG1 ($778), so it could modify the previous value
-// and write it back to PPUCTRL.
-// This port optimizes this away entirely.
-
-static inline void ppu_nametable(u8 nt) {
-  PPU_STATE.t.NN = nt & 0x03;
-}
-
 // A note about ppu_screen_on() and ppu_screen_off():
 // This implements the behavior of writing to $2001 (aka. PPUMASK).
 //
@@ -312,6 +278,11 @@ static inline void ppu_nametable(u8 nt) {
 // Effectively, we evaluate this as a boolean "screen is on" or "screen is off" state.
 // 0x18 is "enable background and sprites":
 //   screen_on = (PPUMASK & 0x18) != 0
+//
+// The original SMB1 and SMB2J would keep track of the value in
+// Mirror_PPU_CTRL_REG2 ($779), so it could modify the previous value
+// and write it back to PPUMASK.
+// This port optimizes this away entirely.
 
 static inline void ppu_screen_on(void) {
   PPU_STATE.screen_on = true;
@@ -321,13 +292,23 @@ static inline void ppu_screen_off(void) {
   PPU_STATE.screen_on = false;
 }
 
-// Write to $2005 twice
-// Same as LDA #x; STA $2005; LDA #y; STA $2005;
-static inline void ppuscroll_xy(u8 x, u8 y) {
-  // Assume "w" register is 0
+// A note about ppu_scroll_xy():
+// This implements the behavior of
+// - writing to $2000 (aka. PPUCTRL) for the nametable
+// - writing to $2005 twice (aka. PPUSCROLL) for the 8-bit x/y offset
 
-  PPU_STATE.t.XXXXX = x >> 3;
-  PPU_STATE.x = x & 0x07;
-  PPU_STATE.t.YYYYY = y >> 3;
-  PPU_STATE.t.yyy = y & 0x07;
+// Notes about PPUCTRL:
+// Effectively, only the lower three bits of PPUCTRL matter.
+// The first two bits are the nametable.
+// The third bit was used exclusively in the UpdateScreen (update_screen) subroutine.
+// Other details are discarded, such as the NMI enable flag.
+//
+// The original SMB1 and SMB2J would keep track of the value in
+// Mirror_PPU_CTRL_REG1 ($778), so it could modify the previous value
+// and write it back to PPUCTRL.
+// This port optimizes this away entirely.
+
+static inline void ppuscroll_xy(u16 x, u16 y) {
+  PPU_STATE.scroll_x = x;
+  PPU_STATE.scroll_y = x;
 }

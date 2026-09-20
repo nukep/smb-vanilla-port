@@ -1461,7 +1461,9 @@ void WriteBlockMetatile(const u8 param_1, const u16 mt_x, const u16 mt_y) {
 // SM2MAIN:6c92
 // Signature: [] -> []
 void InitializeNameTables(void) {
+#ifdef SMB1_MODE
   NameTableSelectSMB1 = 0;
+#endif
 
   // Inlined: WriteNTAddr
 

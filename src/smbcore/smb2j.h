@@ -7,9 +7,6 @@ bool smb2j_load_file(struct SMB_state *state, const char *name);
 struct_ayz smb2j_LoadFiles(void);
 #define LoadFiles smb2j_LoadFiles
 
-void smb2j_IRQHandler(void);
-#define IRQHandler smb2j_IRQHandler
-
 void smb2j_ScrollScreen(u8 scroll_amount);
 #define ScrollScreen smb2j_ScrollScreen
 
