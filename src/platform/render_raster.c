@@ -101,6 +101,6 @@ void SMBraster_set_buffer(struct SMBraster *r, unsigned char *rgb_pixels, int st
 void SMBraster_clear(struct SMBraster *r) {
   // fill every pixel with the background color
   for (int i = 0; i < 256*240; i++) {
-    r->pixels[i] = r->palette[r->palette_indices[0]];
+    r->pixels[i] = r->palette[r->palette_indices[0x10]];
   }
 }

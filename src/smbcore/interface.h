@@ -301,14 +301,6 @@ static inline void ppu_nametable(u8 nt) {
   PPU_STATE.t.NN = nt & 0x03;
 }
 
-static inline void ppu_increment_horz(void) {
-  PPU_STATE.increment_mode = 0;
-}
-
-static inline void ppu_increment_vert(void) {
-  PPU_STATE.increment_mode = 1;
-}
-
 // A note about ppu_screen_on() and ppu_screen_off():
 // This implements the behavior of writing to $2001 (aka. PPUMASK).
 //
@@ -339,31 +331,3 @@ static inline void ppuscroll_xy(u8 x, u8 y) {
   PPU_STATE.t.YYYYY = y >> 3;
   PPU_STATE.t.yyy = y & 0x07;
 }
-
-// Write to $2006 twice
-// Same as LDA #hi; STA $2006; LDA #lo; STA $2006;
-static inline void ppuaddr16(u16 x) {
-  // Assume "w" register is 0
-
-  PPU_STATE.t.hi = (x >> 8) & 0x3f;
-  PPU_STATE.t.lo = x & 0xff;
-  PPU_STATE.v = PPU_STATE.t;
-}
-
-// Write to $2007
-static inline void ppudata(u8 x) {
-  u16 addr = PPU_STATE.v.value & 0x3FFF;
-
-  if (addr == 0x3F10) {
-    addr = 0x3F00;
-  }
-
-  PPURAM(addr) = x;
-
-  if (PPU_STATE.increment_mode == 0) {
-    PPU_STATE.v.value += 1;
-  } else {
-    PPU_STATE.v.value += 32;
-  }
-}
-

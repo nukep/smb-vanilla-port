@@ -6,7 +6,6 @@
 // Signature: [] -> []
 void Reset(void) {
   ppu_nametable(0);
-  ppu_increment_horz();
 
   u8 initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
 
@@ -29,7 +28,6 @@ void Reset(void) {
   DisableScreenFlag += 1;
 
   ppu_nametable(0);
-  ppu_increment_horz();
 
   // There was an infinite do-nothing loop here for the NES.
   // At this point, the NMI would interrupt the loop each frame.

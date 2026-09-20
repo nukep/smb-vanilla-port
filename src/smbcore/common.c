@@ -204,7 +204,7 @@ void update_screen(const u8 *buf, const u16 buf_length) {
 
   u16 vram_idx = 0;
 
-#define READ(var) { if (vram_idx >= buf_length) { return; } var = buf[vram_idx++]; }
+#define READ(var) { if (vram_idx >= buf_length) { break; } var = buf[vram_idx++]; }
 
   while (vram_idx < buf_length) {
     u8 ppuhi;
@@ -216,19 +216,12 @@ void update_screen(const u8 *buf, const u16 buf_length) {
     READ(data_header);
 
     if (ppuhi == 0) {
-      return;
+      break;
     }
 
-    // Start writing to the PPU address
-    ppuaddr16((ppuhi << 8) | ppulo);
+    u16 ppuaddr = (ppuhi << 8) | ppulo;
 
-    if (data_header & DRAW_FLAG_VERTICAL) {
-      // Draw vertically
-      ppu_increment_vert();
-    } else {
-      // Draw horizontally
-      ppu_increment_horz();
-    }
+    const bool draw_vert = (data_header & DRAW_FLAG_VERTICAL) != 0;
 
     int count = data_header & 0x3F;
     if (count == 0) {
@@ -242,23 +235,21 @@ void update_screen(const u8 *buf, const u16 buf_length) {
       u8 val;
       READ(val);
       for (int i = 0; i < count; i++) {
-        ppudata(val);
+        PPURAM(ppuaddr) = val;
+        ppuaddr += draw_vert ? 32 : 1;
+        ppuaddr &= 0x3fff;
       }
     } else {
       // Variable-length
       for (int i = 0; i < count; i++) {
         u8 val;
         READ(val);
-        ppudata(val);
+        PPURAM(ppuaddr) = val;
+        ppuaddr += draw_vert ? 32 : 1;
+        ppuaddr &= 0x3fff;
       }
     }
-
-    // The original SMB does these extra, seemingly pointless assignments to the ppuaddr register
-    ppuaddr16(0x3f00);
-    ppuaddr16(0x0000);
   }
-
-  ppuscroll_xy(0, 0);
 
 #undef READ
 }
@@ -1474,31 +1465,25 @@ void InitializeNameTables(void) {
 
   // Inlined: WriteNTAddr
 
-  ppuaddr16(0x2400);
-
   // Fill the nametable with blank tiles
   for (int i = 0; i < 0x3C0; i++) {
-    ppudata(0x24);
+    PPURAM(0x2400 + i) = 0x24;
   }
   // ... and clear the colors of all metatiles to the first palette
   for (int i = 0; i < 0x40; i++) {
-    ppudata(0x00);
+    PPURAM(0x2400 + 0x3C0 + i) = 0x00;
   }
 
   // Inlined: WriteNTAddr
 
-  ppuaddr16(0x2000);
-
   // Fill the nametable with blank tiles
   for (int i = 0; i < 0x3C0; i++) {
-    ppudata(0x24);
+    PPURAM(0x2000 + i) = 0x24;
   }
   // ... and clear the colors of all metatiles to the first palette
   for (int i = 0; i < 0x40; i++) {
-    ppudata(0x00);
+    PPURAM(0x2000 + 0x3C0 + i) = 0x00;
   }
-
-  ppuscroll_xy(0, 0);
 
   VRAM_Buffer1_Offset = 0;
   VRAM_Buffer1[0] = 0;

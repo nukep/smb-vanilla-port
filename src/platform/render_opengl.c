@@ -200,7 +200,7 @@ void SMBgl_draw_tile(struct SMBgl *gl, const struct SMB_tile tile) {
 bool SMBgl_render_frame(struct SMBgl *gl) {
 
   // opengl
-  const struct RGB bgcolor = gl->palette[gl->palette_indices[0]];
+  const struct RGB bgcolor = gl->palette[gl->palette_indices[0x10]];
 
   if (gl->gl_update_texture) {
     // Upload a texture if there's data queued to upload

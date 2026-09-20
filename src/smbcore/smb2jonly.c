@@ -144,7 +144,6 @@ void Reset(void) {
   enable_interrupt();
 
   ppu_nametable(0);
-  ppu_increment_horz();
 
   // There was an infinite do-nothing loop here for the FDS.
   // At this point, the NMI would interrupt the loop each frame.
