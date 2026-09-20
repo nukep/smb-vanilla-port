@@ -1,4 +1,5 @@
 #include "ctx.h"
+#include "vars.h"
 
 
 static bool RUN_IRQ = false;
@@ -142,8 +143,8 @@ void Reset(void) {
   FDSBIOS_IRQFlag = 0xc0;
   enable_interrupt();
 
-  Mirror_PPU_CTRL_REG1 |= 0x80;
-  ppuctrl(Mirror_PPU_CTRL_REG1);
+  ppu_nametable(0);
+  ppu_increment_horz();
 
   // There was an infinite do-nothing loop here for the FDS.
   // At this point, the NMI would interrupt the loop each frame.
@@ -184,9 +185,6 @@ static const u8 * vram_buffer(u8 addr_ctrl, u16 *length) {
 // SM2MAIN:60a0
 // Signature: [] -> []
 void NMI(void) {
-  Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & ~0x81;
-  ppuctrl(Mirror_PPU_CTRL_REG1);
-
   disable_interrupt();
 
   RUN_IRQ = false;
@@ -266,9 +264,7 @@ void NMI(void) {
   trigger_scroll_irq_if_havent_yet();
 
 
-  // Enable NMI (our port ignores this)
-  Mirror_PPU_CTRL_REG1 |= 0x80;
-  ppuctrl(Mirror_PPU_CTRL_REG1);
+  // NES note: the original would enable NMI again (our port ignores this)
 }
 
 // SM2MAIN:61a2
@@ -282,10 +278,11 @@ void IRQHandler(void) {
       // Scrolling the screen right below the status bar
       // first 2 bits are 01: not transferring bytes, and an irq occurred
 
-      Mirror_PPU_CTRL_REG1 = (Mirror_PPU_CTRL_REG1 & ~0x08) | NameTableSelect;
-      ppuctrl(Mirror_PPU_CTRL_REG1);
       FDS_IrqTimer_Ctrl(0x00); // disable IRQ timer for the rest of the frame
+
+      ppu_nametable(NameTableSelect);
       ppuscroll_xy(HorizontalScroll, VerticalScroll);
+
       IRQAckFlag = 0;
     }
   } else {

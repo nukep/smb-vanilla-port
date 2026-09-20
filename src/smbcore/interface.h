@@ -287,10 +287,26 @@ APU_REG(apu_framecounter_ctrl, 0x4017)
 
 #undef APU_REG
 
-// Write to $2000
-static inline void ppuctrl(u8 x) {
-  PPU_STATE.t.NN = x & 0x03;
-  PPU_STATE.increment_mode = (x & 0x04) ? 1 : 0;
+// A note about ppu_nametable(), ppu_increment_horz() and ppu_increment_vert():
+// This implements the behavior of writing to $2000 (aka. PPUCTRL).
+// Effectively, only the lower three bits of PPUCTRL matter.
+// Other details are discarded, such as the NMI enable flag.
+//
+// The original SMB1 and SMB2J would keep track of the value in
+// Mirror_PPU_CTRL_REG1 ($778), so it could modify the previous value
+// and write it back to PPUCTRL.
+// This port optimizes this away entirely.
+
+static inline void ppu_nametable(u8 nt) {
+  PPU_STATE.t.NN = nt & 0x03;
+}
+
+static inline void ppu_increment_horz(void) {
+  PPU_STATE.increment_mode = 0;
+}
+
+static inline void ppu_increment_vert(void) {
+  PPU_STATE.increment_mode = 1;
 }
 
 // A note about ppu_screen_on() and ppu_screen_off():

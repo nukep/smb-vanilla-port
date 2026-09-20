@@ -224,12 +224,11 @@ void update_screen(const u8 *buf, const u16 buf_length) {
 
     if (data_header & DRAW_FLAG_VERTICAL) {
       // Draw vertically
-      Mirror_PPU_CTRL_REG1 |= 0x04;
+      ppu_increment_vert();
     } else {
       // Draw horizontally
-      Mirror_PPU_CTRL_REG1 &= ~0x04;
+      ppu_increment_horz();
     }
-    ppuctrl(Mirror_PPU_CTRL_REG1);
 
     int count = data_header & 0x3F;
     if (count == 0) {
@@ -1471,9 +1470,7 @@ void WriteBlockMetatile(const u8 param_1, const u16 mt_x, const u16 mt_y) {
 // SM2MAIN:6c92
 // Signature: [] -> []
 void InitializeNameTables(void) {
-  const u8 v = (Mirror_PPU_CTRL_REG1 & 0xf0) | 0x10;
-  ppuctrl(v);
-  Mirror_PPU_CTRL_REG1 = v;
+  NameTableSelectSMB1 = 0;
 
   // Inlined: WriteNTAddr
 
@@ -1753,7 +1750,7 @@ void SecondaryGameSetup(void) {
   BackloadingFlag = 0;
   BalPlatformAlignment = 0xff;
 #ifdef SMB1_MODE
-  Mirror_PPU_CTRL_REG1 = (Mirror_PPU_CTRL_REG1 & 0xfe) | (ScreenLeft_PageLoc & 1);
+  NameTableSelectSMB1 = ScreenLeft_PageLoc & 1;
 #endif
 #ifdef SMB2J_MODE
   NameTableSelect = ScreenLeft_PageLoc & 1;

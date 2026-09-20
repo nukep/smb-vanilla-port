@@ -5,7 +5,8 @@
 // SMB:8000
 // Signature: [] -> []
 void Reset(void) {
-  ppuctrl(0x10);
+  ppu_nametable(0);
+  ppu_increment_horz();
 
   u8 initialize_upto = WarmBootValidation == 0xa5 ? 0xd6 : 0xfe;
 
@@ -27,8 +28,8 @@ void Reset(void) {
   InitializeNameTables();
   DisableScreenFlag += 1;
 
-  Mirror_PPU_CTRL_REG1 |= 0x80;
-  ppuctrl(Mirror_PPU_CTRL_REG1);
+  ppu_nametable(0);
+  ppu_increment_horz();
 
   // There was an infinite do-nothing loop here for the NES.
   // At this point, the NMI would interrupt the loop each frame.
@@ -73,8 +74,7 @@ static const u8 * vram_buffer(u8 addr_ctrl, u16 *length) {
 // SMB:8082
 // Signature: [] -> []
 void NMI(void) {
-  Mirror_PPU_CTRL_REG1 = Mirror_PPU_CTRL_REG1 & ~0x80;
-  ppuctrl(Mirror_PPU_CTRL_REG1 & ~0x81);
+  ppu_nametable(0);
 
   const bool turn_screen_on = DisableScreenFlag == 0;
 
@@ -127,16 +127,17 @@ void NMI(void) {
     // In the NES version, the game waits here until Sprite 0 is no longer being hit.
     // In the NES version, the game wastes 101 CPU cycles here to get the PPU off the bottom of the status bar.
   }
-  ppuscroll_xy(HorizontalScroll, VerticalScroll);
 
-  u8 const prev_mirror_ppu_ctrl = Mirror_PPU_CTRL_REG1;
-  ppuctrl(Mirror_PPU_CTRL_REG1);
+  ppu_nametable(NameTableSelectSMB1);
+  ppuscroll_xy(HorizontalScroll, VerticalScroll);
+  // NES note: PPUCTRL was set here, so the increment mode would also normally be assigned.
+  // But we can ignore it because no writes to PPUDATA occur for the rest of the NMI.
+
   if ((GamePauseStatus & 1) == 0) {
     OperModeExecutionTree();
   }
 
-  // Enable NMI (our port ignores this)
-  ppuctrl(prev_mirror_ppu_ctrl | 0x80);
+  // NES note: the original would enable NMI again (our port ignores this)
 }
 
 
@@ -321,8 +322,7 @@ void ScrollScreen(const u8 param_1) {
   ADD_UNSIGNED_16_8(ScreenLeft_PageLoc, ScreenLeft_X_Pos,
                     param_1);
   HorizontalScroll = ScreenLeft_X_Pos;
-  Mirror_PPU_CTRL_REG1 &= 0xfe;
-  Mirror_PPU_CTRL_REG1 |= ScreenLeft_PageLoc & 1;
+  NameTableSelectSMB1 = ScreenLeft_PageLoc & 1;
   GetScreenPosition();
   ScrollIntervalTimer = 8;
   ChkPOffscr();

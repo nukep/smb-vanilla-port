@@ -25,6 +25,14 @@
 #define MusicData_addr_hi                RAM(0x00F6)
 
 
+// Temporary
+
+// This address is Mirror_PPU_CTRL_REG1 in SMB1,
+// but we're currently reusing it to act more like SMB2J's NameTableSelect
+// TODO - move this to a better place
+#define NameTableSelectSMB1             RAM(0x0778)
+
+
 /* common ----------------------- */
 #define FrameCounter                     RAM(0x0009)
 #define A_B_Buttons                      RAM(0x000A)
@@ -420,7 +428,6 @@
 #define ScrollAmount                     RAM(0x0775)
 #define GamePauseStatus                  RAM(0x0776)
 #define GamePauseTimer                   RAM(0x0777)
-#define Mirror_PPU_CTRL_REG1             RAM(0x0778)
 #define IntervalTimerControl             RAM(0x077F)
 
 #define SelectTimer                      RAM(0x780)
