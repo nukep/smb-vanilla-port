@@ -351,10 +351,10 @@ void DrawMushroomIcon(void) {
 
   if (NumberOfPlayers == 0) {
     VRAM1_DRAW_VERTICAL(PPU_ADDR_NT0_XY(9, 18),
-                        0xce, 0x24, 0x24);
+                        BGTILE_MUSHROOM_ICON, BGTILE_BLANK_0, BGTILE_BLANK_0);
   } else {
     VRAM1_DRAW_VERTICAL(PPU_ADDR_NT0_XY(9, 18),
-                        0x24, 0x24, 0xce);
+                        BGTILE_BLANK_0, BGTILE_BLANK_0, BGTILE_MUSHROOM_ICON);
   }
 
   VRAM_Buffer1[VRAM_Buffer1_Offset++] = 0;
@@ -1245,7 +1245,7 @@ void WriteBottomStatusLine(void) {
 
   VRAM1_DRAW(PPU_ADDR_NT0_XY(19, 3),
              world_number_display,
-             0x28,
+             BGTILE_DASH,
              level_number_display);
 
   // Note: Moved ScreenRoutineTask increment to caller
@@ -1354,11 +1354,11 @@ static inline void draw_block_metatile(const u8 vramoff, const u8 x, const u8 y,
 
   // BlockGfxData
   static const u8 block_tiles[_BMT_NUM][4] = {
-    { 0x45, 0x45, 0x47, 0x47 },
-    { 0x47, 0x47, 0x47, 0x47 },
-    { 0x57, 0x58, 0x59, 0x5a },
-    { 0x24, 0x24, 0x24, 0x24 },
-    { 0x26, 0x26, 0x26, 0x26 }
+    { BGTILE_BRICK_T,        BGTILE_BRICK_T,        BGTILE_BRICK,          BGTILE_BRICK },
+    { BGTILE_BRICK,          BGTILE_BRICK,          BGTILE_BRICK,          BGTILE_BRICK },
+    { BGTILE_BLOCK_EMPTY_TL, BGTILE_BLOCK_EMPTY_TR, BGTILE_BLOCK_EMPTY_BL, BGTILE_BLOCK_EMPTY_BR },
+    { BGTILE_BLANK_0,        BGTILE_BLANK_0,        BGTILE_BLANK_0,        BGTILE_BLANK_0 },
+    { BGTILE_BLANK_2,        BGTILE_BLANK_2,        BGTILE_BLANK_2,        BGTILE_BLANK_2 }
   };
 
   VRAM_Page[vramoff + 0] = addr >> 8;
@@ -1475,7 +1475,7 @@ void InitializeNameTables(void) {
 
   // Fill the nametable with blank tiles
   for (int i = 0; i < 0x3C0; i++) {
-    PPURAM(0x2400 + i) = 0x24;
+    PPURAM(0x2400 + i) = BGTILE_BLANK_0;
   }
   // ... and clear the colors of all metatiles to the first palette
   for (int i = 0; i < 0x40; i++) {
@@ -1486,7 +1486,7 @@ void InitializeNameTables(void) {
 
   // Fill the nametable with blank tiles
   for (int i = 0; i < 0x3C0; i++) {
-    PPURAM(0x2000 + i) = 0x24;
+    PPURAM(0x2000 + i) = BGTILE_BLANK_0;
   }
   // ... and clear the colors of all metatiles to the first palette
   for (int i = 0; i < 0x40; i++) {
@@ -7482,16 +7482,16 @@ void BalancePlatform(const u8 objoff) {
     const u16 ppuaddr_1 = SetupPlatformRope(cond, objoff);
 
     VRAM1_DRAW(ppuaddr_1,
-               cond ? 0xa2 : 0x24,
-               cond ? 0xa3 : 0x24);
+               cond ? BGTILE_FLAGPOLE_ROPE_L : BGTILE_BLANK_0,
+               cond ? BGTILE_FLAGPOLE_ROPE_R : BGTILE_BLANK_0);
 
     // Left hand side
 
     const u16 ppuaddr_2 = SetupPlatformRope(!cond, Enemy_State[objoff]);
 
     VRAM1_DRAW(ppuaddr_2,
-               !cond ? 0xa2 : 0x24,
-               !cond ? 0xa3 : 0x24);
+               !cond ? BGTILE_FLAGPOLE_ROPE_L : BGTILE_BLANK_0,
+               !cond ? BGTILE_FLAGPOLE_ROPE_R : BGTILE_BLANK_0);
   }
 }
 

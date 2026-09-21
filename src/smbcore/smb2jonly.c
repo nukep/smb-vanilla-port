@@ -1206,15 +1206,14 @@ void EraseLivesLines(void) {
   // Inlining TwoBlankRows, because it's tightly coupled to the code
 
   const u8 length = 21;
-  const u8 tile = 0x24;
 
   // Saving and restoring the offset, in case it's not 0
   // TODO: is this ever not 0?
   const u8 saved_vramoff = VRAM_Buffer1_Offset;
   VRAM_Buffer1_Offset = 0;
 
-  VRAM1_DRAW_RLE(PPU_ADDR_NT0_XY(6, 20), length, tile);
-  VRAM1_DRAW_RLE(PPU_ADDR_NT0_XY(6, 21), length, tile);
+  VRAM1_DRAW_RLE(PPU_ADDR_NT0_XY(6, 20), length, BGTILE_BLANK_0);
+  VRAM1_DRAW_RLE(PPU_ADDR_NT0_XY(6, 21), length, BGTILE_BLANK_0);
 
   VRAM_Buffer1_Offset = saved_vramoff;
 
