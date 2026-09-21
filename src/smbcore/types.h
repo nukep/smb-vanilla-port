@@ -1,6 +1,7 @@
 #ifndef SMBCORE_TYPES_H
 #define SMBCORE_TYPES_H
 
+#include "vars.h"
 #define BUTTON_A 0x80
 #define BUTTON_B 0x40
 #define BUTTON_SELECT 0x20
@@ -276,6 +277,90 @@ static inline void set_metatile(const u16 mt_x, const u16 mt_y, const u8 metatil
     warning("SET METATILE OVERFLOW: (%d,%d) <- 0x%02X\n", mt_x, mt_y, metatile);
   }
   Block_Buffers[blockoff] = metatile;
+}
+
+
+// "Direction" and "Vertical direction" are separate concepts for now.
+// Horizontal directions in the code are more common, hence the shorthand.
+// This may change.
+
+#define DIR_INVALID 0
+#define DIR_RIGHT 1
+#define DIR_LEFT 2
+
+#define VERTDIR_TOP 8
+#define VERTDIR_BOTTOM 4
+
+#define PLAYER_COLLISIONBIT_NONE 0
+#define PLAYER_COLLISIONBIT_RIGHT 1
+#define PLAYER_COLLISIONBIT_LEFT 2
+#define PLAYER_COLLISIONBIT_DOWN 4
+#define PLAYER_COLLISIONBIT_UP 8
+#define PLAYER_COLLISIONBIT_ALL 0xff
+
+static inline u8 left_right_buttons_as_dir(void) {
+  expect((Left_Right_Buttons & ~(BUTTON_R | BUTTON_L)) == 0);
+
+  // It's the same
+  return Left_Right_Buttons;
+}
+
+static inline u8 up_down_buttons_as_vertdir(void) {
+  expect((Up_Down_Buttons & ~(BUTTON_U | BUTTON_D)) == 0);
+
+  // It's the same
+  return Up_Down_Buttons;
+}
+
+static inline bool player_collides_dir(u8 dir) {
+  // Any direction in dir
+  // (if dir == DIR_LEFT | DIR_RIGHT, this'll return true if it's either)
+  return (Player_CollisionBits & dir) != 0;
+}
+
+static inline bool player_collides_vertdir(u8 side) {
+  // Any side
+  return (Player_CollisionBits & side) != 0;
+}
+
+static inline void player_collides_right_clear(void) {
+  Player_CollisionBits &= ~PLAYER_COLLISIONBIT_RIGHT;
+}
+static inline void player_collides_left_clear(void) {
+  Player_CollisionBits &= ~PLAYER_COLLISIONBIT_LEFT;
+}
+
+
+#define ACTOR_COLLISIONBIT_PLAYER 1
+
+// Enemy_CollisionBits[n] has this layout:
+//   012345_P
+// where 0-5 is if it's colliding with that actor
+// and P is if it's colliding with the player
+#define ACTOR_COLLISIONBIT_ACTOR(i) (1 << (7 - (i)))
+
+static inline bool actor_collideswith_player(const u8 a) {
+  return (Enemy_CollisionBits[a] & ACTOR_COLLISIONBIT_PLAYER) != 0;
+}
+
+static inline void actor_collideswith_player_set(const u8 a) {
+  Enemy_CollisionBits[a] |= ACTOR_COLLISIONBIT_PLAYER;
+}
+
+static inline void actor_collideswith_player_clear(const u8 a) {
+  Enemy_CollisionBits[a] &= ~ACTOR_COLLISIONBIT_PLAYER;
+}
+
+static inline bool actor_collideswith_actor(const u8 a, const u8 b) {
+  return (Enemy_CollisionBits[a] & ACTOR_COLLISIONBIT_ACTOR(b)) != 0;
+}
+
+static inline void actor_collideswith_actor_set(const u8 a, const u8 b) {
+  Enemy_CollisionBits[a] |= ACTOR_COLLISIONBIT_ACTOR(b);
+}
+
+static inline void actor_collideswith_actor_clear(const u8 a, const u8 b) {
+  Enemy_CollisionBits[a] &= ~ACTOR_COLLISIONBIT_ACTOR(b);
 }
 
 

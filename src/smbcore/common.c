@@ -1,4 +1,6 @@
 #include "ctx.h"
+#include "types.h"
+#include "vars.h"
 
 #include <string.h>
 
@@ -1819,10 +1821,14 @@ void Entrance_GameTimerSetup(void) {
 
   Player_PageLoc = ScreenLeft_PageLoc;
   VerticalForceDown = 0x28;
-  PlayerFacingDir = 1;
+  PlayerFacingDir = DIR_RIGHT;
   Player_Y_HighPos = 1;
   Player_State = PLAYERSTATE_ONGROUND;
-  Player_CollisionBits -= 1;
+
+  // the memory was cleared from earlier in the original
+  expect(Player_CollisionBits == 0);
+  Player_CollisionBits = PLAYER_COLLISIONBIT_ALL;
+
   HalfwayPage = 0;
   SwimmingFlag = AreaType == AREA_WATER;
 
@@ -2390,7 +2396,7 @@ void PlayerEntrance(void) {
   JoypadOverride = 0;
   AltEntranceControl = 0;
   DisableCollisionDet = 0;
-  PlayerFacingDir = 1;
+  PlayerFacingDir = DIR_RIGHT;
   GameEngineSubroutine = GR_PLAYERCTRLROUTINE;
 }
 
@@ -2432,7 +2438,7 @@ void PlayerCtrlRoutine(void) {
     }
   }
   if ((Player_X_Speed != 0)) {
-    Player_MovingDir = (Player_X_Speed < 0x80) ? 1 : 2;
+    Player_MovingDir = (Player_X_Speed < 0x80) ? DIR_RIGHT : DIR_LEFT;
   }
 
   // This shouldn't be used for the rest of the frame
@@ -2710,7 +2716,7 @@ void PlayerEndLevel(void) {
     }
   }
 #endif
-  if ((Player_CollisionBits & 1) == 0) {
+  if (!player_collides_dir(DIR_RIGHT)) {
     if (StarFlagTaskControl == STARFLAGTASK_IDLE) {
       StarFlagTaskControl = STARFLAGTASK_GAMETIMERFIREWORKS;
     }
@@ -2799,7 +2805,7 @@ void PlayerMovementSubs(void) {
 void OnGroundStateSub(void) {
   GetPlayerAnimSpeed();
   if (Left_Right_Buttons != 0) {
-    PlayerFacingDir = Left_Right_Buttons;
+    PlayerFacingDir = left_right_buttons_as_dir();
   }
   ImposeFriction(Left_Right_Buttons);
   Player_X_Scroll = MovePlayerHorizontally();
@@ -2834,8 +2840,8 @@ void JumpSwimSub(void) {
     if (Player_Y_Position < 0x14) {
       VerticalForce = 0x18;
     }
-    if (Left_Right_Buttons != 0) {
-      PlayerFacingDir = Left_Right_Buttons;
+    if (Left_Right_Buttons != BUTTON_NONE) {
+      PlayerFacingDir = left_right_buttons_as_dir();
     }
   }
   LRAir();
@@ -2869,18 +2875,36 @@ void ClimbingSub(void) {
   ADD_SIGNED_24_16(Player_Y_HighPos, Player_Y_Position, Player_YMF_Dummy,
                    Player_Y_Speed, Player_Y_MoveForce);
 
-  const u8 bVar3 = Left_Right_Buttons & Player_CollisionBits;
-  if (bVar3 != 0) {
+  const u8 moving_dir = left_right_buttons_as_dir();
+
+  if (player_collides_dir(moving_dir)) {
     if (ClimbSideTimer == 0) {
       ClimbSideTimer = 0x18;
-      u8 bVar4 = (bVar3 & 1) == 0 ? 2 : 0;
-      if (PlayerFacingDir != 1) {
-        bVar4 += 1;
+
+      i8 add_by;
+
+      if (player_collides_dir(moving_dir & DIR_RIGHT)) {
+        add_by = PlayerFacingDir == DIR_RIGHT ? 14 : 4;
+      } else {
+        add_by = PlayerFacingDir != DIR_RIGHT ? -14 : -4;
       }
-      static const i8 climb_adder[4] = { 14, 4, -4, -14 };
+
       ADD_SIGNED_16_8(Player_PageLoc, Player_X_Position,
-                      climb_adder[bVar4]);
-      PlayerFacingDir = Left_Right_Buttons ^ 3;
+                      add_by);
+
+      const bool left  = moving_dir & DIR_LEFT;
+      const bool right = moving_dir & DIR_RIGHT;
+
+      if (left) {
+        PlayerFacingDir = DIR_RIGHT;
+      } else if (right) {
+        PlayerFacingDir = DIR_LEFT;
+      }
+
+      // Both left and right are pressed (a bug)
+      if (left && right) {
+        PlayerFacingDir = DIR_INVALID;
+      }
     }
   } else {
     ClimbSideTimer = 0;
@@ -2893,18 +2917,22 @@ void ClimbingSub(void) {
 // Signature: [] -> []
 void PlayerPhysicsSub(void) {
   if (Player_State == PLAYERSTATE_CLIMBING) {
-    if (((Up_Down_Buttons & Player_CollisionBits) == 0)) {
+    const u8 vertdir = up_down_buttons_as_vertdir();
+
+    if (player_collides_vertdir(vertdir)) {
+      if (player_collides_vertdir(vertdir & VERTDIR_TOP)) {
+        Player_Y_MoveForce = 32;
+        Player_Y_Speed = -1;
+        PlayerAnimTimerSet = 8;
+      } else {
+        Player_Y_MoveForce = -1;
+        Player_Y_Speed = 1;
+        PlayerAnimTimerSet = 4;
+      }
+    } else {
       Player_Y_MoveForce = 0;
       Player_Y_Speed = 0;
       PlayerAnimTimerSet = 4;
-    } else if ((Up_Down_Buttons & Player_CollisionBits & BUTTON_U) == 0) {
-      Player_Y_MoveForce = -1;
-      Player_Y_Speed = 1;
-      PlayerAnimTimerSet = 4;
-    } else {
-      Player_Y_MoveForce = 32;
-      Player_Y_Speed = -1;
-      PlayerAnimTimerSet = 8;
     }
 
     return;
@@ -3068,20 +3096,18 @@ void GetPlayerAnimSpeed(void) {
 // SMB:b5cc
 // SM2MAIN:8138
 // Signature: [A] -> []
-void ImposeFriction(const u8 param_1) {
-  const u8 tmp1 = param_1 & Player_CollisionBits;
-
+void ImposeFriction(const u8 dir) {
   bool go_left = true;
 
-  if (tmp1 == 0) {
+  if (player_collides_dir(dir)) {
+    go_left = player_collides_dir(dir & DIR_RIGHT);
+  } else {
     if (Player_X_Speed == 0) {
       Player_XSpeedAbsolute = 0;
       return;
     }
 
     go_left = Player_X_Speed >= 0x80;
-  } else {
-    go_left = (tmp1 & 1) != 0;
   }
 
   if (go_left) {
@@ -3224,7 +3250,7 @@ static inline void check_and_setup_bubble(const u8 param_1, const bool random, c
   const u8 bubble_mforce_data = !bug ? bubble_mforce_data_lookup[idx] : ssw(0xf9, 0x8d);
 
   if (setup_bubble) {
-    const bool c = (PlayerFacingDir & 1) != 0;
+    const bool c = (PlayerFacingDir & DIR_RIGHT) != 0;
     // NES note: The carry flag causes the constant to be incremented by 1
     const u8 a = c ? (8 + 1) : 0;
 
@@ -3385,7 +3411,7 @@ void ProcessWhirlpools(void) {
           // Pull the player to the left
           SUB_UNSIGNED_16_8(Player_PageLoc, Player_X_Position,
                             1);
-        } else if ((Player_CollisionBits & 1) != 0) {
+        } else if (player_collides_dir(DIR_RIGHT)) {
           // On the left side of the whirlpool, with collision bit
           // Pull the player to the right
           ADD_UNSIGNED_16_8(Player_PageLoc, Player_X_Position,
@@ -3662,10 +3688,10 @@ void BulletBillHandler(const u8 objoff) {
       const struct_ncr00 sVar2 = PlayerEnemyDiff(objoff);
 
       if (sVar2.n) {
-        Enemy_MovingDir[objoff] = 1;
+        Enemy_MovingDir[objoff] = DIR_RIGHT;
         Enemy_X_Speed[objoff] = 0x18;
       } else {
-        Enemy_MovingDir[objoff] = 2;
+        Enemy_MovingDir[objoff] = DIR_LEFT;
         Enemy_X_Speed[objoff] = -0x18;
       }
 
@@ -3779,9 +3805,9 @@ static inline void ProcHammerObj(const u8 objoff) {
         Misc_Y_Speed[objoff] = 0xfe;
         Enemy_State[bVar2] = Enemy_State[bVar2] & 0xf7;
 
-        expect(Enemy_MovingDir[bVar2] == 1 || Enemy_MovingDir[bVar2] == 2);
+        expect(Enemy_MovingDir[bVar2] == DIR_RIGHT || Enemy_MovingDir[bVar2] == DIR_LEFT);
 
-        Misc_X_Speed[objoff] = Enemy_MovingDir[bVar2] == 1 ? 16 : -16;
+        Misc_X_Speed[objoff] = Enemy_MovingDir[bVar2] == DIR_RIGHT ? 16 : -16;
       }
 
       // SetHPos
@@ -3992,7 +4018,7 @@ void PowerUpObjHandler(const u8 objoff) {
           Enemy_X_Speed[objoff] = 0x10;
           Enemy_State[objoff] = 0x80;
           Enemy_SprAttrib[objoff] = 0;
-          Enemy_MovingDir[objoff] = 1;
+          Enemy_MovingDir[objoff] = DIR_RIGHT;
         }
       }
       if (Enemy_State[objoff] < 6) {
@@ -4959,7 +4985,7 @@ void InitRetainerObj(const u8 param_1) {
 void InitNormalEnemy(const u8 param_1) {
   Enemy_X_Speed[param_1] = PrimaryHardMode != 0 ? -12 : -8;
   Enemy_BoundBoxCtrl[param_1] = 3;
-  Enemy_MovingDir[param_1] = 2;
+  Enemy_MovingDir[param_1] = DIR_LEFT;
   InitVStf(param_1);
 }
 
@@ -4993,7 +5019,7 @@ void InitHammerBro(const u8 objoff) {
   }
 
   Enemy_BoundBoxCtrl[objoff] = 0xb;
-  Enemy_MovingDir[objoff] = 2;
+  Enemy_MovingDir[objoff] = DIR_LEFT;
   InitVStf(objoff);
 }
 
@@ -5004,7 +5030,7 @@ void InitHammerBro(const u8 objoff) {
 void InitHorizFlySwimEnemy(const u8 param_1) {
   Enemy_X_Speed[param_1] = 0;
   Enemy_BoundBoxCtrl[param_1] = 3;
-  Enemy_MovingDir[param_1] = 2;
+  Enemy_MovingDir[param_1] = DIR_LEFT;
   InitVStf(param_1);
 }
 
@@ -5023,7 +5049,7 @@ void InitBloober(const u8 objoff) {
 // Signature: [X] -> [A]
 u8 SmallBBox(const u8 param_1) {
   Enemy_BoundBoxCtrl[param_1] = 9;
-  Enemy_MovingDir[param_1] = 2;
+  Enemy_MovingDir[param_1] = DIR_LEFT;
   InitVStf(param_1);
   return 0;
 }
@@ -5043,7 +5069,7 @@ void InitRedPTroopa(const u8 objoff) {
   RedPTroopaCenterYPos[objoff] = cVar1 + Enemy_Y_Position[objoff];
 
   Enemy_BoundBoxCtrl[objoff] = 3;
-  Enemy_MovingDir[objoff] = 2;
+  Enemy_MovingDir[objoff] = DIR_LEFT;
   InitVStf(objoff);
 }
 
@@ -5061,7 +5087,7 @@ void InitVStf(const u8 param_1) {
 // SM2MAIN:8f56
 // Signature: [X] -> []
 void InitBulletBill(const u8 objoff) {
-  Enemy_MovingDir[objoff] = 2;
+  Enemy_MovingDir[objoff] = DIR_LEFT;
   Enemy_BoundBoxCtrl[objoff] = 9;
 }
 
@@ -5263,7 +5289,7 @@ void InitFlyingCheepCheep(const u8 objoff) {
   }
 
   Enemy_X_Speed[objoff] = speed_lookup[idx][currng];
-  Enemy_MovingDir[objoff] = 1;
+  Enemy_MovingDir[objoff] = DIR_RIGHT;
 
   if (Player_X_Speed == 0) {
     if ((rng1 & 3) != 0) {
@@ -5663,7 +5689,7 @@ void EndFrenzy(const u8 objoff) {
 // SM2MAIN:9406
 // Signature: [X] -> []
 void InitJumpGPTroopa(const u8 objoff) {
-  Enemy_MovingDir[objoff] = 2;
+  Enemy_MovingDir[objoff] = DIR_LEFT;
   Enemy_X_Speed[objoff] = ssw(0xf8, 0xf4);
   Enemy_BoundBoxCtrl[objoff] = 3;
 }
@@ -6348,10 +6374,10 @@ u8 MoveWithXMCntrs(const u8 objoff) {
   const u8 bStack0000 = XMoveSecondaryCounter[objoff];
 
   if ((Enemy_Y_Speed[objoff] & 2) != 0) {
-    Enemy_MovingDir[objoff] = 1;
+    Enemy_MovingDir[objoff] = DIR_RIGHT;
   } else {
     XMoveSecondaryCounter[objoff] *= -1;
-    Enemy_MovingDir[objoff] = 2;
+    Enemy_MovingDir[objoff] = DIR_LEFT;
   }
 
   const u8 sVar2 = MoveEnemyHorizontally(objoff);
@@ -6372,18 +6398,18 @@ void MoveBloober(const u8 objoff, const bool param_2) {
   const u8 rng = PseudoRandomBitReg[objoff + 1] & (SecondaryHardMode == 0 ? 63 : 3);
 
   if (rng == 0) {
-    u8 bVar2;
+    u8 dir;
     bool tmp2;
 
     if ((objoff & 1) != 0) {
-      bVar2 = Player_MovingDir;
+      dir = Player_MovingDir;
       tmp2 = true;
     } else {
       const struct_ncr00 sVar3 = PlayerEnemyDiff(objoff);
-      bVar2 = sVar3.n ? 1 : 2;
+      dir = sVar3.n ? DIR_RIGHT : DIR_LEFT;
       tmp2 = sVar3.c;
     }
-    Enemy_MovingDir[objoff] = bVar2;
+    Enemy_MovingDir[objoff] = dir;
     ProcSwimmingB(objoff, tmp2);
   } else {
     ProcSwimmingB(objoff, param_2);
@@ -6395,7 +6421,7 @@ void MoveBloober(const u8 objoff, const bool param_2) {
     Enemy_Y_Position[objoff] = ydiff;
   }
 
-  if (Enemy_MovingDir[objoff] == 1) {
+  if (Enemy_MovingDir[objoff] == DIR_RIGHT) {
     ADD_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
                       BlooperMoveSpeed[objoff]);
   } else {
@@ -6717,10 +6743,10 @@ void MoveLakitu(const u8 objoff) {
     }
 
     if ((LakituMoveDirection[objoff] & 1) != 0) {
-      Enemy_MovingDir[objoff] = 1;
+      Enemy_MovingDir[objoff] = DIR_RIGHT;
     } else {
       LakituMoveSpeed[objoff] *= -1;
-      Enemy_MovingDir[objoff] = 2;
+      Enemy_MovingDir[objoff] = DIR_LEFT;
     }
 
     MoveEnemyHorizontally(objoff);
@@ -6883,12 +6909,12 @@ void RunBowser(const u8 objoff) {
       BowserBodyControls ^= 1;
     }
     if ((FrameCounter & 0xf) == 0) {
-      Enemy_MovingDir[objoff] = 2;
+      Enemy_MovingDir[objoff] = DIR_LEFT;
     }
     if ((EnemyFrameTimer[objoff] != 0)) {
       sVar4 = PlayerEnemyDiff(objoff);
       if (sVar4.n) {
-        Enemy_MovingDir[objoff] = 1;
+        Enemy_MovingDir[objoff] = DIR_RIGHT;
         BowserMovementSpeed = 2;
         EnemyFrameTimer[objoff] = 0x20;
         BowserFireBreathTimer = 0x20;
@@ -7479,7 +7505,7 @@ void InitPlatformFall(const u8 param_1, const u8 objoff) {
   SetupFloateyNumber(6, objoff);
   FloateyNum_X_Pos[objoff] = Player_Rel_XPos;
   FloateyNum_Y_Pos[objoff] = Player_Y_Position;
-  Enemy_MovingDir[objoff] = 1;
+  Enemy_MovingDir[objoff] = DIR_RIGHT;
 
   // NES note: GetEnemyOffscreenBits sets Y=1. This is later used by StopPlatforms.
   // This is either a bug, or just a way to reuse the value. Either way, it's best extracted out to the caller (here).
@@ -7935,7 +7961,7 @@ void PlayerEnemyCollision(const u8 objoff) {
   // Inlined: GetEnemyBoundBoxOfs
   const bool bVar3 = PlayerCollisionCore(objoff * 4 + 4);
   if (!bVar3) {
-    Enemy_CollisionBits[objoff] = Enemy_CollisionBits[objoff] & 0xfe;
+    actor_collideswith_player_clear(objoff);
     return;
   }
 
@@ -7951,11 +7977,15 @@ void PlayerEnemyCollision(const u8 objoff) {
     return;
   }
 
-  if (((Enemy_CollisionBits[objoff] & 1) | EnemyOffscrBitsMasked[objoff]) != 0) {
+  if (actor_collideswith_player(objoff)) {
     return;
   }
 
-  Enemy_CollisionBits[objoff] = Enemy_CollisionBits[objoff] | 1;
+  if (EnemyOffscrBitsMasked[objoff] != 0) {
+    return;
+  }
+
+  actor_collideswith_player_set(objoff);
 
   if (enemy_id == A_PODOBOO || enemy_id == A_PIRANHA_PLANT) {
     InjurePlayer();
@@ -8265,7 +8295,7 @@ void EnemiesCollision(const u8 objoff) {
     return;
   }
 
-  expect(objoff < 0x80);
+  expect(objoff >= 0 && objoff < 6);
 
   if (EnemiesCollision_condition(objoff)) {
     return;
@@ -8285,18 +8315,12 @@ void EnemiesCollision(const u8 objoff) {
 
     const bool bVar2 = SprObjectCollisionCore(i * 4 + 4, bStack0000);
 
-    // objectoffset must be between 0 and 6 inclusive
-
-    expect(objoff >= 0 && objoff <= 6);
-
-    const u8 bitsmask = 1 << (7 - objoff);
-
     if (!bVar2) {
-      Enemy_CollisionBits[i] &= ~bitsmask;
+      actor_collideswith_actor_clear(i, objoff);
     } else if ((Enemy_State[objoff] & 0x80) != 0 || (Enemy_State[i] & 0x80) != 0) {
       ProcEnemyCollisions(objoff, i);
-    } else if ((Enemy_CollisionBits[i] & bitsmask) == 0) {
-      Enemy_CollisionBits[i] |= bitsmask;
+    } else if (!actor_collideswith_actor(i, objoff)) {
+      actor_collideswith_actor_set(i, objoff);
       ProcEnemyCollisions(objoff, i);
     }
   }
@@ -8451,10 +8475,10 @@ void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, c
   }
 
   if ((u8)(BBOX_BOTRIGHT_X(0) - BBOX_TOPLEFT_X(param_2_div4)) <= 7) {
-    ImpedePlayerMove(1);
+    ImpedePlayerMove(DIR_RIGHT);
   } else {
     if ((u8)(BBOX_BOTRIGHT_X(param_2_div4) - BBOX_TOPLEFT_X(0) - 1) <= 8) {
-      ImpedePlayerMove(2);
+      ImpedePlayerMove(DIR_LEFT);
     }
   }
 }
@@ -8576,7 +8600,7 @@ void PlayerBGCollision(void) {
     return;
   }
 
-  Player_CollisionBits = 0xff;
+  Player_CollisionBits = PLAYER_COLLISIONBIT_ALL;
 
   if (Player_Y_Position > 0xce) {
     return;
@@ -8696,7 +8720,7 @@ void PlayerBGCollision(void) {
       bVar5 = sVar9.a;
       const bool cond = (bVar5 == MT_0) || (bVar5 == MT_PIPE_SIDEWAYS_TL) || (bVar5 == MT_WATERPIPE_T) || CheckForClimbMTiles(bVar5);
       if (!cond) {
-        CheckSideMTiles(2, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
+        CheckSideMTiles(DIR_LEFT, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
         return;
       }
     }
@@ -8708,7 +8732,7 @@ void PlayerBGCollision(void) {
       bVar5 = sVar9.a;
       const bool cond = sVar9.a == MT_0;
       if (!cond) {
-        CheckSideMTiles(2, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
+        CheckSideMTiles(DIR_LEFT, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
         return;
       }
     }
@@ -8720,7 +8744,7 @@ void PlayerBGCollision(void) {
       bVar5 = sVar9.a;
       const bool cond = (bVar5 == MT_0) || (bVar5 == MT_PIPE_SIDEWAYS_TL) || (bVar5 == MT_WATERPIPE_T) || CheckForClimbMTiles(bVar5);
       if (!cond) {
-        CheckSideMTiles(1, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
+        CheckSideMTiles(DIR_RIGHT, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
         return;
       }
     }
@@ -8732,7 +8756,7 @@ void PlayerBGCollision(void) {
       bVar5 = sVar9.a;
       const bool cond = sVar9.a == MT_0;
       if (!cond) {
-        CheckSideMTiles(1, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
+        CheckSideMTiles(DIR_RIGHT, bVar5, sVar9.r04, sVar9.mt_x, sVar9.mt_y);
         return;
       }
     }
@@ -8761,7 +8785,7 @@ static void CheckSideMTiles(const u8 dir, const u8 bVar5, const u8 bVar2, const 
     if (JumpspringAnimCtrl != 0) {
       return;
     }
-  } else if ((Player_State == PLAYERSTATE_ONGROUND) && (PlayerFacingDir == 1) && ((bVar5 == MT_WATERPIPE_B || (bVar5 == MT_PIPE_SIDEWAYS_BL)))) {
+  } else if ((Player_State == PLAYERSTATE_ONGROUND) && (PlayerFacingDir == DIR_RIGHT) && (bVar5 == MT_WATERPIPE_B || bVar5 == MT_PIPE_SIDEWAYS_BL)) {
     if (Player_SprAttrib == 0) {
       Square1SoundQueue = SOUND_SQ1_PIPE_OR_INJURY;
     }
@@ -8797,7 +8821,7 @@ void HandleClimbing(const u8 param_1, const u8 param_2, const u16 mt_x) {
 
   if ((param_1 == MT_FLAGPOLE_T) || (param_1 == MT_FLAGPOLE_M)) {
     if (GameEngineSubroutine != GR_PLAYERENDLEVEL) {
-      PlayerFacingDir = 1;
+      PlayerFacingDir = DIR_RIGHT;
       ScrollLock += 1;
       if (GameEngineSubroutine != GR_FLAGPOLESLIDE) {
         KillEnemies(0x33);
@@ -8832,7 +8856,7 @@ void HandleClimbing(const u8 param_1, const u8 param_2, const u16 mt_x) {
   Player_X_Speed = 0;
   Player_X_MoveForce = 0;
   if ((u8)(Player_X_Position - ScreenLeft_X_Pos) < 0x10) {
-    PlayerFacingDir = 2;
+    PlayerFacingDir = DIR_LEFT;
   }
 
   // NES note: The game assumes PlayerFacingDir is >= 1, but that's not always the case.
@@ -8953,19 +8977,13 @@ void HandlePipeEntry(const u8 param_1, const u8 param_2) {
 // SMB:df4b
 // SM2MAIN:abd4
 // Signature: [r00] -> []
-void ImpedePlayerMove(const u8 param_1) {
-  u8 bVar1;
-  u8 bVar2;
+void ImpedePlayerMove(const u8 dir) {
   bool nxspd;
 
-  if (param_1 == 1) {
+  if (dir == DIR_RIGHT) {
     nxspd = Player_X_Speed < 0x80;
-    bVar2 = 1;
-    bVar1 = -1;
   } else {
     nxspd = (u8)(Player_X_Speed - 1) >= 0x80;
-    bVar2 = 2;
-    bVar1 = 1;
   }
 
   if (nxspd) {
@@ -8975,11 +8993,14 @@ void ImpedePlayerMove(const u8 param_1) {
     Player_X_Speed = 0;
 
     ADD_SIGNED_16_8(Player_PageLoc, Player_X_Position,
-                    bVar1);
+                    dir == DIR_RIGHT ? -1 : 1);
   }
 
-  // ExIPM
-  Player_CollisionBits = (bVar2 ^ 0xff) & Player_CollisionBits;
+  if (dir == DIR_RIGHT) {
+    player_collides_right_clear();
+  } else {
+    player_collides_left_clear();
+  }
 }
 
 
@@ -9149,7 +9170,7 @@ void EnemyToBGCollisionDet(const u8 objoff) {
     }
     if (enemy_id != A_GOOMBA) {
       if (enemy_id == A_SPINY) {
-        Enemy_MovingDir[objoff] = 1;
+        Enemy_MovingDir[objoff] = DIR_RIGHT;
         Enemy_X_Speed[objoff] = 8;
         if ((FrameCounter & 7) == 0) {
           goto LandEnemyInitState;
@@ -11060,16 +11081,13 @@ void DrawBubble(const u8 objoff) {
 // SM2MAIN:bbc4
 // Signature: [] -> []
 void PlayerGfxHandler(void) {
-  u8 bVar1;
-  u8 abVar2;
-
   if ((InjuryTimer == 0) || ((FrameCounter & 1) == 0)) {
     if (GameEngineSubroutine == GR_PLAYERDEATH) {
       PlayerGfxProcessing(PlayerGfxTblOffsets[14]);
       return;
     }
     if (PlayerChangeSizeFlag != 0) {
-      bVar1 = HandleChangeSize();
+      const u8 bVar1 = HandleChangeSize();
       PlayerGfxProcessing(bVar1);
       return;
     }
@@ -11083,18 +11101,18 @@ void PlayerGfxHandler(void) {
     }
     FindPlayerAction();
     if ((FrameCounter & 4) == 0) {
-      abVar2 = Player_SprDataOffset;
-      if ((PlayerFacingDir & 1) == 0) {
-        abVar2 = Player_SprDataOffset + 4;
+      u8 abVar2 = Player_SprDataOffset;
+      if ((PlayerFacingDir & DIR_RIGHT) == 0) {
+        abVar2 += 4;
       }
-      bVar1 = 0;
+
       if (PlayerSize != 0) {
-        if (SPRITE_TILE(abVar2, 6) == PlayerGraphicsTable[158]) {
-          return;
+        if (SPRITE_TILE(abVar2, 6) != PlayerGraphicsTable[158]) {
+          SPRITE_TILE(abVar2, 6) = 0x46;
         }
-        bVar1 = 1;
+      } else {
+        SPRITE_TILE(abVar2, 6) = 0x31;
       }
-      SPRITE_TILE(abVar2, 6) = bVar1 == 0 ? 0x31 : 0x46;
     }
   }
 }
