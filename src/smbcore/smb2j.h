@@ -1009,26 +1009,8 @@ void smb2j_DrawBubble(u8 param_1);
 void smb2j_PlayerGfxHandler(void);
 #define PlayerGfxHandler smb2j_PlayerGfxHandler
 
-void smb2j_FindPlayerAction(void);
-#define FindPlayerAction smb2j_FindPlayerAction
-
-void smb2j_PlayerGfxProcessing(u8 param_1);
-#define PlayerGfxProcessing smb2j_PlayerGfxProcessing
-
 void smb2j_DrawPlayer_Intermediate(void);
 #define DrawPlayer_Intermediate smb2j_DrawPlayer_Intermediate
-
-void smb2j_RenderPlayerSub(u8 param_1);
-#define RenderPlayerSub smb2j_RenderPlayerSub
-
-u8 smb2j_ProcessPlayerAction(void);
-#define ProcessPlayerAction smb2j_ProcessPlayerAction
-
-u8 smb2j_HandleChangeSize(void);
-#define HandleChangeSize smb2j_HandleChangeSize
-
-void smb2j_ChkForPlayerAttrib(void);
-#define ChkForPlayerAttrib smb2j_ChkForPlayerAttrib
 
 u8 smb2j_RelativePlayerPosition(void);
 #define RelativePlayerPosition smb2j_RelativePlayerPosition

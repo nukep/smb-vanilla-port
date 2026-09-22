@@ -1010,26 +1010,8 @@ void smb1_DrawBubble(u8 param_1);
 void smb1_PlayerGfxHandler(void);
 #define PlayerGfxHandler smb1_PlayerGfxHandler
 
-void smb1_FindPlayerAction(void);
-#define FindPlayerAction smb1_FindPlayerAction
-
-void smb1_PlayerGfxProcessing(u8 param_1);
-#define PlayerGfxProcessing smb1_PlayerGfxProcessing
-
 void smb1_DrawPlayer_Intermediate(void);
 #define DrawPlayer_Intermediate smb1_DrawPlayer_Intermediate
-
-void smb1_RenderPlayerSub(u8 param_1);
-#define RenderPlayerSub smb1_RenderPlayerSub
-
-u8 smb1_ProcessPlayerAction(void);
-#define ProcessPlayerAction smb1_ProcessPlayerAction
-
-u8 smb1_HandleChangeSize(void);
-#define HandleChangeSize smb1_HandleChangeSize
-
-void smb1_ChkForPlayerAttrib(void);
-#define ChkForPlayerAttrib smb1_ChkForPlayerAttrib
 
 u8 smb1_RelativePlayerPosition(void);
 #define RelativePlayerPosition smb1_RelativePlayerPosition

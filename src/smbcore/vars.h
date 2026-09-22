@@ -308,7 +308,6 @@
 #define LakituReappearTimer              RAM(0x06D1)
 #define NumberofGroupEnemies             RAM(0x06D3)
 #define ColorRotateOffset                RAM(0x06D4)
-#define PlayerGfxOffset                  RAM(0x06D5)
 #define WarpZoneControl                  RAM(0x06D6)
 #define FireworksCounter                 RAM(0x06D7)
 #define MultiLoopCorrectCntr             RAM(0x06D9)

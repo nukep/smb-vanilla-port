@@ -11083,104 +11083,6 @@ void DrawBubble(const u8 objoff) {
 }
 
 
-// SMB:eee9
-// SM2MAIN:bbc4
-// Signature: [] -> []
-void PlayerGfxHandler(void) {
-  if ((InjuryTimer == 0) || ((FrameCounter & 1) == 0)) {
-    if (GameEngineSubroutine == GR_PLAYERDEATH) {
-      PlayerGfxProcessing(PLAYERFRAME_DEAD * 8);
-      return;
-    }
-    if (PlayerChangeSizeFlag != 0) {
-      const u8 bVar1 = HandleChangeSize();
-      PlayerGfxProcessing(bVar1);
-      return;
-    }
-    if (SwimmingFlag == 0) {
-      FindPlayerAction();
-      return;
-    }
-    if (Player_State == PLAYERSTATE_ONGROUND) {
-      FindPlayerAction();
-      return;
-    }
-    FindPlayerAction();
-    if ((FrameCounter & 4) == 0) {
-      u8 abVar2 = Player_SprDataOffset;
-      if ((PlayerFacingDir & DIR_RIGHT) == 0) {
-        abVar2 += 4;
-      }
-
-      if (PlayerSize != 0) {
-        if (SPRITE_TILE(abVar2, 6) != STILE_PLAYER__0x48) {
-          SPRITE_TILE(abVar2, 6) = STILE_PLAYER__0x46;
-        }
-      } else {
-        SPRITE_TILE(abVar2, 6) = STILE_PLAYER__0x31;
-      }
-    }
-  }
-}
-
-
-// SMB:ef34
-// SM2MAIN:bc0f
-// Signature: [] -> []
-void FindPlayerAction(void) {
-  const u8 bVar1 = ProcessPlayerAction();
-  PlayerGfxProcessing(bVar1);
-}
-
-
-// SMB:ef45
-// SM2MAIN:bc20
-// Signature: [A] -> []
-void PlayerGfxProcessing(const u8 param_1) {
-  PlayerGfxOffset = param_1;
-  RenderPlayerSub(4);
-  ChkForPlayerAttrib();
-  if (FireballThrowingTimer != 0) {
-    if (PlayerAnimTimer < FireballThrowingTimer) {
-      FireballThrowingTimer = PlayerAnimTimer;
-      PlayerGfxOffset = PLAYERFRAME_BIG_FIREBALL_THROW * 8;
-      const u8 bVar3 = ((Player_X_Speed | Left_Right_Buttons) != 0) ? 3 : 4;
-      RenderPlayerSub(bVar3);
-    } else {
-      FireballThrowingTimer = 0;
-    }
-  }
-
-  const u8 sprite_offset = Player_SprDataOffset;
-
-  if (SprObject_OffscrBits[0] & 0x10) {
-    // Inlined: DumpTwoSpr
-    const u8 off = SPRITE_calculate_wrap(sprite_offset, 6);
-    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
-    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
-  }
-
-  if (SprObject_OffscrBits[0] & 0x20) {
-    // Inlined: DumpTwoSpr
-    const u8 off = SPRITE_calculate_wrap(sprite_offset, 4);
-    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
-    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
-  }
-
-  if (SprObject_OffscrBits[0] & 0x40) {
-    // Inlined: DumpTwoSpr
-    const u8 off = SPRITE_calculate_wrap(sprite_offset, 2);
-    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
-    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
-  }
-
-  if (SprObject_OffscrBits[0] & 0x80) {
-    // Inlined: DumpTwoSpr
-    SPRITE_Y(sprite_offset, 0) = SPRITE_Y_OFFSCREEN;
-    SPRITE_Y(sprite_offset, 1) = SPRITE_Y_OFFSCREEN;
-  }
-}
-
 static inline void draw_player(const u8 frame, const u8 sproff, const u8 xpos, const u8 ypos, const u8 dir, const u8 attrs, const u8 num_rows) {
   // Inlined: DrawPlayerLoop
 
@@ -11227,159 +11129,93 @@ static inline void draw_player(const u8 frame, const u8 sproff, const u8 xpos, c
 }
 
 
-// SMB:efa4
-// SM2MAIN:bc7f
-// Signature: [] -> []
-void DrawPlayer_Intermediate(void) {
-  // Draw the player on the intermediate screen
-
-  const u8 ypos = 0x58;
-  const u8 dir = DIR_RIGHT;
-  const u8 attrs = 0;
-  const u8 xpos = 0x60;
-  const u8 num_rows = 4;
-
-  draw_player(PLAYERFRAME_SMALL_STAND, 4, xpos, ypos, dir, attrs, num_rows);
-
-  SPRITE_ATTR(0, 8) = SPRITE_ATTR(0, 9) | SPRATTR_FLIPHORZ;
-}
-
-
-// SMB:efbe
-// SM2MAIN:bc99
-// Signature: [A] -> []
-void RenderPlayerSub(const u8 num_rows) {
-  expect(PlayerGfxOffset % 8 == 0);
-
-  const u8 frame = PlayerGfxOffset / 8;
+static inline void player_gfx_processing(const u8 frame) {
   const u8 sproff = Player_SprDataOffset;
   const u8 xpos = Player_Rel_XPos;
   const u8 ypos = Player_Rel_YPos;
   const u8 dir = PlayerFacingDir;
   const u8 attrs = Player_SprAttrib;
+  const u8 num_rows = 4;
 
-  Player_Pos_ForScroll = Player_Rel_XPos;
+  Player_Pos_ForScroll = xpos;
 
   draw_player(frame, sproff, xpos, ypos, dir, attrs, num_rows);
-}
 
+  // Inlined: ChkForPlayerAttrib
+  {
+    bool row2_symmetric = false;
+    bool row3_symmetric = false;
 
-// SMB:efec
-// SM2MAIN:bcc7
-// Signature: [] -> [A]
-u8 ProcessPlayerAction(void) {
-  u8 play_frames = 0;
-  u8 idx = 0;
-
-  if (Player_State == PLAYERSTATE_CLIMBING) {
-    if (Player_Y_Speed != 0) {
-      play_frames = 2; idx = 5;
+    if (GameEngineSubroutine == GR_PLAYERDEATH) {
+      row2_symmetric = true;
+      row3_symmetric = true;
+    } else if (frame == PLAYERFRAME_BIG_CROUCH || frame == PLAYERFRAME_SMALL_STAND || frame == PLAYERFRAME_GROW) {
+      row2_symmetric = false;
+      row3_symmetric = true;
+    } else if (frame == PLAYERFRAME_BIG_STAND) {
+      row2_symmetric = true;
+      row3_symmetric = true;
     } else {
-      PlayerAnimCtrl = 0;
-      idx = 5;
+      row2_symmetric = false;
+      row3_symmetric = false;
     }
-  } else if (Player_State == PLAYERSTATE_FALLING) {
-    idx = 4;
-  } else if (Player_State == PLAYERSTATE_JUMPSWIM) {
-    if (SwimmingFlag != 0) {
-      if (JumpSwimTimer != 0 || PlayerAnimCtrl != 0) {
-        play_frames = 3; idx = 1;
-      } else if (A_B_Buttons & BUTTON_A) {
-        play_frames = 3; idx = 1;
-      } else {
-        idx = 1;
-      }
-    } else if (CrouchingFlag != 0) {
-      PlayerAnimCtrl = 0;
-      idx = 6;
-    } else {
-      PlayerAnimCtrl = 0;
-      idx = 0;
+
+    if (row2_symmetric) {
+      SPRITE_ATTR(sproff, 4) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 5) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPHORZ;
     }
+
+    if (row3_symmetric) {
+      SPRITE_ATTR(sproff, 6) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 7) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 7) |= SPRATTR_FLIPHORZ;
+    }
+  }
+
+  if (FireballThrowingTimer > PlayerAnimTimer) {
+    FireballThrowingTimer = PlayerAnimTimer;
+
+    const u8 frame = PLAYERFRAME_BIG_FIREBALL_THROW;
+    const u8 num_rows = (Player_X_Speed == 0 && Left_Right_Buttons == 0) ? 4 : 3;
+
+    draw_player(frame, sproff, xpos, ypos, dir, attrs, num_rows);
   } else {
-    if (CrouchingFlag == 0) {
-      if ((Player_X_Speed | Left_Right_Buttons) != 0) {
-        if (Player_XSpeedAbsolute < 9 || (Player_MovingDir & PlayerFacingDir) != 0) {
-          play_frames = 3; idx = 4;
-        } else {
-#ifdef SMB2J_MODE
-          expect(is_gameroutine_valid(GameEngineSubroutine));
-          // GameEngineSubroutine < 9
-          // TODO: is this the right way to express "< 9"?
-          switch (GameEngineSubroutine) {
-            case GR_PLAYERCHANGESIZE:
-            case GR_PLAYERINJURYBLINK:
-            case GR_PLAYERDEATH:
-            case GR_PLAYERFIREFLOWER:
-              break;
-
-            default:
-              NoiseSoundQueue = SOUND_NOISE_SKID;
-              break;
-          }
-#endif
-          PlayerAnimCtrl = 0;
-          idx = 3;
-        }
-      } else {
-        PlayerAnimCtrl = 0;
-        idx = 2;
-      }
-    } else {
-      PlayerAnimCtrl = 0;
-      idx = 6;
-    }
+    FireballThrowingTimer = 0;
   }
 
-  if (PlayerSize != 0) {
-    idx += 8;
+  const u8 sprite_offset = Player_SprDataOffset;
+
+  if (SprObject_OffscrBits[0] & 0x10) {
+    // Inlined: DumpTwoSpr
+    const u8 off = SPRITE_calculate_wrap(sprite_offset, 6);
+    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
   }
 
-  // Inlined: GetCurrentAnimOffset
-
-  expect(PlayerAnimCtrl < 20);
-
-  // From PlayerGfxTblOffsets, divided by 8
-  static const u8 lookup[16] = {
-    PLAYERFRAME_BIG_JUMP,
-    PLAYERFRAME_BIG_SWIM_0,
-    PLAYERFRAME_BIG_STAND,
-    PLAYERFRAME_BIG_SKID,
-    PLAYERFRAME_BIG_WALK_0,
-    PLAYERFRAME_BIG_CLIMB_0,
-    PLAYERFRAME_BIG_CROUCH,
-    PLAYERFRAME_BIG_FIREBALL_THROW,
-
-    PLAYERFRAME_SMALL_JUMP,
-    PLAYERFRAME_SMALL_SWIM_0,
-    PLAYERFRAME_SMALL_STAND,
-    PLAYERFRAME_SMALL_SKID,
-    PLAYERFRAME_SMALL_WALK_0,
-    PLAYERFRAME_SMALL_CLIMB_0,
-    PLAYERFRAME_DEAD,
-    PLAYERFRAME_SMALL_STAND,
-  };
-
-  u8 res = (PlayerAnimCtrl + lookup[idx]) * 8;
-
-  if (play_frames != 0) {
-    if (PlayerAnimTimer == 0) {
-      PlayerAnimTimer = PlayerAnimTimerSet;
-      PlayerAnimCtrl += 1;
-      if (PlayerAnimCtrl >= play_frames) {
-        PlayerAnimCtrl = 0;
-      }
-    }
+  if (SprObject_OffscrBits[0] & 0x20) {
+    // Inlined: DumpTwoSpr
+    const u8 off = SPRITE_calculate_wrap(sprite_offset, 4);
+    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
   }
 
-  return res;
+  if (SprObject_OffscrBits[0] & 0x40) {
+    // Inlined: DumpTwoSpr
+    const u8 off = SPRITE_calculate_wrap(sprite_offset, 2);
+    SPRITE_Y(off, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(off, 1) = SPRITE_Y_OFFSCREEN;
+  }
+
+  if (SprObject_OffscrBits[0] & 0x80) {
+    // Inlined: DumpTwoSpr
+    SPRITE_Y(sprite_offset, 0) = SPRITE_Y_OFFSCREEN;
+    SPRITE_Y(sprite_offset, 1) = SPRITE_Y_OFFSCREEN;
+  }
 }
 
 
-// SMB:f0b0
-// SM2MAIN:bd95
-// Signature: [] -> [A]
-u8 HandleChangeSize(void) {
+static inline u8 handle_change_size(void) {
   if ((FrameCounter & 3) == 0) {
     PlayerAnimCtrl += 1;
     if (PlayerAnimCtrl >= 10) {
@@ -11419,50 +11255,168 @@ u8 HandleChangeSize(void) {
   expect(PlayerAnimCtrl < 10);
 
   if (PlayerSize != 0) {
-    return frames_down[PlayerAnimCtrl] * 8;
+    return frames_down[PlayerAnimCtrl];
   } else {
-    return frames_up[PlayerAnimCtrl] * 8;
+    return frames_up[PlayerAnimCtrl];
   }
 }
 
 
-// SMB:f0e9
-// SM2MAIN:bdce
+static inline u8 process_player_action(void) {
+  u8 play_frames = 0;
+  u8 idx = 0;
+
+  const bool big = PlayerSize == 0;
+
+  if (Player_State == PLAYERSTATE_CLIMBING) {
+    if (Player_Y_Speed != 0) {
+      play_frames = 2;
+    } else {
+      PlayerAnimCtrl = 0;
+    }
+    idx = big ? PLAYERFRAME_BIG_CLIMB_0
+              : PLAYERFRAME_SMALL_CLIMB_0;
+  } else if (Player_State == PLAYERSTATE_FALLING) {
+    idx = big ? PLAYERFRAME_BIG_WALK_0
+              : PLAYERFRAME_SMALL_WALK_0;
+  } else if (Player_State == PLAYERSTATE_JUMPSWIM) {
+    if (SwimmingFlag != 0) {
+      if (JumpSwimTimer != 0 || PlayerAnimCtrl != 0 || (A_B_Buttons & BUTTON_A)) {
+        play_frames = 3;
+      }
+      idx = big ? PLAYERFRAME_BIG_SWIM_0
+                : PLAYERFRAME_SMALL_SWIM_0;
+    } else if (CrouchingFlag != 0) {
+      PlayerAnimCtrl = 0;
+      // NES note: The small "dead" variant shouldn't happen normally
+      idx = big ? PLAYERFRAME_BIG_CROUCH
+                : PLAYERFRAME_DEAD;
+    } else {
+      PlayerAnimCtrl = 0;
+      idx = big ? PLAYERFRAME_BIG_JUMP
+                : PLAYERFRAME_SMALL_JUMP;
+    }
+  } else {
+    if (CrouchingFlag == 0) {
+      if ((Player_X_Speed | Left_Right_Buttons) != 0) {
+        if (Player_XSpeedAbsolute < 9 || (Player_MovingDir & PlayerFacingDir) != 0) {
+          play_frames = 3;
+          idx = big ? PLAYERFRAME_BIG_WALK_0
+                    : PLAYERFRAME_SMALL_WALK_0;
+        } else {
+#ifdef SMB2J_MODE
+          expect(is_gameroutine_valid(GameEngineSubroutine));
+          // GameEngineSubroutine < 9
+          // TODO: is this the right way to express "< 9"?
+          switch (GameEngineSubroutine) {
+            case GR_PLAYERCHANGESIZE:
+            case GR_PLAYERINJURYBLINK:
+            case GR_PLAYERDEATH:
+            case GR_PLAYERFIREFLOWER:
+              break;
+
+            default:
+              NoiseSoundQueue = SOUND_NOISE_SKID;
+              break;
+          }
+#endif
+          PlayerAnimCtrl = 0;
+          idx = big ? PLAYERFRAME_BIG_SKID
+                    : PLAYERFRAME_SMALL_SKID;
+        }
+      } else {
+        PlayerAnimCtrl = 0;
+        idx = big ? PLAYERFRAME_BIG_STAND
+                  : PLAYERFRAME_SMALL_STAND;
+      }
+    } else {
+      PlayerAnimCtrl = 0;
+      // NES note: The small "dead" variant shouldn't happen normally
+      idx = big ? PLAYERFRAME_BIG_CROUCH
+                : PLAYERFRAME_DEAD;
+    }
+  }
+
+  u8 res = PlayerAnimCtrl + idx;
+
+  // NES note: the < 0x20 check is here because the original (from GetOffsetFromAnimCtrl) has a likely unencounterable carry bug where it adds 1 if bit 0x20 (bit 5) is set.
+  expect(PlayerAnimCtrl < 0x20);
+  expect(res < _PLAYERFRAME_NUM);
+
+  if (play_frames != 0) {
+    if (PlayerAnimTimer == 0) {
+      PlayerAnimTimer = PlayerAnimTimerSet;
+      PlayerAnimCtrl += 1;
+      if (PlayerAnimCtrl >= play_frames) {
+        PlayerAnimCtrl = 0;
+      }
+    }
+  }
+
+  return res;
+}
+
+
+// SMB:eee9
+// SM2MAIN:bbc4
 // Signature: [] -> []
-void ChkForPlayerAttrib(void) {
-  const u8 sproff = Player_SprDataOffset;
-
-  bool row2_symmetric = false;
-  bool row3_symmetric = false;
-
-  expect(PlayerGfxOffset % 8 == 0);
-  const u8 frame = PlayerGfxOffset / 8;
+void PlayerGfxHandler(void) {
+  if (InjuryTimer != 0 && (FrameCounter & 1) != 0) {
+    return;
+  }
 
   if (GameEngineSubroutine == GR_PLAYERDEATH) {
-    row2_symmetric = true;
-    row3_symmetric = true;
-  } else if (frame == PLAYERFRAME_BIG_CROUCH || frame == PLAYERFRAME_SMALL_STAND || frame == PLAYERFRAME_GROW) {
-    row2_symmetric = false;
-    row3_symmetric = true;
-  } else if (frame == PLAYERFRAME_BIG_STAND) {
-    row2_symmetric = true;
-    row3_symmetric = true;
-  } else {
-    row2_symmetric = false;
-    row3_symmetric = false;
+    player_gfx_processing(PLAYERFRAME_DEAD);
+    return;
   }
 
-  if (row2_symmetric) {
-    SPRITE_ATTR(sproff, 4) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
-    SPRITE_ATTR(sproff, 5) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
-    SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPHORZ;
+  if (PlayerChangeSizeFlag != 0) {
+    player_gfx_processing(handle_change_size());
+    return;
   }
 
-  if (row3_symmetric) {
-    SPRITE_ATTR(sproff, 6) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
-    SPRITE_ATTR(sproff, 7) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
-    SPRITE_ATTR(sproff, 7) |= SPRATTR_FLIPHORZ;
+  player_gfx_processing(process_player_action());
+
+  if (SwimmingFlag == 0) {
+    return;
   }
+
+  if (Player_State == PLAYERSTATE_ONGROUND) {
+    return;
+  }
+
+  if ((FrameCounter & 4) == 0) {
+    u8 abVar2 = Player_SprDataOffset;
+    if ((PlayerFacingDir & DIR_RIGHT) == 0) {
+      abVar2 += 4;
+    }
+
+    if (PlayerSize != 0) {
+      if (SPRITE_TILE(abVar2, 6) != STILE_PLAYER__0x48) {
+        SPRITE_TILE(abVar2, 6) = STILE_PLAYER__0x46;
+      }
+    } else {
+      SPRITE_TILE(abVar2, 6) = STILE_PLAYER__0x31;
+    }
+  }
+}
+
+
+// SMB:efa4
+// SM2MAIN:bc7f
+// Signature: [] -> []
+void DrawPlayer_Intermediate(void) {
+  // Draw the player on the intermediate screen
+
+  const u8 ypos = 0x58;
+  const u8 dir = DIR_RIGHT;
+  const u8 attrs = 0;
+  const u8 xpos = 0x60;
+  const u8 num_rows = 4;
+
+  draw_player(PLAYERFRAME_SMALL_STAND, 4, xpos, ypos, dir, attrs, num_rows);
+
+  SPRITE_ATTR(0, 8) = SPRITE_ATTR(0, 9) | SPRATTR_FLIPHORZ;
 }
 
 
