@@ -1021,9 +1021,6 @@ void smb2j_DrawPlayer_Intermediate(void);
 void smb2j_RenderPlayerSub(u8 param_1);
 #define RenderPlayerSub smb2j_RenderPlayerSub
 
-void smb2j_DrawPlayerLoop(u8 param_1,u8 param_2,u8 param_3,u8 param_4,u8 param_5,u8 param_6,u8 param_7);
-#define DrawPlayerLoop smb2j_DrawPlayerLoop
-
 u8 smb2j_ProcessPlayerAction(void);
 #define ProcessPlayerAction smb2j_ProcessPlayerAction
 
@@ -1044,9 +1041,6 @@ u8 smb2j_GetGfxOffsetAdder(u8 param_1);
 
 u8 smb2j_HandleChangeSize(void);
 #define HandleChangeSize smb2j_HandleChangeSize
-
-u8 smb2j_GetOffsetFromAnimCtrl(u8 param_1,u8 param_2);
-#define GetOffsetFromAnimCtrl smb2j_GetOffsetFromAnimCtrl
 
 void smb2j_ChkForPlayerAttrib(void);
 #define ChkForPlayerAttrib smb2j_ChkForPlayerAttrib

@@ -11089,7 +11089,7 @@ void DrawBubble(const u8 objoff) {
 void PlayerGfxHandler(void) {
   if ((InjuryTimer == 0) || ((FrameCounter & 1) == 0)) {
     if (GameEngineSubroutine == GR_PLAYERDEATH) {
-      PlayerGfxProcessing(PlayerGfxTblOffsets[14]);
+      PlayerGfxProcessing(PLAYERFRAME_DEAD * 8);
       return;
     }
     if (PlayerChangeSizeFlag != 0) {
@@ -11143,7 +11143,7 @@ void PlayerGfxProcessing(const u8 param_1) {
   if (FireballThrowingTimer != 0) {
     if (PlayerAnimTimer < FireballThrowingTimer) {
       FireballThrowingTimer = PlayerAnimTimer;
-      PlayerGfxOffset = PlayerGfxTblOffsets[7];
+      PlayerGfxOffset = PLAYERFRAME_BIG_FIREBALL_THROW * 8;
       const u8 bVar3 = ((Player_X_Speed | Left_Right_Buttons) != 0) ? 3 : 4;
       RenderPlayerSub(bVar3);
     } else {
@@ -11181,55 +11181,86 @@ void PlayerGfxProcessing(const u8 param_1) {
   }
 }
 
+static inline void draw_player(const u8 frame, const u8 sproff, const u8 xpos, const u8 ypos, const u8 dir, const u8 attrs, const u8 num_rows) {
+  // Inlined: DrawPlayerLoop
+
+  // From PlayerGraphicsTable
+  static const u8 tiles[_PLAYERFRAME_NUM][8] = {
+    { STILE_PLAYER__0x00, STILE_PLAYER__0x01, STILE_PLAYER__0x02, STILE_PLAYER__0x03, STILE_PLAYER__0x04, STILE_PLAYER__0x05, STILE_PLAYER__0x06, STILE_PLAYER__0x07 },
+    { STILE_PLAYER__0x08, STILE_PLAYER__0x09, STILE_PLAYER__0x0a, STILE_PLAYER__0x0b, STILE_PLAYER__0x0c, STILE_PLAYER__0x0d, STILE_PLAYER__0x0e, STILE_PLAYER__0x0f },
+    { STILE_PLAYER__0x10, STILE_PLAYER__0x11, STILE_PLAYER__0x12, STILE_PLAYER__0x13, STILE_PLAYER__0x14, STILE_PLAYER__0x15, STILE_PLAYER__0x16, STILE_PLAYER__0x17 },
+    { STILE_PLAYER__0x18, STILE_PLAYER__0x19, STILE_PLAYER__0x1a, STILE_PLAYER__0x1b, STILE_PLAYER__0x1c, STILE_PLAYER__0x1d, STILE_PLAYER__0x1e, STILE_PLAYER__0x1f },
+    { STILE_PLAYER__0x20, STILE_PLAYER__0x21, STILE_PLAYER__0x22, STILE_PLAYER__0x23, STILE_PLAYER__0x24, STILE_PLAYER__0x25, STILE_PLAYER__0x26, STILE_PLAYER__0x27 },
+    { STILE_PLAYER__0x08, STILE_PLAYER__0x09, STILE_PLAYER__0x28, STILE_PLAYER__0x29, STILE_PLAYER__0x2a, STILE_PLAYER__0x2b, STILE_PLAYER__0x2c, STILE_PLAYER__0x2d },
+    { STILE_PLAYER__0x08, STILE_PLAYER__0x09, STILE_PLAYER__0x0a, STILE_PLAYER__0x0b, STILE_PLAYER__0x0c, STILE_PLAYER__0x30, STILE_PLAYER__0x2c, STILE_PLAYER__0x2d },
+    { STILE_PLAYER__0x08, STILE_PLAYER__0x09, STILE_PLAYER__0x0a, STILE_PLAYER__0x0b, STILE_PLAYER__0x2e, STILE_PLAYER__0x2f, STILE_PLAYER__0x2c, STILE_PLAYER__0x2d },
+    { STILE_PLAYER__0x08, STILE_PLAYER__0x09, STILE_PLAYER__0x28, STILE_PLAYER__0x29, STILE_PLAYER__0x2a, STILE_PLAYER__0x2b, STILE_PLAYER__0x5c, STILE_PLAYER__0x5d },
+    { STILE_PLAYER__0x08, STILE_PLAYER__0x09, STILE_PLAYER__0x0a, STILE_PLAYER__0x0b, STILE_PLAYER__0x0c, STILE_PLAYER__0x0d, STILE_PLAYER__0x5e, STILE_PLAYER__0x5f },
+    { STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x08, STILE_PLAYER__0x09, STILE_PLAYER__0x58, STILE_PLAYER__0x59, STILE_PLAYER__0x5a, STILE_PLAYER__0x5a },
+    { STILE_PLAYER__0x08, STILE_PLAYER__0x09, STILE_PLAYER__0x28, STILE_PLAYER__0x29, STILE_PLAYER__0x2a, STILE_PLAYER__0x2b, STILE_PLAYER__0x0e, STILE_PLAYER__0x0f },
+
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x32, STILE_PLAYER__0x33, STILE_PLAYER__0x34, STILE_PLAYER__0x35 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x36, STILE_PLAYER__0x37, STILE_PLAYER__0x38, STILE_PLAYER__0x39 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x3a, STILE_PLAYER__0x37, STILE_PLAYER__0x3b, STILE_PLAYER__0x3c },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x3d, STILE_PLAYER__0x3e, STILE_PLAYER__0x3f, STILE_PLAYER__0x40 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x32, STILE_PLAYER__0x41, STILE_PLAYER__0x42, STILE_PLAYER__0x43 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x32, STILE_PLAYER__0x33, STILE_PLAYER__0x44, STILE_PLAYER__0x45 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x32, STILE_PLAYER__0x33, STILE_PLAYER__0x44, STILE_PLAYER__0x47 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x32, STILE_PLAYER__0x33, STILE_PLAYER__0x48, STILE_PLAYER__0x49 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x32, STILE_PLAYER__0x33, STILE_PLAYER__0x90, STILE_PLAYER__0x91 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x3a, STILE_PLAYER__0x37, STILE_PLAYER__0x92, STILE_PLAYER__0x93 },
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x9e, STILE_PLAYER__0x9e, STILE_PLAYER__0x9f, STILE_PLAYER__0x9f },
+
+    { STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x3a, STILE_PLAYER__0x37, STILE_PLAYER__0x4f, STILE_PLAYER__0x4f },
+    { STILE_BLANK,        STILE_BLANK,        STILE_PLAYER__0x00, STILE_PLAYER__0x01, STILE_PLAYER__0x4c, STILE_PLAYER__0x4d, STILE_PLAYER__0x4e, STILE_PLAYER__0x4e },
+    { STILE_PLAYER__0x00, STILE_PLAYER__0x01, STILE_PLAYER__0x4c, STILE_PLAYER__0x4d, STILE_PLAYER__0x4a, STILE_PLAYER__0x4a, STILE_PLAYER__0x4b, STILE_PLAYER__0x4b },
+  };
+
+  const bool flip_horz = (dir & DIR_LEFT) != 0;
+
+  for (int i = 0; i < num_rows; i++) {
+    const u8 left_tileidx  = tiles[frame][i*2 + 0];
+    const u8 right_tileidx = tiles[frame][i*2 + 1];
+
+    draw_sprite_row(i, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flip_horz);
+  }
+}
+
 
 // SMB:efa4
 // SM2MAIN:bc7f
 // Signature: [] -> []
 void DrawPlayer_Intermediate(void) {
+  // Draw the player on the intermediate screen
+
   const u8 ypos = 0x58;
-  const u8 flags = 1;
+  const u8 dir = DIR_RIGHT;
   const u8 attrs = 0;
   const u8 xpos = 0x60;
   const u8 num_rows = 4;
 
-  DrawPlayerLoop(0xb8, 4, ypos, flags, attrs, xpos, num_rows);
-  SPRITE_ATTR(0, 8) = SPRITE_ATTR(0, 9) | 0x40;
+  draw_player(PLAYERFRAME_SMALL_STAND, 4, xpos, ypos, dir, attrs, num_rows);
+
+  SPRITE_ATTR(0, 8) = SPRITE_ATTR(0, 9) | SPRATTR_FLIPHORZ;
 }
 
 
 // SMB:efbe
 // SM2MAIN:bc99
 // Signature: [A] -> []
-void RenderPlayerSub(const u8 param_1) {
+void RenderPlayerSub(const u8 num_rows) {
+  expect(PlayerGfxOffset % 8 == 0);
+
+  const u8 frame = PlayerGfxOffset / 8;
+  const u8 sproff = Player_SprDataOffset;
+  const u8 xpos = Player_Rel_XPos;
+  const u8 ypos = Player_Rel_YPos;
+  const u8 dir = PlayerFacingDir;
+  const u8 attrs = Player_SprAttrib;
+
   Player_Pos_ForScroll = Player_Rel_XPos;
-  DrawPlayerLoop(PlayerGfxOffset, Player_SprDataOffset, Player_Rel_YPos, PlayerFacingDir,
-                 Player_SprAttrib, Player_Rel_XPos, param_1);
-}
 
-
-// SMB:efdc
-// SM2MAIN:bcb7
-// Signature: [X, Y, r02, r03, r04, r05, r07] -> []
-void DrawPlayerLoop(const u8 param_1, const u8 sproff, const u8 ypos, const u8 flags, const u8 attrs, const u8 xpos, const u8 num_rows) {
-  // NES note: The loop in the original checks at the end. If num_rows = 0, it loops 256 times.
-  // This never occurs in unmodified ROMS, but it might in modified ones via DrawPlayer_Intermediate.
-  // TODO: have a setting to disable this silly mostly-irrelevant workaround
-  const int actual_num_rows = num_rows != 0 ? num_rows : 256;
-
-  // Inlined: DrawOneSpriteRow
-
-  const bool flip_horz = (flags & 2) != 0;
-
-  u8 table_idx = param_1;
-
-  for (int i = 0; i < actual_num_rows; i++) {
-    const u8 left_tileidx  = PlayerGraphicsTable[table_idx];
-    const u8 right_tileidx = PlayerGraphicsTable[table_idx + 1];
-
-    draw_sprite_row(i, sproff, left_tileidx, right_tileidx, xpos, ypos, attrs, flip_horz);
-
-    table_idx += 2;
-  }
+  draw_player(frame, sproff, xpos, ypos, dir, attrs, num_rows);
 }
 
 
@@ -11250,14 +11281,13 @@ u8 ProcessPlayerAction(void) {
     }
     if (Player_State == PLAYERSTATE_JUMPSWIM) {
       if (SwimmingFlag != 0) {
-        const u8 gfxoffsetadder = GetGfxOffsetAdder(1);
-        if ((JumpSwimTimer | PlayerAnimCtrl) != 0) {
-          return FourFrameExtent(gfxoffsetadder);
+        if (JumpSwimTimer != 0 || PlayerAnimCtrl != 0) {
+          return FourFrameExtent(GetGfxOffsetAdder(1));
         }
         if (A_B_Buttons & BUTTON_A) {
-          return FourFrameExtent(gfxoffsetadder);
+          return FourFrameExtent(GetGfxOffsetAdder(1));
         }
-        return GetCurrentAnimOffset(gfxoffsetadder);
+        return GetCurrentAnimOffset(GetGfxOffsetAdder(1));
       }
       bVar1 = (CrouchingFlag == 0) ? 0 : 6;
     } else {
@@ -11290,17 +11320,42 @@ u8 ProcessPlayerAction(void) {
     }
   }
 
-  const u8 gfxoffsetadder = GetGfxOffsetAdder(bVar1);
   PlayerAnimCtrl = 0;
-  return PlayerGfxTblOffsets[gfxoffsetadder];
+  return GetCurrentAnimOffset(GetGfxOffsetAdder(bVar1));
 }
 
 
 // SMB:f062
 // SM2MAIN:bd47
 // Signature: [Y] -> [A]
-u8 GetCurrentAnimOffset(const u8 param_1) {
-  return GetOffsetFromAnimCtrl(PlayerAnimCtrl, param_1);
+u8 GetCurrentAnimOffset(const u8 idx) {
+  // Inlined: GetOffsetFromAnimCtrl
+
+  expect(PlayerAnimCtrl < 20);
+  expect(idx < 16);
+
+  // From PlayerGfxTblOffsets, divided by 8
+  static const u8 lookup[16] = {
+    PLAYERFRAME_BIG_JUMP,
+    PLAYERFRAME_BIG_SWIM_0,
+    PLAYERFRAME_BIG_STAND,
+    PLAYERFRAME_BIG_SKID,
+    PLAYERFRAME_BIG_WALK_0,
+    PLAYERFRAME_BIG_CLIMB_0,
+    PLAYERFRAME_BIG_CROUCH,
+    PLAYERFRAME_BIG_FIREBALL_THROW,
+
+    PLAYERFRAME_SMALL_JUMP,
+    PLAYERFRAME_SMALL_SWIM_0,
+    PLAYERFRAME_SMALL_STAND,
+    PLAYERFRAME_SMALL_SKID,
+    PLAYERFRAME_SMALL_WALK_0,
+    PLAYERFRAME_SMALL_CLIMB_0,
+    PLAYERFRAME_DEAD,
+    PLAYERFRAME_SMALL_STAND,
+  };
+
+  return (PlayerAnimCtrl + lookup[idx]) * 8;
 }
 
 
@@ -11360,32 +11415,41 @@ u8 HandleChangeSize(void) {
     }
   }
 
-  static const u8 lookup[2][10] = {
-    { 0, 1, 0, 1, 0, 1, 2, 0, 1, 2 },
-    { 2, 0, 2, 0, 2, 0, 2, 0, 2, 0 }
+  // Growing animation
+  static const u8 frames_up[10] = {
+    PLAYERFRAME_SMALL_STAND,
+    PLAYERFRAME_GROW,
+    PLAYERFRAME_SMALL_STAND,
+    PLAYERFRAME_GROW,
+    PLAYERFRAME_SMALL_STAND,
+    PLAYERFRAME_GROW,
+    PLAYERFRAME_BIG_STAND,
+    PLAYERFRAME_SMALL_STAND,
+    PLAYERFRAME_GROW,
+    PLAYERFRAME_BIG_STAND,
+  };
+
+  // Shrinking animation
+  static const u8 frames_down[10] = {
+    PLAYERFRAME_SMALL_SWIM_0,
+    PLAYERFRAME_BIG_SWIM_0,
+    PLAYERFRAME_SMALL_SWIM_0,
+    PLAYERFRAME_BIG_SWIM_0,
+    PLAYERFRAME_SMALL_SWIM_0,
+    PLAYERFRAME_BIG_SWIM_0,
+    PLAYERFRAME_SMALL_SWIM_0,
+    PLAYERFRAME_BIG_SWIM_0,
+    PLAYERFRAME_SMALL_SWIM_0,
+    PLAYERFRAME_BIG_SWIM_0
   };
 
   expect(PlayerAnimCtrl < 10);
 
   if (PlayerSize != 0) {
-    const u8 idx = (lookup[1][PlayerAnimCtrl] == 0) ? 1 : 9;
-    return PlayerGfxTblOffsets[idx];
+    return frames_down[PlayerAnimCtrl] * 8;
+  } else {
+    return frames_up[PlayerAnimCtrl] * 8;
   }
-  return GetOffsetFromAnimCtrl(lookup[0][PlayerAnimCtrl], 0xf);
-}
-
-
-// SMB:f0d0
-// SM2MAIN:bdb5
-// Signature: [A, Y] -> [A]
-u8 GetOffsetFromAnimCtrl(const u8 param_1, const u8 param_2) {
-  u8 o = param_1 * 8 + PlayerGfxTblOffsets[param_2];
-
-  // param_1 is likely never >= 0x20, but the original game computes it this way
-  // TODO: verify one way or the other
-  o += ((param_1 & 0x20) != 0);
-
-  return o;
 }
 
 
@@ -11393,27 +11457,39 @@ u8 GetOffsetFromAnimCtrl(const u8 param_1, const u8 param_2) {
 // SM2MAIN:bdce
 // Signature: [] -> []
 void ChkForPlayerAttrib(void) {
-  const u8 abVar1 = Player_SprDataOffset;
-  if (GameEngineSubroutine != GR_PLAYERDEATH) {
-    if (((PlayerGfxOffset == 0x50) || (PlayerGfxOffset == 0xb8)) || (PlayerGfxOffset == 0xc0)) {
-      goto C_S_IGAtt;
-    }
-    if (PlayerGfxOffset != 200) {
-      return;
-    }
+  const u8 sproff = Player_SprDataOffset;
+
+  bool row2_symmetric = false;
+  bool row3_symmetric = false;
+
+  expect(PlayerGfxOffset % 8 == 0);
+  const u8 frame = PlayerGfxOffset / 8;
+
+  if (GameEngineSubroutine == GR_PLAYERDEATH) {
+    row2_symmetric = true;
+    row3_symmetric = true;
+  } else if (frame == PLAYERFRAME_BIG_CROUCH || frame == PLAYERFRAME_SMALL_STAND || frame == PLAYERFRAME_GROW) {
+    row2_symmetric = false;
+    row3_symmetric = true;
+  } else if (frame == PLAYERFRAME_BIG_STAND) {
+    row2_symmetric = true;
+    row3_symmetric = true;
+  } else {
+    row2_symmetric = false;
+    row3_symmetric = false;
   }
 
-  SPRITE_ATTR(Player_SprDataOffset, 4) &= 0x3f;
+  if (row2_symmetric) {
+    SPRITE_ATTR(sproff, 4) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+    SPRITE_ATTR(sproff, 5) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+    SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPHORZ;
+  }
 
-  SPRITE_ATTR(abVar1, 5) &= 0x3f;
-  SPRITE_ATTR(abVar1, 5) |= 0x40;
-
-C_S_IGAtt:
-
-  SPRITE_ATTR(abVar1, 6) &= 0x3f;
-
-  SPRITE_ATTR(abVar1, 7) &= 0x3f;
-  SPRITE_ATTR(abVar1, 7) |= 0x40;
+  if (row3_symmetric) {
+    SPRITE_ATTR(sproff, 6) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+    SPRITE_ATTR(sproff, 7) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+    SPRITE_ATTR(sproff, 7) |= SPRATTR_FLIPHORZ;
+  }
 }
 
 

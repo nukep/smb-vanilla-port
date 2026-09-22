@@ -45,8 +45,6 @@
 
 #define EnemyGraphicsTable               RAMARRAY_CONST(0xE73E, 258)
 #define EnemyAttributeData               RAMARRAY_CONST(0xE85B, 27)
-#define PlayerGfxTblOffsets              RAMARRAY_CONST(0xEE07, 16)
-#define PlayerGraphicsTable              RAMARRAY_CONST(0xEE17, 208)
 #define SwimStompEnvelopeData            RAMARRAY_CONST(0xF3B1, 14)
 #define ExtraLifeFreqData                RAMARRAY_CONST(0xF4D4, 6)
 #define PowerUpGrabFreqData              RAMARRAY_CONST(0xF4DA, 30)

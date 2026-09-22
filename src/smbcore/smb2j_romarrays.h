@@ -55,7 +55,6 @@
 #define BowserIdentities                 RAMARRAY_CONST(0xA376, 9)
 
 #define EnemyGraphicsTable               RAMARRAY_CONST(0xB3ED, 258)
-#define PlayerGfxTblOffsets              RAMARRAY_CONST(0xBAE2, 16)
 #define PlayerGraphicsTable              RAMARRAY_CONST(0xBAF2, 208)
 #define FileCount                        RAMARRAY_CONST(0xC0F0, 4)
 #define DiskErrorMainMsg                 RAMARRAY(0xC149, 21)

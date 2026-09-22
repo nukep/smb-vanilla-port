@@ -1022,9 +1022,6 @@ void smb1_DrawPlayer_Intermediate(void);
 void smb1_RenderPlayerSub(u8 param_1);
 #define RenderPlayerSub smb1_RenderPlayerSub
 
-void smb1_DrawPlayerLoop(u8 param_1,u8 param_2,u8 param_3,u8 param_4,u8 param_5,u8 param_6,u8 param_7);
-#define DrawPlayerLoop smb1_DrawPlayerLoop
-
 u8 smb1_ProcessPlayerAction(void);
 #define ProcessPlayerAction smb1_ProcessPlayerAction
 
@@ -1045,9 +1042,6 @@ u8 smb1_GetGfxOffsetAdder(u8 param_1);
 
 u8 smb1_HandleChangeSize(void);
 #define HandleChangeSize smb1_HandleChangeSize
-
-u8 smb1_GetOffsetFromAnimCtrl(u8 param_1,u8 param_2);
-#define GetOffsetFromAnimCtrl smb1_GetOffsetFromAnimCtrl
 
 void smb1_ChkForPlayerAttrib(void);
 #define ChkForPlayerAttrib smb1_ChkForPlayerAttrib
