@@ -1024,21 +1024,6 @@ void smb2j_RenderPlayerSub(u8 param_1);
 u8 smb2j_ProcessPlayerAction(void);
 #define ProcessPlayerAction smb2j_ProcessPlayerAction
 
-u8 smb2j_GetCurrentAnimOffset(u8 param_1);
-#define GetCurrentAnimOffset smb2j_GetCurrentAnimOffset
-
-u8 smb2j_FourFrameExtent(u8 param_1);
-#define FourFrameExtent smb2j_FourFrameExtent
-
-u8 smb2j_ThreeFrameExtent(u8 param_1);
-#define ThreeFrameExtent smb2j_ThreeFrameExtent
-
-u8 smb2j_AnimationControl(u8 param_1,u8 param_2);
-#define AnimationControl smb2j_AnimationControl
-
-u8 smb2j_GetGfxOffsetAdder(u8 param_1);
-#define GetGfxOffsetAdder smb2j_GetGfxOffsetAdder
-
 u8 smb2j_HandleChangeSize(void);
 #define HandleChangeSize smb2j_HandleChangeSize
 

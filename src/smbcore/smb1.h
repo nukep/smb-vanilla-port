@@ -1025,21 +1025,6 @@ void smb1_RenderPlayerSub(u8 param_1);
 u8 smb1_ProcessPlayerAction(void);
 #define ProcessPlayerAction smb1_ProcessPlayerAction
 
-u8 smb1_GetCurrentAnimOffset(u8 param_1);
-#define GetCurrentAnimOffset smb1_GetCurrentAnimOffset
-
-u8 smb1_FourFrameExtent(u8 param_1);
-#define FourFrameExtent smb1_FourFrameExtent
-
-u8 smb1_ThreeFrameExtent(u8 param_1);
-#define ThreeFrameExtent smb1_ThreeFrameExtent
-
-u8 smb1_AnimationControl(u8 param_1,u8 param_2);
-#define AnimationControl smb1_AnimationControl
-
-u8 smb1_GetGfxOffsetAdder(u8 param_1);
-#define GetGfxOffsetAdder smb1_GetGfxOffsetAdder
-
 u8 smb1_HandleChangeSize(void);
 #define HandleChangeSize smb1_HandleChangeSize
 

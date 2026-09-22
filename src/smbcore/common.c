@@ -11268,71 +11268,76 @@ void RenderPlayerSub(const u8 num_rows) {
 // SM2MAIN:bcc7
 // Signature: [] -> [A]
 u8 ProcessPlayerAction(void) {
-  u8 bVar1;
+  u8 play_frames = 0;
+  u8 idx = 0;
 
   if (Player_State == PLAYERSTATE_CLIMBING) {
-    bVar1 = 5;
     if (Player_Y_Speed != 0) {
-      return ThreeFrameExtent(GetGfxOffsetAdder(5));
+      play_frames = 2; idx = 5;
+    } else {
+      PlayerAnimCtrl = 0;
+      idx = 5;
+    }
+  } else if (Player_State == PLAYERSTATE_FALLING) {
+    idx = 4;
+  } else if (Player_State == PLAYERSTATE_JUMPSWIM) {
+    if (SwimmingFlag != 0) {
+      if (JumpSwimTimer != 0 || PlayerAnimCtrl != 0) {
+        play_frames = 3; idx = 1;
+      } else if (A_B_Buttons & BUTTON_A) {
+        play_frames = 3; idx = 1;
+      } else {
+        idx = 1;
+      }
+    } else if (CrouchingFlag != 0) {
+      PlayerAnimCtrl = 0;
+      idx = 6;
+    } else {
+      PlayerAnimCtrl = 0;
+      idx = 0;
     }
   } else {
-    if (Player_State == PLAYERSTATE_FALLING) {
-      return GetCurrentAnimOffset(GetGfxOffsetAdder(4));
-    }
-    if (Player_State == PLAYERSTATE_JUMPSWIM) {
-      if (SwimmingFlag != 0) {
-        if (JumpSwimTimer != 0 || PlayerAnimCtrl != 0) {
-          return FourFrameExtent(GetGfxOffsetAdder(1));
-        }
-        if (A_B_Buttons & BUTTON_A) {
-          return FourFrameExtent(GetGfxOffsetAdder(1));
-        }
-        return GetCurrentAnimOffset(GetGfxOffsetAdder(1));
-      }
-      bVar1 = (CrouchingFlag == 0) ? 0 : 6;
-    } else {
-      bVar1 = 6;
-      if (CrouchingFlag == 0) {
-        bVar1 = 2;
-        if ((Player_X_Speed | Left_Right_Buttons) != 0) {
-          if ((Player_XSpeedAbsolute < 9) || ((Player_MovingDir & PlayerFacingDir) != 0)) {
-            return FourFrameExtent(GetGfxOffsetAdder(4));
-          }
+    if (CrouchingFlag == 0) {
+      if ((Player_X_Speed | Left_Right_Buttons) != 0) {
+        if (Player_XSpeedAbsolute < 9 || (Player_MovingDir & PlayerFacingDir) != 0) {
+          play_frames = 3; idx = 4;
+        } else {
 #ifdef SMB2J_MODE
           expect(is_gameroutine_valid(GameEngineSubroutine));
           // GameEngineSubroutine < 9
           // TODO: is this the right way to express "< 9"?
           switch (GameEngineSubroutine) {
-          case GR_PLAYERCHANGESIZE:
-          case GR_PLAYERINJURYBLINK:
-          case GR_PLAYERDEATH:
-          case GR_PLAYERFIREFLOWER:
-            break;
+            case GR_PLAYERCHANGESIZE:
+            case GR_PLAYERINJURYBLINK:
+            case GR_PLAYERDEATH:
+            case GR_PLAYERFIREFLOWER:
+              break;
 
-          default:
-            NoiseSoundQueue = SOUND_NOISE_SKID;
-            break;
+            default:
+              NoiseSoundQueue = SOUND_NOISE_SKID;
+              break;
           }
 #endif
-          bVar1 = 3;
+          PlayerAnimCtrl = 0;
+          idx = 3;
         }
+      } else {
+        PlayerAnimCtrl = 0;
+        idx = 2;
       }
+    } else {
+      PlayerAnimCtrl = 0;
+      idx = 6;
     }
   }
 
-  PlayerAnimCtrl = 0;
-  return GetCurrentAnimOffset(GetGfxOffsetAdder(bVar1));
-}
+  if (PlayerSize != 0) {
+    idx += 8;
+  }
 
-
-// SMB:f062
-// SM2MAIN:bd47
-// Signature: [Y] -> [A]
-u8 GetCurrentAnimOffset(const u8 idx) {
-  // Inlined: GetOffsetFromAnimCtrl
+  // Inlined: GetCurrentAnimOffset
 
   expect(PlayerAnimCtrl < 20);
-  expect(idx < 16);
 
   // From PlayerGfxTblOffsets, divided by 8
   static const u8 lookup[16] = {
@@ -11355,51 +11360,19 @@ u8 GetCurrentAnimOffset(const u8 idx) {
     PLAYERFRAME_SMALL_STAND,
   };
 
-  return (PlayerAnimCtrl + lookup[idx]) * 8;
-}
+  u8 res = (PlayerAnimCtrl + lookup[idx]) * 8;
 
-
-// SMB:f068
-// SM2MAIN:bd4d
-// Signature: [Y] -> [A]
-u8 FourFrameExtent(const u8 param_1) {
-  return AnimationControl(3, param_1);
-}
-
-
-// SMB:f06d
-// SM2MAIN:bd52
-// Signature: [Y] -> [A]
-u8 ThreeFrameExtent(const u8 param_1) {
-  return AnimationControl(2, param_1);
-}
-
-
-// SMB:f06f
-// SM2MAIN:bd54
-// Signature: [A, Y] -> [A]
-u8 AnimationControl(const u8 param_1, const u8 param_2) {
-  const u8 bVar1 = GetCurrentAnimOffset(param_2);
-  if (PlayerAnimTimer == 0) {
-    PlayerAnimTimer = PlayerAnimTimerSet;
-    PlayerAnimCtrl += 1;
-    if (param_1 <= PlayerAnimCtrl) {
-      PlayerAnimCtrl = 0;
+  if (play_frames != 0) {
+    if (PlayerAnimTimer == 0) {
+      PlayerAnimTimer = PlayerAnimTimerSet;
+      PlayerAnimCtrl += 1;
+      if (PlayerAnimCtrl >= play_frames) {
+        PlayerAnimCtrl = 0;
+      }
     }
   }
-  return bVar1;
-}
 
-
-// SMB:f091
-// SM2MAIN:bd76
-// Signature: [Y] -> [Y]
-u8 GetGfxOffsetAdder(const u8 param_1) {
-  if (PlayerSize != 0) {
-    return param_1 + 8;
-  } else {
-    return param_1;
-  }
+  return res;
 }
 
 
