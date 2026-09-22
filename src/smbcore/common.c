@@ -928,17 +928,17 @@ void FloateyNumbersRoutine(const u8 objoff) {
 
   static const u8 tiles[24] = {
     0xff, 0xff, // dummy
-    0xf6, 0xfb, //  "100"
-    0xf7, 0xfb, //  "200"
-    0xf8, 0xfb, //  "400"
-    0xf9, 0xfb, //  "500"
-    0xfa, 0xfb, //  "800"
-    0xf6, 0x50, //  "1000"
-    0xf7, 0x50, //  "2000"
-    0xf8, 0x50, //  "4000"
-    0xf9, 0x50, //  "5000"
-    0xfa, 0x50, //  "8000"
-    0xfd, 0xfe, //  "1-UP"
+    STILE_SCORE_10,    STILE_SCORE_0,     //  "100"
+    STILE_SCORE_20,    STILE_SCORE_0,     //  "200"
+    STILE_SCORE_40,    STILE_SCORE_0,     //  "400"
+    STILE_SCORE_50,    STILE_SCORE_0,     //  "500"
+    STILE_SCORE_80,    STILE_SCORE_0,     //  "800"
+    STILE_SCORE_10,    STILE_SCORE_00,    //  "1000"
+    STILE_SCORE_20,    STILE_SCORE_00,    //  "2000"
+    STILE_SCORE_40,    STILE_SCORE_00,    //  "4000"
+    STILE_SCORE_50,    STILE_SCORE_00,    //  "5000"
+    STILE_SCORE_80,    STILE_SCORE_00,    //  "8000"
+    STILE_SCORE_1UP_0, STILE_SCORE_1UP_1, //  "1-UP"
   };
 
   const u8 ctrl = FloateyNum_Control[objoff];
@@ -1763,7 +1763,7 @@ void SecondaryGameSetup(void) {
 
 #ifdef SMB1_MODE
   SPRITE_Y(0, 0)    = 24;
-  SPRITE_TILE(0, 0) = 0xff;
+  SPRITE_TILE(0, 0) = STILE_SPRITE0TEST;
   SPRITE_ATTR(0, 0) = SPRATTR_DRAWBEHIND | 3;
   SPRITE_X(0, 0)    = 88;
 
@@ -7089,9 +7089,12 @@ void ProcBowserFlame(const u8 objoff) {
 
   const u8 bVar55 = ((FrameCounter & 2) != 0) ? 0x82 : 2;
   const u8 offset = Enemy_SprDataOffset[objoff];
+
+  static const u8 tiles[3] = { STILE_BOWSER_FLAME_0, STILE_BOWSER_FLAME_1, STILE_BOWSER_FLAME_2 };
+
   for (int i = 0; i < 3; i++) {
     SPRITE_Y_strict(offset, i) = Enemy_Rel_YPos;
-    SPRITE_TILE_semistrict(offset, i) = 0x51 + i;
+    SPRITE_TILE_semistrict(offset, i) = tiles[i];
     SPRITE_ATTR_semistrict(offset, i) = bVar55;
     SPRITE_X_semistrict(offset, i) = Enemy_Rel_XPos;
     Enemy_Rel_XPos += 8;
@@ -7263,7 +7266,7 @@ void EndAreaPoints(void) {
 void DrawStarFlag(const u8 objoff) {
   static const u8 xpos_lookup[4] = { 0, 8, 0, 8 };
   static const u8 ypos_lookup[4] = { 0, 0, 8, 8 };
-  static const u8 tile_lookup[4] = { 0x54, 0x55, 0x56, 0x57 };
+  static const u8 tile_lookup[4] = { STILE_FLAG_TL, STILE_FLAG_TR, STILE_FLAG_BL, STILE_FLAG_BR };
 
   RelativeEnemyPosition(objoff);
   const u8 bVar2 = Enemy_SprDataOffset[objoff];
@@ -9725,11 +9728,11 @@ void DrawVine(const u8 vineoff) {
     SPRITE_Y_strict(sproff, i)        = ypos + i*8;
     SPRITE_X(sproff, i)               = xpos + (even ? 0 : 6);
     SPRITE_ATTR(sproff, i)            = 0x21 | (even ? 0 : 0x40);
-    SPRITE_TILE_semistrict(sproff, i) = 0xe1;
+    SPRITE_TILE_semistrict(sproff, i) = STILE_VINE;
   }
 
   if (vineoff == 0) {
-    SPRITE_TILE(sproff, 0) = 0xe0;
+    SPRITE_TILE(sproff, 0) = STILE_VINE_T;
   }
 
   for (int i = 0; i < 6; i++) {
@@ -9747,11 +9750,11 @@ void DrawVine(const u8 vineoff) {
 void DrawHammer(const u8 objoff) {
   static const u8 xpos1_lookup[4] = { 4, 0, 4, 0 };
   static const u8 ypos1_lookup[4] = { 0, 4, 0, 4 };
-  static const u8 tilenum1_lookup[4] = { 0x80, 0x82, 0x81, 0x83 };
+  static const u8 tilenum1_lookup[4] = { STILE_HAMMER_HEAD, STILE_HAMMER_HEAD_ROTATED, STILE_HAMMER_HANDLE, STILE_HAMMER_HANDLE_ROTATED };
 
   static const u8 xpos2_lookup[4] = { 0, 8, 0, 8 };
   static const u8 ypos2_lookup[4] = { 8, 0, 8, 0 };
-  static const u8 tilenum2_lookup[4] = { 0x81, 0x83, 0x80, 0x82 };
+  static const u8 tilenum2_lookup[4] = { STILE_HAMMER_HANDLE, STILE_HAMMER_HANDLE_ROTATED, STILE_HAMMER_HEAD, STILE_HAMMER_HEAD_ROTATED };
 
   static const u8 attr_lookup[4] = {
     3,
@@ -9815,17 +9818,17 @@ void FlagpoleGfxHandler(const u8 objoff) {
   SPRITE_ATTR(off, 1) = 1;
   SPRITE_ATTR(off, 2) = 1;
 
-  SPRITE_TILE(off, 0) = 0x7e;
-  SPRITE_TILE(off, 1) = 0x7f;
-  SPRITE_TILE(off, 2) = 0x7e;
+  SPRITE_TILE(off, 0) = STILE_FLAGPOLE_FLAG_TRIANGLE;
+  SPRITE_TILE(off, 1) = STILE_FLAGPOLE_FLAG_SKULL;
+  SPRITE_TILE(off, 2) = STILE_FLAGPOLE_FLAG_TRIANGLE;
 
   static const u8 score_tiles[][2] = {
-    { 0xf9, 0x50 },
-    { 0xf7, 0x50 },
-    { 0xfa, 0xfb },
-    { 0xf8, 0xfb },
-    { 0xf6, 0xfb },
-    { 0xfd, 0xfe },    // 1-UP (SMB2J only)
+    { STILE_SCORE_50,    STILE_SCORE_00 },        // 5000
+    { STILE_SCORE_20,    STILE_SCORE_00 },        // 2000
+    { STILE_SCORE_80,    STILE_SCORE_0 },         // 800
+    { STILE_SCORE_40,    STILE_SCORE_0 },         // 400
+    { STILE_SCORE_10,    STILE_SCORE_0 },         // 100
+    { STILE_SCORE_1UP_0, STILE_SCORE_1UP_1 },     // 1-UP (SMB2J only)
   };
 
   if (FlagpoleCollisionYPos != 0) {
@@ -9924,7 +9927,7 @@ void DrawLargePlatform(const u8 objoff) {
 // SM2MAIN:b32c
 // Signature: [X] -> []
 void JCoinGfxHandler(const u8 objoff) {
-  static const u8 jumping_coin_tiles[4] = { 0x60, 0x61, 0x62, 0x63 };
+  static const u8 jumping_coin_tiles[4] = { STILE_JUMPING_COIN_0, STILE_JUMPING_COIN_1, STILE_JUMPING_COIN_2, STILE_JUMPING_COIN_3 };
 
   u8 bVar2 = Misc_SprDataOffset[objoff];
   if (Misc_State[objoff] < 2) {
@@ -9960,8 +9963,8 @@ void JCoinGfxHandler(const u8 objoff) {
     SPRITE_X(bVar2, 1) = bVar1 + 8;
     SPRITE_ATTR(bVar2, 0) = 2;
     SPRITE_ATTR(bVar2, 1) = 2;
-    SPRITE_TILE(bVar2, 0) = 0xf7;
-    SPRITE_TILE(bVar2, 1) = 0xfb;
+    SPRITE_TILE(bVar2, 0) = STILE_SCORE_20;
+    SPRITE_TILE(bVar2, 1) = STILE_SCORE_0;
   }
 }
 
@@ -9973,19 +9976,13 @@ void DrawPowerUp(const u8 objoff) {
   // Note: This port accepts an objoff argument. The original hard-coded "5".
 
   static const u8 tiles[_POWERUP_NUM][4] = {
-#ifdef SMB1_MODE
-    { 0x76, 0x77, 0x78, 0x79 }, // regular mushroom
-    { 0xd6, 0xd6, 0xd9, 0xd9 }, // fire flower
-    { 0x8d, 0x8d, 0xe4, 0xe4 }, // star
-    { 0x76, 0x77, 0x78, 0x79 }, // 1-up mushroom
-#endif
+    { STILE_MUSHROOM_TL,  STILE_MUSHROOM_TR,  STILE_MUSHROOM_BL,  STILE_MUSHROOM_BR },  // regular mushroom
+    { STILE_FIREFLOWER_T, STILE_FIREFLOWER_T, STILE_FIREFLOWER_B, STILE_FIREFLOWER_B }, // fire flower
+    { STILE_STAR_T,       STILE_STAR_T,       STILE_STAR_B,       STILE_STAR_B },       // star
+    { STILE_MUSHROOM_TL,  STILE_MUSHROOM_TR,  STILE_MUSHROOM_BL,  STILE_MUSHROOM_BR },  // 1-up mushroom
 
 #ifdef SMB2J_MODE
-    { 0xd8, 0xda, 0xdb, 0xff }, // regular mushroom
-    { 0xd6, 0xd6, 0xd9, 0xd9 }, // fire flower
-    { 0x8d, 0x8d, 0xe4, 0xe4 }, // star
-    { 0xd8, 0xda, 0xdb, 0xff }, // 1-up mushroom
-    { 0xd8, 0xda, 0xdb, 0xff }, // poison mushroom
+    { STILE_MUSHROOM_TL,  STILE_MUSHROOM_TR,  STILE_MUSHROOM_BL,  STILE_MUSHROOM_BR },  // poison mushroom
 #endif
   };
 
@@ -10804,10 +10801,10 @@ void DrawBlock(const u8 objoff) {
   {
     // Inlined: DrawOneSpriteRow
 
-    const u8 left_tileidx_1  = 0x85;
-    const u8 right_tileidx_1 = 0x85;
-    const u8 left_tileidx_2  = 0x86;
-    const u8 right_tileidx_2 = 0x86;
+    const u8 left_tileidx_1  = STILE_BRICK_T;
+    const u8 right_tileidx_1 = STILE_BRICK_T;
+    const u8 left_tileidx_2  = STILE_BRICK;
+    const u8 right_tileidx_2 = STILE_BRICK;
 
     const u8 xpos = Block_Rel_XPos;
     const u8 ypos = Block_Rel_YPos;
@@ -10819,8 +10816,8 @@ void DrawBlock(const u8 objoff) {
   }
 
   if (AreaType != AREA_GROUND) {
-    SPRITE_TILE(sproff, 0) = 0x86;
-    SPRITE_TILE(sproff, 1) = 0x86;
+    SPRITE_TILE(sproff, 0) = STILE_BRICK;
+    SPRITE_TILE(sproff, 1) = STILE_BRICK;
   }
   if (Block_Metatile[objoff] == MT_BLOCK_EMPTY) {
     // Inlined: DumpFourSpr
@@ -10828,10 +10825,10 @@ void DrawBlock(const u8 objoff) {
     // because it's incremented before passing to DumpFourSpr.
     // This port assumes it can't happen.
     expect(sproff != 255);
-    SPRITE_TILE(sproff, 0) = 0x87;
-    SPRITE_TILE(sproff, 1) = 0x87;
-    SPRITE_TILE(sproff, 2) = 0x87;
-    SPRITE_TILE(sproff, 3) = 0x87;
+    SPRITE_TILE(sproff, 0) = STILE_BLOCK_EMPTY;
+    SPRITE_TILE(sproff, 1) = STILE_BLOCK_EMPTY;
+    SPRITE_TILE(sproff, 2) = STILE_BLOCK_EMPTY;
+    SPRITE_TILE(sproff, 3) = STILE_BLOCK_EMPTY;
 
 
     const u8 bVar4 = (AreaType != AREA_GROUND) ? 1 : 3;
@@ -10858,8 +10855,13 @@ void DrawBlock(const u8 objoff) {
 // SM2MAIN:b92e
 // Signature: [X] -> []
 void DrawBrickChunks(const u8 objoff) {
-  const u8 tilepalette = GameEngineSubroutine != GR_PLAYERENDLEVEL ? 3 : 2;
-  const u8 tileidx = GameEngineSubroutine != GR_PLAYERENDLEVEL ? 0x84 : 0x75;
+  // NES note: There's leftover code to draw a ball instead of a brick chunk.
+  // This doesn't seem to get used in practice.
+
+  const bool draw_brick_chunk = GameEngineSubroutine != GR_PLAYERENDLEVEL;
+
+  const u8 tilepalette = draw_brick_chunk ? 3 : 2;
+  const u8 tileidx     = draw_brick_chunk ? STILE_BRICK_CHUNK : STILE_BALL;
 
   const u8 off = Block_SprDataOffset[objoff];
 
@@ -10947,8 +10949,12 @@ void DrawFireball(const u8 objoff) {
 // SM2MAIN:b9c8
 // Signature: [Y] -> []
 void DrawFirebar(const u8 param_1) {
-  SPRITE_TILE(param_1, 0) = ((FrameCounter >> 2) & 1) ^ 100;
-  SPRITE_ATTR(param_1, 0) = ((FrameCounter >> 3 & 1) != 0) ? 0xc2 : 2;
+  static const u8 tiles[2] = { STILE_FIREBALL_0, STILE_FIREBALL_1 };
+
+  const u8 idx = (FrameCounter >> 2) & 1;
+
+  SPRITE_TILE(param_1, 0) = tiles[idx];
+  SPRITE_ATTR(param_1, 0) = (((FrameCounter >> 3) & 1) != 0) ? 0xc2 : 2;
 }
 
 
@@ -10978,7 +10984,7 @@ void DrawExplosion_Fireworks(const u8 param_1, const u8 param_2) {
 
   expect(param_1 < 3);
 
-  static const u8 tiles[3] = { 0x68, 0x67, 0x66 };
+  static const u8 tiles[3] = { STILE_EXPLOSION_0, STILE_EXPLOSION_1, STILE_EXPLOSION_2 };
 
   // Inlined: DumpFourSpr
   SPRITE_TILE(param_2, 0) = tiles[param_1];
@@ -11016,7 +11022,7 @@ void DrawSmallPlatform(const u8 objoff) {
 
   // Inlined: DumpSixSpr
   for (int i = 0; i < 6; i++) {
-    SPRITE_TILE(bVar2, i) = 0x5b;
+    SPRITE_TILE(bVar2, i) = STILE_PLATFORM;
     SPRITE_ATTR(bVar2, i) = 2;
   }
 
@@ -11071,7 +11077,7 @@ void DrawBubble(const u8 objoff) {
     bVar1 = Bubble_SprDataOffset[objoff];
     SPRITE_X(bVar1, 0) = Bubble_Rel_XPos;
     SPRITE_Y(bVar1, 0) = Bubble_Rel_YPos;
-    SPRITE_TILE(bVar1, 0) = 0x74;
+    SPRITE_TILE(bVar1, 0) = STILE_BUBBLE;
     SPRITE_ATTR(bVar1, 0) = 2;
   }
 }
@@ -11107,11 +11113,11 @@ void PlayerGfxHandler(void) {
       }
 
       if (PlayerSize != 0) {
-        if (SPRITE_TILE(abVar2, 6) != PlayerGraphicsTable[158]) {
-          SPRITE_TILE(abVar2, 6) = 0x46;
+        if (SPRITE_TILE(abVar2, 6) != STILE_PLAYER__0x48) {
+          SPRITE_TILE(abVar2, 6) = STILE_PLAYER__0x46;
         }
       } else {
-        SPRITE_TILE(abVar2, 6) = 0x31;
+        SPRITE_TILE(abVar2, 6) = STILE_PLAYER__0x31;
       }
     }
   }

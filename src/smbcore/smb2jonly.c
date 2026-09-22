@@ -859,7 +859,8 @@ void GameOverMenu(void) {
 
     expect(ContinueMenuSelect <= 1);
 
-    SPRITE_TILE(0, 0) = 0x5b;
+    // Platforms are drawn as mushrooms in SMB2J
+    SPRITE_TILE(0, 0) = STILE_PLATFORM;
     SPRITE_ATTR(0, 0) = 2;
     SPRITE_X(0, 0)    = 72;
     SPRITE_Y(0, 0)    = ContinueMenuSelect == 0 ? 119 : 143;
@@ -1000,8 +1001,8 @@ void SimulateWind(void) {
   // };
 
   static const u8 tile[12] = {
-    0x7b, 0x7b, 0x7b, 0x7b, 0x7a, 0x7a,
-    0x7b, 0x7b, 0x7b, 0x7a, 0x7b, 0x7a,
+    STILE_LEAF_1, STILE_LEAF_1, STILE_LEAF_1, STILE_LEAF_1, STILE_LEAF_0, STILE_LEAF_0,
+    STILE_LEAF_1, STILE_LEAF_1, STILE_LEAF_1, STILE_LEAF_0, STILE_LEAF_1, STILE_LEAF_0,
   };
 
   static const u8 posadder[12] = {
