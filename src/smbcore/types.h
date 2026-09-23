@@ -251,6 +251,7 @@ static inline u8 get_metatile(const u16 mt_x, const u16 mt_y) {
     X(0x06CD, EnemyFrenzyQueue);
     X(0x06CC, SecondaryHardMode);
     X(0x06CB, EnemyFrenzyBuffer);
+    XARRAY(0x06C7, Unused_0x6C7);
 
     // mt_y = 14
 

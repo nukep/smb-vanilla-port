@@ -291,7 +291,7 @@ void IncrementColumnPos(void) {
 // SM2MAIN:720d
 // Signature: [] -> []
 void AreaParserCore(void) {
-  if (BackloadingFlag != 0) {
+  if (BackloadingFlag) {
     ProcessAreaData();
   }
 
@@ -424,7 +424,7 @@ void AreaParserCore(void) {
   {
     u8 mt = terrain_metatiles[AreaType];
 
-    if (CloudTypeOverride != 0) {
+    if (CloudTypeOverride) {
       mt = MT_CLOUD_BLOCK;
     }
 
@@ -457,7 +457,7 @@ void AreaParserCore(void) {
     // a 13-bit bitfield
     u16 bits = terrain_renderbits[TerrainControl];
 
-    if (CloudTypeOverride != 0) {
+    if (CloudTypeOverride) {
       // Render 0-7, and 11
       bits &= 0x08ff;
     }
@@ -513,18 +513,18 @@ void ProcessAreaData(void) {
           const u8 data1 = AreaData[AreaDataOffset + 1];
           const u8 first_nibble = AreaData[AreaDataOffset] & 0xf;
 
-          if (AreaObjectPageSel == 0) {
+          if (!AreaObjectPageSel) {
             if (data1 & 0x80) {
-              AreaObjectPageSel = 1;
+              AreaObjectPageSel = true;
               AreaObjectPageLoc += 1;
             } else if ((first_nibble == 0xd) && ((data1 & 0x40) == 0)) {
-              AreaObjectPageSel = 1;
+              AreaObjectPageSel = true;
               AreaObjectPageLoc = data1 & 0x1f;
               decode = false;
             }
           }
 
-          if (first_nibble != 0xe || BackloadingFlag == 0) {
+          if (first_nibble != 0xe || !BackloadingFlag) {
             if (CurrentPageLoc > AreaObjectPageLoc) {
               // SetBehind
               behind_area_parser_flag = true;
@@ -559,8 +559,8 @@ void ProcessAreaData(void) {
             if (AreaObjectLength[objoff] < 0x80) {
               decode_area_data_dispatch(objoff, idx);
             } else if (AreaObjectPageLoc == CurrentPageLoc) {
-              if (BackloadingFlag != 0) {
-                BackloadingFlag = 0;
+              if (BackloadingFlag) {
+                BackloadingFlag = false;
 
                 // ChkLength
                 if (AreaObjectLength[0] < 0x80) {
@@ -572,13 +572,13 @@ void ProcessAreaData(void) {
                 AreaObjOffsetBuffer[objoff] = AreaDataOffset;
                 decode_area_data_dispatch(objoff, idx);
                 AreaDataOffset += 2;
-                AreaObjectPageSel = 0;
+                AreaObjectPageSel = false;
               }
-            } else if ((data0 & 0xf) == 0xe && BackloadingFlag != 0) {
+            } else if ((data0 & 0xf) == 0xe && BackloadingFlag) {
               AreaObjOffsetBuffer[objoff] = AreaDataOffset;
               decode_area_data_dispatch(objoff, idx);
               AreaDataOffset += 2;
-              AreaObjectPageSel = 0;
+              AreaObjectPageSel = false;
             }
           }
         }
@@ -586,7 +586,7 @@ void ProcessAreaData(void) {
         // NextAObj
         // inlined: IncAreaObjOffset
         AreaDataOffset += 2;
-        AreaObjectPageSel = 0;
+        AreaObjectPageSel = false;
       }
 
       // ChkLength
@@ -595,7 +595,7 @@ void ProcessAreaData(void) {
       }
     }
 
-    if ((!behind_area_parser_flag) && (BackloadingFlag == 0)) {
+    if (!behind_area_parser_flag && !BackloadingFlag) {
       return;
     }
   }
@@ -883,8 +883,8 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
     return;
 
   case DECODEAREADATA_HIDDEN1UPBLOCK:
-    if (Hidden1UpFlag != 0) {
-      Hidden1UpFlag = 0;
+    if (Hidden1UpFlag) {
+      Hidden1UpFlag = false;
       // NES note: SMB2J indeed selects a star block for non-ground areas. Likely an oversight. Ultimately unused in official ROMs, though.
       const u8 mt = AreaType == AREA_GROUND ? MT_HIDDEN_1UP : ssw(MT_BRICK_2_1UP, MT_BRICK_2_STAR);
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
@@ -936,7 +936,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
 
   case DECODEAREADATA_BRICKWITHCOINS:
     {
-      BrickCoinTimerFlag = 0;
+      BrickCoinTimerFlag = false;
       const u8 mt = AreaType == AREA_GROUND ? MT_BRICK_2_COINS : MT_BRICK_COINS;
       const struct_yr07 sVar3 = GetLrgObjAttrib(objoff);
       RenderUnderPart(mt, sVar3.r07, 0);
@@ -1506,7 +1506,7 @@ void EmptyBlock(const u8 param_1) {
 void RowOfBricks(const u8 param_1) {
   expect(is_areatype_valid(AreaType));
   u8 bVar1 = AreaType;
-  if (CloudTypeOverride != 0) {
+  if (CloudTypeOverride) {
     bVar1 = 4;
   }
   static const u8 metatiles[5] = { MT_CORAL, MT_BRICK_2, MT_BRICK, MT_BRICK, MT_CLOUD_BLOCK };
@@ -1838,7 +1838,7 @@ void GetAreaDataAddrs(void) {
   BackgroundScenery = bb;
   if (aa == 3) {
     AreaStyle = 0;
-    CloudTypeOverride = 3;
+    CloudTypeOverride = true;
   } else {
     AreaStyle = aa;
   }
@@ -1907,7 +1907,7 @@ void AltHard_GetAreaDataAddrs(void) {
   AreaStyle = aa;
   if (aa == 3) {
     AreaStyle = 0;
-    CloudTypeOverride = 3;
+    CloudTypeOverride = true;
   } else {
     AreaStyle = aa;
   }
@@ -1922,7 +1922,7 @@ void AltHard_GetAreaDataAddrs(void) {
 
 
 static inline u8 ScrollLockObject_Warp_smb2j_impl(void) {
-  if (HardWorldFlag != 0) {
+  if (HardWorldFlag) {
     // 121 = 0x100 - 0x87
     if (LevelNumber != 121) {
       return 0x87 + LevelNumber;
@@ -1938,7 +1938,7 @@ static inline u8 ScrollLockObject_Warp_smb2j_impl(void) {
     //   BNE DumpWarpCtrl
   }
 
-  if (HardWorldFlag == 0 && WorldNumber == 0) {
+  if (!HardWorldFlag && WorldNumber == 0) {
     if (AreaType == AREA_GROUND) {
       return 0x81;
     }
@@ -2140,14 +2140,14 @@ void UpsideDownPipe_Low(const u8 objoff) {
 // SM2DATA2+SM2DATA4:c5be
 // Signature: [] -> []
 void WindOn(void) {
-  WindFlag = 1;
+  WindFlag = true;
 }
 
 
 // SM2DATA2+SM2DATA4:c5c2
 // Signature: [] -> []
 void WindOff(void) {
-  WindFlag = 0;
+  WindFlag = false;
 }
 
 #endif

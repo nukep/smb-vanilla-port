@@ -303,7 +303,7 @@ void SoundEngine(void) {
   }
   apu_framecounter_ctrl(0xff);
   apu_snd_chn(0xf);
-  if ((PauseModeFlag == 0) && (PauseSoundQueue != 1)) {
+  if (!PauseModeFlag && PauseSoundQueue != 1) {
     Square1SfxHandler();
     Square2SfxHandler();
     NoiseSfxHandler();
@@ -319,7 +319,11 @@ void SoundEngine(void) {
       return;
     }
     PauseSoundBuffer = PauseSoundQueue;
-    PauseModeFlag = PauseSoundQueue;
+
+    // Note: the original would set the value to exactly PauseSoundQueue.
+    // This port tests with non-zero.
+    PauseModeFlag = PauseSoundQueue != 0;
+
     Square1SoundBuffer = 0;
     Square2SoundBuffer = 0;
     NoiseSoundBuffer = 0;
@@ -347,7 +351,7 @@ void SoundEngine(void) {
   }
   apu_snd_chn(0);
   if (PauseSoundBuffer == 2) {
-    PauseModeFlag = 0;
+    PauseModeFlag = false;
   }
   PauseSoundBuffer = 0;
   SkipSoundSubroutines();
@@ -994,7 +998,7 @@ void LoadHeader(const u8 param_1) {
   Tri_NoteLenCounter = 1;
   Noise_BeatLenCounter = 1;
   MusicOffset_Square2 = 0;
-  AltRegContentFlag = 0;
+  AltRegContentFlag = false;
   apu_snd_chn(0xb);
   apu_snd_chn(0xf);
   NoiseDataLoopbackOfs = MusicOffset_Noise;
@@ -1086,7 +1090,10 @@ void HandleSquare1Music(void) {
     while (MusicData[MusicOffset_Square1] == 0) {
       apu_sq1_vol(0x83);
       apu_sq1_sweep(0x94);
-      AltRegContentFlag = 0x94;
+
+      // NES note: The original would set to 0x94
+      AltRegContentFlag = true;
+
       MusicOffset_Square1 += 1;
     }
 
@@ -1124,7 +1131,7 @@ void HandleSquare1Music(void) {
     }
   }
 
-  apu_sq1_sweep((AltRegContentFlag != 0) ? AltRegContentFlag : 0x7f);
+  apu_sq1_sweep(AltRegContentFlag ? 0x94 : 0x7f);
   HandleTriangleMusic();
 }
 

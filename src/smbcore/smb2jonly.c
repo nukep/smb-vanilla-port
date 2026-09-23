@@ -115,7 +115,7 @@ void Reset(void) {
   DiskIOTask = 0;
   MoveAllSpritesOffscreen();
   InitializeNameTables();
-  DisableScreenFlag += 1;
+  DisableScreenFlag = true;
 
   FDSBIOS_IRQFlag = 0xc0;
 
@@ -158,7 +158,7 @@ static const u8 * vram_buffer(u8 addr_ctrl, u16 *length) {
 // SM2MAIN:60a0
 // Signature: [] -> []
 void NMI(void) {
-  const bool turn_screen_on = DisableScreenFlag == 0;
+  const bool turn_screen_on = !DisableScreenFlag;
 
   ppu_screen_off();
 
@@ -418,7 +418,7 @@ void WriteGameText(const u8 param_1) {
 
     // Write the world and level numbers
     // Inlined: GetWorldNumForDisplay
-    const u8 world_number_display = HardWorldFlag == 0 ? WorldNumber + 1 : (WorldNumber & 3) + 10;
+    const u8 world_number_display = !HardWorldFlag ? WorldNumber + 1 : (WorldNumber & 3) + 10;
     const u8 level_number_display = LevelNumber + 1;
     VRAM_Buffer1[19] = world_number_display;
     VRAM_Buffer1[21] = level_number_display;
@@ -523,7 +523,7 @@ void LoadHardWorlds(void) {
   bool bVar2;
   struct_ayz sVar3;
 
-  if (HardWorldFlag != 0) {
+  if (HardWorldFlag) {
     FileListNumber = 3;
     sVar3 = LoadFiles();
     bVar1 = sVar3.a;
@@ -540,11 +540,11 @@ void LoadHardWorlds(void) {
   }
 NoLoadHW:
   LoadAreaPointer();
-  if (HardWorldFlag != 0) {
+  if (HardWorldFlag) {
     ChangeHalfwayPages();
   }
-  Hidden1UpFlag += 1;
-  FetchNewGameTimerFlag += 1;
+  Hidden1UpFlag = true;
+  FetchNewGameTimerFlag = true;
   expect(OperMode == OM_TITLESCREEN);
   OperMode = OM_GAME;
   // Inlined: ResetDiskIOTask
@@ -600,7 +600,7 @@ void LoadWorlds1Thru4(void) {
   bool bVar2;
   struct_ayz sVar3;
 
-  if ((NotColdFlag != 0) && ((HardWorldFlag != 0 || (WorldNumber >= 4)))) {
+  if (NotColdFlag != 0 && (HardWorldFlag || WorldNumber >= 4)) {
     FileListNumber = 0;
     sVar3 = LoadFiles();
     bVar1 = sVar3.a;
@@ -618,7 +618,7 @@ void LoadWorlds1Thru4(void) {
 InitWorldPos:
   NotColdFlag = 1;
   WorldNumber = 0;
-  HardWorldFlag = 0;
+  HardWorldFlag = false;
   // Inlined: ResetDiskIOTask
   DiskIOTask = 0;
   expect(OperMode == OM_TITLESCREEN);
@@ -781,7 +781,7 @@ bool CheckFileCount(const u8 param_1) { return param_1 == FileCount[FileListNumb
 // Signature: [] -> []
 void DiskScreen(void) {
   ppu_screen_off();
-  DisableScreenFlag += 1;
+  DisableScreenFlag = true;
   VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_DISKSCREENPALETTE;
   DiskIOTask += 1;
 }
@@ -791,7 +791,7 @@ void DiskScreen(void) {
 // Signature: [] -> []
 void WaitForEject(void) {
   NameTableSelect = 0;
-  DisableScreenFlag = 0;
+  DisableScreenFlag = false;
   const u8 bVar1 = FDS_drive_status();
   if ((bVar1 & 1) != 0) {
     DiskIOTask += 1;
@@ -878,7 +878,7 @@ void GameOverMenu(void) {
   for (int i = 0; i < 12; i++) {
     DisplayDigits[i + 6] = 0;
   }
-  Hidden1UpFlag += 1;
+  Hidden1UpFlag = true;
   ContinueGame();
 }
 
@@ -974,7 +974,7 @@ void MoveUpsideDownPiranhaP(const u8 param_1) {
 // SM2DATA2+SM2DATA4:c4fe
 // Signature: [] -> []
 void BlowPlayerAround(void) {
-  if ((WindFlag != 0) && (AreaType == AREA_GROUND)) {
+  if (WindFlag && AreaType == AREA_GROUND) {
     const u8 mask = (FrameCounter & 0x80) ? 1 : 3;
     if ((FrameCounter & mask) == 0) {
       Player_PageLoc += Player_X_Position == 0xff;
@@ -1010,7 +1010,7 @@ void SimulateWind(void) {
     0x56, 0x56, 0x57, 0x58, 0x57, 0x58,
   };
 
-  if (WindFlag == 0) {
+  if (!WindFlag) {
     return;
   }
 
@@ -1085,7 +1085,7 @@ void ScreenSubsForFinalRoom(void) {
     Left_Right_Buttons = BUTTON_NONE;
     NameTableSelect = 0;
     IRQUpdateFlag = 0;
-    DisableScreenFlag = 0;
+    DisableScreenFlag = false;
     expect(OperMode == OM_VICTORY);
     expect(OperMode_Task == OMT_VICTORY_W8SMB2J_SCREENSUBSFORFINALROOM);
     OperMode_Task = OMT_VICTORY_W8SMB2J_PRINTVICTORYMSGSFORWORLD8;
@@ -1237,7 +1237,7 @@ void RunMushroomRetainers(void) {
     return;
   }
 
-  if (HardWorldFlag == 0) {
+  if (!HardWorldFlag) {
     expect(OperMode == OM_VICTORY);
     expect(OperMode_Task == OMT_VICTORY_W8SMB2J_RUNMUSHROOMRETAINERS);
     OperMode_Task = OMT_VICTORY_W8SMB2J_ENDINGDISKROUTINES;
@@ -1256,7 +1256,7 @@ void BackToNormal(void) {
   SoundEngineJsrOperandLo = 0xa0;
 
   DiskIOTask = 0;
-  if ((HardWorldFlag == 0) && (CompletedWorlds == 0xff)) {
+  if (!HardWorldFlag && CompletedWorlds == 0xff) {
     CompletedWorlds = 0;
     NumberofLives = 0;
     FantasyW9MsgFlag = 0;
@@ -1267,7 +1267,7 @@ void BackToNormal(void) {
       WorldNumber = 8;
     }
     LoadAreaPointer();
-    FetchNewGameTimerFlag += 1;
+    FetchNewGameTimerFlag = true;
     OperMode = OM_GAME;
     OperMode_Task = OMT_GAME_START;
   } else {

@@ -100,6 +100,16 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
       // $74A is JoypadBitMask1
       // $74B is JoypadBitMask2
 
+      // These are ignored due to them being booleans in the port, but are other non-0 values in the original:
+      // $714 is CrouchingFlag
+      // $728 is BackloadingFlag
+      // $743 is CloudTypeOverride
+      // $757 is FetchNewGameTimerFlag
+      // $774 is DisableScreenFlag
+      // $7CA is AltRegContentFlag
+      // $75D is Hidden1UpFlag
+      // $7C6 is PauseModeFlag
+
       if (SMB_which_game(userdata->smb_state) == GAME_SMB1) {
         mem_eq_range(0x0009, 0x0009);
         mem_eq_range(0x000E, 0x00E6);
@@ -110,11 +120,18 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
         mem_eq_range(0x0200, 0x03C3);
         mem_eq_range(0x03CB, 0x06D4);
         mem_eq_range(0x06D6, 0x06FB);
-        mem_eq_range(0x06FE, 0x0728);
+        mem_eq_range(0x06FE, 0x0713);
+        mem_eq_range(0x0715, 0x0727);
         mem_eq_range(0x072A, 0x0734);
-        mem_eq_range(0x0736, 0x0749);
-        mem_eq_range(0x074C, 0x0777);
-        mem_eq_range(0x077A, 0x07FF);
+        mem_eq_range(0x0736, 0x0742);
+        mem_eq_range(0x0744, 0x0749);
+        mem_eq_range(0x074C, 0x0756);
+        mem_eq_range(0x0758, 0x075C);
+        mem_eq_range(0x075E, 0x0773);
+        mem_eq_range(0x0775, 0x0777);
+        mem_eq_range(0x077A, 0x07C5);
+        mem_eq_range(0x07C7, 0x07C9);
+        mem_eq_range(0x07CB, 0x07FF);
       } else if (SMB_which_game(userdata->smb_state) == GAME_SMB2J) {
         // FDS may modify $00-$0F and $F5-$FF with BIOS subroutines, so they're unreliable
         mem_eq_range(0x0010, 0x00E6);
@@ -122,11 +139,18 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
         mem_eq_range(0x0200, 0x03C3);
         mem_eq_range(0x03CB, 0x06D4);
         mem_eq_range(0x06D6, 0x06FB);
-        mem_eq_range(0x06FE, 0x0728);
+        mem_eq_range(0x06FE, 0x0713);
+        mem_eq_range(0x0715, 0x0727);
         mem_eq_range(0x072A, 0x0734);
-        mem_eq_range(0x0736, 0x0749);
-        mem_eq_range(0x074C, 0x0777);
-        mem_eq_range(0x077A, 0x07FF);
+        mem_eq_range(0x0736, 0x0742);
+        mem_eq_range(0x0744, 0x0749);
+        mem_eq_range(0x074C, 0x0756);
+        mem_eq_range(0x0758, 0x075C);
+        mem_eq_range(0x075E, 0x0773);
+        mem_eq_range(0x0775, 0x0777);
+        mem_eq_range(0x077A, 0x07C5);
+        mem_eq_range(0x07C7, 0x07C9);
+        mem_eq_range(0x07CB, 0x07FF);
       }
 
       for (int j = 0; j < range_curidx; j++) {

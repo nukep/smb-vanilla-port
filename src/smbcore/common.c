@@ -93,9 +93,9 @@ static inline void initialize_sound_memory(void) {
   NoiseDataLoopbackOfs  = 0;
   NoteLengthTblAdder    = 0;
   AreaMusicBuffer_Alt   = 0;
-  PauseModeFlag         = 0;
+  PauseModeFlag         = false;
   GroundMusicHeaderOfs  = 0;
-  AltRegContentFlag     = 0;
+  AltRegContentFlag     = false;
 }
 
 
@@ -373,13 +373,13 @@ static inline void GameMenuRoutine_ResetTitle() {
   OperMode_Task = OMT_TITLESCREEN_START;
 
 #ifdef SMB1_MODE
-  Sprite0HitDetectFlag = 0;
+  Sprite0HitDetectFlag = false;
 #endif
 #ifdef SMB2J_MODE
   IRQUpdateFlag = 0;
 #endif
 
-  DisableScreenFlag += 1;
+  DisableScreenFlag = true;
 }
 
 #ifdef SMB1_MODE
@@ -467,9 +467,9 @@ void GameMenuRoutine(void) {
       GoContinue(ContinueWorld);
     }
     LoadAreaPointer();
-    Hidden1UpFlag += 1;
-    OffScr_Hidden1UpFlag += 1;
-    FetchNewGameTimerFlag += 1;
+    Hidden1UpFlag = true;
+    OffScr_Hidden1UpFlag = true;
+    FetchNewGameTimerFlag = true;
 
     expect(OperMode == OM_TITLESCREEN);
     OperMode = OM_GAME;
@@ -519,7 +519,7 @@ void GameMenuRoutine(void) {
   }
 
 #ifdef SMB1_MODE
-  if ((buttons == BUTTON_B) && (WorldSelectEnableFlag != 0)) {
+  if (buttons == BUTTON_B && WorldSelectEnableFlag) {
     DemoTimer = 0x18;
     if (SelectTimer == 0) {
       SelectTimer = 0x10;
@@ -775,7 +775,7 @@ void SetupVictoryMode(void) {
   VictoryDestPageLoc = ScreenRight_PageLoc + 1;
   #ifdef SMB2J_MODE
     CompletedWorlds |= 1 << WorldNumber;
-    if ((HardWorldFlag != 0) && (WorldNumber > 2)) {
+    if (HardWorldFlag && WorldNumber > 2) {
       WorldNumber = 7;
     }
   #endif
@@ -823,7 +823,7 @@ void PlayerEndWorld(void) {
   if (WorldEndTimer == 0) {
     if (SMB1_ONLY && WorldNumber >= 7) {
       if (((SavedJoypadBits1 | SavedJoypadBits2) & BUTTON_B) != 0) {
-        WorldSelectEnableFlag = 1;
+        WorldSelectEnableFlag = true;
         NumberofLives = 0xff;
         TerminateGame();
       }
@@ -836,7 +836,7 @@ void PlayerEndWorld(void) {
       WorldNumber = 8;
     }
     LoadAreaPointer();
-    FetchNewGameTimerFlag += 1;
+    FetchNewGameTimerFlag = true;
     OperMode = OM_GAME;
     OperMode_Task = OMT_GAME_START;
   }
@@ -973,13 +973,13 @@ void ScreenRoutines(void) {
     return;
 
   case SRT_DISPLAYTIMEUP:
-    if (GameTimerExpiredFlag != 0) {
-      GameTimerExpiredFlag = 0;
+    if (GameTimerExpiredFlag) {
+      GameTimerExpiredFlag = false;
       WriteGameText(2);
       // Inlined: ResetScreenTimer
       ScreenTimer = 7;
       ScreenRoutineTask = SRT_RESETSPRITESANDSCREENTIMER_1;
-      DisableScreenFlag = 0;
+      DisableScreenFlag = false;
     } else {
       ScreenRoutineTask = SRT_DISPLAYINTERMEDIATE;
     }
@@ -1008,7 +1008,7 @@ void ScreenRoutines(void) {
     return;
 
   case SRT_AREAPARSERTASKCONTROL:
-    DisableScreenFlag += 1;
+    DisableScreenFlag = true;
     do {
       AreaParserTaskHandler();
     } while (AreaParserTaskNum != 0);
@@ -1238,7 +1238,7 @@ void WriteBottomStatusLine(void) {
 #endif
 #ifdef SMB2J_MODE
   // Inlined: GetWorldNumForDisplay
-  const u8 world_number_display = HardWorldFlag == 0 ? WorldNumber + 1 : (WorldNumber & 3) + 10;
+  const u8 world_number_display = !HardWorldFlag ? WorldNumber + 1 : (WorldNumber & 3) + 10;
 #endif
 
   const u8 level_number_display = LevelNumber + 1;
@@ -1282,7 +1282,7 @@ void DisplayIntermediate(void) {
 
     expect(OperMode_Task == OMT_GAME_SCREENROUTINES);
 
-    if (AltEntranceControl != 0 || (AreaType != AREA_CASTLE && DisableIntermediate != 0)) {
+    if (AltEntranceControl != 0 || (AreaType != AREA_CASTLE && DisableIntermediate)) {
       ScreenRoutineTask = SRT_AREAPARSERTASKCONTROL;
       return;
     }
@@ -1291,14 +1291,14 @@ void DisplayIntermediate(void) {
     WriteGameText(1);
     // Inlined: ResetScreenTimer
     ScreenTimer = 7;
-    DisableScreenFlag = 0;
+    DisableScreenFlag = false;
 
     ScreenRoutineTask = SRT_RESETSPRITESANDSCREENTIMER_2;
 
 #ifdef SMB2J_MODE
     if (WorldNumber == 8) {
       ScreenRoutineTask = SRT_DEMORESET;
-      DisableScreenFlag += 1;
+      DisableScreenFlag = true;
     }
 
 #endif
@@ -1637,7 +1637,7 @@ void TopScoreCheck(const u8 last_digit_offset) {
 void InitializeGame(void) {
 #ifdef SMB2J_MODE
   CompletedWorlds = 0;
-  HardWorldFlag = 0;
+  HardWorldFlag = false;
   CurrentPlayer = 0;
   PatchPlayerNamePal();
 
@@ -1674,7 +1674,10 @@ void InitializeArea(void) {
     ScreenLeft_PageLoc = EntrancePage;
   }
   CurrentPageLoc = ScreenLeft_PageLoc;
-  BackloadingFlag = ScreenLeft_PageLoc;
+
+  // Note: BackloadingFlag behaves like a boolean when read. The original would set this to exactly ScreenLeft_PageLoc. Our port tests non-zero and assigns a boolean (0 or 1).
+  BackloadingFlag = ScreenLeft_PageLoc != 0;
+
   const u8 bVar1 = GetScreenPosition();
   CurrentNTAddr_High = ((bVar1 & 1) == 0) ? 0x20 : 0x24;
   CurrentNTAddr_Low = 0x80;
@@ -1685,8 +1688,8 @@ void InitializeArea(void) {
   ColumnSets = 0xb;
 #ifdef SMB1_MODE
   GetAreaDataAddrs();
-  if ((PrimaryHardMode != 0) || ((WorldNumber >= 4 && ((WorldNumber != 4 || LevelNumber >= 2))))) {
-    SecondaryHardMode += 1;
+  if (PrimaryHardMode || (WorldNumber >= 4 && (WorldNumber != 4 || LevelNumber >= 2))) {
+    SecondaryHardMode = true;
   }
 #endif
 #ifdef SMB2J_MODE
@@ -1695,15 +1698,15 @@ void InitializeArea(void) {
   } else {
     AltHard_GetAreaDataAddrs();
   }
-  if ((HardWorldFlag != 0) || ((WorldNumber >= 3 && ((WorldNumber != 3 || LevelNumber >= 3))))) {
-    SecondaryHardMode += 1;
+  if (HardWorldFlag || (WorldNumber >= 3 && (WorldNumber != 3 || LevelNumber >= 3))) {
+    SecondaryHardMode = true;
   }
 #endif
   if (HalfwayPage != 0) {
     PlayerEntranceCtrl = 2;
   }
   AreaMusicQueue = MUSIC_AREA_SILENCE;
-  DisableScreenFlag = 1;
+  DisableScreenFlag = true;
 #ifdef SMB2J_MODE
   LoadPhysicsData();
 #endif
@@ -1716,7 +1719,7 @@ void InitializeArea(void) {
 // SM2MAIN:c5db
 // Signature: [] -> []
 void PrimaryGameSetup(void) {
-  FetchNewGameTimerFlag = 1;
+  FetchNewGameTimerFlag = true;
   PlayerSize = 1;
   NumberofLives = 2;
 #ifdef SMB1_MODE
@@ -1730,17 +1733,17 @@ void PrimaryGameSetup(void) {
 // SM2MAIN:6eb9
 // Signature: [] -> []
 void SecondaryGameSetup(void) {
-  DisableScreenFlag = 0;
+  DisableScreenFlag = false;
 #ifdef SMB2J_MODE
-  WindFlag = 0;
+  WindFlag = false;
   FlagpoleMusicFlag = 0;
 #endif
   for (int i = 0; i < 256; i++) {
     VRAM_Page[i] = 0;
   }
-  GameTimerExpiredFlag = 0;
-  DisableIntermediate = 0;
-  BackloadingFlag = 0;
+  GameTimerExpiredFlag = false;
+  DisableIntermediate = false;
+  BackloadingFlag = false;
   BalPlatformAlignment = 0xff;
 #ifdef SMB1_MODE
   NameTableSelectSMB1 = ScreenLeft_PageLoc & 1;
@@ -1769,7 +1772,7 @@ void SecondaryGameSetup(void) {
 
   // NES note: there was a call here to "DoNothing2", which, well, does nothing
 
-  Sprite0HitDetectFlag += 1;
+  Sprite0HitDetectFlag = true;
 #endif
 #ifdef SMB2J_MODE
   IRQUpdateFlag += 1;
@@ -1778,7 +1781,8 @@ void SecondaryGameSetup(void) {
   // NES note: there was a call here to "DoNothing1" ("DoNothing" in SMB2J), which appears to set an unused variable
   // The disassembly by doppelganger claims it's residual code
   // We'll inline it here
-  Misc_Collision_Flag[11] = 0xff;
+  // This could potentially be accessed by get_metatile(), so we're still setting it to avoid a regression
+  Unused_0x6C7[2] = 0xff;
 
   // Note: Moved OperMode_Task assignment to caller
 }
@@ -1796,7 +1800,7 @@ void GetAreaMusic(void) {
     return;
   }
 
-  if (CloudTypeOverride != 0) {
+  if (CloudTypeOverride) {
     AreaMusicQueue = MUSIC_AREA_CLOUD;
     return;
   }
@@ -1870,7 +1874,7 @@ void Entrance_GameTimerSetup(void) {
 
   GetPlayerColors();
 
-  if ((GameTimerSetting != 0) && (FetchNewGameTimerFlag != 0)) {
+  if (GameTimerSetting != 0 && FetchNewGameTimerFlag) {
     // Initialize the game timer
 
     // NES note: inlined from GameTimerData
@@ -1884,7 +1888,7 @@ void Entrance_GameTimerSetup(void) {
     GameTimerDisplay[1] = (time / 10) % 10;
     GameTimerDisplay[2] = (time) % 10;
 
-    FetchNewGameTimerFlag = 0;
+    FetchNewGameTimerFlag = false;
     StarInvincibleTimer = 0;
   }
 
@@ -1913,9 +1917,9 @@ void Entrance_GameTimerSetup(void) {
 // SM2MAIN:700f
 // Signature: [] -> []
 void PlayerLoseLife(void) {
-  DisableScreenFlag += 1;
+  DisableScreenFlag = true;
 #ifdef SMB1_MODE
-  Sprite0HitDetectFlag = 0;
+  Sprite0HitDetectFlag = false;
 #endif
 #ifdef SMB2J_MODE
   IRQUpdateFlag = 0;
@@ -1975,14 +1979,14 @@ void GameOverMode(void) {
 void SetupGameOver(void) {
   ScreenRoutineTask = SRT_INITSCREEN;
 #ifdef SMB1_MODE
-  Sprite0HitDetectFlag = 0;
+  Sprite0HitDetectFlag = false;
 #endif
 #ifdef SMB2J_MODE
   IRQUpdateFlag = 0;
   ContinueMenuSelect = 0;
 #endif
   EventMusicQueue = MUSIC_EVENT_GAMEOVER;
-  DisableScreenFlag += 1;
+  DisableScreenFlag = true;
   expect(OperMode_Task == OMT_GAMEOVER_SETUPGAMEOVER);
   OperMode_Task = OMT_GAMEOVER_SCREENROUTINES;
 }
@@ -1992,7 +1996,7 @@ void SetupGameOver(void) {
 // SM2MAIN:7079
 // Signature: [] -> []
 void RunGameOver(void) {
-  DisableScreenFlag = 0;
+  DisableScreenFlag = false;
 #ifdef SMB1_MODE
   if ((SavedJoypadBits1 & BUTTON_START) != 0) {
     TerminateGame();
@@ -2035,7 +2039,7 @@ void TerminateGame(void) {
 void ContinueGame(void) {
   LoadAreaPointer();
   PlayerSize = 1;
-  FetchNewGameTimerFlag += 1;
+  FetchNewGameTimerFlag = true;
   TimerControl = 0;
   PlayerStatus = PLAYERSTATUS_SMALL;
   GameEngineSubroutine = GR_ENTRANCE_GAMETIMERSETUP;
@@ -2363,7 +2367,7 @@ void PlayerEntrance(void) {
       }
       DisableCollisionDet = Player_Y_Position > 0x98;
       bVar1 = 1;
-      if (DisableCollisionDet != 0) {
+      if (DisableCollisionDet) {
         Player_State = PLAYERSTATE_CLIMBING;
         bVar1 = 8;
         set_metatile(4, 11, MT_MOUNTAIN_R);
@@ -2388,14 +2392,14 @@ void PlayerEntrance(void) {
       if (ChangeAreaTimer != 0) {
         return;
       }
-      DisableIntermediate += 1;
+      DisableIntermediate = true;
       NextArea();
       return;
     }
   }
   JoypadOverride = 0;
   AltEntranceControl = 0;
-  DisableCollisionDet = 0;
+  DisableCollisionDet = false;
   PlayerFacingDir = DIR_RIGHT;
   GameEngineSubroutine = GR_PLAYERCTRLROUTINE;
 }
@@ -2433,7 +2437,7 @@ void PlayerCtrlRoutine(void) {
   Player_BoundBoxCtrl = 1;
   if (PlayerSize == 0) {
     Player_BoundBoxCtrl = 0;
-    if (CrouchingFlag != 0) {
+    if (CrouchingFlag) {
       Player_BoundBoxCtrl = 2;
     }
   }
@@ -2468,12 +2472,12 @@ void PlayerCtrlRoutine(void) {
     ScrollLock = 1;
     cVar1 = 4;
     cVar2 = 0;
-    if (((GameTimerExpiredFlag != 0) || (CloudTypeOverride == 0))) {
+    if (GameTimerExpiredFlag || !CloudTypeOverride) {
       cVar2 = 1;
       if (GameEngineSubroutine != GR_PLAYERDEATH) {
-        if (DeathMusicLoaded == 0) {
+        if (!DeathMusicLoaded) {
           EventMusicQueue = MUSIC_EVENT_DEATH;
-          DeathMusicLoaded = 1;
+          DeathMusicLoaded = true;
         }
         cVar1 = 6;
       }
@@ -2561,11 +2565,11 @@ void SideExitPipeEntry(void) {
 // SM2MAIN:7d6b
 // Signature: [] -> [A]
 u8 ChgAreaMode(void) {
-  DisableScreenFlag += 1;
+  DisableScreenFlag = true;
   expect(OperMode == OM_GAME);
   OperMode_Task = OMT_GAME_START;
 #ifdef SMB1_MODE
-  Sprite0HitDetectFlag = 0;
+  Sprite0HitDetectFlag = false;
 #endif
 #ifdef SMB2J_MODE
   IRQUpdateFlag = 0;
@@ -2619,9 +2623,9 @@ void PlayerInjuryBlink(void) {
 // SM2MAIN:7dad
 // Signature: [] -> []
 void InitChangeSize(void) {
-  if (PlayerChangeSizeFlag == 0) {
+  if (!PlayerChangeSizeFlag) {
     PlayerAnimCtrl = PlayerChangeSizeFlag;
-    PlayerChangeSizeFlag = 1;
+    PlayerChangeSizeFlag = true;
     PlayerSize ^= 1;
   }
 }
@@ -2728,12 +2732,12 @@ void PlayerEndLevel(void) {
   LevelNumber += 1;
 #ifdef SMB1_MODE
   if (LevelNumber == 3 && CoinTallyFor1Ups >= Hidden1UpCoinAmts[WorldNumber]) {
-    Hidden1UpFlag += 1;
+    Hidden1UpFlag = true;
   }
 #endif
 #ifdef SMB2J_MODE
   if (LevelNumber == 3 && CoinTallyFor1Ups >= 10) {
-    Hidden1UpFlag += 1;
+    Hidden1UpFlag = true;
   }
 #endif
   NextArea();
@@ -2750,7 +2754,7 @@ void NextArea(void) {
     AreaNumber = 0;
   }
   LoadAreaPointer();
-  FetchNewGameTimerFlag += 1;
+  FetchNewGameTimerFlag = true;
   HalfwayPage = ChgAreaMode();
   EventMusicQueue = MUSIC_EVENT_STOP;
 }
@@ -2760,16 +2764,15 @@ void NextArea(void) {
 // SM2MAIN:7e90
 // Signature: [] -> []
 void PlayerMovementSubs(void) {
-  u8 bVar1 = 0;
   if (PlayerSize == 0) {
-    bVar1 = CrouchingFlag;
     if (Player_State == PLAYERSTATE_ONGROUND) {
-      bVar1 = Up_Down_Buttons & BUTTON_D;
+      CrouchingFlag = (Up_Down_Buttons & BUTTON_D) != 0;
     }
+  } else {
+    CrouchingFlag = false;
   }
-  CrouchingFlag = bVar1;
   PlayerPhysicsSub();
-  if (PlayerChangeSizeFlag != 0) {
+  if (PlayerChangeSizeFlag) {
     return;
   }
   if (Player_State != PLAYERSTATE_CLIMBING) {
@@ -2835,7 +2838,7 @@ void JumpSwimSub(void) {
            && (DiffToHaltJump <= (u8)(JumpOrigin_Y_Position - Player_Y_Position))))) {
     VerticalForce = VerticalForceDown;
   }
-  if (SwimmingFlag != 0) {
+  if (SwimmingFlag) {
     GetPlayerAnimSpeed();
     if (Player_Y_Position < 0x14) {
       VerticalForce = 0x18;
@@ -2940,7 +2943,7 @@ void PlayerPhysicsSub(void) {
 
   const bool button_a_newly_pressed = ((A_B_Buttons & BUTTON_A) != 0) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0);
   if ((JumpspringAnimCtrl == 0) && button_a_newly_pressed) {
-    if (Player_State == PLAYERSTATE_ONGROUND || (SwimmingFlag != 0 && (JumpSwimTimer != 0 || (Player_Y_Speed < 0x80)))) {
+    if (Player_State == PLAYERSTATE_ONGROUND || (SwimmingFlag && (JumpSwimTimer != 0 || (Player_Y_Speed < 0x80)))) {
       JumpSwimTimer = 0x20;
       Player_YMF_Dummy = 0;
       JumpOrigin_Y_HighPos = Player_Y_HighPos;
@@ -2948,7 +2951,7 @@ void PlayerPhysicsSub(void) {
       Player_State = PLAYERSTATE_JUMPSWIM;
 
       u8 bVar1;
-      if (SwimmingFlag == 0) {
+      if (!SwimmingFlag) {
         const u8 xs = Player_XSpeedAbsolute;
         if (xs <= 8) {
           bVar1 = 0;
@@ -2991,7 +2994,7 @@ void PlayerPhysicsSub(void) {
       Player_Y_MoveForce = init_mforce_lookup[bVar1];
       Player_Y_Speed = player_yspd_lookup[bVar1];
 
-      if (SwimmingFlag == 0) {
+      if (!SwimmingFlag) {
         Square1SoundQueue = (PlayerSize != 0) ? SOUND_SQ1_JUMP_SMALL : SOUND_SQ1_JUMP_BIG;
       } else {
         Square1SoundQueue = SOUND_SQ1_SWIM_OR_SQUISH;
@@ -3150,7 +3153,7 @@ void ProcFireball_Bubble(void) {
     cond &= (A_B_Buttons & BUTTON_B & PreviousA_B_Buttons) == 0;
     cond &= Fireball_State[FireballCounter & 1] == 0;
     cond &= Player_Y_HighPos == 1;
-    cond &= CrouchingFlag == 0;
+    cond &= !CrouchingFlag;
     cond &= Player_State != PLAYERSTATE_CLIMBING;
 
     if (cond) {
@@ -3339,7 +3342,7 @@ void RunGameTimer(void) {
     if (is_time_up) {
       PlayerStatus = PLAYERSTATUS_SMALL;
       ForceInjury();
-      GameTimerExpiredFlag += 1;
+      GameTimerExpiredFlag = true;
     } else {
       if (GameTimerDisplay[0] == 1 && GameTimerDisplay[1] == 0 && GameTimerDisplay[2] == 0) {
         EventMusicQueue = MUSIC_EVENT_TIMERUNNINGOUT;
@@ -3634,7 +3637,7 @@ void ProcessCannons(void) {
     bool chk_bb = true;
 
     if (Enemy_Flag[i] == 0) {
-      const u8 rng = PseudoRandomBitReg[i + 1] & (SecondaryHardMode == 0 ? 15 : 7);
+      const u8 rng = PseudoRandomBitReg[i + 1] & (!SecondaryHardMode ? 15 : 7);
 
       if (rng < 6) {
         if (Cannon_PageLoc[rng] != 0) {
@@ -4057,9 +4060,9 @@ void PlayerHeadCollision(const u8 param_1, const u16 mt_x, const u16 mt_y) {
   if (metatile_is_itemblock(mt)) {
     Block_State[sprdataoff] = 0x11;
     if ((mt == MT_BRICK_2_COINS) || (mt == MT_BRICK_COINS)) {
-      if (BrickCoinTimerFlag == 0) {
+      if (!BrickCoinTimerFlag) {
         BrickCoinTimer = 0xb;
-        BrickCoinTimerFlag = 1;
+        BrickCoinTimerFlag = true;
       }
       Block_Metatile[sprdataoff] = (BrickCoinTimer == 0) ? MT_BLOCK_EMPTY : mt;
     } else {
@@ -4074,7 +4077,7 @@ void PlayerHeadCollision(const u8 param_1, const u16 mt_x, const u16 mt_y) {
   set_metatile(mt_x, mt_y, MT_SPECIAL_BLOCKHIT);
 
   BlockBounceTimer = 0x10;
-  const u8 yadderdata = ((CrouchingFlag == 0) && (PlayerSize == 0)) ? 0x4 : 0x12;
+  const u8 yadderdata = (!CrouchingFlag && PlayerSize == 0) ? 0x4 : 0x12;
   Block_Y_Position[sprdataoff] = (Player_Y_Position + yadderdata) & 0xf0;
 
   if (Block_State[sprdataoff] == 0x11) {
@@ -4609,8 +4612,8 @@ void ExecGameLoopback(const u8 param_1) {
   ScreenLeft_PageLoc -= 4;
   ScreenRight_PageLoc -= 4;
   AreaObjectPageLoc -= 4;
-  EnemyObjectPageSel = 0;
-  AreaObjectPageSel = 0;
+  EnemyObjectPageSel = false;
+  AreaObjectPageSel = false;
   EnemyDataOffset = 0;
   EnemyObjectPageLoc = 0;
   AreaDataOffset = AreaDataOfsLoopback[param_1];
@@ -4698,12 +4701,12 @@ void ProcLoopCommand(const u8 objoff) {
     u8 bVar1 = ScreenRight_X_Pos + 0x30;
     const u8 bVar2 = ScreenRight_PageLoc + (ScreenRight_X_Pos >= 0xd0);
     const u8 bVar5 = EnemyDataOffset + 1;
-    if (((char)EnemyData[bVar5] < 0) && (EnemyObjectPageSel == 0)) {
-      EnemyObjectPageSel = 1;
+    if ((char)EnemyData[bVar5] < 0 && !EnemyObjectPageSel) {
+      EnemyObjectPageSel = true;
       EnemyObjectPageLoc += 1;
     }
 
-    if (((EnemyData[EnemyDataOffset] & 0xf) != 0xf) || (EnemyObjectPageSel != 0)) {
+    if ((EnemyData[EnemyDataOffset] & 0xf) != 0xf || EnemyObjectPageSel) {
       Enemy_PageLoc[objoff] = EnemyObjectPageLoc;
       bVar3 = EnemyData[bVar4] & 0xf0;
       Enemy_X_Position[objoff] = bVar3;
@@ -4727,9 +4730,9 @@ void ProcLoopCommand(const u8 objoff) {
         bVar1 = EnemyData[bVar4];
         Enemy_Y_Position[objoff] = bVar1 * 0x10;
         if ((u8)(bVar1 * 0x10) != 0xe0) {
-          if (((EnemyData[bVar5] & 0x40) != 0) && (SecondaryHardMode == 0)) {
+          if ((EnemyData[bVar5] & 0x40) != 0 && !SecondaryHardMode) {
             EnemyDataOffset += 2;
-            EnemyObjectPageSel = 0;
+            EnemyObjectPageSel = false;
             return;
           }
           bVar4 = EnemyData[bVar5] & 0x3f;
@@ -4737,7 +4740,7 @@ void ProcLoopCommand(const u8 objoff) {
             HandleGroupEnemies(bVar4);
             return;
           }
-          if ((bVar4 == A_GOOMBA) && (PrimaryHardMode != 0)) {
+          if (bVar4 == A_GOOMBA && PrimaryHardMode) {
             bVar4 = A_BUZZY_BEETLE;
           }
           Enemy_ID[objoff] = bVar4;
@@ -4747,7 +4750,7 @@ void ProcLoopCommand(const u8 objoff) {
             return;
           }
           EnemyDataOffset += 2;
-          EnemyObjectPageSel = 0;
+          EnemyObjectPageSel = false;
           return;
         }
       } else if ((EnemyData[bVar4] & 0xf) != 0xe) {
@@ -4760,13 +4763,13 @@ void ProcLoopCommand(const u8 objoff) {
       }
       EnemyDataOffset += 1;
       EnemyDataOffset += 2;
-      EnemyObjectPageSel = 0;
+      EnemyObjectPageSel = false;
       return;
     }
 
     EnemyObjectPageLoc = EnemyData[bVar5] & 0x3f;
     EnemyDataOffset += 2;
-    EnemyObjectPageSel = 1;
+    EnemyObjectPageSel = true;
   } while (true);
 }
 
@@ -4788,7 +4791,7 @@ void CheckThreeBytes(void) {
     EnemyDataOffset += 1;
   }
   EnemyDataOffset += 2;
-  EnemyObjectPageSel = 0;
+  EnemyObjectPageSel = false;
 }
 
 
@@ -4983,7 +4986,7 @@ void InitRetainerObj(const u8 param_1) {
 // SM2MAIN:8ef2
 // Signature: [X] -> []
 void InitNormalEnemy(const u8 param_1) {
-  Enemy_X_Speed[param_1] = PrimaryHardMode != 0 ? -12 : -8;
+  Enemy_X_Speed[param_1] = PrimaryHardMode ? -12 : -8;
   Enemy_BoundBoxCtrl[param_1] = 3;
   Enemy_MovingDir[param_1] = DIR_LEFT;
   InitVStf(param_1);
@@ -5003,8 +5006,6 @@ void InitRedKoopa(const u8 objoff) {
 // SM2MAIN:8f0c
 // Signature: [X] -> []
 void InitHammerBro(const u8 objoff) {
-  expect(SecondaryHardMode <= 1);
-
   HammerThrowingTimer[objoff] = 0;
   Enemy_X_Speed[objoff] = 0;
 
@@ -5015,7 +5016,7 @@ void InitHammerBro(const u8 objoff) {
 #endif
 
   if (set_timer) {
-    EnemyIntervalTimer[objoff] = SecondaryHardMode == 0 ? 0x80 : 0x50;
+    EnemyIntervalTimer[objoff] = !SecondaryHardMode ? 0x80 : 0x50;
   }
 
   Enemy_BoundBoxCtrl[objoff] = 0xb;
@@ -5184,7 +5185,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
         Enemy_ID[i] = A_LAKITU;
         SetupLakitu(i);
         u8 bVar1 = 0x20;
-        if (SMB2J_ONLY && (HardWorldFlag != 0 || WorldNumber >= 6)) {
+        if (SMB2J_ONLY && (HardWorldFlag || WorldNumber >= 6)) {
           bVar1 = 0x60;
         }
         PutAtRightExtent(bVar1, i);
@@ -5268,7 +5269,7 @@ void InitFlyingCheepCheep(const u8 objoff) {
 
   FrenzyEnemyTimer = timer_lookup[rng1 & 3];
 
-  if (objoff >= ((SecondaryHardMode != 0) ? 4 : 3)) {
+  if (objoff >= (SecondaryHardMode ? 4 : 3)) {
     return;
   }
 
@@ -5383,7 +5384,7 @@ void InitBowserFlame(const u8 objoff) {
   if (Enemy_ID[BowserFront_Offset] != A_BOWSER) {
     bVar1 = SetFlameTimer();
     FrenzyEnemyTimer = bVar1 + 0x20;
-    if (SecondaryHardMode != 0) {
+    if (SecondaryHardMode) {
       FrenzyEnemyTimer = bVar1 + 0x10;
     }
 
@@ -5563,7 +5564,7 @@ void HandleGroupEnemies(const u8 param_1) {
   if ((groupenemy_data & 4) != 0) {
     id = A_GREEN_KOOPA;
   } else {
-    if (PrimaryHardMode != 0) {
+    if (PrimaryHardMode) {
       id = A_BUZZY_BEETLE;
     } else {
       id = A_GOOMBA;
@@ -5583,7 +5584,7 @@ void HandleGroupEnemies(const u8 param_1) {
       if (k == 5) {
         // exit
         EnemyDataOffset += 2;
-        EnemyObjectPageSel = 0;
+        EnemyObjectPageSel = false;
         return;
       }
       if (Enemy_Flag[k] == 0) {
@@ -5606,7 +5607,7 @@ void HandleGroupEnemies(const u8 param_1) {
   } while (NumberofGroupEnemies -= 1, NumberofGroupEnemies != 0);
 
   EnemyDataOffset += 2;
-  EnemyObjectPageSel = 0;
+  EnemyObjectPageSel = false;
 }
 
 
@@ -5619,7 +5620,7 @@ void InitPiranhaPlant(const u8 objoff) {
 
   #ifdef SMB2J_MODE
     PiranhaPlantCompareOperand = 0x13;
-    if ((HardWorldFlag == 0) && (WorldNumber < 3)) {
+    if (!HardWorldFlag && WorldNumber < 3) {
       PiranhaPlantCompareOperand = 0x21;
     }
   #endif
@@ -5701,7 +5702,7 @@ void InitJumpGPTroopa(const u8 objoff) {
 void InitBalPlatform(const u8 objoff) {
   Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
   Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
-  if (SecondaryHardMode == 0) {
+  if (!SecondaryHardMode) {
     PosPlatform(objoff, 2);
   }
   const bool bVar1 = BalPlatformAlignment >= 0x80;
@@ -5757,7 +5758,7 @@ void InitVertPlatform(const u8 objoff) {
 // SM2MAIN:9460
 // Signature: [X] -> []
 void SPBBox(const u8 objoff) {
-  Enemy_BoundBoxCtrl[objoff] = ((AreaType != AREA_CASTLE) && (SecondaryHardMode == 0)) ? 6 : 5;
+  Enemy_BoundBoxCtrl[objoff] = (AreaType != AREA_CASTLE && !SecondaryHardMode) ? 6 : 5;
 }
 
 
@@ -6139,8 +6140,7 @@ void ProcHammerBro(const u8 objoff) {
       return;
     }
     if (HammerThrowingTimer[objoff] == 0) {
-      expect(SecondaryHardMode <= 1);
-      HammerThrowingTimer[objoff] = SecondaryHardMode == 0 ? 0x30 : 0x1c;
+      HammerThrowingTimer[objoff] = !SecondaryHardMode ? 0x30 : 0x1c;
       const bool sVar2 = SpawnHammerObj(objoff);
       if (sVar2) {
         Enemy_State[objoff] = Enemy_State[objoff] | 8;
@@ -6186,7 +6186,7 @@ void SetHJ(const u8 objoff, const u8 param_2, const u8 param_3) {
 
   EnemyFrameTimer[objoff] = 0x20;
 
-  if (param_3 && SecondaryHardMode != 0) {
+  if (param_3 && SecondaryHardMode) {
     if (PseudoRandomBitReg[objoff + 2] & 1) {
       EnemyFrameTimer[objoff] = 0x37;
     }
@@ -6235,7 +6235,7 @@ void MoveNormalEnemy(const u8 objoff) {
         u8 bVar2 = FrameCounter & 1;
         Enemy_MovingDir[objoff] = bVar2 + 1;
 
-        if (PrimaryHardMode == 0) {
+        if (!PrimaryHardMode) {
           Enemy_X_Speed[objoff] = bVar2 == 0 ? 8 : -8;
         } else {
           Enemy_X_Speed[objoff] = bVar2 == 0 ? 12 : -12;
@@ -6395,7 +6395,7 @@ void MoveBloober(const u8 objoff, const bool param_2) {
     return;
   }
 
-  const u8 rng = PseudoRandomBitReg[objoff + 1] & (SecondaryHardMode == 0 ? 63 : 3);
+  const u8 rng = PseudoRandomBitReg[objoff + 1] & (!SecondaryHardMode ? 63 : 3);
 
   if (rng == 0) {
     u8 dir;
@@ -6618,7 +6618,7 @@ u8 FirebarCollision(const u8 param_1, const u8 param_3, const u8 param_4) {
 
   for (int i = 0; i < 3; i++) {
     if (i < 2) {
-      if ((PlayerSize != 0) || (CrouchingFlag != 0)) {
+      if (PlayerSize != 0 || CrouchingFlag) {
         continue;
       }
     }
@@ -6976,7 +6976,7 @@ ChkFireB:
 
   BowserFireBreathTimer = SetFlameTimer();
 
-  if (SecondaryHardMode != 0) {
+  if (SecondaryHardMode) {
     BowserFireBreathTimer -= 0x10;
   }
   EnemyFrenzyBuffer = A_BOWSER_FLAME;
@@ -7067,7 +7067,7 @@ u8 SetFlameTimer(void) {
 // Signature: [X] -> []
 void ProcBowserFlame(const u8 objoff) {
   if (TimerControl == 0) {
-    const u8 bVar33 = (SecondaryHardMode != 0) ? 0x60 : 0x40;
+    const u8 bVar33 = SecondaryHardMode ? 0x60 : 0x40;
     const bool bVar1 = Enemy_X_MoveForce[objoff] < bVar33;
     Enemy_X_MoveForce[objoff] = Enemy_X_MoveForce[objoff] - bVar33;
 
@@ -7341,7 +7341,7 @@ static inline u16 SetupPlatformRope(const bool cond1, const u8 objoff) {
 
   u16 xpos = LOAD_16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff]);
 
-  if (SecondaryHardMode == 0) {
+  if (!SecondaryHardMode) {
     // NES note: There's a carry bug here.
     // The original game adds 8, then 16 if not in secondary hard mode.
     // The carry result from adding the 16 is used, instead of the total 24.
@@ -7881,8 +7881,8 @@ void PlayerHammerCollision(const u8 objoff) {
   if (((FrameCounter & 1) != 0) && ((smb2j_sprobj | TimerControl | Misc_OffscreenBits) == 0)) {
     const bool bVar2 = PlayerCollisionCore(objoff * 4 + 0x24);
     if (bVar2) {
-      if (Misc_Collision_Flag[objoff] == 0) {
-        Misc_Collision_Flag[objoff] = 1;
+      if (!Misc_Collision_Flag[objoff]) {
+        Misc_Collision_Flag[objoff] = true;
         Misc_X_Speed[objoff] *= -1;
         if (StarInvincibleTimer == 0) {
           InjurePlayer();
@@ -7890,7 +7890,7 @@ void PlayerHammerCollision(const u8 objoff) {
         }
       }
     } else {
-      Misc_Collision_Flag[objoff] = 0;
+      Misc_Collision_Flag[objoff] = false;
     }
   }
 }
@@ -8140,9 +8140,7 @@ void PlayerEnemyCollision(const u8 objoff) {
       SetupFloateyNumber(StompChainCounter + StompTimer, objoff);
       StompTimer += 1;
 
-      expect(PrimaryHardMode <= 1);
-
-      EnemyIntervalTimer[objoff] = PrimaryHardMode == 0 ? 16 : 11;
+      EnemyIntervalTimer[objoff] = !PrimaryHardMode ? 16 : 11;
 
 #ifdef SMB1_MODE
       Player_Y_Speed = 0xfc;
@@ -8577,7 +8575,7 @@ void PlayerBGCollision(void) {
   bool bVar8;
   struct blockbuffer_colli_result sVar11;
 
-  if (DisableCollisionDet != 0) {
+  if (DisableCollisionDet) {
     return;
   }
 
@@ -8591,7 +8589,7 @@ void PlayerBGCollision(void) {
     return;
   }
 
-  if (SwimmingFlag == 0) {
+  if (!SwimmingFlag) {
     if ((Player_State == PLAYERSTATE_ONGROUND) || (Player_State == PLAYERSTATE_CLIMBING)) {
       Player_State = PLAYERSTATE_FALLING;
     }
@@ -8611,8 +8609,8 @@ void PlayerBGCollision(void) {
 
   u8 tmp1;
 
-  if ((CrouchingFlag == 0) && (PlayerSize == 0)) {
-    if (SwimmingFlag == 0) {
+  if (!CrouchingFlag && PlayerSize == 0) {
+    if (!SwimmingFlag) {
       tmp1 = 0;
     } else {
       tmp1 = 7;
@@ -8622,10 +8620,10 @@ void PlayerBGCollision(void) {
   }
 
   // Note: assuming these both cannot be non-zero. it simplifies a lookup.
-  expect(PlayerSize == 0 || CrouchingFlag == 0);
+  expect(PlayerSize == 0 || !CrouchingFlag);
   expect(PlayerSize <= 1);
 
-  const u8 upperextent = (PlayerSize != 0 || CrouchingFlag != 0) ? 0x10 : 0x20;
+  const u8 upperextent = (PlayerSize != 0 || CrouchingFlag) ? 0x10 : 0x20;
 
   if (upperextent <= Player_Y_Position) {
     // Inlined: BlockBufferColli_Head
@@ -8957,7 +8955,7 @@ void HandlePipeEntry(const u8 param_1, const u8 param_2) {
         WorldNumber = bVar1 - 1;
       }
       if (SMB2J_ONLY) {
-        if (HardWorldFlag != 0) {
+        if (HardWorldFlag) {
           bVar1 = WarpZoneNumbers[WarpZoneControl & 0xf] - 9;
         } else {
           bVar1 = WarpZoneNumbers[WarpZoneControl & 0xf];
@@ -8970,8 +8968,8 @@ void HandlePipeEntry(const u8 param_1, const u8 param_2) {
       AreaNumber = 0;
       LevelNumber = 0;
       AltEntranceControl = 0;
-      Hidden1UpFlag += 1;
-      FetchNewGameTimerFlag += 1;
+      Hidden1UpFlag = true;
+      FetchNewGameTimerFlag = true;
     }
   }
 }
@@ -9401,9 +9399,9 @@ void FireballBGCollision(const u8 objoff) {
     if (sVar2.a != 0) {
       const bool bVar1 = ChkForNonSolids(sVar2.a);
       if (!bVar1) {
-        if ((Fireball_Y_Speed[objoff] < 0x80) && (FireballBouncingFlag[objoff] == 0)) {
+        if (Fireball_Y_Speed[objoff] < 0x80 && !FireballBouncingFlag[objoff]) {
           Fireball_Y_Speed[objoff] = 0xfd;
-          FireballBouncingFlag[objoff] = 1;
+          FireballBouncingFlag[objoff] = true;
           Fireball_Y_Position[objoff] = Fireball_Y_Position[objoff] & 0xf8;
           return;
         }
@@ -9412,9 +9410,9 @@ void FireballBGCollision(const u8 objoff) {
         return;
       }
     }
-    FireballBouncingFlag[objoff] = 0;
+    FireballBouncingFlag[objoff] = false;
   } else {
-    FireballBouncingFlag[objoff] = 0;
+    FireballBouncingFlag[objoff] = false;
   }
 }
 
@@ -9880,7 +9878,7 @@ void DrawLargePlatform(const u8 objoff) {
   SPRITE_Y(sproff1, 3) = ypos;
 
   u8 bVar11 = ypos;
-  if ((AreaType == AREA_CASTLE) || (SecondaryHardMode != 0)) {
+  if (AreaType == AREA_CASTLE || SecondaryHardMode) {
     bVar11 = SPRITE_Y_OFFSCREEN;
   }
 
@@ -9894,7 +9892,7 @@ void DrawLargePlatform(const u8 objoff) {
   SPRITE_Y(bVar3, 4) = bVar11;
   SPRITE_Y(bVar3, 5) = bVar11;
 
-  const u8 tile = (CloudTypeOverride != 0) ? 0x75 : 0x5b;
+  const u8 tile = CloudTypeOverride ? 0x75 : 0x5b;
 
   // Inlined: DumpSixSpr
   for (int i = 0; i < 6; i++) {
@@ -11220,7 +11218,7 @@ static inline u8 handle_change_size(void) {
     PlayerAnimCtrl += 1;
     if (PlayerAnimCtrl >= 10) {
       PlayerAnimCtrl = 0;
-      PlayerChangeSizeFlag = 0;
+      PlayerChangeSizeFlag = false;
     }
   }
 
@@ -11280,13 +11278,13 @@ static inline u8 process_player_action(void) {
     idx = big ? PLAYERFRAME_BIG_WALK_0
               : PLAYERFRAME_SMALL_WALK_0;
   } else if (Player_State == PLAYERSTATE_JUMPSWIM) {
-    if (SwimmingFlag != 0) {
+    if (SwimmingFlag) {
       if (JumpSwimTimer != 0 || PlayerAnimCtrl != 0 || (A_B_Buttons & BUTTON_A)) {
         play_frames = 3;
       }
       idx = big ? PLAYERFRAME_BIG_SWIM_0
                 : PLAYERFRAME_SMALL_SWIM_0;
-    } else if (CrouchingFlag != 0) {
+    } else if (CrouchingFlag) {
       PlayerAnimCtrl = 0;
       // NES note: The small "dead" variant shouldn't happen normally
       idx = big ? PLAYERFRAME_BIG_CROUCH
@@ -11297,7 +11295,7 @@ static inline u8 process_player_action(void) {
                 : PLAYERFRAME_SMALL_JUMP;
     }
   } else {
-    if (CrouchingFlag == 0) {
+    if (!CrouchingFlag) {
       if ((Player_X_Speed | Left_Right_Buttons) != 0) {
         if (Player_XSpeedAbsolute < 9 || (Player_MovingDir & PlayerFacingDir) != 0) {
           play_frames = 3;
@@ -11370,14 +11368,14 @@ void PlayerGfxHandler(void) {
     return;
   }
 
-  if (PlayerChangeSizeFlag != 0) {
+  if (PlayerChangeSizeFlag) {
     player_gfx_processing(handle_change_size());
     return;
   }
 
   player_gfx_processing(process_player_action());
 
-  if (SwimmingFlag == 0) {
+  if (!SwimmingFlag) {
     return;
   }
 

@@ -23,7 +23,7 @@ void Reset(void) {
   ppu_screen_off();
   MoveAllSpritesOffscreen();
   InitializeNameTables();
-  DisableScreenFlag += 1;
+  DisableScreenFlag = true;
 
   // There was an infinite do-nothing loop here for the NES.
   // At this point, the NMI would interrupt the loop each frame.
@@ -68,7 +68,7 @@ static const u8 * vram_buffer(u8 addr_ctrl, u16 *length) {
 // SMB:8082
 // Signature: [] -> []
 void NMI(void) {
-  const bool turn_screen_on = DisableScreenFlag == 0;
+  const bool turn_screen_on = !DisableScreenFlag;
 
   ppu_screen_off();
 
@@ -105,7 +105,7 @@ void NMI(void) {
   // Update PRNG (pseudo-random number generator)
   update_prng(&PseudoRandomBitReg[0]);
 
-  if (Sprite0HitDetectFlag != 0) {
+  if (Sprite0HitDetectFlag) {
     // In the NES version, the game waits here until a Sprite 0 hit (the bottom of the status bar).
     if ((GamePauseStatus & 1) == 0) {
       MoveSpritesOffscreen();

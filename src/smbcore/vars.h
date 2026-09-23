@@ -1,6 +1,9 @@
 #ifndef SMBCORE_VARS_H
 #define SMBCORE_VARS_H
 
+#define RAMARRAY_bool RAMARRAY
+#define RAM_bool(x) RAM(x)
+
 // Note: None of the RAM or RAMARRAY declarations should overlap each other.
 // If aliasing occurs, refer to to an existing declaration.
 // TODO: Fix aliasing with the $0300 page. Many of the variables there overlap.
@@ -55,7 +58,7 @@
 #define VictoryWalkControl               FirebarSpinDirection[1]
 
 #define PowerUpType                      RAM(0x0039)
-#define FireballBouncingFlag             RAMARRAY(0x003A, 2)
+#define FireballBouncingFlag             RAMARRAY_bool(0x003A, 2)
 #define HammerBroJumpTimer               RAMARRAY(0x003C, 6)	// as many as Enemy_ID
 #define Player_MovingDir                 RAM(0x0045)
 #define Enemy_MovingDir                  RAMARRAY(0x0046, 6)	// as many as Enemy_ID
@@ -234,7 +237,7 @@
 #define Block_Metatile                   RAMARRAY(0x03E8, 2)
 #define Block_PageLoc2                   RAMARRAY(0x03EA, 2)
 #define Block_RepFlag                    RAMARRAY(0x03EC, 2)
-#define BlockOffsetToggle                RAM(0x03EE) // Called SprDataOffset_Ctrl in doppelganger disasm
+#define BlockOffsetToggle                RAM_bool(0x03EE) // Called SprDataOffset_Ctrl in doppelganger disasm
 #define Block_ResidualCounter            RAM(0x03F0)
 #define Block_Orig_XPos                  RAMARRAY(0x03F1, 2)
 #define AttributeBuffer                  RAMARRAY(0x03F9, 7)
@@ -298,10 +301,11 @@
 #define MetatileBuffer                   RAMARRAY(0x06A1, 13)       // note: this overflows rarely. but MetatileBuffer[13] is accessed in World 4-3 in this TAS: https://tasvideos.org/6913S
 #define HammerEnemyOffset                RAMARRAY(0x06AE, 9)
 #define JumpCoinMiscOffset               RAM(0x06B7)
-#define BrickCoinTimerFlag               RAM(0x06BC)
-#define Misc_Collision_Flag              RAMARRAY(0x06BE, 12)
+#define BrickCoinTimerFlag               RAM_bool(0x06BC)
+#define Misc_Collision_Flag              RAMARRAY_bool(0x06BE, 9)
+#define Unused_0x6C7                     RAMARRAY(0x06C7, 4)    // exists as an array to handle the get_metatile() overflow case
 #define EnemyFrenzyBuffer                RAM(0x06CB)
-#define SecondaryHardMode                RAM(0x06CC)
+#define SecondaryHardMode                RAM_bool(0x06CC)
 #define EnemyFrenzyQueue                 RAM(0x06CD)
 #define FireballCounter                  RAM(0x06CE)
 #define DuplicateObj_Offset              RAM(0x06CF)
@@ -336,25 +340,25 @@
 #define FrictionAdderHigh                RAM(0x0701)
 #define FrictionAdderLow                 RAM(0x0702)
 #define RunningSpeed                     RAM(0x0703)
-#define SwimmingFlag                     RAM(0x0704)
+#define SwimmingFlag                     RAM_bool(0x0704)
 #define Player_X_MoveForce               RAM(0x0705)
 #define DiffToHaltJump                   RAM(0x0706)
 #define JumpOrigin_Y_HighPos             RAM(0x0707)
 #define JumpOrigin_Y_Position            RAM(0x0708)
 #define VerticalForce                    RAM(0x0709)
 #define VerticalForceDown                RAM(0x070A)
-#define PlayerChangeSizeFlag             RAM(0x070B)
+#define PlayerChangeSizeFlag             RAM_bool(0x070B)
 #define PlayerAnimTimerSet               RAM(0x070C)
 #define PlayerAnimCtrl                   RAM(0x070D)
 #define JumpspringAnimCtrl               RAM(0x070E)
 #define FlagpoleCollisionYPos            RAM(0x070F)
 #define PlayerEntranceCtrl               RAM(0x0710)
 #define FireballThrowingTimer            RAM(0x0711)
-#define DeathMusicLoaded                 RAM(0x0712)
+#define DeathMusicLoaded                 RAM_bool(0x0712)
 #define FlagpoleSoundQueue               RAM(0x0713)
-#define CrouchingFlag                    RAM(0x0714)
+#define CrouchingFlag                    RAM(0x0714)  // behaves as a boolean. values are 0 and 4 in the original, and is tested for 0/non-0
 #define GameTimerSetting                 RAM(0x0715)
-#define DisableCollisionDet              RAM(0x0716)
+#define DisableCollisionDet              RAM_bool(0x0716)
 #define DemoAction                       RAM(0x0717)
 #define DemoActionTimer                  RAM(0x0718)
 #define PrimaryMsgCounter                RAM(0x0719)
@@ -372,9 +376,9 @@
 #define CurrentPageLoc                   RAM(0x0725)
 #define CurrentColumnPos                 RAM(0x0726)
 #define TerrainControl                   RAM(0x0727)
-#define BackloadingFlag                  RAM(0x0728)
+#define BackloadingFlag                  RAM_bool(0x0728)   // behaves as a boolean. values are many values (up to about 17) in the original, and is tested for 0/non-0
 #define AreaObjectPageLoc                RAM(0x072A)
-#define AreaObjectPageSel                RAM(0x072B)
+#define AreaObjectPageSel                RAM_bool(0x072B)
 #define AreaDataOffset                   RAM(0x072C)
 #define AreaObjOffsetBuffer              RAMARRAY(0x072D, 3)
 #define AreaObjectLength                 RAMARRAY(0x0730, 3)
@@ -383,14 +387,14 @@
 #define MushroomLedgeHalfLen             RAMARRAY(0x0736, 3)
 #define EnemyDataOffset                  RAM(0x0739)
 #define EnemyObjectPageLoc               RAM(0x073A)
-#define EnemyObjectPageSel               RAM(0x073B)
+#define EnemyObjectPageSel               RAM_bool(0x073B)
 #define ScreenRoutineTask                RAM(0x073C)
 #define ScrollThirtyTwo                  RAM(0x073D)
 #define HorizontalScroll                 RAM(0x073F)
 #define VerticalScroll                   RAM(0x0740)
 #define ForegroundScenery                RAM(0x0741)
 #define BackgroundScenery                RAM(0x0742)
-#define CloudTypeOverride                RAM(0x0743)
+#define CloudTypeOverride                RAM_bool(0x0743)   // behaves as a boolean. values are 0 and 3, and is tested for 0/non-0
 #define BackgroundColorCtrl              RAM(0x0744)
 #define LoopCommand                      RAM(0x0745)
 #define StarFlagTaskControl              RAM(0x0746)
@@ -408,24 +412,24 @@
 #define PlayerSize                       RAM(0x0754)
 #define Player_Pos_ForScroll             RAM(0x0755)
 #define PlayerStatus                     RAM(0x0756)
-#define FetchNewGameTimerFlag            RAM(0x0757)
+#define FetchNewGameTimerFlag            RAM_bool(0x0757)  // this behaves like a boolean. the original would set values to 0, and then set to truthy by incrementing (e.g. FetchNewGameTimeFlag += 1). i don't believe there's a pathological way to wrap back to 0, so such increments are replaced with "true".
 #define JoypadOverride                   RAM(0x0758)
-#define GameTimerExpiredFlag             RAM(0x0759)
+#define GameTimerExpiredFlag             RAM_bool(0x0759)
 #define NumberofLives                    RAM(0x075A)
 #define HalfwayPage                      RAM(0x075B)
 #define LevelNumber                      RAM(0x075C)
-#define Hidden1UpFlag                    RAM(0x075D)
+#define Hidden1UpFlag                    RAM_bool(0x075D)  // this behaves like a boolean. the original would set values to 0, and then set to truthy by incrementing (e.g. Hidden1UpFlag += 1). i don't believe there's a pathological way to wrap back to 0 (not in official ROMs, anyway), so such increments are replaced with "true".
 #define CoinTally                        RAM(0x075E)
 #define WorldNumber                      RAM(0x075F)
 #define AreaNumber                       RAM(0x0760)
 #define ScrollFractional                 RAM(0x0768)
-#define DisableIntermediate              RAM(0x0769)
-#define PrimaryHardMode                  RAM(0x076A)
+#define DisableIntermediate              RAM_bool(0x0769)
+#define PrimaryHardMode                  RAM_bool(0x076A)
 #define WorldSelectNumber                RAM(0x076B)
 #define OperMode                         RAM(0x0770)
 #define OperMode_Task                    RAM(0x0772)
 #define VRAM_Buffer_AddrCtrl             RAM(0x0773)
-#define DisableScreenFlag                RAM(0x0774)
+#define DisableScreenFlag                RAM_bool(0x0774)  // this behaves like a boolean. the original would set values to 0, and then set to truthy by incrementing (e.g. DisableScreenFlag += 1). i don't believe there's a pathological way to wrap back to 0, so such increments are replaced with "true".
 #define ScrollAmount                     RAM(0x0775)
 #define GamePauseStatus                  RAM(0x0776)
 #define GamePauseTimer                   RAM(0x0777)
@@ -478,19 +482,19 @@
 #define NoiseDataLoopbackOfs             RAM(0x7C1)
 #define NoteLengthTblAdder               RAM(0x7C4)
 #define AreaMusicBuffer_Alt              RAM(0x7C5)
-#define PauseModeFlag                    RAM(0x7C6)
+#define PauseModeFlag                    RAM_bool(0x7C6)  // this behaves like a boolean. the original would set values to 0 1 2.
 #define GroundMusicHeaderOfs             RAM(0x7C7)
-#define AltRegContentFlag                RAM(0x7CA)
+#define AltRegContentFlag                RAM_bool(0x7CA)     // this behaves like a boolean. the original sets to 0 and 0x94
 
 #define DisplayDigits                    RAMARRAY(0x07D7, 36)
 
 #define WarmBootValidation               RAM(0x07FF)
 /* smb1 ----------------------- */
-#define Sprite0HitDetectFlag             RAM(0x0722)
+#define Sprite0HitDetectFlag             RAM_bool(0x0722)  // this behaves like a boolean. the original would set values to 0, and then set to truthy by incrementing (e.g. Sprite0HitDetectFlag += 1). i don't believe there's a pathological way to wrap back to 0, so such increments are replaced with "true".
 #define OffScr_NumberofLives             RAM(0x0761)
 #define OffScr_HalfwayPage               RAM(0x0762)
 #define OffScr_LevelNumber               RAM(0x0763)
-#define OffScr_Hidden1UpFlag             RAM(0x0764)
+#define OffScr_Hidden1UpFlag             RAM_bool(0x0764)
 #define OffScr_CoinTally                 RAM(0x0765)
 #define OffScr_WorldNumber               RAM(0x0766)
 #define OffScr_AreaNumber                RAM(0x0767)
@@ -498,7 +502,7 @@
 #ifdef SMB1_MODE
 #define GameTimerDisplay                 (DisplayDigits + 33)
 #endif
-#define WorldSelectEnableFlag            RAM(0x07FC)
+#define WorldSelectEnableFlag            RAM_bool(0x07FC)
 #define ContinueWorld                    RAM(0x07FD)
 /* smb2j ----------------------- */
 #define FDSBIOS_IRQFlag                  RAM(0x0101)
@@ -518,9 +522,9 @@
 #define FlagpoleMusicFlag                RAM(0x07F6)
 #define FileListNumber                   RAM(0x07F7)
 #define ContinueMenuSelect               RAM(0x07F8)
-#define WindFlag                         RAM(0x07F9)
+#define WindFlag                         RAM_bool(0x07F9)
 #define CompletedWorlds                  RAM(0x07FA)
-#define HardWorldFlag                    RAM(0x07FB)
+#define HardWorldFlag                    RAM_bool(0x07FB)
 #define DiskIOTask                       RAM(0x07FC)
 #define NotColdFlag                      RAM(0x07FD)
 
