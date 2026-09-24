@@ -1,9 +1,6 @@
 #ifndef SMBCORE_VARS_H
 #define SMBCORE_VARS_H
 
-#define RAMARRAY_bool RAMARRAY
-#define RAM_bool(x) RAM(x)
-
 // Note: None of the RAM or RAMARRAY declarations should overlap each other.
 // If aliasing occurs, refer to to an existing declaration.
 // TODO: Fix aliasing with the $0300 page. Many of the variables there overlap.

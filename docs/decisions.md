@@ -110,3 +110,16 @@ run-time and compile-time switches for SMB1 and SMB2J.
 Right now I want to keep the literal enumation values equivalent to the original respective games,
 and to not abstract them or create indirection to the "real" values.
 
+
+## Defined wraparound for signed integers
+
+The C standard does not define signed integer wraparound.
+We tell the compiler to define it. In GCC and Clang, this is done with `-fwrapv`.
+
+There are many signed integer variables in the game, and quirks may rely on the wraparound behavior.
+
+This port relies on treating signed overflow as defined behavior.
+
+Without a compiler flag, the in-C workaround would be to have macros or helpers do signed modulo arithmetic for us.
+I believe that's unnecessarily complicated given that any modern C compiler supports defining the behavior. Older compilers likely don't exploit the undefined behavior.
+

@@ -1,3 +1,5 @@
+cc = meson.get_compiler('c')
+
 smbcore_args = []
 
 if get_option('optimize_aggressively')
@@ -21,6 +23,11 @@ endif
 if get_option('use_poison_debug')
   smbcore_args += ['-DUSE_POISON_DEBUG']
 endif
+
+# Define signed integer wraparound
+# Note: may not work for MSVC or other compilers (TODO)
+# Require it for now, until other compilers are supported
+smbcore_args += cc.get_supported_arguments('-fwrapv', checked: 'require')
 
 force_cpp_args = []
 

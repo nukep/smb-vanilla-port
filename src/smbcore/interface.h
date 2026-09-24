@@ -37,6 +37,8 @@ extern struct SMB_state *SMB_STATE;
 #endif
 
 #define RAM(offset) (SMB_STATE->rammem[offset])
+#define RAM_bool(offset) (((bool*)SMB_STATE->rammem)[offset])
+#define RAM_i8(offset) (((i8*)SMB_STATE->rammem)[offset])
 #define PPURAM(offset) (SMB_STATE->ppuram[offset])
 #define CHRROM(offset) (SMB_STATE->chrrom[offset])
 #define RAM_CONST(offset) ((const u8)SMB_STATE->rammem[offset])
@@ -87,12 +89,19 @@ static inline const u8 * rom_ptr(const u16 addr) {
 // Access the RAM buffer directly, as pointers
 
 #  define RAMARRAY(addr, length) (&RAM(addr))
+#  define RAMARRAY_bool(addr, length) (&RAM_bool(addr))
+#  define RAMARRAY_i8(addr, length) (&RAM_i8(addr))
 #  define RAMARRAY_CONST(addr, length) ((const u8*)(&RAM(addr)))
 
 #else
 
-// Represents a byte array at a specific address.
+extern "C++" {
+
+// Represents a byte (or byte-sized) array at a specific address.
+template <typename T=u8>
 class RamByteArray {
+  static_assert(sizeof(T) == 1, "T must be byte-sized");
+
 private:
   u16 addr;
   u16 length;
@@ -102,17 +111,17 @@ public:
   RamByteArray(u16 addr) : addr(addr), length(0), offset(0) {}
   RamByteArray(u16 addr, u16 length) : addr(addr), length(length), offset(0) {}
   RamByteArray(u16 addr, u16 length, int offset) : addr(addr), length(length), offset(offset) {}
-  u8 &operator*() const {
-    return RAM(addr + offset);
+  T &operator*() const {
+    return *(T*)(&RAM(addr + offset));
   }
-  u8 *operator&() const {
-    return &RAM(addr + offset);
+  T *operator&() const {
+    return (T*)(&RAM(addr + offset));
   }
-  RamByteArray operator+(int i) const {
+  RamByteArray<T> operator+(int i) const {
     // Adding an array by a constant gives another array.
-    return RamByteArray(addr, length, offset + i);
+    return RamByteArray<T>(addr, length, offset + i);
   }
-  u8 &operator[](int i) const {
+  T &operator[](int i) const {
     const int idx = offset + i;
     // equivalent to LDA addr,X
     u16 eff = addr + idx;
@@ -133,7 +142,7 @@ public:
       }
     }
 
-    return RAM(eff);
+    return *(T*)(&RAM(eff));
   }
 };
 
@@ -167,7 +176,11 @@ public:
   }
 };
 
-#define RAMARRAY(addr, length) RamByteArray(addr, length)
+}
+
+#define RAMARRAY(addr, length) RamByteArray<u8>(addr, length)
+#define RAMARRAY_bool(addr, length) RamByteArray<bool>(addr, length)
+#define RAMARRAY_i8(addr, length) RamByteArray<i8>(addr, length)
 #define RAMARRAY_CONST(addr, length) ConstRamByteArray(addr, length)
 
 #endif
