@@ -3390,16 +3390,10 @@ void ProcessWhirlpools(void) {
   }
 
   for (int i = 4; i >= 0; i--) {
-    const u8 whirlpool_x_hi = Whirlpool_PageLoc[i];
-    const u8 whirlpool_x_lo = Whirlpool_X_Position[i];
-
-    const u8 player_x_hi = Player_PageLoc;
-    const u8 player_x_lo = Player_X_Position;
-
     const u8 length = Whirlpool_Length[i];
 
-    const u16 player_x = (player_x_hi << 8) | player_x_lo;
-    const u16 whirlpool_x = (whirlpool_x_hi << 8) | whirlpool_x_lo;
+    const u16 player_x    = LOAD_16(Player_PageLoc, Player_X_Position);
+    const u16 whirlpool_x = LOAD_16(Whirlpool_PageLoc[i], Whirlpool_X_Position[i]);
 
     if (whirlpool_x < 256) {
       continue;
@@ -9291,8 +9285,8 @@ void ChkForBump_HammerBroJ(const u8 objoff) {
 // SM2MAIN:add9
 // Signature: [X] -> [N, C, r00]
 struct_ncr00 PlayerEnemyDiff(const u8 param_1) {
-  const u16 player_pos = (Player_PageLoc << 8) | (Player_X_Position);
-  const u16 enemy_pos = (Enemy_PageLoc[param_1] << 8) | (Enemy_X_Position[param_1]);
+  const u16 player_pos = LOAD_16(Player_PageLoc, Player_X_Position);
+  const u16 enemy_pos  = LOAD_16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
 
   const i16 diff = enemy_pos - player_pos;
 
@@ -9561,8 +9555,8 @@ void CheckRightScreenBBox(const u8 param_1) {
   // NES note: The "Y" register is technically an input, but's always X*4 (param_1*4) in practice.
   // This value comes from BoundingBoxCore.
 
-  const u16 screen_left_pos = (ScreenLeft_PageLoc << 8) | ScreenLeft_X_Pos;
-  const u16 object_x_pos = (SprObject_PageLoc[param_1] << 8) | SprObject_X_Position[param_1];
+  const u16 screen_left_pos = LOAD_16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
+  const u16 object_x_pos = LOAD_16(SprObject_PageLoc[param_1], SprObject_X_Position[param_1]);
 
   const u8 a = BBOX_BOTRIGHT_X(param_1);
   const u8 b = BBOX_TOPLEFT_X(param_1);
