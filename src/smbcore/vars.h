@@ -365,7 +365,7 @@
 #define ScreenLeft_X_Pos                 RAM(0x071C)
 #define ScreenRight_X_Pos                RAM(0x071D)
 
-#define ColumnSets                       RAM(0x071E)
+#define ColumnSets                       RAM_i8(0x071E)
 #define AreaParserTaskNum                RAM(0x071F)
 #define CurrentNTAddr_High               RAM(0x0720)
 #define CurrentNTAddr_Low                RAM(0x0721)

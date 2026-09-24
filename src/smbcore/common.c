@@ -1013,7 +1013,7 @@ void ScreenRoutines(void) {
       AreaParserTaskHandler();
     } while (AreaParserTaskNum != 0);
     ColumnSets -= 1;
-    if (ColumnSets >= 0x80) {
+    if (ColumnSets < 0) {
       ScreenRoutineTask = SRT_GETAREAPALETTE;
     }
     VRAM_Buffer_AddrCtrl = ADDRCTRL_VRAM_BUFFER2;
