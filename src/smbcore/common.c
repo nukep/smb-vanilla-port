@@ -1744,7 +1744,7 @@ void SecondaryGameSetup(void) {
   GameTimerExpiredFlag = false;
   DisableIntermediate = false;
   BackloadingFlag = false;
-  BalPlatformAlignment = 0xff;
+  BalPlatformAlignment = -1;
 #ifdef SMB1_MODE
   NameTableSelectSMB1 = ScreenLeft_PageLoc & 1;
 #endif
@@ -5705,12 +5705,15 @@ void InitBalPlatform(const u8 objoff) {
   if (!SecondaryHardMode) {
     PosPlatform(objoff, 2);
   }
-  const bool bVar1 = BalPlatformAlignment >= 0x80;
+
   Enemy_State[objoff] = BalPlatformAlignment;
-  BalPlatformAlignment = 0xff;
-  if (bVar1) {
+
+  if (BalPlatformAlignment < 0) {
     BalPlatformAlignment = objoff;
+  } else {
+    BalPlatformAlignment = -1;
   }
+
   Enemy_MovingDir[objoff] = 0;
   PosPlatform(objoff, 0);
   InitDropPlatform(objoff);
