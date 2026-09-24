@@ -404,13 +404,13 @@ void smb1_BlockObjectsCore(u8 param_1);
 void smb1_BlockObjMT_Updater(void);
 #define BlockObjMT_Updater smb1_BlockObjMT_Updater
 
-u8 smb1_MoveEnemyHorizontally(u8 param_1);
+i8 smb1_MoveEnemyHorizontally(u8 param_1);
 #define MoveEnemyHorizontally smb1_MoveEnemyHorizontally
 
-u8 smb1_MovePlayerHorizontally(void);
+i8 smb1_MovePlayerHorizontally(void);
 #define MovePlayerHorizontally smb1_MovePlayerHorizontally
 
-u8 smb1_MoveObjectHorizontally(u8 param_1);
+i8 smb1_MoveObjectHorizontally(u8 param_1);
 #define MoveObjectHorizontally smb1_MoveObjectHorizontally
 
 void smb1_MovePlayerVertically(void);
@@ -656,7 +656,7 @@ void smb1_XMoveCntr_GreenPTroopa(u8 param_1);
 void smb1_XMoveCntr_Platform(u8 param_1,u8 param_2);
 #define XMoveCntr_Platform smb1_XMoveCntr_Platform
 
-u8 smb1_MoveWithXMCntrs(u8 objoff);
+i8 smb1_MoveWithXMCntrs(u8 objoff);
 #define MoveWithXMCntrs smb1_MoveWithXMCntrs
 
 void smb1_MoveBloober(u8 param_1,bool param_2);
@@ -755,7 +755,7 @@ void smb1_ChkYPCollision(u8 param_1);
 void smb1_XMovingPlatform(u8 objoff);
 #define XMovingPlatform smb1_XMovingPlatform
 
-void smb1_PositionPlayerOnHPlat(u8 param_1,u8 param_2);
+void smb1_PositionPlayerOnHPlat(u8 param_1,i8 param_2);
 #define PositionPlayerOnHPlat smb1_PositionPlayerOnHPlat
 
 void smb1_DropPlatform(u8 param_1);

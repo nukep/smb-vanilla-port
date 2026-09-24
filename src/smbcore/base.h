@@ -121,7 +121,13 @@ static inline u8 _poison_u8_random(void) {
 
 // Loads a 16-bit value from two 8-bit values.
 // Used as an RHS expression.
-#define LOAD_16(src_hi, src_lo) ((u16)(((src_hi) << 8) | ((u8)(src_lo))))
+static inline u16 LOAD_16(const u8 src_hi, const u8 src_lo) {
+  return (u16)(((u16)src_hi << 8) | (u16)src_lo);
+}
+
+static inline i16 LOAD_i16(const i8 src_hi, const i8 src_lo) {
+  return (i16)LOAD_16((u8)src_hi, (u8)src_lo);
+}
 
 // Store a 16-bit value into two 8-bit values from a 16-bit value.
 #define STORE_16(dst_hi, dst_lo, val) { \
@@ -182,8 +188,8 @@ static inline u8 _poison_u8_random(void) {
 // dst_* are 8-bit integers.
 // src is an 8-bit integer, sign-extended to a 16-bit addend.
 #define ADD_SIGNED_16_8(dst_hi, dst_lo, src) { \
-  u8 h = src; \
-  ADD_16_16(dst_hi, dst_lo, h >= 0x80 ? -1 : 0, h); \
+  i8 h = src; \
+  ADD_16_16(dst_hi, dst_lo, h < 0 ? -1 : 0, h); \
 }
 
 // Performs `dst = dst + src`.
@@ -225,7 +231,7 @@ static inline u8 ABS_DIFF(u8 a, u8 b) {
 // Calcules the signed absolute difference between two bytes.
 // e.g. (0, 255) -> 1
 static inline u8 ABS_DIFF_SIGNED(i8 a, i8 b) {
-  u8 d = a - b;
+  u8 d = (u8)(a - b);
   if (d >= 0x80) {
     return -d;
   } else {

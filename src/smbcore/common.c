@@ -2224,21 +2224,23 @@ void UpdScrollVar(void) {
 // Signature: [] -> []
 void ScrollHandler(void) {
   Player_X_Scroll += Platform_X_Scroll;
-  if ((((ScrollLock != 0) || (Player_Pos_ForScroll < 0x50)) || (SideCollisionTimer != 0))
-      || (0x7f < (u8)(Player_X_Scroll - 1))) {
+
+  if (ScrollLock == 0 && Player_Pos_ForScroll >= 0x50 && SideCollisionTimer == 0 && (i8)(Player_X_Scroll - 1) >= 0) {
+    // 1 <= Player_X_Scroll <= 128
+
+    u8 bVar1 = Player_X_Scroll;
+
+    if (Player_Pos_ForScroll < 0x70) {
+      if (bVar1 > 1) {
+        bVar1 -= 1;
+      }
+    }
+
+    ScrollScreen(bVar1);
+  } else {
     ScrollAmount = 0;
     ChkPOffscr();
-    return;
   }
-  u8 bVar1 = Player_X_Scroll;
-  if (Player_X_Scroll > 1) {
-    bVar1 = Player_X_Scroll - 1;
-  }
-  if (Player_Pos_ForScroll < 0x70) {
-    ScrollScreen(bVar1);
-    return;
-  }
-  ScrollScreen(Player_X_Scroll);
 }
 
 
@@ -2419,7 +2421,7 @@ void AutoControlPlayer(const u8 param_1) {
 // Signature: [] -> []
 void PlayerCtrlRoutine(void) {
   char cVar1;
-  char cVar2;
+  u8 cVar2;
 
   if (GameEngineSubroutine != GR_PLAYERDEATH) {
     if ((AreaType == AREA_WATER) && ((Player_Y_HighPos != 1 || (Player_Y_Position >= 0xd0)))) {
@@ -2482,8 +2484,8 @@ void PlayerCtrlRoutine(void) {
         cVar1 = 6;
       }
     }
-    if ((u8)(Player_Y_HighPos - cVar1) < 0x80) {
-      if (0x7f < (u8)(cVar2 - 1U)) {
+    if ((i8)(Player_Y_HighPos - cVar1) >= 0) {
+      if (cVar2 == 0) {
         JoypadOverride = 0;
         SetEntr();
         AltEntranceControl += 1;
@@ -4388,7 +4390,7 @@ void BlockObjMT_Updater(void) {
 // SMB:bf02
 // SM2MAIN:8ad3
 // Signature: [X] -> [A]
-u8 MoveEnemyHorizontally(const u8 param_1) {
+i8 MoveEnemyHorizontally(const u8 param_1) {
   return MoveObjectHorizontally(param_1 + 1);
 }
 
@@ -4396,18 +4398,18 @@ u8 MoveEnemyHorizontally(const u8 param_1) {
 // SMB:bf09
 // SM2MAIN:8ada
 // Signature: [] -> [A]
-u8 MovePlayerHorizontally(void) {
+i8 MovePlayerHorizontally(void) {
   if (JumpspringAnimCtrl == 0) {
     return MoveObjectHorizontally(0);
   }
-  return JumpspringAnimCtrl;
+  return (i8)JumpspringAnimCtrl;
 }
 
 
 // SMB:bf0f
 // SM2MAIN:8ae0
 // Signature: [X] -> [A]
-u8 MoveObjectHorizontally(const u8 param_1) {
+i8 MoveObjectHorizontally(const u8 param_1) {
   // NES note: the original sign-extends the high nibble (ORA #$F0), but we just cast it to signed here.
   const i16 b = ((i16)(i8)SprObject_X_Speed[param_1]) * 16;
 
@@ -5706,10 +5708,10 @@ void InitBalPlatform(const u8 objoff) {
     PosPlatform(objoff, 2);
   }
 
-  Enemy_State[objoff] = BalPlatformAlignment;
+  Enemy_State[objoff] = (u8)BalPlatformAlignment;
 
   if (BalPlatformAlignment < 0) {
-    BalPlatformAlignment = objoff;
+    BalPlatformAlignment = (i8)objoff;
   } else {
     BalPlatformAlignment = -1;
   }
@@ -6373,7 +6375,7 @@ void XMoveCntr_Platform(const u8 param_1, const u8 objoff) {
 // SMB:cb66
 // SM2MAIN:979b
 // Signature: [X] -> [r00]
-u8 MoveWithXMCntrs(const u8 objoff) {
+i8 MoveWithXMCntrs(const u8 objoff) {
   const u8 bStack0000 = XMoveSecondaryCounter[objoff];
 
   if ((Enemy_Y_Speed[objoff] & 2) != 0) {
@@ -6383,7 +6385,7 @@ u8 MoveWithXMCntrs(const u8 objoff) {
     Enemy_MovingDir[objoff] = DIR_LEFT;
   }
 
-  const u8 sVar2 = MoveEnemyHorizontally(objoff);
+  const i8 sVar2 = MoveEnemyHorizontally(objoff);
   XMoveSecondaryCounter[objoff] = bStack0000;
   return sVar2;
 }
@@ -7471,7 +7473,7 @@ void BalancePlatform(const u8 objoff) {
     PositionPlayerOnVPlat(PlatformCollisionFlag[objoff]);
   }
 
-  const i16 yvel = LOAD_16(Enemy_Y_Speed[objoff], Enemy_Y_MoveForce[objoff]);
+  const i16 yvel = LOAD_i16(Enemy_Y_Speed[objoff], Enemy_Y_MoveForce[objoff]);
   const i8 yspd = Enemy_Y_Speed[objoff];
 
   if ((yvel != 0) && (VRAM_Buffer1_Offset < 32)) {
@@ -7581,7 +7583,7 @@ void ChkYPCollision(const u8 param_1) {
 // Signature: [X] -> []
 void XMovingPlatform(const u8 objoff) {
   XMoveCntr_Platform(0xe, objoff);
-  const u8 sVar2 = MoveWithXMCntrs(objoff);
+  const i8 sVar2 = MoveWithXMCntrs(objoff);
   if (PlatformCollisionFlag[objoff] < 0x80) {
     PositionPlayerOnHPlat(objoff, sVar2);
   }
@@ -7591,7 +7593,7 @@ void XMovingPlatform(const u8 objoff) {
 // SMB:d614
 // SM2MAIN:a24e
 // Signature: [X, r00] -> []
-void PositionPlayerOnHPlat(const u8 param_1, const u8 param_2) {
+void PositionPlayerOnHPlat(const u8 param_1, const i8 param_2) {
   ADD_SIGNED_16_8(Player_PageLoc, Player_X_Position, param_2);
 
   Platform_X_Scroll = param_2;
@@ -7616,7 +7618,7 @@ void DropPlatform(const u8 objoff) {
 // SM2MAIN:a277
 // Signature: [X] -> []
 void RightPlatform(const u8 objoff) {
-  const u8 sVar2 = MoveEnemyHorizontally(objoff);
+  const i8 sVar2 = MoveEnemyHorizontally(objoff);
   if (PlatformCollisionFlag[objoff] < 0x80) {
     Enemy_X_Speed[objoff] = 0x10;
     PositionPlayerOnHPlat(objoff, sVar2);

@@ -190,7 +190,7 @@
 #define VineObjOffset                    RAMARRAY(0x039A, 2)
 #define VineStart_Y_Position             RAM(0x039D)
 #define BalPlatformAlignment             RAM_i8(0x03A0)
-#define Platform_X_Scroll                RAM(0x03A1)
+#define Platform_X_Scroll                RAM_i8(0x03A1)
 
 #define PlatformCollisionFlag            RAMARRAY(0x03A2, 5)
 

@@ -302,11 +302,11 @@ void WriteGameText(const u8 param_1) {
 
 // SMB:afc4
 // Signature: [Y] -> []
-void ScrollScreen(const u8 param_1) {
-  ScrollAmount = param_1;
-  ScrollThirtyTwo += param_1;
+void ScrollScreen(const u8 amount) {
+  ScrollAmount = amount;
+  ScrollThirtyTwo += amount;
   ADD_UNSIGNED_16_8(ScreenLeft_PageLoc, ScreenLeft_X_Pos,
-                    param_1);
+                    amount);
   HorizontalScroll = ScreenLeft_X_Pos;
   NameTableSelectSMB1 = ScreenLeft_PageLoc & 1;
   GetScreenPosition();

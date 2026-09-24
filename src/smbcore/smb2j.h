@@ -400,13 +400,13 @@ void smb2j_BlockObjectsCore(u8 param_1);
 void smb2j_BlockObjMT_Updater(void);
 #define BlockObjMT_Updater smb2j_BlockObjMT_Updater
 
-u8 smb2j_MoveEnemyHorizontally(u8 param_1);
+i8 smb2j_MoveEnemyHorizontally(u8 param_1);
 #define MoveEnemyHorizontally smb2j_MoveEnemyHorizontally
 
-u8 smb2j_MovePlayerHorizontally(void);
+i8 smb2j_MovePlayerHorizontally(void);
 #define MovePlayerHorizontally smb2j_MovePlayerHorizontally
 
-u8 smb2j_MoveObjectHorizontally(u8 param_1);
+i8 smb2j_MoveObjectHorizontally(u8 param_1);
 #define MoveObjectHorizontally smb2j_MoveObjectHorizontally
 
 void smb2j_MovePlayerVertically(void);
@@ -652,7 +652,7 @@ void smb2j_XMoveCntr_GreenPTroopa(u8 param_1);
 void smb2j_XMoveCntr_Platform(u8 param_1,u8 param_2);
 #define XMoveCntr_Platform smb2j_XMoveCntr_Platform
 
-u8 smb2j_MoveWithXMCntrs(u8 objoff);
+i8 smb2j_MoveWithXMCntrs(u8 objoff);
 #define MoveWithXMCntrs smb2j_MoveWithXMCntrs
 
 void smb2j_MoveBloober(u8 param_1,bool param_2);
@@ -751,7 +751,7 @@ void smb2j_ChkYPCollision(u8 param_1);
 void smb2j_XMovingPlatform(u8 objoff);
 #define XMovingPlatform smb2j_XMovingPlatform
 
-void smb2j_PositionPlayerOnHPlat(u8 param_1,u8 param_2);
+void smb2j_PositionPlayerOnHPlat(u8 param_1,i8 param_2);
 #define PositionPlayerOnHPlat smb2j_PositionPlayerOnHPlat
 
 void smb2j_DropPlatform(u8 param_1);
