@@ -6902,7 +6902,7 @@ void RunBowser(const u8 objoff) {
   if (TimerControl != 0) {
     goto ChkFireB;
   }
-  if (BowserBodyControls < 0x80) {
+  if ((BowserBodyControls & 0x80) == 0) {
     BowserFeetCounter -= 1;
     if (BowserFeetCounter == 0) {
       BowserFeetCounter = 0x20;
