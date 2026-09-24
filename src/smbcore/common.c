@@ -2974,7 +2974,7 @@ void PlayerPhysicsSub(void) {
 
       DiffToHaltJump = 1;
 
-      static const u8 init_mforce_lookup[7] = { 0,0,0,0,0,128,0 };
+      static const i8 init_mforce_lookup[7] = { 0,0,0,0,0,-128,0 };
       static const i8 player_yspd_lookup[7] = { -4,-4,-4,-5,-5,-2,-1 };
 
       if (MarioPhysics) {
@@ -4554,15 +4554,15 @@ void ImposeGravity(const u8 param_1, const u8 param_2, const u8 param_3, const u
   ADD_UNSIGNED_16_8(SprObject_Y_Speed[param_2], SprObject_Y_MoveForce[param_2],
                     param_3);
 
-  const u8 q = param_5;
-  const u8 h = SprObject_Y_Speed[param_2];
-  const u8 r = SprObject_Y_MoveForce[param_2];
+  const i8 q = param_5;
+  const i8 h = SprObject_Y_Speed[param_2];
+  const i8 r = SprObject_Y_MoveForce[param_2];
 
   // The intention is probably to compare `hr - q0 >= 0x80`,
   // but there may be edge cases
 
-  if ((i8)(h - q) >= 0) {
-    if (r >= 0x80) {
+  if (h - q >= 0) {
+    if (r < 0) {
       // Clamp the speed to a maximum value
       SprObject_Y_Speed[param_2] = q;
       SprObject_Y_MoveForce[param_2] = 0;
@@ -4573,14 +4573,14 @@ void ImposeGravity(const u8 param_1, const u8 param_2, const u8 param_3, const u
     SUB_UNSIGNED_16_8(SprObject_Y_Speed[param_2], SprObject_Y_MoveForce[param_2],
                       param_4);
 
-    const u8 s = SprObject_Y_Speed[param_2];
-    const u8 t = SprObject_Y_MoveForce[param_2];
+    const i8 s = SprObject_Y_Speed[param_2];
+    const i8 t = SprObject_Y_MoveForce[param_2];
 
-    if ((i8)(s + q) < 0) {
-      if (t < 0x80) {
+    if (s + q < 0) {
+      if (t >= 0) {
         // Clamp the speed to a minimum value
         SprObject_Y_Speed[param_2] = -q;
-        SprObject_Y_MoveForce[param_2] = 0xff;
+        SprObject_Y_MoveForce[param_2] = -1;
       }
     }
   }
@@ -5402,7 +5402,7 @@ void InitBowserFlame(const u8 objoff) {
   Enemy_PageLoc[objoff] = Enemy_PageLoc[bVar1];
   Enemy_Y_Position[objoff] = Enemy_Y_Position[bVar1] + 8;
   BowserFlamePRandomOfs[objoff] = rng;
-  Enemy_Y_MoveForce[objoff] = Enemy_Y_Position[objoff] <= FlameYPosData[rng] ? 1 : 0xff;
+  Enemy_Y_MoveForce[objoff] = Enemy_Y_Position[objoff] <= FlameYPosData[rng] ? 1 : -1;
   EnemyFrenzyBuffer = 0;
   Enemy_BoundBoxCtrl[objoff] = 8;
   Enemy_Y_HighPos[objoff] = 1;
@@ -5802,7 +5802,7 @@ void PlatLiftUp(const u8 objoff) {
 // SM2MAIN:948c
 // Signature: [X] -> []
 void PlatLiftDown(const u8 objoff) {
-  Enemy_Y_MoveForce[objoff] = 0xf0;
+  Enemy_Y_MoveForce[objoff] = -0x10;
   Enemy_Y_Speed[objoff] = 0;
   PosPlatform(objoff, 1);
   Enemy_BoundBoxCtrl[objoff] = 4;
@@ -6445,7 +6445,7 @@ void ProcSwimmingB(const u8 param_1, const bool param_2) {
   if ((BlooperMoveCounter[param_1] & 2) == 0) {
     if ((BlooperMoveCounter[param_1] & 1) == 0) {
       if ((FrameCounter & 7) == 0) {
-        const u8 bVar1 = Enemy_Y_MoveForce[param_1] + 1;
+        const i8 bVar1 = Enemy_Y_MoveForce[param_1] + 1;
         Enemy_Y_MoveForce[param_1] = bVar1;
         BlooperMoveSpeed[param_1] = bVar1;
         if (bVar1 == 2) {
@@ -6453,7 +6453,7 @@ void ProcSwimmingB(const u8 param_1, const bool param_2) {
         }
       }
     } else if ((FrameCounter & 7) == 0) {
-      const u8 bVar1 = Enemy_Y_MoveForce[param_1] - 1;
+      const i8 bVar1 = Enemy_Y_MoveForce[param_1] - 1;
       Enemy_Y_MoveForce[param_1] = bVar1;
       BlooperMoveSpeed[param_1] = bVar1;
       if (bVar1 == 0) {
@@ -6713,17 +6713,15 @@ void MoveFlyingCheepCheep(const u8 objoff) {
 
   MoveEnemyHorizontally(objoff);
   SetXMoveAmt(5, objoff, 0xd);
-  u8 bVar3 = Enemy_Y_MoveForce[objoff] >> 4;
+  u8 bVar3 = (Enemy_Y_MoveForce[objoff] >> 4) & 0xf;
 
-  u8 bVar1 = Enemy_Y_Position[objoff] - ypos_sub_lookup[bVar3];
+  i8 bVar1 = Enemy_Y_Position[objoff] - ypos_sub_lookup[bVar3];
 
-  if (bVar1 >= 0x80) {
+  if (bVar1 < 0) {
     bVar1 *= -1;
   }
-  if (bVar1 < 8) {
-    bVar1 = Enemy_Y_MoveForce[objoff];
-    Enemy_Y_MoveForce[objoff] = bVar1 + 0x10;
-    bVar3 = (u8)(bVar1 + 0x10) >> 4;
+  if (bVar1 >= 0 && bVar1 < 8) {
+    Enemy_Y_MoveForce[objoff] += 0x10;
   }
 
   // NES note: There's an assignment to Enemy_SprAttrib in the original here.
@@ -7074,17 +7072,15 @@ u8 SetFlameTimer(void) {
 // Signature: [X] -> []
 void ProcBowserFlame(const u8 objoff) {
   if (TimerControl == 0) {
-    const u8 bVar33 = SecondaryHardMode ? 0x60 : 0x40;
-    const bool bVar1 = Enemy_X_MoveForce[objoff] < bVar33;
-    Enemy_X_MoveForce[objoff] = Enemy_X_MoveForce[objoff] - bVar33;
+    const i8 bVar33 = SecondaryHardMode ? 0x60 : 0x40;
+    const bool bVar1 = Enemy_X_MoveForce[objoff] >= 0 && Enemy_X_MoveForce[objoff] < bVar33;
+    Enemy_X_MoveForce[objoff] -= bVar33;
 
     const u8 bVar3 = Enemy_X_Position[objoff];
     Enemy_X_Position[objoff] = (bVar3 - 1) - bVar1;
     Enemy_PageLoc[objoff] = Enemy_PageLoc[objoff] - ((bVar1 || bVar3 == 0) && (!bVar1 || bVar3 < 2));
-    if (Enemy_Y_Position[objoff]
-        != FlameYPosData[BowserFlamePRandomOfs[objoff]]) {
-      Enemy_Y_Position[objoff]
-          = Enemy_Y_Position[objoff] + Enemy_Y_MoveForce[objoff];
+    if (Enemy_Y_Position[objoff] != FlameYPosData[BowserFlamePRandomOfs[objoff]]) {
+      Enemy_Y_Position[objoff] += Enemy_Y_MoveForce[objoff];
     }
   }
 
@@ -7442,13 +7438,13 @@ void BalancePlatform(const u8 objoff) {
       platform_mode = 2;
     }
   } else {
-    u16 yvel = LOAD_16(Enemy_Y_Speed[objoff], Enemy_Y_MoveForce[objoff]);
+    i16 yvel = LOAD_i16(Enemy_Y_Speed[objoff], Enemy_Y_MoveForce[objoff]);
     yvel += 5;
 
-    if ((i16)yvel < 0) {
+    if (yvel < 0) {
       platform_mode = 2;
     }
-    if (yvel <= 10) {
+    if (yvel >= 0 && yvel <= 10) {
       platform_mode = 0;
     }
   }

@@ -245,11 +245,13 @@
 #define Block_Orig_XPos                  RAMARRAY(0x03F1, 2)
 #define AttributeBuffer                  RAMARRAY(0x03F9, 7)
 
-#define SprObject_X_MoveForce            RAMARRAY(0x0400, 22)
+#define SprObject_X_MoveForce            RAMARRAY_i8(0x0400, 22)
+
+#define Unsigned_0x401                   RAMARRAY(0x0401, 21)
 
 #define Enemy_X_MoveForce                (SprObject_X_MoveForce + 1)
-#define RedPTroopaOrigXPos               (SprObject_X_MoveForce + 1)
-#define YPlatformTopYPos                 (SprObject_X_MoveForce + 1)
+#define RedPTroopaOrigXPos               Unsigned_0x401
+#define YPlatformTopYPos                 Unsigned_0x401
 
 #define SprObject_YMF_Dummy              RAMARRAY(0x0416, 22)
 #define Player_YMF_Dummy   SprObject_YMF_Dummy[0]
@@ -260,14 +262,15 @@
 #define PiranhaPlantUpYPos               Enemy_YMF_Dummy
 
 #define Bubble_YMF_Dummy                 RAMARRAY(0x042C, 3)
-#define SprObject_Y_MoveForce            RAMARRAY(0x0433, 22)
+#define SprObject_Y_MoveForce            RAMARRAY_i8(0x0433, 22)
 #define Player_Y_MoveForce               SprObject_Y_MoveForce[0]
 #define Enemy_Y_MoveForce                (SprObject_Y_MoveForce + 1)
 #define Block_Y_MoveForce                (SprObject_Y_MoveForce + 9)
 
 // reuses memory
-#define CheepCheepOrigYPos               Enemy_Y_MoveForce
-#define PiranhaPlantDownYPos             Enemy_Y_MoveForce
+#define Unsigned_0x434                   RAMARRAY(0x0434, 21)
+#define CheepCheepOrigYPos               Unsigned_0x434
+#define PiranhaPlantDownYPos             Unsigned_0x434
 
 #define MaximumLeftSpeed                 RAM_i8(0x0450)
 #define MaximumRightSpeed                RAM_i8(0x0456)
@@ -344,7 +347,7 @@
 #define FrictionAdderLow                 RAM(0x0702)
 #define RunningSpeed                     RAM_i8(0x0703)
 #define SwimmingFlag                     RAM_bool(0x0704)
-#define Player_X_MoveForce               RAM(0x0705)
+#define Player_X_MoveForce               RAM_i8(0x0705)
 #define DiffToHaltJump                   RAM(0x0706)
 #define JumpOrigin_Y_HighPos             RAM(0x0707)
 #define JumpOrigin_Y_Position            RAM(0x0708)
