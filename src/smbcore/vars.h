@@ -322,7 +322,7 @@
 #define FireworksCounter                 RAM(0x06D7)
 #define MultiLoopCorrectCntr             RAM(0x06D9)
 #define MultiLoopPassCntr                RAM(0x06DA)
-#define JumpspringForce                  RAM(0x06DB)
+#define JumpspringForce                  RAM_i8(0x06DB)
 #define MaxRangeFromOrigin               RAM(0x06DC)
 #define BitMFilter                       RAM(0x06DD)
 #define ChangeAreaTimer                  RAM(0x06DE)

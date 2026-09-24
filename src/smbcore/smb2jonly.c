@@ -945,27 +945,24 @@ void PatchPlayerNamePal(void) {
 // SM2DATA2+SM2DATA4:c4c0
 // Signature: [X] -> []
 void MoveUpsideDownPiranhaP(const u8 param_1) {
-  u8 bVar1;
-  u8 bVar2;
-  u8 bVar3;
+  if (Enemy_State[param_1] != 0) { return; }
+  if (EnemyFrameTimer[param_1] != 0) { return; }
 
-  if ((Enemy_State[param_1] == 0) && (EnemyFrameTimer[param_1] == 0)) {
-    if (PiranhaPlant_MoveFlag[param_1] == 0) {
-      PiranhaPlant_Y_Speed[param_1] *= -1;
-      PiranhaPlant_MoveFlag[param_1] = PiranhaPlant_MoveFlag[param_1] + 1;
-    }
-    bVar3 = PiranhaPlantUpYPos[param_1];
+  if (PiranhaPlant_MoveFlag[param_1] == 0) {
+    PiranhaPlant_Y_Speed[param_1] *= -1;
+    PiranhaPlant_MoveFlag[param_1] = PiranhaPlant_MoveFlag[param_1] + 1;
+  }
+
+  if (TimerControl == 0) {
+    u8 bVar3 = PiranhaPlantUpYPos[param_1];
     if (PiranhaPlant_Y_Speed[param_1] < 0) {
       bVar3 = PiranhaPlantDownYPos[param_1];
     }
-    if (TimerControl == 0) {
-      bVar1 = Enemy_Y_Position[param_1];
-      bVar2 = PiranhaPlant_Y_Speed[param_1];
-      Enemy_Y_Position[param_1] = bVar1 + bVar2;
-      if ((u8)(bVar1 + bVar2) == bVar3) {
-        PiranhaPlant_MoveFlag[param_1] = 0;
-        EnemyFrameTimer[param_1] = 0x20;
-      }
+
+    Enemy_Y_Position[param_1] += PiranhaPlant_Y_Speed[param_1];
+    if (Enemy_Y_Position[param_1] == bVar3) {
+      PiranhaPlant_MoveFlag[param_1] = 0;
+      EnemyFrameTimer[param_1] = 0x20;
     }
   }
 }

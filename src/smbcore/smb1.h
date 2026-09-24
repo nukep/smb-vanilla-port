@@ -437,13 +437,13 @@ void smb1_MoveEnemySlowVert(u8 param_1);
 void smb1_MoveJ_EnemyVertically(u8 param_1);
 #define MoveJ_EnemyVertically smb1_MoveJ_EnemyVertically
 
-void smb1_SetXMoveAmt(u8 param_1,u8 param_2,u8 param_3);
+void smb1_SetXMoveAmt(i8 param_1,u8 param_2,u8 param_3);
 #define SetXMoveAmt smb1_SetXMoveAmt
 
 void smb1_ImposeGravityBlock(u8 param_1);
 #define ImposeGravityBlock smb1_ImposeGravityBlock
 
-void smb1_ImposeGravitySprObj(u8 param_1,u8 param_2,u8 param_3);
+void smb1_ImposeGravitySprObj(i8 param_1,u8 param_2,u8 param_3);
 #define ImposeGravitySprObj smb1_ImposeGravitySprObj
 
 void smb1_MovePlatformDown(u8 param_1);
@@ -452,7 +452,7 @@ void smb1_MovePlatformDown(u8 param_1);
 void smb1_MovePlatformUp(u8 param_1);
 #define MovePlatformUp smb1_MovePlatformUp
 
-void smb1_ImposeGravity(u8 param_1,u8 param_2,u8 param_3,u8 param_4,u8 param_5);
+void smb1_ImposeGravity(u8 param_1,u8 param_2,u8 param_3,u8 param_4,i8 param_5);
 #define ImposeGravity smb1_ImposeGravity
 
 void smb1_EnemiesAndLoopsCore(u8 param_1);
@@ -497,7 +497,7 @@ void smb1_InitHorizFlySwimEnemy(u8 param_1);
 void smb1_InitBloober(u8 param_1);
 #define InitBloober smb1_InitBloober
 
-u8 smb1_SmallBBox(u8 param_1);
+void smb1_SmallBBox(u8 param_1);
 #define SmallBBox smb1_SmallBBox
 
 void smb1_InitRedPTroopa(u8 param_1);
@@ -629,7 +629,7 @@ void smb1_MovePodoboo(u8 param_1);
 void smb1_ProcHammerBro(u8 param_1);
 #define ProcHammerBro smb1_ProcHammerBro
 
-void smb1_SetHJ(u8 param_1,u8 param_2,u8 param_3);
+void smb1_SetHJ(u8 param_1,i8 param_2,bool param_3);
 #define SetHJ smb1_SetHJ
 
 void smb1_MoveHammerBroXDir(u8 param_1);
@@ -689,7 +689,7 @@ void smb1_MoveFlyingCheepCheep(u8 param_1);
 void smb1_MoveLakitu(u8 param_1);
 #define MoveLakitu smb1_MoveLakitu
 
-u8 smb1_PlayerLakituDiff(u8 param_1,u8 param_2,u8 param_3,u8 param_4);
+i8 smb1_PlayerLakituDiff(u8 param_1,u8 param_2,u8 param_3,u8 param_4);
 #define PlayerLakituDiff smb1_PlayerLakituDiff
 
 void smb1_BridgeCollapse(void);

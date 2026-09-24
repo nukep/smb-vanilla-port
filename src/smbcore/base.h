@@ -239,12 +239,12 @@ static inline u8 ABS_DIFF(u8 a, u8 b) {
 
 // Calcules the signed absolute difference between two bytes.
 // e.g. (0, 255) -> 1
-static inline u8 ABS_DIFF_SIGNED(i8 a, i8 b) {
-  u8 d = (u8)(a - b);
-  if (d >= 0x80) {
-    return -d;
+static inline u8 ABS_DIFF_SIGNED(u8 a, u8 b) {
+  i8 d = a - b;
+  if (d < 0) {
+    return (u8)-d;
   } else {
-    return d;
+    return (u8)d;
   }
 }
 

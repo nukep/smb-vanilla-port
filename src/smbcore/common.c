@@ -3095,7 +3095,7 @@ void GetPlayerAnimSpeed(void) {
     }
   } else {
     PlayerAnimTimerSet = 2;
-    RunningSpeed = Player_XSpeedAbsolute;
+    RunningSpeed = (i8)Player_XSpeedAbsolute;
   }
 }
 
@@ -3122,9 +3122,9 @@ void ImposeFriction(const u8 dir) {
     ADD_16_16(Player_X_Speed, Player_X_MoveForce,
               FrictionAdderHigh, FrictionAdderLow);
 
-    if ((i8)(Player_X_Speed - MaximumRightSpeed) >= 0) {
+    if (Player_X_Speed - MaximumRightSpeed >= 0) {
       Player_X_Speed = MaximumRightSpeed;
-      Player_XSpeedAbsolute = MaximumRightSpeed;
+      Player_XSpeedAbsolute = (u8)MaximumRightSpeed;
       return;
     }
   } else {
@@ -3138,9 +3138,9 @@ void ImposeFriction(const u8 dir) {
   }
 
   if (Player_X_Speed < 0) {
-    Player_XSpeedAbsolute = -Player_X_Speed;
+    Player_XSpeedAbsolute = (u8)-Player_X_Speed;
   } else {
-    Player_XSpeedAbsolute = Player_X_Speed;
+    Player_XSpeedAbsolute = (u8)Player_X_Speed;
   }
 }
 
@@ -3496,9 +3496,9 @@ void JumpspringHandler(const u8 objoff) {
     Enemy_Y_Position[objoff] = Jumpspring_FixedYPos[objoff] + ypos_lookup[animctrl - 1];
 
     if ((((animctrl != 1) && ((A_B_Buttons & BUTTON_A) != 0)) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0))) {
-      JumpspringForce = 0xf4;
+      JumpspringForce = -12;
       if (SMB2J_ONLY && (WorldNumber == 1 || WorldNumber == 2 || WorldNumber == 6)) {
-        JumpspringForce = 0xe0;
+        JumpspringForce = -32;
       }
     }
 
@@ -4418,7 +4418,7 @@ i8 MoveObjectHorizontally(const u8 param_1) {
   const u8 old_x = SprObject_X_Position[param_1];
 
   ADD_SIGNED_24_16(SprObject_PageLoc[param_1], SprObject_X_Position[param_1], SprObject_X_MoveForce[param_1],
-                   b>>8, b&0xff);
+                   (i8)(b>>8), (i8)(b&0xff));
 
   // The NES version is a bit tricker with the way it carries the bytes around,
   // but the return value ends up being the difference in the x position.
@@ -4501,7 +4501,7 @@ void MoveJ_EnemyVertically(const u8 objoff) {
 // SMB:bf96
 // SM2MAIN:8b67
 // Signature: [A, X, Y] -> []
-void SetXMoveAmt(const u8 param_1, const u8 param_2, const u8 param_3) {
+void SetXMoveAmt(const i8 param_1, const u8 param_2, const u8 param_3) {
   ImposeGravitySprObj(param_1, param_2 + 1, param_3);
 }
 
@@ -4519,7 +4519,7 @@ void ImposeGravityBlock(const u8 param_1) {
 // SMB:bfad
 // SM2MAIN:8b7e
 // Signature: [A, X, r00] -> []
-void ImposeGravitySprObj(const u8 param_1, const u8 param_2, const u8 param_3) {
+void ImposeGravitySprObj(const i8 param_1, const u8 param_2, const u8 param_3) {
   const u8 in_r01 = 0;
 
   ImposeGravity(0, param_2, param_3, in_r01, param_1);
@@ -4547,7 +4547,7 @@ void MovePlatformUp(const u8 objoff) {
 // SMB:bfd7
 // SM2MAIN:8ba8
 // Signature: [A, X, r00, r01, r02] -> []
-void ImposeGravity(const u8 param_1, const u8 param_2, const u8 param_3, const u8 param_4, const u8 param_5) {
+void ImposeGravity(const u8 param_1, const u8 param_2, const u8 param_3, const u8 param_4, const i8 param_5) {
   ADD_SIGNED_24_16(SprObject_Y_HighPos[param_2], SprObject_Y_Position[param_2], SprObject_YMF_Dummy[param_2],
                    SprObject_Y_Speed[param_2], SprObject_Y_MoveForce[param_2]);
 
@@ -5051,12 +5051,13 @@ void InitBloober(const u8 objoff) {
 
 // SMB:c346
 // SM2MAIN:8f31
-// Signature: [X] -> [A]
-u8 SmallBBox(const u8 param_1) {
+// Signature: [X] -> []
+void SmallBBox(const u8 param_1) {
   Enemy_BoundBoxCtrl[param_1] = 9;
   Enemy_MovingDir[param_1] = DIR_LEFT;
   InitVStf(param_1);
-  return 0;
+
+  // NES note: register A is set to 0. some callers use this.
 }
 
 
@@ -5171,9 +5172,9 @@ void LakituAndSpinyHandler(const u8 objoff) {
                        diff_adjust[1][rng],
                        diff_adjust[2][rng]);
 
-      const i8 bVar1 = SmallBBox(objoff);
-      Enemy_X_Speed[objoff] = bVar1;
-      Enemy_MovingDir[objoff] = (bVar1 >= 0) ? 1 : 2;
+      SmallBBox(objoff);
+      Enemy_X_Speed[objoff] = 0;
+      Enemy_MovingDir[objoff] = DIR_RIGHT;
       Enemy_Y_Speed[objoff] = -3;
       Enemy_Flag[objoff] = 1;
       Enemy_State[objoff] = 5;
@@ -5250,7 +5251,7 @@ void InitFlyingCheepCheep(const u8 objoff) {
     { 0x70, 0x40, 0x90, 0x68, },
   };
 
-  static const u8 speed_lookup[3][4] = {
+  static const i8 speed_lookup[3][4] = {
     { 0x0e, 0x05, 0x06, 0x0e, },
     { 0x1c, 0x20, 0x10, 0x0c, },
     { 0x1e, 0x22, 0x18, 0x14, },
@@ -6167,25 +6168,25 @@ void ProcHammerBro(const u8 objoff) {
     return;
   }
   if (Enemy_Y_Position[objoff] >= 0x80) {
-    SetHJ(objoff, 0xfa, 0);
+    SetHJ(objoff, -6, false);
     return;
   }
   if (Enemy_Y_Position[objoff] < 0x70) {
-    SetHJ(objoff, 0xfd, 1);
+    SetHJ(objoff, -3, true);
     return;
   }
   if ((PseudoRandomBitReg[objoff + 1] & 1) != 0) {
-    SetHJ(objoff, 0xfd, 0);
+    SetHJ(objoff, -3, false);
     return;
   }
-  SetHJ(objoff, 0xfa, 0);
+  SetHJ(objoff, -6, false);
 }
 
 
 // SMB:ca37
 // SM2MAIN:966c
 // Signature: [X, Y, r00] -> []
-void SetHJ(const u8 objoff, const u8 param_2, const u8 param_3) {
+void SetHJ(const u8 objoff, const i8 param_2, const bool param_3) {
   // param_3 is always 0 or 1
 
   Enemy_Y_Speed[objoff] = param_2;
@@ -6562,12 +6563,11 @@ void ProcFirebar(const u8 objoff) {
   // but it does nothing. The results are unused.
   // This port omits it.
 
-  const u8 bVar4 = Enemy_Rel_YPos;
   const u8 sproff = Enemy_SprDataOffset[objoff];
   SPRITE_Y(sproff, 0) = Enemy_Rel_YPos;
   SPRITE_X(sproff, 0) = Enemy_Rel_XPos;
 
-  u8 bVar2 = FirebarCollision(sproff, Enemy_Rel_XPos, bVar4);
+  u8 bVar2 = FirebarCollision(sproff, Enemy_Rel_XPos, Enemy_Rel_YPos);
 
   expect(is_actor_firebar(Enemy_ID[objoff]));
 
@@ -6764,7 +6764,7 @@ void MoveLakitu(const u8 objoff) {
 // SMB:cf6c
 // SM2MAIN:9ba1
 // Signature: [X, r01, r02, r03] -> [A]
-u8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u8 param_4) {
+i8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u8 param_4) {
   u8 bVar2 = 0;
   const struct_ncr00 sVar4 = PlayerEnemyDiff(objoff);
   u8 bVar1 = sVar4.r00;
@@ -8912,7 +8912,7 @@ void ChkForLandJumpSpring(const u8 param_1) {
     if (SMB2J_ONLY) {
       VerticalForceDown = 0x70;
     }
-    JumpspringForce = 0xf9;
+    JumpspringForce = -7;
     JumpspringTimer = 3;
     JumpspringAnimCtrl = 1;
   }
@@ -9276,7 +9276,7 @@ void ChkForBump_HammerBroJ(const u8 objoff) {
     Square1SoundQueue = SOUND_SQ1_BUMP;
   }
   if (Enemy_ID[objoff] == A_HAMMER_BRO) {
-    SetHJ(objoff, 0xfa, 0);
+    SetHJ(objoff, -6, false);
   } else {
     // Turn the enemy around
 
