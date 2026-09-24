@@ -7783,7 +7783,7 @@ void FireballEnemyCollision(const u8 objoff) {
 void HandleEnemyFBallCol(const u8 param_1) {
   u8 bVar2;
   RelativeEnemyPosition(param_1);
-  if ((Enemy_Flag[param_1] < 0x80) || (Enemy_ID[Enemy_Flag[param_1] & 0xf] != A_BOWSER)) {
+  if ((Enemy_Flag[param_1] & 0x80) == 0 || Enemy_ID[Enemy_Flag[param_1] & 0xf] != A_BOWSER) {
     const u8 enemy_id = Enemy_ID[param_1];
     if (enemy_id == A_BUZZY_BEETLE) {
       return;
