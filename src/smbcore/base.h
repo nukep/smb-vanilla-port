@@ -130,33 +130,36 @@ static inline i16 LOAD_i16(const i8 src_hi, const i8 src_lo) {
 }
 
 // Store a 16-bit value into two 8-bit values from a 16-bit value.
+// Unsigned and signed.
 #define STORE_16(dst_hi, dst_lo, val) { \
-  u16 val_to_store = val; \
+  u16 val_to_store = (u16)(val); \
   dst_hi = (val_to_store) >> 8; \
   dst_lo = (val_to_store) & 0xff; \
 }
 
 // Performs `dst = src`.
 // Mostly here for symmetry with the other arithmetic operators
+// Unsigned and signed.
 #define SET_16_16(dst_hi, dst_lo, src_hi, src_lo) { \
-  u8 src_lo_expand = src_lo; \
-  dst_hi = src_hi; \
+  u8 src_lo_expand = (u8)(src_lo); \
+  dst_hi = (u8)(src_hi); \
   dst_lo = src_lo_expand; \
 }
 
 // Performs `dst = dst + src`.
 // dst_* and src_* are 8-bit integers.
+// Unsigned and signed.
 #define ADD_16_16(dst_hi, dst_lo, src_hi, src_lo) { \
-  u16 dst = ((u16)(dst_hi) << 8) | ((u16)(dst_lo)); \
-  u16 src = ((u16)(src_hi) << 8) | ((u16)(src_lo)); \
+  u16 dst = ((u16)(u8)(dst_hi) << 8) | ((u16)(u8)(dst_lo)); \
+  u16 src = ((u16)(u8)(src_hi) << 8) | ((u16)(u8)(src_lo)); \
   dst += src; \
   dst_hi = (dst >> 8) & 0xff; \
   dst_lo = dst & 0xff; \
 }
 
 #define SUB_16_16(dst_hi, dst_lo, src_hi, src_lo) { \
-  u16 dst = ((u16)(dst_hi) << 8) | ((u16)(dst_lo)); \
-  u16 src = ((u16)(src_hi) << 8) | ((u16)(src_lo)); \
+  u16 dst = ((u16)(u8)(dst_hi) << 8) | ((u16)(u8)(dst_lo)); \
+  u16 src = ((u16)(u8)(src_hi) << 8) | ((u16)(u8)(src_lo)); \
   dst -= src; \
   dst_hi = (dst >> 8) & 0xff; \
   dst_lo = dst & 0xff; \
@@ -164,9 +167,10 @@ static inline i16 LOAD_i16(const i8 src_hi, const i8 src_lo) {
 
 // Performs `dst = dst + src`.
 // dst_* and src_* are 8-bit integers.
+// Unsigned and signed.
 #define ADD_24_24(dst_hi, dst_me, dst_lo, src_hi, src_me, src_lo) { \
-  u32 dst = ((u32)(dst_hi) << 16) | ((u32)(dst_me) << 8) | ((u32)(dst_lo)); \
-  u32 src = ((u32)(src_hi) << 16) | ((u32)(src_me) << 8) | ((u32)(src_lo)); \
+  u32 dst = ((u32)(u8)(dst_hi) << 16) | ((u32)(u8)(dst_me) << 8) | ((u32)(u8)(dst_lo)); \
+  u32 src = ((u32)(u8)(src_hi) << 16) | ((u32)(u8)(src_me) << 8) | ((u32)(u8)(src_lo)); \
   dst += src; \
   dst_hi = (dst >> 16) & 0xff; \
   dst_me = (dst >> 8) & 0xff; \
@@ -175,9 +179,10 @@ static inline i16 LOAD_i16(const i8 src_hi, const i8 src_lo) {
 
 // Performs `dst = dst - src`.
 // dst_* and src_* are 8-bit integers.
+// Unsigned and signed.
 #define SUB_24_24(dst_hi, dst_me, dst_lo, src_hi, src_me, src_lo) { \
-  u32 dst = ((u32)(dst_hi) << 16) | ((u32)(dst_me) << 8) | ((u32)(dst_lo)); \
-  u32 src = ((u32)(src_hi) << 16) | ((u32)(src_me) << 8) | ((u32)(src_lo)); \
+  u32 dst = ((u32)(u8)(dst_hi) << 16) | ((u32)(u8)(dst_me) << 8) | ((u32)(u8)(dst_lo)); \
+  u32 src = ((u32)(u8)(src_hi) << 16) | ((u32)(u8)(src_me) << 8) | ((u32)(u8)(src_lo)); \
   dst -= src; \
   dst_hi = (dst >> 16) & 0xff; \
   dst_me = (dst >> 8) & 0xff; \
@@ -188,33 +193,37 @@ static inline i16 LOAD_i16(const i8 src_hi, const i8 src_lo) {
 // dst_* are 8-bit integers.
 // src is an 8-bit integer, sign-extended to a 16-bit addend.
 #define ADD_SIGNED_16_8(dst_hi, dst_lo, src) { \
-  i8 h = src; \
-  ADD_16_16(dst_hi, dst_lo, h < 0 ? -1 : 0, h); \
+  i8 src_expand = src; \
+  ADD_16_16(dst_hi, dst_lo, src_expand < 0 ? -1 : 0, src_expand); \
 }
 
 // Performs `dst = dst + src`.
 // dst_* and src_* are 8-bit integers.
 // src is a 16-bit integer, sign-extended to a 24-bit addend.
 #define ADD_SIGNED_24_16(dst_hi, dst_me, dst_lo, src_me, src_lo) { \
-  u8 h = src_me; \
-  ADD_24_24(dst_hi, dst_me, dst_lo, h >= 0x80 ? -1 : 0, h, src_lo); \
+  i8 src_me_expand = src_me; \
+  i8 src_lo_expand = src_lo; \
+  ADD_24_24(dst_hi, dst_me, dst_lo, src_me_expand < 0 ? -1 : 0, src_me_expand, src_lo_expand); \
 }
 
 // Performs `dst = dst + src`.
 // dst_* are 8-bit integers.
 // src is an 8-bit integer.
 #define ADD_UNSIGNED_16_8(dst_hi, dst_lo, src) { \
-  ADD_16_16(dst_hi, dst_lo, 0, src); \
+  u8 src_expand = src; \
+  ADD_16_16(dst_hi, dst_lo, 0, src_expand); \
 }
 
 #define SUB_UNSIGNED_16_8(dst_hi, dst_lo, src) { \
-  SUB_16_16(dst_hi, dst_lo, 0, src); \
+  u8 src_expand = src; \
+  SUB_16_16(dst_hi, dst_lo, 0, src_expand); \
 }
 
 // Performs `dst = src + addend`.
 #define ADD_UNSIGNED_16_16_8(dst_hi, dst_lo, src_hi, src_lo, addend) { \
-  u16 src = ((src_hi) << 8) | (src_lo); \
-  src += (u8)(addend); \
+  u8 addend_expand = addend; \
+  u16 src = ((u16)(u8)(src_hi) << 8) | (u16)(u8)(src_lo); \
+  src += addend_expand; \
   dst_lo = src & 0xff; \
   dst_hi = src >> 8; \
 }
