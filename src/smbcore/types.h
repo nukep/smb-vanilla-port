@@ -70,7 +70,6 @@
 #define SPRATTR_FLIPVERT 0x80
 #define SPRATTR_FLIPHORZ 0x40
 #define SPRATTR_DRAWBEHIND 0x20
-#define SPRATTR_USED_MASK (~0x1c)
 
 enum ADDRCTRL {
   ADDRCTRL_VRAM_BUFFER1 = 0,
@@ -300,14 +299,14 @@ static inline void set_metatile(const u16 mt_x, const u16 mt_y, const u8 metatil
 #define PLAYER_COLLISIONBIT_ALL 0xff
 
 static inline u8 left_right_buttons_as_dir(void) {
-  expect((Left_Right_Buttons & ~(BUTTON_R | BUTTON_L)) == 0);
+  expect((Left_Right_Buttons & INVBITS_u8(BUTTON_R | BUTTON_L)) == 0);
 
   // It's the same
   return Left_Right_Buttons;
 }
 
 static inline u8 up_down_buttons_as_vertdir(void) {
-  expect((Up_Down_Buttons & ~(BUTTON_U | BUTTON_D)) == 0);
+  expect((Up_Down_Buttons & INVBITS_u8(BUTTON_U | BUTTON_D)) == 0);
 
   // It's the same
   return Up_Down_Buttons;
@@ -325,10 +324,10 @@ static inline bool player_collides_vertdir(u8 side) {
 }
 
 static inline void player_collides_right_clear(void) {
-  Player_CollisionBits &= ~PLAYER_COLLISIONBIT_RIGHT;
+  Player_CollisionBits &= INVBITS_u8(PLAYER_COLLISIONBIT_RIGHT);
 }
 static inline void player_collides_left_clear(void) {
-  Player_CollisionBits &= ~PLAYER_COLLISIONBIT_LEFT;
+  Player_CollisionBits &= INVBITS_u8(PLAYER_COLLISIONBIT_LEFT);
 }
 
 
@@ -349,7 +348,7 @@ static inline void actor_collideswith_player_set(const u8 a) {
 }
 
 static inline void actor_collideswith_player_clear(const u8 a) {
-  Enemy_CollisionBits[a] &= ~ACTOR_COLLISIONBIT_PLAYER;
+  Enemy_CollisionBits[a] &= INVBITS_u8(ACTOR_COLLISIONBIT_PLAYER);
 }
 
 static inline bool actor_collideswith_actor(const u8 a, const u8 b) {
@@ -361,7 +360,7 @@ static inline void actor_collideswith_actor_set(const u8 a, const u8 b) {
 }
 
 static inline void actor_collideswith_actor_clear(const u8 a, const u8 b) {
-  Enemy_CollisionBits[a] &= ~ACTOR_COLLISIONBIT_ACTOR(b);
+  Enemy_CollisionBits[a] &= INVBITS_u8(ACTOR_COLLISIONBIT_ACTOR(b));
 }
 
 

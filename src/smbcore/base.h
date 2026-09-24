@@ -105,6 +105,9 @@ static inline u8 _poison_u8_random(void) {
 
 #endif
 
+#define INVBITS_u8(bits) \
+  (u8)(~(bits))
+
 
 #define SWAP(a, b) \
   do {             \

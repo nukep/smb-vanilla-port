@@ -87,7 +87,7 @@ end:
 // SM2MAIN:6000
 // Signature: [] -> []
 void Reset(void) {
-  FDS_Ctrl(RAM(0xfa) & ~0x08);
+  FDS_Ctrl(RAM(0xfa) & INVBITS_u8(0x08));
 
   // On a hard reset, the World number is a value such as 0xFF
   // assuming a hard reset:

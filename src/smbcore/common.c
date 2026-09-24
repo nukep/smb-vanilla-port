@@ -295,7 +295,7 @@ void ReadPortBits(u8 joynum) {
 
   // If Select or Start were pressed last time this was called, then "unpress" them.
   if ((*bits & (BUTTON_SELECT | BUTTON_START) & *bitmask) != 0) {
-    *bits &= ~(BUTTON_SELECT | BUTTON_START);
+    *bits &= INVBITS_u8(BUTTON_SELECT | BUTTON_START);
   } else {
     *bitmask = *bits;
   }
@@ -2464,7 +2464,7 @@ void PlayerCtrlRoutine(void) {
     case GR_PLAYERINJURYBLINK:
     case GR_PLAYERDEATH:
     case GR_PLAYERFIREFLOWER:
-      Player_SprAttrib &= ~SPRATTR_DRAWBEHIND;
+      Player_SprAttrib &= INVBITS_u8(SPRATTR_DRAWBEHIND);
       break;
     }
   }
@@ -3080,7 +3080,7 @@ void GetPlayerAnimSpeed(void) {
   if (Player_XSpeedAbsolute < 28) {
     PlayerAnimTimerSet = Player_XSpeedAbsolute < 14 ? 7 : 4;
 
-    if ((SavedJoypadBits1 & ~(BUTTON_A)) != 0) {
+    if ((SavedJoypadBits1 & INVBITS_u8(BUTTON_A)) != 0) {
       if ((SavedJoypadBits1 & (BUTTON_L | BUTTON_R)) == Player_MovingDir) {
         RunningSpeed = 0;
       } else if (Player_XSpeedAbsolute < 0xb) {
@@ -7373,7 +7373,7 @@ static inline u16 SetupPlatformRope(const bool cond1, const u8 objoff) {
   if (Enemy_Y_Position[objoff] >= 0xe8) {
     // Turn off bit 6
     // Probably to prevent the address from going into the attribute table
-    addr &= ~0x0040;
+    addr &= (u16)(~0x0040);
   }
 
   return addr;
@@ -10097,7 +10097,7 @@ static inline void draw_enemy_object_2x3(const u8 tableoff, const u8 sproff,
 
   if (mirror_horz) {
     // Do not flip the left column tiles horizontally
-    const u8 attr = SPRITE_ATTR(sproff, 0) & ~SPRATTR_FLIPHORZ;
+    const u8 attr = SPRITE_ATTR(sproff, 0) & INVBITS_u8(SPRATTR_FLIPHORZ);
 
     SPRITE_ATTR(sproff, 0) = attr;
     SPRITE_ATTR(sproff, 2) = attr;
@@ -10183,15 +10183,15 @@ void EnemyGfxHandler(const u8 objoff) {
     draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
 
     if (!flip_vert) {
-      SPRITE_ATTR(sproff, 4) &= ~(SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 4) &= INVBITS_u8(SPRATTR_FLIPHORZ);
       SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPHORZ;
       if (FrenzyEnemyTimer < 16) {
-        const u8 bVar9 = SPRITE_ATTR(sproff, 5);
-        SPRITE_ATTR(sproff, 2) = bVar9 & ~(SPRATTR_FLIPHORZ);
-        SPRITE_ATTR(sproff, 3) = bVar9;
+        SPRITE_ATTR(sproff, 2) = SPRITE_ATTR(sproff, 5);
+        SPRITE_ATTR(sproff, 3) = SPRITE_ATTR(sproff, 5);
+        SPRITE_ATTR(sproff, 2) &= INVBITS_u8(SPRATTR_FLIPHORZ);
       }
     } else {
-      SPRITE_ATTR(sproff, 0) &= ~(SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 0) &= INVBITS_u8(SPRATTR_FLIPHORZ);
       SPRITE_ATTR(sproff, 1) |= SPRATTR_FLIPHORZ;
     }
     break;
@@ -11152,14 +11152,14 @@ static inline void player_gfx_processing(const u8 frame) {
     }
 
     if (row2_symmetric) {
-      SPRITE_ATTR(sproff, 4) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
-      SPRITE_ATTR(sproff, 5) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 4) &= INVBITS_u8(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 5) &= INVBITS_u8(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
       SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPHORZ;
     }
 
     if (row3_symmetric) {
-      SPRITE_ATTR(sproff, 6) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
-      SPRITE_ATTR(sproff, 7) &= ~(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 6) &= INVBITS_u8(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
+      SPRITE_ATTR(sproff, 7) &= INVBITS_u8(SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ);
       SPRITE_ATTR(sproff, 7) |= SPRATTR_FLIPHORZ;
     }
   }
