@@ -73,15 +73,16 @@ struct_ayz LoadFiles(void) {
   }
 
 end:
-
-  // A is the error code, should there be an error
-  // Y is how many files were read
-  // Z is set to 1 if the load is successful
-  struct_ayz res;
-  res.a = 0;
-  res.y = files;
-  res.z = success;
-  return res;
+  {
+    // A is the error code, should there be an error
+    // Y is how many files were read
+    // Z is set to 1 if the load is successful
+    struct_ayz res;
+    res.a = 0;
+    res.y = files;
+    res.z = success;
+    return res;
+  }
 }
 
 // SM2MAIN:6000

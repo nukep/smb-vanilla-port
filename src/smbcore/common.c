@@ -2223,6 +2223,7 @@ void UpdScrollVar(void) {
 // SM2MAIN:7aef
 // Signature: [] -> []
 void ScrollHandler(void) {
+  // Standing on the platform scrolls the screen
   Player_X_Scroll += Platform_X_Scroll;
 
   if (ScrollLock == 0 && Player_Pos_ForScroll >= 0x50 && SideCollisionTimer == 0 && (Player_X_Scroll > 0 || Player_X_Scroll == -128)) {
@@ -3342,6 +3343,7 @@ void RunGameTimer(void) {
   case GR_PLAYERCHANGESIZE:
   case GR_PLAYERINJURYBLINK:
   case GR_PLAYERFIREFLOWER:
+  {
     const bool is_time_up = GameTimerDisplay[0] == 0 && GameTimerDisplay[1] == 0 && GameTimerDisplay[2] == 0;
     if (is_time_up) {
       PlayerStatus = PLAYERSTATUS_SMALL;
@@ -3357,6 +3359,7 @@ void RunGameTimer(void) {
       PrintStatusBarNumbers(ssw(0xa4, 0xa2));
     }
     break;
+  }
   }
 }
 
@@ -5743,12 +5746,12 @@ void InitHoriPlatform(const u8 objoff) {
 // SM2MAIN:9447
 // Signature: [X] -> []
 void InitVertPlatform(const u8 objoff) {
-  i8 bVar1 = Enemy_Y_Position[objoff];
+  i8 bVar1 = (i8)Enemy_Y_Position[objoff];
   if (bVar1 >= 0) {
-    YPlatformTopYPos[objoff] = bVar1;
+    YPlatformTopYPos[objoff] = (u8)bVar1;
     YPlatformCenterYPos[objoff] = Enemy_Y_Position[objoff] + 0x40;
   } else {
-    YPlatformTopYPos[objoff] = -bVar1;
+    YPlatformTopYPos[objoff] = (u8)-bVar1;
     YPlatformCenterYPos[objoff] = Enemy_Y_Position[objoff] - 0x40;
   }
   InitVStf(objoff);
@@ -6114,15 +6117,19 @@ void EraseEnemyObject(const u8 param_1) {
 // SM2MAIN:95e5
 // Signature: [X] -> []
 void MovePodoboo(const u8 objoff) {
-  u8 bVar1;
-
   if (EnemyIntervalTimer[objoff] == 0) {
     InitPodoboo(objoff);
-    bVar1 = PseudoRandomBitReg[objoff + 1];
-    Enemy_Y_MoveForce[objoff] = bVar1 | 0x80;
-    EnemyIntervalTimer[objoff] = (bVar1 & 0xf) | 6;
+
+    const u8 rng = PseudoRandomBitReg[objoff + 1];
+
+    // Always a negative value
+    Enemy_Y_MoveForce[objoff] = (i8)(rng | 0x80);
+
+    EnemyIntervalTimer[objoff] = (rng & 0xf) | 6;
+
     Enemy_Y_Speed[objoff] = -7;
   }
+
   MoveJ_EnemyVertically(objoff);
 }
 
@@ -10498,6 +10505,7 @@ void EnemyGfxHandler(const u8 objoff) {
     break;
 
   case A_JUMPSPRING:
+  {
     static const u8 jumpspring_offsets[5] = {
       TOFF_JUMPSPRING_1,
       TOFF_JUMPSPRING_2,
@@ -10533,6 +10541,7 @@ void EnemyGfxHandler(const u8 objoff) {
     SPRITE_ATTR(sproff, 3) |= SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ;
     SPRITE_ATTR(sproff, 5) |= SPRATTR_FLIPVERT | SPRATTR_FLIPHORZ;
     break;
+  }
 
   case A_RETAINER:
     // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
