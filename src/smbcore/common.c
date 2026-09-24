@@ -801,9 +801,9 @@ void PlayerVictoryWalk(void) {
   }
 
   if (ScreenLeft_PageLoc != VictoryDestPageLoc) {
-    const bool bVar1 = ScrollFractional >= 0x80;
-    ScrollFractional += 0x80;
-    ScrollScreen(bVar1 + 1);
+    const bool bVar1 = (ScrollFractional & 0x80) != 0;
+    ScrollFractional ^= 0x80;
+    ScrollScreen(bVar1 ? 2 : 1);
     UpdScrollVar();
     VictoryWalkControl += 1;
   }
@@ -2225,14 +2225,15 @@ void UpdScrollVar(void) {
 void ScrollHandler(void) {
   Player_X_Scroll += Platform_X_Scroll;
 
-  if (ScrollLock == 0 && Player_Pos_ForScroll >= 0x50 && SideCollisionTimer == 0 && (i8)(Player_X_Scroll - 1) >= 0) {
-    // 1 <= Player_X_Scroll <= 128
+  if (ScrollLock == 0 && Player_Pos_ForScroll >= 0x50 && SideCollisionTimer == 0 && (Player_X_Scroll > 0 || Player_X_Scroll == -128)) {
+    // Player_X_Scroll is 1..127, or -128
 
-    u8 bVar1 = Player_X_Scroll;
+    i8 bVar1 = Player_X_Scroll;
 
     if (Player_Pos_ForScroll < 0x70) {
-      if (bVar1 > 1) {
+      if (bVar1 != 1) {
         bVar1 -= 1;
+        // between 1 and 127 inclusive
       }
     }
 

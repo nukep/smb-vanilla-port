@@ -338,7 +338,7 @@
 
 #define SavedJoypadBits1                 RAM(0x06FC)
 #define SavedJoypadBits2                 RAM(0x06FD)
-#define Player_X_Scroll                  RAM(0x06FF)
+#define Player_X_Scroll                  RAM_i8(0x06FF)
 #define Player_XSpeedAbsolute            RAM(0x0700)
 #define FrictionAdderHigh                RAM(0x0701)
 #define FrictionAdderLow                 RAM(0x0702)
