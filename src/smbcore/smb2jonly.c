@@ -224,23 +224,6 @@ void NMI(void) {
   // NES note: the original would enable NMI again (our port ignores this)
 }
 
-// SM2MAIN:7b20
-// Signature: [Y] -> []
-void ScrollScreen(u8 scroll_amount) {
-  int const x_pos = ScreenLeft_X_Pos + scroll_amount;
-
-  ScrollThirtyTwo += scroll_amount;
-  HorizontalScroll = x_pos % 256;
-  if (x_pos >= 256) {
-    ScreenLeft_PageLoc += 1;
-  }
-  NameTableSelect = ScreenLeft_PageLoc % 2;
-  ScreenLeft_X_Pos = HorizontalScroll;
-  ScrollAmount = scroll_amount;
-  GetScreenPosition();
-  ScrollIntervalTimer = 8;
-  ChkPOffscr();
-}
 
 // SM2DATA3::c759
 // Signature: [] -> []

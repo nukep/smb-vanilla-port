@@ -2223,7 +2223,7 @@ void UpdScrollVar(void) {
 // SM2MAIN:7aef
 // Signature: [] -> []
 void ScrollHandler(void) {
-  // Standing on the platform scrolls the screen
+  // Standing on a platform scrolls the screen
   Player_X_Scroll += Platform_X_Scroll;
 
   if (ScrollLock == 0 && Player_Pos_ForScroll >= 0x50 && SideCollisionTimer == 0 && (Player_X_Scroll > 0 || Player_X_Scroll == -128)) {
@@ -2243,6 +2243,31 @@ void ScrollHandler(void) {
     ScrollAmount = 0;
     ChkPOffscr();
   }
+}
+
+
+// SMB:afc4
+// SM2MAIN:7b20
+// Signature: [Y] -> []
+void ScrollScreen(const u8 amount) {
+  ScrollAmount = amount;
+  ScrollThirtyTwo += amount;
+
+  ADD_UNSIGNED_16_8(ScreenLeft_PageLoc, ScreenLeft_X_Pos,
+                    amount);
+
+  HorizontalScroll = ScreenLeft_X_Pos;
+
+#ifdef SMB1_MODE
+  NameTableSelectSMB1 = ScreenLeft_PageLoc & 1;
+#endif
+#ifdef SMB2J_MODE
+  NameTableSelect = ScreenLeft_PageLoc & 1;
+#endif
+
+  GetScreenPosition();
+  ScrollIntervalTimer = 8;
+  ChkPOffscr();
 }
 
 
