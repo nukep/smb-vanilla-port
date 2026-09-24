@@ -29,6 +29,9 @@ endif
 # Require it for now, until other compilers are supported
 smbcore_args += cc.get_supported_arguments('-fwrapv', checked: 'require')
 
+# Turn on warnings for implicit sign conversions
+smbcore_args += cc.get_supported_arguments('-Wsign-conversion')
+
 force_cpp_args = []
 
 if force_cpp
