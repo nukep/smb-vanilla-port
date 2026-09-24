@@ -60,23 +60,26 @@
 #define Player_MovingDir                 RAM(0x0045)
 #define Enemy_MovingDir                  RAMARRAY(0x0046, 6)	// as many as Enemy_ID
 
-#define SprObject_X_Speed                RAMARRAY(0x0057, 22)
+#define SprObject_X_Speed                RAMARRAY_i8(0x0057, 22)
 #define Player_X_Speed                   SprObject_X_Speed[0]
 #define Enemy_X_Speed                    (SprObject_X_Speed + 1)
 #define Fireball_X_Speed                 (SprObject_X_Speed + 7)
 #define Block_X_Speed                    (SprObject_X_Speed + 9)
 #define Misc_X_Speed                     (SprObject_X_Speed + 13)
 
+// temporary, just so it doesn't inherit the signedness of Enemy_X_Speed
+#define Unsigned_0x58                    RAMARRAY(0x0058, 21)
+
 #define BlooperMoveSpeed                 Enemy_X_Speed
-#define CheepCheepMoveMFlag              Enemy_X_Speed
-#define ExplosionGfxCounter              Enemy_X_Speed
-#define FirebarSpinState_Low             Enemy_X_Speed
-#define Jumpspring_FixedYPos             Enemy_X_Speed
+#define CheepCheepMoveMFlag              Unsigned_0x58
+#define ExplosionGfxCounter              Unsigned_0x58
+#define FirebarSpinState_Low             Unsigned_0x58
+#define Jumpspring_FixedYPos             Unsigned_0x58
 #define LakituMoveSpeed                  Enemy_X_Speed
 #define PiranhaPlant_Y_Speed             Enemy_X_Speed
-#define RedPTroopaCenterYPos             Enemy_X_Speed
-#define XMoveSecondaryCounter            Enemy_X_Speed
-#define YPlatformCenterYPos              Enemy_X_Speed
+#define RedPTroopaCenterYPos             Unsigned_0x58
+#define XMoveSecondaryCounter            Unsigned_0x58
+#define YPlatformCenterYPos              Unsigned_0x58
 
 #define SprObject_PageLoc                RAMARRAY(0x006D, 25)	// 3 more, because of bubbles
 #define Player_PageLoc                   SprObject_PageLoc[0]
@@ -94,19 +97,22 @@
 #define Misc_X_Position                  (SprObject_X_Position + 13)
 #define Bubble_X_Position                (SprObject_X_Position + 22)
 
-#define SprObject_Y_Speed                RAMARRAY(0x009F, 22)
+#define SprObject_Y_Speed                RAMARRAY_i8(0x009F, 22)
 #define Player_Y_Speed                   SprObject_Y_Speed[0]
 #define Enemy_Y_Speed                    (SprObject_Y_Speed + 1)
 #define Fireball_Y_Speed                 (SprObject_Y_Speed + 7)
 #define Block_Y_Speed                    (SprObject_Y_Speed + 9)
 #define Misc_Y_Speed                     (SprObject_Y_Speed + 13)
 
-#define BlooperMoveCounter               Enemy_Y_Speed
-#define ExplosionTimerCounter            Enemy_Y_Speed
-#define FirebarSpinState_High            Enemy_Y_Speed
-#define LakituMoveDirection              Enemy_Y_Speed
-#define PiranhaPlant_MoveFlag            Enemy_Y_Speed
-#define XMovePrimaryCounter              Enemy_Y_Speed
+// temporary, just so it doesn't inherit the signedness of Enemy_Y_Speed
+#define Unsigned_0xA0                    RAMARRAY(0x00A0, 21)
+
+#define BlooperMoveCounter               Unsigned_0xA0
+#define ExplosionTimerCounter            Unsigned_0xA0
+#define FirebarSpinState_High            Unsigned_0xA0
+#define LakituMoveDirection              Unsigned_0xA0
+#define PiranhaPlant_MoveFlag            Unsigned_0xA0
+#define XMovePrimaryCounter              Unsigned_0xA0
 
 #define SprObject_Y_HighPos              RAMARRAY(0x00B5, 25)	// 3 more, because of bubbles
 #define Player_Y_HighPos                 SprObject_Y_HighPos[0]
@@ -178,13 +184,13 @@
 
 #define BowserBodyControls               RAM(0x0363)
 #define BowserFeetCounter                RAM(0x0364)
-#define BowserMovementSpeed              RAM(0x0365)
+#define BowserMovementSpeed              RAM_i8(0x0365)
 #define BowserOrigXPos                   RAM(0x0366)
 #define BowserFlameTimerCtrl             RAM(0x0367)
 #define BowserFront_Offset               RAM(0x0368)
 #define BridgeCollapseOffset             RAM(0x0369)
 #define BowserGfxFlag                    RAM(0x036A)
-#define FirebarSpinSpeed                 RAMARRAY(0x0388, 5)
+#define FirebarSpinSpeed                 RAMARRAY_i8(0x0388, 5)
 #define VineFlagOffset                   RAM(0x0398)
 #define VineHeight                       RAM(0x0399)
 #define VineObjOffset                    RAMARRAY(0x039A, 2)
@@ -263,8 +269,8 @@
 #define CheepCheepOrigYPos               Enemy_Y_MoveForce
 #define PiranhaPlantDownYPos             Enemy_Y_MoveForce
 
-#define MaximumLeftSpeed                 RAM(0x0450)
-#define MaximumRightSpeed                RAM(0x0456)
+#define MaximumLeftSpeed                 RAM_i8(0x0450)
+#define MaximumRightSpeed                RAM_i8(0x0456)
 
 #define Cannon_Or_Whirlpool_Offset       RAM(0x046A)
 #define Cannon_PageLoc                   RAMARRAY(0x046B, 6)
@@ -336,7 +342,7 @@
 #define Player_XSpeedAbsolute            RAM(0x0700)
 #define FrictionAdderHigh                RAM(0x0701)
 #define FrictionAdderLow                 RAM(0x0702)
-#define RunningSpeed                     RAM(0x0703)
+#define RunningSpeed                     RAM_i8(0x0703)
 #define SwimmingFlag                     RAM_bool(0x0704)
 #define Player_X_MoveForce               RAM(0x0705)
 #define DiffToHaltJump                   RAM(0x0706)

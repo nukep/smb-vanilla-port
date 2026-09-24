@@ -437,10 +437,10 @@ void PoisonMushBlock(const u8 param_1) {
 // SM2MAIN:a64e
 // Signature: [X] -> []
 void SetBounce(const u8 param_1) {
-  Player_Y_Speed = 0xfa;
+  Player_Y_Speed = -6;
   const u8 enemy_id = Enemy_ID[param_1];
   if ((enemy_id == A_RED_PARATROOPA) || (enemy_id == A_GREEN_PARATROOPA_HORIZONTAL)) {
-    Player_Y_Speed = 0xf8;
+    Player_Y_Speed = -8;
   }
 }
 
@@ -955,7 +955,7 @@ void MoveUpsideDownPiranhaP(const u8 param_1) {
       PiranhaPlant_MoveFlag[param_1] = PiranhaPlant_MoveFlag[param_1] + 1;
     }
     bVar3 = PiranhaPlantUpYPos[param_1];
-    if (PiranhaPlant_Y_Speed[param_1] >= 0x80) {
+    if (PiranhaPlant_Y_Speed[param_1] < 0) {
       bVar3 = PiranhaPlantDownYPos[param_1];
     }
     if (TimerControl == 0) {

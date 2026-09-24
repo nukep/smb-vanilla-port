@@ -2443,8 +2443,9 @@ void PlayerCtrlRoutine(void) {
       Player_BoundBoxCtrl = 2;
     }
   }
-  if ((Player_X_Speed != 0)) {
-    Player_MovingDir = (Player_X_Speed < 0x80) ? DIR_RIGHT : DIR_LEFT;
+
+  if (Player_X_Speed != 0) {
+    Player_MovingDir = (Player_X_Speed >= 0) ? DIR_RIGHT : DIR_LEFT;
   }
 
   // This shouldn't be used for the rest of the frame
@@ -2835,7 +2836,7 @@ void FallingSub(void) {
 // SM2MAIN:7ee5
 // Signature: [] -> []
 void JumpSwimSub(void) {
-  if ((Player_Y_Speed < 0x80)
+  if ((Player_Y_Speed >= 0)
       || (((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0
            && (DiffToHaltJump <= (u8)(JumpOrigin_Y_Position - Player_Y_Position))))) {
     VerticalForce = VerticalForceDown;
@@ -2945,7 +2946,7 @@ void PlayerPhysicsSub(void) {
 
   const bool button_a_newly_pressed = ((A_B_Buttons & BUTTON_A) != 0) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0);
   if ((JumpspringAnimCtrl == 0) && button_a_newly_pressed) {
-    if (Player_State == PLAYERSTATE_ONGROUND || (SwimmingFlag && (JumpSwimTimer != 0 || (Player_Y_Speed < 0x80)))) {
+    if (Player_State == PLAYERSTATE_ONGROUND || (SwimmingFlag && (JumpSwimTimer != 0 || (Player_Y_Speed >= 0)))) {
       JumpSwimTimer = 0x20;
       Player_YMF_Dummy = 0;
       JumpOrigin_Y_HighPos = Player_Y_HighPos;
@@ -3039,8 +3040,8 @@ void PlayerPhysicsSub(void) {
     }
   }
 
-  static const u8 max_left_xspd_lookup[3] = { 0xd8, 0xe8, 0xf0 };
-  static const u8 max_right_xspd_lookup[3] = { 0x28, 0x18, 0x10 };
+  static const i8 max_left_xspd_lookup[3] = { -0x28, -0x18, -0x10 };
+  static const i8 max_right_xspd_lookup[3] = { 0x28, 0x18, 0x10 };
 
   // getxphy
   MaximumLeftSpeed  = max_left_xspd_lookup[bVar2];
@@ -3112,7 +3113,7 @@ void ImposeFriction(const u8 dir) {
       return;
     }
 
-    go_left = Player_X_Speed >= 0x80;
+    go_left = Player_X_Speed < 0;
   }
 
   if (go_left) {
@@ -3120,7 +3121,7 @@ void ImposeFriction(const u8 dir) {
     ADD_16_16(Player_X_Speed, Player_X_MoveForce,
               FrictionAdderHigh, FrictionAdderLow);
 
-    if ((u8)(Player_X_Speed - MaximumRightSpeed) < 0x80) {
+    if ((i8)(Player_X_Speed - MaximumRightSpeed) >= 0) {
       Player_X_Speed = MaximumRightSpeed;
       Player_XSpeedAbsolute = MaximumRightSpeed;
       return;
@@ -3130,12 +3131,12 @@ void ImposeFriction(const u8 dir) {
     SUB_16_16(Player_X_Speed, Player_X_MoveForce,
               FrictionAdderHigh, FrictionAdderLow);
 
-    if ((u8)(Player_X_Speed - MaximumLeftSpeed) >= 0x80) {
+    if ((i8)(Player_X_Speed - MaximumLeftSpeed) < 0) {
       Player_X_Speed = MaximumLeftSpeed;
     }
   }
 
-  if (Player_X_Speed >= 0x80) {
+  if (Player_X_Speed < 0) {
     Player_XSpeedAbsolute = -Player_X_Speed;
   } else {
     Player_XSpeedAbsolute = Player_X_Speed;
@@ -3781,7 +3782,7 @@ void CoinBlock(const u8 param_1) {
 // SM2MAIN:8737
 // Signature: [X, Y] -> []
 void JCoinC(const u8 param_1, const u8 param_2) {
-  Misc_Y_Speed[param_2] = 0xfb;
+  Misc_Y_Speed[param_2] = -5;
   Misc_Y_HighPos[param_2] = 1;
   Misc_State[param_2] = 1;
   Square2SoundQueue = SOUND_SQ2_COIN;
@@ -3807,7 +3808,7 @@ static inline void ProcHammerObj(const u8 objoff) {
       const u8 bVar2 = HammerEnemyOffset[objoff];
       if ((Misc_State[objoff] & 0x7f) == 2) {
         // SetHSpd
-        Misc_Y_Speed[objoff] = 0xfe;
+        Misc_Y_Speed[objoff] = -2;
         Enemy_State[bVar2] = Enemy_State[bVar2] & 0xf7;
 
         expect(Enemy_MovingDir[bVar2] == DIR_RIGHT || Enemy_MovingDir[bVar2] == DIR_LEFT);
@@ -4144,7 +4145,7 @@ void BumpBlock(const u16 mt_x, const u16 mt_y, const u8 mt) {
   Block_X_Speed[bVar2] = 0;
   Block_Y_MoveForce[bVar2] = 0;
   Player_Y_Speed = 0;
-  Block_Y_Speed[bVar2] = 0xfe;
+  Block_Y_Speed[bVar2] = -2;
 
   if (bug) {
     return;
@@ -4245,7 +4246,7 @@ void BrickShatter(const u16 mt_x, const u16 mt_y) {
   Block_RepFlag[sVar1] = 1;
   NoiseSoundQueue = SOUND_NOISE_BRICKSHATTER;
   SpawnBrickChunks(sVar1);
-  Player_Y_Speed = 0xfe;
+  Player_Y_Speed = -2;
   DigitModifier[5] = 5;
   AddToScore();
 }
@@ -4298,16 +4299,16 @@ u8 CheckTopOfBlock(const u16 mt_x, const u16 mt_y) {
 // Signature: [X] -> []
 void SpawnBrickChunks(const u8 param_1) {
   Block_Orig_XPos[param_1] = Block_X_Position[param_1];
-  Block_X_Speed[param_1] = 0xf0;
-  Block_X_Speed[param_1 + 2] = 0xf0;
-  Block_Y_Speed[param_1] = 0xfa;
-  Block_Y_Speed[param_1 + 2] = 0xfc;
+  Block_X_Speed[param_1] = -16;
+  Block_X_Speed[param_1 + 2] = -16;
+  Block_Y_Speed[param_1] = -6;
+  Block_Y_Speed[param_1 + 2] = -4;
   Block_Y_MoveForce[param_1] = 0;
   Block_Y_MoveForce[param_1 + 2] = 0;
   Block_PageLoc[param_1 + 2] = Block_PageLoc[param_1];
   Block_X_Position[param_1 + 2] = Block_X_Position[param_1];
   Block_Y_Position[param_1 + 2] = Block_Y_Position[param_1] + 8;
-  Block_Y_Speed[param_1] = 0xfa;
+  Block_Y_Speed[param_1] = -6;
 }
 
 
@@ -5169,10 +5170,10 @@ void LakituAndSpinyHandler(const u8 objoff) {
                        diff_adjust[1][rng],
                        diff_adjust[2][rng]);
 
-      const u8 bVar1 = SmallBBox(objoff);
+      const i8 bVar1 = SmallBBox(objoff);
       Enemy_X_Speed[objoff] = bVar1;
-      Enemy_MovingDir[objoff] = (bVar1 < 0x80) ? 1 : 2;
-      Enemy_Y_Speed[objoff] = 0xfd;
+      Enemy_MovingDir[objoff] = (bVar1 >= 0) ? 1 : 2;
+      Enemy_Y_Speed[objoff] = -3;
       Enemy_Flag[objoff] = 1;
       Enemy_State[objoff] = 5;
       return;
@@ -5213,7 +5214,7 @@ void InitLongFirebar(const u8 objoff) {
 void InitShortFirebar(const u8 objoff) {
   const u8 enemy_id = Enemy_ID[objoff];
 
-  u8 speed;
+  i8 speed;
   u8 dir;
 
   switch (enemy_id) {
@@ -5278,14 +5279,14 @@ void InitFlyingCheepCheep(const u8 objoff) {
   // This access would be out of bounds if defined earlier
   const u8 rng2 = PseudoRandomBitReg[objoff + 2];
 
-  Enemy_Y_Speed[objoff] = 0xfb;
+  Enemy_Y_Speed[objoff] = -5;
 
   u8 currng = rng0 & 3;
   u8 idx = 0;
 
   if (Player_X_Speed == 0) {
     idx = 0;
-  } else if (Player_X_Speed <= 0x18) {
+  } else if (Player_X_Speed > 0 && Player_X_Speed <= 0x18) {
     idx = 1;
   } else {
     idx = 2;
@@ -5693,7 +5694,7 @@ void EndFrenzy(const u8 objoff) {
 // Signature: [X] -> []
 void InitJumpGPTroopa(const u8 objoff) {
   Enemy_MovingDir[objoff] = DIR_LEFT;
-  Enemy_X_Speed[objoff] = ssw(0xf8, 0xf4);
+  Enemy_X_Speed[objoff] = ssw(-8, -12);
   Enemy_BoundBoxCtrl[objoff] = 3;
 }
 
@@ -5790,7 +5791,7 @@ void LargeLiftDown(const u8 objoff) {
 // Signature: [X] -> []
 void PlatLiftUp(const u8 objoff) {
   Enemy_Y_MoveForce[objoff] = 0x10;
-  Enemy_Y_Speed[objoff] = 0xff;
+  Enemy_Y_Speed[objoff] = -1;
   PosPlatform(objoff, 1);
   Enemy_BoundBoxCtrl[objoff] = 4;
 }
@@ -6124,7 +6125,7 @@ void MovePodoboo(const u8 objoff) {
     bVar1 = PseudoRandomBitReg[objoff + 1];
     Enemy_Y_MoveForce[objoff] = bVar1 | 0x80;
     EnemyIntervalTimer[objoff] = (bVar1 & 0xf) | 6;
-    Enemy_Y_Speed[objoff] = 0xf9;
+    Enemy_Y_Speed[objoff] = -7;
   }
   MoveJ_EnemyVertically(objoff);
 }
@@ -6206,11 +6207,11 @@ void SetHJ(const u8 objoff, const u8 param_2, const u8 param_3) {
 // SM2MAIN:968d
 // Signature: [X] -> []
 void MoveHammerBroXDir(const u8 objoff) {
-  Enemy_X_Speed[objoff] = ((FrameCounter & 0x40) == 0) ? 4 : 0xfc;;
+  Enemy_X_Speed[objoff] = ((FrameCounter & 0x40) == 0) ? 4 : -4;
   const struct_ncr00 sVar2 = PlayerEnemyDiff(objoff);
   if (!sVar2.n) {
     if (EnemyIntervalTimer[objoff] == 0) {
-      Enemy_X_Speed[objoff] = 0xf8;
+      Enemy_X_Speed[objoff] = -8;
     }
   }
   Enemy_MovingDir[objoff] = (sVar2.n) ? 1 : 2;
@@ -6274,9 +6275,9 @@ void MoveNormalEnemy(const u8 objoff) {
     }
   }
 
-  const u8 old_enemy_speed = Enemy_X_Speed[objoff];
+  const i8 old_enemy_speed = Enemy_X_Speed[objoff];
 
-  if (old_enemy_speed < 0x80) {
+  if (old_enemy_speed >= 0) {
     Enemy_X_Speed[objoff] -= bVar2 == 0 ? 0 : 24;
   } else {
     Enemy_X_Speed[objoff] += bVar2 == 0 ? 0 : 24;
@@ -6428,10 +6429,10 @@ void MoveBloober(const u8 objoff, const bool param_2) {
 
   if (Enemy_MovingDir[objoff] == DIR_RIGHT) {
     ADD_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
-                      BlooperMoveSpeed[objoff]);
+                      (u8)BlooperMoveSpeed[objoff]);
   } else {
     SUB_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
-                      BlooperMoveSpeed[objoff]);
+                      (u8)BlooperMoveSpeed[objoff]);
   }
 }
 
@@ -6475,7 +6476,7 @@ void MoveBulletBill(const u8 objoff) {
   if ((Enemy_State[objoff] & 0x20) != 0) {
     MoveJ_EnemyVertically(objoff);
   } else {
-    Enemy_X_Speed[objoff] = 0xe8;
+    Enemy_X_Speed[objoff] = -0x18;
     MoveEnemyHorizontally(objoff);
   }
 }
@@ -6532,9 +6533,9 @@ void ProcFirebar(const u8 objoff) {
     u16 val = LOAD_16(FirebarSpinState_High[objoff], FirebarSpinState_Low[objoff]);
 
     if (FirebarSpinDirection[objoff] == 0) {
-      val += FirebarSpinSpeed[objoff];
+      val += (u8)FirebarSpinSpeed[objoff];
     } else {
-      val -= FirebarSpinSpeed[objoff];
+      val -= (u8)FirebarSpinSpeed[objoff];
     }
 
     val &= 0x1fff;
@@ -6808,7 +6809,7 @@ u8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u
     return param_2 - bVar1;
   } else if ((Enemy_ID[objoff] != A_SPINY) && (LakituMoveDirection[objoff] == 0)) {
     return param_2 - bVar1;
-  } else if ((Player_X_Speed <= 0x18) || (ScrollAmount <= 1)) {
+  } else if ((Player_X_Speed > 0 && Player_X_Speed <= 0x18) || (ScrollAmount <= 1)) {
     return param_3 - bVar1;
   } else {
     return param_4 - bVar1;
@@ -6890,7 +6891,6 @@ void MoveD_Bowser(const u8 objoff) {
 // Signature: [X] -> []
 void RunBowser(const u8 objoff) {
   u8 bVar1;
-  u8 bVar2;
   struct_ncr00 sVar4;
 
   static const u8 random_lookup[4] = { 0x21, 0x41, 0x11, 0x31 };
@@ -6935,7 +6935,8 @@ void RunBowser(const u8 objoff) {
       bVar1 = Enemy_X_Position[objoff] + BowserMovementSpeed;
       Enemy_X_Position[objoff] = bVar1;
       if (Enemy_MovingDir[objoff] != 1) {
-        bVar2 = 0xff;
+        i8 bVar2;
+        bVar2 = -1;
         bVar1 -= BowserOrigXPos;
         if (bVar1 >= 0x80) {
           bVar1 *= -1;
@@ -6959,7 +6960,7 @@ HammerChk:
   } else if (EnemyFrameTimer[objoff] == 1) {
     Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
     InitVStf(objoff);
-    Enemy_Y_Speed[objoff] = 0xfe;
+    Enemy_Y_Speed[objoff] = -2;
   }
 ChkFireB:
 
@@ -7291,7 +7292,7 @@ void DrawStarFlag(const u8 objoff) {
 void MovePiranhaPlant(const u8 objoff) {
   if ((Enemy_State[objoff] == 0) && (EnemyFrameTimer[objoff] == 0)) {
     if (PiranhaPlant_MoveFlag[objoff] == 0) {
-      if (PiranhaPlant_Y_Speed[objoff] < 0x80) {
+      if (PiranhaPlant_Y_Speed[objoff] >= 0) {
         const struct_ncr00 sVar4 = PlayerEnemyDiff(objoff);
         const u8 bVar3 = sVar4.n ? -sVar4.r00 : sVar4.r00;
 
@@ -7306,7 +7307,7 @@ void MovePiranhaPlant(const u8 objoff) {
       PiranhaPlant_MoveFlag[objoff] += 1;
     }
 
-    const u8 bVar3 = PiranhaPlant_Y_Speed[objoff] >= 0x80
+    const u8 bVar3 = PiranhaPlant_Y_Speed[objoff] < 0
       ? PiranhaPlantUpYPos[objoff]
       : PiranhaPlantDownYPos[objoff];
 
@@ -7817,7 +7818,7 @@ void HandleEnemyFBallCol(const u8 param_1) {
   InitVStf(bVar2);
   EnemyFrenzyBuffer = 0;
   Enemy_X_Speed[bVar2] = 0;
-  Enemy_Y_Speed[bVar2] = 0xfe;
+  Enemy_Y_Speed[bVar2] = -2;
   Enemy_ID[bVar2] = BowserIdentities[WorldNumber];
   Enemy_State[bVar2] = (WorldNumber < 3) ? 0x23 : 0x20;
   Square2SoundQueue = SOUND_SQ2_BOWSERFALL;
@@ -8064,10 +8065,10 @@ void PlayerEnemyCollision(const u8 objoff) {
     }
 
 #ifdef SMB1_MODE
-      const bool cond2 = (Player_Y_Speed == 0) || (Player_Y_Speed >= 0x80);
+      const bool cond2 = Player_Y_Speed <= 0;
 #endif
 #ifdef SMB2J_MODE
-      const bool cond2 = (Player_Y_Speed == 0) || (Player_Y_Speed > 0x80);
+      const bool cond2 = Player_Y_Speed <= 0 && Player_Y_Speed != -128;
 #endif
 
     if (cond1 && cond2) {
@@ -8148,7 +8149,7 @@ void PlayerEnemyCollision(const u8 objoff) {
       EnemyIntervalTimer[objoff] = !PrimaryHardMode ? 16 : 11;
 
 #ifdef SMB1_MODE
-      Player_Y_Speed = 0xfc;
+      Player_Y_Speed = -4;
 #endif
 #ifdef SMB2J_MODE
       SetBounce(objoff);
@@ -8168,7 +8169,7 @@ void PlayerEnemyCollision(const u8 objoff) {
       InitVStf(objoff);
       Enemy_X_Speed[objoff] = EnemyFacePlayer(objoff) ? -8 : 8;
 #ifdef SMB1_MODE
-      Player_Y_Speed = 0xfc;
+      Player_Y_Speed = -4;
 #endif
     }
   } else {
@@ -8185,7 +8186,7 @@ void PlayerEnemyCollision(const u8 objoff) {
     Enemy_X_Speed[objoff] = 0;
 
 #ifdef SMB1_MODE
-    Player_Y_Speed = 0xfd;
+    Player_Y_Speed = -3;
 #endif
 #ifdef SMB2J_MODE
     SetBounce(objoff);
@@ -8215,7 +8216,7 @@ void ForceInjury(void) {
 
   if (PlayerStatus == PLAYERSTATUS_SMALL) {
     EventMusicQueue = MUSIC_EVENT_DEATH;
-    Player_Y_Speed = 0xfc;
+    Player_Y_Speed = -4;
     Player_X_Speed = 0;
     GameEngineSubroutine = GR_PLAYERDEATH;
   } else {
@@ -8467,10 +8468,10 @@ void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, c
   expect(param_2 == (param_1+1)*4);
   const u8 param_2_div4 = param_2 / 4;
 
-  if (((u8)(BBOX_BOTRIGHT_Y(param_2_div4) - BBOX_TOPLEFT_Y(0)) < 4) && (Player_Y_Speed >= 0x80)) {
+  if (((u8)(BBOX_BOTRIGHT_Y(param_2_div4) - BBOX_TOPLEFT_Y(0)) < 4) && (Player_Y_Speed < 0)) {
     Player_Y_Speed = 1;
   }
-  if (((u8)(BBOX_BOTRIGHT_Y(0) - BBOX_TOPLEFT_Y(param_2_div4)) < 6) && (Player_Y_Speed < 0x80)) {
+  if (((u8)(BBOX_BOTRIGHT_Y(0) - BBOX_TOPLEFT_Y(param_2_div4)) < 6) && (Player_Y_Speed >= 0)) {
     u8 tmp3 = param_3;
     if ((Enemy_ID[param_1] != A_SMALLPLATFORM_1) && (Enemy_ID[param_1] != A_SMALLPLATFORM_2)) {
       tmp3 = param_1;
@@ -8641,7 +8642,7 @@ void PlayerBGCollision(void) {
         return;
       }
       bVar7 = sVar9.a;
-      if ((Player_Y_Speed >= 0x80) && (bVar1 >= 4)) {
+      if ((Player_Y_Speed < 0) && (bVar1 >= 4)) {
         bVar8 = CheckForSolidMTiles(bVar7);
 
         bool myspd = true;
@@ -8691,7 +8692,7 @@ void PlayerBGCollision(void) {
         bVar7 = bVar2;
       }
       bVar8 = CheckForClimbMTiles(bVar7);
-      if ((!bVar8) && (Player_Y_Speed < 0x80)) {
+      if ((!bVar8) && (Player_Y_Speed >= 0)) {
         if (bVar7 == MT_AXE) {
           HandleAxeMetatile(sVar11.mt_x, sVar11.mt_y);
           return;
@@ -8987,9 +8988,9 @@ void ImpedePlayerMove(const u8 dir) {
   bool nxspd;
 
   if (dir == DIR_RIGHT) {
-    nxspd = Player_X_Speed < 0x80;
+    nxspd = Player_X_Speed >= 0;
   } else {
-    nxspd = (u8)(Player_X_Speed - 1) >= 0x80;
+    nxspd = (i8)(Player_X_Speed - 1) < 0;
   }
 
   if (nxspd) {
@@ -9207,9 +9208,9 @@ void SetStun2(const u8 param_1) {
   Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
 
   if ((Enemy_ID[param_1] == A_BLOOBER) || (AreaType == AREA_WATER)) {
-    Enemy_Y_Speed[param_1] = 0xff;
+    Enemy_Y_Speed[param_1] = -1;
   } else {
-    Enemy_Y_Speed[param_1] = 0xfd;
+    Enemy_Y_Speed[param_1] = -3;
   }
 
   const struct_ncr00 sVar2 = PlayerEnemyDiff(param_1);
@@ -9328,7 +9329,7 @@ bool SubtEnemyYPos(const u8 objoff) {
 // Signature: [X] -> []
 void EnemyJump(const u8 objoff) {
   bool bVar2 = SubtEnemyYPos(objoff);
-  if ((bVar2) && (2 < (u8)(Enemy_Y_Speed[objoff] + 2))) {
+  if ((bVar2) && ((u8)(Enemy_Y_Speed[objoff] + 2) > 2)) {
     // Inlined: ChkUnderEnemy
     const struct blockbuffer_colli_result sVar3 = BlockBufferCollision(0, objoff + 1, 21);
 
@@ -9336,7 +9337,7 @@ void EnemyJump(const u8 objoff) {
       bVar2 = ChkForNonSolids(sVar3.a);
       if (!bVar2) {
         EnemyLanding(objoff);
-        Enemy_Y_Speed[objoff] = 0xfd;
+        Enemy_Y_Speed[objoff] = -3;
       }
     }
   }
@@ -9372,7 +9373,7 @@ void HammerBroBGColl(const u8 objoff) {
 // Signature: [X] -> []
 void KillEnemyAboveBlock(const u8 objoff) {
   ShellOrBlockDefeat(objoff);
-  Enemy_Y_Speed[objoff] = 0xfc;
+  Enemy_Y_Speed[objoff] = -4;
 }
 
 
@@ -9404,8 +9405,8 @@ void FireballBGCollision(const u8 objoff) {
     if (sVar2.a != 0) {
       const bool bVar1 = ChkForNonSolids(sVar2.a);
       if (!bVar1) {
-        if (Fireball_Y_Speed[objoff] < 0x80 && !FireballBouncingFlag[objoff]) {
-          Fireball_Y_Speed[objoff] = 0xfd;
+        if (Fireball_Y_Speed[objoff] >= 0 && !FireballBouncingFlag[objoff]) {
+          Fireball_Y_Speed[objoff] = -3;
           FireballBouncingFlag[objoff] = true;
           Fireball_Y_Position[objoff] = Fireball_Y_Position[objoff] & 0xf8;
           return;
@@ -10140,7 +10141,7 @@ void EnemyGfxHandler(const u8 objoff) {
   expect_weak(Enemy_SprAttrib[objoff] == 0);
 
   if (enemy_id == A_PIRANHA_PLANT) {
-    if ((PiranhaPlant_Y_Speed[objoff] < 0x80) && (EnemyFrameTimer[objoff] != 0)) {
+    if ((PiranhaPlant_Y_Speed[objoff] >= 0) && (EnemyFrameTimer[objoff] != 0)) {
       return;
     }
   }
@@ -10498,7 +10499,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     mirror_horz = true;
 
-    if (Enemy_Y_Speed[objoff] < 0x80) {
+    if (Enemy_Y_Speed[objoff] >= 0) {
       flip_vert = true;
     }
 
