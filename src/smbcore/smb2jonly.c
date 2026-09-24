@@ -950,7 +950,7 @@ void MoveUpsideDownPiranhaP(const u8 param_1) {
 
   if (PiranhaPlant_MoveFlag[param_1] == 0) {
     PiranhaPlant_Y_Speed[param_1] *= -1;
-    PiranhaPlant_MoveFlag[param_1] = PiranhaPlant_MoveFlag[param_1] + 1;
+    PiranhaPlant_MoveFlag[param_1] += 1;
   }
 
   if (TimerControl == 0) {

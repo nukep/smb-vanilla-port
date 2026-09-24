@@ -191,7 +191,7 @@ void SMBgl_draw_tile(struct SMBgl *gl, const struct SMB_tile tile) {
   if (gl->vbo_cur+4 <= MAX_VBO_ITEMS) {
     memcpy(gl->vbo_buffer + gl->vbo_cur, &items[0], sizeof(items));
 
-    gl->vbo_cur = gl->vbo_cur+4;
+    gl->vbo_cur += 4;
   } else {
     log_error("Too many VBO items");
   }

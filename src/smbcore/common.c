@@ -1410,7 +1410,7 @@ void ReplaceBlockMetatile(const u8 param_1, const u8 param_2, const u16 mt_x, co
 
   WriteBlockMetatile(param_1, mt_x, mt_y);
   Block_ResidualCounter += 1;
-  Block_RepFlag[param_2] = Block_RepFlag[param_2] - 1;
+  Block_RepFlag[param_2] -= 1;
 }
 
 
@@ -2548,7 +2548,7 @@ void VerticalPipeEntry(void) {
 // SM2MAIN:7d58
 // Signature: [A] -> []
 void MovePlayerYAxis(const u8 param_1) {
-  Player_Y_Position = param_1 + Player_Y_Position;
+  Player_Y_Position += param_1;
 }
 
 
@@ -3214,7 +3214,7 @@ void FireballObjCore(const u8 objoff) {
       Fireball_Y_Speed[objoff] = 4;
 
       Fireball_BoundBoxCtrl[objoff] = 7;
-      Fireball_State[objoff] = Fireball_State[objoff] - 1;
+      Fireball_State[objoff] -= 1;
     }
 
     const u8 bVar4 = objoff + 7;
@@ -3810,7 +3810,7 @@ static inline void ProcHammerObj(const u8 objoff) {
       if ((Misc_State[objoff] & 0x7f) == 2) {
         // SetHSpd
         Misc_Y_Speed[objoff] = -2;
-        Enemy_State[bVar2] = Enemy_State[bVar2] & 0xf7;
+        Enemy_State[bVar2] &= 0xf7;
 
         expect(Enemy_MovingDir[bVar2] == DIR_RIGHT || Enemy_MovingDir[bVar2] == DIR_LEFT);
 
@@ -4020,7 +4020,7 @@ void PowerUpObjHandler(const u8 objoff) {
       if ((FrameCounter & 3) == 0) {
         Enemy_Y_Position[objoff] -= 1;
         const bool bVar2 = Enemy_State[objoff] > 0x10;
-        Enemy_State[objoff] = Enemy_State[objoff] + 1;
+        Enemy_State[objoff] += 1;
         if (bVar2) {
           Enemy_X_Speed[objoff] = 0x10;
           Enemy_State[objoff] = 0x80;
@@ -5231,7 +5231,7 @@ void InitShortFirebar(const u8 objoff) {
   FirebarSpinState_Low[objoff] = 0;
   FirebarSpinSpeed[objoff] = speed;
   FirebarSpinDirection[objoff] = dir;
-  Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] + 4;
+  Enemy_Y_Position[objoff] += 4;
 
   ADD_UNSIGNED_16_8(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
                     4);
@@ -5705,8 +5705,8 @@ void InitJumpGPTroopa(const u8 objoff) {
 // SM2MAIN:9414
 // Signature: [X] -> []
 void InitBalPlatform(const u8 objoff) {
-  Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
-  Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
+  Enemy_Y_Position[objoff] -= 1;
+  Enemy_Y_Position[objoff] -= 1;
   if (!SecondaryHardMode) {
     PosPlatform(objoff, 2);
   }
@@ -6142,7 +6142,7 @@ void ProcHammerBro(const u8 objoff) {
     return;
   }
   if (HammerBroJumpTimer[objoff] != 0) {
-    HammerBroJumpTimer[objoff] = HammerBroJumpTimer[objoff] - 1;
+    HammerBroJumpTimer[objoff] -= 1;
     if ((Enemy_OffscreenBits & 0xc) != 0) {
       MoveHammerBroXDir(objoff);
       return;
@@ -6151,15 +6151,15 @@ void ProcHammerBro(const u8 objoff) {
       HammerThrowingTimer[objoff] = !SecondaryHardMode ? 0x30 : 0x1c;
       const bool sVar2 = SpawnHammerObj(objoff);
       if (sVar2) {
-        Enemy_State[objoff] = Enemy_State[objoff] | 8;
+        Enemy_State[objoff] |= 8;
         MoveHammerBroXDir(objoff);
         return;
       }
-      HammerThrowingTimer[objoff] = HammerThrowingTimer[objoff] - 1;
+      HammerThrowingTimer[objoff] -= 1;
       MoveHammerBroXDir(objoff);
       return;
     }
-    HammerThrowingTimer[objoff] = HammerThrowingTimer[objoff] - 1;
+    HammerThrowingTimer[objoff] -= 1;
     MoveHammerBroXDir(objoff);
     return;
   }
@@ -6190,7 +6190,7 @@ void SetHJ(const u8 objoff, const i8 param_2, const bool param_3) {
   // param_3 is always 0 or 1
 
   Enemy_Y_Speed[objoff] = param_2;
-  Enemy_State[objoff] = Enemy_State[objoff] | 1;
+  Enemy_State[objoff] |= 1;
 
   EnemyFrameTimer[objoff] = 0x20;
 
@@ -6317,7 +6317,7 @@ void ProcMoveRedPTroopa(const u8 objoff) {
     Enemy_YMF_Dummy[objoff] = 0;
     if (Enemy_Y_Position[objoff] < RedPTroopaOrigXPos[objoff]) {
       if ((FrameCounter & 7) == 0) {
-        Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] + 1;
+        Enemy_Y_Position[objoff] += 1;
       }
       return;
     }
@@ -6342,7 +6342,7 @@ void MoveFlyGreenPTroopa(const u8 objoff) {
     if ((FrameCounter & 0x40) == 0) {
       cVar2 = -1;
     }
-    Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] + cVar2;
+    Enemy_Y_Position[objoff] += cVar2;
   }
 }
 
@@ -6364,14 +6364,14 @@ void XMoveCntr_Platform(const u8 param_1, const u8 objoff) {
   }
   if ((XMovePrimaryCounter[objoff] & 1) != 0) {
     if (XMoveSecondaryCounter[objoff] != 0) {
-      XMoveSecondaryCounter[objoff] = XMoveSecondaryCounter[objoff] - 1;
+      XMoveSecondaryCounter[objoff] -= 1;
       return;
     }
   } else if (XMoveSecondaryCounter[objoff] != param_1) {
-    XMoveSecondaryCounter[objoff] = XMoveSecondaryCounter[objoff] + 1;
+    XMoveSecondaryCounter[objoff] += 1;
     return;
   }
-  XMovePrimaryCounter[objoff] = XMovePrimaryCounter[objoff] + 1;
+  XMovePrimaryCounter[objoff] += 1;
 }
 
 
@@ -6450,7 +6450,7 @@ void ProcSwimmingB(const u8 param_1, const bool param_2) {
         Enemy_Y_MoveForce[param_1] = bVar1;
         BlooperMoveSpeed[param_1] = bVar1;
         if (bVar1 == 2) {
-          BlooperMoveCounter[param_1] = BlooperMoveCounter[param_1] + 1;
+          BlooperMoveCounter[param_1] += 1;
         }
       }
     } else if ((FrameCounter & 7) == 0) {
@@ -6458,7 +6458,7 @@ void ProcSwimmingB(const u8 param_1, const bool param_2) {
       Enemy_Y_MoveForce[param_1] = bVar1;
       BlooperMoveSpeed[param_1] = bVar1;
       if (bVar1 == 0) {
-        BlooperMoveCounter[param_1] = BlooperMoveCounter[param_1] + 1;
+        BlooperMoveCounter[param_1] += 1;
         EnemyIntervalTimer[param_1] = 2;
       }
     }
@@ -6466,7 +6466,7 @@ void ProcSwimmingB(const u8 param_1, const bool param_2) {
       && (Player_Y_Position <= (u8)(Enemy_Y_Position[param_1] + 0x10 + param_2))) {
     BlooperMoveCounter[param_1] = 0;
   } else if ((FrameCounter & 1) == 0) {
-    Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 1;
+    Enemy_Y_Position[param_1] += 1;
   }
 }
 
@@ -6778,7 +6778,7 @@ i8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u
     if (Enemy_ID[objoff] == A_LAKITU) {
       if (bVar2 != LakituMoveDirection[objoff]) {
         if (LakituMoveDirection[objoff] != 0) {
-          LakituMoveSpeed[objoff] = LakituMoveSpeed[objoff] - 1;
+          LakituMoveSpeed[objoff] -= 1;
           if (LakituMoveSpeed[objoff] != 0) {
             return LakituMoveSpeed[objoff];
           }
@@ -6957,7 +6957,7 @@ HammerChk:
       EnemyFrameTimer[objoff] = random_lookup[PseudoRandomBitReg[objoff] & 3];
     }
   } else if (EnemyFrameTimer[objoff] == 1) {
-    Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
+    Enemy_Y_Position[objoff] -= 1;
     InitVStf(objoff);
     Enemy_Y_Speed[objoff] = -2;
   }
@@ -7078,7 +7078,7 @@ void ProcBowserFlame(const u8 objoff) {
 
     const u8 bVar3 = Enemy_X_Position[objoff];
     Enemy_X_Position[objoff] = (bVar3 - 1) - bVar1;
-    Enemy_PageLoc[objoff] = Enemy_PageLoc[objoff] - ((bVar1 || bVar3 == 0) && (!bVar1 || bVar3 < 2));
+    Enemy_PageLoc[objoff] -= ((bVar1 || bVar3 == 0) && (!bVar1 || bVar3 < 2));
     if (Enemy_Y_Position[objoff] != FlameYPosData[BowserFlamePRandomOfs[objoff]]) {
       Enemy_Y_Position[objoff] += Enemy_Y_MoveForce[objoff];
     }
@@ -7131,7 +7131,7 @@ void RunFireworks(const u8 objoff) {
   ExplosionTimerCounter[objoff] = bVar1;
   if (bVar1 == 0) {
     ExplosionTimerCounter[objoff] = 8;
-    ExplosionGfxCounter[objoff] = ExplosionGfxCounter[objoff] + 1;
+    ExplosionGfxCounter[objoff] += 1;
     if (ExplosionGfxCounter[objoff] > 2) {
       Enemy_Flag[objoff] = 0;
       Square2SoundQueue = SOUND_SQ2_KABOOM;
@@ -7169,7 +7169,7 @@ void RunStarFlagObj(const u8 objoff) {
 
   case STARFLAGTASK_RAISEFLAGSETOFFFWORKS:
     if (Enemy_Y_Position[objoff] >= 0x72) {
-      Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] - 1;
+      Enemy_Y_Position[objoff] -= 1;
       DrawStarFlag(objoff);
     } else if ((FireworksCounter != 0) && (FireworksCounter < 0x80)) {
       EnemyFrenzyBuffer = A_FIREWORKS;
@@ -7465,7 +7465,7 @@ void BalancePlatform(const u8 objoff) {
     break;
   }
 
-  Enemy_Y_Position[Enemy_State[objoff]] = (bStack0000 - Enemy_Y_Position[objoff]) + Enemy_Y_Position[Enemy_State[objoff]];
+  Enemy_Y_Position[Enemy_State[objoff]] += (bStack0000 - Enemy_Y_Position[objoff]);
 
   if ((PlatformCollisionFlag[objoff] & 0x80) == 0) {
     PositionPlayerOnVPlat(PlatformCollisionFlag[objoff]);
@@ -7550,7 +7550,7 @@ void YMovingPlatform(const u8 objoff) {
     Enemy_YMF_Dummy[objoff] = 0;
     if (Enemy_Y_Position[objoff] < YPlatformTopYPos[objoff]) {
       if ((FrameCounter & 7) == 0) {
-        Enemy_Y_Position[objoff] = Enemy_Y_Position[objoff] + 1;
+        Enemy_Y_Position[objoff] += 1;
       }
       ChkYPCollision(objoff);
       return;
@@ -8345,7 +8345,7 @@ void ProcEnemyCollisions(const u8 objoff, const u8 param_2) {
       if (Enemy_ID[param_2] != A_HAMMER_BRO) {
         ShellOrBlockDefeat(objoff);
         SetupFloateyNumber(ShellChainCounter[param_2] + 4, objoff);
-        ShellChainCounter[param_2] = ShellChainCounter[param_2] + 1;
+        ShellChainCounter[param_2] += 1;
         return;
       }
     } else if (Enemy_ID[objoff] != A_HAMMER_BRO) {
@@ -8355,7 +8355,7 @@ void ProcEnemyCollisions(const u8 objoff, const u8 param_2) {
       }
       ShellOrBlockDefeat(param_2);
       SetupFloateyNumber(ShellChainCounter[objoff] + 4, param_2);
-      ShellChainCounter[objoff] = ShellChainCounter[objoff] + 1;
+      ShellChainCounter[objoff] += 1;
     }
   }
 }
@@ -9190,7 +9190,7 @@ void EnemyToBGCollisionDet(const u8 objoff) {
 LandEnemyInitState:
   EnemyLanding(objoff);
   if ((Enemy_State[objoff] & 0x80) != 0) {
-    Enemy_State[objoff] = Enemy_State[objoff] & 0xbf;
+    Enemy_State[objoff] &= 0xbf;
     return;
   }
   Enemy_State[objoff] = 0;
@@ -9201,8 +9201,8 @@ LandEnemyInitState:
 // SM2MAIN:accd
 // Signature: [X] -> []
 void SetStun2(const u8 param_1) {
-  Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
-  Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] - 1;
+  Enemy_Y_Position[param_1] -= 1;
+  Enemy_Y_Position[param_1] -= 1;
 
   if ((Enemy_ID[param_1] == A_BLOOBER) || (AreaType == AREA_WATER)) {
     Enemy_Y_Speed[param_1] = -1;
@@ -9355,13 +9355,13 @@ void HammerBroBGColl(const u8 objoff) {
       return;
     }
     if (EnemyFrameTimer[objoff] == 0) {
-      Enemy_State[objoff] = Enemy_State[objoff] & 0x88;
+      Enemy_State[objoff] &= 0x88;
       EnemyLanding(objoff);
       DoEnemySideCheck(objoff);
       return;
     }
   }
-  Enemy_State[objoff] = Enemy_State[objoff] | 1;
+  Enemy_State[objoff] |= 1;
 }
 
 
@@ -9405,7 +9405,7 @@ void FireballBGCollision(const u8 objoff) {
         if (Fireball_Y_Speed[objoff] >= 0 && !FireballBouncingFlag[objoff]) {
           Fireball_Y_Speed[objoff] = -3;
           FireballBouncingFlag[objoff] = true;
-          Fireball_Y_Position[objoff] = Fireball_Y_Position[objoff] & 0xf8;
+          Fireball_Y_Position[objoff] &= 0xf8;
           return;
         }
         Fireball_State[objoff] = 0x80;
@@ -9952,7 +9952,7 @@ void JCoinGfxHandler(const u8 objoff) {
     SPRITE_ATTR(bVar2, 1) = 0x82;
   } else {
     if ((FrameCounter & 1) == 0) {
-      Misc_Y_Position[objoff] = Misc_Y_Position[objoff] - 1;
+      Misc_Y_Position[objoff] -= 1;
     }
 
     // Inlined: DumpTwoSpr
@@ -10954,7 +10954,7 @@ void DrawFirebar(const u8 param_1) {
 // Signature: [X] -> []
 void DrawExplosion_Fireball(const u8 objoff) {
   u8 bVar1 = Fireball_State[objoff];
-  Fireball_State[objoff] = Fireball_State[objoff] + 1;
+  Fireball_State[objoff] += 1;
   bVar1 = (bVar1 >> 1) & 7;
   if (bVar1 < 3) {
     DrawExplosion_Fireworks(bVar1, Alt_SprDataOffset[objoff]);

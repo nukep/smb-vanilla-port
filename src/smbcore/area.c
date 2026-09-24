@@ -1459,7 +1459,7 @@ void FlagpoleObject(void) {
   Enemy_Y_Position[5] = 0x30;
   FlagpoleFNum_Y_Pos = 0xb0;
   Enemy_ID[5] = A_FLAGPOLE;
-  Enemy_Flag[5] = Enemy_Flag[5] + 1;
+  Enemy_Flag[5] += 1;
 }
 
 
@@ -2103,7 +2103,7 @@ static inline void UpsideDownPipe_impl(const u8 objoff, const u8 val) {
       Enemy_Y_Position[bVar4] = bVar2;
       PiranhaPlantDownYPos[bVar4] = bVar2;
       PiranhaPlantUpYPos[bVar4] = cVar1 + 0xe;
-      PiranhaPlant_MoveFlag[bVar4] = PiranhaPlant_MoveFlag[bVar4] + 1;
+      PiranhaPlant_MoveFlag[bVar4] += 1;
     }
   }
 
