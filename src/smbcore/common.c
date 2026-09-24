@@ -10114,21 +10114,11 @@ void EnemyGfxHandler(const u8 objoff) {
   // Renders the actor to tiles.
   // This is heavily refactored and doesn't closely resemble the original machine code.
   //
-  // The table offsets are inlined because they're highly coupled to the code.
-  // Many assumptions about actor state are made to make the code more approachable.
+  // We compare Enemy_ID instead of the intermediate table index that the original used.
+  // This should make the code more approachable to modification!
   //
-  // Everything is handled on a per-actor basis, instead of the hodge-podge of
-  // spaghetti and tacked-on exceptions that the original did.
-  //
-  // The original would compare table indices, which are derived from Enemy_ID.
-  // This implementation does a more straight-forward comparison to Enemy_ID, to keep it understandable.
-  //   enemy_id -> table_idx
-  //   53 (A_RETAINER)           -> 21
-  //   51 (A_BULLET_BILL_CANNON) -> 8
-  //   50 (A_JUMPSPRING)         -> 24, 25, 26
-  //   *                         -> * (otherwise, keep the same)
-
   // Note that all Bowser paths have been extracted out to EnemyGfxHandler_bowser.
+
   expect(BowserGfxFlag == 0);
 
   // right before any array reads could access writes we optimized away
