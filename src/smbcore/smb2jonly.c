@@ -1322,8 +1322,9 @@ void MushroomRetainersForW8(void) {
   EndControlCntr += 1;
   const u8 bStack0000 = WorldNumber;
   do {
-    if ((BlueDelayFlag < 4)
-        || (FlashMRSpriteDataOfs[(u8)((BlueDelayFlag - 4) - (BlueDelayFlag < 4))] != MRSpriteDataOfs[BlueColorOfs])) {
+    expect(BlueDelayFlag < 10);
+
+    if ((BlueDelayFlag < 4) || (FlashMRSpriteDataOfs[BlueDelayFlag - 4] != MRSpriteDataOfs[BlueColorOfs])) {
       Enemy_SprDataOffset[0] = MRSpriteDataOfs[BlueColorOfs];
       Enemy_ID[0] = A_RETAINER;
       Enemy_Y_Position[0] = MRetainerYPos[BlueColorOfs];

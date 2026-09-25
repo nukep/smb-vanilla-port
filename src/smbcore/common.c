@@ -2283,8 +2283,10 @@ void ChkPOffscr(void) {
   if (b1) {
     const u8 xsubtracterdata = 0;
 
-    Player_X_Position = ScreenLeft_X_Pos - xsubtracterdata;
-    Player_PageLoc = ScreenLeft_PageLoc - (ScreenLeft_X_Pos < xsubtracterdata);
+    SET_16_16(Player_PageLoc, Player_X_Position,
+              ScreenLeft_PageLoc, ScreenLeft_X_Pos);
+    SUB_UNSIGNED_16_8(Player_PageLoc, Player_X_Position,
+                      xsubtracterdata);
 
     if (Left_Right_Buttons != BUTTON_R) {
       Player_X_Speed = 0;
@@ -2292,8 +2294,10 @@ void ChkPOffscr(void) {
   } else if (b2) {
     const u8 xsubtracterdata = 0x10;
 
-    Player_X_Position = ScreenRight_X_Pos - xsubtracterdata;
-    Player_PageLoc = ScreenRight_PageLoc - (ScreenRight_X_Pos < xsubtracterdata);
+    SET_16_16(Player_PageLoc, Player_X_Position,
+              ScreenRight_PageLoc, ScreenRight_X_Pos);
+    SUB_UNSIGNED_16_8(Player_PageLoc, Player_X_Position,
+                      xsubtracterdata);
 
     if (Left_Right_Buttons != BUTTON_L) {
       Player_X_Speed = 0;
@@ -2498,7 +2502,7 @@ void PlayerCtrlRoutine(void) {
       break;
     }
   }
-  if ((u8)(Player_Y_HighPos - 2) < 0x80) {
+  if ((i8)(Player_Y_HighPos - 2) >= 0) {
     ScrollLock = 1;
     cVar1 = 4;
     cVar2 = 0;
@@ -3633,10 +3637,11 @@ void VineObjectHandler(const u8 objoff) {
 #ifdef SMB2J_MODE
 
   const u16 xpos = LOAD_16(Enemy_PageLoc[5], Enemy_X_Position[5]);
+  const u16 screen_xpos = LOAD_16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
 
-  const u8 cmpA = (u8)((Enemy_PageLoc[5] - ScreenLeft_PageLoc) - (Enemy_X_Position[5] < ScreenLeft_X_Pos));
-  const u8 cmpB = (u8)(Enemy_X_Position[5] - ScreenLeft_X_Pos);
-  if ((cmpA >= 0x80) || (cmpB < 9)) {
+  const i16 diff = xpos - screen_xpos;
+
+  if (diff < 0 || (diff % 256) < 9) {
     Enemy_Flag[5] = 0;
 
     const u16 mt_x = xpos >> 4;
