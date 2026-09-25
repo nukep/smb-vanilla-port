@@ -7710,8 +7710,12 @@ void OffscreenBoundsCheck(const u8 param_1) {
   }
   const u8 enemy_id = Enemy_ID[param_1];
 
-  bool bVar3;
-  u8 abVar5;
+  const u8 sl_ploc = ScreenLeft_PageLoc;
+  const u8 sr_ploc = ScreenRight_PageLoc;
+  const u8 sl_xpos = ScreenLeft_X_Pos;
+  const u8 sr_xpos = ScreenRight_X_Pos;
+
+  u16 adjustamount = 0;
 
   switch (enemy_id) {
   case A_HAMMER_BRO:
@@ -7719,8 +7723,7 @@ void OffscreenBoundsCheck(const u8 param_1) {
 #ifdef SMB2J_MODE
   case A_PIRANHA_PLANT_SMB2J:
 #endif
-    abVar5 = ScreenLeft_X_Pos + 0x38 + 1;
-    bVar3 = ScreenLeft_X_Pos < 200 && abVar5 != 0;
+    adjustamount = 0x38 + 1;
     break;
 
   case A_GREEN_KOOPA:
@@ -7738,32 +7741,32 @@ void OffscreenBoundsCheck(const u8 param_1) {
   // Note: This matches the behavior of SMB1, even though this id isn't supposed to be used.
   case A_PIRANHA_PLANT_SMB2J:
 #endif
-    abVar5 = ScreenLeft_X_Pos;
-    bVar3 = true;
+    adjustamount = 0;
     break;
 
   default:
-    abVar5 = ScreenLeft_X_Pos;
-    bVar3 = false;
+    adjustamount = 0x100;
     break;
   }
 
-  const bool bVar2 = abVar5 >= 0x48;
-  const bool bVar4 = abVar5 > 0x48;
-  const bool nk = (!bVar3 && bVar2) || (bVar3 && bVar4);
-  const bool k = !nk;
-  const bool bVar8 = nk || (!nk && ScreenLeft_PageLoc != 0);
-  const u8 bVar6 = ScreenRight_X_Pos + 0x48 + bVar8;
-
   const u8 e_ploc = Enemy_PageLoc[param_1];
   const u8 e_xp = Enemy_X_Position[param_1];
-  const bool p = (ScreenRight_X_Pos >= 0xb8) || (bVar8 && bVar6 == 0);
-  const u8 q = (u8)(abVar5 + 0xb8 - bVar3);
-  const u8 sl_ploc = ScreenLeft_PageLoc;
-  const u8 sr_ploc = ScreenRight_PageLoc;
 
-  const bool A = (u8)(e_ploc - sl_ploc + k - (e_xp < q)) >= 0x80;
-  const bool B = (u8)(e_ploc - sr_ploc - p - (e_xp < bVar6)) >= 0x80;
+  const u8 abVar5 = adjustamount;
+  const bool bVar3 = sl_xpos < 0x100 - adjustamount;
+
+  const u8 aa = sl_xpos + abVar5;
+
+  const bool k = aa < 0x48 + bVar3;
+
+  const bool bVar8 = (aa >= 0x48 + bVar3) || sl_ploc != 0;
+  const u8 bVar6 = sr_xpos + 0x48 + bVar8;
+
+  const bool p = (sr_xpos >= 0x100 - 0x48) || (bVar8 && bVar6 == 0);
+
+  const bool A = (i8)(e_ploc - sl_ploc + k - (e_xp < (u8)(aa + 0x100 - (0x48 + bVar3)))) < 0;
+
+  const bool B = (i8)(e_ploc - sr_ploc - p - (e_xp < bVar6)) < 0;
 
   if (A) {
     // object is to the left of the screen
