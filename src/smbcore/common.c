@@ -1683,10 +1683,13 @@ void InitializeArea(void) {
   // Note: BackloadingFlag behaves like a boolean when read. The original would set this to exactly ScreenLeft_PageLoc. Our port tests non-zero and assigns a boolean (0 or 1).
   BackloadingFlag = ScreenLeft_PageLoc != 0;
 
-  const u8 bVar1 = GetScreenPosition();
-  CurrentNTAddr_High = ((bVar1 & 1) == 0) ? 0x20 : 0x24;
+  GetScreenPosition();
+
+  const bool screenright_is_even_page = (ScreenRight_PageLoc & 1) == 0;
+
+  CurrentNTAddr_High = screenright_is_even_page ? 0x20 : 0x24;
   CurrentNTAddr_Low = 0x80;
-  BlockBufferColumnPos = (bVar1 & 1) << 4;
+  BlockBufferColumnPos = screenright_is_even_page ? 0 : 16;
   AreaObjectLength[0] -= 1;
   AreaObjectLength[1] -= 1;
   AreaObjectLength[2] -= 1;
@@ -2315,11 +2318,20 @@ void ChkPOffscr(void) {
 
 // SMB:b038
 // SM2MAIN:7b90
-// Signature: [] -> [A]
-u8 GetScreenPosition(void) {
-  ScreenRight_X_Pos = ScreenLeft_X_Pos - 1;
-  ScreenRight_PageLoc = ScreenLeft_PageLoc + (ScreenLeft_X_Pos != 0);
-  return ScreenRight_PageLoc;
+// Signature: [] -> []
+void GetScreenPosition(void) {
+  // Modify ScreenRight's x position by making it ScreenLeft + screen width - 1
+
+  const u16 screen_width = 256;
+
+  i16 x = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
+
+  x += screen_width - 1;
+
+  STORE_16(ScreenRight_PageLoc, ScreenRight_X_Pos,
+           x);
+
+  // NES note: register A is set to ScreenRight_PageLoc. InitializeArea would use this.
 }
 
 

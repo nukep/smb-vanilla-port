@@ -200,7 +200,7 @@ void smb1_ScrollScreen(u8 param_1);
 void smb1_ChkPOffscr(void);
 #define ChkPOffscr smb1_ChkPOffscr
 
-u8 smb1_GetScreenPosition(void);
+void smb1_GetScreenPosition(void);
 #define GetScreenPosition smb1_GetScreenPosition
 
 void smb1_GameRoutines(void);

@@ -193,7 +193,7 @@ void smb2j_ScrollHandler(void);
 void smb2j_ChkPOffscr(void);
 #define ChkPOffscr smb2j_ChkPOffscr
 
-u8 smb2j_GetScreenPosition(void);
+void smb2j_GetScreenPosition(void);
 #define GetScreenPosition smb2j_GetScreenPosition
 
 void smb2j_GameRoutines(void);
