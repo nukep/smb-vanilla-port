@@ -7722,12 +7722,7 @@ void OffscreenBoundsCheck(const u8 param_1) {
   }
   const u8 enemy_id = Enemy_ID[param_1];
 
-  const u8 sl_ploc = ScreenLeft_PageLoc;
-  const u8 sr_ploc = ScreenRight_PageLoc;
-  const u8 sl_xpos = ScreenLeft_X_Pos;
-  const u8 sr_xpos = ScreenRight_X_Pos;
-
-  u16 adjustamount = 0;
+  i16 adjustamount = 0;
 
   switch (enemy_id) {
   case A_HAMMER_BRO:
@@ -7761,8 +7756,23 @@ void OffscreenBoundsCheck(const u8 param_1) {
     break;
   }
 
-  const u8 e_ploc = Enemy_PageLoc[param_1];
-  const u8 e_xp = Enemy_X_Position[param_1];
+  // Sometimes screen-left can be negative. It's rare, but it happens.
+  // World 5-3 in SMB2J loops back to the start of the level, which causes a negative screen-left.
+
+  const i16 sl = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
+  const i16 sr = LOAD_i16(ScreenRight_PageLoc, ScreenRight_X_Pos);
+
+  // The screen width is always a fixed amount
+  const u16 screen_width = 256;
+  expect_weak(sr - sl == screen_width - 1);
+
+  const i16 e = LOAD_i16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
+
+  const u8 sl_ploc = (u8)(sl >> 8);
+  const u8 sl_xpos = (u8)(sl & 0xff);
+
+  const u8 e_ploc = (u8)(e >> 8);
+  const u8 e_xp = (u8)(e & 0xff);
 
   const u8 abVar5 = adjustamount;
   const bool bVar3 = sl_xpos < 0x100 - adjustamount;
@@ -7772,13 +7782,13 @@ void OffscreenBoundsCheck(const u8 param_1) {
   const bool k = aa < 0x48 + bVar3;
 
   const bool bVar8 = (aa >= 0x48 + bVar3) || sl_ploc != 0;
-  const u8 bVar6 = sr_xpos + 0x48 + bVar8;
+  const u8 bVar6 = sl_xpos - 1 + 0x48 + bVar8;
 
-  const bool p = (sr_xpos >= 0x100 - 0x48) || (bVar8 && bVar6 == 0);
+  const bool p = ((u8)(sl_xpos - 1) >= 0x100 - 0x48) || (bVar8 && bVar6 == 0);
 
   const bool A = (i8)(e_ploc - sl_ploc + k - (e_xp < (u8)(aa + 0x100 - (0x48 + bVar3)))) < 0;
 
-  const bool B = (i8)(e_ploc - sr_ploc - p - (e_xp < bVar6)) < 0;
+  const bool B = (i8)(e_ploc - (sl_ploc + (sl_xpos != 0)) - p - (e_xp < bVar6)) < 0;
 
   if (A) {
     // object is to the left of the screen
