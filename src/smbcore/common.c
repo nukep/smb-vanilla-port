@@ -7895,10 +7895,10 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
 
   a = ScreenRight_X_Pos;
 
-  bool carry1 = a + 0x48 + (sl_ploc == 0xff) >= 0x100;
+  bool carry1 = a + 0x48 + (sl_ploc == 0xff ? 0 : 1) >= 0x100;
 
   a += 0x48;
-  if (sl_ploc == 0xff) {
+  if (sl_ploc != 0xff) {
     a += 1;
   }
 
@@ -7949,7 +7949,7 @@ void OffscreenBoundsCheck(const u8 param_1) {
     return;
   }
 
-#if 1
+#if 0
   if (offscreenboundscheck_v1(param_1)) {
     EraseEnemyObject(param_1);
   }
