@@ -7809,9 +7809,6 @@ static inline bool offscreenboundscheck_v1(const u8 param_1) {
 static inline bool offscreenboundscheck_v2(const u8 param_1) {
   const u8 enemy_id = Enemy_ID[param_1];
 
-  u8 a = ScreenLeft_X_Pos;
-  u8 sl_ploc = ScreenLeft_PageLoc;
-
   const i16 sl = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
   const i16 sr = LOAD_i16(ScreenRight_PageLoc, ScreenRight_X_Pos);
   const i16 e = LOAD_i16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
@@ -7824,24 +7821,14 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
 #ifdef SMB2J_MODE
   case A_PIRANHA_PLANT_SMB2J:
 #endif
-    {
-      bool newcarry = a + 0x38 + 1 >= 0x100;
 
-      a += 0x38;
+    r00r01 = (u16)sl - 0x48 + 0x38;
 
-      // carry quirk: +1, because ADC #$38 is not accompanied with a CLC
-      if (newcarry) {
-        a += 1;
-      }
-
-      if (a < 0x48) {
-        sl_ploc -= 1;
-      }
-
-      a -= 0x48;
-
-      r00r01 = (sl_ploc << 8) | (a);
+    // carry quirk
+    if ((sl & 0xff) >= 0x100 - 0x38 - 1) {
+      r00r01 -= 0xff;
     }
+
     break;
 
   case A_GREEN_KOOPA:
@@ -7863,46 +7850,26 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
     // carry quirk: carry flag is clear if enemy_id < A_PIRANHA_PLANT
     // SBC is not accompanied with a SEC
 
-    {
-      u8 subtractby = 0x48;
+    r00r01 = (u16)sl - 0x48;
 
-      // carry quirk
-      subtractby += 1;
-
-      if (a < subtractby) {
-        sl_ploc -= 1;
-      }
-
-      a -= subtractby;
-
-      r00r01 = (sl_ploc << 8) | (a);
-    }
+    // carry quirk
+    r00r01 -= 1;
 
     break;
 
   default:
     // > A_PIRANHA_PLANT
+    // no carry quirk here
 
-    {
-      u8 subtractby = 0x48;
+    r00r01 = (u16)sl - 0x48;
 
-      // no carry quirk here
-
-      if (a < subtractby) {
-        sl_ploc -= 1;
-      }
-
-      a -= subtractby;
-
-      r00r01 = (sl_ploc << 8) | (a);
-    }
     break;
   }
 
   u8 r01 = r00r01 & 0xff;
   u8 r00 = r00r01 >> 8;
 
-  a = ScreenRight_X_Pos;
+  u8 a = ScreenRight_X_Pos;
 
   bool carry1 = a + 0x48 + (r00 == 0xff ? 0 : 1) >= 0x100;
 
