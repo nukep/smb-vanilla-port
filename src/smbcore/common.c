@@ -7812,6 +7812,12 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
   u8 a = ScreenLeft_X_Pos;
   u8 sl_ploc = ScreenLeft_PageLoc;
 
+  const i16 sl = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
+  const i16 sr = LOAD_i16(ScreenRight_PageLoc, ScreenRight_X_Pos);
+  const i16 e = LOAD_i16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
+
+  u16 r00r01 = 0;
+
   switch (enemy_id) {
   case A_HAMMER_BRO:
   case A_PIRANHA_PLANT:
@@ -7824,11 +7830,8 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
       a += 0x38;
 
       // carry quirk: +1, because ADC #$38 is not accompanied with a CLC
-      a += 1;
-
-      // carry quirk
-      if (!newcarry) {
-        a -= 1;
+      if (newcarry) {
+        a += 1;
       }
 
       if (a < 0x48) {
@@ -7836,6 +7839,8 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
       }
 
       a -= 0x48;
+
+      r00r01 = (sl_ploc << 8) | (a);
     }
     break;
 
@@ -7869,6 +7874,8 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
       }
 
       a -= subtractby;
+
+      r00r01 = (sl_ploc << 8) | (a);
     }
 
     break;
@@ -7886,19 +7893,21 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
       }
 
       a -= subtractby;
+
+      r00r01 = (sl_ploc << 8) | (a);
     }
     break;
   }
 
-  u8 r01 = a;
-  u8 r00 = sl_ploc;
+  u8 r01 = r00r01 & 0xff;
+  u8 r00 = r00r01 >> 8;
 
   a = ScreenRight_X_Pos;
 
-  bool carry1 = a + 0x48 + (sl_ploc == 0xff ? 0 : 1) >= 0x100;
+  bool carry1 = a + 0x48 + (r00 == 0xff ? 0 : 1) >= 0x100;
 
   a += 0x48;
-  if (sl_ploc != 0xff) {
+  if (r00 != 0xff) {
     a += 1;
   }
 
