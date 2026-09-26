@@ -7871,10 +7871,13 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
 
   u8 a = ScreenRight_X_Pos;
 
-  bool carry1 = a + 0x48 + (r00 == 0xff ? 0 : 1) >= 0x100;
+  // carry quirk: SBC #$00
+  bool carry0 = ((i16)sl >= 0) && ((i16)r00r01 < 0);
+
+  bool carry1 = a + 0x48 + (carry0 ? 0 : 1) >= 0x100;
 
   a += 0x48;
-  if (r00 != 0xff) {
+  if (!carry0) {
     a += 1;
   }
 
