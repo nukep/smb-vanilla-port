@@ -7712,14 +7712,7 @@ void ChkSmallPlatCollision(const u8 param_1) {
   }
 }
 
-
-// SMB:d67a
-// SM2MAIN:a2b4
-// Signature: [X] -> []
-void OffscreenBoundsCheck(const u8 param_1) {
-  if (Enemy_ID[param_1] == A_FLYING_CHEEPCHEEP) {
-    return;
-  }
+static inline bool offscreenboundscheck_v1(const u8 param_1) {
   const u8 enemy_id = Enemy_ID[param_1];
 
   i16 adjustamount = 0;
@@ -7792,26 +7785,180 @@ void OffscreenBoundsCheck(const u8 param_1) {
 
   if (A) {
     // object is to the left of the screen
-    EraseEnemyObject(param_1);
-    return;
+    return true;
   }
 
   if (B) {
     // object is on the screen, do not erase
-    return;
+    return false;
   }
 
   // object is to the right of the screen
   // erase, with some exceptions
 
-  if (Enemy_State[param_1] == 5) { return; }
-  if (enemy_id == A_PIRANHA_PLANT) { return; }
-  if (enemy_id == A_FLAGPOLE) { return; }
-  if (enemy_id == A_STARFLAG) { return; }
-  if (enemy_id == A_JUMPSPRING) { return; }
-  if (SMB2J_ONLY && enemy_id == A_PIRANHA_PLANT_SMB2J) { return; }
+  if (Enemy_State[param_1] == 5) { return false; }
+  if (enemy_id == A_PIRANHA_PLANT) { return false; }
+  if (enemy_id == A_FLAGPOLE) { return false; }
+  if (enemy_id == A_STARFLAG) { return false; }
+  if (enemy_id == A_JUMPSPRING) { return false; }
+  if (SMB2J_ONLY && enemy_id == A_PIRANHA_PLANT_SMB2J) { return false; }
 
-  EraseEnemyObject(param_1);
+  return true;
+}
+
+static inline bool offscreenboundscheck_v2(const u8 param_1) {
+  const u8 enemy_id = Enemy_ID[param_1];
+
+  u8 a = ScreenLeft_X_Pos;
+  u8 sl_ploc = ScreenLeft_PageLoc;
+
+  switch (enemy_id) {
+  case A_HAMMER_BRO:
+  case A_PIRANHA_PLANT:
+#ifdef SMB2J_MODE
+  case A_PIRANHA_PLANT_SMB2J:
+#endif
+    {
+      bool newcarry = a + 0x38 + 1 >= 0x100;
+
+      a += 0x38;
+
+      // carry quirk: +1, because ADC #$38 is not accompanied with a CLC
+      a += 1;
+
+      // carry quirk
+      if (!newcarry) {
+        a -= 1;
+      }
+
+      if (a < 0x48) {
+        sl_ploc -= 1;
+      }
+
+      a -= 0x48;
+    }
+    break;
+
+  case A_GREEN_KOOPA:
+  case A_RED_KOOPA_GREENLIKE:
+  case A_BUZZY_BEETLE:
+  case A_RED_KOOPA:
+  case A_GOOMBA:
+  case A_BLOOBER:
+  case A_BULLET_BILL:
+  case A_GREEN_PARATROOPA_INPLACE:
+  case A_CHEEPCHEEP_GRAY:
+  case A_CHEEPCHEEP_RED:
+  case A_PODOBOO:
+#ifdef SMB1_MODE
+  // Note: This matches the behavior of SMB1, even though this id isn't supposed to be used.
+  case A_PIRANHA_PLANT_SMB2J:
+#endif
+    // < A_PIRANHA_PLANT
+    // carry quirk: carry flag is clear if enemy_id < A_PIRANHA_PLANT
+    // SBC is not accompanied with a SEC
+
+    {
+      u8 subtractby = 0x48;
+
+      // carry quirk
+      subtractby += 1;
+
+      if (a < subtractby) {
+        sl_ploc -= 1;
+      }
+
+      a -= subtractby;
+    }
+
+    break;
+
+  default:
+    // > A_PIRANHA_PLANT
+
+    {
+      u8 subtractby = 0x48;
+
+      // no carry quirk here
+
+      if (a < subtractby) {
+        sl_ploc -= 1;
+      }
+
+      a -= subtractby;
+    }
+    break;
+  }
+
+  u8 r01 = a;
+  u8 r00 = sl_ploc;
+
+  a = ScreenRight_X_Pos;
+
+  bool carry1 = a + 0x48 + (sl_ploc == 0xff) >= 0x100;
+
+  a += 0x48;
+  if (sl_ploc == 0xff) {
+    a += 1;
+  }
+
+  u8 r03 = a;
+
+  u8 r02 = ScreenRight_PageLoc + carry1;
+
+  a = Enemy_X_Position[param_1];
+  a = Enemy_PageLoc[param_1] - r00 - (1 - (a >= r01));
+
+  if ((i8)a < 0) {
+    // bmi TooFar
+    return true;
+  }
+
+  a = Enemy_X_Position[param_1];
+  a = Enemy_PageLoc[param_1] - r02 - (1 - (a >= r03));
+
+  if ((i8)a < 0) {
+    // bmi ExScrnBd
+    return false;
+  }
+
+  // object is to the right of the screen
+  // erase, with some exceptions
+
+  if (Enemy_State[param_1] == 5) { return false; }
+  if (enemy_id == A_PIRANHA_PLANT) { return false; }
+  if (enemy_id == A_FLAGPOLE) { return false; }
+  if (enemy_id == A_STARFLAG) { return false; }
+  if (enemy_id == A_JUMPSPRING) { return false; }
+  if (SMB2J_ONLY && enemy_id == A_PIRANHA_PLANT_SMB2J) { return false; }
+
+  return true;
+}
+
+// SMB:d67a
+// SM2MAIN:a2b4
+// Signature: [X] -> []
+void OffscreenBoundsCheck(const u8 param_1) {
+  // NES note: the original had _tons_ of quirks with the carry flag,
+  // because ADC and SBC were not accompanied with a CLC or SEC.
+  // These quirks are separated in case a feature-enhancing port wants to remove them.
+
+  const u8 enemy_id = Enemy_ID[param_1];
+
+  if (enemy_id == A_FLYING_CHEEPCHEEP) {
+    return;
+  }
+
+#if 1
+  if (offscreenboundscheck_v1(param_1)) {
+    EraseEnemyObject(param_1);
+  }
+#else
+  if (offscreenboundscheck_v2(param_1)) {
+    EraseEnemyObject(param_1);
+  }
+#endif
+
 }
 
 
