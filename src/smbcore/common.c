@@ -440,6 +440,11 @@ void GameMenuRoutine(void) {
       return;
     }
 
+    if ((buttons & BUTTON_U) && ((buttons & BUTTON_D) | (buttons & BUTTON_B))) {
+      // A debug feature
+      WorldSelectEnableFlag = true;
+    }
+
     // not really sure why this is done. seems pointless
     SelectTimer = buttons;
 
