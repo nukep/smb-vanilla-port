@@ -7712,106 +7712,21 @@ void ChkSmallPlatCollision(const u8 param_1) {
   }
 }
 
-static inline bool offscreenboundscheck_v1(const u8 param_1) {
-  const u8 enemy_id = Enemy_ID[param_1];
+// Return true if the actor at the given index should be erased.
+static inline bool offscreenboundscheck_condition(const u8 idx) {
+  // NES note: the original had _tons_ of quirks with the carry flag,
+  // because ADC and SBC were not accompanied with a CLC or SEC.
+  // These quirks are separated in case a feature-enhancing port wants to remove them.
 
-  i16 adjustamount = 0;
+  const u8 enemy_id = Enemy_ID[idx];
 
-  switch (enemy_id) {
-  case A_HAMMER_BRO:
-  case A_PIRANHA_PLANT:
-#ifdef SMB2J_MODE
-  case A_PIRANHA_PLANT_SMB2J:
-#endif
-    adjustamount = 0x38 + 1;
-    break;
-
-  case A_GREEN_KOOPA:
-  case A_RED_KOOPA_GREENLIKE:
-  case A_BUZZY_BEETLE:
-  case A_RED_KOOPA:
-  case A_GOOMBA:
-  case A_BLOOBER:
-  case A_BULLET_BILL:
-  case A_GREEN_PARATROOPA_INPLACE:
-  case A_CHEEPCHEEP_GRAY:
-  case A_CHEEPCHEEP_RED:
-  case A_PODOBOO:
-#ifdef SMB1_MODE
-  // Note: This matches the behavior of SMB1, even though this id isn't supposed to be used.
-  case A_PIRANHA_PLANT_SMB2J:
-#endif
-    adjustamount = 0;
-    break;
-
-  default:
-    adjustamount = 0x100;
-    break;
-  }
-
-  // Sometimes screen-left can be negative. It's rare, but it happens.
-  // World 5-3 in SMB2J loops back to the start of the level, which causes a negative screen-left.
-
-  const i16 sl = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
-  const i16 sr = LOAD_i16(ScreenRight_PageLoc, ScreenRight_X_Pos);
-
-  // The screen width is always a fixed amount
-  const u16 screen_width = 256;
-  expect_weak(sr - sl == screen_width - 1);
-
-  const i16 e = LOAD_i16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
-
-  const u8 sl_ploc = (u8)(sl >> 8);
-  const u8 sl_xpos = (u8)(sl & 0xff);
-
-  const u8 e_ploc = (u8)(e >> 8);
-  const u8 e_xp = (u8)(e & 0xff);
-
-  const u8 abVar5 = adjustamount;
-  const bool bVar3 = sl_xpos < 0x100 - adjustamount;
-
-  const u8 aa = sl_xpos + abVar5;
-
-  const bool k = aa < 0x48 + bVar3;
-
-  const bool bVar8 = (aa >= 0x48 + bVar3) || sl_ploc != 0;
-  const u8 bVar6 = sl_xpos - 1 + 0x48 + bVar8;
-
-  const bool p = ((u8)(sl_xpos - 1) >= 0x100 - 0x48) || (bVar8 && bVar6 == 0);
-
-  const bool A = (i8)(e_ploc - sl_ploc + k - (e_xp < (u8)(aa + 0x100 - (0x48 + bVar3)))) < 0;
-
-  const bool B = (i8)(e_ploc - (sl_ploc + (sl_xpos != 0)) - p - (e_xp < bVar6)) < 0;
-
-  if (A) {
-    // object is to the left of the screen
-    return true;
-  }
-
-  if (B) {
-    // object is on the screen, do not erase
+  if (enemy_id == A_FLYING_CHEEPCHEEP) {
     return false;
   }
 
-  // object is to the right of the screen
-  // erase, with some exceptions
-
-  if (Enemy_State[param_1] == 5) { return false; }
-  if (enemy_id == A_PIRANHA_PLANT) { return false; }
-  if (enemy_id == A_FLAGPOLE) { return false; }
-  if (enemy_id == A_STARFLAG) { return false; }
-  if (enemy_id == A_JUMPSPRING) { return false; }
-  if (SMB2J_ONLY && enemy_id == A_PIRANHA_PLANT_SMB2J) { return false; }
-
-  return true;
-}
-
-static inline bool offscreenboundscheck_v2(const u8 param_1) {
-  const u8 enemy_id = Enemy_ID[param_1];
-
   const i16 sl = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
   const i16 sr = LOAD_i16(ScreenRight_PageLoc, ScreenRight_X_Pos);
-  const i16 e  = LOAD_i16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
+  const i16 e  = LOAD_i16(Enemy_PageLoc[idx], Enemy_X_Position[idx]);
 
   i16 left_bound  = sl - 0x48;
   i16 right_bound = sr + 0x48;
@@ -7870,7 +7785,7 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
   if (e - right_bound >= 0) {
     // Object is right of the right bound. Erase, with some exceptions.
 
-    if (Enemy_State[param_1] == 5) { return false; }
+    if (Enemy_State[idx] == 5) { return false; }
     if (enemy_id == A_PIRANHA_PLANT) { return false; }
     if (enemy_id == A_FLAGPOLE) { return false; }
     if (enemy_id == A_STARFLAG) { return false; }
@@ -7890,26 +7805,9 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
 // SM2MAIN:a2b4
 // Signature: [X] -> []
 void OffscreenBoundsCheck(const u8 param_1) {
-  // NES note: the original had _tons_ of quirks with the carry flag,
-  // because ADC and SBC were not accompanied with a CLC or SEC.
-  // These quirks are separated in case a feature-enhancing port wants to remove them.
-
-  const u8 enemy_id = Enemy_ID[param_1];
-
-  if (enemy_id == A_FLYING_CHEEPCHEEP) {
-    return;
-  }
-
-#if 0
-  if (offscreenboundscheck_v1(param_1)) {
+  if (offscreenboundscheck_condition(param_1)) {
     EraseEnemyObject(param_1);
   }
-#else
-  if (offscreenboundscheck_v2(param_1)) {
-    EraseEnemyObject(param_1);
-  }
-#endif
-
 }
 
 
