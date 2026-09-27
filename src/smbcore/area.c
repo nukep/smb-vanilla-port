@@ -993,7 +993,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
     // Inlined: AreaFrenzy
 
     for (int i = 0; i < 5; i++) {
-      if (Enemy_ID[i] == A_FLYING_CHEEPCHEEP) {
+      if (actor_is(i, A_FLYING_CHEEPCHEEP)) {
         EnemyFrenzyQueue = 0;
         return;
       }
@@ -1006,7 +1006,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
     // Inlined: AreaFrenzy
 
     for (int i = 0; i < 5; i++) {
-      if (Enemy_ID[i] == A_BULLET_BILL_OR_CHEEPCHEEP_FRENZY) {
+      if (actor_is(i, A_BULLET_BILL_OR_CHEEPCHEEP_FRENZY)) {
         EnemyFrenzyQueue = 0;
         return;
       }
@@ -1019,7 +1019,7 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
     // Inlined: AreaFrenzy
 
     for (int i = 0; i < 5; i++) {
-      if (Enemy_ID[i] == A_STOP_FRENZY) {
+      if (actor_is(i, A_STOP_FRENZY)) {
         EnemyFrenzyQueue = 0;
         return;
       }

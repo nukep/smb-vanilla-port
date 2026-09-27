@@ -2061,7 +2061,7 @@ void ContinueGame(void) {
 // Signature: [A] -> []
 void KillEnemies(const u8 param_1) {
   for (int i = 0; i < 5; i++) {
-    if (Enemy_ID[i] == param_1) {
+    if (actor_is(i, param_1)) {
       actor_deactivate(i);
     }
   }
@@ -2736,7 +2736,7 @@ void ResetPalStar(void) {
 void FlagpoleSlide(void) {
   u8 bVar1;
 
-  if (Enemy_ID[5] == A_FLAGPOLE) {
+  if (actor_is(5, A_FLAGPOLE)) {
     Square1SoundQueue = FlagpoleSoundQueue;
     bVar1 = 0;
     FlagpoleSoundQueue = SOUND_SQ1_NONE;
@@ -3484,7 +3484,7 @@ void ProcessWhirlpools(void) {
 // SM2MAIN:83be
 // Signature: [] -> []
 void FlagpoleRoutine(void) {
-  if (Enemy_ID[5] != A_FLAGPOLE) {
+  if (!actor_is(5, A_FLAGPOLE)) {
     return;
   }
 
@@ -3710,7 +3710,7 @@ void ProcessCannons(void) {
     }
 
     if (chk_bb) {
-      if (Enemy_ID[i] == A_BULLET_BILL_CANNON) {
+      if (actor_is(i, A_BULLET_BILL_CANNON)) {
         OffscreenBoundsCheck(i);
         if (actor_is_active(i)) {
           GetEnemyOffscreenBits(i);
@@ -4009,7 +4009,7 @@ void SetupPowerUp(const u8 param_1) {
 // SM2MAIN:8819
 // Signature: [] -> []
 void PwrUpJmp(void) {
-  expect(actor_get_id(5) == A_POWERUP);
+  expect(actor_is(5, A_POWERUP));
   actor_activate(5, A_POWERUP);
   Enemy_State[5] = 1;
   Enemy_BoundBoxCtrl[5] = 3;
@@ -4573,7 +4573,7 @@ void ImposeGravitySprObj(const i8 param_1, const u8 param_2, const u8 param_3) {
 // SM2MAIN:8b85
 // Signature: [X] -> []
 void MovePlatformDown(const u8 objoff) {
-  const u8 bVar1 = (Enemy_ID[objoff] == A_LARGEPLATFORM_DROP) ? 9 : 5;
+  const u8 bVar1 = actor_is(objoff, A_LARGEPLATFORM_DROP) ? 9 : 5;
   ImposeGravity(0, objoff + 1, bVar1, 10, 3);
 }
 
@@ -4582,7 +4582,7 @@ void MovePlatformDown(const u8 objoff) {
 // SM2MAIN:8b88
 // Signature: [X] -> []
 void MovePlatformUp(const u8 objoff) {
-  const u8 bVar1 = (Enemy_ID[objoff] == A_LARGEPLATFORM_DROP) ? 9 : 5;
+  const u8 bVar1 = actor_is(objoff, A_LARGEPLATFORM_DROP) ? 9 : 5;
   ImposeGravity(1, objoff + 1, bVar1, 10, 3);
 }
 
@@ -5195,7 +5195,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
   FrenzyEnemyTimer = 0x80;
 
   for (int i = 4; i >= 0; i--) {
-    if (Enemy_ID[i] == A_LAKITU) {
+    if (actor_is(i, A_LAKITU)) {
       if (Player_Y_Position < 0x2c) {
         return;
       }
@@ -5218,7 +5218,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
       Enemy_X_Speed[objoff] = 0;
       Enemy_MovingDir[objoff] = DIR_RIGHT;
       Enemy_Y_Speed[objoff] = -3;
-      expect(actor_get_id(objoff) == A_SPINY);
+      expect(actor_is(objoff, A_SPINY));
       actor_activate(objoff, A_SPINY);
       Enemy_State[objoff] = 5;
       return;
@@ -5237,7 +5237,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
           bVar1 = 0x60;
         }
         PutAtRightExtent(bVar1, i);
-        expect(actor_get_id(i) == A_LAKITU);
+        expect(actor_is(i, A_LAKITU));
         actor_activate(i, A_LAKITU);
         return;
       }
@@ -5251,7 +5251,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
 // Signature: [X] -> []
 void InitLongFirebar(const u8 objoff) {
   DuplicateEnemyObj(objoff);
-  expect(actor_get_id(objoff) == A_FIREBAR_5);
+  expect(actor_is(objoff, A_FIREBAR_5));
   actor_activate(objoff, A_FIREBAR_5);
   InitShortFirebar(objoff);
 }
@@ -5367,7 +5367,7 @@ void InitFlyingCheepCheep(const u8 objoff) {
                       position_lookup[idx][currng]);
   }
 
-  expect(actor_get_id(objoff) == A_FLYING_CHEEPCHEEP);
+  expect(actor_is(objoff, A_FLYING_CHEEPCHEEP));
   actor_activate(objoff, A_FLYING_CHEEPCHEEP);
 
   Enemy_Y_HighPos[objoff] = 1;
@@ -5384,7 +5384,7 @@ void InitBowser(const u8 objoff) {
       if (i == objoff) {
         continue;
       }
-      if (Enemy_ID[i] == A_BOWSER) {
+      if (actor_is(i, A_BOWSER)) {
         Enemy_ID[i] = A_GREEN_KOOPA;
         actor_deactivate(i);
       }
@@ -5392,7 +5392,7 @@ void InitBowser(const u8 objoff) {
   }
 
   DuplicateEnemyObj(objoff);
-  expect(actor_get_id(objoff) == A_BOWSER);
+  expect(actor_is(objoff, A_BOWSER));
   actor_activate(objoff, A_BOWSER);
   BowserBodyControls = 0;
   BridgeCollapseOffset = 0;
@@ -5440,7 +5440,7 @@ void InitBowserFlame(const u8 objoff) {
   Enemy_Y_MoveForce[objoff] = 0;
   u8 bVar1 = BowserFront_Offset;
   NoiseSoundQueue |= SOUND_NOISE_BOWSERFLAME;
-  if (Enemy_ID[BowserFront_Offset] != A_BOWSER) {
+  if (!actor_is(BowserFront_Offset, A_BOWSER)) {
     bVar1 = SetFlameTimer();
     FrenzyEnemyTimer = bVar1 + 0x20;
     if (SecondaryHardMode) {
@@ -5450,7 +5450,7 @@ void InitBowserFlame(const u8 objoff) {
     const u8 rng = PseudoRandomBitReg[objoff] & 3;
     BowserFlamePRandomOfs[objoff] = rng;
     PutAtRightExtent(FlameYPosData[rng], objoff);
-    expect(actor_get_id(objoff) == A_BOWSER_FLAME);
+    expect(actor_is(objoff, A_BOWSER_FLAME));
     actor_activate(objoff, A_BOWSER_FLAME);
     return;
   }
@@ -5463,7 +5463,7 @@ void InitBowserFlame(const u8 objoff) {
   EnemyFrenzyBuffer = 0;
   Enemy_BoundBoxCtrl[objoff] = 8;
   Enemy_Y_HighPos[objoff] = 1;
-  expect(actor_get_id(objoff) == A_BOWSER_FLAME);
+  expect(actor_is(objoff, A_BOWSER_FLAME));
   actor_activate(objoff, A_BOWSER_FLAME);
   Enemy_X_MoveForce[objoff] = 0;
   Enemy_State[objoff] = 0;
@@ -5504,7 +5504,7 @@ void InitFireworks(const u8 objoff) {
 
   // Find the star flag object
   for (i = 5; i >= 0; i--) {
-    if (Enemy_ID[i] == A_STARFLAG) {
+    if (actor_is(i, A_STARFLAG)) {
       break;
     }
   }
@@ -5529,7 +5529,7 @@ void InitFireworks(const u8 objoff) {
   Enemy_Y_Position[objoff] = ypos_lookup[bVar3];
   Enemy_Y_HighPos[objoff] = 1;
 
-  expect(actor_get_id(objoff) == A_FIREWORKS);
+  expect(actor_is(objoff, A_FIREWORKS));
   actor_activate(objoff, A_FIREWORKS);
 
   ExplosionGfxCounter[objoff] = 0;
@@ -5593,7 +5593,7 @@ void BulletBillCheepCheep(const u8 objoff) {
 
     // Prevent too many bullet bills from being spawned
     for (int i = 0; i < 5; i++) {
-      if (actor_is_active(i) && (Enemy_ID[i] == A_BULLET_BILL)) {
+      if (actor_is_active(i) && actor_is(i, A_BULLET_BILL)) {
         return;
       }
     }
@@ -5742,7 +5742,7 @@ void InitEnemyFrenzy(const u8 objoff) {
 // Signature: [X] -> []
 void EndFrenzy(const u8 objoff) {
   for (int i = 0; i < 6; i++) {
-    if (Enemy_ID[i] == A_LAKITU) {
+    if (actor_is(i, A_LAKITU)) {
       Enemy_State[i] = 1;
     }
   }
@@ -6316,7 +6316,7 @@ void MoveNormalEnemy(const u8 objoff) {
 
         return;
       }
-      if ((EnemyIntervalTimer[objoff] == 0xe) && (Enemy_ID[objoff] == A_GOOMBA)) {
+      if ((EnemyIntervalTimer[objoff] == 0xe) && actor_is(objoff, A_GOOMBA)) {
         EraseEnemyObject(objoff);
       }
       return;
@@ -6337,7 +6337,7 @@ void MoveNormalEnemy(const u8 objoff) {
       return;
     }
 
-    if (((Enemy_State[objoff] & 0x40) != 0) && (Enemy_ID[objoff] != A_POWERUP)) {
+    if (((Enemy_State[objoff] & 0x40) != 0) && !actor_is(objoff, A_POWERUP)) {
       bVar2 = 1;
     }
   }
@@ -6558,7 +6558,7 @@ void MoveSwimmingCheepCheep(const u8 objoff) {
     return;
   }
 
-  const u8 cheepcheep_speed = Enemy_ID[objoff] == A_CHEEPCHEEP_GRAY ? 0x40 : 0x80;
+  const u8 cheepcheep_speed = actor_is(objoff, A_CHEEPCHEEP_GRAY) ? 0x40 : 0x80;
 
   SUB_24_24(Enemy_PageLoc[objoff], Enemy_X_Position[objoff], Enemy_X_MoveForce[objoff],
             0, 0, cheepcheep_speed);
@@ -6840,7 +6840,7 @@ i8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u
 
   if (bVar1 >= 0x3c) {
     bVar1 = 0x3c;
-    if (Enemy_ID[objoff] == A_LAKITU) {
+    if (actor_is(objoff, A_LAKITU)) {
       if (bVar2 != LakituMoveDirection[objoff]) {
         if (LakituMoveDirection[objoff] != 0) {
           LakituMoveSpeed[objoff] -= 1;
@@ -6871,7 +6871,7 @@ i8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u
 
   if ((Player_X_Speed == 0) || (ScrollAmount == 0)) {
     return param_2 - bVar1;
-  } else if ((Enemy_ID[objoff] != A_SPINY) && (LakituMoveDirection[objoff] == 0)) {
+  } else if (!actor_is(objoff, A_SPINY) && (LakituMoveDirection[objoff] == 0)) {
     return param_2 - bVar1;
   } else if ((Player_X_Speed > 0 && Player_X_Speed <= 0x18) || (ScrollAmount <= 1)) {
     return param_3 - bVar1;
@@ -6885,7 +6885,7 @@ i8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u
 // SM2MAIN:9c21
 // Signature: [] -> []
 void BridgeCollapse(void) {
-  if (Enemy_ID[BowserFront_Offset] == A_BOWSER) {
+  if (actor_is(BowserFront_Offset, A_BOWSER)) {
     const u8 objoff = BowserFront_Offset;
     if (Enemy_State[BowserFront_Offset] == 0) {
       BowserFeetCounter -= 1;
@@ -7459,7 +7459,7 @@ void BalancePlatform(const u8 objoff) {
   }
 
 #ifdef SMB2J_MODE
-  if (Enemy_ID[enemy_state] != A_LARGEPLATFORM_BALANCE) {
+  if (!actor_is(enemy_state, A_LARGEPLATFORM_BALANCE)) {
     return;
   }
 #endif
@@ -7862,7 +7862,7 @@ void HandleEnemyFBallCol(const u8 param_1) {
 
   u8 idx;
 
-  if (actor_get_tagged_value(param_1, &idx) && Enemy_ID[idx] == A_BOWSER) {
+  if (actor_get_tagged_value(param_1, &idx) && actor_is(idx, A_BOWSER)) {
     bVar2 = idx;
   } else {
     bVar2 = param_1;
@@ -7934,9 +7934,9 @@ void ShellOrBlockDefeat(const u8 param_1) {
 #endif
 
   Enemy_State[param_1] = (Enemy_State[param_1] & 0x1f) | 0x20;
-  if (Enemy_ID[param_1] == A_GOOMBA) {
+  if (actor_is(param_1, A_GOOMBA)) {
     EnemySmackScore(1, param_1);
-  } else if (Enemy_ID[param_1] == A_HAMMER_BRO) {
+  } else if (actor_is(param_1, A_HAMMER_BRO)) {
     EnemySmackScore(6, param_1);
   } else {
     EnemySmackScore(2, param_1);
@@ -8420,13 +8420,13 @@ void ProcEnemyCollisions(const u8 objoff, const u8 param_2) {
         EnemyTurnAround(objoff);
         return;
       }
-      if (Enemy_ID[param_2] != A_HAMMER_BRO) {
+      if (!actor_is(param_2, A_HAMMER_BRO)) {
         ShellOrBlockDefeat(objoff);
         SetupFloateyNumber(ShellChainCounter[param_2] + 4, objoff);
         ShellChainCounter[param_2] += 1;
         return;
       }
-    } else if (Enemy_ID[objoff] != A_HAMMER_BRO) {
+    } else if (!actor_is(objoff, A_HAMMER_BRO)) {
       if ((char)Enemy_State[param_2] < 0) {
         SetupFloateyNumber(6, objoff);
         ShellOrBlockDefeat(objoff);
@@ -8473,7 +8473,7 @@ static inline void ChkForPlayerC_LargeP(const u8 param_1, const u8 objoff);
 void LargePlatformCollision(const u8 objoff) {
   PlatformCollisionFlag[objoff] = 0xff;
   if ((TimerControl == 0) && (Enemy_State[objoff] < 0x80)) {
-    if (Enemy_ID[objoff] == A_LARGEPLATFORM_BALANCE) {
+    if (actor_is(objoff, A_LARGEPLATFORM_BALANCE)) {
       ChkForPlayerC_LargeP(Enemy_State[objoff], objoff);
     }
     ChkForPlayerC_LargeP(objoff, objoff);
@@ -8548,7 +8548,7 @@ void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, c
   }
   if (((u8)(BBOX_BOTRIGHT_Y(0) - BBOX_TOPLEFT_Y(param_2_div4)) < 6) && (Player_Y_Speed >= 0)) {
     u8 tmp3 = param_3;
-    if ((Enemy_ID[param_1] != A_SMALLPLATFORM_1) && (Enemy_ID[param_1] != A_SMALLPLATFORM_2)) {
+    if (!actor_is(param_1, A_SMALLPLATFORM_1) && (!actor_is(param_1, A_SMALLPLATFORM_2))) {
       tmp3 = param_1;
     }
     PlatformCollisionFlag[objoff] = tmp3;
@@ -9251,7 +9251,7 @@ void EnemyToBGCollisionDet(const u8 objoff) {
         return;
       }
       if (Enemy_State[objoff] == 2) {
-        EnemyIntervalTimer[objoff] = (Enemy_ID[objoff] == A_SPINY) ? 0 : 0x10;
+        EnemyIntervalTimer[objoff] = actor_is(objoff, A_SPINY) ? 0 : 0x10;
         Enemy_State[objoff] = 3;
         EnemyLanding(objoff);
         return;
@@ -9289,7 +9289,7 @@ void SetStun2(const u8 param_1) {
   Enemy_Y_Position[param_1] -= 1;
   Enemy_Y_Position[param_1] -= 1;
 
-  if ((Enemy_ID[param_1] == A_BLOOBER) || (AreaType == AREA_WATER)) {
+  if (actor_is(param_1, A_BLOOBER) || (AreaType == AREA_WATER)) {
     Enemy_Y_Speed[param_1] = -1;
   } else {
     Enemy_Y_Speed[param_1] = -3;
@@ -9297,7 +9297,7 @@ void SetStun2(const u8 param_1) {
 
   const struct_ncr00 sVar2 = PlayerEnemyDiff(param_1);
 
-  if ((Enemy_ID[param_1] != A_BULLET_BILL_CANNON) && (Enemy_ID[param_1] != A_BULLET_BILL)) {
+  if (!actor_is(param_1, A_BULLET_BILL_CANNON) && !actor_is(param_1, A_BULLET_BILL)) {
     Enemy_MovingDir[param_1] = sVar2.n ? 2 : 1;
   }
   Enemy_X_Speed[param_1] = sVar2.n ? -16 : 16;
@@ -9308,7 +9308,7 @@ void SetStun2(const u8 param_1) {
 // SM2MAIN:ad78
 // Signature: [X] -> []
 void ChkForRedKoopa(const u8 objoff) {
-  if ((Enemy_ID[objoff] == A_RED_KOOPA) && (Enemy_State[objoff] == 0)) {
+  if ((actor_is(objoff, A_RED_KOOPA) && (Enemy_State[objoff] == 0))) {
     ChkForBump_HammerBroJ(objoff);
     return;
   }
@@ -9360,7 +9360,7 @@ void ChkForBump_HammerBroJ(const u8 objoff) {
   if ((objoff != 5) && ((char)Enemy_State[objoff] < 0)) {
     Square1SoundQueue = SOUND_SQ1_BUMP;
   }
-  if (Enemy_ID[objoff] == A_HAMMER_BRO) {
+  if (actor_is(objoff, A_HAMMER_BRO)) {
     SetHJ(objoff, -6, false);
   } else {
     // Turn the enemy around
@@ -10775,7 +10775,7 @@ static void EnemyGfxHandler_bowser(const u8 objoff, const u8 bowser_gfx_flag) {
   // right before any array reads could access writes we optimized away
   expect(objoff < 0xeb - 0xcf);
 
-  expect(Enemy_ID[objoff] == A_BOWSER);
+  expect(actor_is(objoff, A_BOWSER));
 
   expect_weak(Enemy_SprAttrib[objoff] == 0);
 
@@ -10868,7 +10868,7 @@ void SprObjectOffscrChk(const u8 objoff) {
     SPRITE_Y(offset, 0) = SPRITE_Y_OFFSCREEN;
     SPRITE_Y(offset, 1) = SPRITE_Y_OFFSCREEN;
 
-    if ((Enemy_ID[objoff] != A_PODOBOO) && (Enemy_Y_HighPos[objoff] == 2)) {
+    if (!actor_is(objoff, A_PODOBOO) && (Enemy_Y_HighPos[objoff] == 2)) {
       EraseEnemyObject(objoff);
     }
   }

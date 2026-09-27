@@ -394,6 +394,10 @@ static inline u8 actor_get_id(const u8 idx) {
   return Enemy_ID[idx];
 }
 
+static inline bool actor_is(const u8 idx, const u8 id) {
+  return Enemy_ID[idx] == id;
+}
+
 
 enum playerframe {
   PLAYERFRAME_BIG_WALK_0 = 0,
