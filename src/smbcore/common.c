@@ -826,7 +826,8 @@ void PlayerVictoryWalk(void) {
 void PlayerEndWorld(void) {
   // For SMB2J, only used for worlds 1 thru 7
   if (WorldEndTimer == 0) {
-    if (SMB1_ONLY && WorldNumber >= 7) {
+#ifdef SMB1_MODE
+    if (WorldNumber >= 7) {
       if (((SavedJoypadBits1 | SavedJoypadBits2) & BUTTON_B) != 0) {
         WorldSelectEnableFlag = true;
         NumberofLives = 0xff;
@@ -834,12 +835,17 @@ void PlayerEndWorld(void) {
       }
       return;
     }
+#endif
     AreaNumber = 0;
     LevelNumber = 0;
     WorldNumber += 1;
-    if (SMB2J_ONLY && WorldNumber >= 8) {
+
+#ifdef SMB2J_MODE
+    if (WorldNumber >= 8) {
       WorldNumber = 8;
     }
+#endif
+
     LoadAreaPointer();
     FetchNewGameTimerFlag = true;
     OperMode = OM_GAME;
@@ -1603,9 +1609,9 @@ void DigitsMathRoutine(const u8 param_1) {
 // Signature: [] -> []
 void UpdateTopScore(void) {
   TopScoreCheck(5);
-  if (SMB1_ONLY) {
-    TopScoreCheck(11);
-  }
+#ifdef SMB1_MODE
+  TopScoreCheck(11);
+#endif
 }
 
 
@@ -2800,10 +2806,14 @@ void PlayerEndLevel(void) {
 // Signature: [] -> []
 void NextArea(void) {
   AreaNumber += 1;
-  if (SMB2J_ONLY && (WorldNumber == 8) && (LevelNumber == 4)) {
+
+#ifdef SMB2J_MODE
+  if (WorldNumber == 8 && LevelNumber == 4) {
     LevelNumber = 0;
     AreaNumber = 0;
   }
+#endif
+
   LoadAreaPointer();
   FetchNewGameTimerFlag = true;
   HalfwayPage = ChgAreaMode();
@@ -2863,8 +2873,9 @@ void OnGroundStateSub(void) {
   }
   ImposeFriction(Left_Right_Buttons);
   Player_X_Scroll = MovePlayerHorizontally();
+
 #ifdef SMB2J_MODE
-  if (SMB2J_ONLY && FileListNumber != 0) {
+  if (FileListNumber != 0) {
     BlowPlayerAround();
   }
 #endif
@@ -2910,11 +2921,13 @@ void LRAir(void) {
     ImposeFriction(Left_Right_Buttons);
   }
   Player_X_Scroll = MovePlayerHorizontally();
+
 #ifdef SMB2J_MODE
-  if (SMB2J_ONLY && FileListNumber != 0) {
+  if (FileListNumber != 0) {
     BlowPlayerAround();
   }
 #endif
+
   if (GameEngineSubroutine == GR_PLAYERDEATH) {
     VerticalForce = 0x28;
   }
@@ -3415,9 +3428,10 @@ void RunGameTimer(void) {
 // Signature: [X] -> []
 void WarpZoneObject(const u8 objoff) {
   if ((ScrollLock != 0) && ((Player_Y_Position & Player_Y_HighPos) == 0)) {
-    if (SMB1_ONLY) {
-      WarpZoneControl += 1;
-    }
+#ifdef SMB1_MODE
+    WarpZoneControl += 1;
+#endif
+
     ScrollLock = Player_Y_Position & Player_Y_HighPos;
     EraseEnemyObject(objoff);
   }
@@ -3493,7 +3507,13 @@ void FlagpoleRoutine(void) {
 
   if ((GameEngineSubroutine == GR_FLAGPOLESLIDE) && (Player_State == PLAYERSTATE_CLIMBING)) {
     if ((Enemy_Y_Position[5] >= 0xaa) || (Player_Y_Position >= 0xa2)) {
-      if (SMB2J_ONLY && FlagpoleScore == 5) {
+      bool cond = false;
+
+#ifdef SMB2J_MODE
+      cond = FlagpoleScore == 5;
+#endif
+
+      if (cond) {
         NumberofLives += 1;
         Square2SoundQueue = SOUND_SQ2_1UP;
       } else {
@@ -3540,9 +3560,12 @@ void JumpspringHandler(const u8 objoff) {
 
     if ((((animctrl != 1) && ((A_B_Buttons & BUTTON_A) != 0)) && ((A_B_Buttons & BUTTON_A & PreviousA_B_Buttons) == 0))) {
       JumpspringForce = -12;
-      if (SMB2J_ONLY && (WorldNumber == 1 || WorldNumber == 2 || WorldNumber == 6)) {
+
+#ifdef SMB2J_MODE
+      if (WorldNumber == 1 || WorldNumber == 2 || WorldNumber == 6) {
         JumpspringForce = -32;
       }
+#endif
     }
 
     if (animctrl == 4) {
@@ -4686,7 +4709,8 @@ void ProcLoopCommand(const u8 objoff) {
           MultiLoopCorrectCntr += 1;
         }
 
-        if (SMB1_ONLY && WorldNumber != 6) {
+#ifdef SMB1_MODE
+        if (WorldNumber != 6) {
           if (Player_Y_Position != LoopCmdYPosition[idx] || Player_State != PLAYERSTATE_ONGROUND) {
             ExecGameLoopback(idx);
             KillAllEnemies();
@@ -4696,6 +4720,7 @@ void ProcLoopCommand(const u8 objoff) {
           LoopCommand = 0;
           break;
         }
+#endif
 
         MultiLoopPassCntr += 1;
     #ifdef SMB1_MODE
@@ -4803,10 +4828,18 @@ void ProcLoopCommand(const u8 objoff) {
         CheckThreeBytes();
         return;
       }
-      if ((SMB2J_ONLY && WorldNumber == 8) || (EnemyData[(u8)(bVar4 + 2)] >> 5 == WorldNumber)) {
+
+      bool cond = WorldNumber == (EnemyData[(u8)(bVar4 + 2)] >> 5);
+
+#ifdef SMB2J_MODE
+      cond |= WorldNumber == 8;
+#endif
+
+      if (cond) {
         AreaPointer = EnemyData[(u8)(bVar4 + 1)];
         EntrancePage = EnemyData[(u8)(bVar4 + 2)] & 0x1f;
       }
+
       EnemyDataOffset += 1;
       EnemyDataOffset += 2;
       EnemyObjectPageSel = false;
@@ -4872,9 +4905,11 @@ void CheckpointEnemyID(const u8 param_1) {
     return;
 
   case A_PIRANHA_PLANT_SMB2J:
-    if (SMB2J_ONLY) {
-      InitPiranhaPlant(objoff);
-    }
+
+#ifdef SMB2J_MODE
+    InitPiranhaPlant(objoff);
+#endif
+
     return;
 
   case A_HAMMER_BRO:
@@ -5233,9 +5268,13 @@ void LakituAndSpinyHandler(const u8 objoff) {
         Enemy_ID[i] = A_LAKITU;
         SetupLakitu(i);
         u8 bVar1 = 0x20;
-        if (SMB2J_ONLY && (HardWorldFlag || WorldNumber >= 6)) {
+
+#ifdef SMB2J_MODE
+        if (HardWorldFlag || WorldNumber >= 6) {
           bVar1 = 0x60;
         }
+#endif
+
         PutAtRightExtent(bVar1, i);
         expect(actor_is(i, A_LAKITU));
         actor_activate(i, A_LAKITU);
@@ -5379,17 +5418,18 @@ void InitFlyingCheepCheep(const u8 objoff) {
 // SM2MAIN:9142
 // Signature: [X] -> []
 void InitBowser(const u8 objoff) {
-  if (SMB2J_ONLY) {
-    for (int i = 0; i < 5; i++) {
-      if (i == objoff) {
-        continue;
-      }
-      if (actor_is(i, A_BOWSER)) {
-        Enemy_ID[i] = A_GREEN_KOOPA;
-        actor_deactivate(i);
-      }
+
+#ifdef SMB2J_MODE
+  for (int i = 0; i < 5; i++) {
+    if (i == objoff) {
+      continue;
+    }
+    if (actor_is(i, A_BOWSER)) {
+      Enemy_ID[i] = A_GREEN_KOOPA;
+      actor_deactivate(i);
     }
   }
+#endif
 
   DuplicateEnemyObj(objoff);
   expect(actor_is(objoff, A_BOWSER));
@@ -7957,22 +7997,36 @@ void EnemySmackScore(const u8 param_1, const u8 param_2) {
 // SM2MAIN:a410
 // Signature: [X] -> []
 void PlayerHammerCollision(const u8 objoff) {
-  const u8 smb2j_sprobj = SMB2J_ONLY ? SprObject_OffscrBits[0] : 0;
+  if ((FrameCounter & 1) == 0) {
+    return;
+  }
 
-  if ((FrameCounter & 1) != 0 && smb2j_sprobj == 0 && TimerControl == 0 && Misc_OffscreenBits == 0) {
-    const bool bVar2 = PlayerCollisionCore(objoff * 4 + 0x24);
-    if (bVar2) {
-      if (!Misc_Collision_Flag[objoff]) {
-        Misc_Collision_Flag[objoff] = true;
-        Misc_X_Speed[objoff] *= -1;
-        if (StarInvincibleTimer == 0) {
-          InjurePlayer();
-          return;
-        }
+#ifdef SMB2J_MODE
+  if (SprObject_OffscrBits[0] != 0) {
+    return;
+  }
+#endif
+
+  if (TimerControl != 0) {
+    return;
+  }
+
+  if (Misc_OffscreenBits != 0) {
+    return;
+  }
+
+  const bool bVar2 = PlayerCollisionCore(objoff * 4 + 0x24);
+
+  if (bVar2) {
+    if (!Misc_Collision_Flag[objoff]) {
+      Misc_Collision_Flag[objoff] = true;
+      Misc_X_Speed[objoff] *= -1;
+      if (StarInvincibleTimer == 0) {
+        InjurePlayer();
       }
-    } else {
-      Misc_Collision_Flag[objoff] = false;
     }
+  } else {
+    Misc_Collision_Flag[objoff] = false;
   }
 }
 
@@ -8275,11 +8329,17 @@ void PlayerEnemyCollision(const u8 objoff) {
 // SM2MAIN:a587
 // Signature: [] -> []
 void InjurePlayer(void) {
-  if (InjuryTimer == 0) {
-    if (SMB1_ONLY || (SMB2J_ONLY && StarInvincibleTimer == 0)) {
-      ForceInjury();
-    }
+  if (InjuryTimer != 0) {
+    return;
   }
+
+#ifdef SMB2J_MODE
+  if (StarInvincibleTimer != 0) {
+    return;
+  }
+#endif
+
+  ForceInjury();
 }
 
 
@@ -8932,9 +8992,12 @@ void HandleClimbing(const u8 param_1, const u8 param_2, const u16 mt_x) {
 
         // In SMB2J, if the coins are a multiple of 11 and have the same digit as the last digit of the timer,
         // then award a 1-up.
-        if (SMB2J_ONLY && (CoinDisplay[0] == CoinDisplay[1]) && (CoinDisplay[0] == GameTimerDisplay[2])) {
+
+#ifdef SMB2J_MODE
+        if (CoinDisplay[0] == CoinDisplay[1] && CoinDisplay[0] == GameTimerDisplay[2]) {
           FlagpoleScore = 5;
         }
+#endif
       }
       GameEngineSubroutine = GR_FLAGPOLESLIDE;
     }
@@ -8994,9 +9057,11 @@ void ChkForLandJumpSpring(const u8 param_1) {
   const bool bVar1 = ChkJumpspringMetatiles(param_1);
   if (bVar1) {
     VerticalForce = 0x70;
-    if (SMB2J_ONLY) {
-      VerticalForceDown = 0x70;
-    }
+
+#ifdef SMB2J_MODE
+    VerticalForceDown = 0x70;
+#endif
+
     JumpspringForce = -7;
     JumpspringTimer = 3;
     JumpspringAnimCtrl = 1;
@@ -9032,24 +9097,26 @@ void HandlePipeEntry(const u8 param_1, const u8 param_2) {
     Square1SoundQueue = SOUND_SQ1_PIPE_OR_INJURY;
     Player_SprAttrib = 0x20;
     if (WarpZoneControl != 0) {
-      if (SMB1_ONLY) {
-        if (Player_X_Position < 0x60) {
-          bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4];
-        } else if (Player_X_Position < 0xa0) {
-          bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4 + 1];
-        } else {
-          bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4 + 2];
-        }
-        WorldNumber = bVar1 - 1;
+#ifdef SMB1_MODE
+      if (Player_X_Position < 0x60) {
+        bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4];
+      } else if (Player_X_Position < 0xa0) {
+        bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4 + 1];
+      } else {
+        bVar1 = WarpZoneNumbers[(WarpZoneControl & 3) * 4 + 2];
       }
-      if (SMB2J_ONLY) {
-        if (HardWorldFlag) {
-          bVar1 = WarpZoneNumbers[WarpZoneControl & 0xf] - 9;
-        } else {
-          bVar1 = WarpZoneNumbers[WarpZoneControl & 0xf];
-        }
-        WorldNumber = bVar1 - 1;
+      WorldNumber = bVar1 - 1;
+#endif
+
+#ifdef SMB2J_MODE
+      if (HardWorldFlag) {
+        bVar1 = WarpZoneNumbers[WarpZoneControl & 0xf] - 9;
+      } else {
+        bVar1 = WarpZoneNumbers[WarpZoneControl & 0xf];
       }
+      WorldNumber = bVar1 - 1;
+#endif
+
       AreaPointer = AreaAddrOffsets[WorldAddrOffsets[WorldNumber]];
       EventMusicQueue = MUSIC_EVENT_STOP;
       EntrancePage = 0;
@@ -9463,12 +9530,13 @@ void KillEnemyAboveBlock(const u8 objoff) {
 // SM2MAIN:ae4b
 // Signature: [A] -> [Z]
 bool ChkForNonSolids(const u8 v) {
-  if (SMB1_ONLY) {
-    return v == 0x26 || v == 0x5f || v == 0x60 || v == 0xc2 || v == 0xc3;
-  } else if (SMB2J_ONLY) {
-    return v == 0x23 || v == 0x5e || v == 0x5f || v == 0x60 || v == 0x61 || v == 0xc3 || v == 0xc4;
-  }
-  return false;
+#ifdef SMB1_MODE
+  return v == 0x26 || v == 0x5f || v == 0x60 || v == 0xc2 || v == 0xc3;
+#endif
+
+#ifdef SMB2J_MODE
+  return v == 0x23 || v == 0x5e || v == 0x5f || v == 0x60 || v == 0x61 || v == 0xc3 || v == 0xc4;
+#endif
 }
 
 

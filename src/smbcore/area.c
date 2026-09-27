@@ -1605,9 +1605,12 @@ void Jumpspring(const u8 param_1) {
   const u8 bVar1 = sVar4.r07;
   const u8 i = FindEmptyEnemySlot();
 
-  if (SMB2J_ONLY && i == NO_AVAIL_ENEMY_SLOT) {
+  
+#ifdef SMB2J_MODE
+  if (i == NO_AVAIL_ENEMY_SLOT) {
     return;
   }
+#endif
 
   Enemy_X_Position[i] = GetAreaObjXPosition();
   Enemy_PageLoc[i] = CurrentPageLoc;

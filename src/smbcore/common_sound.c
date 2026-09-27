@@ -157,9 +157,11 @@ void DecrementSfx3Length(void) {
   Noise_SfxLenCounter -= 1;
   if (Noise_SfxLenCounter == 0) {
     apu_noise_vol(0xf0);
-    if (SMB2J_ONLY) {
-      apu_tri_linear(0);
-    }
+
+#ifdef SMB2J_MODE
+    apu_tri_linear(0);
+#endif
+
     NoiseSoundBuffer = 0;
   }
 }
@@ -180,11 +182,14 @@ void ContinueBowserFlame(void) {
   // NES note: The index is regularly 0, which underflows BowserFlameEnvData-1.
   const u8 vol = BowserFlameEnvData_Minus1[idx];
 
-  if (SMB1_ONLY && vol == 0) {
+#ifdef SMB1_MODE
+  if (vol == 0) {
     ContinueMusic();
-  } else {
-    PlayNoiseSfx(vol, 0xf);
+    return;
   }
+#endif
+
+  PlayNoiseSfx(vol, 0xf);
 }
 
 #ifdef SMB2J_MODE
