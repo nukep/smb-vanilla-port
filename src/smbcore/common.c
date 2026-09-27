@@ -7813,7 +7813,7 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
   const i16 sr = LOAD_i16(ScreenRight_PageLoc, ScreenRight_X_Pos);
   const i16 e = LOAD_i16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
 
-  u16 r00r01 = 0;
+  i16 r00r01 = 0;
 
   switch (enemy_id) {
   case A_HAMMER_BRO:
@@ -7822,7 +7822,7 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
   case A_PIRANHA_PLANT_SMB2J:
 #endif
 
-    r00r01 = (u16)sl - 0x48 + 0x38;
+    r00r01 = sl - 0x48 + 0x38;
 
     // carry quirk
     if ((sl & 0xff) >= 0x100 - 0x38 - 1) {
@@ -7850,7 +7850,7 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
     // carry quirk: carry flag is clear if enemy_id < A_PIRANHA_PLANT
     // SBC is not accompanied with a SEC
 
-    r00r01 = (u16)sl - 0x48;
+    r00r01 = sl - 0x48;
 
     // carry quirk
     r00r01 -= 1;
@@ -7861,22 +7861,22 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
     // > A_PIRANHA_PLANT
     // no carry quirk here
 
-    r00r01 = (u16)sl - 0x48;
+    r00r01 = sl - 0x48;
 
     break;
   }
 
-  if (e - (i16)r00r01 < 0) {
+  if (e - r00r01 < 0) {
     // bmi TooFar
     return true;
   }
 
-  u16 r02r03 = (u16)sr + 0x48;
+  i16 r02r03 = sr + 0x48;
 
   // carry quirk: SBC #$00
-  r02r03 += !(((i16)sl >= 0) && ((i16)r00r01 < 0));
+  r02r03 += sl < 0 || r00r01 >= 0;
 
-  if (e - (i16)r02r03 < 0) {
+  if (e - r02r03 < 0) {
     // bmi ExScrnBd
     return false;
   }
