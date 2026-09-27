@@ -7811,9 +7811,10 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
 
   const i16 sl = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
   const i16 sr = LOAD_i16(ScreenRight_PageLoc, ScreenRight_X_Pos);
-  const i16 e = LOAD_i16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
+  const i16 e  = LOAD_i16(Enemy_PageLoc[param_1], Enemy_X_Position[param_1]);
 
-  i16 r00r01 = 0;
+  i16 left_bound  = sl - 0x48;
+  i16 right_bound = sr + 0x48;
 
   switch (enemy_id) {
   case A_HAMMER_BRO:
@@ -7822,15 +7823,21 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
   case A_PIRANHA_PLANT_SMB2J:
 #endif
 
-    r00r01 = sl - 0x48 + 0x38;
+    left_bound = sl - 0x10;
 
     // carry quirk
-    if ((sl & 0xff) >= 0x100 - 0x38 - 1) {
-      r00r01 -= 0xff;
+    if ((sl & 0xff) >= 0x100 - (0x48 - 0x10) - 1) {
+      left_bound -= 0xff;
     }
 
     break;
+  }
 
+  // carry quirk, only for these enemies
+  // NES note: These are all less than A_PIRANHA_PLANT.
+  // CPY #13 clears the carry bit because enemy_id < 13.
+  // SBC #$48 then subtracts 0x48+1 because carry = 0.
+  switch (enemy_id) {
   case A_GREEN_KOOPA:
   case A_RED_KOOPA_GREENLIKE:
   case A_BUZZY_BEETLE:
@@ -7846,52 +7853,37 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
   // Note: This matches the behavior of SMB1, even though this id isn't supposed to be used.
   case A_PIRANHA_PLANT_SMB2J:
 #endif
-    // < A_PIRANHA_PLANT
-    // carry quirk: carry flag is clear if enemy_id < A_PIRANHA_PLANT
-    // SBC is not accompanied with a SEC
 
-    r00r01 = sl - 0x48;
-
-    // carry quirk
-    r00r01 -= 1;
-
-    break;
-
-  default:
-    // > A_PIRANHA_PLANT
-    // no carry quirk here
-
-    r00r01 = sl - 0x48;
+    left_bound -= 1;
 
     break;
   }
 
-  if (e - r00r01 < 0) {
-    // bmi TooFar
+  // carry quirk: SBC #$00
+  right_bound += sl < 0 || left_bound >= 0;
+
+  if (e - left_bound < 0) {
+    // Object is left of the left bound. Erase.
     return true;
   }
 
-  i16 r02r03 = sr + 0x48;
+  if (e - right_bound >= 0) {
+    // Object is right of the right bound. Erase, with some exceptions.
 
-  // carry quirk: SBC #$00
-  r02r03 += sl < 0 || r00r01 >= 0;
+    if (Enemy_State[param_1] == 5) { return false; }
+    if (enemy_id == A_PIRANHA_PLANT) { return false; }
+    if (enemy_id == A_FLAGPOLE) { return false; }
+    if (enemy_id == A_STARFLAG) { return false; }
+    if (enemy_id == A_JUMPSPRING) { return false; }
+#ifdef SMB2J_MODE
+    if (enemy_id == A_PIRANHA_PLANT_SMB2J) { return false; }
+#endif
 
-  if (e - r02r03 < 0) {
-    // bmi ExScrnBd
-    return false;
+    return true;
   }
 
-  // object is to the right of the screen
-  // erase, with some exceptions
-
-  if (Enemy_State[param_1] == 5) { return false; }
-  if (enemy_id == A_PIRANHA_PLANT) { return false; }
-  if (enemy_id == A_FLAGPOLE) { return false; }
-  if (enemy_id == A_STARFLAG) { return false; }
-  if (enemy_id == A_JUMPSPRING) { return false; }
-  if (SMB2J_ONLY && enemy_id == A_PIRANHA_PLANT_SMB2J) { return false; }
-
-  return true;
+  // Object is between the bounds. Don't erase.
+  return false;
 }
 
 // SMB:d67a
