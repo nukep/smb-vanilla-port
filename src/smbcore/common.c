@@ -7866,37 +7866,17 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
     break;
   }
 
-  u8 a = ScreenRight_X_Pos;
-
-  // carry quirk: SBC #$00
-  bool carry0 = ((i16)sl >= 0) && ((i16)r00r01 < 0);
-
-  bool carry1 = a + 0x48 + (carry0 ? 0 : 1) >= 0x100;
-
-  a += 0x48;
-  if (!carry0) {
-    a += 1;
-  }
-
-  u8 r03 = a;
-
-  u8 r02 = ScreenRight_PageLoc + carry1;
-
-  u8 r01 = r00r01 & 0xff;
-  u8 r00 = r00r01 >> 8;
-
-  a = Enemy_PageLoc[param_1] - r00;
-  a -= Enemy_X_Position[param_1] < r01;
-
-  if ((i8)a < 0) {
+  if (e - (i16)r00r01 < 0) {
     // bmi TooFar
     return true;
   }
 
-  a = Enemy_PageLoc[param_1] - r02;
-  a -= Enemy_X_Position[param_1] < r03;
+  u16 r02r03 = (u16)sr + 0x48;
 
-  if ((i8)a < 0) {
+  // carry quirk: SBC #$00
+  r02r03 += !(((i16)sl >= 0) && ((i16)r00r01 < 0));
+
+  if (e - (i16)r02r03 < 0) {
     // bmi ExScrnBd
     return false;
   }
