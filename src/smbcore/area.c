@@ -1453,9 +1453,13 @@ void FlagpoleObject(void) {
   MetatileBuffer[0] = MT_FLAGPOLE_T;
   RenderUnderPart(MT_FLAGPOLE_M, 1, 8);
   MetatileBuffer[10] = MT_STAIR_BLOCK;
-  const u8 bVar1 = GetAreaObjXPosition();
-  Enemy_X_Position[5] = bVar1 - 8;
-  Enemy_PageLoc[5] = CurrentPageLoc - (bVar1 < 8);
+
+  u16 x = (CurrentPageLoc << 8) + GetAreaObjXPosition();
+  x -= 8;
+
+  STORE_16(Enemy_PageLoc[5], Enemy_X_Position[5],
+           x);
+
   Enemy_Y_Position[5] = 0x30;
   FlagpoleFNum_Y_Pos = 0xb0;
   Enemy_ID[5] = A_FLAGPOLE;
@@ -1625,10 +1629,13 @@ void Hole_Empty(const u8 param_1) {
   const struct_ycr07 sVar3 = ChkLrgObjLength(param_1);
   const u8 bVar2 = sVar3.y;
   if ((sVar3.c) && (AreaType == AREA_WATER)) {
-    const u8 x = GetAreaObjXPosition();
+    u16 x = (CurrentPageLoc << 8) + GetAreaObjXPosition();
 
-    Whirlpool_X_Position[Cannon_Or_Whirlpool_Offset] = x - 0x10;
-    Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset] = CurrentPageLoc - (x < 0x10);
+    x -= 0x10;
+
+    STORE_16(Whirlpool_PageLoc[Cannon_Or_Whirlpool_Offset], Whirlpool_X_Position[Cannon_Or_Whirlpool_Offset],
+             x);
+
     Whirlpool_Length[Cannon_Or_Whirlpool_Offset] = (bVar2 + 2) * 0x10;
 
     Cannon_Or_Whirlpool_Offset += 1;

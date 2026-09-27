@@ -207,6 +207,15 @@ static inline i16 LOAD_i16(const i8 src_hi, const i8 src_lo) {
 }
 
 // Performs `dst = dst + src`.
+// dst_* and src_* are 8-bit integers.
+// src is a 16-bit integer, sign-extended to a 24-bit addend.
+#define SUB_SIGNED_24_16(dst_hi, dst_me, dst_lo, src_me, src_lo) { \
+  i8 src_me_expand = src_me; \
+  i8 src_lo_expand = src_lo; \
+  SUB_24_24(dst_hi, dst_me, dst_lo, src_me_expand < 0 ? -1 : 0, src_me_expand, src_lo_expand); \
+}
+
+// Performs `dst = dst + src`.
 // dst_* are 8-bit integers.
 // src is an 8-bit integer.
 #define ADD_UNSIGNED_16_8(dst_hi, dst_lo, src) { \

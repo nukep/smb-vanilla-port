@@ -7120,13 +7120,11 @@ u8 SetFlameTimer(void) {
 // Signature: [X] -> []
 void ProcBowserFlame(const u8 objoff) {
   if (TimerControl == 0) {
-    const i8 bVar33 = SecondaryHardMode ? 0x60 : 0x40;
-    const bool bVar1 = Enemy_X_MoveForce[objoff] >= 0 && Enemy_X_MoveForce[objoff] < bVar33;
-    Enemy_X_MoveForce[objoff] -= bVar33;
+    const i8 amount = SecondaryHardMode ? 0x60 : 0x40;
 
-    const u8 bVar3 = Enemy_X_Position[objoff];
-    Enemy_X_Position[objoff] = (bVar3 - 1) - bVar1;
-    Enemy_PageLoc[objoff] -= ((bVar1 || bVar3 == 0) && (!bVar1 || bVar3 < 2));
+    SUB_SIGNED_24_16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff], Enemy_X_MoveForce[objoff],
+                     1, amount);
+
     if (Enemy_Y_Position[objoff] != FlameYPosData[BowserFlamePRandomOfs[objoff]]) {
       Enemy_Y_Position[objoff] += Enemy_Y_MoveForce[objoff];
     }
@@ -8568,9 +8566,16 @@ void PositionPlayerOnS_Plat(const u8 param_1, const u8 param_2) {
 // SM2MAIN:a896
 // Signature: [X] -> []
 void PositionPlayerOnVPlat(const u8 param_1) {
-  if ((GameEngineSubroutine != GR_PLAYERDEATH) && (Enemy_Y_HighPos[param_1] == 1)) {
-    Player_Y_Position = Enemy_Y_Position[param_1] - 0x20;
-    Player_Y_HighPos = 1 - (Enemy_Y_Position[param_1] < 0x20);
+  if (GameEngineSubroutine == GR_PLAYERDEATH) {
+    return;
+  }
+
+  const i16 e = LOAD_i16(Enemy_Y_HighPos[param_1], Enemy_Y_Position[param_1]);
+
+  if (e >= 0x100 && e < 0x200) {
+    STORE_16(Player_Y_HighPos, Player_Y_Position,
+             e - 0x20);
+
     Player_Y_Speed = 0;
     Player_Y_MoveForce = 0;
   }
@@ -9517,15 +9522,20 @@ void SmallPlatformBoundBox(const u8 objoff) {
 // SM2MAIN:aef0
 // Signature: [X, Y, r00] -> []
 void GetMaskedOffScrBits(const u8 objoff, const u8 param_2, const u8 param_3) {
-  u8 bVar1 = (Enemy_PageLoc[objoff] - ScreenLeft_PageLoc) - (Enemy_X_Position[objoff] < ScreenLeft_X_Pos);
-  if ((bVar1 < 0x80) && ((u8)(bVar1 | (Enemy_X_Position[objoff] - ScreenLeft_X_Pos)) != 0)) {
-    bVar1 = param_3 & Enemy_OffscreenBits;
-  } else {
-    bVar1 = param_2 & Enemy_OffscreenBits;
-  }
-  EnemyOffscrBitsMasked[objoff] = bVar1;
+  const i16 e = LOAD_i16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff]);
+  const i16 sl = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
 
-  if (bVar1 != 0) {
+  u8 bits = Enemy_OffscreenBits;
+
+  if (e - sl > 0) {
+    bits &= param_3;
+  } else {
+    bits &= param_2;
+  }
+
+  EnemyOffscrBitsMasked[objoff] = bits;
+
+  if (bits != 0) {
     MoveBoundBoxOffscreen(objoff);
   } else {
     SetupEOffsetFBBox(objoff);
