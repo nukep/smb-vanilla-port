@@ -363,6 +363,32 @@ static inline void actor_collideswith_actor_clear(const u8 a, const u8 b) {
   Enemy_CollisionBits[a] &= INVBITS_u8(ACTOR_COLLISIONBIT_ACTOR(b));
 }
 
+static inline void actor_set_tagged_value(const u8 idx, const u8 val) {
+  expect((val & 0xf0) == 0);
+  Enemy_Flag[idx] = 0x80 | (val & 0xf);
+}
+
+static inline bool actor_get_tagged_value(const u8 idx, u8 *val) {
+  if (Enemy_Flag[idx] & 0x80) {
+    *val = Enemy_Flag[idx] & 0xf;
+    return true;
+  }
+  return false;
+}
+
+static inline void actor_deactivate(const u8 idx) {
+  Enemy_Flag[idx] = 0;
+}
+
+static inline void actor_activate(const u8 idx) {
+  Enemy_Flag[idx] = 1;
+}
+
+static inline bool actor_is_active(const u8 idx) {
+  // also returns true if a tagged value is set
+  return Enemy_Flag[idx] != 0;
+}
+
 
 enum playerframe {
   PLAYERFRAME_BIG_WALK_0 = 0,

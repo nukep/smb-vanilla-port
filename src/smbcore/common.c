@@ -2062,7 +2062,7 @@ void ContinueGame(void) {
 void KillEnemies(const u8 param_1) {
   for (int i = 0; i < 5; i++) {
     if (Enemy_ID[i] == param_1) {
-      Enemy_Flag[i] = 0;
+      actor_deactivate(i);
     }
   }
 }
@@ -3571,7 +3571,7 @@ void Setup_Vine(const u8 param_1, const u8 param_2) {
   expect(param_2 == 0 || param_2 == 1 || param_2 == 0x60);
 
   Enemy_ID[param_1] = A_VINE;
-  Enemy_Flag[param_1] = 1;
+  actor_activate(param_1);
 
   if (!bug) {
     // Normal behavaior
@@ -3659,7 +3659,7 @@ void VineObjectHandler(const u8 objoff) {
   const i16 diff = xpos - screen_xpos;
 
   if (diff < 0 || (diff % 256) < 9) {
-    Enemy_Flag[5] = 0;
+    actor_deactivate(5);
 
     const u16 mt_x = xpos >> 4;
 
@@ -3684,7 +3684,7 @@ void ProcessCannons(void) {
   for (int i = 2; i >= 0; i--) {
     bool chk_bb = true;
 
-    if (Enemy_Flag[i] == 0) {
+    if (!actor_is_active(i)) {
       const u8 rng = PseudoRandomBitReg[i + 1] & (!SecondaryHardMode ? 15 : 7);
 
       if (rng < 6) {
@@ -3700,7 +3700,7 @@ void ProcessCannons(void) {
             Enemy_X_Position[i] = Cannon_X_Position[rng];
             Enemy_Y_Position[i] = Cannon_Y_Position[rng] - 8;
             Enemy_Y_HighPos[i] = 1;
-            Enemy_Flag[i] = 1;
+            actor_activate(i);
             Enemy_State[i] = 0;
             Enemy_BoundBoxCtrl[i] = 9;
             Enemy_ID[i] = A_BULLET_BILL_CANNON;
@@ -3714,7 +3714,7 @@ void ProcessCannons(void) {
     if (chk_bb) {
       if (Enemy_ID[i] == A_BULLET_BILL_CANNON) {
         OffscreenBoundsCheck(i);
-        if (Enemy_Flag[i] != 0) {
+        if (actor_is_active(i)) {
           GetEnemyOffscreenBits(i);
 
           BulletBillHandler(i);
@@ -3781,7 +3781,7 @@ bool SpawnHammerObj(const u8 objoff) {
   // ofs = 4, 5, 6
   const u8 ofs = 4 + bVar2 / 3;
 
-  if ((Misc_State[bVar2] == 0) && (Enemy_Flag[ofs] == 0)) {
+  if ((Misc_State[bVar2] == 0) && (!actor_is_active(ofs))) {
     HammerEnemyOffset[bVar2] = objoff;
     Misc_State[bVar2] = 0x90;
     Misc_BoundBoxCtrl[bVar2] = 7;
@@ -4012,7 +4012,7 @@ void SetupPowerUp(const u8 param_1) {
 // Signature: [] -> []
 void PwrUpJmp(void) {
   Enemy_State[5] = 1;
-  Enemy_Flag[5] = 1;
+  actor_activate(5);
   Enemy_BoundBoxCtrl[5] = 3;
   if (PowerUpType == POWERUP_MUSHROOM || PowerUpType == POWERUP_FIREFLOWER) {
     expect(is_playerstatus_valid(PlayerStatus));
@@ -4635,12 +4635,13 @@ void ImposeGravity(const u8 param_1, const u8 param_2, const u8 param_3, const u
 // SM2MAIN:8c23
 // Signature: [X] -> []
 void EnemiesAndLoopsCore(const u8 objoff) {
-  if (Enemy_Flag[objoff] & 0x80) {
-    if (Enemy_Flag[Enemy_Flag[objoff] & 0xf] == 0) {
-      Enemy_Flag[objoff] = 0;
+  u8 idx;
+  if (actor_get_tagged_value(objoff, &idx)) {
+    if (!actor_is_active(idx)) {
+      actor_deactivate(objoff);
     }
   } else {
-    if (Enemy_Flag[objoff] != 0) {
+    if (actor_is_active(objoff)) {
       RunEnemyObjectsCore(objoff);
       return;
     }
@@ -4720,7 +4721,7 @@ void ProcLoopCommand(const u8 objoff) {
     u8 bVar4 = EnemyDataOffset;
     if (EnemyFrenzyQueue != 0) {
       Enemy_ID[objoff] = EnemyFrenzyQueue;
-      Enemy_Flag[objoff] = 1;
+      actor_activate(objoff);
       Enemy_State[objoff] = 0;
       EnemyFrenzyQueue = 0;
       InitEnemyObject(objoff);
@@ -4792,9 +4793,9 @@ void ProcLoopCommand(const u8 objoff) {
             bVar4 = A_BUZZY_BEETLE;
           }
           Enemy_ID[objoff] = bVar4;
-          Enemy_Flag[objoff] = 1;
+          actor_activate(objoff);
           InitEnemyObject(objoff);
-          if (Enemy_Flag[objoff] == 0) {
+          if (!actor_is_active(objoff)) {
             return;
           }
           EnemyDataOffset += 2;
@@ -5220,7 +5221,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
       Enemy_X_Speed[objoff] = 0;
       Enemy_MovingDir[objoff] = DIR_RIGHT;
       Enemy_Y_Speed[objoff] = -3;
-      Enemy_Flag[objoff] = 1;
+      actor_activate(objoff);
       Enemy_State[objoff] = 5;
       return;
     }
@@ -5229,7 +5230,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
   LakituReappearTimer += 1;
   if (LakituReappearTimer > ssw(6, 2)) {
     for (int i = 4; i >= 0; i--) {
-      if (Enemy_Flag[i] == 0) {
+      if (!actor_is_active(i)) {
         Enemy_State[i] = 0;
         Enemy_ID[i] = A_LAKITU;
         SetupLakitu(i);
@@ -5364,7 +5365,7 @@ void InitFlyingCheepCheep(const u8 objoff) {
                       position_lookup[idx][currng]);
   }
 
-  Enemy_Flag[objoff] = 1;
+  actor_activate(objoff);
   Enemy_Y_HighPos[objoff] = 1;
   Enemy_Y_Position[objoff] = SPRITE_Y_OFFSCREEN;
 }
@@ -5381,7 +5382,7 @@ void InitBowser(const u8 objoff) {
       }
       if (Enemy_ID[i] == A_BOWSER) {
         Enemy_ID[i] = A_GREEN_KOOPA;
-        Enemy_Flag[i] = 0;
+        actor_deactivate(i);
       }
     }
   }
@@ -5405,16 +5406,18 @@ void InitBowser(const u8 objoff) {
 // Signature: [X] -> []
 void DuplicateEnemyObj(const u8 objoff) {
   int i;
-  for (i = 0; Enemy_Flag[i] != 0; i++) {
+  for (i = 0; actor_is_active(i); i++) {
   }
 
-  // i = first offset with flag=0
+  // i = first non-active actor index
 
   DuplicateObj_Offset = i;
-  Enemy_Flag[i] = objoff | 0x80;
+
+  actor_set_tagged_value(i, objoff);
+
   Enemy_PageLoc[i] = Enemy_PageLoc[objoff];
   Enemy_X_Position[i] = Enemy_X_Position[objoff];
-  Enemy_Flag[objoff] = 1;
+  actor_activate(objoff);
   Enemy_Y_HighPos[i] = 1;
   Enemy_Y_Position[i] = Enemy_Y_Position[objoff];
 }
@@ -5451,7 +5454,7 @@ void InitBowserFlame(const u8 objoff) {
   EnemyFrenzyBuffer = 0;
   Enemy_BoundBoxCtrl[objoff] = 8;
   Enemy_Y_HighPos[objoff] = 1;
-  Enemy_Flag[objoff] = 1;
+  actor_activate(objoff);
   Enemy_X_MoveForce[objoff] = 0;
   Enemy_State[objoff] = 0;
 }
@@ -5467,7 +5470,7 @@ void PutAtRightExtent(const u8 param_1, const u8 param_2) {
   Enemy_PageLoc[param_2] = ScreenRight_PageLoc + bVar1;
   Enemy_BoundBoxCtrl[param_2] = 8;
   Enemy_Y_HighPos[param_2] = 1;
-  Enemy_Flag[param_2] = 1;
+  actor_activate(param_2);
   Enemy_X_MoveForce[param_2] = 0;
   Enemy_State[param_2] = 0;
 
@@ -5515,7 +5518,7 @@ void InitFireworks(const u8 objoff) {
   Enemy_Y_Position[objoff] = ypos_lookup[bVar3];
   Enemy_Y_HighPos[objoff] = 1;
 
-  Enemy_Flag[objoff] = 1;
+  actor_activate(objoff);
 
   ExplosionGfxCounter[objoff] = 0;
   ExplosionTimerCounter[objoff] = 8;
@@ -5576,7 +5579,7 @@ void BulletBillCheepCheep(const u8 objoff) {
 
     // Prevent too many bullet bills from being spawned
     for (int i = 0; i < 5; i++) {
-      if ((Enemy_Flag[i] != 0) && (Enemy_ID[i] == A_BULLET_BILL)) {
+      if (actor_is_active(i) && (Enemy_ID[i] == A_BULLET_BILL)) {
         return;
       }
     }
@@ -5636,7 +5639,7 @@ void HandleGroupEnemies(const u8 param_1) {
         EnemyObjectPageSel = false;
         return;
       }
-      if (Enemy_Flag[k] == 0) {
+      if (!actor_is_active(k)) {
         break;
       }
     }
@@ -5647,7 +5650,7 @@ void HandleGroupEnemies(const u8 param_1) {
     Enemy_X_Position[k] = xpos;
     Enemy_Y_Position[k] = ypos;
     Enemy_Y_HighPos[k] = 1;
-    Enemy_Flag[k] = 1;
+    actor_activate(k);
     CheckpointEnemyID(k);
     if (xpos >= 0xe8) {
       pageloc += 1;
@@ -5731,7 +5734,7 @@ void EndFrenzy(const u8 objoff) {
   }
 
   EnemyFrenzyBuffer = 0;
-  Enemy_Flag[objoff] = 0;
+  actor_deactivate(objoff);
 }
 
 
@@ -6146,7 +6149,7 @@ void LargePlatformSubroutines(const u8 objoff) {
 // SM2MAIN:95cd
 // Signature: [X] -> []
 void EraseEnemyObject(const u8 param_1) {
-  Enemy_Flag[param_1] = 0;
+  actor_deactivate(param_1);
   Enemy_ID[param_1] = A_GREEN_KOOPA;
   Enemy_State[param_1] = 0;
   FloateyNum_Control[param_1] = 0;
@@ -7179,7 +7182,7 @@ void RunFireworks(const u8 objoff) {
     ExplosionTimerCounter[objoff] = 8;
     ExplosionGfxCounter[objoff] += 1;
     if (ExplosionGfxCounter[objoff] > 2) {
-      Enemy_Flag[objoff] = 0;
+      actor_deactivate(objoff);
       Square2SoundQueue = SOUND_SQ2_KABOOM;
       DigitModifier[4] = 5;
       EndAreaPoints();
@@ -7821,7 +7824,7 @@ void FireballEnemyCollision(const u8 objoff) {
     const u8 enemy_id = Enemy_ID[i];
 
     if ((Enemy_State[i] & 0x20) != 0) { continue; }
-    if (Enemy_Flag[i] == 0) { continue; }
+    if (!actor_is_active(i)) { continue; }
     if (is_actor_platform_large(enemy_id)) { continue; }
     if (enemy_id == A_GOOMBA && Enemy_State[i] >= 2) { continue; }
     if (EnemyOffscrBitsMasked[i] != 0) { continue; }
@@ -7839,14 +7842,21 @@ void FireballEnemyCollision(const u8 objoff) {
 // SM2MAIN:a37f
 // Signature: [X+r01] -> []
 void HandleEnemyFBallCol(const u8 param_1) {
-  u8 bVar2;
   RelativeEnemyPosition(param_1);
-  if ((Enemy_Flag[param_1] & 0x80) == 0 || Enemy_ID[Enemy_Flag[param_1] & 0xf] != A_BOWSER) {
+
+  u8 bVar2;
+
+  u8 idx;
+
+  if (actor_get_tagged_value(param_1, &idx) && Enemy_ID[idx] == A_BOWSER) {
+    bVar2 = idx;
+  } else {
+    bVar2 = param_1;
+
     const u8 enemy_id = Enemy_ID[param_1];
     if (enemy_id == A_BUZZY_BEETLE) {
       return;
     }
-    bVar2 = param_1;
     if (enemy_id != A_BOWSER) {
       if (enemy_id == A_BULLET_BILL) {
         return;
@@ -7860,9 +7870,8 @@ void HandleEnemyFBallCol(const u8 param_1) {
       ShellOrBlockDefeat(param_1);
       return;
     }
-  } else {
-    bVar2 = Enemy_Flag[param_1] & 0xf;
   }
+
   BowserHitPoints -= 1;
   if (BowserHitPoints != 0) {
     return;
@@ -8364,7 +8373,7 @@ void EnemiesCollision(const u8 objoff) {
   const u8 bStack0000 = objoff * 4 + 4;
 
   for (int i = objoff - 1; i >= 0; i--) {
-    if (Enemy_Flag[i] == 0) {
+    if (!actor_is_active(i)) {
       continue;
     }
 

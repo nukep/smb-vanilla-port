@@ -1205,7 +1205,7 @@ void CastleObject(const u8 objoff) {
       Enemy_X_Position[i] = bStack0000;
       Enemy_PageLoc[i] = CurrentPageLoc;
       Enemy_Y_HighPos[i] = 1;
-      Enemy_Flag[i] = 1;
+      actor_activate(i);
       Enemy_Y_Position[i] = 0x90;
       Enemy_ID[i] = A_STARFLAG;
     }
@@ -1301,7 +1301,7 @@ void SetupPiranhaPlant(const u8 enemy_id, const u8 param_2, const u8 param_3) {
   Enemy_Y_HighPos[param_2] = 1;
   Enemy_Y_Position[param_2] = GetAreaObjYPosition(param_3);
 
-  Enemy_Flag[param_2] = 1;
+  actor_activate(param_2);
   Enemy_ID[param_2] = enemy_id;
 
   InitPiranhaPlant(param_2);
@@ -1370,7 +1370,7 @@ u8 FindEmptyEnemySlot(void) {
   // Rewritten to return a sentinel value if one is not found
 
   for (int i = 0; i < 5; i++) {
-    if (Enemy_Flag[i] == 0) {
+    if (!actor_is_active(i)) {
       return i;
     }
   }
@@ -1463,7 +1463,10 @@ void FlagpoleObject(void) {
   Enemy_Y_Position[5] = 0x30;
   FlagpoleFNum_Y_Pos = 0xb0;
   Enemy_ID[5] = A_FLAGPOLE;
-  Enemy_Flag[5] += 1;
+
+  // Original incremented the value
+  expect_weak(!actor_is_active(5));
+  actor_activate(5);
 }
 
 
@@ -1616,7 +1619,11 @@ void Jumpspring(const u8 param_1) {
   Jumpspring_FixedYPos[i] = bVar2;
   Enemy_ID[i] = A_JUMPSPRING;
   Enemy_Y_HighPos[i] = 1;
-  Enemy_Flag[i] += 1;
+
+  // Original incremented the value
+  expect_weak(!actor_is_active(i));
+  actor_activate(i);
+
   MetatileBuffer[bVar1] = MT_JUMPSPRING_T;
   MetatileBuffer[bVar1 + 1] = MT_JUMPSPRING_B;
 }
