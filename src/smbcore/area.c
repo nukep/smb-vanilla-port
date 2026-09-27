@@ -1108,7 +1108,7 @@ void TreeLedge(const u8 param_1) {
 
   if (areaobjlen >= 0x80) {
     AreaObjectLength[param_1] = sVar2.y;
-    if ((CurrentPageLoc | CurrentColumnPos) != 0) {
+    if (CurrentPageLoc != 0 || CurrentColumnPos != 0) {
       NoUnder(MT_TREELEDGE_L, bVar1);
       return;
     }

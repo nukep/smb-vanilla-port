@@ -898,7 +898,7 @@ void MusicHandler(void) {
     LoadAreaMusic(AreaMusicQueue);
     return;
   }
-  if ((EventMusicBuffer | AreaMusicBuffer) != 0) {
+  if (EventMusicBuffer != 0 || AreaMusicBuffer != 0) {
     ContinueMusic();
   }
 }

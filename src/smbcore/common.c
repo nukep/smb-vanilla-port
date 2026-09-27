@@ -6361,7 +6361,7 @@ void MoveJumpingEnemy(const u8 objoff) {
 // SM2MAIN:9734
 // Signature: [X] -> []
 void ProcMoveRedPTroopa(const u8 objoff) {
-  if (((Enemy_Y_Speed[objoff] | Enemy_Y_MoveForce[objoff]) == 0)) {
+  if (Enemy_Y_Speed[objoff] == 0 && Enemy_Y_MoveForce[objoff] == 0) {
     Enemy_YMF_Dummy[objoff] = 0;
     if (Enemy_Y_Position[objoff] < RedPTroopaOrigXPos[objoff]) {
       if ((FrameCounter & 7) == 0) {
@@ -7206,10 +7206,10 @@ void RunStarFlagObj(const u8 objoff) {
     return;
 
   case STARFLAGTASK_AWARDGAMETIMERPOINTS:
-    if ((GameTimerDisplay[0] | GameTimerDisplay[1] | GameTimerDisplay[2]) != 0) {
-      AwardTimerCastle();
-    } else {
+    if (GameTimerDisplay[0] == 0 && GameTimerDisplay[1] == 0 && GameTimerDisplay[2] == 0) {
       StarFlagTaskControl = STARFLAGTASK_RAISEFLAGSETOFFFWORKS;
+    } else {
+      AwardTimerCastle();
     }
     return;
 
@@ -7592,7 +7592,7 @@ void PlatformFall(const u8 objoff, const u8 param_2) {
 // SM2MAIN:a20d
 // Signature: [X] -> []
 void YMovingPlatform(const u8 objoff) {
-  if (((Enemy_Y_Speed[objoff] | Enemy_Y_MoveForce[objoff]) == 0)) {
+  if (Enemy_Y_Speed[objoff] == 0 && Enemy_Y_MoveForce[objoff] == 0) {
     Enemy_YMF_Dummy[objoff] = 0;
     if (Enemy_Y_Position[objoff] < YPlatformTopYPos[objoff]) {
       if ((FrameCounter & 7) == 0) {
@@ -7936,7 +7936,7 @@ void EnemySmackScore(const u8 param_1, const u8 param_2) {
 void PlayerHammerCollision(const u8 objoff) {
   const u8 smb2j_sprobj = SMB2J_ONLY ? SprObject_OffscrBits[0] : 0;
 
-  if (((FrameCounter & 1) != 0) && ((smb2j_sprobj | TimerControl | Misc_OffscreenBits) == 0)) {
+  if ((FrameCounter & 1) != 0 && smb2j_sprobj == 0 && TimerControl == 0 && Misc_OffscreenBits == 0) {
     const bool bVar2 = PlayerCollisionCore(objoff * 4 + 0x24);
     if (bVar2) {
       if (!Misc_Collision_Flag[objoff]) {
@@ -11358,7 +11358,7 @@ static inline u8 process_player_action(void) {
     }
   } else {
     if (!CrouchingFlag) {
-      if ((Player_X_Speed | Left_Right_Buttons) != 0) {
+      if (Player_X_Speed != 0 || Left_Right_Buttons != 0) {
         if (Player_XSpeedAbsolute < 9 || (Player_MovingDir & PlayerFacingDir) != 0) {
           play_frames = 3;
           idx = big ? PLAYERFRAME_BIG_WALK_0
