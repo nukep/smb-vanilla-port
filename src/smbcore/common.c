@@ -7866,9 +7866,6 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
     break;
   }
 
-  u8 r01 = r00r01 & 0xff;
-  u8 r00 = r00r01 >> 8;
-
   u8 a = ScreenRight_X_Pos;
 
   // carry quirk: SBC #$00
@@ -7885,16 +7882,19 @@ static inline bool offscreenboundscheck_v2(const u8 param_1) {
 
   u8 r02 = ScreenRight_PageLoc + carry1;
 
-  a = Enemy_X_Position[param_1];
-  a = Enemy_PageLoc[param_1] - r00 - (1 - (a >= r01));
+  u8 r01 = r00r01 & 0xff;
+  u8 r00 = r00r01 >> 8;
+
+  a = Enemy_PageLoc[param_1] - r00;
+  a -= Enemy_X_Position[param_1] < r01;
 
   if ((i8)a < 0) {
     // bmi TooFar
     return true;
   }
 
-  a = Enemy_X_Position[param_1];
-  a = Enemy_PageLoc[param_1] - r02 - (1 - (a >= r03));
+  a = Enemy_PageLoc[param_1] - r02;
+  a -= Enemy_X_Position[param_1] < r03;
 
   if ((i8)a < 0) {
     // bmi ExScrnBd
