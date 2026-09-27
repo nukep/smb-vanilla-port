@@ -1683,10 +1683,13 @@ void InitializeArea(void) {
   // Note: BackloadingFlag behaves like a boolean when read. The original would set this to exactly ScreenLeft_PageLoc. Our port tests non-zero and assigns a boolean (0 or 1).
   BackloadingFlag = ScreenLeft_PageLoc != 0;
 
-  const u8 bVar1 = GetScreenPosition();
-  CurrentNTAddr_High = ((bVar1 & 1) == 0) ? 0x20 : 0x24;
+  GetScreenPosition();
+
+  const bool screenright_is_even_page = (ScreenRight_PageLoc & 1) == 0;
+
+  CurrentNTAddr_High = screenright_is_even_page ? 0x20 : 0x24;
   CurrentNTAddr_Low = 0x80;
-  BlockBufferColumnPos = (bVar1 & 1) << 4;
+  BlockBufferColumnPos = screenright_is_even_page ? 0 : 16;
   AreaObjectLength[0] -= 1;
   AreaObjectLength[1] -= 1;
   AreaObjectLength[2] -= 1;
@@ -2315,11 +2318,20 @@ void ChkPOffscr(void) {
 
 // SMB:b038
 // SM2MAIN:7b90
-// Signature: [] -> [A]
-u8 GetScreenPosition(void) {
-  ScreenRight_X_Pos = ScreenLeft_X_Pos - 1;
-  ScreenRight_PageLoc = ScreenLeft_PageLoc + (ScreenLeft_X_Pos != 0);
-  return ScreenRight_PageLoc;
+// Signature: [] -> []
+void GetScreenPosition(void) {
+  // Modify ScreenRight's x position by making it ScreenLeft + screen width - 1
+
+  const u16 screen_width = 256;
+
+  i16 x = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
+
+  x += screen_width - 1;
+
+  STORE_16(ScreenRight_PageLoc, ScreenRight_X_Pos,
+           x);
+
+  // NES note: register A is set to ScreenRight_PageLoc. InitializeArea would use this.
 }
 
 
@@ -7700,18 +7712,24 @@ void ChkSmallPlatCollision(const u8 param_1) {
   }
 }
 
+// Return true if the actor at the given index should be erased.
+static inline bool offscreenboundscheck_condition(const u8 idx) {
+  // NES note: the original had _tons_ of quirks with the carry flag,
+  // because ADC and SBC were not accompanied with a CLC or SEC.
+  // These quirks are separated in case a feature-enhancing port wants to remove them.
 
-// SMB:d67a
-// SM2MAIN:a2b4
-// Signature: [X] -> []
-void OffscreenBoundsCheck(const u8 param_1) {
-  if (Enemy_ID[param_1] == A_FLYING_CHEEPCHEEP) {
-    return;
+  const u8 enemy_id = Enemy_ID[idx];
+
+  if (enemy_id == A_FLYING_CHEEPCHEEP) {
+    return false;
   }
-  const u8 enemy_id = Enemy_ID[param_1];
 
-  bool bVar3;
-  u8 abVar5;
+  const i16 sl = LOAD_i16(ScreenLeft_PageLoc, ScreenLeft_X_Pos);
+  const i16 sr = LOAD_i16(ScreenRight_PageLoc, ScreenRight_X_Pos);
+  const i16 e  = LOAD_i16(Enemy_PageLoc[idx], Enemy_X_Position[idx]);
+
+  i16 left_bound  = sl - 0x48;
+  i16 right_bound = sr + 0x48;
 
   switch (enemy_id) {
   case A_HAMMER_BRO:
@@ -7719,10 +7737,22 @@ void OffscreenBoundsCheck(const u8 param_1) {
 #ifdef SMB2J_MODE
   case A_PIRANHA_PLANT_SMB2J:
 #endif
-    abVar5 = ScreenLeft_X_Pos + 0x38 + 1;
-    bVar3 = ScreenLeft_X_Pos < 200 && abVar5 != 0;
-    break;
 
+    left_bound = sl - 0x10;
+
+    // carry quirk
+    if ((sl & 0xff) >= 0x100 - (0x48 - 0x10) - 1) {
+      left_bound -= 0xff;
+    }
+
+    break;
+  }
+
+  // carry quirk, only for these enemies
+  // NES note: These are all less than A_PIRANHA_PLANT.
+  // CPY #13 clears the carry bit because enemy_id < 13.
+  // SBC #$48 then subtracts 0x48+1 because carry = 0.
+  switch (enemy_id) {
   case A_GREEN_KOOPA:
   case A_RED_KOOPA_GREENLIKE:
   case A_BUZZY_BEETLE:
@@ -7738,55 +7768,46 @@ void OffscreenBoundsCheck(const u8 param_1) {
   // Note: This matches the behavior of SMB1, even though this id isn't supposed to be used.
   case A_PIRANHA_PLANT_SMB2J:
 #endif
-    abVar5 = ScreenLeft_X_Pos;
-    bVar3 = true;
-    break;
 
-  default:
-    abVar5 = ScreenLeft_X_Pos;
-    bVar3 = false;
+    left_bound -= 1;
+
     break;
   }
 
-  const bool bVar2 = abVar5 >= 0x48;
-  const bool bVar4 = abVar5 > 0x48;
-  const bool nk = (!bVar3 && bVar2) || (bVar3 && bVar4);
-  const bool k = !nk;
-  const bool bVar8 = nk || (!nk && ScreenLeft_PageLoc != 0);
-  const u8 bVar6 = ScreenRight_X_Pos + 0x48 + bVar8;
+  // carry quirk: SBC #$00
+  right_bound += sl < 0 || left_bound >= 0;
 
-  const u8 e_ploc = Enemy_PageLoc[param_1];
-  const u8 e_xp = Enemy_X_Position[param_1];
-  const bool p = (ScreenRight_X_Pos >= 0xb8) || (bVar8 && bVar6 == 0);
-  const u8 q = (u8)(abVar5 + 0xb8 - bVar3);
-  const u8 sl_ploc = ScreenLeft_PageLoc;
-  const u8 sr_ploc = ScreenRight_PageLoc;
+  if (e - left_bound < 0) {
+    // Object is left of the left bound. Erase.
+    return true;
+  }
 
-  const bool A = (u8)(e_ploc - sl_ploc + k - (e_xp < q)) >= 0x80;
-  const bool B = (u8)(e_ploc - sr_ploc - p - (e_xp < bVar6)) >= 0x80;
+  if (e - right_bound >= 0) {
+    // Object is right of the right bound. Erase, with some exceptions.
 
-  if (A) {
-    // object is to the left of the screen
+    if (Enemy_State[idx] == 5) { return false; }
+    if (enemy_id == A_PIRANHA_PLANT) { return false; }
+    if (enemy_id == A_FLAGPOLE) { return false; }
+    if (enemy_id == A_STARFLAG) { return false; }
+    if (enemy_id == A_JUMPSPRING) { return false; }
+#ifdef SMB2J_MODE
+    if (enemy_id == A_PIRANHA_PLANT_SMB2J) { return false; }
+#endif
+
+    return true;
+  }
+
+  // Object is between the bounds. Don't erase.
+  return false;
+}
+
+// SMB:d67a
+// SM2MAIN:a2b4
+// Signature: [X] -> []
+void OffscreenBoundsCheck(const u8 param_1) {
+  if (offscreenboundscheck_condition(param_1)) {
     EraseEnemyObject(param_1);
-    return;
   }
-
-  if (B) {
-    // object is on the screen, do not erase
-    return;
-  }
-
-  // object is to the right of the screen
-  // erase, with some exceptions
-
-  if (Enemy_State[param_1] == 5) { return; }
-  if (enemy_id == A_PIRANHA_PLANT) { return; }
-  if (enemy_id == A_FLAGPOLE) { return; }
-  if (enemy_id == A_STARFLAG) { return; }
-  if (enemy_id == A_JUMPSPRING) { return; }
-  if (SMB2J_ONLY && enemy_id == A_PIRANHA_PLANT_SMB2J) { return; }
-
-  EraseEnemyObject(param_1);
 }
 
 
