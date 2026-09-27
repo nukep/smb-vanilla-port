@@ -5,6 +5,17 @@ Hi! Thank you for your interest in contributing! :)
 Before you do, keep the following in mind:
 
 
+## It's still in the early stages
+
+Contributions are currently limited to:
+
+- Bug and regression reporting
+- Platform enhancements
+- Discussions in general
+
+Much of the code in src/smbcore/ is still a mess of decompiled Ghidra output. It's a monolith that's changing very frequently, so I want to get that house in order first. After that, I'll be glad to open up contributions for src/smbcore/.
+
+
 ## Bugs
 
 A bug is defined as:
@@ -26,43 +37,6 @@ Details such as the stack, and temporary $00-$08 registers, are abstracted away 
 There may be rare glitches in the original games that depend on these details.
 
 We should probably document all non-implementable glitches though, so feel free to create an issue regardless.
-
-
-## Regression testing
-
-TODO: Expand on this section.
-
-Right now, contributers are NOT expected to perform regression testing. This will change in the future.
-All changes will be regression-tested by the maintainer.
-
-This project builds a `smbvanilla_testrunner` executable. As of writing, the project maintainer has a bespoke setup for this, so it's not fully documented yet. He currently validates by testing against several TAS and non-TAS gameplays. Movies (per-frame button and RAM dumps) are created with FCEUX using the `fceux_movie_dump.lua` script. The movie files are rather large, so they're not committed to this repo.
-
-
-## Refactoring
-
-Refactoring or simplifying code is encouraged, within reason.
-
-Examples of acceptable refactors:
-
-- Simplifying loops
-- Inlining trivial subroutines
-- Creating or renaming constants
-- Using 16-bit arithmetic helpers
-- Reordering non-aliased variable assignments
-- Assuming invariants (e.g. if a subroutine sets a constant, and the caller uses it)
-- Removing unreachable code/branches
-
-We want the code for this project to be a good cross-reference for existing disassemblies.
-In particular, doppelganger's disassemblies of SMB1 and SMB2J.
-This is for both practical and educational reasons. Fixing issues is easier if it can be cross-referenced. An enthusiast who wishes to study SMB's original 6502 may find the higher-level code useful.
-
-If a refactor potentially obscures a relevant low-level detail, comments are encouraged.
-
-Example comments:
-
-- `Inlined: Foo`
-- `Note: There's a carry bug here. "ADC Bar" was used without "CLC".`.
-- `Note: Foo() always sets the "A" register to 0. Setting Bar to 0 because of the "STA Bar" 6502 instruction.`
 
 
 ## Enhancements
