@@ -380,13 +380,18 @@ static inline void actor_deactivate(const u8 idx) {
   Enemy_Flag[idx] = 0;
 }
 
-static inline void actor_activate(const u8 idx) {
+static inline void actor_activate(const u8 idx, const u8 id) {
   Enemy_Flag[idx] = 1;
+  Enemy_ID[idx] = id;
 }
 
 static inline bool actor_is_active(const u8 idx) {
   // also returns true if a tagged value is set
   return Enemy_Flag[idx] != 0;
+}
+
+static inline u8 actor_get_id(const u8 idx) {
+  return Enemy_ID[idx];
 }
 
 

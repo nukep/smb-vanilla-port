@@ -3570,8 +3570,7 @@ void Setup_Vine(const u8 param_1, const u8 param_2) {
 
   expect(param_2 == 0 || param_2 == 1 || param_2 == 0x60);
 
-  Enemy_ID[param_1] = A_VINE;
-  actor_activate(param_1);
+  actor_activate(param_1, A_VINE);
 
   if (!bug) {
     // Normal behavaior
@@ -3700,10 +3699,9 @@ void ProcessCannons(void) {
             Enemy_X_Position[i] = Cannon_X_Position[rng];
             Enemy_Y_Position[i] = Cannon_Y_Position[rng] - 8;
             Enemy_Y_HighPos[i] = 1;
-            actor_activate(i);
+            actor_activate(i, A_BULLET_BILL_CANNON);
             Enemy_State[i] = 0;
             Enemy_BoundBoxCtrl[i] = 9;
-            Enemy_ID[i] = A_BULLET_BILL_CANNON;
 
             chk_bb = false;
           }
@@ -4011,8 +4009,9 @@ void SetupPowerUp(const u8 param_1) {
 // SM2MAIN:8819
 // Signature: [] -> []
 void PwrUpJmp(void) {
+  expect(actor_get_id(5) == A_POWERUP);
+  actor_activate(5, A_POWERUP);
   Enemy_State[5] = 1;
-  actor_activate(5);
   Enemy_BoundBoxCtrl[5] = 3;
   if (PowerUpType == POWERUP_MUSHROOM || PowerUpType == POWERUP_FIREFLOWER) {
     expect(is_playerstatus_valid(PlayerStatus));
@@ -4720,8 +4719,7 @@ void ProcLoopCommand(const u8 objoff) {
 
     u8 bVar4 = EnemyDataOffset;
     if (EnemyFrenzyQueue != 0) {
-      Enemy_ID[objoff] = EnemyFrenzyQueue;
-      actor_activate(objoff);
+      actor_activate(objoff, EnemyFrenzyQueue);
       Enemy_State[objoff] = 0;
       EnemyFrenzyQueue = 0;
       InitEnemyObject(objoff);
@@ -4792,8 +4790,7 @@ void ProcLoopCommand(const u8 objoff) {
           if (bVar4 == A_GOOMBA && PrimaryHardMode) {
             bVar4 = A_BUZZY_BEETLE;
           }
-          Enemy_ID[objoff] = bVar4;
-          actor_activate(objoff);
+          actor_activate(objoff, bVar4);
           InitEnemyObject(objoff);
           if (!actor_is_active(objoff)) {
             return;
@@ -5221,7 +5218,8 @@ void LakituAndSpinyHandler(const u8 objoff) {
       Enemy_X_Speed[objoff] = 0;
       Enemy_MovingDir[objoff] = DIR_RIGHT;
       Enemy_Y_Speed[objoff] = -3;
-      actor_activate(objoff);
+      expect(actor_get_id(objoff) == A_SPINY);
+      actor_activate(objoff, A_SPINY);
       Enemy_State[objoff] = 5;
       return;
     }
@@ -5239,6 +5237,8 @@ void LakituAndSpinyHandler(const u8 objoff) {
           bVar1 = 0x60;
         }
         PutAtRightExtent(bVar1, i);
+        expect(actor_get_id(i) == A_LAKITU);
+        actor_activate(i, A_LAKITU);
         return;
       }
     }
@@ -5251,6 +5251,8 @@ void LakituAndSpinyHandler(const u8 objoff) {
 // Signature: [X] -> []
 void InitLongFirebar(const u8 objoff) {
   DuplicateEnemyObj(objoff);
+  expect(actor_get_id(objoff) == A_FIREBAR_5);
+  actor_activate(objoff, A_FIREBAR_5);
   InitShortFirebar(objoff);
 }
 
@@ -5365,7 +5367,9 @@ void InitFlyingCheepCheep(const u8 objoff) {
                       position_lookup[idx][currng]);
   }
 
-  actor_activate(objoff);
+  expect(actor_get_id(objoff) == A_FLYING_CHEEPCHEEP);
+  actor_activate(objoff, A_FLYING_CHEEPCHEEP);
+
   Enemy_Y_HighPos[objoff] = 1;
   Enemy_Y_Position[objoff] = SPRITE_Y_OFFSCREEN;
 }
@@ -5388,6 +5392,8 @@ void InitBowser(const u8 objoff) {
   }
 
   DuplicateEnemyObj(objoff);
+  expect(actor_get_id(objoff) == A_BOWSER);
+  actor_activate(objoff, A_BOWSER);
   BowserBodyControls = 0;
   BridgeCollapseOffset = 0;
   BowserOrigXPos = Enemy_X_Position[objoff];
@@ -5417,9 +5423,10 @@ void DuplicateEnemyObj(const u8 objoff) {
 
   Enemy_PageLoc[i] = Enemy_PageLoc[objoff];
   Enemy_X_Position[i] = Enemy_X_Position[objoff];
-  actor_activate(objoff);
   Enemy_Y_HighPos[i] = 1;
   Enemy_Y_Position[i] = Enemy_Y_Position[objoff];
+
+  // Note: This port sets Enemy_Flag outside of this call
 }
 
 
@@ -5443,6 +5450,8 @@ void InitBowserFlame(const u8 objoff) {
     const u8 rng = PseudoRandomBitReg[objoff] & 3;
     BowserFlamePRandomOfs[objoff] = rng;
     PutAtRightExtent(FlameYPosData[rng], objoff);
+    expect(actor_get_id(objoff) == A_BOWSER_FLAME);
+    actor_activate(objoff, A_BOWSER_FLAME);
     return;
   }
   const u8 rng = PseudoRandomBitReg[objoff] & 3;
@@ -5454,7 +5463,8 @@ void InitBowserFlame(const u8 objoff) {
   EnemyFrenzyBuffer = 0;
   Enemy_BoundBoxCtrl[objoff] = 8;
   Enemy_Y_HighPos[objoff] = 1;
-  actor_activate(objoff);
+  expect(actor_get_id(objoff) == A_BOWSER_FLAME);
+  actor_activate(objoff, A_BOWSER_FLAME);
   Enemy_X_MoveForce[objoff] = 0;
   Enemy_State[objoff] = 0;
 }
@@ -5470,11 +5480,12 @@ void PutAtRightExtent(const u8 param_1, const u8 param_2) {
   Enemy_PageLoc[param_2] = ScreenRight_PageLoc + bVar1;
   Enemy_BoundBoxCtrl[param_2] = 8;
   Enemy_Y_HighPos[param_2] = 1;
-  actor_activate(param_2);
   Enemy_X_MoveForce[param_2] = 0;
   Enemy_State[param_2] = 0;
 
   // NES note: The "A" register is set to 0 here. Used by BulletBillCheepCheep
+
+  // Note: This port sets Enemy_Flag outside of this call
 }
 
 
@@ -5518,7 +5529,8 @@ void InitFireworks(const u8 objoff) {
   Enemy_Y_Position[objoff] = ypos_lookup[bVar3];
   Enemy_Y_HighPos[objoff] = 1;
 
-  actor_activate(objoff);
+  expect(actor_get_id(objoff) == A_FIREWORKS);
+  actor_activate(objoff, A_FIREWORKS);
 
   ExplosionGfxCounter[objoff] = 0;
   ExplosionTimerCounter[objoff] = 8;
@@ -5558,6 +5570,8 @@ void BulletBillCheepCheep(const u8 objoff) {
     return;
   }
 
+  u8 enemy_id;
+
   if (AreaType == AREA_WATER) {
     // Auto-appearing cheep cheeps (in SMB1 2-2 and 7-2)
 
@@ -5573,7 +5587,7 @@ void BulletBillCheepCheep(const u8 objoff) {
       red_cheepcheep = !red_cheepcheep;
     }
 
-    Enemy_ID[objoff] = red_cheepcheep ? A_CHEEPCHEEP_RED : A_CHEEPCHEEP_GRAY;
+    enemy_id = red_cheepcheep ? A_CHEEPCHEEP_RED : A_CHEEPCHEEP_GRAY;
   } else {
     // Auto-appearing bullet bills (in SMB1 5-3 and 6-3)
 
@@ -5588,7 +5602,7 @@ void BulletBillCheepCheep(const u8 objoff) {
     Square2SoundQueue |= SOUND_SQ2_KABOOM;
 
     // Spawn a bullet bill
-    Enemy_ID[objoff] = A_BULLET_BILL;
+    enemy_id = A_BULLET_BILL;
   }
 
   const u8 rng_bag = random_from_bag(PseudoRandomBitReg[objoff], &BitMFilter);
@@ -5599,6 +5613,7 @@ void BulletBillCheepCheep(const u8 objoff) {
   };
 
   PutAtRightExtent(ypos_lookup[rng_bag], objoff);
+  actor_activate(objoff, enemy_id);
   Enemy_YMF_Dummy[objoff] = 0;
 
   FrenzyEnemyTimer = 0x20;
@@ -5645,12 +5660,11 @@ void HandleGroupEnemies(const u8 param_1) {
     }
     // k = 0..=4; object index with zero'd enemy flag
 
-    Enemy_ID[k] = id;
     Enemy_PageLoc[k] = pageloc;
     Enemy_X_Position[k] = xpos;
     Enemy_Y_Position[k] = ypos;
     Enemy_Y_HighPos[k] = 1;
-    actor_activate(k);
+    actor_activate(k, id);
     CheckpointEnemyID(k);
     if (xpos >= 0xe8) {
       pageloc += 1;
