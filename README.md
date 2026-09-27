@@ -1,5 +1,7 @@
 # SMB Vanilla
 
+For issues and pull requests, go to [Codeberg](https://codeberg.org/dannysp/smbvanilla).
+
 A C/C++ reconstruction compatible with the NES games "Super Mario Bros" and "Super Mario Bros 2 Japan" (aka Lost Levels).
 
 This project intends to support most non-gamebreaking glitches from the original games (e.g. the minus world, collision and clipping bugs).
