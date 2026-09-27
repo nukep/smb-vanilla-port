@@ -369,6 +369,9 @@
 #define DemoActionTimer                  RAM(0x0718)
 #define PrimaryMsgCounter                RAM(0x0719)
 
+// Sometimes screen-left can be negative. It's rare, but it happens.
+// World 5-3 in SMB2J loops back to the start of the level, which causes a negative screen-left.
+
 #define ScreenLeft_PageLoc               RAM(0x071A)
 #define ScreenRight_PageLoc              RAM(0x071B)
 #define ScreenLeft_X_Pos                 RAM(0x071C)
