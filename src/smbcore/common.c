@@ -3777,7 +3777,7 @@ void BulletBillHandler(const u8 objoff) {
       EnemyFrameTimer[objoff] = 10;
       Square2SoundQueue = SOUND_SQ2_KABOOM;
     }
-    if ((Enemy_State[objoff] & 0x20) != 0) {
+    if (actor_state_is_defeated(objoff)) {
       MoveD_EnemyVertically(objoff);
     }
     MoveEnemyHorizontally(objoff);
@@ -6249,7 +6249,7 @@ void MovePodoboo(const u8 objoff) {
 // SM2MAIN:960d
 // Signature: [X] -> []
 void ProcHammerBro(const u8 objoff) {
-  if ((Enemy_State[objoff] & 0x20) != 0) {
+  if (actor_state_is_defeated(objoff)) {
     MoveDefeatedEnemy(objoff);
     return;
   }
@@ -6344,7 +6344,7 @@ void MoveNormalEnemy(const u8 objoff) {
 
     if (actor_state_is_kicked(objoff)) {
       fall_e = false;
-    } else if ((Enemy_State[objoff] & 0x20) != 0) {
+    } else if (actor_state_is_defeated(objoff)) {
       MoveDefeatedEnemy(objoff);
       return;
     } else if (bVar1 == 0) {
@@ -6510,7 +6510,7 @@ i8 MoveWithXMCntrs(const u8 objoff) {
 // SM2MAIN:97be
 // Signature: [X, C] -> []
 void MoveBloober(const u8 objoff, const bool param_2) {
-  if ((Enemy_State[objoff] & 0x20) != 0) {
+  if (actor_state_is_defeated(objoff)) {
     MoveEnemySlowVert(objoff);
     return;
   }
@@ -6587,7 +6587,7 @@ void ProcSwimmingB(const u8 param_1, const bool param_2) {
 // SM2MAIN:986b
 // Signature: [X] -> []
 void MoveBulletBill(const u8 objoff) {
-  if ((Enemy_State[objoff] & 0x20) != 0) {
+  if (actor_state_is_defeated(objoff)) {
     MoveJ_EnemyVertically(objoff);
   } else {
     Enemy_X_Speed[objoff] = -0x18;
@@ -6600,7 +6600,7 @@ void MoveBulletBill(const u8 objoff) {
 // SM2MAIN:987f
 // Signature: [X] -> []
 void MoveSwimmingCheepCheep(const u8 objoff) {
-  if ((Enemy_State[objoff] & 0x20) != 0) {
+  if (actor_state_is_defeated(objoff)) {
     MoveEnemySlowVert(objoff);
     return;
   }
@@ -6813,7 +6813,7 @@ struct_r01r02r03 GetFirebarPosition(const u8 param_1, const u8 param_2) {
 // SM2MAIN:9b14
 // Signature: [X] -> []
 void MoveFlyingCheepCheep(const u8 objoff) {
-  if ((Enemy_State[objoff] & 0x20) != 0) {
+  if (actor_state_is_defeated(objoff)) {
     Enemy_SprAttrib[objoff] = 0;
     MoveJ_EnemyVertically(objoff);
     return;
@@ -6849,7 +6849,7 @@ void MoveFlyingCheepCheep(const u8 objoff) {
 // SM2MAIN:9b5d
 // Signature: [X] -> []
 void MoveLakitu(const u8 objoff) {
-  if ((Enemy_State[objoff] & 0x20) == 0) {
+  if ((actor_state_is_defeated(objoff)) == 0) {
     if (Enemy_State[objoff] == 0) {
       EnemyFrenzyBuffer = A_SPINY;
       LakituMoveSpeed[objoff] = PlayerLakituDiff(objoff, 21, 48, 64);
@@ -7006,7 +7006,7 @@ void RunBowser(const u8 objoff) {
 
   static const u8 random_lookup[4] = { 0x21, 0x41, 0x11, 0x31 };
 
-  if ((Enemy_State[objoff] & 0x20) != 0) {
+  if (actor_state_is_defeated(objoff)) {
     if (Enemy_Y_Position[objoff] >= 0xe0) {
       KillAllEnemies();
       return;
@@ -7884,7 +7884,7 @@ void FireballEnemyCollision(const u8 objoff) {
   for (int i = 4; i >= 0; i--) {
     const u8 enemy_id = Enemy_ID[i];
 
-    if ((Enemy_State[i] & 0x20) != 0) { continue; }
+    if (actor_state_is_defeated(i)) { continue; }
     if (!actor_is_active(i)) { continue; }
     if (is_actor_platform_large(enemy_id)) { continue; }
     if (enemy_id == A_GOOMBA && Enemy_State[i] >= 2) { continue; }
@@ -7936,12 +7936,18 @@ void HandleEnemyFBallCol(const u8 param_1) {
   if (BowserHitPoints != 0) {
     return;
   }
+
+  expect(actor_is(bVar2, A_BOWSER));
+
   InitVStf(bVar2);
   EnemyFrenzyBuffer = 0;
   Enemy_X_Speed[bVar2] = 0;
   Enemy_Y_Speed[bVar2] = -2;
   Enemy_ID[bVar2] = BowserIdentities[WorldNumber];
-  Enemy_State[bVar2] = (WorldNumber < 3) ? 0x23 : 0x20;
+
+  Enemy_State[bVar2] = (WorldNumber < 3) ? 3 : 0;
+  actor_state_set_defeated(bVar2);
+
   Square2SoundQueue = SOUND_SQ2_BOWSERFALL;
   EnemySmackScore(9, param_1);
 }
@@ -7979,7 +7985,9 @@ void ShellOrBlockDefeat(const u8 param_1) {
   ChkToStunEnemies(param_1);
 #endif
 
-  Enemy_State[param_1] = (Enemy_State[param_1] & 0x1f) | 0x20;
+  Enemy_State[param_1] &= 0x1f;
+  actor_state_set_defeated(param_1);
+
   if (actor_is(param_1, A_GOOMBA)) {
     EnemySmackScore(1, param_1);
   } else if (actor_is(param_1, A_HAMMER_BRO)) {
@@ -8098,7 +8106,7 @@ void PlayerEnemyCollision(const u8 objoff) {
   if (GameEngineSubroutine != GR_PLAYERCTRLROUTINE) {
     return;
   }
-  if ((Enemy_State[objoff] & 0x20) != 0) {
+  if (actor_state_is_defeated(objoff)) {
     return;
   }
 
@@ -8316,7 +8324,8 @@ void PlayerEnemyCollision(const u8 objoff) {
 
     SetStun2(objoff);
     Enemy_MovingDir[objoff] = old_movingdir;
-    Enemy_State[objoff] = 0x20;
+    Enemy_State[objoff] = 0;
+    actor_state_set_defeated(objoff);
     InitVStf(objoff);
     Enemy_X_Speed[objoff] = 0;
 
@@ -8479,29 +8488,39 @@ void EnemiesCollision(const u8 objoff) {
 // SM2MAIN:a725
 // Signature: [X, Y+r01] -> []
 void ProcEnemyCollisions(const u8 objoff, const u8 param_2) {
-  if (((Enemy_State[param_2] | Enemy_State[objoff]) & 0x20) == 0) {
-    if (Enemy_State[objoff] < 6) {
-      if (Enemy_State[param_2] < 6) {
-        EnemyTurnAround(param_2);
-        EnemyTurnAround(objoff);
-        return;
-      }
-      if (!actor_is(param_2, A_HAMMER_BRO)) {
-        ShellOrBlockDefeat(objoff);
-        SetupFloateyNumber(ShellChainCounter[param_2] + 4, objoff);
-        ShellChainCounter[param_2] += 1;
-        return;
-      }
-    } else if (!actor_is(objoff, A_HAMMER_BRO)) {
-      if (actor_state_is_kicked(param_2)) {
-        SetupFloateyNumber(6, objoff);
-        ShellOrBlockDefeat(objoff);
-      }
-      ShellOrBlockDefeat(param_2);
-      SetupFloateyNumber(ShellChainCounter[objoff] + 4, param_2);
-      ShellChainCounter[objoff] += 1;
-    }
+  if (actor_state_is_defeated(objoff) || actor_state_is_defeated(param_2)) {
+    return;
   }
+
+  if (Enemy_State[objoff] < 6) {
+    if (Enemy_State[param_2] < 6) {
+      EnemyTurnAround(param_2);
+      EnemyTurnAround(objoff);
+      return;
+    }
+
+    if (actor_is(param_2, A_HAMMER_BRO)) {
+      return;
+    }
+
+    ShellOrBlockDefeat(objoff);
+    SetupFloateyNumber(ShellChainCounter[param_2] + 4, objoff);
+    ShellChainCounter[param_2] += 1;
+    return;
+  }
+
+  if (actor_is(objoff, A_HAMMER_BRO)) {
+    return;
+  }
+
+  if (actor_state_is_kicked(param_2)) {
+    SetupFloateyNumber(6, objoff);
+    ShellOrBlockDefeat(objoff);
+  }
+
+  ShellOrBlockDefeat(param_2);
+  SetupFloateyNumber(ShellChainCounter[objoff] + 4, param_2);
+  ShellChainCounter[objoff] += 1;
 }
 
 
@@ -9217,7 +9236,7 @@ bool CheckForCoinMTiles(const u8 param_1) {
 // SM2MAIN:ac4a
 // Signature: [X] -> []
 void EnemyToBGCollisionDet(const u8 objoff) {
-  if ((Enemy_State[objoff] & 0x20) != 0) {
+  if (actor_state_is_defeated(objoff)) {
     return;
   }
 
