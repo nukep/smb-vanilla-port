@@ -418,6 +418,14 @@ static inline void actor_state_set_kicked(const u8 idx) {
   Enemy_State[idx] |= 0x80;
 }
 
+static inline bool actor_state_powerup_is_emerged(const u8 idx) {
+  return (Enemy_State[idx] & 0x80) != 0;
+}
+
+static inline void actor_state_powerup_set_emerged(const u8 idx) {
+  Enemy_State[idx] = 0x80;
+}
+
 
 enum playerframe {
   PLAYERFRAME_BIG_WALK_0 = 0,

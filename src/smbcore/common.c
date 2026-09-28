@@ -4056,17 +4056,20 @@ void PowerUpObjHandler(const u8 objoff) {
   // Original signature: [] -> []
   // Note: This port accepts an objoff argument. The original hard-coded "5".
 
-  if (Enemy_State[objoff] != 0) {
-    if ((char)Enemy_State[objoff] < 0) {
-      if (TimerControl == 0) {
+  if (Enemy_State[objoff] == 0) {
+    return;
+  }
 
-        // NES note: The original SMB2J checks for PowerUpType == 5,
-        // but it doesn't exist.
-        // This port ignores it.
+  if (actor_state_powerup_is_emerged(objoff)) {
+    if (TimerControl == 0) {
 
-        expect(is_powerup_valid(PowerUpType));
+      // NES note: The original SMB2J checks for PowerUpType == 5,
+      // but it doesn't exist.
+      // This port ignores it.
 
-        switch (PowerUpType) {
+      expect(is_powerup_valid(PowerUpType));
+
+      switch (PowerUpType) {
         case POWERUP_MUSHROOM:
         case POWERUP_1UP:
 #ifdef SMB2J_MODE
@@ -4080,32 +4083,32 @@ void PowerUpObjHandler(const u8 objoff) {
           MoveJumpingEnemy(objoff);
           EnemyJump(objoff);
           break;
-        }
-      }
-    } else {
-      if ((FrameCounter & 3) == 0) {
-        Enemy_Y_Position[objoff] -= 1;
-
-        if (Enemy_State[objoff] > 0x10) {
-          Enemy_X_Speed[objoff] = 0x10;
-          Enemy_State[objoff] = 0x80;
-          Enemy_SprAttrib[objoff] = 0;
-          Enemy_MovingDir[objoff] = DIR_RIGHT;
-        } else {
-          Enemy_State[objoff] += 1;
-        }
-      }
-      if (Enemy_State[objoff] < 6) {
-        return;
       }
     }
-    RelativeEnemyPosition(objoff);
-    GetEnemyOffscreenBits(objoff);
-    GetEnemyBoundBox(objoff);
-    DrawPowerUp(objoff);
-    PlayerEnemyCollision(objoff);
-    OffscreenBoundsCheck(objoff);
+  } else {
+    if ((FrameCounter & 3) == 0) {
+      Enemy_Y_Position[objoff] -= 1;
+
+      if (Enemy_State[objoff] > 0x10) {
+        Enemy_X_Speed[objoff] = 0x10;
+        actor_state_powerup_set_emerged(objoff);
+        Enemy_SprAttrib[objoff] = 0;
+        Enemy_MovingDir[objoff] = DIR_RIGHT;
+      } else {
+        Enemy_State[objoff] += 1;
+      }
+    }
+    if (Enemy_State[objoff] < 6) {
+      return;
+    }
   }
+
+  RelativeEnemyPosition(objoff);
+  GetEnemyOffscreenBits(objoff);
+  GetEnemyBoundBox(objoff);
+  DrawPowerUp(objoff);
+  PlayerEnemyCollision(objoff);
+  OffscreenBoundsCheck(objoff);
 }
 
 
@@ -5238,7 +5241,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
       if (Player_Y_Position < 0x2c) {
         return;
       }
-      if (Enemy_State[i] != 0) {
+      if (Enemy_State[i] != ACTOR_STATE_NORMAL) {
         return;
       }
       Enemy_PageLoc[objoff] = Enemy_PageLoc[i];
@@ -8490,7 +8493,7 @@ void ProcEnemyCollisions(const u8 objoff, const u8 param_2) {
         return;
       }
     } else if (!actor_is(objoff, A_HAMMER_BRO)) {
-      if ((char)Enemy_State[param_2] < 0) {
+      if (actor_state_is_kicked(param_2)) {
         SetupFloateyNumber(6, objoff);
         ShellOrBlockDefeat(objoff);
       }
@@ -9214,8 +9217,6 @@ bool CheckForCoinMTiles(const u8 param_1) {
 // SM2MAIN:ac4a
 // Signature: [X] -> []
 void EnemyToBGCollisionDet(const u8 objoff) {
-  struct_ncr00 sVar5;
-
   if ((Enemy_State[objoff] & 0x20) != 0) {
     return;
   }
@@ -9321,22 +9322,30 @@ void EnemyToBGCollisionDet(const u8 objoff) {
         return;
       }
     }
-    if (enemy_id != A_GOOMBA) {
-      if (enemy_id == A_SPINY) {
-        Enemy_MovingDir[objoff] = DIR_RIGHT;
-        Enemy_X_Speed[objoff] = 8;
-        if ((FrameCounter & 7) == 0) {
-          goto LandEnemyInitState;
-        }
-      }
-      sVar5 = PlayerEnemyDiff(objoff);
-      const u8 tmp2 = sVar5.n ? 2 : 1;
-      if (tmp2 == Enemy_MovingDir[objoff]) {
+
+    bool cond = true;
+
+    if (enemy_id == A_SPINY) {
+      Enemy_MovingDir[objoff] = DIR_RIGHT;
+      Enemy_X_Speed[objoff] = 8;
+      cond = (FrameCounter & 7) != 0;
+    }
+
+    if (enemy_id == A_GOOMBA) {
+      cond = false;
+    }
+
+    if (cond) {
+      const struct_ncr00 sVar5 = PlayerEnemyDiff(objoff);
+
+      const u8 tmp2 = sVar5.n ? DIR_LEFT : DIR_RIGHT;
+
+      if (Enemy_MovingDir[objoff] == tmp2) {
         ChkForBump_HammerBroJ(objoff);
       }
     }
   }
-LandEnemyInitState:
+
   EnemyLanding(objoff);
   if (actor_state_is_kicked(objoff)) {
     Enemy_State[objoff] &= 0xbf;
@@ -9421,9 +9430,10 @@ void DoEnemySideCheck(const u8 objoff) {
 // SM2MAIN:adba
 // Signature: [X] -> []
 void ChkForBump_HammerBroJ(const u8 objoff) {
-  if ((objoff != 5) && ((char)Enemy_State[objoff] < 0)) {
+  if (objoff != 5 && actor_state_is_kicked(objoff)) {
     Square1SoundQueue = SOUND_SQ1_BUMP;
   }
+
   if (actor_is(objoff, A_HAMMER_BRO)) {
     SetHJ(objoff, -6, false);
   } else {
