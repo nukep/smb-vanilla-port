@@ -350,15 +350,13 @@ void SoundEngine(void) {
   }
 
   Squ1_SfxLenCounter -= 1;
-  if (Squ1_SfxLenCounter != 0) {
-    SkipSoundSubroutines();
-    return;
+  if (Squ1_SfxLenCounter == 0) {
+    apu_snd_chn(0);
+    if (PauseSoundBuffer == 2) {
+      PauseModeFlag = false;
+    }
+    PauseSoundBuffer = 0;
   }
-  apu_snd_chn(0);
-  if (PauseSoundBuffer == 2) {
-    PauseModeFlag = false;
-  }
-  PauseSoundBuffer = 0;
   SkipSoundSubroutines();
 }
 
@@ -725,11 +723,9 @@ void PlayBlast(void) {
 // SM2MAIN:d515
 // Signature: [] -> []
 void ContinueBlast(void) {
-  if (Squ2_SfxLenCounter != 0x18) {
-    DecrementSfx2Length();
-    return;
+  if (Squ2_SfxLenCounter == 0x18) {
+    PlaySqu2Sfx(0x18, 0x9f, 0x93);
   }
-  PlaySqu2Sfx(0x18, 0x9f, 0x93);
   DecrementSfx2Length();
 }
 
@@ -822,11 +818,9 @@ void PlayBowserFall(void) {
 // SM2MAIN:d5a3
 // Signature: [] -> []
 void ContinueBowserFall(void) {
-  if (Squ2_SfxLenCounter != 8) {
-    DecrementSfx2Length();
-    return;
+  if (Squ2_SfxLenCounter == 8) {
+    PlaySqu2Sfx(0x5a, 0x9f, 0xa4);
   }
-  PlaySqu2Sfx(0x5a, 0x9f, 0xa4);
   DecrementSfx2Length();
 }
 

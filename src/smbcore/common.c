@@ -4396,10 +4396,10 @@ void BlockObjectsCore(const u8 objoff) {
     DrawBlock(objoff);
     if (4 < (Block_Y_Position[objoff] & 0xf)) {
       Block_State[objoff] = 1;
-      return;
+    } else {
+      Block_RepFlag[objoff] = 1;
+      Block_State[objoff] = 0;
     }
-    Block_RepFlag[objoff] = 1;
-    Block_State[objoff] = 0;
     return;
   } else {
     ImposeGravityBlock(objoff + 9);
@@ -4418,9 +4418,9 @@ void BlockObjectsCore(const u8 objoff) {
     }
     if (Block_Y_Position[objoff] < 0xf0) {
       Block_State[objoff] = bStack0000;
-      return;
+    } else {
+      Block_State[objoff] = 0;
     }
-    Block_State[objoff] = 0;
   }
 }
 
@@ -8606,6 +8606,7 @@ void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, c
   if (((u8)(BBOX_BOTRIGHT_Y(param_2_div4) - BBOX_TOPLEFT_Y(0)) < 4) && (Player_Y_Speed < 0)) {
     Player_Y_Speed = 1;
   }
+
   if (((u8)(BBOX_BOTRIGHT_Y(0) - BBOX_TOPLEFT_Y(param_2_div4)) < 6) && (Player_Y_Speed >= 0)) {
     u8 tmp3 = param_3;
     if (!actor_is(param_1, A_SMALLPLATFORM_1) && (!actor_is(param_1, A_SMALLPLATFORM_2))) {
@@ -8613,15 +8614,10 @@ void ProcLPlatCollisions(const u8 param_1, const u8 param_2, const u8 param_3, c
     }
     PlatformCollisionFlag[objoff] = tmp3;
     Player_State = PLAYERSTATE_ONGROUND;
-    return;
-  }
-
-  if ((u8)(BBOX_BOTRIGHT_X(0) - BBOX_TOPLEFT_X(param_2_div4)) <= 7) {
+  } else if ((u8)(BBOX_BOTRIGHT_X(0) - BBOX_TOPLEFT_X(param_2_div4)) <= 7) {
     ImpedePlayerMove(DIR_RIGHT);
-  } else {
-    if ((u8)(BBOX_BOTRIGHT_X(param_2_div4) - BBOX_TOPLEFT_X(0) - 1) <= 8) {
-      ImpedePlayerMove(DIR_LEFT);
-    }
+  } else if ((u8)(BBOX_BOTRIGHT_X(param_2_div4) - BBOX_TOPLEFT_X(0) - 1) <= 8) {
+    ImpedePlayerMove(DIR_LEFT);
   }
 }
 

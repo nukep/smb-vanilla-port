@@ -1078,17 +1078,15 @@ void decode_area_data_dispatch(const u8 objoff, const u8 idx) {
 // SM2MAIN:74e6
 // Signature: [X] -> []
 void AlterAreaAttributes(const u8 param_1) {
-  u8 bVar1 = AreaData[(u8)(AreaObjOffsetBuffer[param_1] + 1)];
+  const u8 bVar1 = AreaData[(u8)(AreaObjOffsetBuffer[param_1] + 1)];
   if ((bVar1 & 0x40) == 0) {
     TerrainControl = bVar1 & 0xf;
     BackgroundScenery = (bVar1 & 0x30) >> 4;
-    return;
-  }
-  bVar1 &= 7;
-  ForegroundScenery = bVar1;
-  if (bVar1 >= 4) {
+  } else if ((bVar1 & 7) < 4) {
+    ForegroundScenery = bVar1 & 7;
+  } else {
     ForegroundScenery = 0;
-    BackgroundColorCtrl = bVar1;
+    BackgroundColorCtrl = bVar1 & 7;
   }
 }
 
