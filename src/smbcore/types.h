@@ -460,10 +460,12 @@ static inline void actor_state_set_defeated(const u8 idx) {
 }
 
 static inline bool actor_state_powerup_is_emerged(const u8 idx) {
+  expect(actor_is(idx, A_POWERUP));
   return (Enemy_State[idx] & 0x80) != 0;
 }
 
 static inline void actor_state_powerup_set_emerged(const u8 idx) {
+  expect(actor_is(idx, A_POWERUP));
   Enemy_State[idx] = 0x80;
 }
 

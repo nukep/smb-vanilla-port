@@ -5296,9 +5296,26 @@ void LakituAndSpinyHandler(const u8 objoff) {
 // SM2MAIN:9052
 // Signature: [X] -> []
 void InitLongFirebar(const u8 objoff) {
-  DuplicateEnemyObj(objoff);
+  // Inlined: DuplicateEnemyObj
+
+  int i;
+  for (i = 0; actor_is_active(i); i++) {
+  }
+
+  // i = first non-active actor index
+
+  DuplicateObj_Offset = i;
+
+  actor_set_tagged_value(i, objoff);
+
+  Enemy_PageLoc[i] = Enemy_PageLoc[objoff];
+  Enemy_X_Position[i] = Enemy_X_Position[objoff];
+  Enemy_Y_HighPos[i] = 1;
+  Enemy_Y_Position[i] = Enemy_Y_Position[objoff];
+
   expect(actor_is(objoff, A_FIREBAR_5));
   actor_activate(objoff, A_FIREBAR_5);
+
   InitShortFirebar(objoff);
 }
 
@@ -5438,26 +5455,8 @@ void InitBowser(const u8 objoff) {
   }
 #endif
 
-  DuplicateEnemyObj(objoff);
-  expect(actor_is(objoff, A_BOWSER));
-  actor_activate(objoff, A_BOWSER);
-  BowserBodyControls = 0;
-  BridgeCollapseOffset = 0;
-  BowserOrigXPos = Enemy_X_Position[objoff];
-  BowserFireBreathTimer = 0xdf;
-  BowserFront_Offset = objoff;
-  Enemy_MovingDir[objoff] = 0xdf;
-  BowserFeetCounter = 0x20;
-  EnemyFrameTimer[objoff] = 0x20;
-  BowserHitPoints = 5;
-  BowserMovementSpeed = 2;
-}
+  // Inlined: DuplicateEnemyObj
 
-
-// SMB:c575
-// SM2MAIN:9186
-// Signature: [X] -> []
-void DuplicateEnemyObj(const u8 objoff) {
   int i;
   for (i = 0; actor_is_active(i); i++) {
   }
@@ -5473,7 +5472,19 @@ void DuplicateEnemyObj(const u8 objoff) {
   Enemy_Y_HighPos[i] = 1;
   Enemy_Y_Position[i] = Enemy_Y_Position[objoff];
 
-  // Note: This port sets Enemy_Flag outside of this call
+  expect(actor_is(objoff, A_BOWSER));
+  actor_activate(objoff, A_BOWSER);
+
+  BowserBodyControls = 0;
+  BridgeCollapseOffset = 0;
+  BowserOrigXPos = Enemy_X_Position[objoff];
+  BowserFireBreathTimer = 0xdf;
+  BowserFront_Offset = objoff;
+  Enemy_MovingDir[objoff] = 0xdf;
+  BowserFeetCounter = 0x20;
+  EnemyFrameTimer[objoff] = 0x20;
+  BowserHitPoints = 5;
+  BowserMovementSpeed = 2;
 }
 
 
@@ -5510,10 +5521,10 @@ void InitBowserFlame(const u8 objoff) {
   EnemyFrenzyBuffer = 0;
   Enemy_BoundBoxCtrl[objoff] = 8;
   Enemy_Y_HighPos[objoff] = 1;
+  Enemy_State[objoff] = ACTOR_STATE_NORMAL;
   expect(actor_is(objoff, A_BOWSER_FLAME));
   actor_activate(objoff, A_BOWSER_FLAME);
   Enemy_X_MoveForce[objoff] = 0;
-  Enemy_State[objoff] = ACTOR_STATE_NORMAL;
 }
 
 
