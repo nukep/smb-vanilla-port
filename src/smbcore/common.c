@@ -6339,7 +6339,9 @@ void MoveHammerBroXDir(const u8 objoff) {
 void MoveNormalEnemy(const u8 objoff) {
   bool fall_e = true;
 
-  if ((Enemy_State[objoff] & 0x40) == 0) {
+  if (actor_state_is_falling_override(objoff)) {
+    fall_e = true;
+  } else {
     const u8 bVar1 = Enemy_State[objoff] & 7;
 
     if (actor_state_is_kicked(objoff)) {
@@ -6347,9 +6349,11 @@ void MoveNormalEnemy(const u8 objoff) {
     } else if (actor_state_is_defeated(objoff)) {
       MoveDefeatedEnemy(objoff);
       return;
-    } else if (bVar1 == 0) {
+    } else if (bVar1 == ACTOR_STATE_NORMAL) {
       fall_e = false;
-    } else if (bVar1 == 3 || bVar1 == 4 || bVar1 == 6 || bVar1 == 7) {
+    } else if (bVar1 == ACTOR_STATE_FALLING || bVar1 == ACTOR_STATE_STUN || bVar1 == ACTOR_STATE_SPINY_EGG) {
+      fall_e = true;
+    } else {
       if (EnemyIntervalTimer[objoff] == 0) {
         Enemy_State[objoff] = ACTOR_STATE_NORMAL;
         u8 bVar2 = FrameCounter & 1;
@@ -6375,8 +6379,6 @@ void MoveNormalEnemy(const u8 objoff) {
   // FallE
   if (fall_e) {
     MoveD_EnemyVertically(objoff);
-    const u8 tmp1 = objoff;
-    expect(tmp1 == objoff);
 
     if (Enemy_State[objoff] == ACTOR_STATE_STUN) {
       // MEHor
@@ -6384,7 +6386,7 @@ void MoveNormalEnemy(const u8 objoff) {
       return;
     }
 
-    if (((Enemy_State[objoff] & 0x40) != 0) && !actor_is(objoff, A_POWERUP)) {
+    if (actor_state_is_falling_override(objoff) && !actor_is(objoff, A_POWERUP)) {
       bVar2 = 1;
     }
   }
@@ -6934,7 +6936,7 @@ i8 PlayerLakituDiff(const u8 objoff, const u8 param_2, const u8 param_3, const u
 void BridgeCollapse(void) {
   if (actor_is(BowserFront_Offset, A_BOWSER)) {
     const u8 objoff = BowserFront_Offset;
-    if (Enemy_State[BowserFront_Offset] == 0) {
+    if (Enemy_State[objoff] == 0) {
       BowserFeetCounter -= 1;
       if (BowserFeetCounter == 0) {
         BowserFeetCounter = 4;
@@ -6968,14 +6970,17 @@ void BridgeCollapse(void) {
         BridgeCollapseOffset += 1;
         if (BridgeCollapseOffset == 0xf) {
           InitVStf(objoff);
-          Enemy_State[objoff] = 0x40;
+
+          expect(Enemy_State[objoff] == 0);
+          actor_state_set_falling_override(objoff);
+
           Square2SoundQueue = SOUND_SQ2_BOWSERFALL;
         }
       }
       BowserGfxHandler(objoff);
       return;
     }
-    if (((Enemy_State[objoff] & 0x40) != 0) && (Enemy_Y_Position[objoff] < 0xe0)) {
+    if (actor_state_is_falling_override(objoff) && (Enemy_Y_Position[objoff] < 0xe0)) {
       MoveD_Bowser(objoff);
       return;
     }
@@ -9320,7 +9325,7 @@ void EnemyToBGCollisionDet(const u8 objoff) {
     ChkForRedKoopa(objoff);
     return;
   }
-  if ((Enemy_State[objoff] & 0x40) == 0) {
+  if (!actor_state_is_falling_override(objoff)) {
     const u8 tmp1 = Enemy_State[objoff];
     if (actor_state_is_kicked(objoff)) {
       DoEnemySideCheck(objoff);
@@ -9400,19 +9405,29 @@ void SetStun2(const u8 param_1) {
 // SM2MAIN:ad78
 // Signature: [X] -> []
 void ChkForRedKoopa(const u8 objoff) {
-  if ((actor_is(objoff, A_RED_KOOPA) && (Enemy_State[objoff] == 0))) {
-    ChkForBump_HammerBroJ(objoff);
+  if (actor_is(objoff, A_RED_KOOPA) && (Enemy_State[objoff] == 0)) {
+    // Inlined: ChkForBump_HammerBroJ
+
+    // Turn the enemy around
+    Enemy_X_Speed[objoff] *= -1;
+    Enemy_MovingDir[objoff] ^= 3;
     return;
   }
 
   if (actor_state_is_kicked(objoff)) {
-    Enemy_State[objoff] |= 0x40;
+    actor_state_set_falling_override(objoff);
   } else {
     expect(Enemy_State[objoff] < 6);
 
-    static const u8 new_state_lookup[] = { 1, 1, 2, 2, 2, 5 };
-
-    Enemy_State[objoff] = new_state_lookup[Enemy_State[objoff]];
+    if (Enemy_State[objoff] == ACTOR_STATE_NORMAL) {
+      Enemy_State[objoff] = ACTOR_STATE_FALLING;
+    }
+    if (Enemy_State[objoff] == ACTOR_STATE_UPSIDEDOWN) {
+      Enemy_State[objoff] = ACTOR_STATE_STUN;
+    }
+    if (Enemy_State[objoff] == ACTOR_STATE_STOMPED) {
+      Enemy_State[objoff] = ACTOR_STATE_STUN;
+    }
   }
 
   DoEnemySideCheck(objoff);
