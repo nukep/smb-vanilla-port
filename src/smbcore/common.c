@@ -7504,40 +7504,42 @@ void BalancePlatform(const u8 objoff) {
     return;
   }
 
-  const u8 enemy_state = Enemy_State[objoff];
-
-  if (enemy_state >= 0x80) {
+  if (actor_state_is_kicked(objoff)) {
     return;
   }
 
+  // Otherwise, the enemy state is an actor index for the other platform
+
+  const u8 idx = Enemy_State[objoff];
+
 #ifdef SMB2J_MODE
-  if (!actor_is(enemy_state, A_LARGEPLATFORM_BALANCE)) {
+  if (!actor_is(idx, A_LARGEPLATFORM_BALANCE)) {
     return;
   }
 #endif
 
   if (Enemy_MovingDir[objoff] != 0) {
-    PlatformFall(objoff, enemy_state);
+    PlatformFall(objoff, idx);
     return;
   }
 
   if (Enemy_Y_Position[objoff] < 0x2e) {
-    if (enemy_state != PlatformCollisionFlag[objoff]) {
+    if (idx != PlatformCollisionFlag[objoff]) {
       Enemy_Y_Position[objoff] = 0x2f;
-      StopPlatforms(objoff, enemy_state);
+      StopPlatforms(objoff, idx);
       return;
     }
-    InitPlatformFall(enemy_state, objoff);
+    InitPlatformFall(idx, objoff);
     return;
   }
 
-  if (Enemy_Y_Position[enemy_state] < 0x2e) {
+  if (Enemy_Y_Position[idx] < 0x2e) {
     if (objoff != PlatformCollisionFlag[objoff]) {
-      Enemy_Y_Position[enemy_state] = 0x2f;
-      StopPlatforms(objoff, enemy_state);
+      Enemy_Y_Position[idx] = 0x2f;
+      StopPlatforms(objoff, idx);
       return;
     }
-    InitPlatformFall(enemy_state, objoff);
+    InitPlatformFall(idx, objoff);
     return;
   }
 
@@ -7568,7 +7570,7 @@ void BalancePlatform(const u8 objoff) {
 
   switch (platform_mode) {
   case 0:
-    StopPlatforms(objoff, enemy_state);
+    StopPlatforms(objoff, idx);
     break;
 
   case 1:
@@ -10355,11 +10357,16 @@ void EnemyGfxHandler(const u8 objoff) {
   const u8 enemy_state = Enemy_State[objoff];
   const u8 st = enemy_state & 0x1f;
 
+  const bool st_normallike = st == ACTOR_STATE_NORMAL || st == ACTOR_STATE_FALLING;
+
+  const bool is_defeated = actor_state_is_defeated(objoff);
+  const bool is_kicked = actor_state_is_kicked(objoff);
+
   bool flip_horz = (Enemy_MovingDir[objoff] & 2) != 0;
 
   bool draw_behind = false;
 
-  bool flip_vert = (enemy_state & 0x20) != 0;
+  bool flip_vert = is_defeated;
 
   u8 tableoff;
   u8 next_tableoff;
@@ -10368,7 +10375,7 @@ void EnemyGfxHandler(const u8 objoff) {
   u8 palette = 1;
   bool tall = false;
 
-  const bool cond1 = (enemy_state & 0xa0) == 0 && TimerControl == 0;
+  const bool cond1 = TimerControl == 0 && !is_kicked && !is_defeated;
 
   switch (enemy_id) {
   case A_LAKITU:
@@ -10403,7 +10410,7 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_SPINY_1;
     next_tableoff = TOFF_SPINY_2;
 
-    if (st == 5) {
+    if (st == ACTOR_STATE_SPINY_EGG) {
       tableoff = TOFF_SPINY_EGG_1;
       next_tableoff = TOFF_SPINY_EGG_2;
       flip_horz = true;
@@ -10420,7 +10427,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
 
-    if (st == 5) {
+    if (st == ACTOR_STATE_SPINY_EGG) {
       // Flip right column vertically (effectively rotated 180 degrees)
       SPRITE_ATTR(sproff, 1) |= 0x80;
       SPRITE_ATTR(sproff, 3) |= 0x80;
@@ -10440,12 +10447,12 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_KOOPA_1;
     next_tableoff = TOFF_KOOPA_2;
 
-    if (st > 1) {
+    if (!st_normallike) {
       tableoff = TOFF_KOOPA_SHELL_UPSIDEDOWN_1;
       next_tableoff = TOFF_KOOPA_SHELL_UPSIDEDOWN_2;
     }
 
-    if (st == 4) {
+    if (st == ACTOR_STATE_STOMPED) {
       tableoff = TOFF_KOOPA_SHELL_1;
       next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
@@ -10453,7 +10460,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     flip_vert = false;
 
-    if (st > 1) { mirror_horz = true; }
+    if (!st_normallike) { mirror_horz = true; }
 
     if (interval_timer < 5) {
       if (cond1) {
@@ -10465,7 +10472,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
 
-    if (st == 4) {
+    if (st == ACTOR_STATE_STOMPED) {
       // Flip bottom two rows vertically
       SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
       SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
@@ -10484,13 +10491,13 @@ void EnemyGfxHandler(const u8 objoff) {
     next_tableoff = TOFF_KOOPA_2;
     palette = 1;
 
-    if (st == 4) {
+    if (st == ACTOR_STATE_STOMPED) {
       tableoff = TOFF_KOOPA_SHELL_1;
       next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
-    if (!flip_vert && st > 1) { mirror_horz = true; }
+    if (!flip_vert && !st_normallike) { mirror_horz = true; }
 
     if (interval_timer < 5) {
       if (cond1) {
@@ -10502,7 +10509,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
 
-    if (!flip_vert && st == 4) {
+    if (!flip_vert && st == ACTOR_STATE_STOMPED) {
       // Flip bottom two rows vertically
       SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
       SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
@@ -10520,13 +10527,13 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_BUZZY_BEETLE_1;
     next_tableoff = TOFF_BUZZY_BEETLE_2;
 
-    if (st > 1) {
+    if (!st_normallike) {
       tableoff = TOFF_BUZZY_BEETLE_SHELL_1;
       next_tableoff = TOFF_BUZZY_BEETLE_SHELL_2;
       ypos += 1;
     }
 
-    if (st == 4) {
+    if (st == ACTOR_STATE_STOMPED) {
       tableoff = TOFF_BUZZY_BEETLE_SHELL_UPSIDEDOWN_1;
       next_tableoff = TOFF_BUZZY_BEETLE_SHELL_UPSIDEDOWN_2;
       ypos += 1;
@@ -10534,7 +10541,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     flip_vert = false;
 
-    if (st > 1) { mirror_horz = true; }
+    if (!st_normallike) { mirror_horz = true; }
 
     if (interval_timer < 5) {
       if (cond1) {
@@ -10546,7 +10553,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
 
-    if (st == 4) {
+    if (st == ACTOR_STATE_STOMPED) {
       // Flip bottom two rows vertically
       SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
       SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
@@ -10569,7 +10576,7 @@ void EnemyGfxHandler(const u8 objoff) {
         flip_horz = !flip_horz;
       }
 
-      if (enemy_state > 1) {
+      if (enemy_state != ACTOR_STATE_NORMAL && enemy_state != ACTOR_STATE_FALLING) {
         tableoff = TOFF_STOMPED_GOOMBA;
         ypos += 1;
         mirror_horz = true;
@@ -10578,7 +10585,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     draw_enemy_object_2x3(tableoff, sproff, xpos, ypos, palette, draw_behind, flip_horz, flip_vert, tall, mirror_horz);
 
-    if (enemy_state > 1) {
+    if (enemy_state != ACTOR_STATE_NORMAL && enemy_state != ACTOR_STATE_FALLING) {
       // Ensure bottom two rows are flipped vertically
       SPRITE_ATTR(sproff, 2) |= SPRATTR_FLIPVERT;
       SPRITE_ATTR(sproff, 4) |= SPRATTR_FLIPVERT;
@@ -10595,14 +10602,14 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_HAMMER_BRO_1;
     next_tableoff = TOFF_HAMMER_BRO_2;
 
-    expect_weak(st != 4);
+    expect_weak(st != ACTOR_STATE_STOMPED);
 
-    if ((enemy_state & 8) != 0) {
+    if (actor_state_is_hammerbro_throw(objoff)) {
         tableoff = TOFF_HAMMER_BRO_3;
         next_tableoff = TOFF_HAMMER_BRO_4;
     }
 
-    if (enemy_state == 0 || (enemy_state & 8) != 0) {
+    if (enemy_state == 0 || actor_state_is_hammerbro_throw(objoff)) {
       if (cond1) {
         if ((FrameCounter & 0x8) == 0) {
           tableoff = next_tableoff;
@@ -10626,8 +10633,8 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_CHEEPCHEEP_1;
     next_tableoff = TOFF_CHEEPCHEEP_2;
 
-    expect_weak(st <= 2);
-    expect_weak(st != 2 || flip_vert);  // if st == 2 then flip_vert
+    expect_weak(st == ACTOR_STATE_NORMAL || st == ACTOR_STATE_FALLING || st == ACTOR_STATE_STUN);
+    expect_weak(st != ACTOR_STATE_STUN || flip_vert);  // if st == 2 then flip_vert
 
     if (cond1) {
       if ((FrameCounter & 0x8) == 0) {
@@ -10644,7 +10651,7 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_BLOOBER_1;
     next_tableoff = TOFF_BLOOBER_2;
 
-    expect_weak(st <= 2);
+    expect_weak(st == ACTOR_STATE_NORMAL || st == ACTOR_STATE_FALLING || st == ACTOR_STATE_STUN);
 
     if (interval_timer != 1 && interval_timer < 5) {
       ypos += 3;
@@ -10681,7 +10688,7 @@ void EnemyGfxHandler(const u8 objoff) {
     tableoff = TOFF_BULLET_BILL;
 
     draw_behind = false;
-    expect_weak(st != 4);
+    expect_weak(st != ACTOR_STATE_STOMPED);
 
     flip_vert = false;
 
@@ -10693,7 +10700,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
     tableoff = TOFF_PODOBOO;
 
-    expect_weak(st != 4);
+    expect_weak(st != ACTOR_STATE_STOMPED);
 
     mirror_horz = true;
 
@@ -10795,7 +10802,7 @@ void EnemyGfxHandler(const u8 objoff) {
     }
 #endif
 
-    expect_weak(st != 4);
+    expect_weak(st != ACTOR_STATE_STOMPED);
 
     mirror_horz = true;
 
@@ -10822,15 +10829,9 @@ void EnemyGfxHandler(const u8 objoff) {
       palette = 2;
     }
 
-    expect_weak(st != 4);
+    expect_weak(st != ACTOR_STATE_STOMPED);
 
-    if (st == 4) {
-      tableoff = TOFF_KOOPA_SHELL_1;
-      next_tableoff = TOFF_KOOPA_SHELL_2;
-      ypos += 2;
-    }
-
-    if (st > 1) { mirror_horz = true; }
+    if (!st_normallike) { mirror_horz = true; }
 
     expect_weak(!flip_vert);
     expect_weak(interval_timer == 0);
@@ -10853,13 +10854,13 @@ void EnemyGfxHandler(const u8 objoff) {
     draw_behind = true;
     palette = 0xff;
 
-    if (st == 4) {
+    if (st == ACTOR_STATE_STOMPED) {
       tableoff = TOFF_KOOPA_SHELL_1;
       next_tableoff = TOFF_KOOPA_SHELL_2;
       ypos += 2;
     }
 
-    if (!flip_vert && st > 1) { mirror_horz = true; }
+    if (!flip_vert && !st_normallike) { mirror_horz = true; }
 
     if (interval_timer < 5) {
       if (cond1) {
@@ -10901,12 +10902,12 @@ static void EnemyGfxHandler_bowser(const u8 objoff, const u8 bowser_gfx_flag) {
   // sproff @ $eb
   const u8 sproff = Enemy_SprDataOffset[objoff];
 
-  const u8 enemy_state = Enemy_State[objoff];
+  const bool is_defeated = actor_state_is_defeated(objoff);
 
   // Bowser can turn upside down in World 8-4
-  const bool flip_vert = (enemy_state & 0x20) != 0;
+  const bool flip_vert = is_defeated;
 
-  const bool flip_horz = (Enemy_MovingDir[objoff] & 2) != 0;
+  const bool flip_horz = (Enemy_MovingDir[objoff] & DIR_LEFT) != 0;
 
   u8 tableoff;
 
