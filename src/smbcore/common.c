@@ -3725,7 +3725,7 @@ void ProcessCannons(void) {
             Enemy_Y_Position[i] = Cannon_Y_Position[rng] - 8;
             Enemy_Y_HighPos[i] = 1;
             actor_activate(i, A_BULLET_BILL_CANNON);
-            Enemy_State[i] = 0;
+            Enemy_State[i] = ACTOR_STATE_NORMAL;
             Enemy_BoundBoxCtrl[i] = 9;
 
             chk_bb = false;
@@ -3773,7 +3773,7 @@ void BulletBillHandler(const u8 objoff) {
         EraseEnemyObject(objoff);
         return;
       }
-      Enemy_State[objoff] = 1;
+      Enemy_State[objoff] = ACTOR_STATE_BULLETBILL_FIRING;
       EnemyFrameTimer[objoff] = 10;
       Square2SoundQueue = SOUND_SQ2_KABOOM;
     }
@@ -4036,7 +4036,7 @@ void SetupPowerUp(const u8 param_1) {
 void PwrUpJmp(void) {
   expect(actor_is(5, A_POWERUP));
   actor_activate(5, A_POWERUP);
-  Enemy_State[5] = 1;
+  Enemy_State[5] = ACTOR_STATE_POWERUP_ACTIVE;
   Enemy_BoundBoxCtrl[5] = 3;
   if (PowerUpType == POWERUP_MUSHROOM || PowerUpType == POWERUP_FIREFLOWER) {
     expect(is_playerstatus_valid(PlayerStatus));
@@ -4087,13 +4087,14 @@ void PowerUpObjHandler(const u8 objoff) {
     } else {
       if ((FrameCounter & 3) == 0) {
         Enemy_Y_Position[objoff] -= 1;
-        const bool bVar2 = Enemy_State[objoff] > 0x10;
-        Enemy_State[objoff] += 1;
-        if (bVar2) {
+
+        if (Enemy_State[objoff] > 0x10) {
           Enemy_X_Speed[objoff] = 0x10;
           Enemy_State[objoff] = 0x80;
           Enemy_SprAttrib[objoff] = 0;
           Enemy_MovingDir[objoff] = DIR_RIGHT;
+        } else {
+          Enemy_State[objoff] += 1;
         }
       }
       if (Enemy_State[objoff] < 6) {
@@ -4747,7 +4748,7 @@ void ProcLoopCommand(const u8 objoff) {
     u8 bVar4 = EnemyDataOffset;
     if (EnemyFrenzyQueue != 0) {
       actor_activate(objoff, EnemyFrenzyQueue);
-      Enemy_State[objoff] = 0;
+      Enemy_State[objoff] = ACTOR_STATE_NORMAL;
       EnemyFrenzyQueue = 0;
       InitEnemyObject(objoff);
       return;
@@ -4859,7 +4860,7 @@ void ProcLoopCommand(const u8 objoff) {
 // SM2MAIN:8e03
 // Signature: [X] -> []
 void InitEnemyObject(const u8 objoff) {
-  Enemy_State[objoff] = 0;
+  Enemy_State[objoff] = ACTOR_STATE_NORMAL;
   CheckpointEnemyID(objoff);
 }
 
@@ -5052,7 +5053,7 @@ void InitPodoboo(const u8 objoff) {
   Enemy_Y_HighPos[objoff] = 2;
   Enemy_Y_Position[objoff] = 2;
   EnemyIntervalTimer[objoff] = 1;
-  Enemy_State[objoff] = 0;
+  Enemy_State[objoff] = ACTOR_STATE_NORMAL;
   SmallBBox(objoff);
 }
 
@@ -5081,7 +5082,7 @@ void InitNormalEnemy(const u8 param_1) {
 // Signature: [X] -> []
 void InitRedKoopa(const u8 objoff) {
   InitNormalEnemy(objoff);
-  Enemy_State[objoff] = 1;
+  Enemy_State[objoff] = ACTOR_STATE_FALLING;
 }
 
 
@@ -5266,7 +5267,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
   if (LakituReappearTimer > ssw(6, 2)) {
     for (int i = 4; i >= 0; i--) {
       if (!actor_is_active(i)) {
-        Enemy_State[i] = 0;
+        Enemy_State[i] = ACTOR_STATE_NORMAL;
         Enemy_ID[i] = A_LAKITU;
         SetupLakitu(i);
         u8 bVar1 = 0x20;
@@ -5508,7 +5509,7 @@ void InitBowserFlame(const u8 objoff) {
   expect(actor_is(objoff, A_BOWSER_FLAME));
   actor_activate(objoff, A_BOWSER_FLAME);
   Enemy_X_MoveForce[objoff] = 0;
-  Enemy_State[objoff] = 0;
+  Enemy_State[objoff] = ACTOR_STATE_NORMAL;
 }
 
 
@@ -5523,7 +5524,7 @@ void PutAtRightExtent(const u8 param_1, const u8 param_2) {
   Enemy_BoundBoxCtrl[param_2] = 8;
   Enemy_Y_HighPos[param_2] = 1;
   Enemy_X_MoveForce[param_2] = 0;
-  Enemy_State[param_2] = 0;
+  Enemy_State[param_2] = ACTOR_STATE_NORMAL;
 
   // NES note: The "A" register is set to 0 here. Used by BulletBillCheepCheep
 
@@ -5733,7 +5734,7 @@ void InitPiranhaPlant(const u8 objoff) {
     }
   #endif
   Enemy_X_Speed[objoff] = 1;
-  Enemy_State[objoff] = 0;
+  Enemy_State[objoff] = ACTOR_STATE_NORMAL;
   PiranhaPlant_MoveFlag[objoff] = 0;
   PiranhaPlantDownYPos[objoff] = Enemy_Y_Position[objoff];
   PiranhaPlantUpYPos[objoff] = Enemy_Y_Position[objoff] - 0x18;
@@ -6207,7 +6208,7 @@ void LargePlatformSubroutines(const u8 objoff) {
 void EraseEnemyObject(const u8 param_1) {
   actor_deactivate(param_1);
   Enemy_ID[param_1] = A_GREEN_KOOPA;
-  Enemy_State[param_1] = 0;
+  Enemy_State[param_1] = ACTOR_STATE_NORMAL;
   FloateyNum_Control[param_1] = 0;
   EnemyIntervalTimer[param_1] = 0;
   ShellChainCounter[param_1] = 0;
@@ -6337,7 +6338,7 @@ void MoveNormalEnemy(const u8 objoff) {
   if ((Enemy_State[objoff] & 0x40) == 0) {
     const u8 bVar1 = Enemy_State[objoff] & 7;
 
-    if (Enemy_State[objoff] & 0x80) {
+    if (actor_state_is_kicked(objoff)) {
       fall_e = false;
     } else if ((Enemy_State[objoff] & 0x20) != 0) {
       MoveDefeatedEnemy(objoff);
@@ -6346,7 +6347,7 @@ void MoveNormalEnemy(const u8 objoff) {
       fall_e = false;
     } else if (bVar1 == 3 || bVar1 == 4 || bVar1 == 6 || bVar1 == 7) {
       if (EnemyIntervalTimer[objoff] == 0) {
-        Enemy_State[objoff] = 0;
+        Enemy_State[objoff] = ACTOR_STATE_NORMAL;
         u8 bVar2 = FrameCounter & 1;
         Enemy_MovingDir[objoff] = bVar2 + 1;
 
@@ -7302,7 +7303,7 @@ void RunStarFlagObj(const u8 objoff) {
 void GameTimerFireworks(const u8 objoff) {
   const u8 last_digit = GameTimerDisplay[2];
 
-  Enemy_State[objoff] = 0;
+  Enemy_State[objoff] = ACTOR_STATE_NORMAL;
   FireworksCounter = 0xff;
 
 #ifdef SMB1_MODE
@@ -7313,7 +7314,7 @@ void GameTimerFireworks(const u8 objoff) {
     Enemy_State[objoff] = 3;
     FireworksCounter = 3;
   } else if (last_digit == 6) {
-    Enemy_State[objoff] = 0;
+    Enemy_State[objoff] = ACTOR_STATE_NORMAL;
     FireworksCounter = 6;
   }
 #endif
@@ -7324,7 +7325,7 @@ void GameTimerFireworks(const u8 objoff) {
 
     if ((last_digit & 1) == 0) {
       // timer is even
-      Enemy_State[objoff] = 0;
+      Enemy_State[objoff] = ACTOR_STATE_NORMAL;
       FireworksCounter = 6;
     } else {
       // timer is odd
@@ -8149,12 +8150,12 @@ void PlayerEnemyCollision(const u8 objoff) {
       return;
     }
 
-    if (((Enemy_State[objoff] & 0x80) == 0) && ((Enemy_State[objoff] & 6) != 0)) {
+    if (!actor_state_is_kicked(objoff) && (Enemy_State[objoff] & 6) != 0) {
       if (enemy_id == A_GOOMBA) {
         return;
       }
       Square1SoundQueue = SOUND_SQ1_KICK;
-      Enemy_State[objoff] |= 0x80;
+      actor_state_set_kicked(objoff);
       Enemy_X_Speed[objoff] = EnemyFacePlayer(objoff) ? -0x30 : 0x30;
 
       const u8 interval_timer = EnemyIntervalTimer[objoff];
@@ -8294,7 +8295,7 @@ void PlayerEnemyCollision(const u8 objoff) {
 #endif
 
       Enemy_ID[objoff] = is_actor_even(Enemy_ID[objoff]) ? A_GREEN_KOOPA : A_RED_KOOPA_GREENLIKE;
-      Enemy_State[objoff] = 0;
+      Enemy_State[objoff] = ACTOR_STATE_NORMAL;
       SetupFloateyNumber(3, objoff);
       InitVStf(objoff);
       Enemy_X_Speed[objoff] = EnemyFacePlayer(objoff) ? -8 : 8;
@@ -8460,7 +8461,7 @@ void EnemiesCollision(const u8 objoff) {
 
     if (!bVar2) {
       actor_collideswith_actor_clear(i, objoff);
-    } else if ((Enemy_State[objoff] & 0x80) != 0 || (Enemy_State[i] & 0x80) != 0) {
+    } else if (actor_state_is_kicked(objoff) || actor_state_is_kicked(i)) {
       ProcEnemyCollisions(objoff, i);
     } else if (!actor_collideswith_actor(i, objoff)) {
       actor_collideswith_actor_set(i, objoff);
@@ -9338,11 +9339,11 @@ void EnemyToBGCollisionDet(const u8 objoff) {
   }
 LandEnemyInitState:
   EnemyLanding(objoff);
-  if ((Enemy_State[objoff] & 0x80) != 0) {
+  if (actor_state_is_kicked(objoff)) {
     Enemy_State[objoff] &= 0xbf;
     return;
   }
-  Enemy_State[objoff] = 0;
+  Enemy_State[objoff] = ACTOR_STATE_NORMAL;
 }
 
 
@@ -9377,7 +9378,7 @@ void ChkForRedKoopa(const u8 objoff) {
     return;
   }
 
-  if ((Enemy_State[objoff] & 0x80) != 0) {
+  if (actor_state_is_kicked(objoff)) {
     Enemy_State[objoff] |= 0x40;
   } else {
     expect(Enemy_State[objoff] < 6);

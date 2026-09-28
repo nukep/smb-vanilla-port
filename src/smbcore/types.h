@@ -399,6 +399,22 @@ static inline bool actor_is(const u8 idx, const u8 id) {
 }
 
 
+#define ACTOR_STATE_NORMAL 0
+#define ACTOR_STATE_FALLING 1
+#define ACTOR_STATE_STUN 2
+
+#define ACTOR_STATE_BULLETBILL_FIRING 1
+#define ACTOR_STATE_POWERUP_ACTIVE 1
+
+static inline bool actor_state_is_kicked(const u8 idx) {
+  return (Enemy_State[idx] & 0x80) != 0;
+}
+
+static inline void actor_state_set_kicked(const u8 idx) {
+  Enemy_State[idx] |= 0x80;
+}
+
+
 enum playerframe {
   PLAYERFRAME_BIG_WALK_0 = 0,
   PLAYERFRAME_BIG_WALK_1,

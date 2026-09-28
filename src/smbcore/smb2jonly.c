@@ -454,7 +454,7 @@ void ChkToStunEnemies(const u8 param_1) {
     break;
   }
 
-  Enemy_State[param_1] = 2;
+  Enemy_State[param_1] = ACTOR_STATE_STUN;
   SetStun2(param_1);
 }
 
