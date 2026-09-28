@@ -1582,13 +1582,13 @@ void DigitsMathRoutine(const u8 param_1) {
 
   if (OperMode != OM_TITLESCREEN) {
     for (int i = 6; i >= 1; i--) {
-      u8 bVar1 = DigitModifier_Minus1[i] + DisplayDigits[param_1 + i - 6];
-      if (bVar1 < 0x80) {
+      i8 bVar1 = DigitModifier_Minus1[i] + DisplayDigits[param_1 + i - 6];
+      if (bVar1 >= 0) {
         if (bVar1 >= 10) {
           bVar1 -= 10;
           DigitModifier_Minus1[i-1] += 1;
         }
-        DisplayDigits[param_1 + i - 6] = bVar1;
+        DisplayDigits[param_1 + i - 6] = (u8)bVar1;
       } else {
         DigitModifier_Minus1[i-1] -= 1;
         DisplayDigits[param_1 + i - 6] = 9;
@@ -3255,46 +3255,48 @@ void FireballObjCore(const u8 objoff) {
     return;
   }
 
-  if (Fireball_State[objoff] != 0) {
-    if (Fireball_State[objoff] != 1) {
-      ADD_UNSIGNED_16_16_8(Fireball_PageLoc[objoff], Fireball_X_Position[objoff],
-                           Player_PageLoc, Player_X_Position,
-                           4);
-
-      Fireball_Y_Position[objoff] = Player_Y_Position;
-      Fireball_Y_HighPos[objoff] = 1;
-
-      // NES note: xspd_lookup[0] and [3] are bugs.
-      // PlayerFacingDir may = 0 or 3 sometimes, so this goes out of bounds in the original.
-      // The original lookup is FireballXSpdData[(u8)(PlayerFacingDir - 1)].
-      const i8 xspd_lookup[4] = { -87, 64, -64, -122 };
-      expect(PlayerFacingDir < 4);
-
-      Fireball_X_Speed[objoff] = xspd_lookup[PlayerFacingDir];
-      Fireball_Y_Speed[objoff] = 4;
-
-      Fireball_BoundBoxCtrl[objoff] = 7;
-      Fireball_State[objoff] -= 1;
-    }
-
-    const u8 bVar4 = objoff + 7;
-
-    const u8 in_r01 = 0;
-    ImposeGravity(0, bVar4, 0x50, in_r01, 3);
-
-    MoveObjectHorizontally(bVar4);
-
-    RelativeFireballPosition(objoff);
-    GetFireballOffscreenBits(objoff);
-    GetFireballBoundBox(objoff);
-    FireballBGCollision(objoff);
-    if ((FBall_OffscreenBits & 0xcc) == 0) {
-      FireballEnemyCollision(objoff);
-      DrawFireball(objoff);
-      return;
-    }
-    Fireball_State[objoff] = 0;
+  if (Fireball_State[objoff] == 0) {
+    return;
   }
+
+  if (Fireball_State[objoff] != 1) {
+    ADD_UNSIGNED_16_16_8(Fireball_PageLoc[objoff], Fireball_X_Position[objoff],
+                          Player_PageLoc, Player_X_Position,
+                          4);
+
+    Fireball_Y_Position[objoff] = Player_Y_Position;
+    Fireball_Y_HighPos[objoff] = 1;
+
+    // NES note: xspd_lookup[0] and [3] are bugs.
+    // PlayerFacingDir may = 0 or 3 sometimes, so this goes out of bounds in the original.
+    // The original lookup is FireballXSpdData[(u8)(PlayerFacingDir - 1)].
+    const i8 xspd_lookup[4] = { -87, 64, -64, -122 };
+    expect(PlayerFacingDir < 4);
+
+    Fireball_X_Speed[objoff] = xspd_lookup[PlayerFacingDir];
+    Fireball_Y_Speed[objoff] = 4;
+
+    Fireball_BoundBoxCtrl[objoff] = 7;
+    Fireball_State[objoff] -= 1;
+  }
+
+  const u8 bVar4 = objoff + 7;
+
+  const u8 in_r01 = 0;
+  ImposeGravity(0, bVar4, 0x50, in_r01, 3);
+
+  MoveObjectHorizontally(bVar4);
+
+  RelativeFireballPosition(objoff);
+  GetFireballOffscreenBits(objoff);
+  GetFireballBoundBox(objoff);
+  FireballBGCollision(objoff);
+  if ((FBall_OffscreenBits & 0xcc) == 0) {
+    FireballEnemyCollision(objoff);
+    DrawFireball(objoff);
+    return;
+  }
+  Fireball_State[objoff] = 0;
 }
 
 static inline void check_and_setup_bubble(const u8 param_1, const bool random, const bool docheck, const bool bug) {
@@ -7908,20 +7910,19 @@ void HandleEnemyFBallCol(const u8 param_1) {
     bVar2 = param_1;
 
     const u8 enemy_id = Enemy_ID[param_1];
-    if (enemy_id == A_BUZZY_BEETLE) {
-      return;
-    }
     if (enemy_id != A_BOWSER) {
+      if (enemy_id == A_BUZZY_BEETLE) {
+        return;
+      }
       if (enemy_id == A_BULLET_BILL) {
         return;
       }
       if (enemy_id == A_PODOBOO) {
         return;
       }
-      if (!is_actor_enemy(enemy_id)) {
-        return;
+      if (is_actor_enemy(enemy_id)) {
+        ShellOrBlockDefeat(param_1);
       }
-      ShellOrBlockDefeat(param_1);
       return;
     }
   }
@@ -9497,11 +9498,12 @@ void HammerBroBGColl(const u8 objoff) {
   // Inlined: ChkUnderEnemy
   const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, objoff + 1, 21);
 
-  if (sVar2.a != 0) {
-    if (sVar2.a == MT_SPECIAL_BLOCKHIT) {
-      KillEnemyAboveBlock(objoff);
-      return;
-    }
+  if (sVar2.a == MT_SPECIAL_BLOCKHIT) {
+    KillEnemyAboveBlock(objoff);
+    return;
+  }
+
+  if (sVar2.a != MT_0) {
     if (EnemyFrameTimer[objoff] == 0) {
       Enemy_State[objoff] &= 0x88;
       EnemyLanding(objoff);

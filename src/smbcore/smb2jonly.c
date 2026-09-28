@@ -322,10 +322,8 @@ void PrintVictoryMessages(void) {
       VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_THANKYOUMESSAGE;
     } else if (PrimaryMsgCounter == 1) {
       VRAM_Buffer_AddrCtrl = ADDRCTRL_SMB2J_BUTOURPRINCESSISINANOTHERCASTLE;
-    } else if (PrimaryMsgCounter < 8) {
-      if (PrimaryMsgCounter >= 3) {
-        inc_msg_counter = false;
-      }
+    } else if (PrimaryMsgCounter >= 3 && PrimaryMsgCounter < 8) {
+      inc_msg_counter = false;
     }
   }
 
@@ -833,11 +831,7 @@ void DiskErrorHandler(const u8 param_1) {
 void GameOverMenu(void) {
   if ((SavedJoypadBits1 & BUTTON_START) == 0) {
     if (((SavedJoypadBits1 & BUTTON_SELECT) != 0) && (SelectTimer == 0)) {
-      if ((SavedJoypadBits1 & BUTTON_SELECT) != 0) {
-        SelectTimer = 0x10;
-      } else {
-        SelectTimer = 0;
-      }
+      SelectTimer = 0x10;
       ContinueMenuSelect ^= 1;
     }
 
@@ -850,11 +844,17 @@ void GameOverMenu(void) {
     SPRITE_Y(0, 0)    = ContinueMenuSelect == 0 ? 119 : 143;
     return;
   }
+
+  // ContinueOrRetry
+
   if (ContinueMenuSelect != 0) {
     CompletedWorlds = 0;
     TerminateGame();
     return;
   }
+
+  // Continue
+
   NumberofLives = 2;
   LevelNumber = 0;
   AreaNumber = 0;
