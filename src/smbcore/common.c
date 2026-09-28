@@ -901,7 +901,7 @@ void FloateyNumbersRoutine(const u8 objoff) {
   case A_GOOMBA:
   case A_BLOOBER:
   case A_BULLET_BILL:
-    cond = Enemy_State[objoff] < 2;
+    cond = Enemy_State[objoff] == ACTOR_STATE_NORMAL || Enemy_State[objoff] == ACTOR_STATE_FALLING;
     break;
 
   case A_HAMMER_BRO:
@@ -3753,7 +3753,7 @@ void ProcessCannons(void) {
 // Signature: [X] -> []
 void BulletBillHandler(const u8 objoff) {
   if (TimerControl == 0) {
-    if (Enemy_State[objoff] == 0) {
+    if (Enemy_State[objoff] == ACTOR_STATE_NORMAL) {
       if ((Enemy_OffscreenBits & 0xc) == 0xc) {
         EraseEnemyObject(objoff);
         return;
@@ -3779,10 +3779,8 @@ void BulletBillHandler(const u8 objoff) {
     }
     if ((Enemy_State[objoff] & 0x20) != 0) {
       MoveD_EnemyVertically(objoff);
-      MoveEnemyHorizontally(objoff);
-    } else {
-      MoveEnemyHorizontally(objoff);
     }
+    MoveEnemyHorizontally(objoff);
   }
   GetEnemyOffscreenBits(objoff);
   RelativeEnemyPosition(objoff);
@@ -4511,11 +4509,14 @@ void MovePlayerVertically(void) {
 // SM2MAIN:8b34
 // Signature: [X] -> []
 void MoveD_EnemyVertically(const u8 objoff) {
-  if (Enemy_State[objoff] == 5) {
+  if (Enemy_State[objoff] == ACTOR_STATE_SPINY_EGG) {
+    expect_weak(actor_is(objoff, A_SPINY));
+
     MoveFallingPlatform(objoff);
-  } else {
-    SetXMoveAmt(3, objoff, 0x3d);
+    return;
   }
+
+  SetXMoveAmt(3, objoff, 0x3d);
 }
 
 
@@ -5258,7 +5259,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
       Enemy_Y_Speed[objoff] = -3;
       expect(actor_is(objoff, A_SPINY));
       actor_activate(objoff, A_SPINY);
-      Enemy_State[objoff] = 5;
+      Enemy_State[objoff] = ACTOR_STATE_SPINY_EGG;
       return;
     }
   }
@@ -6374,7 +6375,7 @@ void MoveNormalEnemy(const u8 objoff) {
     const u8 tmp1 = objoff;
     expect(tmp1 == objoff);
 
-    if (Enemy_State[objoff] == 2) {
+    if (Enemy_State[objoff] == ACTOR_STATE_STUN) {
       // MEHor
       MoveEnemyHorizontally(objoff);
       return;
@@ -8272,7 +8273,7 @@ void PlayerEnemyCollision(const u8 objoff) {
     }
 
     if (cond4) {
-      Enemy_State[objoff] = 4;
+      Enemy_State[objoff] = ACTOR_STATE_STOMPED;
       StompChainCounter += 1;
       SetupFloateyNumber(StompChainCounter + StompTimer, objoff);
       StompTimer += 1;
@@ -9301,24 +9302,22 @@ void EnemyToBGCollisionDet(const u8 objoff) {
   }
   if ((Enemy_State[objoff] & 0x40) == 0) {
     const u8 tmp1 = Enemy_State[objoff];
-    if ((i8)tmp1 < 0) {
+    if (actor_state_is_kicked(objoff)) {
       DoEnemySideCheck(objoff);
       return;
     }
-    else {
-      if (tmp1 == 0) {
-        DoEnemySideCheck(objoff);
-        return;
-      }
+    if (tmp1 == ACTOR_STATE_NORMAL) {
+      DoEnemySideCheck(objoff);
+      return;
     }
-    if (tmp1 != 5) {
-      if (tmp1 > 2) {
-        return;
-      }
-      if (Enemy_State[objoff] == 2) {
-        EnemyIntervalTimer[objoff] = actor_is(objoff, A_SPINY) ? 0 : 0x10;
-        Enemy_State[objoff] = 3;
-        EnemyLanding(objoff);
+    if (tmp1 == ACTOR_STATE_STUN) {
+      EnemyIntervalTimer[objoff] = actor_is(objoff, A_SPINY) ? 0 : 0x10;
+      Enemy_State[objoff] = ACTOR_STATE_UPSIDEDOWN;
+      EnemyLanding(objoff);
+      return;
+    }
+    if (tmp1 != ACTOR_STATE_SPINY_EGG) {
+      if (tmp1 != ACTOR_STATE_NORMAL && tmp1 != ACTOR_STATE_FALLING) {
         return;
       }
     }

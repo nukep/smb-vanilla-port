@@ -402,9 +402,13 @@ static inline bool actor_is(const u8 idx, const u8 id) {
 #define ACTOR_STATE_NORMAL 0
 #define ACTOR_STATE_FALLING 1
 #define ACTOR_STATE_STUN 2
+#define ACTOR_STATE_UPSIDEDOWN 3
+#define ACTOR_STATE_STOMPED 4
 
 #define ACTOR_STATE_BULLETBILL_FIRING 1
 #define ACTOR_STATE_POWERUP_ACTIVE 1
+
+#define ACTOR_STATE_SPINY_EGG 5
 
 static inline bool actor_state_is_kicked(const u8 idx) {
   return (Enemy_State[idx] & 0x80) != 0;
