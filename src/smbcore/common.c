@@ -4394,7 +4394,7 @@ void BlockObjectsCore(const u8 objoff) {
     RelativeBlockPosition(objoff);
     GetBlockOffscreenBits(objoff);
     DrawBlock(objoff);
-    if (4 < (Block_Y_Position[objoff] & 0xf)) {
+    if ((Block_Y_Position[objoff] & 0xf) > 4) {
       Block_State[objoff] = 1;
     } else {
       Block_RepFlag[objoff] = 1;
@@ -7027,7 +7027,7 @@ void RunBowser(const u8 objoff) {
         BowserMovementSpeed = 2;
         EnemyFrameTimer[objoff] = 0x20;
         BowserFireBreathTimer = 0x20;
-        if (199 < Enemy_X_Position[objoff]) {
+        if (Enemy_X_Position[objoff] >= 0xc8) {
           goto HammerChk;
         }
       }
