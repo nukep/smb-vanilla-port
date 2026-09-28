@@ -409,6 +409,24 @@ static inline bool actor_is(const u8 idx, const u8 id) {
 #define ACTOR_STATE_BULLETBILL_FIRING 1
 #define ACTOR_STATE_POWERUP_ACTIVE 1
 
+static inline void actor_state_set_hammerbro_jump(const u8 idx) {
+  expect(actor_is(idx, A_HAMMER_BRO));
+  Enemy_State[idx] |= 0x01;
+}
+
+static inline void actor_state_set_stun(const u8 idx) {
+  Enemy_State[idx] |= ACTOR_STATE_STUN;
+}
+
+static inline bool actor_state_is_hammerbro_throw(const u8 idx) {
+  expect(actor_is(idx, A_HAMMER_BRO));
+  return (Enemy_State[idx] & 0x08) != 0;
+}
+
+static inline void actor_state_set_hammerbro_throw(const u8 idx) {
+  expect(actor_is(idx, A_HAMMER_BRO));
+  Enemy_State[idx] |= 0x08;
+}
 
 static inline bool actor_state_is_kicked(const u8 idx) {
   return (Enemy_State[idx] & 0x80) != 0;

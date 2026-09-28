@@ -6263,7 +6263,7 @@ void ProcHammerBro(const u8 objoff) {
       HammerThrowingTimer[objoff] = !SecondaryHardMode ? 0x30 : 0x1c;
       const bool sVar2 = SpawnHammerObj(objoff);
       if (sVar2) {
-        Enemy_State[objoff] |= 8;
+        actor_state_set_hammerbro_throw(objoff);
         MoveHammerBroXDir(objoff);
         return;
       }
@@ -6302,7 +6302,7 @@ void SetHJ(const u8 objoff, const i8 param_2, const bool param_3) {
   // param_3 is always 0 or 1
 
   Enemy_Y_Speed[objoff] = param_2;
-  Enemy_State[objoff] |= 1;
+  actor_state_set_hammerbro_jump(objoff);
 
   EnemyFrameTimer[objoff] = 0x20;
 
@@ -9555,7 +9555,8 @@ void HammerBroBGColl(const u8 objoff) {
       return;
     }
   }
-  Enemy_State[objoff] |= 1;
+
+  actor_state_set_hammerbro_jump(objoff);
 }
 
 
