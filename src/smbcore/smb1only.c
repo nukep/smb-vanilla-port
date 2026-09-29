@@ -319,7 +319,7 @@ void ChkToStunEnemies(const u8 enemy_id, const u8 param_2) {
 
   // Inlined: SetStun
 
-  Enemy_State[param_2] &= 0xf0;
   actor_state_set_stun(param_2);
+
   SetStun2(param_2);
 }

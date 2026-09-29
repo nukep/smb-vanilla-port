@@ -3876,25 +3876,30 @@ static inline void ProcHammerObj(const u8 objoff) {
       MoveObjectHorizontally(bVar2);
       PlayerHammerCollision(objoff);
     } else {
-      const u8 bVar2 = HammerEnemyOffset[objoff];
+      const u8 owner = HammerEnemyOffset[objoff];
+      // owner is the wielder of the hammer.
+      // It could be a hammer bro, bowser, or even a bloober (e.g. if you kill Bowser with a fireball at the end of World 6-4)
+
       if ((Misc_State[objoff] & 0x7f) == 2) {
         // SetHSpd
         Misc_Y_Speed[objoff] = -2;
-        Enemy_State[bVar2] &= 0xf7;
 
-        expect(Enemy_MovingDir[bVar2] == DIR_RIGHT || Enemy_MovingDir[bVar2] == DIR_LEFT);
+        // Intended for a hammer bro, but could be other actor ids (see above note)
+        actor_state_clear_hammerbro_throw_unchecked(owner);
 
-        Misc_X_Speed[objoff] = Enemy_MovingDir[bVar2] == DIR_RIGHT ? 16 : -16;
+        expect(Enemy_MovingDir[owner] == DIR_RIGHT || Enemy_MovingDir[owner] == DIR_LEFT);
+
+        Misc_X_Speed[objoff] = Enemy_MovingDir[owner] == DIR_RIGHT ? 16 : -16;
       }
 
       // SetHPos
       Misc_State[objoff] -= 1;
 
       ADD_UNSIGNED_16_16_8(Misc_PageLoc[objoff], Misc_X_Position[objoff],
-                           Enemy_PageLoc[bVar2], Enemy_X_Position[bVar2],
+                           Enemy_PageLoc[owner], Enemy_X_Position[owner],
                            2);
 
-      Misc_Y_Position[objoff] = Enemy_Y_Position[bVar2] - 10;
+      Misc_Y_Position[objoff] = Enemy_Y_Position[owner] - 10;
       Misc_Y_HighPos[objoff] = 1;
     }
   }
@@ -4080,30 +4085,39 @@ void PowerUpObjHandler(const u8 objoff) {
 #ifdef SMB2J_MODE
         case POWERUP_POISONSHROOM:
 #endif
+          // Sliding
+
           MoveNormalEnemy(objoff);
           EnemyToBGCollisionDet(objoff);
           break;
 
         case POWERUP_STAR:
+          // Bouncing
+
           MoveJumpingEnemy(objoff);
           EnemyJump(objoff);
           break;
       }
     }
   } else {
+    u8 counter = actor_state_get_raw(objoff);
+
     if ((FrameCounter & 3) == 0) {
       Enemy_Y_Position[objoff] -= 1;
 
-      if (actor_state_get_raw(objoff) > 0x10) {
+      if (counter > 0x10) {
+        counter = 0x80;
         Enemy_X_Speed[objoff] = 0x10;
         actor_state_powerup_set_emerged(objoff);
         Enemy_SprAttrib[objoff] = 0;
         Enemy_MovingDir[objoff] = DIR_RIGHT;
       } else {
-        Enemy_State[objoff] += 1;
+        counter += 1;
+        actor_state_set_raw(objoff, counter);
       }
     }
-    if (actor_state_get_raw(objoff) < 6) {
+
+    if (counter < 6) {
       return;
     }
   }
@@ -8014,7 +8028,8 @@ void ShellOrBlockDefeat(const u8 param_1) {
   ChkToStunEnemies(param_1);
 #endif
 
-  Enemy_State[param_1] &= 0x1f;
+  actor_state_clear_kicked(param_1);
+  actor_state_clear_falling_override(param_1);
   actor_state_set_defeated(param_1);
 
   if (actor_is(param_1, A_GOOMBA)) {
@@ -9398,7 +9413,7 @@ void EnemyToBGCollisionDet(const u8 objoff) {
 
   EnemyLanding(objoff);
   if (actor_state_is_kicked(objoff)) {
-    Enemy_State[objoff] &= 0xbf;
+    actor_state_clear_falling_override(objoff);
     return;
   }
   actor_state_set_raw(objoff, ACTOR_STATE_NORMAL);
@@ -9565,6 +9580,8 @@ void EnemyJump(const u8 objoff) {
 // SM2MAIN:ae1b
 // Signature: [X] -> []
 void HammerBroBGColl(const u8 objoff) {
+  expect(actor_is(objoff, A_HAMMER_BRO));
+
   // Inlined: ChkUnderEnemy
   const struct blockbuffer_colli_result sVar2 = BlockBufferCollision(0, objoff + 1, 21);
 
@@ -9573,16 +9590,13 @@ void HammerBroBGColl(const u8 objoff) {
     return;
   }
 
-  if (sVar2.a != MT_0) {
-    if (EnemyFrameTimer[objoff] == 0) {
-      Enemy_State[objoff] &= 0x88;
-      EnemyLanding(objoff);
-      DoEnemySideCheck(objoff);
-      return;
-    }
+  if (sVar2.a == MT_0 || EnemyFrameTimer[objoff] != 0) {
+    actor_state_set_hammerbro_jump(objoff);
+  } else {
+    actor_state_clear_hammerbro_jump(objoff);
+    EnemyLanding(objoff);
+    DoEnemySideCheck(objoff);
   }
-
-  actor_state_set_hammerbro_jump(objoff);
 }
 
 

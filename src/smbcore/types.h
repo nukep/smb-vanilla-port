@@ -428,7 +428,16 @@ static inline void actor_state_set_hammerbro_jump(const u8 idx) {
   Enemy_State[idx] |= 0x01;
 }
 
+static inline void actor_state_clear_hammerbro_jump(const u8 idx) {
+  // This clears more bits because it's what the game did
+  // just keeps bit 7 and bit 3
+  Enemy_State[idx] &= 0x88;
+}
+
 static inline void actor_state_set_stun(const u8 idx) {
+  // Note: can be called for A_HAMMER_BRO
+
+  Enemy_State[idx] &= 0xf0;
   Enemy_State[idx] |= ACTOR_STATE_STUN;
 }
 
@@ -441,6 +450,9 @@ static inline void actor_state_set_hammerbro_throw(const u8 idx) {
   expect(actor_is(idx, A_HAMMER_BRO));
   Enemy_State[idx] |= 0x08;
 }
+static inline void actor_state_clear_hammerbro_throw_unchecked(const u8 idx) {
+  Enemy_State[idx] &= (u8)(~0x08);
+}
 
 static inline bool actor_state_is_kicked(const u8 idx) {
   return (actor_state_get_raw(idx) & 0x80) != 0;
@@ -451,6 +463,9 @@ static inline bool actor_state_is_kicked_unchecked(const u8 idx) {
 
 static inline void actor_state_set_kicked(const u8 idx) {
   Enemy_State[idx] |= 0x80;
+}
+static inline void actor_state_clear_kicked(const u8 idx) {
+  Enemy_State[idx] &= (u8)(~0x80);
 }
 
 // This is different from ACTOR_STATE_FALLING.
@@ -469,6 +484,9 @@ static inline bool actor_state_is_falling_override_unchecked(const u8 idx) {
 // A_POWERUP
 static inline void actor_state_set_falling_override(const u8 idx) {
   Enemy_State[idx] |= 0x40;
+}
+static inline void actor_state_clear_falling_override(const u8 idx) {
+  Enemy_State[idx] &= (u8)(~0x40);
 }
 
 static inline bool actor_state_is_defeated(const u8 idx) {
