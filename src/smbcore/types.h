@@ -409,6 +409,20 @@ static inline bool actor_is(const u8 idx, const u8 id) {
 #define ACTOR_STATE_BULLETBILL_FIRING 1
 #define ACTOR_STATE_POWERUP_ACTIVE 1
 
+static inline u8 actor_state_get_raw(const u8 idx) {
+  // 99% of the time, we expect the actor to be active
+  expect_weak(actor_is_active(idx));
+  return Enemy_State[idx];
+}
+static inline u8 actor_state_get_raw_unchecked(const u8 idx) {
+  return Enemy_State[idx];
+}
+
+static inline void actor_state_set_raw(const u8 idx, const u8 val) {
+  // This doesn't do an active check, because writing doesn't do anything that bad
+  Enemy_State[idx] = val;
+}
+
 static inline void actor_state_set_hammerbro_jump(const u8 idx) {
   expect(actor_is(idx, A_HAMMER_BRO));
   Enemy_State[idx] |= 0x01;
@@ -420,7 +434,7 @@ static inline void actor_state_set_stun(const u8 idx) {
 
 static inline bool actor_state_is_hammerbro_throw(const u8 idx) {
   expect(actor_is(idx, A_HAMMER_BRO));
-  return (Enemy_State[idx] & 0x08) != 0;
+  return (actor_state_get_raw(idx) & 0x08) != 0;
 }
 
 static inline void actor_state_set_hammerbro_throw(const u8 idx) {
@@ -429,6 +443,9 @@ static inline void actor_state_set_hammerbro_throw(const u8 idx) {
 }
 
 static inline bool actor_state_is_kicked(const u8 idx) {
+  return (actor_state_get_raw(idx) & 0x80) != 0;
+}
+static inline bool actor_state_is_kicked_unchecked(const u8 idx) {
   return (Enemy_State[idx] & 0x80) != 0;
 }
 
@@ -438,6 +455,9 @@ static inline void actor_state_set_kicked(const u8 idx) {
 
 // This is different from ACTOR_STATE_FALLING.
 static inline bool actor_state_is_falling_override(const u8 idx) {
+  return (actor_state_get_raw(idx) & 0x40) != 0;
+}
+static inline bool actor_state_is_falling_override_unchecked(const u8 idx) {
   return (Enemy_State[idx] & 0x40) != 0;
 }
 
@@ -452,6 +472,9 @@ static inline void actor_state_set_falling_override(const u8 idx) {
 }
 
 static inline bool actor_state_is_defeated(const u8 idx) {
+  return (actor_state_get_raw(idx) & 0x20) != 0;
+}
+static inline bool actor_state_is_defeated_unchecked(const u8 idx) {
   return (Enemy_State[idx] & 0x20) != 0;
 }
 
@@ -461,7 +484,7 @@ static inline void actor_state_set_defeated(const u8 idx) {
 
 static inline bool actor_state_powerup_is_emerged(const u8 idx) {
   expect(actor_is(idx, A_POWERUP));
-  return (Enemy_State[idx] & 0x80) != 0;
+  return (actor_state_get_raw(idx) & 0x80) != 0;
 }
 
 static inline void actor_state_powerup_set_emerged(const u8 idx) {
