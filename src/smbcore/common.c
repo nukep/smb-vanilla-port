@@ -4534,7 +4534,7 @@ void MoveD_EnemyVertically(const u8 objoff) {
   if (actor_state_get_raw(objoff) == ACTOR_STATE_SPINY_EGG) {
     expect_weak(actor_is(objoff, A_SPINY));
 
-    MoveFallingPlatform(objoff);
+    SetXMoveAmt(3, objoff, 0x20);
     return;
   }
 
@@ -4683,19 +4683,22 @@ void ImposeGravity(const u8 param_1, const u8 param_2, const u8 param_3, const u
 // SM2MAIN:8c23
 // Signature: [X] -> []
 void EnemiesAndLoopsCore(const u8 objoff) {
-  u8 idx;
-  if (actor_get_tagged_value(objoff, &idx)) {
-    if (!actor_is_active(idx)) {
+  u8 idx_original;
+  if (actor_get_duplicate_backref(objoff, &idx_original)) {
+    // Deactivate the duplicate actor if the original is deactivated
+    if (!actor_is_active(idx_original)) {
       actor_deactivate(objoff);
     }
-  } else {
-    if (actor_is_active(objoff)) {
-      RunEnemyObjectsCore(objoff);
-      return;
-    }
-    if ((AreaParserTaskNum & 7) != 7) {
-      ProcLoopCommand(objoff);
-    }
+    return;
+  } 
+
+  if (actor_is_active(objoff)) {
+    RunEnemyObjectsCore(objoff);
+    return;
+  }
+
+  if ((AreaParserTaskNum & 7) != 7) {
+    ProcLoopCommand(objoff);
   }
 }
 
@@ -5260,7 +5263,7 @@ void LakituAndSpinyHandler(const u8 objoff) {
       if (Player_Y_Position < 0x2c) {
         return;
       }
-      if (actor_state_get_raw(i) != ACTOR_STATE_NORMAL) {
+      if (!actor_state_is_lakitu_normal(i)) {
         return;
       }
 
@@ -5326,7 +5329,7 @@ void InitLongFirebar(const u8 objoff) {
 
   DuplicateObj_Offset = i;
 
-  actor_set_tagged_value(i, objoff);
+  actor_set_duplicate_backref(i, objoff);
 
   Enemy_PageLoc[i] = Enemy_PageLoc[objoff];
   Enemy_X_Position[i] = Enemy_X_Position[objoff];
@@ -5485,7 +5488,7 @@ void InitBowser(const u8 objoff) {
 
   DuplicateObj_Offset = i;
 
-  actor_set_tagged_value(i, objoff);
+  actor_set_duplicate_backref(i, objoff);
 
   Enemy_PageLoc[i] = Enemy_PageLoc[objoff];
   Enemy_X_Position[i] = Enemy_X_Position[objoff];
@@ -6282,6 +6285,8 @@ void MovePodoboo(const u8 objoff) {
 // SM2MAIN:960d
 // Signature: [X] -> []
 void ProcHammerBro(const u8 objoff) {
+  expect(actor_is(objoff, A_HAMMER_BRO));
+
   if (actor_state_is_defeated(objoff)) {
     MoveDefeatedEnemy(objoff);
     return;
@@ -6308,7 +6313,7 @@ void ProcHammerBro(const u8 objoff) {
     MoveHammerBroXDir(objoff);
     return;
   }
-  if ((actor_state_get_raw(objoff) & 7) == 1) {
+  if (actor_state_is_hammerbro_jump(objoff)) {
     MoveHammerBroXDir(objoff);
     return;
   }
@@ -6376,28 +6381,34 @@ void MoveNormalEnemy(const u8 objoff) {
 
   if (actor_state_is_falling_override_unchecked(objoff)) {
     fall_e = true;
+  } else if (actor_state_is_kicked_unchecked(objoff)) {
+    fall_e = false;
+  } else if (actor_state_is_defeated_unchecked(objoff)) {
+    MoveDefeatedEnemy(objoff);
+    return;
   } else {
+    // 000_ ____
     const u8 bVar1 = actor_state_get_raw_unchecked(objoff) & 7;
 
-    if (actor_state_is_kicked_unchecked(objoff)) {
-      fall_e = false;
-    } else if (actor_state_is_defeated_unchecked(objoff)) {
-      MoveDefeatedEnemy(objoff);
-      return;
-    } else if (bVar1 == ACTOR_STATE_NORMAL) {
+    if (bVar1 == ACTOR_STATE_NORMAL) {
       fall_e = false;
     } else if (bVar1 == ACTOR_STATE_FALLING || bVar1 == ACTOR_STATE_STUN || bVar1 == ACTOR_STATE_SPINY_EGG) {
       fall_e = true;
     } else {
       if (EnemyIntervalTimer[objoff] == 0) {
-        actor_state_set_raw(objoff, ACTOR_STATE_NORMAL);
-        u8 bVar2 = FrameCounter & 1;
-        Enemy_MovingDir[objoff] = bVar2 + 1;
+        // Koopa or buzzy beetle comes out of its shell
+        // May also be spiny, but I'm unsure why. Possibly a glitch.
 
-        if (!PrimaryHardMode) {
-          Enemy_X_Speed[objoff] = bVar2 == 0 ? 8 : -8;
+        actor_state_set_raw(objoff, ACTOR_STATE_NORMAL);
+
+        const i8 speed = !PrimaryHardMode ? 8 : 12;
+
+        if ((FrameCounter & 1) == 0) {
+          Enemy_MovingDir[objoff] = DIR_RIGHT;
+          Enemy_X_Speed[objoff] = speed;
         } else {
-          Enemy_X_Speed[objoff] = bVar2 == 0 ? 12 : -12;
+          Enemy_MovingDir[objoff] = DIR_LEFT;
+          Enemy_X_Speed[objoff] = -speed;
         }
 
         return;
@@ -7164,6 +7175,8 @@ static void EnemyGfxHandler_bowser(const u8 objoff, const u8 bowser_gfx_flag);
 // SM2MAIN:9db0
 // Signature: [X] -> []
 void BowserGfxHandler(const u8 objoff) {
+  expect(actor_is(objoff, A_BOWSER));
+
   expect(BowserGfxFlag == 0);
 
   // NES note: BowserGfxFlag ($036a) is only used here and the EnemyGfxHandler tree.
@@ -7178,7 +7191,7 @@ void BowserGfxHandler(const u8 objoff) {
   RelativeEnemyPosition(objoff);
   EnemyGfxHandler_bowser(objoff, 1);
 
-  if (actor_state_get_raw(objoff) == 0) {
+  if (actor_state_is_bowser_normal(objoff)) {
     Enemy_BoundBoxCtrl[objoff] = 10;
     GetEnemyBoundBox(objoff);
     PlayerEnemyCollision(objoff);
@@ -7198,13 +7211,11 @@ void BowserGfxHandler(const u8 objoff) {
   RelativeEnemyPosition(dup_objoff);
   EnemyGfxHandler_bowser(dup_objoff, 2);
 
-  if (actor_state_get_raw(dup_objoff) == 0) {
+  if (actor_state_is_bowser_normal(dup_objoff)) {
     Enemy_BoundBoxCtrl[dup_objoff] = 10;
     GetEnemyBoundBox(dup_objoff);
     PlayerEnemyCollision(dup_objoff);
   }
-
-  expect(BowserGfxFlag == 0);
 }
 
 
@@ -7957,58 +7968,58 @@ void FireballEnemyCollision(const u8 objoff) {
   }
 }
 
+static void bowser_hit_fireball(const u8 idx, const u8 floatey_idx) {
+  expect(actor_is(idx, A_BOWSER));
+
+  BowserHitPoints -= 1;
+  if (BowserHitPoints > 0) {
+    return;
+  }
+
+  InitVStf(idx);
+  EnemyFrenzyBuffer = 0;
+  Enemy_X_Speed[idx] = 0;
+  Enemy_Y_Speed[idx] = -2;
+  Enemy_ID[idx] = BowserIdentities[WorldNumber];
+
+  actor_state_set_raw(idx, (WorldNumber < 3) ? 3 : 0);
+  actor_state_set_defeated(idx);
+
+  Square2SoundQueue = SOUND_SQ2_BOWSERFALL;
+  EnemySmackScore(9, floatey_idx);
+}
 
 // SMB:d73e
 // SM2MAIN:a37f
 // Signature: [X+r01] -> []
-void HandleEnemyFBallCol(const u8 param_1) {
-  RelativeEnemyPosition(param_1);
+void HandleEnemyFBallCol(const u8 idx) {
+  RelativeEnemyPosition(idx);
 
-  u8 bVar2;
+  u8 idx_original;
 
-  u8 idx;
-
-  if (actor_get_tagged_value(param_1, &idx) && actor_is(idx, A_BOWSER)) {
-    bVar2 = idx;
-  } else {
-    bVar2 = param_1;
-
-    const u8 enemy_id = Enemy_ID[param_1];
-    if (enemy_id != A_BOWSER) {
-      if (enemy_id == A_BUZZY_BEETLE) {
-        return;
-      }
-      if (enemy_id == A_BULLET_BILL) {
-        return;
-      }
-      if (enemy_id == A_PODOBOO) {
-        return;
-      }
-      if (is_actor_enemy(enemy_id)) {
-        ShellOrBlockDefeat(param_1);
-      }
-      return;
-    }
-  }
-
-  BowserHitPoints -= 1;
-  if (BowserHitPoints != 0) {
+  if (actor_get_duplicate_backref(idx, &idx_original) && actor_is(idx_original, A_BOWSER)) {
+    bowser_hit_fireball(idx_original, idx);
     return;
   }
 
-  expect(actor_is(bVar2, A_BOWSER));
+  if (actor_is(idx, A_BOWSER)) {
+    bowser_hit_fireball(idx, idx);
+    return;
+  }
 
-  InitVStf(bVar2);
-  EnemyFrenzyBuffer = 0;
-  Enemy_X_Speed[bVar2] = 0;
-  Enemy_Y_Speed[bVar2] = -2;
-  Enemy_ID[bVar2] = BowserIdentities[WorldNumber];
+  if (actor_is(idx, A_BUZZY_BEETLE)) {
+    return;
+  }
+  if (actor_is(idx, A_BULLET_BILL)) {
+    return;
+  }
+  if (actor_is(idx, A_PODOBOO)) {
+    return;
+  }
 
-  actor_state_set_raw(bVar2, (WorldNumber < 3) ? 3 : 0);
-  actor_state_set_defeated(bVar2);
-
-  Square2SoundQueue = SOUND_SQ2_BOWSERFALL;
-  EnemySmackScore(9, param_1);
+  if (is_actor_enemy(actor_get_id(idx))) {
+    ShellOrBlockDefeat(idx);
+  }
 }
 
 

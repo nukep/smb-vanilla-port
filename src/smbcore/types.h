@@ -363,14 +363,17 @@ static inline void actor_collideswith_actor_clear(const u8 a, const u8 b) {
   Enemy_CollisionBits[a] &= INVBITS_u8(ACTOR_COLLISIONBIT_ACTOR(b));
 }
 
-static inline void actor_set_tagged_value(const u8 idx, const u8 val) {
-  expect((val & 0xf0) == 0);
-  Enemy_Flag[idx] = 0x80 | (val & 0xf);
+// Assigns a back-reference from a duplicate actor to its original
+static inline void actor_set_duplicate_backref(const u8 idx_dup, const u8 idx_original) {
+  expect((idx_original & 0xf0) == 0);
+  Enemy_Flag[idx_dup] = 0x80 | (idx_original & 0xf);
 }
 
-static inline bool actor_get_tagged_value(const u8 idx, u8 *val) {
-  if (Enemy_Flag[idx] & 0x80) {
-    *val = Enemy_Flag[idx] & 0xf;
+// Reads a back-reference from a duplicate actor to its original, if it exists.
+// Returns true and sets idx_original if it does.
+static inline bool actor_get_duplicate_backref(const u8 idx_dup, u8 *idx_original) {
+  if (Enemy_Flag[idx_dup] & 0x80) {
+    *idx_original = Enemy_Flag[idx_dup] & 0xf;
     return true;
   }
   return false;
@@ -421,6 +424,11 @@ static inline u8 actor_state_get_raw_unchecked(const u8 idx) {
 static inline void actor_state_set_raw(const u8 idx, const u8 val) {
   // This doesn't do an active check, because writing doesn't do anything that bad
   Enemy_State[idx] = val;
+}
+
+static inline bool actor_state_is_hammerbro_jump(const u8 idx) {
+  expect(actor_is(idx, A_HAMMER_BRO));
+  return (actor_state_get_raw(idx) & 7) == 1;
 }
 
 static inline void actor_state_set_hammerbro_jump(const u8 idx) {
@@ -518,6 +526,11 @@ static inline bool actor_state_powerup_is_emerged(const u8 idx) {
 static inline void actor_state_powerup_set_emerged(const u8 idx) {
   expect(actor_is(idx, A_POWERUP));
   Enemy_State[idx] = 0x80;
+}
+
+static inline bool actor_state_is_bowser_normal(const u8 idx) {
+  expect(actor_is(idx, A_BOWSER));
+  return actor_state_get_raw(idx) == 0;
 }
 
 
