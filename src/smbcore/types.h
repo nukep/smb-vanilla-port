@@ -454,6 +454,16 @@ static inline void actor_state_clear_hammerbro_throw_unchecked(const u8 idx) {
   Enemy_State[idx] &= (u8)(~0x08);
 }
 
+static inline bool actor_state_is_lakitu_normal(const u8 idx) {
+  expect(actor_is(idx, A_LAKITU));
+  return actor_state_get_raw(idx) == 0;
+}
+
+static inline void actor_state_set_lakitu_leaving(const u8 idx) {
+  expect(actor_is(idx, A_LAKITU));
+  actor_state_set_raw(idx, 1);
+}
+
 static inline bool actor_state_is_kicked(const u8 idx) {
   return (actor_state_get_raw(idx) & 0x80) != 0;
 }

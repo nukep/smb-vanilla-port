@@ -5589,22 +5589,24 @@ void InitFireworks(const u8 objoff) {
 
   assert_smb_crashbug(i >= 0, "A star flag object should exist. If not, the original game would loop infinitely or do something weird here");
 
-  const u8 bVar3 = FireworksCounter + actor_state_get_raw(i);
+  // The starflag actor state is set such that the initial counter puts us
+  // at the end of the lookup (the 6th item).
+  // It goes backwards as the counter decrements.
+  // The mod 6 is not in the original, but is there for safety.
+  const u8 j = (FireworksCounter + actor_state_get_raw(i)) % 6;
 
   u16 x = LOAD_16(Enemy_PageLoc[i], Enemy_X_Position[i]);
 
   static const u8 xpos_lookup[6] = { 0x00, 0x30, 0x60, 0x60, 0x00, 0x20 };
   static const u8 ypos_lookup[6] = { 0x60, 0x40, 0x70, 0x40, 0x60, 0x30 };
 
-  expect(bVar3 < 6);
-
   x -= 0x30;
-  x += xpos_lookup[bVar3];
+  x += xpos_lookup[j];
 
   STORE_16(Enemy_PageLoc[objoff], Enemy_X_Position[objoff],
            x);
 
-  Enemy_Y_Position[objoff] = ypos_lookup[bVar3];
+  Enemy_Y_Position[objoff] = ypos_lookup[j];
   Enemy_Y_HighPos[objoff] = 1;
 
   expect(actor_is(objoff, A_FIREWORKS));
@@ -5821,7 +5823,7 @@ void InitEnemyFrenzy(const u8 objoff) {
 void EndFrenzy(const u8 objoff) {
   for (int i = 0; i < 6; i++) {
     if (actor_is(i, A_LAKITU)) {
-      actor_state_set_raw(i, 1);
+      actor_state_set_lakitu_leaving(i);
     }
   }
 
@@ -6243,7 +6245,7 @@ void LargePlatformSubroutines(const u8 objoff) {
 void EraseEnemyObject(const u8 param_1) {
   actor_deactivate(param_1);
   Enemy_ID[param_1] = A_GREEN_KOOPA;
-  actor_state_set_raw(param_1, ACTOR_STATE_NORMAL);
+  actor_state_set_raw(param_1, 0);
   FloateyNum_Control[param_1] = 0;
   EnemyIntervalTimer[param_1] = 0;
   ShellChainCounter[param_1] = 0;
@@ -6884,27 +6886,30 @@ void MoveFlyingCheepCheep(const u8 objoff) {
 // SM2MAIN:9b5d
 // Signature: [X] -> []
 void MoveLakitu(const u8 objoff) {
-  if ((actor_state_is_defeated(objoff)) == 0) {
-    if (actor_state_get_raw(objoff) == 0) {
-      EnemyFrenzyBuffer = A_SPINY;
-      LakituMoveSpeed[objoff] = PlayerLakituDiff(objoff, 21, 48, 64);
-    } else {
-      LakituMoveDirection[objoff] = 0;
-      EnemyFrenzyBuffer = 0;
-      LakituMoveSpeed[objoff] = 0x10;
-    }
-
-    if ((LakituMoveDirection[objoff] & 1) != 0) {
-      Enemy_MovingDir[objoff] = DIR_RIGHT;
-    } else {
-      LakituMoveSpeed[objoff] *= -1;
-      Enemy_MovingDir[objoff] = DIR_LEFT;
-    }
-
-    MoveEnemyHorizontally(objoff);
-  } else {
+  if (actor_state_is_defeated(objoff)) {
     MoveD_EnemyVertically(objoff);
+    return;
   }
+
+  if (actor_state_is_lakitu_normal(objoff)) {
+    EnemyFrenzyBuffer = A_SPINY;
+    LakituMoveSpeed[objoff] = PlayerLakituDiff(objoff, 21, 48, 64);
+  } else {
+    // The lakitu is leaving
+
+    LakituMoveDirection[objoff] = 0;
+    EnemyFrenzyBuffer = 0;
+    LakituMoveSpeed[objoff] = 0x10;
+  }
+
+  if ((LakituMoveDirection[objoff] & 1) != 0) {
+    Enemy_MovingDir[objoff] = DIR_RIGHT;
+  } else {
+    LakituMoveSpeed[objoff] *= -1;
+    Enemy_MovingDir[objoff] = DIR_LEFT;
+  }
+
+  MoveEnemyHorizontally(objoff);
 }
 
 
@@ -7344,23 +7349,23 @@ void RunStarFlagObj(const u8 objoff) {
 // SM2MAIN:9f27
 // Signature: [X] -> []
 void GameTimerFireworks(const u8 objoff) {
+  expect(actor_is(objoff, A_STARFLAG));
+
   const u8 last_digit = GameTimerDisplay[2];
 
-  actor_state_set_raw(objoff, ACTOR_STATE_NORMAL);
-  FireworksCounter = 0xff;
+  // Between 0 and 127 inclusive
+  u8 counter = 0;
 
 #ifdef SMB1_MODE
   if (last_digit == 1) {
-    actor_state_set_raw(objoff, 5);
-    FireworksCounter = 1;
+    counter = 1;
   } else if (last_digit == 3) {
-    actor_state_set_raw(objoff, 3);
-    FireworksCounter = 3;
+    counter = 3;
   } else if (last_digit == 6) {
-    actor_state_set_raw(objoff, ACTOR_STATE_NORMAL);
-    FireworksCounter = 6;
+    counter = 6;
   }
 #endif
+
 #ifdef SMB2J_MODE
   if (last_digit == CoinDisplay[1]) {
     // only show fireworks if the last digit of the timer
@@ -7368,15 +7373,24 @@ void GameTimerFireworks(const u8 objoff) {
 
     if ((last_digit & 1) == 0) {
       // timer is even
-      actor_state_set_raw(objoff, ACTOR_STATE_NORMAL);
-      FireworksCounter = 6;
+      counter = 6;
     } else {
       // timer is odd
-      actor_state_set_raw(objoff, 3);
-      FireworksCounter = 3;
+      counter = 3;
     }
   }
 #endif
+
+  // Set the starflag actor state to a lookup offset:
+  // initial fireworks counter + starflag state = 6
+  if (counter > 0 && counter < 128) {
+    FireworksCounter = counter;
+    actor_state_set_raw(objoff, 6 - counter);
+  } else {
+    // No fireworks
+    FireworksCounter = 0xff;
+    actor_state_set_raw(objoff, 0);
+  }
 
   // Note: StarFlagTaskControl increment moved to caller
 }
@@ -7538,13 +7552,13 @@ void BalancePlatform(const u8 objoff) {
     return;
   }
 
-  if (actor_state_is_kicked(objoff)) {
+  // The actor state is the index of the other platform
+  const u8 idx = actor_state_get_raw(objoff);
+
+  if ((i8)idx < 0) {
+    // No other platform is defined
     return;
   }
-
-  // Otherwise, the enemy state is an actor index for the other platform
-
-  const u8 idx = actor_state_get_raw(objoff);
 
 #ifdef SMB2J_MODE
   if (!actor_is(idx, A_LARGEPLATFORM_BALANCE)) {
@@ -7616,7 +7630,9 @@ void BalancePlatform(const u8 objoff) {
     break;
   }
 
-  Enemy_Y_Position[actor_state_get_raw(objoff)] += (bStack0000 - Enemy_Y_Position[objoff]);
+  expect(actor_state_get_raw(objoff) == idx);
+
+  Enemy_Y_Position[idx] += (bStack0000 - Enemy_Y_Position[objoff]);
 
   if ((PlatformCollisionFlag[objoff] & 0x80) == 0) {
     PositionPlayerOnVPlat(PlatformCollisionFlag[objoff]);
@@ -7644,7 +7660,7 @@ void BalancePlatform(const u8 objoff) {
 
     // Left hand side
 
-    const u16 ppuaddr_2 = SetupPlatformRope(!cond, actor_state_get_raw(objoff));
+    const u16 ppuaddr_2 = SetupPlatformRope(!cond, idx);
 
     VRAM1_DRAW(ppuaddr_2,
                !cond ? BGTILE_FLAGPOLE_ROPE_L : BGTILE_BLANK_0,
