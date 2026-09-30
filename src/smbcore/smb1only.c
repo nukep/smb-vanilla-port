@@ -302,9 +302,9 @@ void WriteGameText(const u8 param_1) {
 
 // SMB:e01b
 // Signature: [A, X] -> []
-void ChkToStunEnemies(const u8 enemy_id, const u8 param_2) {
+void ChkToStunEnemies(const u8 actor_id, const u8 param_2) {
   // Turn these enemies into koopas
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_GREEN_PARATROOPA_INPLACE:
   case A_RED_PARATROOPA:
   case A_PIRANHA_PLANT:

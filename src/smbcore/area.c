@@ -1290,7 +1290,7 @@ void ExitPipe(const u8 objoff) {
 // SMB:N/A (inlined in VerticalPipe)
 // SM2MAIN:7772
 // Signature: [A, X, r07] -> []
-void SetupPiranhaPlant(const u8 enemy_id, const u8 param_2, const u8 param_3) {
+void SetupPiranhaPlant(const u8 actor_id, const u8 param_2, const u8 param_3) {
   const u16 xpos = (CurrentPageLoc << 8) + GetAreaObjXPosition() + 8;
   Enemy_X_Position[param_2] = xpos & 0xff;
   Enemy_PageLoc[param_2] = xpos >> 8;
@@ -1298,7 +1298,7 @@ void SetupPiranhaPlant(const u8 enemy_id, const u8 param_2, const u8 param_3) {
   Enemy_Y_HighPos[param_2] = 1;
   Enemy_Y_Position[param_2] = GetAreaObjYPosition(param_3);
 
-  actor_activate(param_2, enemy_id);
+  actor_activate(param_2, actor_id);
 
   InitPiranhaPlant(param_2);
 }

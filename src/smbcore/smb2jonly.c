@@ -420,8 +420,8 @@ void PoisonMushBlock(const u8 param_1) {
 // Signature: [X] -> []
 void SetBounce(const u8 param_1) {
   Player_Y_Speed = -6;
-  const u8 enemy_id = actor_get_id(param_1);
-  if ((enemy_id == A_RED_PARATROOPA) || (enemy_id == A_GREEN_PARATROOPA_HORIZONTAL)) {
+  const u8 actor_id = actor_get_id(param_1);
+  if ((actor_id == A_RED_PARATROOPA) || (actor_id == A_GREEN_PARATROOPA_HORIZONTAL)) {
     Player_Y_Speed = -8;
   }
 }
@@ -434,15 +434,15 @@ void ChkToStunEnemies(const u8 param_1) {
   // The NES implementation did a bunch of compares to hoan in on the object types,
   // but it's more obvious to just do the comparisons directly.
 
-  const u8 enemy_id = actor_get_id(param_1);
+  const u8 actor_id = actor_get_id(param_1);
 
-  if (enemy_id == A_GOOMBA || enemy_id == A_POWERUP) {
+  if (actor_id == A_GOOMBA || actor_id == A_POWERUP) {
     SetStun2(param_1);
     return;
   }
 
   // Turn these enemies into koopas
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_GREEN_PARATROOPA_INPLACE:
   case A_RED_PARATROOPA:
     actor_set_id(param_1, A_RED_KOOPA_GREENLIKE);

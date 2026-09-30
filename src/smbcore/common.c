@@ -888,11 +888,11 @@ void FloateyNumbersRoutine(const u8 objoff) {
     AddToScore();
   }
 
-  const u8 enemy_id = actor_get_id(objoff);
+  const u8 actor_id = actor_get_id(objoff);
 
   bool cond = false;
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_GREEN_KOOPA:
   case A_RED_KOOPA_GREENLIKE:
   case A_BUZZY_BEETLE:
@@ -4907,12 +4907,12 @@ void CheckThreeBytes(void) {
 // SM2MAIN:8e50
 // Signature: [X] -> []
 void CheckpointEnemyID(const u8 param_1) {
-  const u8 enemy_id = actor_get_id(param_1);
+  const u8 actor_id = actor_get_id(param_1);
 
-  expect(is_actor_valid(enemy_id));
-  expect(!is_actor_groupenemy(enemy_id));
+  expect(is_actor_valid(actor_id));
+  expect(!is_actor_groupenemy(actor_id));
 
-  if (is_actor_enemy(enemy_id)) {
+  if (is_actor_enemy(actor_id)) {
     Enemy_Y_Position[param_1] += 8;
     EnemyOffscrBitsMasked[param_1] = 1;
   }
@@ -4922,7 +4922,7 @@ void CheckpointEnemyID(const u8 param_1) {
   // Enemy_ID = 0,2,6 (HandleGroupEnemies)
   const u8 objoff = param_1;
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_GREEN_KOOPA:
   case A_RED_KOOPA_GREENLIKE:
   case A_BUZZY_BEETLE:
@@ -5347,12 +5347,12 @@ void InitLongFirebar(const u8 objoff) {
 // SM2MAIN:9055
 // Signature: [X] -> []
 void InitShortFirebar(const u8 objoff) {
-  const u8 enemy_id = actor_get_id(objoff);
+  const u8 actor_id = actor_get_id(objoff);
 
   i8 speed;
   u8 dir;
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_FIREBAR_1: speed = 0x28; dir = 0; break;
   case A_FIREBAR_2: speed = 0x38; dir = 0; break;
   case A_FIREBAR_3: speed = 0x28; dir = 16; break;
@@ -5653,7 +5653,7 @@ void BulletBillCheepCheep(const u8 objoff) {
     return;
   }
 
-  u8 enemy_id;
+  u8 actor_id;
 
   if (AreaType == AREA_WATER) {
     // Auto-appearing cheep cheeps (in SMB1 2-2 and 7-2)
@@ -5670,7 +5670,7 @@ void BulletBillCheepCheep(const u8 objoff) {
       red_cheepcheep = !red_cheepcheep;
     }
 
-    enemy_id = red_cheepcheep ? A_CHEEPCHEEP_RED : A_CHEEPCHEEP_GRAY;
+    actor_id = red_cheepcheep ? A_CHEEPCHEEP_RED : A_CHEEPCHEEP_GRAY;
   } else {
     // Auto-appearing bullet bills (in SMB1 5-3 and 6-3)
 
@@ -5685,7 +5685,7 @@ void BulletBillCheepCheep(const u8 objoff) {
     Square2SoundQueue |= SOUND_SQ2_KABOOM;
 
     // Spawn a bullet bill
-    enemy_id = A_BULLET_BILL;
+    actor_id = A_BULLET_BILL;
   }
 
   const u8 rng_bag = random_from_bag(PseudoRandomBitReg[objoff], &BitMFilter);
@@ -5696,7 +5696,7 @@ void BulletBillCheepCheep(const u8 objoff) {
   };
 
   PutAtRightExtent(ypos_lookup[rng_bag], objoff);
-  actor_activate(objoff, enemy_id);
+  actor_activate(objoff, actor_id);
   Enemy_YMF_Dummy[objoff] = 0;
 
   FrenzyEnemyTimer = 0x20;
@@ -5786,10 +5786,10 @@ void InitPiranhaPlant(const u8 objoff) {
 // SM2MAIN:93d5
 // Signature: [X] -> []
 void InitEnemyFrenzy(const u8 objoff) {
-  const u8 enemy_id = actor_get_id(objoff);
-  EnemyFrenzyBuffer = enemy_id;
+  const u8 actor_id = actor_get_id(objoff);
+  EnemyFrenzyBuffer = actor_id;
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_SPINY:
     LakituAndSpinyHandler(objoff);
     return;
@@ -5814,7 +5814,7 @@ void InitEnemyFrenzy(const u8 objoff) {
     return;
 
   default:
-    jmpengine_overflow(enemy_id - A_SPINY);
+    jmpengine_overflow(actor_id - A_SPINY);
     return;
   }
 }
@@ -5971,29 +5971,29 @@ void PosPlatform(const u8 objoff, const u8 param_2) {
 // SM2MAIN:94b7
 // Signature: [r08] -> []
 void RunEnemyObjectsCore(const u8 objoff) {
-  const u8 enemy_id = actor_get_id(objoff);
+  const u8 actor_id = actor_get_id(objoff);
 
-  if (is_actor_enemy(enemy_id)) {
+  if (is_actor_enemy(actor_id)) {
     RunNormalEnemies(objoff);
     return;
   }
 
-  if (is_actor_platform_large(enemy_id)) {
+  if (is_actor_platform_large(actor_id)) {
     RunLargePlatform(objoff);
     return;
   }
 
-  if (is_actor_firebar(enemy_id)) {
+  if (is_actor_firebar(actor_id)) {
     RunFirebarObj(objoff);
     return;
   }
 
-  if (enemy_id == A_UNK_0x36 || is_actor_groupenemy(enemy_id) || !is_actor_valid(enemy_id)) {
-    jmpengine_overflow(enemy_id - 0x14);
+  if (actor_id == A_UNK_0x36 || is_actor_groupenemy(actor_id) || !is_actor_valid(actor_id)) {
+    jmpengine_overflow(actor_id - 0x14);
     return;
   }
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_BOWSER_FLAME:
     RunBowserFlame(objoff);
     return;
@@ -6075,14 +6075,14 @@ void RunNormalEnemies(const u8 objoff) {
 // SM2MAIN:953a
 // Signature: [X] -> []
 void EnemyMovementSubs(const u8 objoff) {
-  const u8 enemy_id = actor_get_id(objoff);
+  const u8 actor_id = actor_get_id(objoff);
 
-  if (!is_actor_enemy(enemy_id)) {
-    jmpengine_overflow(enemy_id);
+  if (!is_actor_enemy(actor_id)) {
+    jmpengine_overflow(actor_id);
     return;
   }
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_GREEN_KOOPA:
   case A_RED_KOOPA_GREENLIKE:
   case A_BUZZY_BEETLE:
@@ -6206,14 +6206,14 @@ void RunLargePlatform(const u8 objoff) {
 // SM2MAIN:95b7
 // Signature: [X] -> []
 void LargePlatformSubroutines(const u8 objoff) {
-  const u8 enemy_id = actor_get_id(objoff);
+  const u8 actor_id = actor_get_id(objoff);
 
-  if (!is_actor_platform_large(enemy_id)) {
-    jmpengine_overflow(enemy_id - A_LARGEPLATFORM_BALANCE);
+  if (!is_actor_platform_large(actor_id)) {
+    jmpengine_overflow(actor_id - A_LARGEPLATFORM_BALANCE);
     return;
   }
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_LARGEPLATFORM_BALANCE:
     BalancePlatform(objoff);
     return;
@@ -7848,9 +7848,9 @@ static inline bool offscreenboundscheck_condition(const u8 idx) {
   // because ADC and SBC were not accompanied with a CLC or SEC.
   // These quirks are separated in case a feature-enhancing port wants to remove them.
 
-  const u8 enemy_id = actor_get_id(idx);
+  const u8 actor_id = actor_get_id(idx);
 
-  if (enemy_id == A_FLYING_CHEEPCHEEP) {
+  if (actor_id == A_FLYING_CHEEPCHEEP) {
     return false;
   }
 
@@ -7861,7 +7861,7 @@ static inline bool offscreenboundscheck_condition(const u8 idx) {
   i16 left_bound  = sl - 0x48;
   i16 right_bound = sr + 0x48;
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_HAMMER_BRO:
   case A_PIRANHA_PLANT:
 #ifdef SMB2J_MODE
@@ -7880,9 +7880,9 @@ static inline bool offscreenboundscheck_condition(const u8 idx) {
 
   // carry quirk, only for these enemies
   // NES note: These are all less than A_PIRANHA_PLANT.
-  // CPY #13 clears the carry bit because enemy_id < 13.
+  // CPY #13 clears the carry bit because actor_id < 13.
   // SBC #$48 then subtracts 0x48+1 because carry = 0.
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_GREEN_KOOPA:
   case A_RED_KOOPA_GREENLIKE:
   case A_BUZZY_BEETLE:
@@ -7918,12 +7918,12 @@ static inline bool offscreenboundscheck_condition(const u8 idx) {
     // Note: this reads the actor state even if the slot is deactivated
 
     if (actor_state_get_raw_unchecked(idx) == ACTOR_STATE_SPINY_EGG) { return false; }
-    if (enemy_id == A_PIRANHA_PLANT) { return false; }
-    if (enemy_id == A_FLAGPOLE) { return false; }
-    if (enemy_id == A_STARFLAG) { return false; }
-    if (enemy_id == A_JUMPSPRING) { return false; }
+    if (actor_id == A_PIRANHA_PLANT) { return false; }
+    if (actor_id == A_FLAGPOLE) { return false; }
+    if (actor_id == A_STARFLAG) { return false; }
+    if (actor_id == A_JUMPSPRING) { return false; }
 #ifdef SMB2J_MODE
-    if (enemy_id == A_PIRANHA_PLANT_SMB2J) { return false; }
+    if (actor_id == A_PIRANHA_PLANT_SMB2J) { return false; }
 #endif
 
     return true;
@@ -7952,12 +7952,12 @@ void FireballEnemyCollision(const u8 objoff) {
   if ((FrameCounter & 1) != 0) { return; }
 
   for (int i = 4; i >= 0; i--) {
-    const u8 enemy_id = actor_get_id(i);
+    const u8 actor_id = actor_get_id(i);
 
     if (!actor_is_active(i)) { continue; }
     if (actor_state_is_defeated(i)) { continue; }
-    if (is_actor_platform_large(enemy_id)) { continue; }
-    if (enemy_id == A_GOOMBA && actor_state_get_raw(i) >= 2) { continue; }
+    if (is_actor_platform_large(actor_id)) { continue; }
+    if (actor_id == A_GOOMBA && actor_state_get_raw(i) >= 2) { continue; }
     if (EnemyOffscrBitsMasked[i] != 0) { continue; }
 
     const bool bVar3 = SprObjectCollisionCore(i * 4 + 4, objoff * 4 + 0x1c);
@@ -8027,28 +8027,28 @@ void HandleEnemyFBallCol(const u8 idx) {
 // SM2MAIN:a3d6
 // Signature: [X] -> []
 void ShellOrBlockDefeat(const u8 param_1) {
-  u8 enemy_id = actor_get_id(param_1);
+  u8 actor_id = actor_get_id(param_1);
 
 #ifdef SMB2J_MODE
-  if (enemy_id == A_PIRANHA_PLANT_SMB2J) {
+  if (actor_id == A_PIRANHA_PLANT_SMB2J) {
     // +1 is possible oversight in original game, didn't clc before adc
     Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 0x18 + 1 - 0x31;
   }
 #endif
 
-  if (enemy_id == A_PIRANHA_PLANT) {
+  if (actor_id == A_PIRANHA_PLANT) {
     // +1 is possible oversight in original game, didn't clc before adc
     Enemy_Y_Position[param_1] = Enemy_Y_Position[param_1] + 0x18 + 1;
   }
 
 #ifdef SMB1_MODE
-  if (enemy_id == A_PIRANHA_PLANT) {
+  if (actor_id == A_PIRANHA_PLANT) {
     // this reimplements a bug in SMB1
     // NES note: The "A" register is overwritten by the Piranha plant case
-    enemy_id = Enemy_Y_Position[param_1];
+    actor_id = Enemy_Y_Position[param_1];
   }
 
-  ChkToStunEnemies(enemy_id, param_1);
+  ChkToStunEnemies(actor_id, param_1);
 #endif
 
 #ifdef SMB2J_MODE
@@ -8188,9 +8188,9 @@ void PlayerEnemyCollision(const u8 objoff) {
     return;
   }
 
-  const u8 enemy_id = actor_get_id(objoff);
+  const u8 actor_id = actor_get_id(objoff);
 
-  if (enemy_id == A_POWERUP) {
+  if (actor_id == A_POWERUP) {
     HandlePowerUpCollision(objoff);
     return;
   }
@@ -8210,20 +8210,20 @@ void PlayerEnemyCollision(const u8 objoff) {
 
   actor_collideswith_player_set(objoff);
 
-  if (enemy_id == A_PODOBOO || enemy_id == A_PIRANHA_PLANT) {
+  if (actor_id == A_PODOBOO || actor_id == A_PIRANHA_PLANT) {
     InjurePlayer();
     return;
   }
 
 #ifdef SMB2J_MODE
-  if (enemy_id == A_PIRANHA_PLANT_SMB2J) {
+  if (actor_id == A_PIRANHA_PLANT_SMB2J) {
     InjurePlayer();
     return;
   }
 #endif
 
-  if ((enemy_id != A_SPINY) && (enemy_id != A_BULLET_BILL_CANNON)) {
-    if (!is_actor_enemy(enemy_id)) {
+  if ((actor_id != A_SPINY) && (actor_id != A_BULLET_BILL_CANNON)) {
+    if (!is_actor_enemy(actor_id)) {
       InjurePlayer();
       return;
     }
@@ -8234,7 +8234,7 @@ void PlayerEnemyCollision(const u8 objoff) {
     }
 
     if (!actor_state_is_kicked(objoff) && (actor_state_get_raw(objoff) & 6) != 0) {
-      if (enemy_id == A_GOOMBA) {
+      if (actor_id == A_GOOMBA) {
         return;
       }
       Square1SoundQueue = SOUND_SQ1_KICK;
@@ -8257,12 +8257,12 @@ void PlayerEnemyCollision(const u8 objoff) {
     }
   }
 
-  expect(is_actor_enemy(enemy_id) || enemy_id == A_BULLET_BILL_CANNON);
+  expect(is_actor_enemy(actor_id) || actor_id == A_BULLET_BILL_CANNON);
 
   if (StompTimer == 0) {
     bool cond1 = false;
 
-    switch (enemy_id) {
+    switch (actor_id) {
     case A_GREEN_KOOPA:
     case A_RED_KOOPA_GREENLIKE:
     case A_BUZZY_BEETLE:
@@ -8302,7 +8302,7 @@ void PlayerEnemyCollision(const u8 objoff) {
     }
   }
 
-  if (enemy_id == A_SPINY) {
+  if (actor_id == A_SPINY) {
     InjurePlayer();
     return;
   }
@@ -8312,7 +8312,7 @@ void PlayerEnemyCollision(const u8 objoff) {
 
   u8 points;
 
-  switch (enemy_id) {
+  switch (actor_id) {
     case A_HAMMER_BRO:
       points = 6;
       cond3 = false;
@@ -8339,7 +8339,7 @@ void PlayerEnemyCollision(const u8 objoff) {
   if (cond3) {
     bool cond4 = false;
 
-    switch (enemy_id) {
+    switch (actor_id) {
     case A_GREEN_KOOPA:
     case A_RED_KOOPA_GREENLIKE:
     case A_BUZZY_BEETLE:
@@ -8496,14 +8496,14 @@ void SetupFloateyNumber(const u8 param_1, const u8 param_2) {
 
 
 static inline bool EnemiesCollision_condition(const u8 enemyoff) {
-  const u8 enemy_id = actor_get_id(enemyoff);
+  const u8 actor_id = actor_get_id(enemyoff);
 
-  if (!is_actor_enemy(enemy_id)) { return true; }
-  if (enemy_id == A_LAKITU) { return true; }
-  if (enemy_id == A_PIRANHA_PLANT) { return true; }
+  if (!is_actor_enemy(actor_id)) { return true; }
+  if (actor_id == A_LAKITU) { return true; }
+  if (actor_id == A_PIRANHA_PLANT) { return true; }
 
 #ifdef SMB2J_MODE
-  if (enemy_id == A_PIRANHA_PLANT_SMB2J) { return true; }
+  if (actor_id == A_PIRANHA_PLANT_SMB2J) { return true; }
 #endif
 
   if (EnemyOffscrBitsMasked[enemyoff] != 0) { return true; }
@@ -8599,9 +8599,9 @@ void ProcEnemyCollisions(const u8 objoff, const u8 param_2) {
 // SM2MAIN:a78d
 // Signature: [X] -> []
 void EnemyTurnAround(const u8 param_1) {
-  const u8 enemy_id = actor_get_id(param_1);
+  const u8 actor_id = actor_get_id(param_1);
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_GREEN_KOOPA:
   case A_RED_KOOPA_GREENLIKE:
   case A_BUZZY_BEETLE:
@@ -9318,9 +9318,9 @@ void EnemyToBGCollisionDet(const u8 objoff) {
     return;
   }
 
-  const u8 enemy_id = actor_get_id(objoff);
+  const u8 actor_id = actor_get_id(objoff);
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_GREEN_PARATROOPA:
     EnemyJump(objoff);
     return;
@@ -9364,21 +9364,21 @@ void EnemyToBGCollisionDet(const u8 objoff) {
     set_metatile(sVar6.mt_x, sVar6.mt_y, MT_0);
 #endif
 
-    if (is_actor_enemy(enemy_id)) {
-      if (enemy_id == A_GOOMBA) {
+    if (is_actor_enemy(actor_id)) {
+      if (actor_id == A_GOOMBA) {
         KillEnemyAboveBlock(objoff);
       }
       SetupFloateyNumber(1, objoff);
     }
 
 #ifdef SMB1_MODE
-    if (is_actor_enemy(enemy_id)) {
+    if (is_actor_enemy(actor_id)) {
       // this reimplements a bug in SMB1
       // NES note: The "A" register is overwritten by the call to SetupFloateyNumber.
       // The value happens to be Enemy_Rel_XPos
       ChkToStunEnemies(Enemy_Rel_XPos, objoff);
     } else {
-      ChkToStunEnemies(enemy_id, objoff);
+      ChkToStunEnemies(actor_id, objoff);
     }
 #endif
 
@@ -9417,13 +9417,13 @@ void EnemyToBGCollisionDet(const u8 objoff) {
 
     bool cond = true;
 
-    if (enemy_id == A_SPINY) {
+    if (actor_id == A_SPINY) {
       Enemy_MovingDir[objoff] = DIR_RIGHT;
       Enemy_X_Speed[objoff] = 8;
       cond = (FrameCounter & 7) != 0;
     }
 
-    if (enemy_id == A_GOOMBA) {
+    if (actor_id == A_GOOMBA) {
       cond = false;
     }
 
@@ -10395,9 +10395,9 @@ void EnemyGfxHandler(const u8 objoff) {
   // right before any array reads could access writes we optimized away
   expect(objoff < 0xeb - 0xcf);
 
-  const u8 enemy_id = actor_get_id(objoff);
+  const u8 actor_id = actor_get_id(objoff);
 
-  expect(is_actor_enemy(enemy_id) || enemy_id == A_JUMPSPRING || enemy_id == A_BULLET_BILL_CANNON || enemy_id == A_RETAINER);
+  expect(is_actor_enemy(actor_id) || actor_id == A_JUMPSPRING || actor_id == A_BULLET_BILL_CANNON || actor_id == A_RETAINER);
 
   // Note: Enemy_SprAttrib[objoff] is always 0 for EnemyGfxHandler.
   // RunNormalEnemies sets this to 0 right before calling EnemyGfxHandler. The other non-enemy actor types never assign it to non-zero.
@@ -10405,14 +10405,14 @@ void EnemyGfxHandler(const u8 objoff) {
   // The use of this array is mostly residual, and is only meaningfully used in DrawPowerUp.
   expect_weak(Enemy_SprAttrib[objoff] == 0);
 
-  if (enemy_id == A_PIRANHA_PLANT) {
+  if (actor_id == A_PIRANHA_PLANT) {
     if ((PiranhaPlant_Y_Speed[objoff] >= 0) && (EnemyFrameTimer[objoff] != 0)) {
       return;
     }
   }
 
   // Workaround for CheckpointEnemyID() -> Setup_Vine() bug
-  rEF = enemy_id;
+  rEF = actor_id;
 
   const u8 xpos = Enemy_Rel_XPos;
   u8 ypos = Enemy_Y_Position[objoff];
@@ -10442,7 +10442,7 @@ void EnemyGfxHandler(const u8 objoff) {
 
   const bool cond1 = TimerControl == 0 && !is_kicked && !is_defeated;
 
-  switch (enemy_id) {
+  switch (actor_id) {
   case A_LAKITU:
     palette = 1;
     tall = true;
@@ -10505,7 +10505,7 @@ void EnemyGfxHandler(const u8 objoff) {
   case A_RED_KOOPA:
     palette = 1;
 
-    if (enemy_id == A_RED_KOOPA || enemy_id == A_RED_KOOPA_GREENLIKE) {
+    if (actor_id == A_RED_KOOPA || actor_id == A_RED_KOOPA_GREENLIKE) {
       palette = 2;
     }
 
@@ -10691,7 +10691,7 @@ void EnemyGfxHandler(const u8 objoff) {
   case A_FLYING_CHEEPCHEEP:
     palette = 2;
 
-    if (enemy_id == A_CHEEPCHEEP_GRAY) {
+    if (actor_id == A_CHEEPCHEEP_GRAY) {
       palette = 1;
     }
 
@@ -10890,7 +10890,7 @@ void EnemyGfxHandler(const u8 objoff) {
     next_tableoff = TOFF_PARATROOPA_2;
     palette = 1;
 
-    if (enemy_id == A_RED_PARATROOPA) {
+    if (actor_id == A_RED_PARATROOPA) {
       palette = 2;
     }
 
