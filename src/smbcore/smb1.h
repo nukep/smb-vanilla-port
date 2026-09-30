@@ -533,9 +533,6 @@ void smb1_InitFlyingCheepCheep(u8 param_1);
 void smb1_InitBowser(u8 param_1);
 #define InitBowser smb1_InitBowser
 
-void smb1_DuplicateEnemyObj(u8 param_1);
-#define DuplicateEnemyObj smb1_DuplicateEnemyObj
-
 void smb1_InitBowserFlame(u8 param_1);
 #define InitBowserFlame smb1_InitBowserFlame
 

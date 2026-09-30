@@ -363,14 +363,17 @@ static inline void actor_collideswith_actor_clear(const u8 a, const u8 b) {
   Enemy_CollisionBits[a] &= INVBITS_u8(ACTOR_COLLISIONBIT_ACTOR(b));
 }
 
-static inline void actor_set_tagged_value(const u8 idx, const u8 val) {
-  expect((val & 0xf0) == 0);
-  Enemy_Flag[idx] = 0x80 | (val & 0xf);
+// Assigns a back-reference from a duplicate actor to its original
+static inline void actor_set_duplicate_backref(const u8 idx_dup, const u8 idx_original) {
+  expect((idx_original & 0xf0) == 0);
+  Enemy_Flag[idx_dup] = 0x80 | (idx_original & 0xf);
 }
 
-static inline bool actor_get_tagged_value(const u8 idx, u8 *val) {
-  if (Enemy_Flag[idx] & 0x80) {
-    *val = Enemy_Flag[idx] & 0xf;
+// Reads a back-reference from a duplicate actor to its original, if it exists.
+// Returns true and sets idx_original if it does.
+static inline bool actor_get_duplicate_backref(const u8 idx_dup, u8 *idx_original) {
+  if (Enemy_Flag[idx_dup] & 0x80) {
+    *idx_original = Enemy_Flag[idx_dup] & 0xf;
     return true;
   }
   return false;
@@ -396,6 +399,138 @@ static inline u8 actor_get_id(const u8 idx) {
 
 static inline bool actor_is(const u8 idx, const u8 id) {
   return Enemy_ID[idx] == id;
+}
+
+
+#define ACTOR_STATE_NORMAL 0
+#define ACTOR_STATE_FALLING 1
+#define ACTOR_STATE_STUN 2
+#define ACTOR_STATE_UPSIDEDOWN 3
+#define ACTOR_STATE_STOMPED 4
+#define ACTOR_STATE_SPINY_EGG 5
+
+#define ACTOR_STATE_BULLETBILL_FIRING 1
+#define ACTOR_STATE_POWERUP_ACTIVE 1
+
+static inline u8 actor_state_get_raw(const u8 idx) {
+  // 99% of the time, we expect the actor to be active
+  expect_weak(actor_is_active(idx));
+  return Enemy_State[idx];
+}
+static inline u8 actor_state_get_raw_unchecked(const u8 idx) {
+  return Enemy_State[idx];
+}
+
+static inline void actor_state_set_raw(const u8 idx, const u8 val) {
+  // This doesn't do an active check, because writing doesn't do anything that bad
+  Enemy_State[idx] = val;
+}
+
+static inline bool actor_state_is_hammerbro_jump(const u8 idx) {
+  expect(actor_is(idx, A_HAMMER_BRO));
+  return (actor_state_get_raw(idx) & 7) == 1;
+}
+
+static inline void actor_state_set_hammerbro_jump(const u8 idx) {
+  expect(actor_is(idx, A_HAMMER_BRO));
+  Enemy_State[idx] |= 0x01;
+}
+
+static inline void actor_state_clear_hammerbro_jump(const u8 idx) {
+  // This clears more bits because it's what the game did
+  // just keeps bit 7 and bit 3
+  Enemy_State[idx] &= 0x88;
+}
+
+static inline void actor_state_set_stun(const u8 idx) {
+  // Note: can be called for A_HAMMER_BRO
+
+  Enemy_State[idx] &= 0xf0;
+  Enemy_State[idx] |= ACTOR_STATE_STUN;
+}
+
+static inline bool actor_state_is_hammerbro_throw(const u8 idx) {
+  expect(actor_is(idx, A_HAMMER_BRO));
+  return (actor_state_get_raw(idx) & 0x08) != 0;
+}
+
+static inline void actor_state_set_hammerbro_throw(const u8 idx) {
+  expect(actor_is(idx, A_HAMMER_BRO));
+  Enemy_State[idx] |= 0x08;
+}
+static inline void actor_state_clear_hammerbro_throw_unchecked(const u8 idx) {
+  Enemy_State[idx] &= (u8)(~0x08);
+}
+
+static inline bool actor_state_is_lakitu_normal(const u8 idx) {
+  expect(actor_is(idx, A_LAKITU));
+  return actor_state_get_raw(idx) == 0;
+}
+
+static inline void actor_state_set_lakitu_leaving(const u8 idx) {
+  expect(actor_is(idx, A_LAKITU));
+  actor_state_set_raw(idx, 1);
+}
+
+static inline bool actor_state_is_kicked(const u8 idx) {
+  return (actor_state_get_raw(idx) & 0x80) != 0;
+}
+static inline bool actor_state_is_kicked_unchecked(const u8 idx) {
+  return (Enemy_State[idx] & 0x80) != 0;
+}
+
+static inline void actor_state_set_kicked(const u8 idx) {
+  Enemy_State[idx] |= 0x80;
+}
+static inline void actor_state_clear_kicked(const u8 idx) {
+  Enemy_State[idx] &= (u8)(~0x80);
+}
+
+// This is different from ACTOR_STATE_FALLING.
+static inline bool actor_state_is_falling_override(const u8 idx) {
+  return (actor_state_get_raw(idx) & 0x40) != 0;
+}
+static inline bool actor_state_is_falling_override_unchecked(const u8 idx) {
+  return (Enemy_State[idx] & 0x40) != 0;
+}
+
+// known actors to use this:
+// A_GREEN_KOOPA
+// A_BUZZY_BEETLE
+// A_RED_KOOPA
+// A_BOWSER
+// A_POWERUP
+static inline void actor_state_set_falling_override(const u8 idx) {
+  Enemy_State[idx] |= 0x40;
+}
+static inline void actor_state_clear_falling_override(const u8 idx) {
+  Enemy_State[idx] &= (u8)(~0x40);
+}
+
+static inline bool actor_state_is_defeated(const u8 idx) {
+  return (actor_state_get_raw(idx) & 0x20) != 0;
+}
+static inline bool actor_state_is_defeated_unchecked(const u8 idx) {
+  return (Enemy_State[idx] & 0x20) != 0;
+}
+
+static inline void actor_state_set_defeated(const u8 idx) {
+  Enemy_State[idx] |= 0x20;
+}
+
+static inline bool actor_state_powerup_is_emerged(const u8 idx) {
+  expect(actor_is(idx, A_POWERUP));
+  return (actor_state_get_raw(idx) & 0x80) != 0;
+}
+
+static inline void actor_state_powerup_set_emerged(const u8 idx) {
+  expect(actor_is(idx, A_POWERUP));
+  Enemy_State[idx] = 0x80;
+}
+
+static inline bool actor_state_is_bowser_normal(const u8 idx) {
+  expect(actor_is(idx, A_BOWSER));
+  return actor_state_get_raw(idx) == 0;
 }
 
 

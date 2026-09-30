@@ -529,9 +529,6 @@ void smb2j_InitFlyingCheepCheep(u8 param_1);
 void smb2j_InitBowser(u8 param_1);
 #define InitBowser smb2j_InitBowser
 
-void smb2j_DuplicateEnemyObj(u8 param_1);
-#define DuplicateEnemyObj smb2j_DuplicateEnemyObj
-
 void smb2j_InitBowserFlame(u8 param_1);
 #define InitBowserFlame smb2j_InitBowserFlame
 

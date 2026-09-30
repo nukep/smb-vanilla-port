@@ -454,7 +454,7 @@ void ChkToStunEnemies(const u8 param_1) {
     break;
   }
 
-  Enemy_State[param_1] = 2;
+  actor_state_set_raw(param_1, ACTOR_STATE_STUN);
   SetStun2(param_1);
 }
 
@@ -929,7 +929,7 @@ void PatchPlayerNamePal(void) {
 // SM2DATA2+SM2DATA4:c4c0
 // Signature: [X] -> []
 void MoveUpsideDownPiranhaP(const u8 param_1) {
-  if (Enemy_State[param_1] != 0) { return; }
+  if (actor_state_get_raw(param_1) != 0) { return; }
   if (EnemyFrameTimer[param_1] != 0) { return; }
 
   if (PiranhaPlant_MoveFlag[param_1] == 0) {
