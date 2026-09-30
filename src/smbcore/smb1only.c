@@ -308,12 +308,12 @@ void ChkToStunEnemies(const u8 enemy_id, const u8 param_2) {
   case A_GREEN_PARATROOPA_INPLACE:
   case A_RED_PARATROOPA:
   case A_PIRANHA_PLANT:
-    Enemy_ID[param_2] = A_RED_KOOPA_GREENLIKE;
+    actor_set_id(param_2, A_RED_KOOPA_GREENLIKE);
     break;
 
   case A_GREEN_PARATROOPA:
   case A_GREEN_PARATROOPA_HORIZONTAL:
-    Enemy_ID[param_2] = A_GREEN_KOOPA;
+    actor_set_id(param_2, A_GREEN_KOOPA);
     break;
   }
 

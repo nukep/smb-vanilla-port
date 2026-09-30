@@ -420,7 +420,7 @@ void PoisonMushBlock(const u8 param_1) {
 // Signature: [X] -> []
 void SetBounce(const u8 param_1) {
   Player_Y_Speed = -6;
-  const u8 enemy_id = Enemy_ID[param_1];
+  const u8 enemy_id = actor_get_id(param_1);
   if ((enemy_id == A_RED_PARATROOPA) || (enemy_id == A_GREEN_PARATROOPA_HORIZONTAL)) {
     Player_Y_Speed = -8;
   }
@@ -434,7 +434,7 @@ void ChkToStunEnemies(const u8 param_1) {
   // The NES implementation did a bunch of compares to hoan in on the object types,
   // but it's more obvious to just do the comparisons directly.
 
-  const u8 enemy_id = Enemy_ID[param_1];
+  const u8 enemy_id = actor_get_id(param_1);
 
   if (enemy_id == A_GOOMBA || enemy_id == A_POWERUP) {
     SetStun2(param_1);
@@ -445,12 +445,12 @@ void ChkToStunEnemies(const u8 param_1) {
   switch (enemy_id) {
   case A_GREEN_PARATROOPA_INPLACE:
   case A_RED_PARATROOPA:
-    Enemy_ID[param_1] = A_RED_KOOPA_GREENLIKE;
+    actor_set_id(param_1, A_RED_KOOPA_GREENLIKE);
     break;
 
   case A_GREEN_PARATROOPA:
   case A_GREEN_PARATROOPA_HORIZONTAL:
-    Enemy_ID[param_1] = A_GREEN_KOOPA;
+    actor_set_id(param_1, A_GREEN_KOOPA);
     break;
   }
 
@@ -1326,7 +1326,7 @@ void MushroomRetainersForW8(void) {
 
     if ((BlueDelayFlag < 4) || (FlashMRSpriteDataOfs[BlueDelayFlag - 4] != MRSpriteDataOfs[BlueColorOfs])) {
       Enemy_SprDataOffset[0] = MRSpriteDataOfs[BlueColorOfs];
-      Enemy_ID[0] = A_RETAINER;
+      actor_set_id(0, A_RETAINER);
       Enemy_Y_Position[0] = MRetainerYPos[BlueColorOfs];
       Enemy_Rel_XPos = MRetainerXPos[BlueColorOfs];
       WorldNumber = 0;

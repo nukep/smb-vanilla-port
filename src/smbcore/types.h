@@ -397,6 +397,10 @@ static inline u8 actor_get_id(const u8 idx) {
   return Enemy_ID[idx];
 }
 
+static inline void actor_set_id(const u8 idx, const u8 id) {
+  Enemy_ID[idx] = id;
+}
+
 static inline bool actor_is(const u8 idx, const u8 id) {
   return Enemy_ID[idx] == id;
 }
