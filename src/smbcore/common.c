@@ -5437,7 +5437,7 @@ void InitFlyingCheepCheep(const u8 objoff) {
     }
 
     if (currng >= 2) {
-      Enemy_X_Speed[objoff] *= 1;
+      Enemy_X_Speed[objoff] *= -1;
       Enemy_MovingDir[objoff] += 1;
     }
   }
