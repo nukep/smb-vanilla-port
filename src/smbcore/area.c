@@ -1159,14 +1159,14 @@ void CastleObject(const u8 objoff) {
   // shorter castles (in X-1 and X-2 levels) don't draw the bottom
   expect(sVar5.y < 11);
 
-  static const u8 _ = MT_0;
-  static const u8 T = MT_CASTLE_TOP;
-  static const u8 N = MT_CASTLE_NOTCH;
-  static const u8 x = MT_CASTLE_BRICK;
-  static const u8 D = MT_CASTLE_DOOR_T;
-  static const u8 E = MT_CASTLE_DOOR_B;
-  static const u8 L = MT_CASTLE_WINDOW_L;
-  static const u8 R = MT_CASTLE_WINDOW_R;
+#define _ MT_0
+#define T MT_CASTLE_TOP
+#define N MT_CASTLE_NOTCH
+#define x MT_CASTLE_BRICK
+#define D MT_CASTLE_DOOR_T
+#define E MT_CASTLE_DOOR_B
+#define L MT_CASTLE_WINDOW_L
+#define R MT_CASTLE_WINDOW_R
 
   // Tiles are right-to-left
   static const u8 castle_metatiles[11][5] = {
@@ -1183,6 +1183,15 @@ void CastleObject(const u8 objoff) {
     { D, x, D, x, D },
     { E, x, E, x, E },
   };
+
+#undef _
+#undef T
+#undef N
+#undef x
+#undef D
+#undef E
+#undef L
+#undef R
 
   for (int i = start_at_y; i < 11; i++) {
     MetatileBuffer[i] = castle_metatiles[i - start_at_y][j];

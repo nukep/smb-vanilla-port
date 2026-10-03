@@ -25,9 +25,14 @@ if get_option('use_poison_debug')
 endif
 
 # Define signed integer wraparound
-# Note: may not work for MSVC or other compilers (TODO)
 # Require it for now, until other compilers are supported
-smbcore_args += cc.get_supported_arguments('-fwrapv', checked: 'require')
+if cc.get_id() == 'msvc'
+  # Note: I only tested this on Visual Studio 2022 (msvc 19.38)
+  smbcore_args += cc.get_supported_arguments('/UndefIntOverflow-', checked: 'require')
+else
+  # GCC-like and Clang
+  smbcore_args += cc.get_supported_arguments('-fwrapv', checked: 'require')
+endif
 
 # Turn on warnings for implicit sign conversions
 smbcore_args += cc.get_supported_arguments('-Wsign-conversion')

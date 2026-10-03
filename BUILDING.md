@@ -41,3 +41,19 @@ Run:
 ./build/src/platform/smbvanilla
 ```
 
+## Windows, MSVC 64-bit
+
+TODO: make these build steps more robust
+
+Building in Windows is a bit tricker, but it's doable. I'll refrain from documenting specific environment paths. But the gist of it is:
+
+Download Meson, ensure it and the Python environment are on your PATH: https://mesonbuild.com/
+
+Download the built devel libraries for SDL3. It'll be named something like "SDL3-devel-3.4.18-VC.zip": https://github.com/libsdl-org/SDL/releases
+
+
+These build flags work for me:
+
+```
+meson setup build/  --cmake-prefix-path="C:\path\to\SDL3-3.4.18" --buildtype=debugoptimized
+```

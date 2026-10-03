@@ -76,8 +76,8 @@ bool run_movie(struct Movie *movie, struct testrunner_userdata *userdata, uint32
       }
 
       int range_curidx = 0;
-      int range_from[RANGE_N] = {};
-      int range_upto[RANGE_N] = {};
+      int range_from[RANGE_N] = { 0 };
+      int range_upto[RANGE_N] = { 0 };
 
       // Missing ranges:
       // $00-$08 are temporary registers
