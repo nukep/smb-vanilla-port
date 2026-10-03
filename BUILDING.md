@@ -11,7 +11,7 @@ SDL3 is preferred. If SDL3 is missing, then SDL2 will be used.
 Using git:
 
 ```
-git clone https://codeberg.org/dannysp/smbvanilla.git
+git clone https://codeberg.org/dannysp/SMB-Vanilla.git
 git submodule update --init --recursive
 ```
 
